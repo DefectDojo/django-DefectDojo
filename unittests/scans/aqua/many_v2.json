@@ -1,0 +1,67 @@
+{
+  "status": "SCANNED",
+  "image_name": "example:latest",
+  "registry": "docker.example.com",
+  "disallowed": false,
+  "cves_counts": {
+    "total": 3,
+    "high": 2,
+    "medium": 1,
+    "low": 0,
+    "score_average": 0
+  },
+  "cves": [
+    {
+      "file": "/usr/lib/libcrypto.so",
+      "name": "CVE-2101-1337",
+      "type": "CVE",
+      "description": "In LibCrypto6 1.0, there is a timing vulnerability in its PQCv6e2 implementation.",
+      "score": "7.5",
+      "severity": "high",
+      "publishdate": "2101-04-20",
+      "acknowledged": false,
+      "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2101-1337",
+      "score_version": "CVSS v2",
+      "solution": "Upgrade to LibCrypto6 1.1",
+      "vendor_name": "",
+      "vendor_severity": "high",
+      "vendor_statement": "",
+      "fix_version": "libcrypto6-1.1"
+    },
+    {
+      "file": "/usr/share/java/commons-beanutils-1.9.3.jar",
+      "name": "CVE-2019-10086",
+      "type": "CVE",
+      "description": "In Apache Commons Beanutils 1.9.2, a special BeanIntrospector class was added which allows suppressing the ability for an attacker to access the classloader via the class property available on all Java objects. We, however were not using this by default characteristic of the PropertyUtilsBean.",
+      "score": "7.5",
+      "severity": "high",
+      "publishdate": "2019-08-20",
+      "acknowledged": false,
+      "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-10086",
+      "score_version": "CVSS v2",
+      "solution": "1.9.4",
+      "vendor_name": "",
+      "vendor_severity": "high",
+      "vendor_statement": "",
+      "fix_version": "1.9.4"
+    },
+    {
+      "file": "curl",
+      "name": "CVE-2019-15601",
+      "type": "CVE",
+      "description": "CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).",
+      "score": "5",
+      "severity": "medium",
+      "publishdate": "2020-01-06",
+      "acknowledged": false,
+      "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-15601",
+      "score_version": "CVSS v2",
+      "solution": "",
+      "vendor_name": "",
+      "vendor_severity": "medium",
+      "vendor_statement": "",
+      "fix_version": ""
+    }
+  ],
+  "errorMsg": null
+}

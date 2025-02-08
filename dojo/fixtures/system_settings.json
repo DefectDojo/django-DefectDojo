@@ -1,0 +1,18 @@
+[
+{
+  "model": "dojo.system_settings",
+  "pk": 1,
+  "fields": {
+    "enable_deduplication": false,
+    "enable_jira": false,
+    "url_prefix": "",
+    "time_zone": "UTC",
+    "product_grade": "def grade_product(crit, high, med, low):\r\n    health=100\r\n    if crit > 0:\r\n        health = 40\r\n        health = health - ((crit - 1) * 5)\r\n    if high > 0:\r\n        if health == 100:\r\n            health = 60\r\n        health = health - ((high - 1) * 3)\r\n    if med > 0:\r\n        if health == 100:\r\n            health = 80\r\n        health = health - ((med - 1) * 2)\r\n    if low > 0:\r\n        if health == 100:\r\n            health = 95\r\n        health = health - low\r\n\r\n    if health < 5:\r\n        health = 5\r\n\r\n    return health",
+    "product_grade_a": 90,
+    "product_grade_b": 80,
+    "product_grade_c": 70,
+    "product_grade_d": 60,
+    "product_grade_f": 59
+  }
+}
+]

@@ -1,0 +1,29 @@
+{% load humanize %}
+{% if finding.sonarqube_issue %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>SonarQube Transition History <span class="pull-right"><a data-toggle="collapse" href="#vuln_sq_history">
+                <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+        </div>
+        <div id="vuln_sq_history" class="panel-body collapse">
+            <div class="table-responsive">
+                <table class="table-striped table table-condensed table-hover centered">
+                    <tr>
+                        <th>Finding Date updated</th>
+                        <th>SonarQube Status</th>
+                        <th>Transitions applied</th>
+                        <th>Finding Status</th>
+                    </tr>
+                    {% for transition in finding.sonarqube_issue.sonarqube_issue_transition_set.all %}
+                    <tr>
+                        <td>{{ transition.created }}</td>
+                        <td>{{ transition.sonarqube_status }}</td>
+                        <td>{{ transition.transitions }}</td>
+                        <td>{{ transition.finding_status }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %}

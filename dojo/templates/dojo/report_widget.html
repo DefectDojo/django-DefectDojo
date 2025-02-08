@@ -1,0 +1,20 @@
+<div class="panel panel-available-widget" data-multiple="{{ multiple }}">
+    <div class="panel-heading" title="Click and drag to move" data-toggle="tooltip">
+        <div class="clearfix">
+            <h5 class="pull-left">{{ title }}</h5>
+            <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
+        </div>
+    </div>
+    <div class="panel-body">
+        {% if extra_help %}
+            <div class="alert alert-info" role="alert">
+                {{ extra_help }}
+            </div>
+        {% endif %}
+        <form id="{{ title|slugify }}" class="form-horizontal">
+            <fieldset>
+                {% include "dojo/form_fields.html" with form=form %}
+            </fieldset>
+        </form>
+    </div>
+</div>

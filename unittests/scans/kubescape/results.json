@@ -1,0 +1,2838 @@
+{
+  "generationTime": "0001-01-01T00:00:00Z",
+  "clusterAPIServerInfo": null,
+  "clusterCloudProvider": "",
+  "customerGUID": "",
+  "clusterName": "",
+  "reportGUID": "",
+  "jobID": "",
+  "summaryDetails": {
+    "controls": {
+      "C-0002": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0002",
+        "name": "Exec into container",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 5,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0007": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0007",
+        "name": "Data Destruction",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 5,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0009": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0009",
+        "name": "Resource limits",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5"
+        }
+      },
+      "C-0012": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0012",
+        "name": "Applications credentials in configuration files",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 8,
+        "category": {
+          "name": "Secrets",
+          "id": "Cat-3"
+        }
+      },
+      "C-0013": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0013",
+        "name": "Non-root containers",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0014": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0014",
+        "name": "Access Kubernetes dashboard",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 2,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0015": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0015",
+        "name": "List Kubernetes secrets",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0016": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0016",
+        "name": "Allow privilege escalation",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0017": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0017",
+        "name": "Immutable container filesystem",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 3,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0020": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0020",
+        "name": "Mount service principal",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5"
+        }
+      },
+      "C-0030": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0030",
+        "name": "Ingress and Egress blocked",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 2,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Network",
+          "id": "Cat-4"
+        }
+      },
+      "C-0031": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0031",
+        "name": "Delete Kubernetes events",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0034": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0034",
+        "name": "Automatic mapping of service account",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Secrets",
+          "id": "Cat-3"
+        }
+      },
+      "C-0035": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0035",
+        "name": "Cluster-admin binding",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0037": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0037",
+        "name": "CoreDNS poisoning",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0038": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0038",
+        "name": "Host PID/IPC privileges",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0041": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0041",
+        "name": "HostNetwork access",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Network",
+            "id": "Cat-4"
+          }
+        }
+      },
+      "C-0042": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0042",
+        "name": "SSH server running inside container",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 3,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5"
+        }
+      },
+      "C-0044": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0044",
+        "name": "Container hostPort",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Network",
+          "id": "Cat-4"
+        }
+      },
+      "C-0045": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0045",
+        "name": "Writable hostPath mount",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 8,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Storage",
+            "id": "Cat-8"
+          }
+        }
+      },
+      "C-0046": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0046",
+        "name": "Insecure capabilities",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0048": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0048",
+        "name": "HostPath mount",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Storage",
+            "id": "Cat-8"
+          }
+        }
+      },
+      "C-0053": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0053",
+        "name": "Access container service account",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 6,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0054": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0054",
+        "name": "Cluster internal networking",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Network",
+          "id": "Cat-4"
+        }
+      },
+      "C-0055": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0055",
+        "name": "Linux hardening",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 4,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0057": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0057",
+        "name": "Privileged container",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 8,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5",
+          "subCategory": {
+            "name": "Node escape",
+            "id": "Cat-9"
+          }
+        }
+      },
+      "C-0059": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0059",
+        "name": "CVE-2021-25742-nginx-ingress-snippet-annotation-vulnerability",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 8,
+        "category": {
+          "name": "Workload",
+          "id": "Cat-5"
+        }
+      },
+      "C-0063": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0063",
+        "name": "Portforwarding privileges",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 5,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0068": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0068",
+        "name": "PSP enabled",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 1,
+        "category": {
+          "name": "Control plane",
+          "id": "Cat-1"
+        }
+      },
+      "C-0187": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0187",
+        "name": "Minimize wildcard use in Roles and ClusterRoles",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0188": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0188",
+        "name": "Minimize access to create pods",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 5,
+        "category": {
+          "name": "Access control",
+          "id": "Cat-2"
+        }
+      },
+      "C-0260": {
+        "statusInfo": {
+          "status": "passed"
+        },
+        "controlID": "C-0260",
+        "name": "Missing network policy",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 2,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 5,
+        "category": {
+          "name": "Network",
+          "id": "Cat-4"
+        }
+      },
+      "C-0262": {
+        "statusInfo": {
+          "status": "passed",
+          "subStatus": "irrelevant"
+        },
+        "controlID": "C-0262",
+        "name": "Anonymous access enabled",
+        "status": "passed",
+        "resourceIDs": {},
+        "ResourceCounters": {
+          "passedResources": 0,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "subStatusCounters": {
+          "ignoredResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100,
+        "scoreFactor": 7,
+        "category": {
+          "name": "Control plane",
+          "id": "Cat-1",
+          "subCategory": {
+            "name": "Supply chain",
+            "id": "Cat-6"
+          }
+        }
+      }
+    },
+    "status": "passed",
+    "frameworks": [
+      {
+        "controls": {
+          "C-0002": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0002",
+            "name": "Exec into container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0007": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0007",
+            "name": "Data Destruction",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0012": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0012",
+            "name": "Applications credentials in configuration files",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Secrets",
+              "id": "Cat-3"
+            }
+          },
+          "C-0013": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0013",
+            "name": "Non-root containers",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0015": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0015",
+            "name": "List Kubernetes secrets",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0035": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0035",
+            "name": "Cluster-admin binding",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0038": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0038",
+            "name": "Host PID/IPC privileges",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0041": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0041",
+            "name": "HostNetwork access",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Network",
+                "id": "Cat-4"
+              }
+            }
+          },
+          "C-0048": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0048",
+            "name": "HostPath mount",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Storage",
+                "id": "Cat-8"
+              }
+            }
+          },
+          "C-0057": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0057",
+            "name": "Privileged container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0063": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0063",
+            "name": "Portforwarding privileges",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0187": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0187",
+            "name": "Minimize wildcard use in Roles and ClusterRoles",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0188": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0188",
+            "name": "Minimize access to create pods",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0260": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0260",
+            "name": "Missing network policy",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 2,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Network",
+              "id": "Cat-4"
+            }
+          },
+          "C-0262": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0262",
+            "name": "Anonymous access enabled",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Control plane",
+              "id": "Cat-1",
+              "subCategory": {
+                "name": "Supply chain",
+                "id": "Cat-6"
+              }
+            }
+          }
+        },
+        "name": "ClusterScan",
+        "status": "passed",
+        "version": "",
+        "ResourceCounters": {
+          "passedResources": 2,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100
+      },
+      {
+        "controls": {
+          "C-0002": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0002",
+            "name": "Exec into container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0007": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0007",
+            "name": "Data Destruction",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0012": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0012",
+            "name": "Applications credentials in configuration files",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Secrets",
+              "id": "Cat-3"
+            }
+          },
+          "C-0014": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0014",
+            "name": "Access Kubernetes dashboard",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 2,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0015": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0015",
+            "name": "List Kubernetes secrets",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0020": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0020",
+            "name": "Mount service principal",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5"
+            }
+          },
+          "C-0031": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0031",
+            "name": "Delete Kubernetes events",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0035": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0035",
+            "name": "Cluster-admin binding",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0037": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0037",
+            "name": "CoreDNS poisoning",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0042": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0042",
+            "name": "SSH server running inside container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 3,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5"
+            }
+          },
+          "C-0045": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0045",
+            "name": "Writable hostPath mount",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Storage",
+                "id": "Cat-8"
+              }
+            }
+          },
+          "C-0048": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0048",
+            "name": "HostPath mount",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Storage",
+                "id": "Cat-8"
+              }
+            }
+          },
+          "C-0053": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0053",
+            "name": "Access container service account",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0054": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0054",
+            "name": "Cluster internal networking",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Network",
+              "id": "Cat-4"
+            }
+          },
+          "C-0057": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0057",
+            "name": "Privileged container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0059": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0059",
+            "name": "CVE-2021-25742-nginx-ingress-snippet-annotation-vulnerability",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5"
+            }
+          },
+          "C-0068": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0068",
+            "name": "PSP enabled",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 1,
+            "category": {
+              "name": "Control plane",
+              "id": "Cat-1"
+            }
+          }
+        },
+        "name": "MITRE",
+        "status": "passed",
+        "version": "",
+        "ResourceCounters": {
+          "passedResources": 1,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100
+      },
+      {
+        "controls": {
+          "C-0002": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0002",
+            "name": "Exec into container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 5,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0009": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0009",
+            "name": "Resource limits",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5"
+            }
+          },
+          "C-0012": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0012",
+            "name": "Applications credentials in configuration files",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Secrets",
+              "id": "Cat-3"
+            }
+          },
+          "C-0013": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0013",
+            "name": "Non-root containers",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0016": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0016",
+            "name": "Allow privilege escalation",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0017": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0017",
+            "name": "Immutable container filesystem",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 3,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0030": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0030",
+            "name": "Ingress and Egress blocked",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 2,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Network",
+              "id": "Cat-4"
+            }
+          },
+          "C-0034": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0034",
+            "name": "Automatic mapping of service account",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Secrets",
+              "id": "Cat-3"
+            }
+          },
+          "C-0035": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0035",
+            "name": "Cluster-admin binding",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 6,
+            "category": {
+              "name": "Access control",
+              "id": "Cat-2"
+            }
+          },
+          "C-0038": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0038",
+            "name": "Host PID/IPC privileges",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0041": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0041",
+            "name": "HostNetwork access",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Network",
+                "id": "Cat-4"
+              }
+            }
+          },
+          "C-0044": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0044",
+            "name": "Container hostPort",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Network",
+              "id": "Cat-4"
+            }
+          },
+          "C-0046": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0046",
+            "name": "Insecure capabilities",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 7,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0054": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0054",
+            "name": "Cluster internal networking",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Network",
+              "id": "Cat-4"
+            }
+          },
+          "C-0055": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0055",
+            "name": "Linux hardening",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 4,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0057": {
+            "statusInfo": {
+              "status": "passed"
+            },
+            "controlID": "C-0057",
+            "name": "Privileged container",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 1,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5",
+              "subCategory": {
+                "name": "Node escape",
+                "id": "Cat-9"
+              }
+            }
+          },
+          "C-0059": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0059",
+            "name": "CVE-2021-25742-nginx-ingress-snippet-annotation-vulnerability",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 8,
+            "category": {
+              "name": "Workload",
+              "id": "Cat-5"
+            }
+          },
+          "C-0068": {
+            "statusInfo": {
+              "status": "passed",
+              "subStatus": "irrelevant"
+            },
+            "controlID": "C-0068",
+            "name": "PSP enabled",
+            "status": "passed",
+            "resourceIDs": {},
+            "ResourceCounters": {
+              "passedResources": 0,
+              "failedResources": 0,
+              "skippedResources": 0,
+              "excludedResources": 0
+            },
+            "subStatusCounters": {
+              "ignoredResources": 0
+            },
+            "score": 0,
+            "complianceScore": 100,
+            "scoreFactor": 1,
+            "category": {
+              "name": "Control plane",
+              "id": "Cat-1"
+            }
+          }
+        },
+        "name": "NSA",
+        "status": "passed",
+        "version": "",
+        "ResourceCounters": {
+          "passedResources": 2,
+          "failedResources": 0,
+          "skippedResources": 0,
+          "excludedResources": 0
+        },
+        "score": 0,
+        "complianceScore": 100
+      }
+    ],
+    "resourcesSeverityCounters": {
+      "criticalSeverity": 0,
+      "highSeverity": 0,
+      "mediumSeverity": 0,
+      "lowSeverity": 0
+    },
+    "controlsSeverityCounters": {
+      "criticalSeverity": 0,
+      "highSeverity": 0,
+      "mediumSeverity": 0,
+      "lowSeverity": 0
+    },
+    "ResourceCounters": {
+      "passedResources": 2,
+      "failedResources": 0,
+      "skippedResources": 0,
+      "excludedResources": 0
+    },
+    "score": 0,
+    "complianceScore": 100
+  },
+  "resources": [
+    {
+      "resourceID": "path=966824446/api=apps/v1//Deployment/nginx-deployment",
+      "object": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "labels": {
+            "app": "nginx"
+          },
+          "name": "nginx-deployment"
+        },
+        "sourcePath": "nginx.yaml:0",
+        "spec": {
+          "replicas": 3,
+          "selector": {
+            "matchLabels": {
+              "app": "nginx"
+            }
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "container.apparmor.security.beta.kubernetes.io/nginx": "runtime/default",
+                "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+              },
+              "labels": {
+                "app": "nginx"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "nginx",
+                  "image": "nginx:alpine",
+                  "ports": [
+                    {
+                      "containerPort": 80
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "cpu": "500m",
+                      "memory": "128Mi"
+                    },
+                    "requests": {
+                      "cpu": "250m",
+                      "memory": "64Mi"
+                    }
+                  },
+                  "livenessProbe": {
+                    "httpGet": {
+                      "path": "/",
+                      "port": 80
+                    },
+                    "initialDelaySeconds": 30,
+                    "periodSeconds": 10
+                  },
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/",
+                      "port": 80
+                    },
+                    "initialDelaySeconds": 30,
+                    "periodSeconds": 10
+                  },
+                  "securityContext": {
+                    "capabilities": {
+                      "drop": [
+                        "ALL"
+                      ]
+                    },
+                    "readOnlyRootFilesystem": true,
+                    "allowPrivilegeEscalation": false
+                  }
+                }
+              ],
+              "securityContext": {
+                "runAsGroup": 1000,
+                "runAsNonRoot": true,
+                "runAsUser": 1000,
+                "seLinuxOptions": {
+                  "level": "s0:c123,c456"
+                }
+              }
+            }
+          }
+        }
+      },
+      "source": {
+        "path": "/home/administrator/k8s-kubescape-test",
+        "relativePath": "nginx.yaml",
+        "fileType": "YAML",
+        "lastCommit": {
+          "date": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "resourceID": "path=983602065/api=networking.k8s.io/v1/default/NetworkPolicy/nginx-network-policy",
+      "object": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "nginx-network-policy",
+          "namespace": "default"
+        },
+        "sourcePath": "nginx.yaml:1",
+        "spec": {
+          "egress": [
+            {
+              "to": [
+                {
+                  "podSelector": {}
+                }
+              ]
+            }
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "podSelector": {}
+                }
+              ],
+              "ports": [
+                {
+                  "port": 80,
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ],
+          "podSelector": {
+            "matchLabels": {
+              "app": "nginx"
+            }
+          },
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ]
+        }
+      },
+      "source": {
+        "path": "/home/administrator/k8s-kubescape-test",
+        "relativePath": "nginx.yaml",
+        "fileType": "YAML",
+        "lastCommit": {
+          "date": "0001-01-01T00:00:00Z"
+        }
+      }
+    }
+  ],
+  "attributes": null,
+  "results": [
+    {
+      "resourceID": "path=966824446/api=apps/v1//Deployment/nginx-deployment",
+      "controls": [
+        {
+          "controlID": "C-0044",
+          "name": "Container hostPort",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "container-hostPort",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0016",
+          "name": "Allow privilege escalation",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "rule-allow-privilege-escalation",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0017",
+          "name": "Immutable container filesystem",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "immutable-container-filesystem",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0014",
+          "name": "Access Kubernetes dashboard",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "rule-access-dashboard-wl-v1",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0020",
+          "name": "Mount service principal",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "alert-mount-potential-credentials-paths",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0057",
+          "name": "Privileged container",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "rule-privilege-escalation",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0013",
+          "name": "Non-root containers",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "non-root-containers",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0009",
+          "name": "Resource limits",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "resource-policies",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0260",
+          "name": "Missing network policy",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "ensure_network_policy_configured_in_labels",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0041",
+          "name": "HostNetwork access",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "host-network-access",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0045",
+          "name": "Writable hostPath mount",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "alert-rw-hostpath",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0034",
+          "name": "Automatic mapping of service account",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "automount-service-account",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0030",
+          "name": "Ingress and Egress blocked",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "ingress-and-egress-blocked",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0012",
+          "name": "Applications credentials in configuration files",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "controlConfigurations": {
+                "sensitiveKeyNames": [
+                  "aws_access_key_id",
+                  "aws_secret_access_key",
+                  "azure_batchai_storage_account",
+                  "azure_batchai_storage_key",
+                  "azure_batch_account",
+                  "azure_batch_key",
+                  "secret",
+                  "key",
+                  "password",
+                  "pwd",
+                  "token",
+                  "jwt",
+                  "bearer",
+                  "credential"
+                ],
+                "sensitiveValues": [
+                  "BEGIN \\w+ PRIVATE KEY",
+                  "PRIVATE KEY",
+                  "eyJhbGciO",
+                  "JWT",
+                  "Bearer",
+                  "_key_",
+                  "_secret_"
+                ]
+              },
+              "name": "rule-credentials-in-env-var",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0046",
+          "name": "Insecure capabilities",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "controlConfigurations": {
+                "insecureCapabilities": [
+                  "SETPCAP",
+                  "NET_ADMIN",
+                  "NET_RAW",
+                  "SYS_MODULE",
+                  "SYS_RAWIO",
+                  "SYS_PTRACE",
+                  "SYS_ADMIN",
+                  "SYS_BOOT",
+                  "MAC_OVERRIDE",
+                  "MAC_ADMIN",
+                  "PERFMON",
+                  "ALL",
+                  "BPF"
+                ]
+              },
+              "name": "insecure-capabilities",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0055",
+          "name": "Linux hardening",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "linux-hardening",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0038",
+          "name": "Host PID/IPC privileges",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "host-pid-ipc-privileges",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0048",
+          "name": "HostPath mount",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "alert-any-hostpath",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resourceID": "path=983602065/api=networking.k8s.io/v1/default/NetworkPolicy/nginx-network-policy",
+      "controls": [
+        {
+          "controlID": "C-0260",
+          "name": "Missing network policy",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "ensure_network_policy_configured_in_labels",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        },
+        {
+          "controlID": "C-0030",
+          "name": "Ingress and Egress blocked",
+          "status": {
+            "status": "passed"
+          },
+          "rules": [
+            {
+              "name": "ingress-and-egress-blocked",
+              "status": "passed",
+              "subStatus": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "targetMetadata": {
+      "gitRepoContextMetadata": {
+        "provider": "none",
+        "repo": "file@/home/administrator/k8s-kubescape-test/nginx.yaml",
+        "owner": "ubu",
+        "branch": "none",
+        "defaultBranch": "none",
+        "lastCommit": {
+          "date": "0001-01-01T00:00:00Z"
+        },
+        "localRootPath": "/home/administrator/k8s-kubescape-test/nginx.yaml"
+      },
+      "fileContextMetadata": {
+        "filePath": "/home/administrator/k8s-kubescape-test/nginx.yaml",
+        "hostName": "ubu"
+      }
+    },
+    "clusterMetadata": {},
+    "scanMetadata": {
+      "targetType": "Framework",
+      "kubescapeVersion": "v3.0.3",
+      "formatVersion": "v2",
+      "formats": [
+        "json"
+      ],
+      "targetNames": [
+        "clusterscan",
+        "mitre",
+        "nsa"
+      ],
+      "failThreshold": 100,
+      "scanningTarget": 1
+    }
+  },
+  "paginationInfo": {
+    "chunkNumber": 0,
+    "isLastChunk": false
+  },
+  "customerGUIDGenerated": false
+}

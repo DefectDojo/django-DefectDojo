@@ -1,0 +1,719 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% load static %}
+{% block add_styles %}
+    {{ block.super }}
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <div class="panel panel-default">
+        <div class="panel-heading tight">
+            <div class="clearfix">
+              <h3 class="has-filters">
+                  Metrics Overview
+                <div class="dropdown pull-right ">
+                    <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                        <span class="fa-solid fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
+                                <i class="fa-solid fa-file-lines"></i> Measure Findings
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
+                                <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+              </h3>
+
+
+
+            </div>
+        </div>
+        <div id="the-filters" class="is-filters panel-body collapse">
+            {% include "dojo/filter_snippet.html" with form=form clear_link=reset_link %}
+        </div>
+        <div class="panel-body product-graphs-overview">
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-crosshairs fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ verified_objs }}</span>
+                                    <span><a
+                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are open/active and verified">Verified
+                                        {{ view }}{{ verified_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="verified_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Since {{ start_date }}."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Verified since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ open_objs }}</span>
+                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                        title="Findings that are open/active, but not (yet) verified">Open
+                                        {{ view }}{{ open_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Opened since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-check fa-2x"></i>
+
+                                <div class="pull-right text-right">
+                                    <span class="fa-2x">{{ accepted_objs }}</span>
+                                    <span><a
+                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that have been accepted in a risk acceptance.">Risk Accepted
+                                    {{ view }}s <i class="fa-solid fa-circle-right"></i></a>
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="accepted_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Accepted since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ closed_objs }}</span>
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are closed and mitigated.">Closed
+                                        {{ view }}{{ closed_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="closed_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Closed since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ false_positive_objs }}</span>
+                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are marked as false postive.">False-postive
+                                        {{ view }}{{ false_positive_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="false_positive_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Flagged since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ out_of_scope_objs }}</span>
+                                    <span><a
+                                            href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are marked as out of scope.">Out Of Scope
+                                        {{ view }}{{ out_of_scope_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="out_of_scope_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Since {{ start_date }}."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Since {{ start_date|date:"D., M. d, Y" }}.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-bullseye fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ all_objs }}</span>
+                                    <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="All findings.">Total
+                                        {{ view }}{{ all_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="all_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa-solid fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ inactive_objs }}</span>
+                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are not active but not mitigated for some reason">Inactive
+                                        {{ view }}{{ inactive_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="inactive_objs" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Ingested since {{ start_date }}"
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Detailed Metrics
+                </h3>
+
+                <div class="dropdown pull-right">
+                    <div class="btn-group">
+                      <!--
+                        <button class="btn btn-primary clickable panel-collapsed">
+                            <span><i class="fa-solid fa-chart-column"></i></span>
+                        </button>
+                      -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body product-graphs">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open Day to Day by Severity
+                        <i title="Days are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body text-center">
+                        <div id="id_open_findings_burndown_loader" class="graph-loader">
+                            <p><i class="fas fa-spinner fa-spin fa-2x"></i></p>
+                            <p>Loading Finding Burndown Metrics...</p>
+                        </div>
+                        <div id="open_findings_burndown" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Days are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open, Closed, and Risk Accepted Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_close_weekly" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Week to Week by Severity
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_weekly" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Critical Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_critical" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        High Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_high" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Medium Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_medium" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Finding Age
+                    </div>
+                    <div class="panel-body">
+                        <div id="finding_age" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Finding age of {{ open_objs|apnumber }} open
+                            finding{{ open_objs|pluralize }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Weekly activity of findings reported
+                            <i title="Weeks are only displayed if findings are available."
+                            class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div class="graph" id="punchcard"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Findings by Test Type
+                        <i title="Test Types shown only if available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div class="graph" id="test_type"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Test Types shown only if available.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open CWE Vulnerabilities
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_vulnerabilities" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Showing {{ open_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ open_vulnerabilities_count|pluralize:"y,ies"}} from Open findings</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Total CWE Vulnerabilities
+                    </div>
+                    <div class="panel-body">
+                        <div id="all_vulnerabilities" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Showing {{ all_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ all_vulnerabilities_count|pluralize:"y,ies"}} from all findings</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <!-- Flot Charts JavaScript -->
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
+    {% include "dojo/filter_js_snippet.html" %}
+    {% if punchcard %}
+        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
+    {% endif %}
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
+    <script type="text/javascript">
+        $(function () {
+            if (document.referrer.indexOf('simple_search') > 0) {
+                var terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
+
+                    for (var i = 0; i < terms.length; i++) {
+                        $('body').highlight(terms[i]);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+
+            $(document).on('click', '.panel-heading button.clickable', function (e) {
+                var $this = $(this);
+                if (!$this.hasClass('panel-collapsed')) {
+                    $this.parents('.panel').find('.panel-body').slideUp();
+                    $this.addClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                } else {
+                    $this.parents('.panel').find('.panel-body').slideDown();
+                    $this.removeClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                }
+            });
+
+
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            $(document).ready(function() {
+                fetch_burndown_metrics({{ prod.id }});
+            })
+
+            function fetch_burndown_metrics(pid) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/product/' + pid + '/async_burndown_metrics',
+                    beforeSend: function() {
+                        $('#open_findings_burndown').hide();
+                        $('#id_open_findings_burndown_loader').show();
+                    },
+                    success: function(response) {
+                        $('#open_findings_burndown').show();
+                        $('#id_open_findings_burndown_loader').hide();
+                        open_findings_burndown(
+                            response.critical,
+                            response.high,
+                            response.medium,
+                            response.low,
+                            response.info,
+                            response.max,
+                            response.min,
+                        );
+                    }
+                });
+            }
+
+            accepted_objs(
+                [[0, {{ accepted_objs_by_severity.Critical }}]],
+                [[1, {{ accepted_objs_by_severity.High }}]],
+                [[2, {{ accepted_objs_by_severity.Medium }}]],
+                [[3, {{ accepted_objs_by_severity.Low }}]],
+                [[4, {{ accepted_objs_by_severity.Info }}]],
+                ticks);
+
+            inactive_objs(
+                [[0, {{ inactive_objs_by_severity.Critical }}]],
+                [[1, {{ inactive_objs_by_severity.High }}]],
+                [[2, {{ inactive_objs_by_severity.Medium }}]],
+                [[3, {{ inactive_objs_by_severity.Low }}]],
+                [[4, {{ inactive_objs_by_severity.Info }}]],
+                ticks);
+
+            open_objs(
+                [[0, {{ open_objs_by_severity.Critical }}]],
+                [[1, {{ open_objs_by_severity.High }}]],
+                [[2, {{ open_objs_by_severity.Medium }}]],
+                [[3, {{ open_objs_by_severity.Low }}]],
+                [[4, {{ open_objs_by_severity.Info }}]],
+                ticks);
+
+            false_positive_objs(
+                [[0, {{ false_positive_objs_by_severity.Critical }}]],
+                [[1, {{ false_positive_objs_by_severity.High }}]],
+                [[2, {{ false_positive_objs_by_severity.Medium }}]],
+                [[3, {{ false_positive_objs_by_severity.Low }}]],
+                [[4, {{ false_positive_objs_by_severity.Info }}]],
+                ticks);
+
+            verified_objs(
+                [[0, {{ verified_objs_by_severity.Critical }}]],
+                [[1, {{ verified_objs_by_severity.High }}]],
+                [[2, {{ verified_objs_by_severity.Medium }}]],
+                [[3, {{ verified_objs_by_severity.Low }}]],
+                [[4, {{ verified_objs_by_severity.Info }}]],
+                ticks);
+
+            out_of_scope_objs(
+                [[0, {{ out_of_scope_objs_by_severity.Critical }}]],
+                [[1, {{ out_of_scope_objs_by_severity.High }}]],
+                [[2, {{ out_of_scope_objs_by_severity.Medium }}]],
+                [[3, {{ out_of_scope_objs_by_severity.Low }}]],
+                [[4, {{ out_of_scope_objs_by_severity.Info }}]],
+                ticks);
+
+            all_objs(
+                [[0, {{ all_objs_by_severity.Critical }}]],
+                [[1, {{ all_objs_by_severity.High }}]],
+                [[2, {{ all_objs_by_severity.Medium }}]],
+                [[3, {{ all_objs_by_severity.Low }}]],
+                [[4, {{ all_objs_by_severity.Info }}]],
+                ticks);
+
+            closed_objs(
+                [[0, {{ closed_objs_by_severity.Critical }}]],
+                [[1, {{ closed_objs_by_severity.High }}]],
+                [[2, {{ closed_objs_by_severity.Medium }}]],
+                [[3, {{ closed_objs_by_severity.Low }}]],
+                [[4, {{ closed_objs_by_severity.Info }}]],
+                ticks);
+
+            new_objs(
+                [[0, {{ new_objs_by_severity.Critical }}]],
+                [[1, {{ new_objs_by_severity.High }}]],
+                [[2, {{ new_objs_by_severity.Medium }}]],
+                [[3, {{ new_objs_by_severity.Low }}]],
+                [[4, {{ new_objs_by_severity.Info }}]],
+                ticks);
+
+            
+            var opened = [];
+            var closed = [];
+            var accepted = [];
+            ticks = [];
+            {% for week, values in open_close_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"])
+                opened.push([{{ forloop.counter0 }}, {{ values.open }}])
+                closed.push([{{ forloop.counter0 }}, {{ values.closed }}])
+                accepted.push([{{ forloop.counter0 }}, {{ values.accepted }}])
+            {% endfor %}
+            open_close_weekly(opened, closed, accepted, ticks);
+            
+            let critical = [];
+            let high = [];
+            let medium = [];
+            let low = [];
+            let info = [];
+            ticks = [];
+            {% for week, values in severity_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                critical.push([{{ forloop.counter0 }}, {{ values.Critical }}]);
+                high.push([{{ forloop.counter0 }}, {{ values.High }}]);
+                medium.push([{{ forloop.counter0 }}, {{ values.Medium }}]);
+                low.push([{{ forloop.counter0 }}, {{ values.Low }}]);
+                info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
+            {% endfor %}
+            severity_weekly(critical, high, medium, low, info, ticks);
+            
+            critical = [];
+            high = [];
+            medium = [];
+            ticks = [];
+            {% for week, values in critical_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                critical.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+            {% for week, values in high_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                high.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+            {% for week, values in medium_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                medium.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+            severity_counts_weekly(critical, high, medium, ticks);
+            
+            var data = []
+            {% for x, y in test_data.items %}
+                {% if y > 0 %}
+                    data.push(['{{x}}', {{ y }}]);
+                {%  endif %}
+            {% endfor %}
+            test_type(data);
+            
+            var data_2 = []
+            var ticks = []
+
+            var i = 0;
+            $.each({{ open_objs_by_age }}, function (index, value) {
+                if (value > 0) {
+                    data_2.push([i, value]);
+                    ticks.push([i, index])
+                }
+                i++;
+            });
+            finding_age(data_2, ticks);
+            
+            draw_vulnerabilities_graph("#open_vulnerabilities", {{ open_vulnerabilities|safe }});
+            draw_vulnerabilities_graph("#all_vulnerabilities", {{ all_vulnerabilities|safe }});
+
+            //$(".product-graphs").hide();
+            $("#meta_accordion").accordion();
+        });
+
+        {%  if punchcard %}
+
+            punchcard("#punchcard", {{ punchcard|safe }}, {{ ticks|safe }});
+
+        {%  endif %}
+
+
+    </script>
+{% endblock %}

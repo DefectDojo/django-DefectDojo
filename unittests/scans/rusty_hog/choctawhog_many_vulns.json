@@ -1,0 +1,210 @@
+[
+  {
+    "commit": "removing action\n",
+    "commitHash": "a7bce96377c4ff2ac16cd51fb0da7fe7ea678829",
+    "date": "2020-04-15 12:47:20",
+    "diff": "          COMMIT_EMAIL: \"dojo-helpers@this-repo.com\"\n",
+    "stringsFound": [
+      "dojo-helpers@this-repo.com"
+    ],
+    "path": ".github/workflows/main.yml",
+    "reason": "Email address",
+    "old_file_id": "2aba123d6e872777c8cf39ee34664d70e0b90ff0",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 35,
+    "new_line_num": 0,
+    "parent_commit_hash": "d8b2f39e826321896a3c7c474fc40dfc0d1fc586"
+  },
+  {
+    "commit": "humble beginnings\n",
+    "commitHash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c",
+    "date": "2020-03-28 21:33:37",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Cloud Platform OAuth",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "old_line_num": 0,
+    "new_line_num": 73,
+    "parent_commit_hash": "None"
+  },
+  {
+    "commit": "humble beginnings\n",
+    "commitHash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c",
+    "date": "2020-03-28 21:33:37",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google YouTube OAuth",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "old_line_num": 0,
+    "new_line_num": 73,
+    "parent_commit_hash": "None"
+  },
+  {
+    "commit": "duh.\n",
+    "commitHash": "7a662dce5dd19c03c16ff7704408394d62cafd40",
+    "date": "2020-03-28 21:47:45",
+    "diff": "# Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db\n",
+    "stringsFound": [
+      "pass@127.0.0.1"
+    ],
+    "path": "settings.py",
+    "reason": "Email address",
+    "old_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 161,
+    "new_line_num": 0,
+    "parent_commit_hash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c"
+  },
+  {
+    "commit": "humble beginnings\n",
+    "commitHash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c",
+    "date": "2020-03-28 21:33:37",
+    "diff": "# Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db\n",
+    "stringsFound": [
+      "pass@127.0.0.1"
+    ],
+    "path": "settings.py",
+    "reason": "Email address",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "old_line_num": 0,
+    "new_line_num": 161,
+    "parent_commit_hash": "None"
+  },
+  {
+    "commit": "Create main.yml\n\nplantUML action",
+    "commitHash": "d8b2f39e826321896a3c7c474fc40dfc0d1fc586",
+    "date": "2020-04-06 15:27:58",
+    "diff": "          COMMIT_EMAIL: \"dojo-helpers@this-repo.com\"\n",
+    "stringsFound": [
+      "dojo-helpers@this-repo.com"
+    ],
+    "path": ".github/workflows/main.yml",
+    "reason": "Email address",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "2aba123d6e872777c8cf39ee34664d70e0b90ff0",
+    "old_line_num": 0,
+    "new_line_num": 35,
+    "parent_commit_hash": "5922b23ab531acc9aa3017ca493d4d020bc2d0d2"
+  },
+  {
+    "commit": "humble beginnings\n",
+    "commitHash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c",
+    "date": "2020-03-28 21:33:37",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Drive OAuth",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "old_line_num": 0,
+    "new_line_num": 73,
+    "parent_commit_hash": "None"
+  },
+  {
+    "commit": "duh.\n",
+    "commitHash": "7a662dce5dd19c03c16ff7704408394d62cafd40",
+    "date": "2020-03-28 21:47:45",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Drive OAuth",
+    "old_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 73,
+    "new_line_num": 0,
+    "parent_commit_hash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c"
+  },
+  {
+    "commit": "duh.\n",
+    "commitHash": "7a662dce5dd19c03c16ff7704408394d62cafd40",
+    "date": "2020-03-28 21:47:45",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google YouTube OAuth",
+    "old_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 73,
+    "new_line_num": 0,
+    "parent_commit_hash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c"
+  },
+  {
+    "commit": "humble beginnings\n",
+    "commitHash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c",
+    "date": "2020-03-28 21:33:37",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Gmail OAuth",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "old_line_num": 0,
+    "new_line_num": 73,
+    "parent_commit_hash": "None"
+  },
+  {
+    "commit": "duh.\n",
+    "commitHash": "7a662dce5dd19c03c16ff7704408394d62cafd40",
+    "date": "2020-03-28 21:47:45",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Gmail OAuth",
+    "old_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 73,
+    "new_line_num": 0,
+    "parent_commit_hash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c"
+  },
+  {
+    "commit": "duh.\n",
+    "commitHash": "7a662dce5dd19c03c16ff7704408394d62cafd40",
+    "date": "2020-03-28 21:47:45",
+    "diff": "DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com'),\n",
+    "stringsFound": [
+      "921763464581-es3re9ajbevrbvn1e9ov2um1vc7o6pj3.apps.googleusercontent.com"
+    ],
+    "path": "settings.py",
+    "reason": "Google Cloud Platform OAuth",
+    "old_file_id": "f5674967eba6bcb23159a1dffadad697ca384077",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 73,
+    "new_line_num": 0,
+    "parent_commit_hash": "d1ccafd98ab590205dcdaec41f0de0b32a7e0e8c"
+  },
+  {
+    "commit": "uploading files\n",
+    "commitHash": "6dfe4a876a791412d2d9d89485923c25ff592944",
+    "date": "2020-03-29 21:12:07",
+    "diff": "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['xxxxxx@gmail.com']\n",
+    "stringsFound": [
+      "'xxxxxx@gmail.com"
+    ],
+    "path": "README.md",
+    "reason": "Email address",
+    "old_file_id": "0000000000000000000000000000000000000000",
+    "new_file_id": "4111b76c3a44cf98fe2d7f5385d674fce04143ab",
+    "old_line_num": 0,
+    "new_line_num": 9,
+    "parent_commit_hash": "7a662dce5dd19c03c16ff7704408394d62cafd40"
+  }
+]

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>DefectDojo - {{ name }}</title>
+
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ STATIC_URL }}bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- Custom CSS -->
+    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="{{ STATIC_URL }}fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui/dist/themes/base/jquery-ui.min.css">
+    <link rel="shortcut icon" href="{{ STATIC_URL }}dojo/img/favicon.png"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}dojo/css/dojo.css">
+</head>
+<body>
+<!-- Page Content -->
+
+{% block content %}
+    {{ block.super }}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <form id="id_question_form" method="post" class="form-horizontal">
+                    <legend>{{ name }}</legend>
+                    {% csrf_token %}
+                    {% include "dojo/form_fields.html" with form=form %}
+                    {% include "dojo/form_fields.html" with form=textForm %}
+                    {% include "dojo/form_fields.html" with form=choiceForm %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-6">
+                            <a class="btn btn-primary" name="return" href="{% url 'questionnaire' %}" role="button">return</a>
+                        </div>
+                        <div class="col-sm-offset-2">
+                            <input class="btn btn-primary" type="submit" label="submit" name="submit" value="Submit"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block postscript %}
+    {{ block.super }}
+    <script type="application/javascript">
+        $(function () {
+            $("*[data-type='choice']").parents('.form-group').hide();
+    
+            if ($('#id_type').val() == 'choice'){
+                $("*[data-type='choice']").parents('.form-group').show();
+            }
+            if ($('#id_type').val() == 'text'){
+                $("*[data-type='choice']").parents('.form-group').hide();
+            }
+    
+            $('#id_type').change(function(){
+                $("*[data-type='choice']").parents('.form-group').hide();
+                if (this.value == 'choice'){
+                    $("*[data-type='choice']").parents('.form-group').show();
+                }
+                if (this.value == 'text'){
+                    $("*[data-type='text']").parents('.form-group').show();
+                }
+            });
+        });
+    </script>
+{% endblock postscript %}

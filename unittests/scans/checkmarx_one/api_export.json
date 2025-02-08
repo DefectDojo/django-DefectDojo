@@ -1,0 +1,555 @@
+{
+    "results": [
+      {
+        "type": "kics",
+        "id": "704597058",
+        "similarityId": "05bdd0124158e318fae858d1428d56a824181ff2b786ef4bccb59c2e1682216e",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "MEDIUM",
+        "confidenceLevel": 0,
+        "created": "2024-04-03T11:42:23Z",
+        "firstFoundAt": "2023-12-04T11:56:51Z",
+        "foundAt": "2024-04-03T11:42:23Z",
+        "firstScanId": "046ee778-accb-45c9-9cd1-f79668c8cbeb",
+        "description": "Pinning an action to a full length commit SHA is currently the only way to use an action as an immutable release. Pinning to a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's repository, as they would need to generate a SHA-1 collision for a valid Git object payload. When selecting a SHA, you should verify it is from the action's repository and not a repository fork.",
+        "data": {
+          "queryId": "555ab8f9-2001-455e-a077-f2d0f41e2fb9 [Taken from query_id]",
+          "queryName": "Unpinned Actions Full Length Commit SHA",
+          "group": "Supply-Chain [Taken from category]",
+          "queryUrl": "Unpinned Actions Full Length Commit SHA [Taken from query_name]",
+          "fileName": "/.github/workflows/checkmarx.yaml",
+          "line": 17,
+          "platform": "CICD",
+          "issueType": "IncorrectValue",
+          "expectedValue": "Action pinned to a full length commit SHA.",
+          "value": "Action is not pinned to a full length commit SHA."
+        },
+        "comments": {},
+        "vulnerabilityDetails": {}
+      },
+      {
+        "type": "sast",
+        "id": "wUBV69FwAKwM2V0JMHrAf1C00Dk=",
+        "similarityId": "-624652752",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "MEDIUM",
+        "confidenceLevel": 0,
+        "created": "2024-04-08T20:12:22Z",
+        "firstFoundAt": "2024-04-08T17:07:12Z",
+        "foundAt": "2024-04-08T20:12:22Z",
+        "firstScanId": "06befdb0-0c91-4cfd-9e6b-dc447cf3c4fc",
+        "description": "/robot/SAC016 atendimento_seller.py relies HTTPS requests, in main. The get parameter, at line 50, effectively disables verification of the SSL certificate trust chain.\n\n",
+        "data": {
+          "queryId": 8957684266794785000,
+          "queryName": "SSL_Verification_Bypass",
+          "group": "Python_Medium_Threat",
+          "resultHash": "wUBV69FwAKwM2V0JMHrAf1C00Dk=",
+          "languageName": "Python",
+          "nodes": [
+            {
+              "id": "R18ggKhxzyHu1g4VGRXnCzuYBTA=",
+              "line": 50,
+              "name": "false",
+              "column": 56,
+              "length": 5,
+              "method": "main",
+              "nodeID": 1235,
+              "domType": "BooleanLiteral",
+              "fileName": "/robot/SAC016 atendimento_seller.py",
+              "fullName": "false",
+              "typeName": "BooleanLiteral",
+              "methodLine": 14,
+              "definitions": "-1"
+            },
+            {
+              "id": "OV9IntfK3HCqiF3UxKAAgUXKkAQ=",
+              "line": 50,
+              "name": "get",
+              "column": 29,
+              "length": 3,
+              "method": "main",
+              "nodeID": 1227,
+              "domType": "MethodInvokeExpr",
+              "fileName": "/robot/SAC016 atendimento_seller.py",
+              "fullName": "requests.get",
+              "typeName": "get",
+              "methodLine": 14,
+              "definitions": "0"
+            }
+          ]
+        },
+        "comments": {},
+        "vulnerabilityDetails": {
+          "cweId": 599,
+          "compliances": [
+            "MOIS(KISA) Secure Coding 2021",
+            "OWASP ASVS",
+            "OWASP Top 10 2021",
+            "SANS top 25"
+          ]
+        }
+      },
+      {
+        "type": "sast",
+        "id": "599424943",
+        "similarityId": "1012480974",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "LOW",
+        "confidenceLevel": 0,
+        "created": "2024-04-09T20:27:34Z",
+        "firstFoundAt": "2024-03-01T16:15:45Z",
+        "foundAt": "2024-04-09T20:27:34Z",
+        "firstScanId": "395dc4a5-4196-494a-971d-ed0369d64b52",
+        "description": "No checks to identify whether the device has been rooted were found.\n\n",
+        "data": {
+          "queryId": 5904646516379823000,
+          "queryName": "Missing_Rooted_Device_Check",
+          "group": "Kotlin_Android",
+          "resultHash": "vOqNOr/NihqjRTHlMQE8aI5223k=",
+          "languageName": "Kotlin",
+          "nodes": [
+            {
+              "id": "YuN11R9zQZp9KpJJv+x8G4yMZkQ=",
+              "line": 13,
+              "name": "main",
+              "column": 5,
+              "length": 4,
+              "method": "main",
+              "nodeID": 20212,
+              "domType": "MethodDecl",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/CentauroBackofficeApiApplication.kt",
+              "fullName": "main",
+              "methodLine": 13,
+              "definitions": "1"
+            }
+          ]
+        },
+        "comments": {},
+        "vulnerabilityDetails": {
+          "cweId": 693,
+          "compliances": null
+        }
+      },
+      {
+        "type": "sca-container",
+        "id": "CVE-2024-28085",
+        "similarityId": "CVE-2024-28085",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "LOW",
+        "confidenceLevel": 0,
+        "created": "2024-04-09T20:26:39Z",
+        "firstFoundAt": "2024-04-08T07:51:56Z",
+        "foundAt": "2024-04-09T20:26:39Z",
+        "firstScanId": "2f38848b-48dc-4656-a44f-9a4576108c48",
+        "description": "wall in util-linux through 2.40, often installed with setgid tty permissions, allows escape sequences to be sent to other users' terminals through argv. (Specifically, escape sequences received from stdin are blocked, but escape sequences received from argv are not blocked.) There may be plausible scenarios where this leads to account takeover.",
+        "data": {
+          "packageName": "libuuid1",
+          "packageVersion": "2.34-0.1ubuntu9.4",
+          "publishedAt": "2024-03-27T19:15:48+00:00",
+          "metadata": {
+            "enrichers": [
+              "ResultIDEnrichResult",
+              "FirstFoundEnrichResult",
+              "StatusEnrichResult"
+            ]
+          }
+        },
+        "comments": {
+          "comments": ""
+        },
+        "vulnerabilityDetails": {
+          "cvssScore": 0,
+          "cveName": "",
+          "cweId": "",
+          "cvss": {}
+        }
+      },
+      {
+        "type": "sast",
+        "id": "5JhJ3WKFg0HVdCiGPhzsHccG6RA=",
+        "similarityId": "375824765",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "MEDIUM",
+        "confidenceLevel": 0,
+        "created": "2024-04-09T20:27:34Z",
+        "firstFoundAt": "2024-03-25T13:20:06Z",
+        "foundAt": "2024-04-09T20:27:34Z",
+        "firstScanId": "e10744e2-8bd5-41b3-afcd-af0d5ea34753",
+        "description": "Method processOrder at line 18 of /src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/api/OrderIntegrationController.kt gets user input from element payload . This element’s value flows through the code without being validated, and is eventually used in a loop condition in mapToEntity at line 19 of /src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/ItPedidosSiteAtMapper.kt. This constitutes an Unchecked Input for Loop Condition.\n\n",
+        "data": {
+          "queryId": 7308467749988345000,
+          "queryName": "Unchecked_Input_for_Loop_Condition",
+          "group": "Kotlin_Medium_Threat",
+          "resultHash": "5JhJ3WKFg0HVdCiGPhzsHccG6RA=",
+          "languageName": "Kotlin",
+          "nodes": [
+            {
+              "id": "jI5HZPnvmPZE7ku6EQQF7sEgS/U=",
+              "line": 18,
+              "name": "payload",
+              "column": 22,
+              "length": 7,
+              "method": "processOrder",
+              "nodeID": 20680,
+              "domType": "ParamDecl",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/api/OrderIntegrationController.kt",
+              "fullName": "OrderIntegrationController.processOrder.payload",
+              "typeName": "OrderIntegrationRequest",
+              "methodLine": 17,
+              "definitions": "1"
+            },
+            {
+              "id": "RlC8sPQzgE+XAnIxCQzXFBj7hdA=",
+              "line": 20,
+              "name": "payload",
+              "column": 43,
+              "length": 7,
+              "method": "processOrder",
+              "nodeID": 20660,
+              "domType": "UnknownReference",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/api/OrderIntegrationController.kt",
+              "fullName": "OrderIntegrationController.processOrder.payload",
+              "typeName": "OrderIntegrationRequest",
+              "methodLine": 17,
+              "definitions": "1"
+            },
+            {
+              "id": "4K5ae6rvN7weIiN4vKArfrkXKno=",
+              "line": 20,
+              "name": "orderV2Dto",
+              "column": 51,
+              "length": 10,
+              "method": "processOrder",
+              "nodeID": 20661,
+              "domType": "MemberAccess",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/api/OrderIntegrationController.kt",
+              "fullName": "OrderIntegrationController.processOrder.payload.orderV2Dto",
+              "typeName": "OrderV2Dto",
+              "methodLine": 17,
+              "definitions": "1"
+            },
+            {
+              "id": "ArGwisa9yeqMtJC7hiFHDmXMFdM=",
+              "line": 63,
+              "name": "order",
+              "column": 9,
+              "length": 5,
+              "method": "saveOrder",
+              "nodeID": 55152,
+              "domType": "ParamDecl",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/service/OrderIntegrationService.kt",
+              "fullName": "OrderIntegrationService.saveOrder.order",
+              "typeName": "OrderV2Dto",
+              "methodLine": 62,
+              "definitions": "1"
+            },
+            {
+              "id": "WOm76cc9Rxr1FvEQvMm19gENblU=",
+              "line": 88,
+              "name": "order",
+              "column": 57,
+              "length": 5,
+              "method": "saveOrder",
+              "nodeID": 54803,
+              "domType": "UnknownReference",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/service/OrderIntegrationService.kt",
+              "fullName": "OrderIntegrationService.saveOrder.order",
+              "typeName": "OrderV2Dto",
+              "methodLine": 62,
+              "definitions": "1"
+            },
+            {
+              "id": "ccApoHEYoJlhag1EhoWZ6TmE+VE=",
+              "line": 22,
+              "name": "order",
+              "column": 9,
+              "length": 5,
+              "method": "map",
+              "nodeID": 32399,
+              "domType": "ParamDecl",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.order",
+              "typeName": "OrderV2Dto",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "I9skkjfUDYdzTwJf8t5EcTJ5bm8=",
+              "line": 26,
+              "name": "order",
+              "column": 29,
+              "length": 5,
+              "method": "map",
+              "nodeID": 32290,
+              "domType": "UnknownReference",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.order",
+              "typeName": "OrderV2Dto",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "vqXXHbM8Uo7fycMJGvZY+nblwTc=",
+              "line": 26,
+              "name": "delivery",
+              "column": 35,
+              "length": 8,
+              "method": "map",
+              "nodeID": 32291,
+              "domType": "MemberAccess",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.order.delivery",
+              "typeName": "DeliveryDto",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "QvfpBIOMR4wgnMezxwbon2E3vt8=",
+              "line": 26,
+              "name": "groups",
+              "column": 45,
+              "length": 6,
+              "method": "map",
+              "nodeID": 32292,
+              "domType": "MemberAccess",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.order.delivery.groups",
+              "typeName": "MutableSet",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "5wwVv/Jt6kkaBhZrRDAcEs5lR2Y=",
+              "line": 26,
+              "name": "firstOrNull",
+              "column": 53,
+              "length": 11,
+              "method": "map",
+              "nodeID": 32295,
+              "domType": "MethodInvokeExpr",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.order.delivery.groups.firstOrNull",
+              "typeName": "firstOrNull",
+              "methodLine": 21,
+              "definitions": "0"
+            },
+            {
+              "id": "uiMi2/1yDbGY7JWmiSLGRjY5OJ4=",
+              "line": 26,
+              "name": "deliveryGroup",
+              "column": 13,
+              "length": 13,
+              "method": "map",
+              "nodeID": 32289,
+              "domType": "Declarator",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.deliveryGroup",
+              "typeName": "DeliveryGroupDto",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "nDCCjXl74JdHqzJPV6+rik6FUg8=",
+              "line": 29,
+              "name": "deliveryGroup",
+              "column": 50,
+              "length": 13,
+              "method": "map",
+              "nodeID": 32396,
+              "domType": "UnknownReference",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/BaseMapper.kt",
+              "fullName": "BaseMapper.map.deliveryGroup",
+              "typeName": "DeliveryGroupDto",
+              "methodLine": 21,
+              "definitions": "1"
+            },
+            {
+              "id": "uNhJeYxfnJL5Rd2BvPaUINnS344=",
+              "line": 15,
+              "name": "deliveryGroup",
+              "column": 9,
+              "length": 13,
+              "method": "mapToEntity",
+              "nodeID": 35790,
+              "domType": "ParamDecl",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/ItPedidosSiteAtMapper.kt",
+              "fullName": "ItPedidosSiteAtMapper.mapToEntity.deliveryGroup",
+              "typeName": "DeliveryGroupDto",
+              "methodLine": 12,
+              "definitions": "1"
+            },
+            {
+              "id": "p8KGK04SPIrcD1ip3F9L34cHr1o=",
+              "line": 19,
+              "name": "deliveryGroup",
+              "column": 46,
+              "length": 13,
+              "method": "mapToEntity",
+              "nodeID": 35569,
+              "domType": "UnknownReference",
+              "fileName": "/src/main/kotlin/ca/com/squeaky-clean-fresh/centaurobackofficeapi/infrastructure/repositories/informix/mappers/ItPedidosSiteAtMapper.kt",
+              "fullName": "ItPedidosSiteAtMapper.mapToEntity.deliveryGroup",
+              "typeName": "DeliveryGroupDto",
+              "methodLine": 12,
+              "definitions": "1"
+            }
+          ]
+        },
+        "comments": {},
+        "vulnerabilityDetails": {
+          "cweId": 606,
+          "compliances": [
+            "OWASP Top 10 2021"
+          ]
+        }
+      },
+      {
+        "type": "sca-container",
+        "id": "CVE-2020-26137",
+        "similarityId": "CVE-2020-26137",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "MEDIUM",
+        "confidenceLevel": 0,
+        "created": "2024-04-09T20:26:39Z",
+        "firstFoundAt": "2024-01-31T18:15:29Z",
+        "foundAt": "2024-04-09T20:26:39Z",
+        "firstScanId": "8635c62c-d0ef-423b-97ca-44866fa1157b",
+        "description": "urllib3 before 1.25.9 allows CRLF injection if the attacker controls the HTTP request method, as demonstrated by inserting CR and LF control characters in the first argument of putrequest(). NOTE: this is similar to CVE-2020-26116.",
+        "data": {
+          "packageName": "urllib3",
+          "packageVersion": "1.25.8",
+          "publishedAt": "2020-09-30T18:15:00+00:00",
+          "metadata": {
+            "enrichers": [
+              "ResultIDEnrichResult",
+              "FirstFoundEnrichResult",
+              "StatusEnrichResult"
+            ]
+          }
+        },
+        "comments": {
+          "comments": ""
+        },
+        "vulnerabilityDetails": {
+          "cvssScore": 0,
+          "cveName": "",
+          "cweId": "CWE-74",
+          "cvss": {
+            "version": 3,
+            "attackVector": "NETWORK",
+            "availability": "NONE",
+            "cvss3severity": "Medium",
+            "authentication": "NONE",
+            "confidentiality": "LOW",
+            "integrityImpact": "LOW",
+            "attackComplexity": "LOW"
+          }
+        }
+      },
+      {
+        "type": "sca",
+        "id": "Cxda14f253-4e52",
+        "similarityId": "Cxda14f253-4e52",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "LOW",
+        "confidenceLevel": 0,
+        "created": "2024-03-21T23:18:03Z",
+        "firstFoundAt": "2023-08-21T11:55:47Z",
+        "foundAt": "2024-03-21T23:18:03Z",
+        "firstScanId": "7ef7bca2-18e6-41ac-8182-252e6e0eefa7",
+        "description": "The package `bluebird` is vulnerable to memory leak, when running the function longStackTraces() with the flag `--expose_gc`. This causes a significant increase in the memory usage, affecting the server's availability.",
+        "data": {
+          "packageIdentifier": "Npm-bluebird-3.7.2",
+          "publishedAt": "2016-04-24T21:00:00+00:00",
+          "recommendations": "",
+          "recommendedVersion": "",
+          "exploitableMethods": null,
+          "packageData": [
+            {
+              "url": "https://github.com/petkaantonov/bluebird/issues/1080",
+              "type": "Issue",
+              "comment": "https://github.com/petkaantonov/bluebird/issues/1080"
+            }
+          ]
+        },
+        "comments": {
+          "comments": ""
+        },
+        "vulnerabilityDetails": {
+          "cvssScore": 3.700000047683716,
+          "cveName": "CWE-401",
+          "cweId": "CWE-401",
+          "cvss": {
+            "version": 3,
+            "attackVector": "NETWORK",
+            "availability": "LOW",
+            "cvss3severity": "Low",
+            "confidentiality": "NONE",
+            "attackComplexity": "HIGH"
+          }
+        }
+      },
+      {
+        "type": "sca",
+        "id": "CVE-2023-44270",
+        "similarityId": "CVE-2023-44270",
+        "status": "RECURRENT",
+        "state": "TO_VERIFY",
+        "severity": "MEDIUM",
+        "confidenceLevel": 0,
+        "created": "2024-03-21T23:18:03Z",
+        "firstFoundAt": "2023-10-24T19:06:36Z",
+        "foundAt": "2024-03-21T23:18:03Z",
+        "firstScanId": "99c3412d-bfb5-4ebc-b465-96f406da4467",
+        "description": "An issue was discovered in postcss versions prior to 8.4.31. The vulnerability affects linters using PostCSS to parse external untrusted CSS. An attacker can prepare CSS in such a way that it will contains parts parsed by PostCSS as a CSS comment. After processing by PostCSS, it will be included in the PostCSS output in CSS nodes (rules, properties) despite being included in a comment.",
+        "data": {
+          "packageIdentifier": "Npm-postcss-7.0.39",
+          "publishedAt": "2023-09-29T10:44:00+00:00",
+          "recommendations": "",
+          "recommendedVersion": "8.4.31",
+          "exploitableMethods": null,
+          "packageData": [
+            {
+              "url": "https://github.com/advisories/GHSA-7fh5-64p2-3v2j",
+              "type": "Advisory",
+              "comment": "https://github.com/advisories/GHSA-7fh5-64p2-3v2j"
+            },
+            {
+              "url": "https://github.com/postcss/postcss/releases/tag/8.4.31",
+              "type": "Release Note",
+              "comment": "https://github.com/postcss/postcss/releases/tag/8.4.31"
+            },
+            {
+              "url": "https://github.com/postcss/postcss/commit/58cc860b4c1707510c9cd1bc1fa30b423a9ad6c5",
+              "type": "Commit",
+              "comment": "https://github.com/postcss/postcss/commit/58cc860b4c1707510c9cd1bc1fa30b423a9ad6c5"
+            }
+          ]
+        },
+        "comments": {
+          "comments": ""
+        },
+        "vulnerabilityDetails": {
+          "cvssScore": 5.300000190734863,
+          "cveName": "CWE-74",
+          "cweId": "CWE-74",
+          "cvss": {
+            "version": 3,
+            "attackVector": "NETWORK",
+            "availability": "NONE",
+            "cvss3severity": "Medium",
+            "confidentiality": "NONE",
+            "attackComplexity": "LOW"
+          }
+        }
+      }
+    ],
+    "totalCount": 7
+  }

@@ -1,0 +1,1058 @@
+[
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3851,
+    "fields": {
+      "benchmark_requirement": 193,
+      "cwe": 419
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3854,
+    "fields": {
+      "benchmark_requirement": 196,
+      "cwe": 434
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3858,
+    "fields": {
+      "benchmark_requirement": 200,
+      "cwe": 779
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3859,
+    "fields": {
+      "benchmark_requirement": 201,
+      "cwe": 436
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3863,
+    "fields": {
+      "benchmark_requirement": 205,
+      "cwe": 770
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3865,
+    "fields": {
+      "benchmark_requirement": 207,
+      "cwe": 749
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3867,
+    "fields": {
+      "benchmark_requirement": 209,
+      "cwe": 272
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3868,
+    "fields": {
+      "benchmark_requirement": 210,
+      "cwe": 507
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3869,
+    "fields": {
+      "benchmark_requirement": 211,
+      "cwe": 511
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3870,
+    "fields": {
+      "benchmark_requirement": 212,
+      "cwe": 511
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3871,
+    "fields": {
+      "benchmark_requirement": 213,
+      "cwe": 507
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3873,
+    "fields": {
+      "benchmark_requirement": 215,
+      "cwe": 353
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3875,
+    "fields": {
+      "benchmark_requirement": 218,
+      "cwe": 120
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3882,
+    "fields": {
+      "benchmark_requirement": 228,
+      "cwe": 209
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3887,
+    "fields": {
+      "benchmark_requirement": 233,
+      "cwe": 1021
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3891,
+    "fields": {
+      "benchmark_requirement": 237,
+      "cwe": 346
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3892,
+    "fields": {
+      "benchmark_requirement": 238,
+      "cwe": 749
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3893,
+    "fields": {
+      "benchmark_requirement": 239,
+      "cwe": 346
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3894,
+    "fields": {
+      "benchmark_requirement": 240,
+      "cwe": 346
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3896,
+    "fields": {
+      "benchmark_requirement": 242,
+      "cwe": 311
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3897,
+    "fields": {
+      "benchmark_requirement": 243,
+      "cwe": 311
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3898,
+    "fields": {
+      "benchmark_requirement": 244,
+      "cwe": 311
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3900,
+    "fields": {
+      "benchmark_requirement": 246,
+      "cwe": 327
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3906,
+    "fields": {
+      "benchmark_requirement": 252,
+      "cwe": 385
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3907,
+    "fields": {
+      "benchmark_requirement": 253,
+      "cwe": 338
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3908,
+    "fields": {
+      "benchmark_requirement": 254,
+      "cwe": 338
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3909,
+    "fields": {
+      "benchmark_requirement": 255,
+      "cwe": 338
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3910,
+    "fields": {
+      "benchmark_requirement": 256,
+      "cwe": 798
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3915,
+    "fields": {
+      "benchmark_requirement": 261,
+      "cwe": 295
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3918,
+    "fields": {
+      "benchmark_requirement": 264,
+      "cwe": 299
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3919,
+    "fields": {
+      "benchmark_requirement": 265,
+      "cwe": 544
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3920,
+    "fields": {
+      "benchmark_requirement": 266,
+      "cwe": 602
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3921,
+    "fields": {
+      "benchmark_requirement": 267,
+      "cwe": 639
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3925,
+    "fields": {
+      "benchmark_requirement": 271,
+      "cwe": 639
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3927,
+    "fields": {
+      "benchmark_requirement": 273,
+      "cwe": 419
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3932,
+    "fields": {
+      "benchmark_requirement": 278,
+      "cwe": 331
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3934,
+    "fields": {
+      "benchmark_requirement": 280,
+      "cwe": 331
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3935,
+    "fields": {
+      "benchmark_requirement": 281,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3936,
+    "fields": {
+      "benchmark_requirement": 282,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3937,
+    "fields": {
+      "benchmark_requirement": 283,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3938,
+    "fields": {
+      "benchmark_requirement": 284,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3944,
+    "fields": {
+      "benchmark_requirement": 290,
+      "cwe": 290
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3945,
+    "fields": {
+      "benchmark_requirement": 291,
+      "cwe": 798
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3947,
+    "fields": {
+      "benchmark_requirement": 293,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3948,
+    "fields": {
+      "benchmark_requirement": 294,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3949,
+    "fields": {
+      "benchmark_requirement": 295,
+      "cwe": 778
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3952,
+    "fields": {
+      "benchmark_requirement": 298,
+      "cwe": 778
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3953,
+    "fields": {
+      "benchmark_requirement": 299,
+      "cwe": 778
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3954,
+    "fields": {
+      "benchmark_requirement": 300,
+      "cwe": 778
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3956,
+    "fields": {
+      "benchmark_requirement": 302,
+      "cwe": 117
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3957,
+    "fields": {
+      "benchmark_requirement": 303,
+      "cwe": 117
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3959,
+    "fields": {
+      "benchmark_requirement": 306,
+      "cwe": 210
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3960,
+    "fields": {
+      "benchmark_requirement": 307,
+      "cwe": 544
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3964,
+    "fields": {
+      "benchmark_requirement": 311,
+      "cwe": 233
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3965,
+    "fields": {
+      "benchmark_requirement": 312,
+      "cwe": 770
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3972,
+    "fields": {
+      "benchmark_requirement": 319,
+      "cwe": 212
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3976,
+    "fields": {
+      "benchmark_requirement": 323,
+      "cwe": 226
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3977,
+    "fields": {
+      "benchmark_requirement": 324,
+      "cwe": 327
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3979,
+    "fields": {
+      "benchmark_requirement": 326,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3980,
+    "fields": {
+      "benchmark_requirement": 327,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3981,
+    "fields": {
+      "benchmark_requirement": 328,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3982,
+    "fields": {
+      "benchmark_requirement": 329,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3985,
+    "fields": {
+      "benchmark_requirement": 332,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3986,
+    "fields": {
+      "benchmark_requirement": 333,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3987,
+    "fields": {
+      "benchmark_requirement": 334,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3988,
+    "fields": {
+      "benchmark_requirement": 335,
+      "cwe": 263
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3989,
+    "fields": {
+      "benchmark_requirement": 336,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3990,
+    "fields": {
+      "benchmark_requirement": 337,
+      "cwe": 521
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3991,
+    "fields": {
+      "benchmark_requirement": 338,
+      "cwe": 307
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3992,
+    "fields": {
+      "benchmark_requirement": 339,
+      "cwe": 304
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3994,
+    "fields": {
+      "benchmark_requirement": 341,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3996,
+    "fields": {
+      "benchmark_requirement": 343,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3997,
+    "fields": {
+      "benchmark_requirement": 344,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 3999,
+    "fields": {
+      "benchmark_requirement": 346,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4001,
+    "fields": {
+      "benchmark_requirement": 348,
+      "cwe": 916
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4002,
+    "fields": {
+      "benchmark_requirement": 349,
+      "cwe": 916
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4003,
+    "fields": {
+      "benchmark_requirement": 350,
+      "cwe": 916
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4004,
+    "fields": {
+      "benchmark_requirement": 351,
+      "cwe": 916
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4005,
+    "fields": {
+      "benchmark_requirement": 352,
+      "cwe": 916
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4006,
+    "fields": {
+      "benchmark_requirement": 353,
+      "cwe": 640
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4007,
+    "fields": {
+      "benchmark_requirement": 354,
+      "cwe": 640
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4008,
+    "fields": {
+      "benchmark_requirement": 355,
+      "cwe": 640
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4010,
+    "fields": {
+      "benchmark_requirement": 357,
+      "cwe": 304
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4011,
+    "fields": {
+      "benchmark_requirement": 358,
+      "cwe": 640
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4012,
+    "fields": {
+      "benchmark_requirement": 359,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4013,
+    "fields": {
+      "benchmark_requirement": 360,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4022,
+    "fields": {
+      "benchmark_requirement": 369,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4027,
+    "fields": {
+      "benchmark_requirement": 374,
+      "cwe": 613
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4028,
+    "fields": {
+      "benchmark_requirement": 375,
+      "cwe": 308
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4031,
+    "fields": {
+      "benchmark_requirement": 378,
+      "cwe": 327
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4034,
+    "fields": {
+      "benchmark_requirement": 381,
+      "cwe": 522
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4035,
+    "fields": {
+      "benchmark_requirement": 382,
+      "cwe": 798
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4037,
+    "fields": {
+      "benchmark_requirement": 384,
+      "cwe": 409
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4038,
+    "fields": {
+      "benchmark_requirement": 385,
+      "cwe": 770
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4039,
+    "fields": {
+      "benchmark_requirement": 386,
+      "cwe": 434
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4042,
+    "fields": {
+      "benchmark_requirement": 389,
+      "cwe": 98
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4043,
+    "fields": {
+      "benchmark_requirement": 390,
+      "cwe": 641
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4044,
+    "fields": {
+      "benchmark_requirement": 391,
+      "cwe": 78
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4047,
+    "fields": {
+      "benchmark_requirement": 394,
+      "cwe": 509
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4048,
+    "fields": {
+      "benchmark_requirement": 395,
+      "cwe": 552
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4049,
+    "fields": {
+      "benchmark_requirement": 396,
+      "cwe": 434
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4050,
+    "fields": {
+      "benchmark_requirement": 397,
+      "cwe": 918
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4051,
+    "fields": {
+      "benchmark_requirement": 399,
+      "cwe": 1053
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4052,
+    "fields": {
+      "benchmark_requirement": 400,
+      "cwe": 1110
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4061,
+    "fields": {
+      "benchmark_requirement": 409,
+      "cwe": 602
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4063,
+    "fields": {
+      "benchmark_requirement": 411,
+      "cwe": 272
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4068,
+    "fields": {
+      "benchmark_requirement": 416,
+      "cwe": 602
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4076,
+    "fields": {
+      "benchmark_requirement": 427,
+      "cwe": 295
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4080,
+    "fields": {
+      "benchmark_requirement": 431,
+      "cwe": 367
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4081,
+    "fields": {
+      "benchmark_requirement": 432,
+      "cwe": 552
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4084,
+    "fields": {
+      "benchmark_requirement": 435,
+      "cwe": 494
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4085,
+    "fields": {
+      "benchmark_requirement": 436,
+      "cwe": 1104
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4087,
+    "fields": {
+      "benchmark_requirement": 439,
+      "cwe": 477
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4089,
+    "fields": {
+      "benchmark_requirement": 441,
+      "cwe": 915
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4096,
+    "fields": {
+      "benchmark_requirement": 448,
+      "cwe": 95
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4098,
+    "fields": {
+      "benchmark_requirement": 450,
+      "cwe": 918
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4103,
+    "fields": {
+      "benchmark_requirement": 455,
+      "cwe": 79
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4104,
+    "fields": {
+      "benchmark_requirement": 456,
+      "cwe": 89
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4105,
+    "fields": {
+      "benchmark_requirement": 457,
+      "cwe": 89
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4106,
+    "fields": {
+      "benchmark_requirement": 458,
+      "cwe": 830
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4108,
+    "fields": {
+      "benchmark_requirement": 460,
+      "cwe": 78
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4110,
+    "fields": {
+      "benchmark_requirement": 462,
+      "cwe": 643
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4111,
+    "fields": {
+      "benchmark_requirement": 463,
+      "cwe": 120
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4112,
+    "fields": {
+      "benchmark_requirement": 464,
+      "cwe": 134
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4113,
+    "fields": {
+      "benchmark_requirement": 465,
+      "cwe": 190
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4117,
+    "fields": {
+      "benchmark_requirement": 469,
+      "cwe": 95
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4118,
+    "fields": {
+      "benchmark_requirement": 470,
+      "cwe": 841
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4119,
+    "fields": {
+      "benchmark_requirement": 471,
+      "cwe": 779
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4120,
+    "fields": {
+      "benchmark_requirement": 472,
+      "cwe": 770
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4121,
+    "fields": {
+      "benchmark_requirement": 473,
+      "cwe": 770
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4122,
+    "fields": {
+      "benchmark_requirement": 474,
+      "cwe": 841
+    }
+  },
+  {
+    "model": "dojo.benchmark_requirement_cwe_mapping",
+    "pk": 4123,
+    "fields": {
+      "benchmark_requirement": 475,
+      "cwe": 367
+    }
+  }
+]

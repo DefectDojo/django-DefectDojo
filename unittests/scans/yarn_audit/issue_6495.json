@@ -1,0 +1,142 @@
+{
+  "actions": [],
+  "advisories": {
+    "1068298": {
+      "findings": [
+        {
+          "version": "1.3.5",
+          "paths": [
+            "@angular/cli>ini",
+            "danger>parse-git-config>ini",
+            "@datorama/akita>schematics-utilities>@schematics/update>ini",
+            "@datorama/akita-ng-entity-service>@datorama/akita>schematics-utilities>@schematics/update>ini",
+            "nodemon>update-notifier>latest-version>package-json>registry-auth-token>rc>ini",
+            "@mikro-orm/cli>@mikro-orm/migrations>knex>liftoff>findup-sync>resolve-dir>global-modules>global-prefix>ini",
+            "@mikro-orm/cli>@mikro-orm/knex>@mikro-orm/migrations>knex>liftoff>findup-sync>resolve-dir>global-modules>global-prefix>ini",
+            "@mikro-orm/cli>@mikro-orm/entity-generator>@mikro-orm/knex>@mikro-orm/migrations>knex>liftoff>findup-sync>resolve-dir>global-modules>global-prefix>ini"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.3.6",
+      "module_name": "ini",
+      "severity": "high",
+      "github_advisory_id": "GHSA-qqgx-2p2h-9c37",
+      "cves": [
+        "CVE-2020-7788"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.3.6",
+      "cvss": {
+        "score": 7.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2021-07-28T21:12:38.000Z",
+      "recommendation": "Upgrade to version 1.3.6 or later",
+      "cwe": [
+        "CWE-1321"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1068298,
+      "references": "- https://github.com/npm/ini/commit/56d2805e07ccd94e2ba0984ac9240ff02d44b6f1\n- https://www.npmjs.com/advisories/1589\n- https://snyk.io/vuln/SNYK-JS-INI-1048974\n- https://nvd.nist.gov/vuln/detail/CVE-2020-7788\n- https://lists.debian.org/debian-lts-announce/2020/12/msg00032.html\n- https://github.com/advisories/GHSA-qqgx-2p2h-9c37",
+      "created": "2020-12-10T16:53:45.000Z",
+      "reported_by": null,
+      "title": "Prototype Pollution",
+      "npm_advisory_id": null,
+      "overview": "### Overview\nThe `ini` npm package before version 1.3.6 has a Prototype Pollution vulnerability.\n\nIf an attacker submits a malicious INI file to an application that parses it with `ini.parse`, they will pollute the prototype on the application. This can be exploited further depending on the context.\n\n### Patches\n\nThis has been patched in 1.3.6\n\n### Steps to reproduce\n\npayload.ini\n```\n[__proto__]\npolluted = \"polluted\"\n```\n\npoc.js:\n```\nvar fs = require('fs')\nvar ini = require('ini')\n\nvar parsed = ini.parse(fs.readFileSync('./payload.ini', 'utf-8'))\nconsole.log(parsed)\nconsole.log(parsed.__proto__)\nconsole.log(polluted)\n```\n\n```\n> node poc.js\n{}\n{ polluted: 'polluted' }\n{ polluted: 'polluted' }\npolluted\n```",
+      "url": "https://github.com/advisories/GHSA-qqgx-2p2h-9c37"
+    },
+    "1075625": {
+      "findings": [
+        {
+          "version": "0.4.3",
+          "paths": [
+            "@playwright/test>jpeg-js",
+            "@playwright/test>playwright-core>jpeg-js"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.4.4",
+      "module_name": "jpeg-js",
+      "severity": "high",
+      "github_advisory_id": "GHSA-xvf7-4v9q-58w6",
+      "cves": [
+        "CVE-2022-25851"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.4.4",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2022-06-20T21:58:36.000Z",
+      "recommendation": "Upgrade to version 0.4.4 or later",
+      "cwe": [
+        "CWE-835"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1075625,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-25851\n- https://github.com/jpeg-js/jpeg-js/issues/105\n- https://github.com/jpeg-js/jpeg-js/pull/106/\n- https://github.com/jpeg-js/jpeg-js/commit/9ccd35fb5f55a6c4f1902ac5b0f270f675750c27\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-2860295\n- https://snyk.io/vuln/SNYK-JS-JPEGJS-2859218\n- https://github.com/advisories/GHSA-xvf7-4v9q-58w6",
+      "created": "2022-06-11T00:00:17.000Z",
+      "reported_by": null,
+      "title": "Infinite loop in jpeg-js",
+      "npm_advisory_id": null,
+      "overview": "The package jpeg-js before 0.4.4 is vulnerable to Denial of Service (DoS) where a particular piece of input will cause the program to enter an infinite loop and never return.",
+      "url": "https://github.com/advisories/GHSA-xvf7-4v9q-58w6"
+    },
+    "1075701": {
+      "findings": [
+        {
+          "version": "9.6.0",
+          "paths": [
+            "nodemon>update-notifier>latest-version>package-json>got"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<11.8.5",
+      "module_name": "got",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-pfrx-2q88-qq97",
+      "cves": [
+        "CVE-2022-33987"
+      ],
+      "access": "public",
+      "patched_versions": ">=11.8.5",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2022-06-27T17:09:23.000Z",
+      "recommendation": "Upgrade to version 11.8.5 or later",
+      "cwe": [],
+      "found_by": null,
+      "deleted": null,
+      "id": 1075701,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-33987\n- https://github.com/sindresorhus/got/pull/2047\n- https://github.com/sindresorhus/got/compare/v12.0.3...v12.1.0\n- https://github.com/sindresorhus/got/commit/861ccd9ac2237df762a9e2beed7edd88c60782dc\n- https://github.com/sindresorhus/got/releases/tag/v11.8.5\n- https://github.com/sindresorhus/got/releases/tag/v12.1.0\n- https://github.com/advisories/GHSA-pfrx-2q88-qq97",
+      "created": "2022-06-19T00:00:21.000Z",
+      "reported_by": null,
+      "title": "Got allows a redirect to a UNIX socket",
+      "npm_advisory_id": null,
+      "overview": "The got package before 11.8.5 and 12.1.0 for Node.js allows a redirect to a UNIX socket.",
+      "url": "https://github.com/advisories/GHSA-pfrx-2q88-qq97"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 10,
+      "critical": 0
+    },
+    "dependencies": 2236,
+    "devDependencies": 121,
+    "optionalDependencies": 0,
+    "totalDependencies": 2357
+  }
+}

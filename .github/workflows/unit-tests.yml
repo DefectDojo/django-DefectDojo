@@ -1,0 +1,31 @@
+name: Unit tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+      - dev
+      - bugfix
+      - release/**
+      - hotfix/**
+
+jobs:
+  build-docker-containers:
+    uses: ./.github/workflows/build-docker-images-for-testing.yml
+    secrets: inherit
+  
+  test-rest-framework:
+    needs: build-docker-containers
+    uses: ./.github/workflows/rest-framework-tests.yml
+    secrets: inherit
+
+  test-user-interface:
+    needs: build-docker-containers
+    uses: ./.github/workflows/integration-tests.yml
+    secrets: inherit
+  
+  test-k8s:
+    needs: build-docker-containers
+    uses: ./.github/workflows/k8s-tests.yml
+    secrets: inherit

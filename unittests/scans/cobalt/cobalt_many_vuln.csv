@@ -1,0 +1,37 @@
+Token,Tag,Title,Type,CreatedAt,BrowserUrl,HttpRequest,CriticalityJustification,Description,StepsToReproduce,ToolsUsed,SuggestedFix,RequestParams,Prerequisites,AssignedTo,EvaluatedResult,ReportUrl,ReportedBy,ResearcherUrl,RefKey
+'vu_6db7imx,#TBD_1,'Stored XSS in comment field,Cross-Site Scripting (XSS),2015-09-02 08:14:15 UTC,'https://www.example.com/users/comments,"",'Here the tester will describe the reason why he/she thinks it is of the criticality specified,'here the tester will fill out details on the vulnerability,"'1. Here the tester will describe how to reproduce the issue
+2. then we do this
+3. then we do this","",'Here the tester will describe how to fix the issue,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/1,esben-cb,https://app.cobalt.io/esben-cb,
+'vu_L3wAiH2,#DDXYZ_3,'Missing CSRF token on change email action,Cross-Site Request Forgery (CSRF),2016-10-21 16:35:06 UTC,'https://xyz.xyz/profile/update,"'GET profile/update?email=malicious@cobalt.io&confirmEmail=malicious@cobalt.io HTTP/1.1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:49.0) Gecko/20100101 Firefox/49.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Host: xyz.xyz
+
+","'If this were used as part of a phishing attack, the user's email address could be changed to one owned by the attacker. This would enable the attacker to receive a ""Forgot password?"" email and take over the account.","'The profile page does not have a CSRF token present when changing the account's email address. Also, the page accepts both GET and POST requests for updating the email. Using GET makes it easier for an attacker to deliver a phishing payload.","'Choose an attacker's email address, e.g. malicious@cobalt.io
+
+Craft a GET request with the new email:
+https://xyz.xyz/profile/update?email=malicious@cobalt.io&confirmEmail=malicious@cobalt.io",'Zed Attack Proxy,'Apply the CSRF token to the update email page.,,"'User must be logged in.
+User must receive a phishing email.",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/3,zombie,https://app.cobalt.io/zombie,
+'vu_PjfGyaA,#DDXYZ_4,'Reflected XSS in search,Cross-Site Scripting (XSS),2016-10-21 16:48:08 UTC,'https://xyz.xyz/users/search,"","'Reflected self-XSS, but the link could be sent to other people to annoy them.",'Users can use single quote characters to create an XSS payload in search terms.,"'This is a basic XSS that's trivial to reproduce.
+
+Here's an example payload:
+https://xyz.xyz/users/search?q='><script>alert(9)</script>",'Browser,"'Apply output encoding for single quotes, e.g. &apos;
+
+Also, make sure quotation marks ("") are encoded as well. Use PHP's htmlentities() to help ensure this is correctly done.",,'No prereqs.,,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/4,zombie,https://app.cobalt.io/zombie,
+'vu_9N24UEM,#DDXYZ_5,'Race condition in check out workflow - multiple uses of same promo code for one purchase,Misconfiguration,2016-10-21 16:49:30 UTC,'https://xyz.xyz/checkout,"",'I would rate this vulnerability as High as is business will loose money from it,'By creating multiple identical POST requests while the price calculations are done it's possible to reduce the price with the value of multiple Promo codes. In the terms is says only one promo code can be used pr purchase.,"'- Add things to shopping card and proceed to checkout
+- Add in Promocode (e.g. ""fallyall"" = $5 discount)
+- Push Go to payment, and run POST requests","",'Add in checks that only allows for 1 promocode,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/5,jakobstorm,https://app.cobalt.io/jakobstorm,
+'vu_huqneGn,#DDXYZ_7,'SSRF during login flow,Redirects and Forwards,2016-10-21 17:13:36 UTC,'https://xyz.xyz/users/login,"","'Kind of high, it enables the attacker to enumerate systems. If there's an internal web-based vuln, then it'd be possible to leverage this to exploit that vuln.","'When a user enters incorrect credentials there's a redirect to an error page. If you catch this redirected URL and change it to an arbitrary URL, you can enumerate info about internal systems.","'Changed to ""redirUrl"" parameter to something like https://localhost:22/. The app will return the banner of the SSH service.
+
+You can also use it for time-based detection of open ports, i.e. a port that's open returns quickly, a port that's closed takes about 10 seconds to respond.","","'Restrict the ""redirUrl"" parameter to the https://xyz.xyz/ protocol and domain.",,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/7,zombie,https://app.cobalt.io/zombie,Test
+'vu_hfCaCWV,#DDXYZ_8,'phpMyAdmin install files left on server,Components with Known Vulnerabilities,2016-10-21 17:18:07 UTC,'https://xyz.xyz/concierge/db/phpMyAdmin/install/,"",'Not sure. I didn't want to overwrite any production data so I didn't try to change anything with it.,'The phpMyAdmin install files should be removed. It'd be better to restrict access to the phpMyAdmin to internal access only.,'Visit https://xyz.xyz/concierge/db/phpMyAdmin/install/.,"",'Remove the files.,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/8,zombie,https://app.cobalt.io/zombie,test
+'vu_xl9m1Fl,#DDXYZ_10,'Verbose PHP error messages,Sensitive Data Exposure,2016-10-21 17:29:24 UTC,"","","'Not a big deal. It's just file names, but shouldn't be exposed to end users anyway.",'The HTTP 500 page contains verbose info about the page including full file path.,'Any page error will show this.,"",'Use a default template that doesn't contain info about the files.,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/10,zombie,https://app.cobalt.io/zombie,check
+'vu_pctOid4,#DDXYZ_11,'Logout doesn't destroy the server-side session,Authentication and Sessions,2016-10-21 17:33:37 UTC,'https://xyz.xyz/users/logout,"",'Probably not that high. An attacker would have to steal a cookie for this to be high impact.,"'Upon logout, the app clears the browser's cookie value. However, a user can still re-use the cookie.","'Capture your SID cookie.
+Click logout.
+Reset the value of your SID cookie.
+Navigate to any authenticated page, e.g. /users/profile/update","",'Invalidate the user's session on the server when they logout.,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/11,zombie,https://app.cobalt.io/zombie,
+'vu_xaQB2Mj,#DDXYZ_16,'Missing HSTS header,Misconfiguration,2016-10-21 18:05:51 UTC,"","",'Harder to effectively exploit. Would need to be on a network near the victim.,'The site uses HTTPS throughout. It could also use the HSTS header to better enforce HTTPS.,'The HSTS header is missing. It's possible to downgrade links from HTTPS to HTTP.,"",'Deploy a Strict-Transport-Security header with a long lifetime.,,"",AMV,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/16,zombie,https://app.cobalt.io/zombie,Hello

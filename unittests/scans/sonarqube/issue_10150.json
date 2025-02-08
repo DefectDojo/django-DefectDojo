@@ -1,0 +1,74 @@
+{
+    "date": "Tuesday, May 7, 2024",
+    "projectName": "my-project-repo",
+    "applicationName": "my-project-repo",
+    "branch": "new-sonar-integration",
+    "inNewCodePeriod": false,
+    "allBugs": false,
+    "fixMissingRule": false,
+    "noSecurityHotspot": false,
+    "noRulesInReport": false,
+    "onlyDetectedRules": false,
+    "vulnerabilityPhrase": "Vulnerability",
+    "noCoverage": true,
+    "vulnerabilityPluralPhrase": "Vulnerabilities",
+    "sonarBaseURL": "https://sonarqube.internal.eu",
+    "sonarComponent": "my-project-repo",
+    "rules": {
+      "objc:S5982": {
+        "name": "Changing working directories without verifying the success is security-sensitive",
+        "htmlDesc": "<p>The purpose of changing the current working directory is to modify the base path when the process performs relative path resolutions. When the\nworking directory cannot be changed, the process keeps the directory previously defined as the active working directory. Thus, verifying the success\nof chdir() type of functions is important to prevent unintended relative paths and unauthorized access.</p>\n<h2>Ask Yourself Whether</h2>\n<ul>\n  <li> The success of changing the working directory is relevant for the application. </li>\n  <li> Changing the working directory is required by chroot to make the new root effective. </li>\n  <li> Subsequent disk operations are using relative paths. </li>\n</ul>\n<p>There is a risk if you answered yes to any of those questions.</p>\n<h2>Recommended Secure Coding Practices</h2>\n<p>After changing the current working directory verify the success of the operation and handle errors.</p>\n<h2>Sensitive Code Example</h2>\n<p>The <code>chdir</code> operation could fail and the process still has access to unauthorized resources. The return code should be verified:</p>\n<pre>\nconst char* any_dir = \"/any/\";\nchdir(any_dir); // Sensitive: missing check of the return value\n\nint fd = open(any_dir, O_RDONLY | O_DIRECTORY);\nfchdir(fd); // Sensitive: missing check of the return value\n</pre>\n<h2>Compliant Solution</h2>\n<p>Verify the return code of <code>chdir</code> and handle errors:</p>\n<pre>\nconst char* root_dir = \"/jail/\";\nif (chdir(root_dir) == -1) {\n  exit(-1);\n} // Compliant\n\nint fd = open(any_dir, O_RDONLY | O_DIRECTORY);\nif(fchdir(fd) == -1) {\n  exit(-1);\n} // Compliant\n</pre>\n<h2>See</h2>\n<ul>\n  <li> OWASP - <a href=\"https://owasp.org/Top10/A01_2021-Broken_Access_Control/\">Top 10 2021 Category A1 - Broken Access Control</a> </li>\n  <li> OWASP - <a href=\"https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control\">Top 10 2017 Category A5 - Broken Access Control</a>\n  </li>\n  <li> CWE - <a href=\"https://cwe.mitre.org/data/definitions/252\">CWE-252 - Unchecked Return Value</a> </li>\n  <li> <a href=\"https://man7.org/linux/man-pages/man2/chdir.2.html\">man7.org</a> - chdir </li>\n</ul>",
+        "severity": "CRITICAL"
+      },
+      "mule4-repository:configuration.13": {
+        "name": "Domain - Mule Secure Properties should use AES-CBC algorithm",
+        "htmlDesc": "<b>Domain</b> - Mule Secure Properties should use AES-CBC algorithm",
+        "severity": "MAJOR"
+      }
+    },
+    "issues": [
+      {
+        "rule": "python:S3752",
+        "severity": "HIGH",
+        "status": "TO_REVIEW",
+        "component": "app.py",
+        "line": 90,
+        "description": "Allowing both safe and unsafe HTTP methods is security-sensitive",
+        "message": "Make sure allowing safe and unsafe HTTP methods is safe here.",
+        "key": "fe0b8add-a857-4136-9a8a-0bdc39ee3204"
+      },
+      {
+        "rule": "python:S4502",
+        "severity": "HIGH",
+        "status": "TO_REVIEW",
+        "component": "app.py",
+        "line": 27,
+        "description": "Disabling CSRF protections is security-sensitive",
+        "message": "Make sure disabling CSRF protection is safe here.",
+        "key": "d9e751f5-31da-42c0-842e-53f659cec80b"
+      },
+      {
+        "rule": "docker:S6471",
+        "severity": "MEDIUM",
+        "status": "TO_REVIEW",
+        "component": "Dockerfile",
+        "line": 1,
+        "description": "Running containers as a privileged user is security-sensitive",
+        "message": "The python image runs with root as the default user. Make sure it is safe here.",
+        "key": "dc781f67-3704-47a0-9df1-565d19a2bf23"
+      }
+    ],
+    "hotspotKeys": [
+      "fe0b8add-a857-4136-9a8a-0bdc39ee3204",
+      "d9e751f5-31da-42c0-842e-53f659cec80b",
+      "dc781f67-3704-47a0-9df1-565d19a2bf23"
+    ],
+    "deltaAnalysis": "No",
+    "qualityGateStatus": false,
+    "summary": {
+      "high": 2,
+      "medium": 1,
+      "low": 0
+    }
+  }
+  

@@ -1,0 +1,2 @@
+"id","fqdn/ip","port","severity","finding","cve","cwe"
+"engine_problem","www.defectdojo.org/","443","WARN","No engine or GOST support via engine with your /opt/repo_github/testssl.sh/bin/openssl.Linux.x86_64","",""

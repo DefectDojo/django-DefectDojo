@@ -1,0 +1,5 @@
+Title,Description,Severity,Date,Url,Vulnerability Id
+Title1,,,28/02/2021,www.example.com,CVE-2015-9235
+Title2,,,28/02/2021,localhost,GHSA-5mrr-rgp6-x4gr
+Title3,,,28/02/2021,127.0.0.1:80,
+Title4,,,28/02/2021,foo.bar/path,

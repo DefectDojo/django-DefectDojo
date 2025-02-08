@@ -1,0 +1,122 @@
+# This docker-compose.yml file  is fully functional to evaluate DefectDojo
+# in your local environment.
+#
+# Although Docker Compose is one of the supported installation methods to
+# deploy a containerized DefectDojo in a production environment, the
+# docker-compose.yml file is not intended for production use without first
+# customizing it to your particular situation.
+---
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
+    image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
+    depends_on:
+      - uwsgi
+    environment:
+      NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
+      DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
+      DD_UWSGI_PORT: "${DD_UWSGI_PORT:-3031}"
+    volumes:
+      - defectdojo_media:/usr/share/nginx/html/media
+    ports:
+      - target: 8080
+        published: ${DD_PORT:-8080}
+        protocol: tcp
+        mode: host
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
+        protocol: tcp
+        mode: host
+  uwsgi:
+    build:
+      context: ./
+      dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
+      target: django
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
+    depends_on:
+      - postgres
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+    environment:
+      DD_DEBUG: 'False'
+      DD_DJANGO_METRICS_ENABLED: "${DD_DJANGO_METRICS_ENABLED:-False}"
+      DD_ALLOWED_HOSTS: "${DD_ALLOWED_HOSTS:-*}"
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-redis://redis:6379/0}
+      DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
+      DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
+        - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
+  celerybeat:
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
+    depends_on:
+      - postgres
+      - redis
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-beat.sh']
+    environment:
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-redis://redis:6379/0}
+      DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
+      DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
+  celeryworker:
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
+    depends_on:
+      - postgres
+      - redis
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker.sh']
+    environment:
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-redis://redis:6379/0}
+      DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
+      DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
+        - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
+  initializer:
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
+    depends_on:
+      - postgres
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '--', '/entrypoint-initializer.sh']
+    environment:
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
+      DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
+      DD_ADMIN_MAIL: "${DD_ADMIN_USER:-admin@defectdojo.local}"
+      DD_ADMIN_FIRST_NAME: "${DD_ADMIN_FIRST_NAME:-Admin}"
+      DD_ADMIN_LAST_NAME: "${DD_ADMIN_LAST_NAME:-User}"
+      DD_INITIALIZE: "${DD_INITIALIZE:-true}"
+      DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
+      DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
+  postgres:
+    image: postgres:17.2-alpine@sha256:0bcc5bbbb2aa9c9b4c6505845918c7eb55d783cf5c1f434fac33012579fb149d
+    environment:
+      POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
+      POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
+      POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
+    volumes:
+      - defectdojo_postgres:/var/lib/postgresql/data
+  redis:
+    image: redis:7.2.5-alpine@sha256:6aaf3f5e6bc8a592fbfe2cccf19eb36d27c39d12dab4f4b01556b7449e7b1f44
+    volumes:
+      - defectdojo_redis:/data
+volumes:
+  defectdojo_postgres: {}
+  defectdojo_media: {}
+  defectdojo_redis: {}

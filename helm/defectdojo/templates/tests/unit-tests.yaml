@@ -1,0 +1,66 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $fullName }}-unit-tests
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  serviceAccountName: {{ $fullName }}
+  {{- if .Values.imagePullSecrets }}
+  imagePullSecrets:
+  - name: {{ .Values.imagePullSecrets }}
+  {{- end }}
+  containers:
+    - name: unit-tests
+      image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
+      imagePullPolicy: {{ .Values.imagePullPolicy }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 8 }}
+      {{- end }}
+      command: ['/entrypoint-unit-tests.sh']
+      envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+      env:
+        - name: DD_DATABASE_USER
+          value: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              # Use broker chart secret
+              # name: {{ $fullName }}-{{ .Values.celery.broker }}
+              # Use secret handled outside of the chart
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if eq .Values.database "postgresql" }}
+              name: {{ .Values.postgresql.auth.existingSecret }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else if eq .Values.database "postgresqlha" }}
+              name: "{{ .Values.postgresqlha.postgresql.existingSecret }}"
+              key: postgresql-postgres-password
+              {{- end }}
+        - name: DD_DEBUG
+          value: 'True'
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        - name: DD_CREDENTIAL_AES_256_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_CREDENTIAL_AES_256_KEY
+      resources:
+        {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}
+  restartPolicy: Never

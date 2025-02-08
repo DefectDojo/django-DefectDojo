@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% load humanize %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block add_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    {% if risk_acceptance.is_expired %}
+        <div class="danger-zone panel panel-danger">
+            <div class="panel-heading">
+                <h3>Expired</h3>
+            </div>
+        </div>
+    {% endif %}
+    {% if edit_mode %}
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <div class="clearfix">
+                    <h3 class="pull-left">
+                        Risk Acceptance</small>
+                    </h3>
+                </div>
+            </div>
+            <br/>
+            <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}" method="post">
+                {% csrf_token %}
+                {% if return_url %}
+                    <input type="hidden" name="return_url" value="{{ return_url }}" />
+                {% endif %}
+                {% include "dojo/form_fields.html" with form=risk_acceptance_form %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn" type="submit" value="Save"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <div class="clearfix">
+                    <h3 class="pull-left">
+                        Risk Acceptance <small>added by {{ risk_acceptance.owner.get_full_name }}, Updated {{ risk_acceptance.updated|naturaltime|default_if_none:"" }}, Created {{ risk_acceptance.created|naturaltime|default_if_none:"" }}</small>
+                    </h3>
+
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true" aria-label="Risk acceptance options">
+                            <span class="fa-solid fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table-striped table table-condensed table-hover centered">
+                    <tr>
+                        <th>Date</th>
+                        <th>Accepted By</th>
+                        <th>Name</th>
+                        <th>Decision</th>
+                        <!-- <th>Decision Details</th> -->
+                        <th>Expiration</th>
+                        <th>Expiration handled</th>
+                        <th>Findings</th>
+                        <th>Proof</th>
+                        <th>Reactivate
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </th>
+                        <th>Restart SLA
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </th>
+                        <th>Owner</th>
+                    </tr>
+                    <tr>
+                        <td>{{ risk_acceptance.created|date }}</td>
+                        <td>{{ risk_acceptance.accepted_by }}</td>
+                        <td>{{ risk_acceptance.name }}</td>
+                        <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
+                        <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
+                        <td>
+                            {% if risk_acceptance.expiration_date %}
+                                {{ risk_acceptance.expiration_date|date }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>{{ risk_acceptance.expiration_date_handled|date }}</td>
+                        <td>{{ risk_acceptance.accepted_findings.count }}</td>
+                        {% if risk_acceptance.filename %}
+                            <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                        {% else %}
+                            <td>No</a></td>
+                        {% endif %}
+                        <td>
+                            {{ risk_acceptance.reactivate_expired }}
+                        </td>
+                        <td>
+                            {{ risk_acceptance.restart_sla_expired }}
+                        </td>
+                        <td>{{ risk_acceptance.owner.get_full_name }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel panel-default table-responsive">
+            <div class="panel-heading">
+                <h3>Decision & Recommendation</h3>
+            </div>
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Recommendation</th>
+                        <th>Details</th>
+                        <th>Decision</th>
+                        <th>Details</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width="10%">
+                            {{ risk_acceptance.get_recommendation_display }}
+                        </td>
+                        <td width="40%">
+                            {{ risk_acceptance.recommendation_details|markdown_render }}
+                        </td>
+                        <td width="10%">
+                            {{ risk_acceptance.get_decision_display }}
+                        </td>
+                        <td width="40%">
+                            {{ risk_acceptance.decision_details|markdown_render }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <div id="risk_acceptance" class="panel panel-default table-responsive">
+        <div class="panel-heading">
+            <h3>Findings Accepted</h3>
+        </div>
+        {% if accepted_findings %}
+            <table id="open_findings" class="table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>Severity</th>
+                    <th>EPSS Score / Percentile</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </thead>
+                <tbody>
+                {% for finding in accepted_findings %}
+                    <tr>
+                        <td>
+                          <span class="label severity severity-{{ finding.severity }}">
+                              {{ finding.severity_display }}
+                          </span>
+                        </td>
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
+                        </td>
+                        <td><a href="{% url 'view_finding' finding.id %}"
+                               title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
+                        <td>{{ finding.date }}</td>
+                        <td>{{ finding.active }}</td>
+
+                        <td>
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
+                                    <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
+                                           value="Remove"/>
+                                </form>
+                            {% else %}
+                                Not Authorized
+                            {% endif %}
+                            </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="panel-body">
+                {% include "dojo/paging_snippet.html" with page=accepted_findings %}
+            </div>
+        {% else %}
+            <div class="panel-body">
+                <p><b>No findings associated with this Risk Acceptance.</b></p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if engagement|has_object_permission:"Risk_Acceptance" %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>Accept Additional Findings</h3>
+            </div>
+            <br/>
+            <form method="post" class="form-horizontal">{% csrf_token %}
+                <div class="show_add_findings_form" style="padding: 1em;">
+                    <div class="text-left"><b>Add findings as accepted:</b></div>
+                    {{ add_findings_form.as_p }}
+                </div>
+                <div class="panel-body">
+                    {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn" name="add_findings" type="submit" value="Add Selected Findings"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    <div class="panel panel-default table-responsive">
+        <div class="panel-heading">
+            <h3>Uploaded Proof</h3>
+        </div>
+        <table id="doc" class="tablesorter-bootstrap table table-condensed table-striped">
+            <thead>
+            <tr>
+                <th>Current File</th>
+                <th>Date Added</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+            <tr>
+                {% if risk_acceptance.filename %}
+                    <td>
+                        <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
+                    </td>
+                    <td>
+                        {{ risk_acceptance.created }}
+                    </td>
+                    <td>
+                        {% if engagement|has_object_permission:"Risk_Acceptance" %}
+                            <form id="replace_risk_file" enctype="multipart/form-data" method="post">
+                                {% csrf_token %}
+                                <label class="btn btn-sm btn-primary">
+                                    Replace File
+                                    <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
+                                </label>
+                                <input type="hidden" name="replace_file" value="Replace File"/>
+                            </form>
+                        {% else %}
+                            Not Authorized
+                        {% endif %}
+                    </td>
+                {% else %}
+                    <td>None</td>
+                    <td>None</td>
+                    <td>None</td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Notes</h3>
+        </div>
+        {% if notes %}
+            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </thead>
+                <tbody>
+                {% for note in notes %}
+                    <tr>
+                        <td>
+                            {{ note.author.username }}
+                        </td>
+                        <td>
+                            {{ note.date }}
+                        </td>
+                        <td>
+                            {{ note }}
+                        </td>
+                        <td>
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>
+                                    <input class="btn btn-sm btn-danger" type="submit" name="delete_note"
+                                           value="Delete"/>
+                                </form>
+                            {% else %}
+                                Not Authorized
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center">No notes saved.</p>
+        {% endif %}
+        <hr/>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            {% include "dojo/form_fields.html" with form=note_form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn" type="submit" value="Add Note"/>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block postscript %}
+    {{ block.super }}
+{% if not edit_mode %}
+    <script type="text/javascript">
+        // keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key == 'e') {
+                window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
+            }
+        });
+
+        <!-- what works on every other page with the 'e' keydown, conflicts here with the textare for notes, stoppropagation 'fixes' this -->
+        $('#id_entry').keydown( function(e) {
+            e.stopPropagation();
+        });
+
+    </script>
+{% else %}
+    <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
+    <script>
+        $("#edit_risk_acceptance textarea").each(function (index, elem) {
+            if (elem.hasAttribute("required")) {
+                elem.removeAttribute("required");
+                elem.id = "req"
+            }
+
+            var mde = new EasyMDE({
+                spellChecker: false,
+                element: elem,
+                autofocus: false,
+                forceSync: true,
+                toolbar: ["bold", "italic", "heading", "|",
+                    "quote", "unordered-list", "ordered-list", "|",
+                    "link", "image", "|",
+                    "table", "horizontal-rule", "code", "|",
+                    "guide"
+                ]
+            });
+            mde.render();
+        });
+    </script>
+{% endif %}
+
+<script type="text/javascript">
+     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+</script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+                $(entry.target).DataTable().columns.adjust();
+            });
+        }) : null;
+
+        resizeHandler = function ($table) {
+            if (observer)
+                observer.observe($table[0]);
+        };
+    
+        {% if enable_table_filtering %}
+            setTimeout(function() {
+                var table = $('#findings_table').DataTable({
+                    "paging": false,
+                    "searching": true,
+                    "ordering": true,
+                    "info": false,
+                    scrollCollapse: true,
+                    scrollY: '30vh',
+                    columns: [
+                        { title: '' },
+                        { title: 'ID' },
+                        { title: 'Severity' },
+                        { title: 'Name' },
+                        { title: 'CWE' },
+                        { title: 'Vulnerability Id' },
+                        { title: 'EPSS Score' },
+                        { title: 'EPSS Precentile' },
+                        { 
+                            title: 'Date', 
+                            render: function(data) {
+                                var date = new Date(data);
+                                var year = date.getFullYear();
+                                var month = (1 + date.getMonth()).toString().padStart(2, '0');
+                                var day = date.getDate().toString().padStart(2, '0');
+
+                                return year + '-' + month + '-' + day;
+                            }
+                        },
+                        { title: 'Active' }
+                    ]
+                });
+                resizeHandler($('#findings_table'));
+            }, 0);
+        {% endif %}
+    });
+</script>
+{% endblock %}

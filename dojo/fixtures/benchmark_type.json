@@ -1,0 +1,26 @@
+[
+  {
+    "model": "dojo.benchmark_type",
+    "pk": 1,
+    "fields": {
+      "name": "OWASP ASVS",
+      "version": "v. 3.1",
+      "benchmark_source": "OWASP ASVS",
+      "created": "2018-04-03T20:05:56.066Z",
+      "updated": "2018-04-03T20:10:06.519Z",
+      "enabled": true
+    }
+  },
+  {
+    "model": "dojo.benchmark_type",
+    "pk": 2,
+    "fields": {
+      "name": "OWASP ASVS",
+      "version": "v. 4.0.1",
+      "benchmark_source": "OWASP ASVS",
+      "created": "2019-03-27T10:44:17.930Z",
+      "updated": "2019-03-27T10:44:17.930Z",
+      "enabled": true
+    }
+  }
+]

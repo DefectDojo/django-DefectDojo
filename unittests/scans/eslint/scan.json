@@ -1,0 +1,48 @@
+[
+  {
+    "filePath": "/Users/omerlh/dev/juice-shop/routes/b2bOrder.js",
+    "messages": [],
+    "errorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0
+  },
+  {
+    "filePath": "/Users/omerlh/dev/juice-shop/routes/basketItems.js",
+    "messages": [
+      {
+        "ruleId": "security/detect-object-injection",
+        "severity": 2,
+        "message": "Generic Object Injection Sink",
+        "line": 19,
+        "column": 11,
+        "nodeType": "MemberExpression",
+        "endLine": 19,
+        "endColumn": 20
+      },
+      {
+        "ruleId": "security/detect-object-injection",
+        "severity": 1,
+        "message": "Generic Object Injection Sink",
+        "line": 20,
+        "column": 25,
+        "nodeType": "MemberExpression",
+        "endLine": 20,
+        "endColumn": 34
+      }
+    ],
+    "errorCount": 6,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "source": "/*\n * Copyright (c) 2014-2020 Bjoern Kimminich.\n * SPDX-License-Identifier: MIT\n */\n\nconst utils = require('../lib/utils')\nconst challenges = require('../data/datacache').challenges\nconst insecurity = require('../lib/insecurity')\nconst models = require('../models/index')\n\nmodule.exports.addBasketItem = function addBasketItem () {\n  return (req, res, next) => {\n    var result = utils.parseJsonCustom(req.rawBody)\n    var productIds = []\n    var basketIds = []\n    var quantities = []\n\n    for (var i = 0; i < result.length; i++) {\n      if (result[i].key === 'ProductId') {\n        productIds.push(result[i].value)\n      } else if (result[i].key === 'BasketId') {\n        basketIds.push(result[i].value)\n      } else if (result[i].key === 'quantity') {\n        quantities.push(result[i].value)\n      }\n    }\n\n    const user = insecurity.authenticatedUsers.from(req)\n    if (user && basketIds[0] && basketIds[0] !== 'undefined' && user.bid != basketIds[0]) { // eslint-disable-line eqeqeq\n      res.status(401).send('{\\'error\\' : \\'Invalid BasketId\\'}')\n    } else {\n      const basketItem = {\n        ProductId: productIds[productIds.length - 1],\n        BasketId: basketIds[basketIds.length - 1],\n        quantity: quantities[quantities.length - 1]\n      }\n      utils.solveIf(challenges.basketManipulateChallenge, () => { return user && basketItem.BasketId && basketItem.BasketId !== 'undefined' && user.bid != basketItem.BasketId }) // eslint-disable-line eqeqeq\n\n      const basketItemInstance = models.BasketItem.build(basketItem)\n      basketItemInstance.save().then((basketItem) => {\n        basketItem = {\n          status: 'success',\n          data: basketItem\n        }\n        res.json(basketItem)\n      }).catch(error => {\n        next(error)\n      })\n    }\n  }\n}\n\nmodule.exports.quantityCheckBeforeBasketItemAddition = function quantityCheckBeforeBasketItemAddition () {\n  return (req, res, next) => {\n    quantityCheck(req, res, next, req.body.ProductId, req.body.quantity)\n  }\n}\n\nmodule.exports.quantityCheckBeforeBasketItemUpdate = function quantityCheckBeforeBasketItemUpdate () {\n  return (req, res, next) => {\n    models.BasketItem.findOne({ where: { id: req.params.id } }).then((item) => {\n      if (req.body.quantity) {\n        quantityCheck(req, res, next, item.ProductId, req.body.quantity)\n      } else {\n        next()\n      }\n    }).catch(error => {\n      next(error)\n    })\n  }\n}\n\nasync function quantityCheck (req, res, next, id, quantity) {\n  const record = await models.PurchaseQuantity.findOne({ where: { ProductId: id, UserId: req.body.UserId } })\n\n  const previousPurchase = record ? record.quantity : 0\n\n  const product = await models.Quantity.findOne({ where: { ProductId: id } })\n\n  if (!product.limitPerUser || (product.limitPerUser && (product.limitPerUser - previousPurchase) >= quantity) || insecurity.isDeluxe(req)) {\n    if (product.quantity >= quantity) {\n      next()\n    } else {\n      res.status(400).json({ error: res.__('We are out of stock! Sorry for the inconvenience.') })\n    }\n  } else {\n    res.status(400).json({ error: res.__('You can order only up to {{quantity}} items of this product.', { quantity: product.limitPerUser }) })\n  }\n}\n"
+  },
+  {
+    "filePath": "/Users/omerlh/dev/juice-shop/routes/wallet.js",
+    "messages": [],
+    "errorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0
+  }
+]

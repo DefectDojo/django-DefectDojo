@@ -1,0 +1,32 @@
+[
+    {
+        "line":9,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        },
+    {
+        "line":9,"code":"DL3015",
+        "message":"Avoid additional packages by specifying `--no-install-recommends`",
+        "column":1,"file":"django-DefectDojo\\Dockerfile.django",
+        "level":"info"
+        },
+    {
+        "line":25,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        },
+    {
+        "line":44,
+        "code":"DL3013",
+        "message":"Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        }
+]

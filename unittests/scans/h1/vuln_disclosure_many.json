@@ -1,0 +1,274 @@
+{
+    "data": [
+      {
+        "id": "1337",
+        "type": "report",
+        "attributes": {
+          "title": "XSS in login form",
+          "state": "new",
+          "created_at": "2016-02-02T04:05:06.000Z",
+          "vulnerability_information": "...",
+          "triaged_at": null,
+          "closed_at": null,
+          "last_reporter_activity_at": null,
+          "first_program_activity_at": null,
+          "last_program_activity_at": null,
+          "bounty_awarded_at": null,
+          "last_activity_at": null,
+          "last_public_activity_at": null,
+          "swag_awarded_at": null,
+          "disclosed_at": null,
+          "source": null,
+          "reporter_agreed_on_going_public_at": null
+        },
+        "relationships": {
+          "reporter": {
+            "data": {
+              "id": "1337",
+              "type": "user",
+              "attributes": {
+                "username": "api-example",
+                "name": "API Example",
+                "disabled": false,
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "profile_picture": {
+                  "62x62": "/assets/avatars/default.png",
+                  "82x82": "/assets/avatars/default.png",
+                  "110x110": "/assets/avatars/default.png",
+                  "260x260": "/assets/avatars/default.png"
+                }
+              }
+            }
+          },
+          "assignee": {
+            "data": {
+              "id": "1337",
+              "type": "user",
+              "attributes": {
+                "username": "member",
+                "name": "Member",
+                "disabled": false,
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "profile_picture": {
+                  "62x62": "/assets/avatars/default.png",
+                  "82x82": "/assets/avatars/default.png",
+                  "110x110": "/assets/avatars/default.png",
+                  "260x260": "/assets/avatars/default.png"
+                }
+              }
+            }
+          },
+          "program": {
+            "data": {
+              "id": "1337",
+              "type": "program",
+              "attributes": {
+                "handle": "security",
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "updated_at": "2016-02-02T04:05:06.000Z"
+              }
+            }
+          },
+          "severity": {
+            "data": {
+              "id": "57",
+              "type": "severity",
+              "attributes": {
+                "rating": "high",
+                "author_type": "User",
+                "user_id": 1337,
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "score": 8.7,
+                "attack_complexity": "low",
+                "attack_vector": "adjacent",
+                "availability": "high",
+                "confidentiality": "low",
+                "integrity": "high",
+                "privileges_required": "low",
+                "user_interaction": "required",
+                "scope": "changed"
+              }
+            }
+          },
+          "weakness": {
+            "data": {
+              "id": "1337",
+              "type": "weakness",
+              "attributes": {
+                "name": "Cross-Site Request Forgery (CSRF)",
+                "description": "The web application does not, or can not, sufficiently verify whether a well-formed, valid, consistent request was intentionally provided by the user who submitted the request.",
+                "external_id": "cwe-352",
+                "created_at": "2016-02-02T04:05:06.000Z"
+              }
+            }
+          },
+          "structured_scope": {
+            "data": {
+              "id": "57",
+              "type": "structured-scope",
+              "attributes": {
+                "asset_identifier": "api.example.com",
+                "asset_type": "url",
+                "confidentiality_requirement": "high",
+                "integrity_requirement": "high",
+                "availability_requirement": "high",
+                "max_severity": "critical",
+                "created_at": "2015-02-02T04:05:06.000Z",
+                "updated_at": "2016-05-02T04:05:06.000Z",
+                "instruction": null,
+                "eligible_for_bounty": true,
+                "eligible_for_submission": true,
+                "reference": "H001001"
+              }        
+            } 
+          },
+          "bounties": {
+            "data": [
+  
+            ]
+          },
+          "custom_field_values": {
+            "data": [
+  
+            ]
+          }
+        }
+      },
+      {
+        "id": "1338",
+        "type": "report",
+        "attributes": {
+          "title": "CSRF in admin panel",
+          "state": "triaged",
+          "created_at": "2016-02-02T04:05:06.000Z",
+          "vulnerability_information": "...",
+          "triaged_at": "2016-02-03T03:01:36.000Z",
+          "closed_at": null,
+          "last_reporter_activity_at": null,
+          "first_program_activity_at": null,
+          "last_program_activity_at": null,
+          "bounty_awarded_at": null,
+          "swag_awarded_at": null,
+          "disclosed_at": null,
+          "issue_tracker_reference_id": "T554",
+          "issue_tracker_reference_url": "https://phabricator.tld/T554",
+          "cve_ids": [],
+          "source": null,
+          "reporter_agreed_on_going_public_at": null
+        },
+        "relationships": {
+          "reporter": {
+            "data": {
+              "id": "1337",
+              "type": "user",
+              "attributes": {
+                "username": "api-example",
+                "name": "API Example",
+                "disabled": false,
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "profile_picture": {
+                  "62x62": "/assets/avatars/default.png",
+                  "82x82": "/assets/avatars/default.png",
+                  "110x110": "/assets/avatars/default.png",
+                  "260x260": "/assets/avatars/default.png"
+                }
+              }
+            }
+          },
+          "assignee": {
+            "data": {
+              "id": "1337",
+              "type": "group",
+              "attributes": {
+                "name": "Admin",
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "permissions": [
+                  "user_management",
+                  "report_management"
+                ]
+              }
+            }
+          },
+          "program": {
+            "data": {
+              "id": "1337",
+              "type": "program",
+              "attributes": {
+                "handle": "security",
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "updated_at": "2016-02-02T04:05:06.000Z"
+              }
+            }
+          },
+          "severity": {
+            "data": {
+              "id": "64",
+              "type": "severity",
+              "attributes": {
+                "rating": "medium",
+                "author_type": "User",
+                "user_id": 1337,
+                "created_at": "2016-02-02T04:05:06.000Z",
+                "score": 6.3,
+                "attack_complexity": "low",
+                "attack_vector": "adjacent",
+                "availability": "medium",
+                "confidentiality": "low",
+                "integrity": "medium",
+                "privileges_required": "low",
+                "user_interaction": "required",
+                "scope": "changed"
+              }
+            }
+          },
+          "weakness": {
+            "data": {
+              "id": "1337",
+              "type": "weakness",
+              "attributes": {
+                "name": "Cross-Site Request Forgery (CSRF)",
+                "description": "The web application does not, or can not, sufficiently verify whether a well-formed, valid, consistent request was intentionally provided by the user who submitted the request.",
+                "external_id": "cwe-352",
+                "created_at": "2016-02-02T04:05:06.000Z"
+              }
+            }
+          },
+          "structured_scope": {
+            "data": {
+              "id": "64",
+              "type": "structured-scope",
+              "attributes": {
+                "asset_identifier": "example.com",
+                "asset_type": "url",
+                "confidentiality_requirement": "medium",
+                "integrity_requirement": "low",
+                "availability_requirement": "high",
+                "max_severity": "critical",
+                "created_at": "2015-03-04T04:05:06.000Z",
+                "updated_at": "2017-06-04T04:05:06.000Z",
+                "instruction": null,
+                "eligible_for_bounty": true,
+                "eligible_for_submission": true,
+                "reference": "T12345"
+              }
+            } 
+          },
+          "bounties": {
+            "data": [
+  
+            ]
+          },
+          "custom_field_values": {
+            "data": [
+  
+            ]
+          }
+        }
+      }
+    ],
+    "links": {
+      "self": "https://api.hackerone.com/v1/reports?filter%5Bprogram%5D%5B%5D=security&page%5Bnumber%5D=1",
+      "next": "https://api.hackerone.com/v1/reports?filter%5Bprogram%5D%5B%5D=security&page%5Bnumber%5D=2",
+      "last": "https://api.hackerone.com/v1/reports?filter%5Bprogram%5D%5B%5D=security&page%5Bnumber%5D=5"
+    }
+  }

@@ -1,0 +1,121 @@
+# Always generate Python 3.11-compatible code.
+target-version = "py311"
+
+# Same as Black.
+line-length = 120
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    #  Not for the dojo specific stuff
+    "dojo/db_migrations"
+]
+
+[lint]
+select = [
+   "F",
+   "E",
+   "W",
+   "C90",
+   "I",
+   "N804", "N811", "N814", "N818",
+   "D2", "D3", "D402", "D403", "D405", "D406", "D407", "D408", "D409", "D410", "D411", "D412", "D413", "D416",
+   "UP",
+   "YTT",
+   "ASYNC",
+   "S1", "S2", "S302", "S303", "S304", "S305", "S306", "S307", "S31", "S323", "S401", "S402", "S406", "S407", "S408", "S409", "S41", "S5", "S601", "S602", "S604", "S605", "S606", "S607", "S609", "S610", "S612", "S7",
+   "FBT001", "FBT003",
+   "A003", "A004", "A005", "A006",
+   "COM",
+   "C4",
+   "T10",
+   "DJ003", "DJ01",
+   "EM",
+   "EXE",
+   "FA",
+   "ISC001",
+   "ICN",
+   "LOG",
+   "G001", "G002", "G01", "G1", "G2",
+   "INP",
+   "PIE",
+   "T20",
+   "Q",
+   "RSE",
+   "RET",
+   "SLOT",
+   "SIM",
+   "TID",
+   "TC",
+   "INT",
+   "ARG003", "ARG004", "ARG005",
+   "PTH2", "PTH10", "PTH11", "PTH120", "PTH121", "PTH122", "PTH124",
+   "TD001", "TD004", "TD005",
+   "FIX001", "FIX003",
+   "PD",
+   "PGH",
+   "PLC01", "PLC0205", "PLC0208", "PLC0414", "PLC24", "PLC3",
+   "PLE",
+   "PLR01", "PLR0203", "PLR0206", "PLR0915", "PLR1716", "PLR172", "PLR1733", "PLR1736",
+   "PLW0120", "PLW0129", "PLW013", "PLW017", "PLW02", "PLW04", "PLW07", "PLW1", "PLW2", "PLW3",
+   "TRY003", "TRY004", "TRY2",
+   "FLY",
+   "NPY",
+   "FAST",
+   "AIR",
+   "FURB",
+   "DOC202", "DOC403", "DOC502",
+   "RUF",
+]
+ignore = [
+    "E501",
+    "E722",
+    "SIM102",
+    "SIM113",
+    "SIM115",
+    "SIM117",
+    "RUF012",
+    "RUF015",
+    "D205",
+    "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
+    "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+preview = true
+
+[lint.per-file-ignores]
+"unittests/**" = [
+    "S105",  # hardcoded passwords in tests are fine
+    "S108",  # tmp paths mentioned in tests are fine
+]
+
+[lint.flake8-boolean-trap]
+extend-allowed-calls = ["dojo.utils.get_system_setting"]
+
+[lint.pylint]
+max-statements = 234
+
+[lint.mccabe]
+max-complexity = 70  # value is far from perfect (recommended default is 10). But we will try to decrease it over the time.

@@ -1,0 +1,4 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+01/30/2018,Matching title and Endpoints (DUPE),23,https://www.same.com/samesies,Critical,Test Description,,,,False,False,False,False
+01/30/2018,Matching title not Description,23,https://www.weird.com/so-weird,Critical,Test Description,,,,False,False,False,False
+01/30/2018,Differing title and Endpoints,24,https://www.same.com/samesies,Critical,Test Description,,,,False,False,False,False

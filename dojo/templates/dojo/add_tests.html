@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+.chosen-container {
+    width: 70% !important;
+}
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    <h3> Add Tests</h3>
+    <p>
+        <a href="https://defectdojo.github.io/django-DefectDojo/integrations/importing/">Documentation</a>
+    </p>
+    <form class="form-horizontal" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/form_fields.html" with form=cred_form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="_Add Another Test" value="Add Another Test"/>
+                <input class="btn btn-primary" type="submit" name="_Add Findings" value="Add Findings"/>
+                <input class="btn btn-primary" type="submit" name="_Finished" value="Finished"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+{% endblock %}

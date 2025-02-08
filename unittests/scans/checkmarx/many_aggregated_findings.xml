@@ -1,0 +1,3520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CxXMLResults InitiatorName="Cx55_xxx" Owner="_xxx_Cx_Tech" ScanId="1209124" ProjectId="1362" ProjectName="myprojectname" TeamFullPathOnReportDate="CxServer\xxx" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362" ScanStart="Monday, February 7, 2022 10:25:32 AM" Preset="Checkmarx Default" ScanTime="00h:00m:40s" LinesOfCodeScanned="30291" FilesScanned="148" ReportCreationTime="Wednesday, February 9, 2022 5:12:32 PM" Team="Team_xxx" CheckmarxVersion="9.4.3" ScanComments="" ScanType="Full" SourceOrigin="GIT" Visibility="Public">
+  <Query id="5273" categories="OWASP Top 10 API;API10-Insufficient Logging and Monitoring,OWASP Top 10 2021;A9-Security Logging and Monitoring Failures" cweId="778" name="Insufficient_Logging_of_Exceptions" group="CSharp_Best_Coding_Practice" Severity="Information" Language="CSharp" LanguageHash="5845120472948080" LanguageChangeDate="2022-02-01T00:00:00.0000000" SeverityIndex="0" QueryPath="CSharp\Cx\CSharp Best Coding Practice\Insufficient Logging of Exceptions Version:1" QueryVersionCode="116665176">
+    <Result NodeId="12091240032" FileName="filename3.cs" Status="Recurrent" Line="283" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=32" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="32" SimilarityId="1314645465" SourceMethod="Class_Terminate" DestinationMethod="Class_Terminate">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>283</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>283</Number>
+              <Code>            catch (System.Exception ex1)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240033" FileName="filename3.cs" Status="Recurrent" Line="322" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=33" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="33" SimilarityId="-77711167" SourceMethod="Init" DestinationMethod="Init">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>322</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>322</Number>
+              <Code>            catch (System.Exception ex2)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240034" FileName="filename3.cs" Status="Recurrent" Line="360" Column="17" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=34" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="34" SimilarityId="390847291" SourceMethod="Connexion" DestinationMethod="Connexion">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>360</Line>
+          <Column>17</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>360</Number>
+              <Code>                catch (System.Exception ex3)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240035" FileName="filename3.cs" Status="Recurrent" Line="348" Column="17" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=35" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="35" SimilarityId="390847291" SourceMethod="Connexion" DestinationMethod="Connexion">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>348</Line>
+          <Column>17</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>348</Number>
+              <Code>                catch (System.Exception ex3)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240036" FileName="filename3.cs" Status="Recurrent" Line="387" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=36" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="36" SimilarityId="910751321" SourceMethod="NouveauParametre" DestinationMethod="NouveauParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>387</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>387</Number>
+              <Code>            catch (System.Exception ex4)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240037" FileName="filename3.cs" Status="Recurrent" Line="414" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=37" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="37" SimilarityId="1839260627" SourceMethod="NouvelleLiaison" DestinationMethod="NouvelleLiaison">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>414</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>414</Number>
+              <Code>            catch (System.Exception ex5)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240038" FileName="filename3.cs" Status="Recurrent" Line="443" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=38" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="38" SimilarityId="-892913575" SourceMethod="NouvelleOption" DestinationMethod="NouvelleOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>443</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>443</Number>
+              <Code>            catch (System.Exception ex6)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240039" FileName="filename3.cs" Status="Recurrent" Line="472" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=39" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="39" SimilarityId="1943614151" SourceMethod="NouvelleGamme" DestinationMethod="NouvelleGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>472</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>472</Number>
+              <Code>            catch (System.Exception ex7)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240040" FileName="filename3.cs" Status="Recurrent" Line="501" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=40" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="40" SimilarityId="-82412775" SourceMethod="NouvelleGammeTmp" DestinationMethod="NouvelleGammeTmp">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>501</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>501</Number>
+              <Code>            catch (System.Exception ex8)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240041" FileName="filename3.cs" Status="Recurrent" Line="530" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=41" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="41" SimilarityId="-1796300387" SourceMethod="NouvelleZone" DestinationMethod="NouvelleZone">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>530</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>530</Number>
+              <Code>            catch (System.Exception ex9)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240042" FileName="filename3.cs" Status="Recurrent" Line="559" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=42" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="42" SimilarityId="-804333329" SourceMethod="NouvelleZoneTmp" DestinationMethod="NouvelleZoneTmp">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>559</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>559</Number>
+              <Code>            catch (System.Exception ex10)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240043" FileName="filename3.cs" Status="Recurrent" Line="588" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=43" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="43" SimilarityId="-2098235143" SourceMethod="NouveauTypeOption" DestinationMethod="NouveauTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>588</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>588</Number>
+              <Code>            catch (System.Exception ex11)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240044" FileName="filename3.cs" Status="Recurrent" Line="616" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=44" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="44" SimilarityId="-1504134183" SourceMethod="NouvelleValeur" DestinationMethod="NouvelleValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>616</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>616</Number>
+              <Code>            catch (System.Exception ex12)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240045" FileName="filename3.cs" Status="Recurrent" Line="653" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=45" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="45" SimilarityId="-1832533797" SourceMethod="NouveauTypeInterlocuteur" DestinationMethod="NouveauTypeInterlocuteur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>653</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>653</Number>
+              <Code>            catch (System.Exception ex13)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240046" FileName="filename3.cs" Status="Recurrent" Line="682" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=46" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="46" SimilarityId="1777245721" SourceMethod="NouvelleAgence" DestinationMethod="NouvelleAgence">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>682</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>682</Number>
+              <Code>            catch (System.Exception ex14)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240047" FileName="filename3.cs" Status="Recurrent" Line="771" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=47" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="47" SimilarityId="-272199623" SourceMethod="ValeurExist" DestinationMethod="ValeurExist">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>771</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>771</Number>
+              <Code>            catch (System.Exception ex15)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240048" FileName="filename3.cs" Status="Recurrent" Line="861" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=48" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="48" SimilarityId="118511001" SourceMethod="Initialiser" DestinationMethod="Initialiser">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>861</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>861</Number>
+              <Code>            catch (System.Exception ex16)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240049" FileName="filename3.cs" Status="Recurrent" Line="900" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=49" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="49" SimilarityId="706362231" SourceMethod="ExistenceService" DestinationMethod="ExistenceService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>900</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>900</Number>
+              <Code>            catch (System.Exception ex17)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240050" FileName="filename3.cs" Status="Recurrent" Line="939" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=50" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="50" SimilarityId="798513241" SourceMethod="ExistenceTypeService" DestinationMethod="ExistenceTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>939</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>939</Number>
+              <Code>            catch (System.Exception ex18)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240051" FileName="filename3.cs" Status="Recurrent" Line="988" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=51" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="51" SimilarityId="1191582461" SourceMethod="EstDuType" DestinationMethod="EstDuType">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>988</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>988</Number>
+              <Code>            catch (System.Exception ex19)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240052" FileName="filename3.cs" Status="Recurrent" Line="1014" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=52" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="52" SimilarityId="-911301895" SourceMethod="LireService" DestinationMethod="LireService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1014</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1014</Number>
+              <Code>            catch (System.Exception ex20)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240053" FileName="filename3.cs" Status="Recurrent" Line="1041" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=53" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="53" SimilarityId="645105945" SourceMethod="LireTypeService" DestinationMethod="LireTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1041</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1041</Number>
+              <Code>            catch (System.Exception ex21)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240054" FileName="filename3.cs" Status="Recurrent" Line="1068" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=54" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="54" SimilarityId="335530489" SourceMethod="LireTypesServices" DestinationMethod="LireTypesServices">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1068</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1068</Number>
+              <Code>            catch (System.Exception ex22)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240055" FileName="filename3.cs" Status="Recurrent" Line="1098" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=55" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="55" SimilarityId="-2133793223" SourceMethod="NbParametres" DestinationMethod="NbParametres">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1098</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1098</Number>
+              <Code>            catch (System.Exception ex23)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240056" FileName="filename3.cs" Status="Recurrent" Line="1137" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=56" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="56" SimilarityId="10827737" SourceMethod="LireElementParametre" DestinationMethod="LireElementParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1137</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1137</Number>
+              <Code>            catch (System.Exception ex24)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240057" FileName="filename3.cs" Status="Recurrent" Line="1199" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=57" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="57" SimilarityId="-139775367" SourceMethod="LireParametre" DestinationMethod="LireParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1199</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1199</Number>
+              <Code>            catch (System.Exception ex25)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240058" FileName="filename3.cs" Status="Recurrent" Line="1271" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=58" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="58" SimilarityId="-504741479" SourceMethod="LireElementValeur" DestinationMethod="LireElementValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1271</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1271</Number>
+              <Code>            catch (System.Exception ex26)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240059" FileName="filename3.cs" Status="Recurrent" Line="1343" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=59" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="59" SimilarityId="-995202905" SourceMethod="LireElementUnite" DestinationMethod="LireElementUnite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1343</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1343</Number>
+              <Code>            catch (System.Exception ex27)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240060" FileName="filename3.cs" Status="Recurrent" Line="1415" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=60" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="60" SimilarityId="709221477" SourceMethod="LireElementUniteValeur" DestinationMethod="LireElementUniteValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1415</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1415</Number>
+              <Code>            catch (System.Exception ex28)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240061" FileName="filename3.cs" Status="Recurrent" Line="1483" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=61" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="61" SimilarityId="-809605767" SourceMethod="LireLibelleValeur" DestinationMethod="LireLibelleValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1483</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1483</Number>
+              <Code>            catch (System.Exception ex29)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240062" FileName="filename3.cs" Status="Recurrent" Line="1579" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=62" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="62" SimilarityId="-2035664999" SourceMethod="LireLibelleUnite" DestinationMethod="LireLibelleUnite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1579</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1579</Number>
+              <Code>            catch (System.Exception ex30)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240063" FileName="filename3.cs" Status="Recurrent" Line="1651" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=63" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="63" SimilarityId="1104723043" SourceMethod="ExistenceValeur" DestinationMethod="ExistenceValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1651</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1651</Number>
+              <Code>            catch (System.Exception ex31)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240064" FileName="filename3.cs" Status="Recurrent" Line="1711" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=64" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="64" SimilarityId="651770023" SourceMethod="ExistenceTypeServiceDep" DestinationMethod="ExistenceTypeServiceDep">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1711</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1711</Number>
+              <Code>            catch (System.Exception ex32)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240065" FileName="filename3.cs" Status="Recurrent" Line="1743" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=65" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="65" SimilarityId="-1309740303" SourceMethod="NbTypesOptions" DestinationMethod="NbTypesOptions">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1743</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1743</Number>
+              <Code>            catch (System.Exception ex33)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240066" FileName="filename3.cs" Status="Recurrent" Line="1781" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=66" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="66" SimilarityId="650953049" SourceMethod="LireElementTypeOption" DestinationMethod="LireElementTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1781</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1781</Number>
+              <Code>            catch (System.Exception ex34)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240067" FileName="filename3.cs" Status="Recurrent" Line="1817" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=67" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="67" SimilarityId="1778332313" SourceMethod="LireElementsTypeOption" DestinationMethod="LireElementsTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1817</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1817</Number>
+              <Code>            catch (System.Exception ex35)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240068" FileName="filename3.cs" Status="Recurrent" Line="1874" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=68" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="68" SimilarityId="-778644157" SourceMethod="LireCodeTypeOption" DestinationMethod="LireCodeTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1874</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1874</Number>
+              <Code>            catch (System.Exception ex36)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240069" FileName="filename3.cs" Status="Recurrent" Line="1930" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=69" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="69" SimilarityId="1414672505" SourceMethod="LireOption" DestinationMethod="LireOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1930</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1930</Number>
+              <Code>            catch (System.Exception ex37)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240070" FileName="filename3.cs" Status="Recurrent" Line="1987" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=70" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="70" SimilarityId="11594777" SourceMethod="LireTypeOption" DestinationMethod="LireTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>1987</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>1987</Number>
+              <Code>            catch (System.Exception ex38)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240071" FileName="filename3.cs" Status="Recurrent" Line="2038" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=71" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="71" SimilarityId="1876577145" SourceMethod="ExistenceOptionService" DestinationMethod="ExistenceOptionService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2038</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2038</Number>
+              <Code>            catch (System.Exception ex39)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240072" FileName="filename3.cs" Status="Recurrent" Line="2072" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=72" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="72" SimilarityId="-1998315961" SourceMethod="NbParametresBcpVal" DestinationMethod="NbParametresBcpVal">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2072</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2072</Number>
+              <Code>            catch (System.Exception ex40)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240073" FileName="filename3.cs" Status="Recurrent" Line="2106" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=73" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="73" SimilarityId="409552857" SourceMethod="NbEnsCmpBcpVal" DestinationMethod="NbEnsCmpBcpVal">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2106</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2106</Number>
+              <Code>            catch (System.Exception ex41)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240074" FileName="filename3.cs" Status="Recurrent" Line="2157" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=74" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="74" SimilarityId="694087743" SourceMethod="ExistenceOption" DestinationMethod="ExistenceOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2157</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2157</Number>
+              <Code>            catch (System.Exception ex42)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240075" FileName="filename3.cs" Status="Recurrent" Line="2214" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=75" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="75" SimilarityId="411097173" SourceMethod="LireInfosTypeOption" DestinationMethod="LireInfosTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2214</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2214</Number>
+              <Code>            catch (System.Exception ex43)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240076" FileName="filename3.cs" Status="Recurrent" Line="2263" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=76" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="76" SimilarityId="-1888819333" SourceMethod="LireLibelleService" DestinationMethod="LireLibelleService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2263</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2263</Number>
+              <Code>            catch (System.Exception ex44)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240077" FileName="filename3.cs" Status="Recurrent" Line="2314" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=77" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="77" SimilarityId="-1446523899" SourceMethod="LireRefAProduire" DestinationMethod="LireRefAProduire">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2314</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2314</Number>
+              <Code>            catch (System.Exception ex45)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240078" FileName="filename3.cs" Status="Recurrent" Line="2357" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=78" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="78" SimilarityId="-1232099847" SourceMethod="IsProductionByTypeService" DestinationMethod="IsProductionByTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2357</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2357</Number>
+              <Code>            catch (System.Exception ex46)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240079" FileName="filename3.cs" Status="Recurrent" Line="2385" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=79" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="79" SimilarityId="-1192699847" SourceMethod="IsProductionBiModeByTypeService" DestinationMethod="IsProductionBiModeByTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2385</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2385</Number>
+              <Code>            catch (System.Exception ex46)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240080" FileName="filename3.cs" Status="Recurrent" Line="2425" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=80" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="80" SimilarityId="-1710597743" SourceMethod="LireFraisMiseEnServiceTypeService" DestinationMethod="LireFraisMiseEnServiceTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2425</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2425</Number>
+              <Code>            catch (System.Exception ex46)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240081" FileName="filename3.cs" Status="Recurrent" Line="2475" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=81" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="81" SimilarityId="1478615641" SourceMethod="LireLibelleTypeService" DestinationMethod="LireLibelleTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2475</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2475</Number>
+              <Code>            catch (System.Exception ex47)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240082" FileName="filename3.cs" Status="Recurrent" Line="2525" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=82" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="82" SimilarityId="1575378969" SourceMethod="LireCodeRap" DestinationMethod="LireCodeRap">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2525</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2525</Number>
+              <Code>            catch (System.Exception ex48)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240083" FileName="filename3.cs" Status="Recurrent" Line="2575" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=83" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="83" SimilarityId="953569785" SourceMethod="LireIndicateurProduction" DestinationMethod="LireIndicateurProduction">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2575</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2575</Number>
+              <Code>            catch (System.Exception ex49)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240084" FileName="filename3.cs" Status="Recurrent" Line="2625" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=84" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="84" SimilarityId="1399367161" SourceMethod="LireIndicateurDDPResil" DestinationMethod="LireIndicateurDDPResil">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2625</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2625</Number>
+              <Code>            catch (System.Exception ex50)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240085" FileName="filename3.cs" Status="Recurrent" Line="2675" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=85" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="85" SimilarityId="588673249" SourceMethod="LireIndicateurParametreUnique" DestinationMethod="LireIndicateurParametreUnique">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2675</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2675</Number>
+              <Code>            catch (System.Exception ex51)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240086" FileName="filename3.cs" Status="Recurrent" Line="2702" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=86" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="86" SimilarityId="305786553" SourceMethod="AffecterTypeOption" DestinationMethod="AffecterTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2702</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2702</Number>
+              <Code>            catch (System.Exception ex52)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240087" FileName="filename3.cs" Status="Recurrent" Line="2752" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=87" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="87" SimilarityId="1366630103" SourceMethod="AffecterValeurDeduiteParametre" DestinationMethod="AffecterValeurDeduiteParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2752</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2752</Number>
+              <Code>            catch (System.Exception ex53)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240088" FileName="filename3.cs" Status="Recurrent" Line="2791" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=88" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="88" SimilarityId="1046891167" SourceMethod="ExistenceGamme" DestinationMethod="ExistenceGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2791</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2791</Number>
+              <Code>            catch (System.Exception ex54)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240089" FileName="filename3.cs" Status="Recurrent" Line="2864" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=89" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="89" SimilarityId="1661110329" SourceMethod="DisponibiliteGamme" DestinationMethod="DisponibiliteGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2864</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2864</Number>
+              <Code>            catch (System.Exception ex55)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240090" FileName="filename3.cs" Status="Recurrent" Line="2957" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=90" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="90" SimilarityId="53438329" SourceMethod="DisponibiliteAgence" DestinationMethod="DisponibiliteAgence">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>2957</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>2957</Number>
+              <Code>            catch (System.Exception ex56)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240091" FileName="filename3.cs" Status="Recurrent" Line="3055" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=91" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="91" SimilarityId="326325017" SourceMethod="DisponibiliteAgenceType" DestinationMethod="DisponibiliteAgenceType">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>3055</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>3055</Number>
+              <Code>            catch (System.Exception ex57)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240092" FileName="filename3.cs" Status="Recurrent" Line="3107" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=92" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="92" SimilarityId="1109484845" SourceMethod="DisponibiliteAgenceTypeSsDateOuvFerm" DestinationMethod="DisponibiliteAgenceTypeSsDateOuvFerm">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>3107</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>3107</Number>
+              <Code>            catch (System.Exception ex58)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240093" FileName="filename3.cs" Status="Recurrent" Line="3204" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=93" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="93" SimilarityId="1253422073" SourceMethod="DisponibiliteTypSvc" DestinationMethod="DisponibiliteTypSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>3204</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>3204</Number>
+              <Code>            catch (System.Exception ex59)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240094" FileName="filename3.cs" Status="Recurrent" Line="3346" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=94" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="94" SimilarityId="-1436862527" SourceMethod="DisponibiliteTypOpt" DestinationMethod="DisponibiliteTypOpt">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>3346</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>3346</Number>
+              <Code>            catch (System.Exception ex60)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240095" FileName="filename3.cs" Status="Recurrent" Line="3673" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=95" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="95" SimilarityId="-1060976519" SourceMethod="DisponibiliteZonOuv" DestinationMethod="DisponibiliteZonOuv">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>3673</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>3673</Number>
+              <Code>            catch (System.Exception ex61)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240096" FileName="filename3.cs" Status="Recurrent" Line="4191" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=96" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="96" SimilarityId="2138996711" SourceMethod="DisponibiliteGeoTypSvc" DestinationMethod="DisponibiliteGeoTypSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4191</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4191</Number>
+              <Code>            catch (System.Exception ex62)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240097" FileName="filename3.cs" Status="Recurrent" Line="4481" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=97" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="97" SimilarityId="-1972716135" SourceMethod="DisponibiliteGeoTypOpt" DestinationMethod="DisponibiliteGeoTypOpt">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4481</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4481</Number>
+              <Code>            catch (System.Exception ex63)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240098" FileName="filename3.cs" Status="Recurrent" Line="4568" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=98" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="98" SimilarityId="-487924423" SourceMethod="DisponibiliteRefSvc" DestinationMethod="DisponibiliteRefSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4568</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4568</Number>
+              <Code>            catch (System.Exception ex64)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240099" FileName="filename3.cs" Status="Recurrent" Line="4662" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=99" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="99" SimilarityId="1917487065" SourceMethod="TypeAppartientGamme" DestinationMethod="TypeAppartientGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4662</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4662</Number>
+              <Code>            catch (System.Exception ex65)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240100" FileName="filename3.cs" Status="Recurrent" Line="4767" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=100" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="100" SimilarityId="677547303" SourceMethod="RefAppartientGamme" DestinationMethod="RefAppartientGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4767</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4767</Number>
+              <Code>            catch (System.Exception ex66)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240101" FileName="filename3.cs" Status="Recurrent" Line="4799" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=101" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="101" SimilarityId="217053233" SourceMethod="NbLiaisons" DestinationMethod="NbLiaisons">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4799</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4799</Number>
+              <Code>            catch (System.Exception ex67)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240102" FileName="filename3.cs" Status="Recurrent" Line="4833" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=102" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="102" SimilarityId="2016036985" SourceMethod="NbLiaisonsExt" DestinationMethod="NbLiaisonsExt">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4833</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4833</Number>
+              <Code>            catch (System.Exception ex68)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240103" FileName="filename3.cs" Status="Recurrent" Line="4862" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=103" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="103" SimilarityId="-228970055" SourceMethod="NbEnsFacturables" DestinationMethod="NbEnsFacturables">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4862</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4862</Number>
+              <Code>            catch (System.Exception ex69)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240104" FileName="filename3.cs" Status="Recurrent" Line="4891" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=104" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="104" SimilarityId="1961721957" SourceMethod="NbEnsMigration" DestinationMethod="NbEnsMigration">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4891</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4891</Number>
+              <Code>            catch (System.Exception ex70)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240105" FileName="filename3.cs" Status="Recurrent" Line="4923" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=105" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="105" SimilarityId="-1759044203" SourceMethod="NbSSPackages" DestinationMethod="NbSSPackages">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4923</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4923</Number>
+              <Code>            catch (System.Exception ex71)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240106" FileName="filename3.cs" Status="Recurrent" Line="4972" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=106" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="106" SimilarityId="502327239" SourceMethod="HasLiaisonsDeComposition" DestinationMethod="HasLiaisonsDeComposition">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>4972</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>4972</Number>
+              <Code>            catch (System.Exception ex72)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240107" FileName="filename3.cs" Status="Recurrent" Line="5010" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=107" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="107" SimilarityId="-467339367" SourceMethod="LireElementLiaison" DestinationMethod="LireElementLiaison">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5010</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5010</Number>
+              <Code>            catch (System.Exception ex73)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240108" FileName="filename3.cs" Status="Recurrent" Line="5048" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=108" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="108" SimilarityId="-2111870417" SourceMethod="LireElementLiaisonExterne" DestinationMethod="LireElementLiaisonExterne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5048</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5048</Number>
+              <Code>            catch (System.Exception ex74)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240109" FileName="filename3.cs" Status="Recurrent" Line="5098" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=109" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="109" SimilarityId="16717593" SourceMethod="LireLienFacturation" DestinationMethod="LireLienFacturation">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5098</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5098</Number>
+              <Code>            catch (System.Exception ex75)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240110" FileName="filename3.cs" Status="Recurrent" Line="5133" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=110" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="110" SimilarityId="-474280973" SourceMethod="LireElementEnsemblefacturable" DestinationMethod="LireElementEnsemblefacturable">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5133</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5133</Number>
+              <Code>            catch (System.Exception ex76)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240111" FileName="filename3.cs" Status="Recurrent" Line="5166" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=111" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="111" SimilarityId="-997620263" SourceMethod="LireElementEnsembleMigration" DestinationMethod="LireElementEnsembleMigration">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5166</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5166</Number>
+              <Code>            catch (System.Exception ex77)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240112" FileName="filename3.cs" Status="Recurrent" Line="5201" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=112" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="112" SimilarityId="-755900167" SourceMethod="LireComposition" DestinationMethod="LireComposition">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5201</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5201</Number>
+              <Code>            catch (System.Exception ex78)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240113" FileName="filename3.cs" Status="Recurrent" Line="5270" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=113" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="113" SimilarityId="-1848497327" SourceMethod="LireElementParametreLie" DestinationMethod="LireElementParametreLie">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5270</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5270</Number>
+              <Code>            catch (System.Exception ex79)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240114" FileName="filename3.cs" Status="Recurrent" Line="5324" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=114" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="114" SimilarityId="-92572069" SourceMethod="LireLiaison" DestinationMethod="LireLiaison">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5324</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5324</Number>
+              <Code>            catch (System.Exception ex80)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240115" FileName="filename3.cs" Status="Recurrent" Line="5382" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=115" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="115" SimilarityId="1779624925" SourceMethod="LireLiaisonExterne" DestinationMethod="LireLiaisonExterne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5382</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5382</Number>
+              <Code>            catch (System.Exception ex81)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240116" FileName="filename3.cs" Status="Recurrent" Line="5421" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=116" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="116" SimilarityId="-1093965895" SourceMethod="LireElementSSPackage" DestinationMethod="LireElementSSPackage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5421</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5421</Number>
+              <Code>            catch (System.Exception ex82)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240117" FileName="filename3.cs" Status="Recurrent" Line="5455" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=117" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="117" SimilarityId="304112887" SourceMethod="LireLibellePackage" DestinationMethod="LireLibellePackage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5455</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5455</Number>
+              <Code>            catch (System.Exception ex83)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240118" FileName="filename3.cs" Status="Recurrent" Line="5517" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=118" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="118" SimilarityId="-992052621" SourceMethod="LireParametrePereOblPrm" DestinationMethod="LireParametrePereOblPrm">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5517</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5517</Number>
+              <Code>            catch (System.Exception ex84)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240119" FileName="filename3.cs" Status="Recurrent" Line="5586" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=119" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="119" SimilarityId="-432198695" SourceMethod="AutorisationLiaisonSvc" DestinationMethod="AutorisationLiaisonSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5586</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5586</Number>
+              <Code>            catch (System.Exception ex85)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240120" FileName="filename3.cs" Status="Recurrent" Line="5657" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=120" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="120" SimilarityId="-1850159173" SourceMethod="AutorisationEltLiaisonSvc" DestinationMethod="AutorisationEltLiaisonSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5657</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5657</Number>
+              <Code>            catch (System.Exception ex86)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240121" FileName="filename3.cs" Status="Recurrent" Line="5876" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=121" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="121" SimilarityId="-634357255" SourceMethod="ChargerParametres" DestinationMethod="ChargerParametres">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5876</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5876</Number>
+              <Code>            catch (System.Exception ex87)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240122" FileName="filename3.cs" Status="Recurrent" Line="5948" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=122" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="122" SimilarityId="1479050265" SourceMethod="ChargerParametresService" DestinationMethod="ChargerParametresService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5948</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5948</Number>
+              <Code>            catch (System.Exception ex88)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240123" FileName="filename3.cs" Status="Recurrent" Line="5999" Column="17" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=123" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="123" SimilarityId="-1226672743" SourceMethod="ChargerValeursPourParametre" DestinationMethod="ChargerValeursPourParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>5999</Line>
+          <Column>17</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>5999</Number>
+              <Code>                catch(Exception ex)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240124" FileName="filename3.cs" Status="Recurrent" Line="6027" Column="25" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=124" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="124" SimilarityId="-1891110919" SourceMethod="ChargerValeursPourParametre" DestinationMethod="ChargerValeursPourParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6027</Line>
+          <Column>25</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6027</Number>
+              <Code>                        catch(Exception ex)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240125" FileName="filename3.cs" Status="Recurrent" Line="6082" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=125" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="125" SimilarityId="-1041708839" SourceMethod="ChargerValeursPourParametre" DestinationMethod="ChargerValeursPourParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6082</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6082</Number>
+              <Code>            catch (System.Exception ex89)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240126" FileName="filename3.cs" Status="Recurrent" Line="6131" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=126" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="126" SimilarityId="2130138121" SourceMethod="ChargerParametresCombinaison" DestinationMethod="ChargerParametresCombinaison">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6131</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6131</Number>
+              <Code>            catch (System.Exception ex90)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240127" FileName="filename3.cs" Status="Recurrent" Line="6175" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=127" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="127" SimilarityId="1443582521" SourceMethod="ChargerParametreDoubleUnicite" DestinationMethod="ChargerParametreDoubleUnicite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6175</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6175</Number>
+              <Code>            catch (System.Exception ex91)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240128" FileName="filename3.cs" Status="Recurrent" Line="6234" Column="33" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=128" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="128" SimilarityId="-668601927" SourceMethod="ChargerValeursDeduites" DestinationMethod="ChargerValeursDeduites">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6234</Line>
+          <Column>33</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6234</Number>
+              <Code>                                catch(Exception ex)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240129" FileName="filename3.cs" Status="Recurrent" Line="6260" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=129" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="129" SimilarityId="-16979559" SourceMethod="ChargerValeursDeduites" DestinationMethod="ChargerValeursDeduites">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6260</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6260</Number>
+              <Code>            catch (System.Exception ex91)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240130" FileName="filename3.cs" Status="Recurrent" Line="6310" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=130" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="130" SimilarityId="-1789920469" SourceMethod="ChargerGammes" DestinationMethod="ChargerGammes">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6310</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6310</Number>
+              <Code>            catch (System.Exception ex93)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240131" FileName="filename3.cs" Status="Recurrent" Line="6359" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=131" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="131" SimilarityId="893418617" SourceMethod="ChargerGammesTypSvcTmp" DestinationMethod="ChargerGammesTypSvcTmp">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6359</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6359</Number>
+              <Code>            catch (System.Exception ex94)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240132" FileName="filename3.cs" Status="Recurrent" Line="6547" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=132" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="132" SimilarityId="1925778653" SourceMethod="ChargerLiaisons" DestinationMethod="ChargerLiaisons">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6547</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6547</Number>
+              <Code>            catch (System.Exception ex94)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240133" FileName="filename3.cs" Status="Recurrent" Line="6628" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=133" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="133" SimilarityId="1937780283" SourceMethod="ChargerLiaisonsExternes" DestinationMethod="ChargerLiaisonsExternes">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6628</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6628</Number>
+              <Code>            catch (System.Exception ex95)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240134" FileName="filename3.cs" Status="Recurrent" Line="6819" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=134" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="134" SimilarityId="-1376077639" SourceMethod="ChargerLiaisonsFils" DestinationMethod="ChargerLiaisonsFils">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6819</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6819</Number>
+              <Code>            catch (System.Exception ex96)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240135" FileName="filename3.cs" Status="Recurrent" Line="6937" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=135" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="135" SimilarityId="-1191600659" SourceMethod="ChargerLiaisonsDeComposition" DestinationMethod="ChargerLiaisonsDeComposition">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>6937</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>6937</Number>
+              <Code>            catch (System.Exception ex97)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240136" FileName="filename3.cs" Status="Recurrent" Line="7111" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=136" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="136" SimilarityId="4243641" SourceMethod="ChargerTypeService" DestinationMethod="ChargerTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7111</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7111</Number>
+              <Code>            catch (System.Exception ex99)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240137" FileName="filename3.cs" Status="Recurrent" Line="7194" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=137" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="137" SimilarityId="34348505" SourceMethod="ChargerTypeServiceTmp" DestinationMethod="ChargerTypeServiceTmp">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7194</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7194</Number>
+              <Code>            catch (System.Exception ex100)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240138" FileName="filename3.cs" Status="Recurrent" Line="7250" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=138" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="138" SimilarityId="223798233" SourceMethod="ChargerTypesOptions" DestinationMethod="ChargerTypesOptions">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7250</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7250</Number>
+              <Code>            catch (System.Exception ex101)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240139" FileName="filename3.cs" Status="Recurrent" Line="7348" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=139" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="139" SimilarityId="-301360903" SourceMethod="ChargerTypeOption" DestinationMethod="ChargerTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7348</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7348</Number>
+              <Code>            catch (System.Exception ex102)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240140" FileName="filename3.cs" Status="Recurrent" Line="7395" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=140" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="140" SimilarityId="530307765" SourceMethod="ChargerService" DestinationMethod="ChargerService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7395</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7395</Number>
+              <Code>            catch (System.Exception ex103)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240141" FileName="filename3.cs" Status="Recurrent" Line="7447" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=141" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="141" SimilarityId="-412624787" SourceMethod="ChargerOptions" DestinationMethod="ChargerOptions">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7447</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7447</Number>
+              <Code>            catch (System.Exception ex104)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240142" FileName="filename3.cs" Status="Recurrent" Line="7493" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=142" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="142" SimilarityId="-1741521415" SourceMethod="ChargerOption" DestinationMethod="ChargerOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7493</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7493</Number>
+              <Code>            catch (System.Exception ex105)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240143" FileName="filename3.cs" Status="Recurrent" Line="7547" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=143" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="143" SimilarityId="612303801" SourceMethod="LireGamme" DestinationMethod="LireGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7547</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7547</Number>
+              <Code>            catch (System.Exception ex106)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240144" FileName="filename3.cs" Status="Recurrent" Line="7601" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=144" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="144" SimilarityId="-590533927" SourceMethod="LireDomaine" DestinationMethod="LireDomaine">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7601</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7601</Number>
+              <Code>            catch (System.Exception ex107)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240145" FileName="filename3.cs" Status="Recurrent" Line="7655" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=145" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="145" SimilarityId="760719705" SourceMethod="LireZoneValeur" DestinationMethod="LireZoneValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7655</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7655</Number>
+              <Code>            catch (System.Exception ex108)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240146" FileName="filename3.cs" Status="Recurrent" Line="7742" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=146" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="146" SimilarityId="1331075865" SourceMethod="FacturationParametre" DestinationMethod="FacturationParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7742</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7742</Number>
+              <Code>            catch (System.Exception ex109)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240147" FileName="filename3.cs" Status="Recurrent" Line="7831" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=147" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="147" SimilarityId="1697571769" SourceMethod="FacturationTypeOption" DestinationMethod="FacturationTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7831</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7831</Number>
+              <Code>            catch (System.Exception ex110)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240148" FileName="filename3.cs" Status="Recurrent" Line="7908" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=148" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="148" SimilarityId="-1545137639" SourceMethod="FacturationService" DestinationMethod="FacturationService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7908</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7908</Number>
+              <Code>            catch (System.Exception ex111)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240149" FileName="filename3.cs" Status="Recurrent" Line="7963" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=149" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="149" SimilarityId="-1895645747" SourceMethod="FacturationStandard" DestinationMethod="FacturationStandard">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>7963</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>7963</Number>
+              <Code>            catch (System.Exception ex112)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240150" FileName="filename3.cs" Status="Recurrent" Line="8019" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=150" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="150" SimilarityId="-1190131975" SourceMethod="LireLiaisonFils" DestinationMethod="LireLiaisonFils">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8019</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8019</Number>
+              <Code>            catch (System.Exception ex113)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240151" FileName="filename3.cs" Status="Recurrent" Line="8094" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=151" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="151" SimilarityId="276270985" SourceMethod="AutorisationLiaisonSvcFils" DestinationMethod="AutorisationLiaisonSvcFils">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8094</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8094</Number>
+              <Code>            catch (System.Exception ex114)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240152" FileName="filename3.cs" Status="Recurrent" Line="8150" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=152" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="152" SimilarityId="-1926930951" SourceMethod="AutorisationOption" DestinationMethod="AutorisationOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8150</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8150</Number>
+              <Code>            catch (System.Exception ex115)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240153" FileName="filename3.cs" Status="Recurrent" Line="8182" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=153" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="153" SimilarityId="-1913867631" SourceMethod="NbTypesInterlocuteurs" DestinationMethod="NbTypesInterlocuteurs">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8182</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8182</Number>
+              <Code>            catch (System.Exception ex116)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240154" FileName="filename3.cs" Status="Recurrent" Line="8213" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=154" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="154" SimilarityId="-1260713611" SourceMethod="LireElementTypeInterlocuteur" DestinationMethod="LireElementTypeInterlocuteur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8213</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8213</Number>
+              <Code>            catch (System.Exception ex117)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240155" FileName="filename3.cs" Status="Recurrent" Line="8270" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=155" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="155" SimilarityId="922050867" SourceMethod="LireTypeInterlocuteur" DestinationMethod="LireTypeInterlocuteur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8270</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8270</Number>
+              <Code>            catch (System.Exception ex118)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240156" FileName="filename3.cs" Status="Recurrent" Line="8329" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=156" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="156" SimilarityId="-5640487" SourceMethod="ChargerTypesInterlocuteurs" DestinationMethod="ChargerTypesInterlocuteurs">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8329</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8329</Number>
+              <Code>            catch (System.Exception ex119)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240157" FileName="filename3.cs" Status="Recurrent" Line="8426" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=157" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="157" SimilarityId="-1083800231" SourceMethod="ChargerUnitesParametres" DestinationMethod="ChargerUnitesParametres">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8426</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8426</Number>
+              <Code>            catch (System.Exception ex120)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240158" FileName="filename3.cs" Status="Recurrent" Line="8485" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=158" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="158" SimilarityId="859598031" SourceMethod="ChargerUnitesValeurParametres" DestinationMethod="ChargerUnitesValeurParametres">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8485</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8485</Number>
+              <Code>            catch (System.Exception ex121)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240159" FileName="filename3.cs" Status="Recurrent" Line="8514" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=159" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="159" SimilarityId="1443654041" SourceMethod="OuvrirConnexion" DestinationMethod="OuvrirConnexion">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8514</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8514</Number>
+              <Code>            catch (System.Exception ex122)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240160" FileName="filename3.cs" Status="Recurrent" Line="8539" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=160" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="160" SimilarityId="71029113" SourceMethod="FermerConnexion" DestinationMethod="FermerConnexion">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8539</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8539</Number>
+              <Code>            catch (System.Exception ex123)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240161" FileName="filename3.cs" Status="Recurrent" Line="8590" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=161" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="161" SimilarityId="1461071225" SourceMethod="ChargerControlesPourParametre" DestinationMethod="ChargerControlesPourParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8590</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8590</Number>
+              <Code>            catch (System.Exception ex124)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240162" FileName="filename3.cs" Status="Recurrent" Line="8639" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=162" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="162" SimilarityId="2084987929" SourceMethod="ChargerValeursPourControle" DestinationMethod="ChargerValeursPourControle">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8639</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8639</Number>
+              <Code>            catch (System.Exception ex125)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240163" FileName="filename3.cs" Status="Recurrent" Line="8709" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=163" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="163" SimilarityId="-139430599" SourceMethod="ChargerAgences" DestinationMethod="ChargerAgences">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8709</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8709</Number>
+              <Code>            catch (System.Exception ex126)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240164" FileName="filename3.cs" Status="Recurrent" Line="8757" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=164" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="164" SimilarityId="476925849" SourceMethod="AutorisationCompoTypeSvc" DestinationMethod="AutorisationCompoTypeSvc">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8757</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8757</Number>
+              <Code>            catch (System.Exception ex127)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240165" FileName="filename3.cs" Status="Recurrent" Line="8889" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=165" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="165" SimilarityId="820513577" SourceMethod="ChargerAutorisationOption" DestinationMethod="ChargerAutorisationOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8889</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8889</Number>
+              <Code>            catch (System.Exception ex127)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240166" FileName="filename3.cs" Status="Recurrent" Line="8919" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=166" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="166" SimilarityId="895322463" SourceMethod="NbOptionsAutorisees" DestinationMethod="NbOptionsAutorisees">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8919</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8919</Number>
+              <Code>            catch (System.Exception ex129)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240167" FileName="filename3.cs" Status="Recurrent" Line="8994" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=167" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="167" SimilarityId="712608369" SourceMethod="InitialiserTypeService" DestinationMethod="InitialiserTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>8994</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>8994</Number>
+              <Code>            catch (System.Exception ex130)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240168" FileName="filename3.cs" Status="Recurrent" Line="9068" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=168" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="168" SimilarityId="188947385" SourceMethod="ValeurParametrePermise" DestinationMethod="ValeurParametrePermise">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9068</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9068</Number>
+              <Code>            catch (System.Exception ex131)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240169" FileName="filename3.cs" Status="Recurrent" Line="9131" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=169" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="169" SimilarityId="-808175847" SourceMethod="ExistenceUnite" DestinationMethod="ExistenceUnite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9131</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9131</Number>
+              <Code>            catch (System.Exception ex132)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240170" FileName="filename3.cs" Status="Recurrent" Line="9193" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=170" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="170" SimilarityId="-127287627" SourceMethod="ExistenceParametreUnite" DestinationMethod="ExistenceParametreUnite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9193</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9193</Number>
+              <Code>            catch (System.Exception ex133)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240171" FileName="filename3.cs" Status="Recurrent" Line="9210" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=171" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="171" SimilarityId="-443604127" SourceMethod="IsSavedInUpperCase" DestinationMethod="IsSavedInUpperCase">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9210</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9210</Number>
+              <Code>            catch(Exception ex)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240172" FileName="filename3.cs" Status="Recurrent" Line="9311" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=172" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="172" SimilarityId="-395872007" SourceMethod="ExistenceParametreValeurUnite" DestinationMethod="ExistenceParametreValeurUnite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9311</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9311</Number>
+              <Code>            catch (System.Exception ex134)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240173" FileName="filename3.cs" Status="Recurrent" Line="9337" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=173" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="173" SimilarityId="-349037403" SourceMethod="ModifierValLimit" DestinationMethod="ModifierValLimit">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9337</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9337</Number>
+              <Code>            catch (System.Exception ex135)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240174" FileName="filename3.cs" Status="Recurrent" Line="9392" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=174" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="174" SimilarityId="-467424839" SourceMethod="ChargerParametresPeres" DestinationMethod="ChargerParametresPeres">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9392</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9392</Number>
+              <Code>            catch (System.Exception ex136)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240175" FileName="filename3.cs" Status="Recurrent" Line="9470" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=175" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="175" SimilarityId="3365049" SourceMethod="LireValeurDeduite" DestinationMethod="LireValeurDeduite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9470</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9470</Number>
+              <Code>            catch (System.Exception ex137)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240176" FileName="filename3.cs" Status="Recurrent" Line="9510" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=176" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="176" SimilarityId="1234939151" SourceMethod="LireVersion" DestinationMethod="LireVersion">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9510</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9510</Number>
+              <Code>            catch (System.Exception ex138)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240177" FileName="filename3.cs" Status="Recurrent" Line="9591" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=177" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="177" SimilarityId="-911090411" SourceMethod="LireUniteValeur" DestinationMethod="LireUniteValeur">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9591</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9591</Number>
+              <Code>            catch (System.Exception ex139)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240178" FileName="filename3.cs" Status="Recurrent" Line="9699" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=178" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="178" SimilarityId="1027661689" SourceMethod="ChargerEnsemblesFacturables" DestinationMethod="ChargerEnsemblesFacturables">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9699</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9699</Number>
+              <Code>            catch (System.Exception ex139)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240179" FileName="filename3.cs" Status="Recurrent" Line="9809" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=179" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="179" SimilarityId="-392275763" SourceMethod="ChargerPackage" DestinationMethod="ChargerPackage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9809</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9809</Number>
+              <Code>            catch (System.Exception ex140)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240180" FileName="filename3.cs" Status="Recurrent" Line="9860" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=180" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="180" SimilarityId="-726410727" SourceMethod="ChargerParametreOblPrm" DestinationMethod="ChargerParametreOblPrm">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9860</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9860</Number>
+              <Code>            catch (System.Exception ex142)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240181" FileName="filename3.cs" Status="Recurrent" Line="9900" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=181" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="181" SimilarityId="148906521" SourceMethod="LireTypSvcDeReferenceService" DestinationMethod="LireTypSvcDeReferenceService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9900</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9900</Number>
+              <Code>            catch (System.Exception ex143)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240182" FileName="filename3.cs" Status="Recurrent" Line="9967" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=182" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="182" SimilarityId="1726942681" SourceMethod="ChargerEnsemblesMigration" DestinationMethod="ChargerEnsemblesMigration">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>9967</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>9967</Number>
+              <Code>            catch (System.Exception ex143)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240183" FileName="filename3.cs" Status="Recurrent" Line="10157" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=183" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="183" SimilarityId="1898058921" SourceMethod="ChargerEntite" DestinationMethod="ChargerEntite">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10157</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10157</Number>
+              <Code>            catch (System.Exception ex145)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240184" FileName="filename3.cs" Status="Recurrent" Line="10249" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=184" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="184" SimilarityId="1542763353" SourceMethod="ArretCommercialisation" DestinationMethod="ArretCommercialisation">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10249</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10249</Number>
+              <Code>            catch (System.Exception ex146)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240185" FileName="filename3.cs" Status="Recurrent" Line="10290" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=185" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="185" SimilarityId="630511193" SourceMethod="EstDefiniPackage" DestinationMethod="EstDefiniPackage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10290</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10290</Number>
+              <Code>            catch (System.Exception ex147)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240186" FileName="filename3.cs" Status="Recurrent" Line="10341" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=186" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="186" SimilarityId="2096490905" SourceMethod="AppartientSousPackage" DestinationMethod="AppartientSousPackage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10341</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10341</Number>
+              <Code>            catch (System.Exception ex148)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240187" FileName="filename3.cs" Status="Recurrent" Line="10392" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=187" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="187" SimilarityId="-1287316423" SourceMethod="AppartientSousPackageReference" DestinationMethod="AppartientSousPackageReference">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10392</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10392</Number>
+              <Code>            catch (System.Exception ex149)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240188" FileName="filename3.cs" Status="Recurrent" Line="10447" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=188" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="188" SimilarityId="650619001" SourceMethod="AppartientSousPackageDonne" DestinationMethod="AppartientSousPackageDonne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10447</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10447</Number>
+              <Code>            catch (System.Exception ex150)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240189" FileName="filename3.cs" Status="Recurrent" Line="10502" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=189" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="189" SimilarityId="947591061" SourceMethod="AppartientSousPackageReferenceDonne" DestinationMethod="AppartientSousPackageReferenceDonne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10502</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10502</Number>
+              <Code>            catch (System.Exception ex151)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240190" FileName="filename3.cs" Status="Recurrent" Line="10600" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=190" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="190" SimilarityId="-2084629319" SourceMethod="EstParametreOblPrm" DestinationMethod="EstParametreOblPrm">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10600</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10600</Number>
+              <Code>            catch (System.Exception ex152)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240191" FileName="filename3.cs" Status="Recurrent" Line="10696" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=191" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="191" SimilarityId="841063641" SourceMethod="EstParametreIntPrm" DestinationMethod="EstParametreIntPrm">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10696</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10696</Number>
+              <Code>            catch (System.Exception ex153)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240192" FileName="filename3.cs" Status="Recurrent" Line="10741" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=192" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="192" SimilarityId="2125537237" SourceMethod="EstZoneFrance" DestinationMethod="EstZoneFrance">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10741</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10741</Number>
+              <Code>            catch (System.Exception ex154)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240193" FileName="filename3.cs" Status="Recurrent" Line="10774" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=193" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="193" SimilarityId="320660729" SourceMethod="NbOptions" DestinationMethod="NbOptions">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10774</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10774</Number>
+              <Code>            catch (System.Exception ex155)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240194" FileName="filename3.cs" Status="Recurrent" Line="10824" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=194" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="194" SimilarityId="-1878018115" SourceMethod="LireCanalTypeService" DestinationMethod="LireCanalTypeService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10824</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10824</Number>
+              <Code>            catch (System.Exception ex156)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240195" FileName="filename3.cs" Status="Recurrent" Line="10866" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=195" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="195" SimilarityId="606635289" SourceMethod="LireCanalGamme" DestinationMethod="LireCanalGamme">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10866</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10866</Number>
+              <Code>            catch (System.Exception ex157)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240196" FileName="filename3.cs" Status="Recurrent" Line="10915" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=196" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="196" SimilarityId="-652531531" SourceMethod="LireCanalTypeOption" DestinationMethod="LireCanalTypeOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10915</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10915</Number>
+              <Code>            catch (System.Exception ex158)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240197" FileName="filename3.cs" Status="Recurrent" Line="10957" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=197" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="197" SimilarityId="-1535186247" SourceMethod="LireCanalService" DestinationMethod="LireCanalService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>10957</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>10957</Number>
+              <Code>            catch (System.Exception ex159)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240198" FileName="filename3.cs" Status="Recurrent" Line="11003" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=198" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="198" SimilarityId="1028105465" SourceMethod="LireCanalOption" DestinationMethod="LireCanalOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11003</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11003</Number>
+              <Code>            catch (System.Exception ex160)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240199" FileName="filename3.cs" Status="Recurrent" Line="11045" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=199" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="199" SimilarityId="2100426265" SourceMethod="LireIndicateurReferenceEvolution" DestinationMethod="LireIndicateurReferenceEvolution">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11045</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11045</Number>
+              <Code>            catch (System.Exception ex161)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240200" FileName="filename3.cs" Status="Recurrent" Line="11144" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=200" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="200" SimilarityId="-859724325" SourceMethod="LireValeursFiltreesParametre" DestinationMethod="LireValeursFiltreesParametre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11144</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11144</Number>
+              <Code>            catch (System.Exception ex162)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240201" FileName="filename3.cs" Status="Recurrent" Line="11284" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=201" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="201" SimilarityId="1345461679" SourceMethod="LireCombinaisonsFiltre" DestinationMethod="LireCombinaisonsFiltre">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11284</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11284</Number>
+              <Code>            catch (System.Exception ex163)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240202" FileName="filename3.cs" Status="Recurrent" Line="11334" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=202" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="202" SimilarityId="-429150567" SourceMethod="LireLibelleValeurExterne" DestinationMethod="LireLibelleValeurExterne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11334</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11334</Number>
+              <Code>            catch (System.Exception ex164)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240203" FileName="filename3.cs" Status="Recurrent" Line="11465" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=203" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="203" SimilarityId="243607225" SourceMethod="ExistenceValeurExterne" DestinationMethod="ExistenceValeurExterne">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11465</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11465</Number>
+              <Code>            catch (System.Exception ex165)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240204" FileName="filename3.cs" Status="Recurrent" Line="11512" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=204" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="204" SimilarityId="158844121" SourceMethod="PresenceGroupeNrcFue" DestinationMethod="PresenceGroupeNrcFue">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11512</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11512</Number>
+              <Code>            catch (System.Exception ex166)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240205" FileName="filename3.cs" Status="Recurrent" Line="11550" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=205" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="205" SimilarityId="1717136579" SourceMethod="GetCategorieService" DestinationMethod="GetCategorieService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11550</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11550</Number>
+              <Code>            catch (System.Exception ex167)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240206" FileName="filename3.cs" Status="Recurrent" Line="11588" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=206" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="206" SimilarityId="-1698821927" SourceMethod="GetCustomerService" DestinationMethod="GetCustomerService">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11588</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11588</Number>
+              <Code>            catch (System.Exception ex168)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240207" FileName="filename3.cs" Status="Recurrent" Line="11635" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=207" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="207" SimilarityId="-128806953" SourceMethod="ReferenceAvecFAS" DestinationMethod="ReferenceAvecFAS">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11635</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11635</Number>
+              <Code>            catch (System.Exception ex169)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240208" FileName="filename3.cs" Status="Recurrent" Line="11691" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=208" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="208" SimilarityId="988214457" SourceMethod="LireLibelleUsage" DestinationMethod="LireLibelleUsage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11691</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11691</Number>
+              <Code>            catch (System.Exception ex170)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240209" FileName="filename3.cs" Status="Recurrent" Line="11762" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=209" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="209" SimilarityId="-1464331655" SourceMethod="LireUsages" DestinationMethod="LireUsages">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11762</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11762</Number>
+              <Code>            catch (System.Exception ex171)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240210" FileName="filename3.cs" Status="Recurrent" Line="11801" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=210" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="210" SimilarityId="-2072683111" SourceMethod="LireElementUsage" DestinationMethod="LireElementUsage">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11801</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11801</Number>
+              <Code>            catch (System.Exception ex172)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240211" FileName="filename3.cs" Status="Recurrent" Line="11852" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=211" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="211" SimilarityId="81450997" SourceMethod="AutorisationParametreReference" DestinationMethod="AutorisationParametreReference">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11852</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11852</Number>
+              <Code>            catch (System.Exception ex173)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240212" FileName="filename3.cs" Status="Recurrent" Line="11924" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=212" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="212" SimilarityId="-1010620279" SourceMethod="NbRefOptValid" DestinationMethod="NbRefOptValid">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11924</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11924</Number>
+              <Code>            catch (System.Exception ex174)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240213" FileName="filename3.cs" Status="Recurrent" Line="11958" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=213" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="213" SimilarityId="1916774169" SourceMethod="ReferencesDuType" DestinationMethod="ReferencesDuType">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>11958</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>11958</Number>
+              <Code>            catch (System.Exception ex175)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240214" FileName="filename3.cs" Status="Recurrent" Line="12003" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=214" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="214" SimilarityId="-536759431" SourceMethod="IsVide" DestinationMethod="IsVide">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>12003</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>12003</Number>
+              <Code>            catch (System.Exception ex176)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240215" FileName="filename3.cs" Status="Recurrent" Line="12050" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=215" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="215" SimilarityId="-1066803841" SourceMethod="AutorisationRefOption" DestinationMethod="AutorisationRefOption">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>12050</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>12050</Number>
+              <Code>            catch (System.Exception ex177)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="12091240216" FileName="filename3.cs" Status="Recurrent" Line="12067" Column="13" FalsePositive="False" Severity="Information" AssignToUser="" state="0" Remark="" DeepLink="https://servername.com/CxWebClient/ViewerMain.aspx?scanid=1209124&amp;projectid=1362&amp;pathid=216" SeverityIndex="0" StatusIndex="1" DetectionDate="6/16/2021 6:06:21 PM">
+      <Path ResultId="1209124" PathId="216" SimilarityId="-1976454649" SourceMethod="ListUsagesParListPackages" DestinationMethod="ListUsagesParListPackages">
+        <PathNode>
+          <FileName>filename3.cs</FileName>
+          <Line>12067</Line>
+          <Column>13</Column>
+          <NodeId>1</NodeId>
+          <Name>catch</Name>
+          <Type></Type>
+          <Length>5</Length>
+          <Snippet>
+            <Line>
+              <Number>12067</Number>
+              <Code>            catch (Exception ex)</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+  </Query>
+</CxXMLResults>

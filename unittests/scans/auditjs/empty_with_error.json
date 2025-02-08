@@ -1,0 +1,168 @@
+________   ___  ___   ________   ___   _________       ___   ________
+|\   __  \ |\  \|\  \ |\   ___ \ |\  \ |\___   ___\    |\  \ |\   ____\
+\ \  \|\  \\ \  \\\  \\ \  \_|\ \\ \  \\|___ \  \_|    \ \  \\ \  \___|_
+ \ \   __  \\ \  \\\  \\ \  \ \\ \\ \  \    \ \  \   __ \ \  \\ \_____  \
+  \ \  \ \  \\ \  \\\  \\ \  \_\\ \\ \  \    \ \  \ |\  \\_\  \\|____|\  \
+   \ \__\ \__\\ \_______\\ \_______\\ \__\    \ \__\\ \________\ ____\_\  \
+    \|__|\|__| \|_______| \|_______| \|__|     \|__| \|________||\_________\
+                                                                \|_________|
+
+
+  _      _                       _   _
+ /_)    /_`_  _  _ _/_   _  _   (/  /_`_._  _   _/ _
+/_)/_/ ._//_// //_|/ /_//_//_' (_X /  ///_'/ //_/_\
+   _/                _//
+
+  AuditJS version: 4.0.25
+
+
+  Sonabot here, beep boop beep boop, here are your Sonatype OSS Index results:
+  Total dependencies audited: 58
+
+
+[2/58] - pkg:npm/assert@2.0.0 - No vulnerabilities found!
+[3/58] - pkg:npm/available-typed-arrays@1.0.4 - No vulnerabilities found!
+[4/58] - pkg:npm/bytes@0.1.0 - No vulnerabilities found!
+[5/58] - pkg:npm/call-bind@1.0.2 - No vulnerabilities found!
+[6/58] - pkg:npm/colors@1.4.0 - No vulnerabilities found!
+[7/58] - pkg:npm/commander@0.6.1 - No vulnerabilities found!
+[8/58] - pkg:npm/connect@2.6.0 - 3 vulnerabilities found!
+
+  Vulnerability Title:  Cross-Site Scripting with connect.methodOverride()
+  ID:  843bf109-df0b-4ef2-8a9d-f2fa2f5ece19
+  Description:  This middleware overwrite req.method with the req.body['_method'] value. When you don't catch the error it responds with a default error msg: "Cannot [METHOD] [URL]" (https://github.com/senchalabs/connect/blob/6db901f967036ccc3c892b4bcb5bcb59e0b0dca9/lib/proto.js#L155). Because this is not enough sanitized, you can force a Cross-Site Scripting in the response:
+
+  ~ curl "localhost:3000" -d "_method=<script src=http://martes13.net/a.js></script>"
+  Cannot <SCRIPT SRC=HTTP://MARTES13.NET/A.JS></SCRIPT> /
+  This is very dangerous because in a server like ExpressJS it won't be handled with a app.all('/*', ...), so all servers using this middleware are vulnerable.
+  CVSS Score:  6.5
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N
+  Reference:  https://ossindex.sonatype.org/vulnerability/843bf109-df0b-4ef2-8a9d-f2fa2f5ece19?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+  Vulnerability Title:  CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')
+  ID:  07257200-4d10-45ca-a46a-14b3aa9b2673
+  Description:  The software uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the software does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory.
+  CVSS Score:  5.8
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N
+  Reference:  https://ossindex.sonatype.org/vulnerability/07257200-4d10-45ca-a46a-14b3aa9b2673?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+  Vulnerability Title:  [CVE-2018-3717] connect node module before 2.14.0 suffers from a Cross-Site Scripting (XSS) vuln...
+  ID:  7df31426-09a2-4b5f-a0ab-acc699023c57
+  Description:  connect node module before 2.14.0 suffers from a Cross-Site Scripting (XSS) vulnerability due to a lack of validation of file in directory.js middleware.
+  CVSS Score:  5.4
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N
+  CVE:  CVE-2018-3717
+  Reference:  https://ossindex.sonatype.org/vulnerability/7df31426-09a2-4b5f-a0ab-acc699023c57?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[9/58] - pkg:npm/cookie@0.0.4 - No vulnerabilities found!
+[10/58] - pkg:npm/crc@0.2.0 - No vulnerabilities found!
+[11/58] - pkg:npm/debug@4.3.1 - No vulnerabilities found!
+[12/58] - pkg:npm/define-properties@1.1.3 - No vulnerabilities found!
+[13/58] - pkg:npm/es-abstract@1.18.3 - No vulnerabilities found!
+[14/58] - pkg:npm/es-to-primitive@1.2.1 - No vulnerabilities found!
+[15/58] - pkg:npm/es6-object-assign@1.1.0 - No vulnerabilities found!
+[16/58] - pkg:npm/express@3.0.0 - No vulnerabilities found!
+[17/58] - pkg:npm/foreach@2.0.5 - No vulnerabilities found!
+[18/58] - pkg:npm/formidable@1.0.11 - No vulnerabilities found!
+[19/58] - pkg:npm/fresh@0.1.0 - 1 vulnerability found!
+
+  Vulnerability Title:  CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')
+  ID:  4e1a10ea-4fa1-4e1e-9571-83362672b97e
+  Description:  The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.
+  CVSS Score:  7.5
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H
+  Reference:  https://ossindex.sonatype.org/vulnerability/4e1a10ea-4fa1-4e1e-9571-83362672b97e?component-type=npm&component-name=fresh&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[20/58] - pkg:npm/function-bind@1.1.1 - No vulnerabilities found!
+[21/58] - pkg:npm/get-intrinsic@1.1.1 - No vulnerabilities found!
+[22/58] - pkg:npm/has-bigints@1.0.1 - No vulnerabilities found!
+[23/58] - pkg:npm/has-symbols@1.0.2 - No vulnerabilities found!
+[24/58] - pkg:npm/has@1.0.3 - No vulnerabilities found!
+[25/58] - pkg:npm/inherits@2.0.4 - No vulnerabilities found!
+[26/58] - pkg:npm/is-arguments@1.1.0 - No vulnerabilities found!
+[27/58] - pkg:npm/is-bigint@1.0.2 - No vulnerabilities found!
+[28/58] - pkg:npm/is-boolean-object@1.1.1 - No vulnerabilities found!
+[29/58] - pkg:npm/is-callable@1.2.3 - No vulnerabilities found!
+[30/58] - pkg:npm/is-date-object@1.0.4 - No vulnerabilities found!
+[31/58] - pkg:npm/is-generator-function@1.0.9 - No vulnerabilities found!
+[32/58] - pkg:npm/is-nan@1.3.2 - No vulnerabilities found!
+[33/58] - pkg:npm/is-negative-zero@2.0.1 - No vulnerabilities found!
+[34/58] - pkg:npm/is-number-object@1.0.5 - No vulnerabilities found!
+[35/58] - pkg:npm/is-regex@1.1.3 - No vulnerabilities found!
+[36/58] - pkg:npm/is-string@1.0.6 - No vulnerabilities found!
+[37/58] - pkg:npm/is-symbol@1.0.4 - No vulnerabilities found!
+[38/58] - pkg:npm/is-typed-array@1.1.5 - No vulnerabilities found!
+[39/58] - pkg:npm/methods@0.0.1 - No vulnerabilities found!
+[40/58] - pkg:npm/mime@1.2.6 - 1 vulnerability found!
+
+  Vulnerability Title:  CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')
+  ID:  0fa304f3-b464-4e44-b747-1bd5b1922e06
+  Description:  The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.
+  CVSS Score:  7.5
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H
+  Reference:  https://ossindex.sonatype.org/vulnerability/0fa304f3-b464-4e44-b747-1bd5b1922e06?component-type=npm&component-name=mime&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[41/58] - pkg:npm/mkdirp@0.3.3 - No vulnerabilities found!
+[42/58] - pkg:npm/ms@2.1.2 - No vulnerabilities found!
+[43/58] - pkg:npm/object-inspect@1.10.3 - No vulnerabilities found!
+[44/58] - pkg:npm/object-is@1.1.5 - No vulnerabilities found!
+[45/58] - pkg:npm/object-keys@1.1.1 - No vulnerabilities found!
+[46/58] - pkg:npm/object.assign@4.1.2 - No vulnerabilities found!
+[47/58] - pkg:npm/pause@0.0.1 - No vulnerabilities found!
+[48/58] - pkg:npm/qs@0.5.1 - 4 vulnerabilities found!
+
+  Vulnerability Title:  CWE-20: Improper Input Validation
+  ID:  c99eedca-ca97-4170-a935-defaf176f412
+  Description:  The product does not validate or incorrectly validates input that can affect the control flow or data flow of a program.
+  CVSS Score:  8.2
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H
+  Reference:  https://ossindex.sonatype.org/vulnerability/c99eedca-ca97-4170-a935-defaf176f412?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+  Vulnerability Title:  CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')
+  ID:  e9d3e8e7-e367-42d0-b5d7-193cbd96a755
+  Description:  The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.
+  CVSS Score:  7.5
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H
+  Reference:  https://ossindex.sonatype.org/vulnerability/e9d3e8e7-e367-42d0-b5d7-193cbd96a755?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+  Vulnerability Title:  [CVE-2014-7191]  Resource Management Errors
+  ID:  3a3bf289-21dc-4c84-a46e-39280f80bb01
+  Description:  The qs module before 1.0.0 in Node.js does not call the compact function for array data, which allows remote attackers to cause a denial of service (memory consumption) by using a large index value to create a sparse array.
+  CVSS Score:  5
+  CVSS Vector:  AV:N/AC:L/Au:N/C:N/I:N/A:P
+  CVE:  CVE-2014-7191
+  Reference:  https://ossindex.sonatype.org/vulnerability/3a3bf289-21dc-4c84-a46e-39280f80bb01?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+  Vulnerability Title:  Prototype override protection bypass
+  ID:  3b7c9a3f-0265-4435-b43d-7dbee2d6a461
+  Description:  A prototype override protection bypass is possible, which allows attackers to overwrite properties and functions. A previous solution for the problem is incomplete.
+  CVSS Score:  0
+  Reference:  https://ossindex.sonatype.org/vulnerability/3b7c9a3f-0265-4435-b43d-7dbee2d6a461?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[49/58] - pkg:npm/range-parser@0.0.4 - No vulnerabilities found!
+[50/58] - pkg:npm/safe-buffer@5.2.1 - No vulnerabilities found!
+[51/58] - pkg:npm/send@0.0.4 - 1 vulnerability found!
+
+  Vulnerability Title:  CWE-200: Information Exposure
+  ID:  3a5ca7f8-cd91-4681-a8b5-285ef96915f2
+  Description:  An information exposure is the intentional or unintentional disclosure of information to an actor that is not explicitly authorized to have access to that information.
+  CVSS Score:  5.3
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Reference:  https://ossindex.sonatype.org/vulnerability/3a5ca7f8-cd91-4681-a8b5-285ef96915f2?component-type=npm&component-name=send&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[52/58] - pkg:npm/send@0.1.0 - 1 vulnerability found!
+
+  Vulnerability Title:  CWE-200: Information Exposure
+  ID:  3a5ca7f8-cd91-4681-a8b5-285ef96915f2
+  Description:  An information exposure is the intentional or unintentional disclosure of information to an actor that is not explicitly authorized to have access to that information.
+  CVSS Score:  5.3
+  CVSS Vector:  CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Reference:  https://ossindex.sonatype.org/vulnerability/3a5ca7f8-cd91-4681-a8b5-285ef96915f2?component-type=npm&component-name=send&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25
+
+[53/58] - pkg:npm/string.prototype.trimend@1.0.4 - No vulnerabilities found!
+[54/58] - pkg:npm/string.prototype.trimstart@1.0.4 - No vulnerabilities found!
+[55/58] - pkg:npm/unbox-primitive@1.0.1 - No vulnerabilities found!
+[56/58] - pkg:npm/util@0.12.4 - No vulnerabilities found!
+[57/58] - pkg:npm/which-boxed-primitive@1.0.2 - No vulnerabilities found!
+[58/58] - pkg:npm/which-typed-array@1.1.4 - No vulnerabilities found!
+

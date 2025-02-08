@@ -1,0 +1,772 @@
+{
+  "path_excludes" : [ {
+    "_id" : 0,
+    "pattern" : "sub/module/project/build.gradle",
+    "reason" : "EXAMPLE_OF",
+    "comment" : "The project is an example."
+  }, {
+    "_id" : 1,
+    "pattern" : "**.java",
+    "reason" : "EXAMPLE_OF",
+    "comment" : "These are example files."
+  } ],
+  "scope_excludes" : [ {
+    "_id" : 0,
+    "pattern" : "testCompile",
+    "reason" : "TEST_DEPENDENCY_OF",
+    "comment" : "The scope only contains test dependencies."
+  } ],
+  "copyrights" : [ {
+    "_id" : 0,
+    "statement" : "Copyright (c) example authors."
+  } ],
+  "licenses" : [ {
+    "_id" : 0,
+    "id" : "GPL-2.0-only WITH Classpath-exception-2.0"
+  }, {
+    "_id" : 1,
+    "id" : "BSD-3-Clause"
+  }, {
+    "_id" : 2,
+    "id" : "MIT"
+  }, {
+    "_id" : 3,
+    "id" : "LicenseRef-test-Apache-2.0-multi-line"
+  }, {
+    "_id" : 4,
+    "id" : "LicenseRef-test-Apache-2.0-single-line"
+  }, {
+    "_id" : 5,
+    "id" : "GPL-3.0-only WITH GCC-exception-3.1 AND CC-BY-NC-3.0"
+  }, {
+    "_id" : 6,
+    "id" : "GPL-3.0-only WITH GCC-exception-3.1"
+  }, {
+    "_id" : 7,
+    "id" : "CC-BY-NC-3.0"
+  }, {
+    "_id" : 8,
+    "id" : "Apache-2.0"
+  }, {
+    "_id" : 9,
+    "id" : "Eclipse Public License 1.0"
+  }, {
+    "_id" : 10,
+    "id" : "EPL-1.0"
+  }, {
+    "_id" : 11,
+    "id" : "Apache License, Version 2.0"
+  }, {
+    "_id" : 12,
+    "id" : "New BSD License"
+  } ],
+  "scopes" : [ {
+    "_id" : 0,
+    "name" : "compile"
+  }, {
+    "_id" : 1,
+    "name" : "testCompile",
+    "excludes" : [ 0 ]
+  } ],
+  "issue_resolutions" : [ ],
+  "issues" : [ {
+    "_id" : 0,
+    "timestamp" : "1970-01-01T00:00:00Z",
+    "type" : "SCANNER",
+    "source" : "FileCounter",
+    "message" : "DownloadException: No source artifact URL provided for 'Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0'.\nCaused by: DownloadException: No VCS URL provided for 'Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0'. Please make sure the release POM file includes the SCM connection, see: https://docs.gradle.org/current/userguide/publishing_maven.html#example_customizing_the_pom_file",
+    "severity" : "ERROR",
+    "pkg" : 0,
+    "scan_result" : 0,
+    "how_to_fix" : "Some how to fix text."
+  } ],
+  "scan_results" : [ {
+    "_id" : 0,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "vcs_info" : {
+        "type" : "Git",
+        "url" : "https://github.com/oss-review-toolkit/ort.git",
+        "revision" : "master",
+        "resolved_revision" : "3dcca3e6ee0dea120922f90495bf04b4e09ae455",
+        "path" : "analyzer/src/funTest/assets/projects/synthetic/gradle/lib"
+      }
+    },
+    "scanner" : {
+      "name" : "FakeScanner",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 0,
+    "package_verification_code" : "0000000000000000000000000000000000000000",
+    "issues" : [ 0 ]
+  }, {
+    "_id" : 1,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "vcs_info" : {
+        "type" : "Git",
+        "url" : "https://example.com/git",
+        "revision" : "master",
+        "resolved_revision" : "0000000000000000000000000000000000000000",
+        "path" : "project"
+      }
+    },
+    "scanner" : {
+      "name" : "FakeScanner",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 0,
+    "package_verification_code" : "0000000000000000000000000000000000000000"
+  }, {
+    "_id" : 2,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "source_artifact" : {
+        "url" : "https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12-sources.jar",
+        "hash" : {
+          "value" : "a6c32b40bf3d76eca54e3c601e5d1470c86fcdfa",
+          "algorithm" : "SHA-1"
+        }
+      }
+    },
+    "scanner" : {
+      "name" : "FileCounter",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 234,
+    "package_verification_code" : "0000000000000000000000000000000000000000"
+  }, {
+    "_id" : 3,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "source_artifact" : {
+        "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.5/commons-lang3-3.5-sources.jar",
+        "hash" : {
+          "value" : "f7d878153e86a1cdddf6b37850e00a9f8bff726f",
+          "algorithm" : "SHA-1"
+        }
+      }
+    },
+    "scanner" : {
+      "name" : "FileCounter",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 168,
+    "package_verification_code" : "0000000000000000000000000000000000000000"
+  }, {
+    "_id" : 4,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "source_artifact" : {
+        "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.1/commons-text-1.1-sources.jar",
+        "hash" : {
+          "value" : "f0770f7f0472bf120ada47beecadce4056fbd20a",
+          "algorithm" : "SHA-1"
+        }
+      }
+    },
+    "scanner" : {
+      "name" : "FileCounter",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 80,
+    "package_verification_code" : "0000000000000000000000000000000000000000"
+  }, {
+    "_id" : 5,
+    "provenance" : {
+      "download_time" : "1970-01-01T00:00:00Z",
+      "source_artifact" : {
+        "url" : "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3-sources.jar",
+        "hash" : {
+          "value" : "1dc37250fbc78e23a65a67fbbaf71d2e9cbc3c0b",
+          "algorithm" : "SHA-1"
+        }
+      }
+    },
+    "scanner" : {
+      "name" : "FileCounter",
+      "version" : "1.0",
+      "configuration" : ""
+    },
+    "start_time" : "1970-01-01T00:00:00Z",
+    "end_time" : "1970-01-01T00:00:00Z",
+    "file_count" : 47,
+    "package_verification_code" : "0000000000000000000000000000000000000000"
+  } ],
+  "packages" : [ {
+    "_id" : 0,
+    "id" : "Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0",
+    "is_project" : true,
+    "definition_file_path" : "analyzer/src/funTest/assets/projects/synthetic/gradle/lib/build.gradle",
+    "purl" : "pkg:gradle/org.ossreviewtoolkit.gradle.example/lib@1.0.0",
+    "declared_licenses_processed" : { },
+    "detected_licenses" : [ 0, 1, 2, 3, 4 ],
+    "binary_artifact" : {
+      "url" : "",
+      "hash" : {
+        "value" : "",
+        "algorithm" : ""
+      }
+    },
+    "source_artifact" : {
+      "url" : "",
+      "hash" : {
+        "value" : "",
+        "algorithm" : ""
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "Git",
+      "url" : "https://github.com/oss-review-toolkit/ort.git",
+      "revision" : "master",
+      "path" : "analyzer/src/funTest/assets/projects/synthetic/gradle/lib"
+    },
+    "paths" : [ ],
+    "levels" : [ 0 ],
+    "scan_results" : [ 0 ],
+    "findings" : [ {
+      "type" : "LICENSE",
+      "license" : 0,
+      "path" : "src/code.cpp",
+      "start_line" : 1,
+      "end_line" : 1,
+      "scan_result" : 0
+    }, {
+      "type" : "LICENSE",
+      "license" : 1,
+      "path" : "src/code.cpp",
+      "start_line" : 1,
+      "end_line" : 1,
+      "scan_result" : 0
+    }, {
+      "type" : "LICENSE",
+      "license" : 2,
+      "path" : "src/code.cpp",
+      "start_line" : 1,
+      "end_line" : 1,
+      "scan_result" : 0
+    }, {
+      "type" : "COPYRIGHT",
+      "copyright" : 0,
+      "path" : "build.gradle",
+      "start_line" : 20,
+      "end_line" : 20,
+      "scan_result" : 0
+    }, {
+      "type" : "LICENSE",
+      "license" : 3,
+      "path" : "build.gradle",
+      "start_line" : 19,
+      "end_line" : 20,
+      "scan_result" : 0
+    }, {
+      "type" : "COPYRIGHT",
+      "copyright" : 0,
+      "path" : "build.gradle",
+      "start_line" : 20,
+      "end_line" : 20,
+      "scan_result" : 0
+    }, {
+      "type" : "LICENSE",
+      "license" : 4,
+      "path" : "build.gradle",
+      "start_line" : 19,
+      "end_line" : 19,
+      "scan_result" : 0
+    }, {
+      "type" : "LICENSE",
+      "license" : 4,
+      "path" : "build.gradle",
+      "start_line" : 20,
+      "end_line" : 20,
+      "scan_result" : 0
+    } ],
+    "is_excluded" : false
+  }, {
+    "_id" : 1,
+    "id" : "Gradle:org.ossreviewtoolkit:nested-fake-project:1.0.0",
+    "is_project" : true,
+    "definition_file_path" : "project/build.gradle",
+    "purl" : "pkg:gradle/org.ossreviewtoolkit/nested-fake-project@1.0.0",
+    "declared_licenses" : [ 5 ],
+    "declared_licenses_processed" : {
+      "spdx_expression" : "GPL-3.0-only WITH GCC-exception-3.1 AND CC-BY-NC-3.0",
+      "mapped_licenses" : [ 6, 7 ]
+    },
+    "detected_licenses" : [ 8, 2 ],
+    "detected_excluded_licenses" : [ 2 ],
+    "binary_artifact" : {
+      "url" : "",
+      "hash" : {
+        "value" : "",
+        "algorithm" : ""
+      }
+    },
+    "source_artifact" : {
+      "url" : "",
+      "hash" : {
+        "value" : "",
+        "algorithm" : ""
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "Git",
+      "url" : "https://example.com/git",
+      "revision" : "master",
+      "path" : "project"
+    },
+    "paths" : [ ],
+    "levels" : [ 0 ],
+    "scan_results" : [ 1 ],
+    "findings" : [ {
+      "type" : "COPYRIGHT",
+      "copyright" : 0,
+      "path" : "file.java",
+      "start_line" : 1,
+      "end_line" : 1,
+      "scan_result" : 1,
+      "path_excludes" : [ 1 ]
+    }, {
+      "type" : "LICENSE",
+      "license" : 8,
+      "path" : "file.java",
+      "start_line" : 1,
+      "end_line" : 2,
+      "scan_result" : 1,
+      "path_excludes" : [ 1 ]
+    }, {
+      "type" : "LICENSE",
+      "license" : 8,
+      "path" : "file.kt",
+      "start_line" : 1,
+      "end_line" : 2,
+      "scan_result" : 1
+    }, {
+      "type" : "COPYRIGHT",
+      "copyright" : 0,
+      "path" : "file1.java",
+      "start_line" : 1,
+      "end_line" : 1,
+      "scan_result" : 1,
+      "path_excludes" : [ 1 ]
+    }, {
+      "type" : "LICENSE",
+      "license" : 2,
+      "path" : "file1.java",
+      "start_line" : 1,
+      "end_line" : 2,
+      "scan_result" : 1,
+      "path_excludes" : [ 1 ]
+    }, {
+      "type" : "LICENSE",
+      "license" : 2,
+      "path" : "file2.java",
+      "start_line" : 1,
+      "end_line" : 2,
+      "scan_result" : 1,
+      "path_excludes" : [ 1 ]
+    } ],
+    "is_excluded" : true,
+    "path_excludes" : [ 0 ]
+  }, {
+    "_id" : 2,
+    "id" : "Ant:junit:junit:4.12",
+    "is_project" : false,
+    "definition_file_path" : "",
+    "purl" : "pkg:ant/junit/junit@4.12",
+    "declared_licenses" : [ 9 ],
+    "declared_licenses_processed" : {
+      "spdx_expression" : "EPL-1.0",
+      "mapped_licenses" : [ 10 ]
+    },
+    "description" : "JUnit is a unit testing framework for Java, created by Erich Gamma and Kent Beck.",
+    "homepage_url" : "http://junit.org",
+    "binary_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12.jar",
+      "hash" : {
+        "value" : "2973d150c0dc1fefe998f834810d68f278ea58ec",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "source_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12-sources.jar",
+      "hash" : {
+        "value" : "a6c32b40bf3d76eca54e3c601e5d1470c86fcdfa",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "paths" : [ 0 ],
+    "levels" : [ 0 ],
+    "scopes" : [ 1 ],
+    "scan_results" : [ 2 ],
+    "is_excluded" : true,
+    "scope_excludes" : [ 0 ]
+  }, {
+    "_id" : 3,
+    "id" : "Maven:org.apache.commons:commons-lang3:3.5",
+    "is_project" : false,
+    "definition_file_path" : "",
+    "purl" : "pkg:maven/org.apache.commons/commons-lang3@3.5",
+    "declared_licenses" : [ 11 ],
+    "declared_licenses_processed" : {
+      "spdx_expression" : "Apache-2.0",
+      "mapped_licenses" : [ 8 ]
+    },
+    "description" : "Apache Commons Lang, a package of Java utility classes for the\n  classes that are in java.lang's hierarchy, or are considered to be so\n  standard as to justify existence in java.lang.",
+    "homepage_url" : "http://commons.apache.org/proper/commons-lang/",
+    "binary_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.5/commons-lang3-3.5.jar",
+      "hash" : {
+        "value" : "6c6c702c89bfff3cd9e80b04d668c5e190d588c6",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "source_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.5/commons-lang3-3.5-sources.jar",
+      "hash" : {
+        "value" : "f7d878153e86a1cdddf6b37850e00a9f8bff726f",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "paths" : [ 1, 2 ],
+    "levels" : [ 1 ],
+    "scopes" : [ 0, 1 ],
+    "scan_results" : [ 3 ],
+    "is_excluded" : false
+  }, {
+    "_id" : 4,
+    "id" : "Maven:org.apache.commons:commons-text:1.1",
+    "is_project" : false,
+    "definition_file_path" : "",
+    "purl" : "pkg:maven/org.apache.commons/commons-text@1.1",
+    "declared_licenses" : [ 11 ],
+    "declared_licenses_processed" : {
+      "spdx_expression" : "Apache-2.0",
+      "mapped_licenses" : [ 8 ]
+    },
+    "description" : "Apache Commons Text is a library focused on algorithms working on strings.",
+    "homepage_url" : "http://commons.apache.org/proper/commons-text/",
+    "binary_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.1/commons-text-1.1.jar",
+      "hash" : {
+        "value" : "c336bf600f44b88af356c8a85eef4af822b06a4d",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "source_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.1/commons-text-1.1-sources.jar",
+      "hash" : {
+        "value" : "f0770f7f0472bf120ada47beecadce4056fbd20a",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "paths" : [ 3, 4 ],
+    "levels" : [ 0 ],
+    "scopes" : [ 0, 1 ],
+    "scan_results" : [ 4 ],
+    "is_excluded" : false
+  }, {
+    "_id" : 5,
+    "id" : "Maven:org.hamcrest:hamcrest-core:1.3",
+    "is_project" : false,
+    "definition_file_path" : "",
+    "purl" : "pkg:maven/org.hamcrest/hamcrest-core@1.3",
+    "declared_licenses" : [ 12 ],
+    "declared_licenses_processed" : {
+      "spdx_expression" : "BSD-3-Clause",
+      "mapped_licenses" : [ 1 ]
+    },
+    "description" : "This is the core API of hamcrest matcher framework to be used by third-party framework providers. This includes the a foundation set of matcher implementations for common operations.",
+    "homepage_url" : "https://github.com/hamcrest/JavaHamcrest/hamcrest-core",
+    "binary_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar",
+      "hash" : {
+        "value" : "42a25dc3219429f0e5d060061f71acb49bf010a0",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "source_artifact" : {
+      "url" : "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3-sources.jar",
+      "hash" : {
+        "value" : "1dc37250fbc78e23a65a67fbbaf71d2e9cbc3c0b",
+        "algorithm" : "SHA-1"
+      }
+    },
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "paths" : [ 5 ],
+    "levels" : [ 1 ],
+    "scopes" : [ 1 ],
+    "scan_results" : [ 5 ],
+    "is_excluded" : true,
+    "scope_excludes" : [ 0 ]
+  } ],
+  "paths" : [ {
+    "_id" : 0,
+    "pkg" : 2,
+    "project" : 0,
+    "scope" : 1,
+    "path" : [ ]
+  }, {
+    "_id" : 1,
+    "pkg" : 3,
+    "project" : 0,
+    "scope" : 0,
+    "path" : [ 4 ]
+  }, {
+    "_id" : 2,
+    "pkg" : 3,
+    "project" : 0,
+    "scope" : 1,
+    "path" : [ 4 ]
+  }, {
+    "_id" : 3,
+    "pkg" : 4,
+    "project" : 0,
+    "scope" : 0,
+    "path" : [ ]
+  }, {
+    "_id" : 4,
+    "pkg" : 4,
+    "project" : 0,
+    "scope" : 1,
+    "path" : [ ]
+  }, {
+    "_id" : 5,
+    "pkg" : 5,
+    "project" : 0,
+    "scope" : 1,
+    "path" : [ 2 ]
+  } ],
+  "dependency_trees" : [ {
+    "key" : 0,
+    "pkg" : 0,
+    "children" : [ {
+      "key" : 1,
+      "scope" : 0,
+      "children" : [ {
+        "key" : 2,
+        "linkage" : "DYNAMIC",
+        "pkg" : 4,
+        "children" : [ {
+          "key" : 3,
+          "linkage" : "DYNAMIC",
+          "pkg" : 3
+        } ]
+      } ]
+    }, {
+      "key" : 4,
+      "scope" : 1,
+      "scope_excludes" : [ 0 ],
+      "children" : [ {
+        "key" : 5,
+        "linkage" : "DYNAMIC",
+        "pkg" : 2,
+        "children" : [ {
+          "key" : 6,
+          "linkage" : "DYNAMIC",
+          "pkg" : 5
+        } ]
+      }, {
+        "key" : 7,
+        "linkage" : "DYNAMIC",
+        "pkg" : 4,
+        "children" : [ {
+          "key" : 8,
+          "linkage" : "DYNAMIC",
+          "pkg" : 3
+        } ]
+      } ]
+    } ]
+  }, {
+    "key" : 9,
+    "pkg" : 1,
+    "path_excludes" : [ 0 ]
+  } ],
+  "rule_violation_resolutions" : [ {
+    "_id" : 0,
+    "message" : "Apache-2.0 hint",
+    "reason" : "CANT_FIX_EXCEPTION",
+    "comment" : "Apache-2 is not an issue."
+  } ],
+  "rule_violations" : [ {
+    "_id" : 0,
+    "rule" : "rule 1",
+    "pkg" : 2,
+    "license" : 10,
+    "license_source" : "DETECTED",
+    "severity" : "ERROR",
+    "message" : "EPL-1.0 error",
+    "how_to_fix" : "* *Step 1*\n* __Step 2__\n* ***Step 3***\n```\nSome long text verify that overflow:scroll is working as expected.\n```"
+  }, {
+    "_id" : 1,
+    "rule" : "rule 2",
+    "pkg" : 4,
+    "license" : 8,
+    "license_source" : "DECLARED",
+    "severity" : "HINT",
+    "message" : "Apache-2.0 hint",
+    "how_to_fix" : "* *Step 1*\n* __Step 2__\n* ***Step 3***\n```\nSome long text verify that overflow:scroll is working as expected.\n```",
+    "resolutions" : [ 0 ]
+  }, {
+    "_id" : 2,
+    "rule" : "rule 3",
+    "pkg" : 5,
+    "license" : 1,
+    "license_source" : "CONCLUDED",
+    "severity" : "WARNING",
+    "message" : "BSD-3-Clause warning",
+    "how_to_fix" : "* *Step 1*\n* __Step 2__\n* ***Step 3***\n```\nSome long text verify that overflow:scroll is working as expected.\n```"
+  } ],
+  "statistics" : {
+    "open_issues" : {
+      "errors" : 1,
+      "warnings" : 0,
+      "hints" : 0
+    },
+    "open_rule_violations" : {
+      "errors" : 1,
+      "warnings" : 1,
+      "hints" : 0
+    },
+    "dependency_tree" : {
+      "included_projects" : 1,
+      "excluded_projects" : 1,
+      "included_packages" : 2,
+      "excludes_packages" : 2,
+      "total_tree_depth" : 2,
+      "included_tree_depth" : 2,
+      "included_scopes" : [ "compile" ],
+      "excluded_scopes" : [ "testCompile" ]
+    },
+    "licenses" : {
+      "declared" : {
+        "Apache-2.0" : 2,
+        "BSD-3-Clause" : 1,
+        "CC-BY-NC-3.0" : 1,
+        "EPL-1.0" : 1,
+        "GPL-3.0-only WITH GCC-exception-3.1" : 1
+      },
+      "detected" : {
+        "Apache-2.0" : 1,
+        "BSD-3-Clause" : 1,
+        "GPL-2.0-only WITH Classpath-exception-2.0" : 1,
+        "LicenseRef-test-Apache-2.0-multi-line" : 1,
+        "LicenseRef-test-Apache-2.0-single-line" : 1,
+        "MIT" : 2
+      }
+    }
+  },
+  "repository" : {
+    "vcs" : {
+      "type" : "",
+      "url" : "",
+      "revision" : "",
+      "path" : ""
+    },
+    "vcs_processed" : {
+      "type" : "Git",
+      "url" : "https://github.com/oss-review-toolkit/ort.git",
+      "revision" : "master",
+      "path" : "analyzer/src/funTest/assets/projects/synthetic/gradle/lib"
+    },
+    "nested_repositories" : {
+      "sub/module" : {
+        "type" : "Git",
+        "url" : "https://example.com/git",
+        "revision" : "master",
+        "path" : ""
+      }
+    },
+    "config" : {
+      "excludes" : {
+        "paths" : [ 0, 1 ],
+        "scopes" : [ 0 ]
+      },
+      "resolutions" : {
+        "rule_violations" : [ 0 ]
+      }
+    }
+  },
+  "repository_configuration" : "---\nexcludes:\n  paths:\n  - pattern: \"sub/module/project/build.gradle\"\n    reason: \"EXAMPLE_OF\"\n    comment: \"The project is an example.\"\n  - pattern: \"**.java\"\n    reason: \"EXAMPLE_OF\"\n    comment: \"These are example files.\"\n  scopes:\n  - pattern: \"testCompile\"\n    reason: \"TEST_DEPENDENCY_OF\"\n    comment: \"The scope only contains test dependencies.\"\nresolutions:\n  rule_violations:\n  - message: \"Apache-2.0 hint\"\n    reason: \"CANT_FIX_EXCEPTION\"\n    comment: \"Apache-2 is not an issue.\"\n",
+  "labels" : {
+    "job_parameters.JOB_PARAM_1" : "label job param 1",
+    "job_parameters.JOB_PARAM_2" : "label job param 2",
+    "process_parameters.PROCESS_PARAM_1" : "label process param 1",
+    "process_parameters.PROCESS_PARAM_2" : "label process param 2",
+    "OTHER" : "label other"
+  }
+}

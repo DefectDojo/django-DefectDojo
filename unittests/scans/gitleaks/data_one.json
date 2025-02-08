@@ -1,0 +1,16 @@
+[
+  {
+   "line": "-----BEGIN PRIVATE KEY-----",
+   "offender": "-----BEGIN PRIVATE KEY-----",
+   "commit": "9afb561b348d59eceb6dc82c0061fb07bee09f7b",
+   "repo": ".",
+   "rule": "Asymmetric Private Key",
+   "commitMessage": "saving my cert\n",
+   "author": "John Doe",
+   "email": "john.doe@mail.com",
+   "file": "cert-key.pem",
+   "date": "2020-04-04T15:58:14-07:00",
+   "tags": "key, AsymmetricPrivateKey"
+  }
+ ]
+ 

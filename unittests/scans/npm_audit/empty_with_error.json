@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "ENOAUDIT",
+    "summary": "Your configured registry (https://registry.npmjs.org/) may not support audit requests, or the audit endpoint may be temporarily unavailable.",
+    "detail": ""
+  }
+}

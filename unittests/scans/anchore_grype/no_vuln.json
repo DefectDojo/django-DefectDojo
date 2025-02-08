@@ -1,0 +1,35 @@
+{
+  "matches": [],
+  "source": {
+    "type": "image",
+    "target": {
+      "userInput": "busybox:latest",
+      "imageID": "sha256:22667f53682a2920948d19c7133ab1c9c3f745805c14125859d20cede07f11f9",
+      "manifestDigest": "sha256:6bea45f4e050ffdbb3a0f57a6c6f16318314a482f31442c4461a72a3ee2f3ee6",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "tags": [
+        "busybox:latest"
+      ],
+      "imageSize": 1231733,
+      "scope": "Squashed",
+      "layers": [
+        {
+          "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+          "digest": "sha256:6b245f040973e14e29f371ff2b4059c84ab2de8b7b9a04bc21fd4a7b0a72c446",
+          "size": 1231733
+        }
+      ],
+      "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjoxNDU3LCJkaWdlc3QiOiJzaGEyNTY6MjI2NjdmNTM2ODJhMjkyMDk0OGQxOWM3MTMzYWIxYzljM2Y3NDU4MDVjMTQxMjU4NTlkMjBjZWRlMDdmMTFmOSJ9LCJsYXllcnMiOlt7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLCJzaXplIjoxNDQ5OTg0LCJkaWdlc3QiOiJzaGEyNTY6NmIyNDVmMDQwOTczZTE0ZTI5ZjM3MWZmMmI0MDU5Yzg0YWIyZGU4YjdiOWEwNGJjMjFmZDRhN2IwYTcyYzQ0NiJ9XX0=",
+      "config": "eyJhcmNoaXRlY3R1cmUiOiJhbWQ2NCIsImNvbmZpZyI6eyJIb3N0bmFtZSI6IiIsIkRvbWFpbm5hbWUiOiIiLCJVc2VyIjoiIiwiQXR0YWNoU3RkaW4iOmZhbHNlLCJBdHRhY2hTdGRvdXQiOmZhbHNlLCJBdHRhY2hTdGRlcnIiOmZhbHNlLCJUdHkiOmZhbHNlLCJPcGVuU3RkaW4iOmZhbHNlLCJTdGRpbk9uY2UiOmZhbHNlLCJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iXSwiQ21kIjpbInNoIl0sIkltYWdlIjoic2hhMjU2OjQwNzliNDdmODA3N2MxOWY0NmUzOTQyMjIwMTFkNzM4MDYwZjJmNDI0OTE1MTc2NzA1MDc1M2Q2ZTcwZjFhYWUiLCJWb2x1bWVzIjpudWxsLCJXb3JraW5nRGlyIjoiIiwiRW50cnlwb2ludCI6bnVsbCwiT25CdWlsZCI6bnVsbCwiTGFiZWxzIjpudWxsfSwiY29udGFpbmVyIjoiMTgxNjZhNzg3NDAwMjYwZjJmNjIzODJmZTQ2YjAzODc5ZjUzOGQyYjgwNGMxMjUyMTVmOTkwMWRmOGJkOGIzNSIsImNvbnRhaW5lcl9jb25maWciOnsiSG9zdG5hbWUiOiIxODE2NmE3ODc0MDAiLCJEb21haW5uYW1lIjoiIiwiVXNlciI6IiIsIkF0dGFjaFN0ZGluIjpmYWxzZSwiQXR0YWNoU3Rkb3V0IjpmYWxzZSwiQXR0YWNoU3RkZXJyIjpmYWxzZSwiVHR5IjpmYWxzZSwiT3BlblN0ZGluIjpmYWxzZSwiU3RkaW5PbmNlIjpmYWxzZSwiRW52IjpbIlBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluIl0sIkNtZCI6WyIvYmluL3NoIiwiLWMiLCIjKG5vcCkgIiwiQ01EIFtcInNoXCJdIl0sIkltYWdlIjoic2hhMjU2OjQwNzliNDdmODA3N2MxOWY0NmUzOTQyMjIwMTFkNzM4MDYwZjJmNDI0OTE1MTc2NzA1MDc1M2Q2ZTcwZjFhYWUiLCJWb2x1bWVzIjpudWxsLCJXb3JraW5nRGlyIjoiIiwiRW50cnlwb2ludCI6bnVsbCwiT25CdWlsZCI6bnVsbCwiTGFiZWxzIjp7fX0sImNyZWF0ZWQiOiIyMDIxLTAyLTAyVDAwOjExOjE0Ljg1MjA5MjE5M1oiLCJkb2NrZXJfdmVyc2lvbiI6IjE5LjAzLjEyIiwiaGlzdG9yeSI6W3siY3JlYXRlZCI6IjIwMjEtMDItMDJUMDA6MTE6MTQuNjgxMDEwNzc0WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSBBREQgZmlsZTpkMWRlYWU4M2FmMjBhNzk1OTRmODMyMThjMmI1YmI0MGMxMTVlZTFmOWU0NzQzNzdhYmY4NGM1OGY5YTdlMGU4IGluIC8gIn0seyJjcmVhdGVkIjoiMjAyMS0wMi0wMlQwMDoxMToxNC44NTIwOTIxOTNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApICBDTUQgW1wic2hcIl0iLCJlbXB0eV9sYXllciI6dHJ1ZX1dLCJvcyI6ImxpbnV4Iiwicm9vdGZzIjp7InR5cGUiOiJsYXllcnMiLCJkaWZmX2lkcyI6WyJzaGEyNTY6NmIyNDVmMDQwOTczZTE0ZTI5ZjM3MWZmMmI0MDU5Yzg0YWIyZGU4YjdiOWEwNGJjMjFmZDRhN2IwYTcyYzQ0NiJdfX0="
+    }
+  },
+  "distro": {
+    "name": "busybox",
+    "version": "1.32.1",
+    "idLike": ""
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "0.7.0"
+  }
+}

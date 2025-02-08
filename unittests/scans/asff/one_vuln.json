@@ -1,0 +1,147 @@
+[
+    {
+        "SchemaVersion": "2018-10-08",
+        "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/e7dd7a6979b7ce39de463533b1e6cd44",
+        "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+        "ProductName": "Inspector",
+        "CompanyName": "Amazon",
+        "Region": "eu-west-1",
+        "GeneratorId": "AWSInspector",
+        "AwsAccountId": "123456789123",
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ],
+        "FirstObservedAt": "2023-08-30T20:07:14Z",
+        "LastObservedAt": "2023-09-15T07:00:24Z",
+        "CreatedAt": "2023-08-30T20:07:14Z",
+        "UpdatedAt": "2023-09-15T07:00:24Z",
+        "Severity": {
+            "Label": "HIGH",
+            "Normalized": 70
+        },
+        "Title": "CVE-2017-9735 - org.eclipse.jetty:jetty-server, org.eclipse.jetty:jetty-util",
+        "Description": "Jetty through 9.4.x is prone to a timing channel in util/security/Password.java, which makes it easier for remote attackers to obtain access by observing elapsed times before rejection of incorrect passwords.",
+        "Remediation": {
+            "Recommendation": {
+                "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+            }
+        },
+        "ProductFields": {
+            "aws/inspector/ProductVersion": "2",
+            "aws/inspector/FindingStatus": "ACTIVE",
+            "aws/inspector/inspectorScore": "7.5",
+            "aws/inspector/instanceId": "i-0sdg8sa1k2l3j11m2",
+            "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+            "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/e7dd7a6979b7ce39de463533b1e6cd44",
+            "aws/securityhub/ProductName": "Inspector",
+            "aws/securityhub/CompanyName": "Amazon"
+        },
+        "Resources": [
+            {
+                "Type": "AwsEc2Instance",
+                "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0sdg8sa1k2l3j11m2",
+                "Partition": "aws",
+                "Region": "eu-west-1",
+                "Tags": {
+                    "Name": "MyWebServer"
+                },
+                "Details": {
+                    "AwsEc2Instance": {
+                        "Type": "m5d.large",
+                        "ImageId": "ami-0211k2j12l987bg2h7",
+                        "IpV4Addresses": [
+                            "123.123.123.123",
+                            "172.31.0.31"
+                        ],
+                        "KeyName": "MySSHkey",
+                        "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                        "VpcId": "vpc-12jh8mgg",
+                        "SubnetId": "subnet-k12i88jh",
+                        "LaunchedAt": "2023-08-30T05:09:41Z"
+                    }
+                }
+            }
+    
+        ],
+        "WorkflowState": "NEW",
+        "Workflow": {
+            "Status": "NEW"
+        },
+        "RecordState": "ACTIVE",
+        "Vulnerabilities": [
+            {
+                "Id": "CVE-2017-9735",
+                "VulnerablePackages": [
+                    {
+                        "Name": "org.eclipse.jetty:jetty-server",
+                        "Version": "8.1.14.v20131031",
+                        "Epoch": "0",
+                        "PackageManager": "JAR",
+                        "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar",
+                        "FixedInVersion": "9.4.6.v20170531",
+                        "Remediation": "Update jetty-server to 9.4.6.v20170531"
+                    },
+                    {
+                        "Name": "org.eclipse.jetty:jetty-util",
+                        "Version": "8.1.14.v20131031",
+                        "Epoch": "0",
+                        "PackageManager": "JAR",
+                        "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar",
+                        "FixedInVersion": "9.4.6.v20170531",
+                        "Remediation": "Update jetty-util to 9.4.6.v20170531"
+                    }
+                ],
+                "Cvss": [
+                    {
+                        "Version": "2.0",
+                        "BaseScore": 5,
+                        "BaseVector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+                        "Source": "NVD"
+                    },
+                    {
+                        "Version": "3.1",
+                        "BaseScore": 7.5,
+                        "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                        "Source": "NVD"
+                    },
+                    {
+                        "Version": "3.1",
+                        "BaseScore": 7.5,
+                        "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                        "Source": "NVD"
+                    }
+                ],
+                "Vendor": {
+                    "Name": "NVD",
+                    "Url": "https://nvd.nist.gov/vuln/detail/CVE-2017-9735",
+                    "VendorSeverity": "HIGH",
+                    "VendorCreatedAt": "2017-06-16T21:29:00Z",
+                    "VendorUpdatedAt": "2022-03-15T14:55:00Z"
+                },
+                "ReferenceUrls": [
+                    "https://lists.debian.org/debian-lts-announce/2021/05/msg00016.html",
+                    "https://lists.apache.org/thread.html/053d9ce4d579b02203db18545fee5e33f35f2932885459b74d1e4272@%3Cissues.activemq.apache.org%3E",
+                    "https://lists.apache.org/thread.html/36870f6c51f5bc25e6f7bb1fcace0e57e81f1524019b11f466738559@%3Ccommon-dev.hadoop.apache.org%3E",
+                    "https://www.oracle.com/technetwork/security-advisory/cpuoct2019-5072832.html",
+                    "https://bugs.debian.org/864631",
+                    "https://www.oracle.com/security-alerts/cpuoct2020.html",
+                    "https://lists.apache.org/thread.html/ff8dcfe29377088ab655fda9d585dccd5b1f07fabd94ae84fd60a7f8@%3Ccommits.pulsar.apache.org%3E",
+                    "https://lists.apache.org/thread.html/519eb0fd45642dcecd9ff74cb3e71c20a4753f7d82e2f07864b5108f@%3Cdev.drill.apache.org%3E",
+                    "https://www.oracle.com//security-alerts/cpujul2021.html",
+                    "https://lists.apache.org/thread.html/f887a5978f5e4c62b9cfe876336628385cff429e796962649649ec8a@%3Ccommon-issues.hadoop.apache.org%3E",
+                    "https://lists.apache.org/thread.html/f9bc3e55f4e28d1dcd1a69aae6d53e609a758e34d2869b4d798e13cc@%3Cissues.drill.apache.org%3E"
+                ],
+                "FixAvailable": "YES",
+                "ExploitAvailable": "YES"
+            }
+        ],
+        "FindingProviderFields": {
+            "Severity": {
+                "Label": "HIGH"
+            },
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ]
+        }
+    }
+]

@@ -1,0 +1,2305 @@
+{
+    "task_id": "3",
+    "scan_status": "auditing",
+    "scan_metrics": {
+        "crawl_requests_made": 90,
+        "crawl_network_errors": 0,
+        "crawl_unique_locations_visited": 19,
+        "crawl_requests_queued": 0,
+        "audit_queue_items_completed": 0,
+        "audit_queue_items_waiting": 27,
+        "audit_requests_made": 4336,
+        "audit_network_errors": 0,
+        "issue_events": 25,
+        "crawl_and_audit_caption": "Auditing. Estimating time remaining...",
+        "crawl_and_audit_progress": 0
+    },
+    "message": "",
+    "issue_events": [
+        {
+            "id": "0",
+            "type": "issue_found",
+            "issue": {
+                "name": "Robots.txt file",
+                "type_index": 6292992,
+                "serial_number": "3242427303404163072",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/robots.txt",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The web server contains a robots.txt file.",
+                "caption": "/robots.txt",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L3JvYm90cy50eHQ=",
+                                    "length": 11
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkNvbm5lY3Rpb246IGNsb3NlDQpDb29raWU6IGlvPW5TU21BcUtUQmgwZzRoRDhBQWFUOyBsYW5ndWFnZT1lbjsgd2VsY29tZWJhbm5lcl9zdGF0dXM9ZGlzbWlzcw0KDQo=",
+                                    "length": 140
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnt9fQ=="
+            }
+        },
+        {
+            "id": "1",
+            "type": "issue_found",
+            "issue": {
+                "name": "TLS certificate",
+                "type_index": 16777472,
+                "serial_number": "7383466645825261568",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The server presented a valid, trusted TLS certificate. This issue is purely informational.<br><br>The server presented the following certificates:<br><br><h4>Server certificate<\/h4><table><tr><td><b>Issued to:<\/b>&nbsp;&nbsp;<\/td><td>*.herokuapp.com, herokuapp.com<\/td><\/tr><tr><td><b>Issued by:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert SHA2 High Assurance Server CA<\/td><\/tr><tr><td><b>Valid from:<\/b>&nbsp;&nbsp;<\/td><td>Mon Jun 15 00:00:00 GMT 2020<\/td><\/tr><tr><td><b>Valid to:<\/b>&nbsp;&nbsp;<\/td><td>Wed Jul 07 12:00:00 GMT 2021<\/td><\/tr><\/table><h4>Certificate chain #1<\/h4><table><tr><td><b>Issued to:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert SHA2 High Assurance Server CA<\/td><\/tr><tr><td><b>Issued by:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert High Assurance EV Root CA<\/td><\/tr><tr><td><b>Valid from:<\/b>&nbsp;&nbsp;<\/td><td>Tue Oct 22 12:00:00 GMT 2013<\/td><\/tr><tr><td><b>Valid to:<\/b>&nbsp;&nbsp;<\/td><td>Sun Oct 22 12:00:00 GMT 2028<\/td><\/tr><\/table><h4>Certificate chain #2<\/h4><table><tr><td><b>Issued to:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert High Assurance EV Root CA<\/td><\/tr><tr><td><b>Issued by:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert High Assurance EV Root CA<\/td><\/tr><tr><td><b>Valid from:<\/b>&nbsp;&nbsp;<\/td><td>Fri Nov 10 00:00:00 GMT 2006<\/td><\/tr><tr><td><b>Valid to:<\/b>&nbsp;&nbsp;<\/td><td>Mon Nov 10 00:00:00 GMT 2031<\/td><\/tr><\/table><h4>Certificate chain #3<\/h4><table><tr><td><b>Issued to:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert High Assurance EV Root CA<\/td><\/tr><tr><td><b>Issued by:<\/b>&nbsp;&nbsp;<\/td><td>DigiCert High Assurance EV Root CA<\/td><\/tr><tr><td><b>Valid from:<\/b>&nbsp;&nbsp;<\/td><td>Fri Nov 10 00:00:00 GMT 2006<\/td><\/tr><tr><td><b>Valid to:<\/b>&nbsp;&nbsp;<\/td><td>Mon Nov 10 00:00:00 GMT 2031<\/td><\/tr><\/table>",
+                "caption": "/",
+                "evidence": [],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiMzQiOiKnKi5oZXJva3VhcHAuY29tLCBoZXJva3VhcHAuY29tp0RpZ2lDZXJ0IFNIQTIgSGlnaCBBc3N1cmFuY2UgU2VydmVyIENBp01vbiBKdW4gMTUgMDA6MDA6MDAgR01UIDIwMjCnV2VkIEp1bCAwNyAxMjowMDowMCBHTVQgMjAyMacwp6dEaWdpQ2VydCBTSEEyIEhpZ2ggQXNzdXJhbmNlIFNlcnZlciBDQadEaWdpQ2VydCBIaWdoIEFzc3VyYW5jZSBFViBSb290IENBp1R1ZSBPY3QgMjIgMTI6MDA6MDAgR01UIDIwMTOnU3VuIE9jdCAyMiAxMjowMDowMCBHTVQgMjAyOKcwp6dEaWdpQ2VydCBIaWdoIEFzc3VyYW5jZSBFViBSb290IENBp0RpZ2lDZXJ0IEhpZ2ggQXNzdXJhbmNlIEVWIFJvb3QgQ0GnRnJpIE5vdiAxMCAwMDowMDowMCBHTVQgMjAwNqdNb24gTm92IDEwIDAwOjAwOjAwIEdNVCAyMDMxpzCnp0RpZ2lDZXJ0IEhpZ2ggQXNzdXJhbmNlIEVWIFJvb3QgQ0GnRGlnaUNlcnQgSGlnaCBBc3N1cmFuY2UgRVYgUm9vdCBDQadGcmkgTm92IDEwIDAwOjAwOjAwIEdNVCAyMDA2p01vbiBOb3YgMTAgMDA6MDA6MDAgR01UIDIwMzGnMKcifX0="
+            }
+        },
+        {
+            "id": "2",
+            "type": "issue_found",
+            "issue": {
+                "name": "Strict transport security not enforced",
+                "type_index": 16777984,
+                "serial_number": "163726061629059072",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/",
+                "severity": "low",
+                "confidence": "certain",
+                "description": "This issue was found in multiple locations under the reported path.",
+                "caption": "/",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/quarantine",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcXVhcmFudGluZSBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQoNCg==",
+                                    "length": 376
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6MjkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDk1OTINCg0KPCFET0NUWVBFIGh0bWw+CjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDx0aXRsZT5saXN0aW5nIGRpcmVjdG8=",
+                                    "length": 518
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 9392
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066290713"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiNDkiOiIyIn19"
+            }
+        },
+        {
+            "id": "3",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cacheable HTTPS response",
+                "type_index": 7340288,
+                "serial_number": "8899344801094651904",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "This issue was found in multiple locations under the reported path.",
+                "caption": "/",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/quarantine",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcXVhcmFudGluZSBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQoNCg==",
+                                    "length": 376
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6MjkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDk1OTINCg0KPCFET0NUWVBFIGh0bWw+CjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDx0aXRsZT5saXN0aW5nIGRpcmVjdG8=",
+                                    "length": 518
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 9392
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291012"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg0K",
+                                    "length": 318
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6MTUgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDExMDMzDQoNCjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KICA8aGVhZD4KICAgIDxtZXRhIGNoYXJzZXQ9J3V0Zi04Jz4gCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCwgbWF4aW11bS1zY2FsZT0xLjAsIHVzZXItc2NhbGFibGU9bm8iIC8+CiAgICA8dGl0bGU+bGlzdGluZyBkaXJlY3Rv",
+                                    "length": 519
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 10833
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066307895"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9yb2JvdHMudHh0IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg0K",
+                                    "length": 324
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6MTMgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066307932"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiNDkiOiIyIn19"
+            }
+        },
+        {
+            "id": "4",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-domain script include",
+                "type_index": 5244160,
+                "serial_number": "6741842706448344064",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The response dynamically includes the following scripts from other domains:<ul><li>https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js<\/li><li>https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js<\/li><\/ul>",
+                "caption": "/",
+                "evidence": [
+                    {
+                        "type": "InformationListEvidence",
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC8gSFRUUC8xLjENCkhvc3Q6IGp1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KDQo=",
+                                    "length": 314
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkFjY2VwdC1SYW5nZXM6IGJ5dGVzDQpDYWNoZS1Db250cm9sOiBwdWJsaWMsIG1heC1hZ2U9MA0KTGFzdC1Nb2RpZmllZDogVHVlLCAxOSBKYW4gMjAyMSAxMTo1MDozOCBHTVQNCkV0YWc6IFcvIjc4NC0xNzcxYTdiODQzOSINCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PVVURi04DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6MTQgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE5MjQNCg0KPCEtLQogIH4gQ29weXJpZ2h0IChjKSAyMDE0LTIwMjEgQmpvZXJuIEtpbW1pbmljaC4KICB+IFNQRFgtTGljZW5zZS1JZGVudGlmaWVyOiBNSVQKICAtLT4KCjwhZG9jdHlwZSBodG1sPgo8aHRtbCBsYW5nPSJlbiI+CjxoZWFkPgogIDxtZXRhIGNoYXJzZXQ9InV0Zi04Ij4KICA8dGl0bGU+T1dBU1AgSnVpY2UgU2hvcDwvdGl0bGU+CiAgPG1ldGEgbmE=",
+                                    "length": 647
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 258
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpbmsgcmVsPSJzdHlsZXNoZWV0IiB0eXBlPSJ0ZXh0L2NzcyIgaHJlZj0iLy9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvY29va2llY29uc2VudDIvMy4xLjAvY29va2llY29uc2VudC5taW4uY3NzIi8+CiAg",
+                                    "length": 126
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "PHNjcmlwdCBzcmM9Ii8vY2RuanMuY2xvdWRmbGFyZS5jb20vYWpheC9saWJzL2Nvb2tpZWNvbnNlbnQyLzMuMS4wL2Nvb2tpZWNvbnNlbnQubWluLmpzIj4=",
+                                    "length": 89
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9zY3JpcHQ+CiAg",
+                                    "length": 12
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "PHNjcmlwdCBzcmM9Ii8vY2RuanMuY2xvdWRmbGFyZS5jb20vYWpheC9saWJzL2pxdWVyeS8yLjIuNC9qcXVlcnkubWluLmpzIj4=",
+                                    "length": 74
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9zY3JpcHQ+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1156
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066311306"
+                        },
+                        "information_items": [
+                            "https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js",
+                            "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"
+                        ]
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiNDgiOiJjZG5qcy5jbG91ZGZsYXJlLmNvbSJ9fQ=="
+            }
+        },
+        {
+            "id": "5",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "9204404992839697408",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/robots.txt",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://tjyljfnakuiu.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/robots.txt",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9yb2JvdHMudHh0IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 322
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL3RqeWxqZm5ha3VpdS5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 39
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpDb250ZW50LUxlbmd0aDogMjgNCkV0YWc6IFcvIjFjLThIZ0Y2bU55aHNTRkswcGFzY0M5dUIwd2pYMCINClZhcnk6IEFjY2VwdC1FbmNvZGluZw0KRGF0ZTogVHVlLCAxOSBKYW4gMjAyMSAxNDoyNjo1NSBHTVQNClZpYTogMS4xIHZlZ3VyDQoNClVzZXItYWdlbnQ6ICoKRGlzYWxsb3c6IC9mdHA=",
+                                    "length": 170
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066422440"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly90anlsamZuYWt1aXUuY29tIn19"
+            }
+        },
+        {
+            "id": "6",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "4526422108745768960",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/robots.txt",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/robots.txt",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9yb2JvdHMudHh0IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 322
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 39
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpDb250ZW50LUxlbmd0aDogMjgNCkV0YWc6IFcvIjFjLThIZ0Y2bU55aHNTRkswcGFzY0M5dUIwd2pYMCINClZhcnk6IEFjY2VwdC1FbmNvZGluZw0KRGF0ZTogVHVlLCAxOSBKYW4gMjAyMSAxNDoyNjo1NCBHTVQNClZpYTogMS4xIHZlZ3VyDQoNClVzZXItYWdlbnQ6ICoKRGlzYWxsb3c6IC9mdHA=",
+                                    "length": 170
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066422440"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "7",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "591215027220312064",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://ocpftwinhntk.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 316
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL29jcGZ0d2luaG50ay5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjY6NTkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDExMDMzDQoNCjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KICA8aGVhZD4KICAgIDxtZXRhIGNoYXJzZXQ9J3V0Zi04Jz4gCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCwgbWF4aW11bS1zY2FsZT0xLjAsIHVzZXItc2NhbGFibGU9bm8iIC8+CiAgICA8dGl0bGU+bGlzdGluZyBkaXJlY3Rv",
+                                    "length": 303
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 10833
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066429101"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9vY3BmdHdpbmhudGsuY29tIn19"
+            }
+        },
+        {
+            "id": "8",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "3721724579804606464",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 316
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjY6NTggR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDExMDMzDQoNCjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KICA8aGVhZD4KICAgIDxtZXRhIGNoYXJzZXQ9J3V0Zi04Jz4gCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCwgbWF4aW11bS1zY2FsZT0xLjAsIHVzZXItc2NhbGFibGU9bm8iIC8+CiAgICA8dGl0bGU+bGlzdGluZyBkaXJlY3Rv",
+                                    "length": 303
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 10833
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066429101"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "9",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "2458351537959435264",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/eastere.gg",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://pogjbtrobdhv.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/eastere.gg",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/eastere.gg",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvZWFzdGVyZS5nZyBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 374
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL3BvZ2pidHJvYmRodi5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTggR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066448628"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9wb2dqYnRyb2JkaHYuY29tIn19"
+            }
+        },
+        {
+            "id": "10",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "4297284918746976256",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/eastere.gg",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/eastere.gg",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/eastere.gg",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvZWFzdGVyZS5nZyBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 374
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTcgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066448629"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "11",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "899160659106726912",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/coupons_2013.md.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://vpmbxbzhvkzw.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/coupons_2013.md.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/coupons_2013.md.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvY291cG9uc18yMDEzLm1kLmJhayBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 383
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL3ZwbWJ4Ynpodmt6dy5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066449139"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly92cG1ieGJ6aHZrencuY29tIn19"
+            }
+        },
+        {
+            "id": "12",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "7636244376096482304",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/coupons_2013.md.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/coupons_2013.md.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/coupons_2013.md.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvY291cG9uc18yMDEzLm1kLmJhayBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 383
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTggR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066449140"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "13",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "7501646367333921792",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/suspicious_errors.yml",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://pinwbamtehrx.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/suspicious_errors.yml",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/suspicious_errors.yml",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvc3VzcGljaW91c19lcnJvcnMueW1sIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCg==",
+                                    "length": 385
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL3BpbndiYW10ZWhyeC5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MjAgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066450145"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9waW53YmFtdGVocnguY29tIn19"
+            }
+        },
+        {
+            "id": "14",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "7284471744469895168",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/suspicious_errors.yml",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/suspicious_errors.yml",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/suspicious_errors.yml",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvc3VzcGljaW91c19lcnJvcnMueW1sIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCg==",
+                                    "length": 385
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066450145"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "15",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "4010300856145890304",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/package.json.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://qtnemwscvsis.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/package.json.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/package.json.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcGFja2FnZS5qc29uLmJhayBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 380
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL3F0bmVtd3NjdnNpcy5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MjAgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066450220"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9xdG5lbXdzY3ZzaXMuY29tIn19"
+            }
+        },
+        {
+            "id": "16",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "8623870789253906432",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/package.json.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/package.json.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/package.json.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcGFja2FnZS5qc29uLmJhayBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 380
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MTkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066450220"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "17",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "5042576900095119360",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/encrypt.pyc",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://ftfvdfqdeqvf.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/encrypt.pyc",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/encrypt.pyc",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvZW5jcnlwdC5weWMgSFRUUC8xLjENCkhvc3Q6IGp1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KUmVmZXJlcjogaHR0cHM6Ly9qdWljZS1zaG9wLmhlcm9rdWFwcC5jb20vZnRwLw0K",
+                                    "length": 375
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2Z0ZnZkZnFkZXF2Zi5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MjggR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066457403"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9mdGZ2ZGZxZGVxdmYuY29tIn19"
+            }
+        },
+        {
+            "id": "18",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "472970177812300800",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/encrypt.pyc",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/encrypt.pyc",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/encrypt.pyc",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvZW5jcnlwdC5weWMgSFRUUC8xLjENCkhvc3Q6IGp1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KUmVmZXJlcjogaHR0cHM6Ly9qdWljZS1zaG9wLmhlcm9rdWFwcC5jb20vZnRwLw0K",
+                                    "length": 375
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQo=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MjcgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDE4NTENCg0KPGh0bWw+CiAgPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSd1dGYtOCc+IAogICAgPHRpdGxlPkVycm9yOiBPbmx5IC5tZCBhbmQgLnBkZiBmaWxlcyBhcmUgYWxsb3dlZCE8L3RpdGxlPgogICAgPHN0eWxlPiogewogIG1hcmdpbjogMDsKICBwYWRkaW5nOiAwOwogIG91dGxpbmU6IDA7Cn0KCmJvZHkgewogIHBhZGRpbmc6IDgwcHggMTAwcHg7CiAgZm8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 1651
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066457403"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "19",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "7526242199372005376",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/quarantine",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://apaxxpmrkmpa.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/quarantine",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/quarantine",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcXVhcmFudGluZSBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 374
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2FwYXh4cG1ya21wYS5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzIgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDk1OTINCg0KPCFET0NUWVBFIGh0bWw+CjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDx0aXRsZT5saXN0aW5nIGRpcmVjdG8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 9392
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066462533"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9hcGF4eHBtcmttcGEuY29tIn19"
+            }
+        },
+        {
+            "id": "20",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "7290853199141330944",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/quarantine",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/ftp/quarantine",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/quarantine",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9mdHAvcXVhcmFudGluZSBIVFRQLzEuMQ0KSG9zdDoganVpY2Utc2hvcC5oZXJva3VhcHAuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQpSZWZlcmVyOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbS9mdHAvDQo=",
+                                    "length": 374
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0K",
+                                    "length": 96
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9dXRmLTg=",
+                                    "length": 38
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzIgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDk1OTINCg0KPCFET0NUWVBFIGh0bWw+CjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDx0aXRsZT5saXN0aW5nIGRpcmVjdG8=",
+                                    "length": 302
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 9392
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066462537"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "21",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing: arbitrary origin trusted",
+                "type_index": 2098689,
+                "serial_number": "7765735443390341120",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/polyfills-es2018.js",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://oztekwrpomwl.com<\/strong><br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/polyfills-es2018.js",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/polyfills-es2018.js",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9wb2x5ZmlsbHMtZXMyMDE4LmpzIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 331
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL296dGVrd3Jwb213bC5jb20=",
+                                    "length": 32
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0KQWNjZXB0LVJhbmdlczogYnl0ZXMNCkNhY2hlLUNvbnRyb2w6IHB1YmxpYywgbWF4LWFnZT0wDQpMYXN0LU1vZGlmaWVkOiBTYXQsIDE2IEphbiAyMDIxIDAwOjQzOjA4IEdNVA0KRXRhZzogVy8iZTM1NC0xNzcwOGE1NTE2MCINCg==",
+                                    "length": 226
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qYXZhc2NyaXB0OyBjaGFyc2V0PVVURi04",
+                                    "length": 51
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzcgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDU4MTk2DQoNCih3aW5kb3cud2VicGFja0pzb25wPXdpbmRvdy53ZWJwYWNrSnNvbnB8fFtdKS5wdXNoKFtbMl0seyIrZWRjIjpmdW5jdGlvbih0LGUsbil7dmFyIHI9bigic1UvcCIpO3QuZXhwb3J0cz1mdW5jdGlvbih0LGUsbil7Zm9yKHZhciBvIGluIGUpcih0LG8sZVtvXSxuKTtyZXR1cm4gdH19LCIwb1BEIjpmdW5jdGlvbih0LGUpe2UuZj1PYmplY3QuZ2V0T3du",
+                                    "length": 303
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 57996
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066465396"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7IjQwIjoiaHR0cHM6Ly9venRla3dycG9td2wuY29tIn19"
+            }
+        },
+        {
+            "id": "22",
+            "type": "issue_found",
+            "issue": {
+                "name": "Cross-origin resource sharing",
+                "type_index": 2098688,
+                "serial_number": "2138337585452759040",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/polyfills-es2018.js",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.<br><br>If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.<br><br>Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.",
+                "caption": "/polyfills-es2018.js",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/polyfills-es2018.js",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIC9wb2x5ZmlsbHMtZXMyMDE4LmpzIEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg==",
+                                    "length": 331
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T3JpZ2luOiBodHRwczovL2p1aWNlLXNob3AuaGVyb2t1YXBwLmNvbQ==",
+                                    "length": 40
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCg==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCg==",
+                                    "length": 52
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "QWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luOiAq",
+                                    "length": 30
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmDQpYLUZyYW1lLU9wdGlvbnM6IFNBTUVPUklHSU4NCkZlYXR1cmUtUG9saWN5OiBwYXltZW50ICdzZWxmJw0KQWNjZXB0LVJhbmdlczogYnl0ZXMNCkNhY2hlLUNvbnRyb2w6IHB1YmxpYywgbWF4LWFnZT0wDQpMYXN0LU1vZGlmaWVkOiBTYXQsIDE2IEphbiAyMDIxIDAwOjQzOjA4IEdNVA0KRXRhZzogVy8iZTM1NC0xNzcwOGE1NTE2MCINCg==",
+                                    "length": 226
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "Q29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qYXZhc2NyaXB0OyBjaGFyc2V0PVVURi04",
+                                    "length": 51
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzYgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IDU4MTk2DQoNCih3aW5kb3cud2VicGFja0pzb25wPXdpbmRvdy53ZWJwYWNrSnNvbnB8fFtdKS5wdXNoKFtbMl0seyIrZWRjIjpmdW5jdGlvbih0LGUsbil7dmFyIHI9bigic1UvcCIpO3QuZXhwb3J0cz1mdW5jdGlvbih0LGUsbil7Zm9yKHZhciBvIGluIGUpcih0LG8sZVtvXSxuKTtyZXR1cm4gdH19LCIwb1BEIjpmdW5jdGlvbih0LGUpe2UuZj1PYmplY3QuZ2V0T3du",
+                                    "length": 303
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 57996
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066465396"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6NjU1NjksInZhcmlhbnQiOjAsImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+            }
+        },
+        {
+            "id": "23",
+            "type": "issue_found",
+            "issue": {
+                "name": "Backup file",
+                "type_index": 6291672,
+                "serial_number": "3438553209638628352",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/coupons_2013.md.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "caption": "/ftp/coupons_2013.md.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "payload": {
+                                "bytes": "L2Z0cC9jb3Vwb25zXzIwMTMubWQuYmFr",
+                                "flags": 0
+                            },
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/coupons_2013.md.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L2Z0cC9jb3Vwb25zXzIwMTMubWQuYmFr",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCkNvb2tpZTogaW89blNTbUFxS1RCaDBnNGhEOEFBYVQ7IGxhbmd1YWdlPWVuOyB3ZWxjb21lYmFubmVyX3N0YXR1cz1kaXNtaXNzDQoNCg==",
+                                    "length": 433
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEg",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "NDAz",
+                                    "length": 3
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICoNClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYNClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTg0KRmVhdHVyZS1Qb2xpY3k6IHBheW1lbnQgJ3NlbGYnDQpDb250ZW50LVR5cGU6IA==",
+                                    "length": 187
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzUgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IA==",
+                                    "length": 94
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "MTg1MQ==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDx0aXRsZT4=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "RXJyb3I6IE9ubHkgLm1kIGFuZCAucGRmIGZpbGVzIGFyZSBhbGxvd2VkIQ==",
+                                    "length": 43
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC90aXRsZT4KICAgIDxzdHlsZT4qIHsKICBtYXJnaW46IDA7CiAgcGFkZGluZzogMDsKICBvdXRsaW5lOiAwOwp9Cgpib2R5IHsKICBwYWRkaW5nOiA4MHB4IDEwMHB4OwogIGZv",
+                                    "length": 102
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 577
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGgxPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T1dBU1AgSnVpY2UgU2hvcCAoRXhwcmVzcyBeNC4xNy4xKQ==",
+                                    "length": 34
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9oMT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 861
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCAvYXBwL25vZGVfbW9kdWxlcy9zZXJ2ZS1pbmRleC9pbmRleC5qczoxNDU6Mzk=",
+                                    "length": 62
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT48bGk+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCBGU1JlcUNhbGxiYWNrLm9uY29tcGxldGUgKGZzLmpzOjE4NDo1KQ==",
+                                    "length": 55
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 35
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066468106"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "payload": {
+                                "bytes": "L2Z0cC9janVtLmJhaw==",
+                                "flags": 0
+                            },
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/cjum.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L2Z0cC9janVtLmJhaw==",
+                                    "length": 13
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCkNvb2tpZTogaW89blNTbUFxS1RCaDBnNGhEOEFBYVQ7IGxhbmd1YWdlPWVuOyB3ZWxjb21lYmFubmVyX3N0YXR1cz1kaXNtaXNzDQoNCg==",
+                                    "length": 433
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEg",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "NDAz",
+                                    "length": 3
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICoNClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYNClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTg0KRmVhdHVyZS1Qb2xpY3k6IHBheW1lbnQgJ3NlbGYnDQpDb250ZW50LVR5cGU6IA==",
+                                    "length": 187
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzUgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IA==",
+                                    "length": 94
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "MTg1Mg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDx0aXRsZT4=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "RXJyb3I6IE9ubHkgLm1kIGFuZCAucGRmIGZpbGVzIGFyZSBhbGxvd2VkIQ==",
+                                    "length": 43
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC90aXRsZT4KICAgIDxzdHlsZT4qIHsKICBtYXJnaW46IDA7CiAgcGFkZGluZzogMDsKICBvdXRsaW5lOiAwOwp9Cgpib2R5IHsKICBwYWRkaW5nOiA4MHB4IDEwMHB4OwogIGZv",
+                                    "length": 102
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 577
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGgxPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T1dBU1AgSnVpY2UgU2hvcCAoRXhwcmVzcyBeNC4xNy4xKQ==",
+                                    "length": 34
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9oMT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 861
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCAvYXBwL25vZGVfbW9kdWxlcy9zZXJ2ZS1pbmRleC9pbmRleC5qczoxMzU6MTY=",
+                                    "length": 62
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT48bGk+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCBGU1JlcUNhbGxiYWNrLm9uY29tcGxldGUgKGZzLmpzOjE4MzoyMSk=",
+                                    "length": 56
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 35
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066468112"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MiwiaXNzdWVfZGV0YWlsc19tYXAiOnsiMjAiOiIuYmFrIn19"
+            }
+        },
+        {
+            "id": "24",
+            "type": "issue_found",
+            "issue": {
+                "name": "Backup file",
+                "type_index": 6291672,
+                "serial_number": "4375561345635635200",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/ftp/package.json.bak",
+                "severity": "info",
+                "confidence": "certain",
+                "caption": "/ftp/package.json.bak",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "payload": {
+                                "bytes": "L2Z0cC9wYWNrYWdlLmpzb24uYmFr",
+                                "flags": 0
+                            },
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/package.json.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L2Z0cC9wYWNrYWdlLmpzb24uYmFr",
+                                    "length": 21
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCkNvb2tpZTogaW89blNTbUFxS1RCaDBnNGhEOEFBYVQ7IGxhbmd1YWdlPWVuOyB3ZWxjb21lYmFubmVyX3N0YXR1cz1kaXNtaXNzDQoNCg==",
+                                    "length": 433
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEg",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "NDAz",
+                                    "length": 3
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICoNClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYNClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTg0KRmVhdHVyZS1Qb2xpY3k6IHBheW1lbnQgJ3NlbGYnDQpDb250ZW50LVR5cGU6IA==",
+                                    "length": 187
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6NDggR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IA==",
+                                    "length": 94
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "MTg1MQ==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDx0aXRsZT4=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "RXJyb3I6IE9ubHkgLm1kIGFuZCAucGRmIGZpbGVzIGFyZSBhbGxvd2VkIQ==",
+                                    "length": 43
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC90aXRsZT4KICAgIDxzdHlsZT4qIHsKICBtYXJnaW46IDA7CiAgcGFkZGluZzogMDsKICBvdXRsaW5lOiAwOwp9Cgpib2R5IHsKICBwYWRkaW5nOiA4MHB4IDEwMHB4OwogIGZv",
+                                    "length": 102
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 577
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGgxPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T1dBU1AgSnVpY2UgU2hvcCAoRXhwcmVzcyBeNC4xNy4xKQ==",
+                                    "length": 34
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9oMT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 861
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCAvYXBwL25vZGVfbW9kdWxlcy9zZXJ2ZS1pbmRleC9pbmRleC5qczoxNDU6Mzk=",
+                                    "length": 62
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT48bGk+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCBGU1JlcUNhbGxiYWNrLm9uY29tcGxldGUgKGZzLmpzOjE4NDo1KQ==",
+                                    "length": 55
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 35
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066484760"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "payload": {
+                                "bytes": "L2Z0cC9jd3ZiLmJhaw==",
+                                "flags": 0
+                            },
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/ftp/cwvb.bak",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L2Z0cC9jd3ZiLmJhaw==",
+                                    "length": 13
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCkNvb2tpZTogaW89blNTbUFxS1RCaDBnNGhEOEFBYVQ7IGxhbmd1YWdlPWVuOyB3ZWxjb21lYmFubmVyX3N0YXR1cz1kaXNtaXNzDQoNCg==",
+                                    "length": 433
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEg",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "NDAz",
+                                    "length": 3
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICoNClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYNClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTg0KRmVhdHVyZS1Qb2xpY3k6IHBheW1lbnQgJ3NlbGYnDQpDb250ZW50LVR5cGU6IA==",
+                                    "length": 187
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6NDkgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IA==",
+                                    "length": 94
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "MTg1Mg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDx0aXRsZT4=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "RXJyb3I6IE9ubHkgLm1kIGFuZCAucGRmIGZpbGVzIGFyZSBhbGxvd2VkIQ==",
+                                    "length": 43
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC90aXRsZT4KICAgIDxzdHlsZT4qIHsKICBtYXJnaW46IDA7CiAgcGFkZGluZzogMDsKICBvdXRsaW5lOiAwOwp9Cgpib2R5IHsKICBwYWRkaW5nOiA4MHB4IDEwMHB4OwogIGZv",
+                                    "length": 102
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 577
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGgxPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T1dBU1AgSnVpY2UgU2hvcCAoRXhwcmVzcyBeNC4xNy4xKQ==",
+                                    "length": 34
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9oMT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 861
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCAvYXBwL25vZGVfbW9kdWxlcy9zZXJ2ZS1pbmRleC9pbmRleC5qczoxMzU6MTY=",
+                                    "length": 62
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT48bGk+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCBGU1JlcUNhbGxiYWNrLm9uY29tcGxldGUgKGZzLmpzOjE4MzoyMSk=",
+                                    "length": 56
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 35
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066484761"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MiwiaXNzdWVfZGV0YWlsc19tYXAiOnsiMjAiOiIuYmFrIn19"
+            }
+        }
+    ]
+}

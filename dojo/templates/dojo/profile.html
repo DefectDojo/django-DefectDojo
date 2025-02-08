@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load i18n %}
+{% block content %}
+    {{ block.super }}
+    <h3>{% blocktrans with full_name=user.get_full_name %} User Profile - {{ full_name }}{% endblocktrans %}</h3>
+    <div class="row">
+        <div class="col-md-7">
+            <form class="form-horizontal" method="post">{% csrf_token %}
+                <fieldset>
+                    <legend>{% trans "Default Information" %}</legend>
+                    {% include "dojo/form_fields.html" with form=form %}
+                </fieldset>
+                        <fieldset>
+                    <legend>{% trans "Additional Contact Information" %}</legend>
+                    {% include "dojo/form_fields.html" with form=contact_form %}
+                </fieldset>
+                <fieldset>
+                    <legend>{% trans "Global Role" %}</legend>
+                    {% include "dojo/form_fields.html" with form=global_role_form %}
+                </fieldset>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-primary" type="submit" value="{% trans "Submit" %}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li><b>{% trans "Last Login:" %} </b>{{ user.last_login }}</li>
+                    <li><b>{% trans "Date Joined:" %} </b>{{ user.date_joined }}</li>
+                </ul>
+                <div class="center" style="margin: auto; text-align: center;">
+                {% if user.has_usable_password %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">{% trans "Change Password" %}</a>
+                {% endif %}
+                {% if API_TOKENS_ENABLED %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">{% trans "API Key" %}</a>
+                {% endif %}
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">{% trans "Groups" %}</h4>
+                        &nbsp;
+                        <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                            <i class="fa-solid fa-circle-question"></i></a>
+                        {% if request.user.is_superuser %}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa-solid fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
+                                <li role="presentation">
+                                    <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
+                                        <i class="fa-solid fa-plus"></i>{% trans "Add Groups" %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if group_members %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>{% trans "Group" %}</th>
+                            <th>{% trans "Group role" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for member in group_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                            <td name="group_role">{{ member.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>{% trans "No group members found." %}</em></small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

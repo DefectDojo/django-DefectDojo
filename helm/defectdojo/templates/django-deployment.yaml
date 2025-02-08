@@ -1,0 +1,348 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-django
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- if .Values.django.annotations }}
+  annotations:
+{{- with .Values.django.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  replicas: {{ .Values.django.replicas }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
+  selector:
+    matchLabels:
+      defectdojo.org/component: django
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: django
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+      {{- with .Values.django.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9113"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+      {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ $fullName }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+      {{- end }}
+      volumes:
+      - name: run
+        emptyDir: {}
+      {{- if  .Values.localsettingspy }}
+      - name: localsettingspy
+        configMap:
+          name: {{ $fullName }}-localsettingspy
+      {{- end }}
+      {{- if  .Values.django.uwsgi.certificates.enabled }}
+      - name: cert-mount
+        configMap:
+          name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
+      {{- range .Values.django.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      - name: {{ .Values.django.mediaPersistentVolume.name }}
+        {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
+        persistentVolumeClaim:
+          claimName: {{ include "django.pvc_name" $ }}
+        {{ else }}
+        emptyDir: {}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled }}
+      initContainers:
+      {{- end }}
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
+      {{- end }}
+      {{- if .Values.dbMigrationChecker.enabled }}
+      {{$data := dict "fullName" $fullName }}
+      {{- $newContext := merge . (dict "fullName" $fullName) }}
+      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
+      {{- end }}
+      containers:
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+      - name: metrics
+        image: {{ .Values.monitoring.prometheus.image }}
+        imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
+        command: [ '/usr/bin/nginx-prometheus-exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        ports:
+        - name: http-metrics
+          protocol: TCP
+          containerPort: 9113
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: http-metrics
+          periodSeconds: 20
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+      {{- end }}
+      - name: uwsgi
+        image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: run
+          mountPath: /run/defectdojo
+        {{- if  .Values.localsettingspy }}
+        - name: localsettingspy
+          readOnly: true
+          mountPath: /app/dojo/settings/local_settings.py
+          subPath: file
+        {{- end }}
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "uwsgi") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
+        {{- end }}
+        ports:
+        - name: http-uwsgi
+          protocol: TCP
+          containerPort: 8081
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
+        env:
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+            {{- if eq .Values.celery.broker "redis" }}
+              name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
+            {{- end }}
+        {{- if .Values.django.uwsgi.enableDebug }}
+        - name: DD_DEBUG
+          value: 'True'
+        {{- end }}
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if eq .Values.database "postgresql" }}
+                name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+                key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+              {{- else if eq .Values.database "postgresqlha" }}
+                name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
+                key: postgresql-postgres-password
+              {{- end }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        - name: DD_CREDENTIAL_AES_256_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_CREDENTIAL_AES_256_KEY
+        - name: DD_SESSION_COOKIE_SECURE
+          value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        - name: DD_CSRF_COOKIE_SECURE
+          value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /login?force_login_form&next=/
+            port: http-uwsgi
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+      - name: nginx
+        image: '{{ template "django.nginx.repository" . }}:{{ .Values.tag }}'
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.nginxSecurityContext | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: run
+          mountPath: /run/defectdojo
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "nginx") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: /usr/share/nginx/html/media
+        {{- end }}
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: {{- if .Values.django.nginx.tls.enabled }} 8443 {{- else }} 8080 {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        env:
+        - name: METRICS_HTTP_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: METRICS_HTTP_AUTH_PASSWORD
+        - name: USE_TLS
+          value: '{{ .Values.django.nginx.tls.enabled }}'
+        - name: GENERATE_TLS_CERTIFICATE
+          value: '{{ .Values.django.nginx.tls.generateCertificate }}'
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /nginx_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.startupProbe.enabled }}
+        startupProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.startupProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.startupProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.startupProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.startupProbe.timeoutSeconds }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.django.nginx.resources | nindent 10 }}
+      {{- with .Values.django.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.django.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.django.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

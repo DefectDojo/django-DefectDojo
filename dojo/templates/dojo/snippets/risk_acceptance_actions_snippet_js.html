@@ -1,0 +1,22 @@
+$('a.delete-risk_acceptance').on('click', function (e) {
+    if (confirm('Are you sure you want to delete this risk acceptance? ' +
+        'Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make findings active again. ' +
+        'Metrics over historical data will no longer show/count anything related to this risk acceptance.'
+        )) {
+            $(this).next().submit();
+        }
+});
+
+$('a.reinstate-risk_acceptance').on('click', function (e) {
+    return confirm('Are you sure you want reinstate this risk acceptance? ' +
+        'All its findings will be deactivated and marked as accepted. ' +
+        'The default of {{ system_settings.risk_acceptance_form_default_days }} days from now will be the expiration date.'
+        )
+});
+
+$('a.expire-risk_acceptance').on('click', function (e) {
+    return confirm('Are you sure you want let this risk acceptance expire now? ' +
+        'All its findings will be re-activated and no longer marked as accepted. ' +
+        'The expiration date for this risk acceptance will be set to "now".'
+        )
+});

@@ -1,0 +1,44 @@
+{
+  "content-security-policy": {
+    "expectation": "csp-implemented-with-no-unsafe",
+    "name": "content-security-policy",
+    "output": {
+      "data": null,
+      "http": false,
+      "meta": false,
+      "policy": null
+    },
+    "pass": false,
+    "result": "csp-not-implemented",
+    "score_description": "Content Security Policy (CSP) header not implemented",
+    "score_modifier": -25
+  },
+  "subresource-integrity": {
+    "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+    "name": "subresource-integrity",
+    "output": {
+      "data": {
+        "//cdn.bizible.com/scripts/bizible.js": {
+          "crossorigin": null,
+          "integrity": null
+        },
+        "//cdnjs.cloudflare.com/ajax/libs/mermaid/8.0.0/mermaid.min.js": {
+          "crossorigin": null,
+          "integrity": null
+        },
+        "https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.8.7/min/tiny-slider.js": {
+          "crossorigin": null,
+          "integrity": null
+        },
+        "https://consent.cookiebot.com/uc.js": {
+          "crossorigin": null,
+          "integrity": null
+        }
+      }
+    },
+    "pass": false,
+    "result": "sri-not-implemented-and-external-scripts-not-loaded-securely",
+    "score_description": "Subresource Integrity (SRI) not implemented, and external scripts are loaded over HTTP or use protocol-relative URLs via src=\"//...\"",
+    "score_modifier": -50
+  }
+}

@@ -1,0 +1,214 @@
+{
+    "id": "800177c8-2478-4371-87a3-484da1acce1c",
+    "projects": null,
+    "createdAt": "2024-07-22T14:50:26.600849032Z",
+    "startedAt": "0001-01-01T00:00:00Z",
+    "createdBy": {
+      "serviceAccount": {
+        "id": "12312312312312312"
+      }
+    },
+    "status": {
+      "state": "SUCCESS",
+      "verdict": "WARN_BY_POLICY"
+    },
+    "policies": [
+      {
+        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
+        "name": "Default vulnerabilities policy",
+        "description": "Default built-in policy",
+        "type": "VULNERABILITIES",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "BLOCK",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamsvulnerabilities",
+          "severity": "CRITICAL",
+          "packageCountThreshold": 1,
+          "ignoreUnfixed": true,
+          "packageAllowList": [],
+          "detectionMethods": null,
+          "fixGracePeriodHours": 0,
+          "publishGracePeriodHours": 0
+        }
+      },
+      {
+        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
+        "name": "Default sensitive data policy",
+        "description": "Default built-in policy for sensitive data scanning",
+        "type": "SENSITIVE_DATA",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssensitivedata",
+          "dataFindingSeverityThreshold": "",
+          "countThreshold": 0
+        }
+      },
+      {
+        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+        "name": "Default secrets policy",
+        "description": "Default built-in policy for secret scanning",
+        "type": "SECRETS",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssecrets",
+          "countThreshold": 1,
+          "pathAllowList": []
+        }
+      }
+    ],
+    "extraInfo": null,
+    "tags": null,
+    "outdatedPolicies": [],
+    "taggedResource": null,
+    "scanOriginResource": {
+      "__typename": "CICDScanOriginContainerImage",
+      "name": "wizcli-imagescan",
+      "id": null,
+      "digest": null
+    },
+    "result": {
+      "__typename": "CICDDiskScanResult",
+      "osPackages": null,
+      "libraries": null,
+      "applications": null,
+      "cpes": null,
+      "secrets": [
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)",
+          "path": "/app/testing.go",
+          "lineNumber": 35,
+          "offset": 521,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Password",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": {
+            "__typename": "DiskScanSecretDetailsPassword",
+            "length": 8,
+            "isComplex": false
+          }
+        }
+      ],
+      "dataFindings": null,
+      "vulnerableSBOMArtifactsByNameVersion": null,
+      "hostConfiguration": null,
+      "failedPolicyMatches": [
+        {
+          "policy": {
+            "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+            "name": "Default secrets policy",
+            "description": "Default built-in policy for secret scanning",
+            "type": "SECRETS",
+            "builtin": true,
+            "projects": null,
+            "policyLifecycleEnforcements": [
+              {
+                "enforcementMethod": "AUDIT",
+                "deploymentLifecycle": "CLI",
+                "enforcementConfig": null
+              }
+            ],
+            "ignoreRules": null,
+            "lifecycleTargets": null,
+            "Default": false,
+            "params": {
+              "__typename": "cicdscanpolicyparamssecrets",
+              "countThreshold": 1,
+              "pathAllowList": []
+            }
+          }
+        }
+      ],
+      "analytics": {
+        "vulnerabilities": {
+          "infoCount": 0,
+          "lowCount": 0,
+          "mediumCount": 0,
+          "highCount": 0,
+          "criticalCount": 0,
+          "unfixedCount": 0,
+          "totalCount": 0
+        },
+        "secrets": {
+          "privateKeyCount": 0,
+          "publicKeyCount": 0,
+          "passwordCount": 1,
+          "certificateCount": 0,
+          "cloudKeyCount": 0,
+          "sshAuthorizedKeyCount": 0,
+          "dbConnectionStringCount": 0,
+          "gitCredentialCount": 0,
+          "presignedURLCount": 0,
+          "saasAPIKeyCount": 0,
+          "totalCount": 1
+        },
+        "hostConfiguration": null,
+        "filesScannedCount": 122,
+        "directoriesScannedCount": 116
+      }
+    },
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans#"
+  }
+  

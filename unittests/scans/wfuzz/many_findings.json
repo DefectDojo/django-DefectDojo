@@ -1,0 +1,51 @@
+[
+  {
+    "chars": 2823,
+    "code": 200,
+    "payload": "/server-status | GET /server-status HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\nUser-Agent: Wfuzz/3.1.0\nHost: example.com\n\n",
+    "lines": 0,
+    "location": "",
+    "method": "GET",
+    "post_data": [],
+    "server": "",
+    "url": "https://example.com/server-status",
+    "words": 60
+  },
+  {
+    "chars": 2823,
+    "code": 401,
+    "payload": "/server | GET /server HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\nUser-Agent: Wfuzz/3.1.0\nHost: example.com\n\n",
+    "lines": 0,
+    "location": "",
+    "method": "GET",
+    "post_data": [],
+    "server": "",
+    "url": "https://example.com/server",
+    "words": 60
+  },
+  {
+    "chars": 2823,
+    "code": 200,
+    "payload": "/status | GET /status HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\nUser-Agent: Wfuzz/3.1.0\nHost: example.com\n\n",
+    "lines": 0,
+    "location": "",
+    "method": "POST",
+    "post_data": [],
+    "server": "",
+    "url": "https://example.com/status",
+    "words": 60
+  },
+  {
+    "chars": 2823,
+    "code": 200,
+    "payload": "/server-status | GET /server-status HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\nUser-Agent: Wfuzz/3.1.0\nHost: example2.com\n\n",
+    "lines": 0,
+    "location": "",
+    "method": "GET",
+    "post_data": [],
+    "server": "",
+    "url": "https://example2.com/server-status",
+    "words": 60
+  }
+
+  ]

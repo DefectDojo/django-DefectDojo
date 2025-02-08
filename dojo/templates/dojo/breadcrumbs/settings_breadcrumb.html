@@ -1,0 +1,10 @@
+{% if product_tab.tab == "settings" and not custom_breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+  <li><a href="#">Settings</a></li>
+  {% if product_tab.title %}
+    <li class="breadcrumb-item active" aria-current="page">{{product_tab.title}}</li>
+  {% endif %}
+  </ol>
+</nav>
+{% endif %}

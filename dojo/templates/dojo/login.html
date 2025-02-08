@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load get_banner %}
+{% block content %}
+    {{ block.super }}
+    <h3>{% trans "Login" %}</h3>
+    <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
+        <fieldset class="col-md-offset-3 col-md-6">
+            {% if "banner_enable"|get_banner_conf %}
+                <div class="well">
+                    {{ "banner_message"|get_banner_conf }}
+                </div>
+            {% endif %}
+
+            {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
+               {% include "dojo/form_fields.html" with form=form %}
+            {% endif %}
+
+            <!-- Button -->
+            <div class="form-group">
+
+                {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
+                    <div class="col-sm-offset-1 col-sm-2" id="toggleBox" onclick="togglePassVisibility()">
+                        <i class="fa-solid fa-eye"></i>
+                        <span><b>{% trans "Show Password" %}</b></span>
+                    </div>
+                {% endif %}
+
+                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success">{% trans "Login" %}</button>
+                    </div>
+                    {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
+                        <div class="col-sm-4">
+                            <ul style="list-style-type: none">
+                                {% if FORGOT_PASSWORD %}
+                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
+                                {% endif %}
+                                {% if FORGOT_USERNAME %}
+                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {% if GOOGLE_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Google" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if OKTA_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with OKTA" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if AZUREAD_TENANT_OAUTH2_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Azure AD" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if GITLAB_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'gitlab' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Gitlab" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if AUTH0_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Auth0" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if KEYCLOAK_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'keycloak' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{{ SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT }}</a>
+                    </div>
+                {% endif %}
+
+                {% if GITHUB_ENTERPRISE_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with GitHub Enterprise" %}</a>
+                    </div>
+                {% endif %}
+
+                {% if SAML2_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{{ SAML2_LOGIN_BUTTON_TEXT }}</a>
+                    </div>
+                {% endif %}
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

@@ -1,0 +1,1065 @@
+{
+    "host": "juice-shop.herokuapp.com",
+    "ip": "52.51.36.193",
+    "port": "443",
+    "banner": "Cowboy",
+    "vulnerabilities": [
+        {
+            "id": "999986",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "Retrieved via header: 1.1 vegur"
+        },
+        {
+            "id": "999986",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "Retrieved access-control-allow-origin header: *"
+        },
+        {
+            "id": "999970",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "The site uses SSL and the Strict-Transport-Security HTTP header is not defined."
+        },
+        {
+            "id": "999955",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "The site uses SSL and Expect-CT header is not present."
+        },
+        {
+            "id": "999997",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/ftp/",
+            "msg": "Entry '/ftp/' in robots.txt returned a non-forbidden or redirect HTTP code (503)"
+        },
+        {
+            "id": "999996",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/robots.txt",
+            "msg": "\"robots.txt\" contains 1 entry which should be manually viewed."
+        },
+        {
+            "id": "999966",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "The Content-Encoding header is set to \"deflate\" this may mean that the server is vulnerable to the BREACH attack."
+        },
+        {
+            "id": "999992",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "Server is using a wildcard certificate: *.herokuapp.com"
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/backup.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/database.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/com.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.cer",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuappcom.alz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.tar.bz2",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.war",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/herokuapp.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/archive.egg",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.jks",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/52.51.36.193.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop_herokuapp_com.pem",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/site.tgz",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/dump.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.com.tar",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shopherokuapp.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "740001",
+            "OSVDB": "0",
+            "method": "HEAD",
+            "url": "/juice-shop.herokuapp.tar.lzma",
+            "msg": "Potentially interesting backup/cert file found. "
+        },
+        {
+            "id": "001811",
+            "OSVDB": "3092",
+            "method": "GET",
+            "url": "/public/",
+            "msg": "This might be interesting."
+        },
+        {
+            "id": "006737",
+            "OSVDB": "0",
+            "method": "POST",
+            "url": "/wp-content/plugins/nextgen-gallery/products/photocrati_nextgen/modules/nextgen_addgallery_page/static/jquery.filetree/connectors/jqueryFileTree.php",
+            "msg": "NextGEN Gallery LFI, see https://security.dxw.com/advisories/directory-traversal-in-nextgen-gallery-2-0-0/"
+        },
+        {
+            "id": "006737",
+            "OSVDB": "0",
+            "method": "POST",
+            "url": "/wordpress/wp-content/plugins/nextgen-gallery/products/photocrati_nextgen/modules/nextgen_addgallery_page/static/jquery.filetree/connectors/jqueryFileTree.php",
+            "msg": "NextGEN Gallery LFI, see https://security.dxw.com/advisories/directory-traversal-in-nextgen-gallery-2-0-0/"
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+name: Fetch OpenAPI Specifications
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        description: |
+          The version to be associated with the GitHub release that's created or updated.
+          This will override any version calculated by the release-drafter.
+        required: true
+
+env:
+  release_version: ${{ github.event.inputs.version || github.event.inputs.release_number }}
+
+jobs:
+  oas_fetch:
+    name: Fetch OpenAPI Specifications
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-type: [yaml, json]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: release/${{ env.release_version }}
+
+      - name: Load docker images
+        run: |-
+             docker pull defectdojo/defectdojo-django:${{ env.release_version }}-alpine
+             docker pull defectdojo/defectdojo-nginx:${{ env.release_version }}-alpine
+             docker images
+
+      - name: Start Dojo
+        run: docker compose up --no-deps -d postgres nginx uwsgi
+        env:
+          DJANGO_VERSION: ${{ env.release_version }}-alpine
+          NGINX_VERSION: ${{ env.release_version }}-alpine
+
+      - name: Download OpenAPI Specifications
+        run: |-
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=${{ matrix.file-type }}' -O oas.${{ matrix.file-type }} --tries=10 --retry-on-http-error=502
+
+      - name: Logs
+        if: always()
+        run: docker compose logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down
+
+      - name: Upload oas.${{ matrix.file-type }} as artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: oas-${{ matrix.file-type }}
+          path: oas.${{ matrix.file-type }}
+          retention-days: 1

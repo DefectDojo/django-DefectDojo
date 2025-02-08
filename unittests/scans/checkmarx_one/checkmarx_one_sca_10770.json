@@ -1,0 +1,696 @@
+{
+    "results":
+    [
+        {
+            "type": "sast",
+            "label": "sast",
+            "id": "111914456",
+            "similarityId": "1382380206",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:28:30Z",
+            "firstFoundAt": "2023-08-24T15:03:11Z",
+            "foundAt": "2024-08-15T10:28:30Z",
+            "firstScanId": "e6b8bb67-65a1-4d0e-b952-b0d5477fb8c3",
+            "description": "The application's resolveSigningKeyBytes method executes an SQL query with executeQuery, at line 91 of /src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\n\nAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input get; this input is then read by the resolveSigningKeyBytes method at line 86 of /src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java. This input then flows through the code, into a query and to the database server - without sanitization.\r\n\r\nThis may enable an SQL Injection attack.\n\n",
+            "descriptionHTML": "<p>The application‘s resolveSigningKeyBytes method executes an SQL query with executeQuery, at line 91 of /src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.</p>\n\n<p>An attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input get; this input is then read by the resolveSigningKeyBytes method at line 86 of /src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java. This input then flows through the code, into a query and to the database server - without sanitization.</p>\n\n<p>This may enable an SQL Injection attack.</p>\n",
+            "data":
+            {
+                "queryId": 14517067005933136034,
+                "queryName": "SQL_Injection",
+                "group": "Java_High_Risk",
+                "resultHash": "DAGel891N7XdIZndJNSGRnK62UE=",
+                "languageName": "Java",
+                "nodes":
+                [
+                    {
+                        "id": "1I4S2FV4tiQgJgms1KwOz2Aw5Ck=",
+                        "line": 86,
+                        "name": "get",
+                        "column": 63,
+                        "length": 1,
+                        "method": "resolveSigningKeyBytes",
+                        "nodeID": 60647,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+                        "fullName": "org.owasp.webgoat.lessons.jwt.claimmisuse.JWTHeaderKIDEndpoint.anonymous_class_85_37.resolveSigningKeyBytes.header.get",
+                        "typeName": "get",
+                        "methodLine": 85,
+                        "definitions": "0"
+                    },
+                    {
+                        "id": "Dc53B7ZoeVHJC/5yqEC2RyzVOF8=",
+                        "line": 86,
+                        "name": "kid",
+                        "column": 38,
+                        "length": 3,
+                        "method": "resolveSigningKeyBytes",
+                        "nodeID": 60642,
+                        "domType": "Declarator",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+                        "fullName": "org.owasp.webgoat.lessons.jwt.claimmisuse.JWTHeaderKIDEndpoint.anonymous_class_85_37.resolveSigningKeyBytes.kid",
+                        "typeName": "String",
+                        "methodLine": 85,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "JVAWf7QUjJd9tNVdBS/3wNG/8Ak=",
+                        "line": 92,
+                        "name": "kid",
+                        "column": 81,
+                        "length": 3,
+                        "method": "resolveSigningKeyBytes",
+                        "nodeID": 60699,
+                        "domType": "UnknownReference",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+                        "fullName": "org.owasp.webgoat.lessons.jwt.claimmisuse.JWTHeaderKIDEndpoint.anonymous_class_85_37.resolveSigningKeyBytes.kid",
+                        "typeName": "String",
+                        "methodLine": 85,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "R/lvRgYEd8lM5F0e7mLmGByWzO8=",
+                        "line": 91,
+                        "name": "executeQuery",
+                        "column": 48,
+                        "length": 1,
+                        "method": "resolveSigningKeyBytes",
+                        "nodeID": 60692,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/jwt/claimmisuse/JWTHeaderKIDEndpoint.java",
+                        "fullName": "org.owasp.webgoat.lessons.jwt.claimmisuse.JWTHeaderKIDEndpoint.anonymous_class_85_37.resolveSigningKeyBytes.executeQuery",
+                        "typeName": "executeQuery",
+                        "methodLine": 85,
+                        "definitions": "0"
+                    }
+                ]
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": 89,
+                "cvss":
+                {},
+                "compliances":
+                [
+                    "OWASP Top 10 API",
+                    "OWASP Mobile Top 10 2016",
+                    "ASA Mobile Premium",
+                    "MOIS(KISA) Secure Coding 2021",
+                    "OWASP Top 10 2013",
+                    "FISMA 2014",
+                    "CWE top 25",
+                    "NIST SP 800-53",
+                    "Top Tier",
+                    "ASA Premium",
+                    "ASD STIG 5.3",
+                    "SANS top 25",
+                    "PCI DSS v4.0",
+                    "OWASP Top 10 2021",
+                    "OWASP ASVS",
+                    "Base Preset",
+                    "PCI DSS v3.2.1"
+                ]
+            }
+        },
+        {
+            "type": "sast",
+            "label": "sast",
+            "id": "111914462",
+            "similarityId": "1978850937",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:28:30Z",
+            "firstFoundAt": "2023-04-24T09:17:25Z",
+            "foundAt": "2024-08-15T10:28:30Z",
+            "firstScanId": "e6b8bb67-65a1-4d0e-b952-b0d5477fb8c3",
+            "description": "The application's login method executes an SQL query with executeQuery, at line 65 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\n\nAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input username_login; this input is then read by the login method at line 50 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. This input then flows through the code, into a query and to the database server - without sanitization.\r\n\r\nThis may enable an SQL Injection attack.\n\n",
+            "descriptionHTML": "<p>The application‘s login method executes an SQL query with executeQuery, at line 65 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.</p>\n\n<p>An attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input username_login; this input is then read by the login method at line 50 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. This input then flows through the code, into a query and to the database server - without sanitization.</p>\n\n<p>This may enable an SQL Injection attack.</p>\n",
+            "data":
+            {
+                "queryId": 14517067005933136034,
+                "queryName": "SQL_Injection",
+                "group": "Java_High_Risk",
+                "resultHash": "axoLDacn79rEUgFJS9/1KMVM+4E=",
+                "languageName": "Java",
+                "nodes":
+                [
+                    {
+                        "id": "JFB0AWnxYt6IvoFGiyulVcIQnvI=",
+                        "line": 50,
+                        "name": "username_login",
+                        "column": 28,
+                        "length": 14,
+                        "method": "login",
+                        "nodeID": 39508,
+                        "domType": "ParamDecl",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.username_login",
+                        "typeName": "String",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "XqtJe9wzm2bW0OW7dp0lSk43pJ8=",
+                        "line": 61,
+                        "name": "username_login",
+                        "column": 21,
+                        "length": 14,
+                        "method": "login",
+                        "nodeID": 39398,
+                        "domType": "UnknownReference",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.username_login",
+                        "typeName": "String",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "ogE7PvqIghqjQ+gIjwyUy8PXpZQ=",
+                        "line": 59,
+                        "name": "prepareStatement",
+                        "column": 38,
+                        "length": 1,
+                        "method": "login",
+                        "nodeID": 39389,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.connection.prepareStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "hgfFQ7qtYVL801yUa1A0OkzWg/s=",
+                        "line": 58,
+                        "name": "statement",
+                        "column": 25,
+                        "length": 9,
+                        "method": "login",
+                        "nodeID": 39385,
+                        "domType": "Declarator",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement",
+                        "typeName": "PreparedStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "7Nci6hR/VYUj+TB2XoyUncY/XnQ=",
+                        "line": 65,
+                        "name": "statement",
+                        "column": 29,
+                        "length": 9,
+                        "method": "login",
+                        "nodeID": 39409,
+                        "domType": "UnknownReference",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement",
+                        "typeName": "PreparedStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "pSrcWFrBQDSE5DjqElG2LhLTSeI=",
+                        "line": 65,
+                        "name": "executeQuery",
+                        "column": 51,
+                        "length": 1,
+                        "method": "login",
+                        "nodeID": 39412,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement.executeQuery",
+                        "typeName": "executeQuery",
+                        "methodLine": 49,
+                        "definitions": "0"
+                    }
+                ]
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": 89,
+                "cvss":
+                {},
+                "compliances":
+                [
+                    "OWASP Top 10 API",
+                    "OWASP Mobile Top 10 2016",
+                    "ASA Mobile Premium",
+                    "MOIS(KISA) Secure Coding 2021",
+                    "OWASP Top 10 2013",
+                    "FISMA 2014",
+                    "CWE top 25",
+                    "NIST SP 800-53",
+                    "Top Tier",
+                    "ASA Premium",
+                    "ASD STIG 5.3",
+                    "SANS top 25",
+                    "PCI DSS v4.0",
+                    "OWASP Top 10 2021",
+                    "OWASP ASVS",
+                    "Base Preset",
+                    "PCI DSS v3.2.1"
+                ]
+            }
+        },
+        {
+            "type": "sast",
+            "label": "sast",
+            "id": "111914463",
+            "similarityId": "2009875372",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:28:30Z",
+            "firstFoundAt": "2023-04-24T09:17:25Z",
+            "foundAt": "2024-08-15T10:28:30Z",
+            "firstScanId": "e6b8bb67-65a1-4d0e-b952-b0d5477fb8c3",
+            "description": "The application's login method executes an SQL query with executeQuery, at line 65 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\n\nAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input password_login; this input is then read by the login method at line 50 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. This input then flows through the code, into a query and to the database server - without sanitization.\r\n\r\nThis may enable an SQL Injection attack.\n\n",
+            "descriptionHTML": "<p>The application‘s login method executes an SQL query with executeQuery, at line 65 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.</p>\n\n<p>An attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input password_login; this input is then read by the login method at line 50 of /src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java. This input then flows through the code, into a query and to the database server - without sanitization.</p>\n\n<p>This may enable an SQL Injection attack.</p>\n",
+            "data":
+            {
+                "queryId": 14517067005933136034,
+                "queryName": "SQL_Injection",
+                "group": "Java_High_Risk",
+                "resultHash": "srq19vKLsuPLGGpeNmQuYcO9MQs=",
+                "languageName": "Java",
+                "nodes":
+                [
+                    {
+                        "id": "ZBwJ2ZVWa5USjOoFeYkm20gq4xg=",
+                        "line": 50,
+                        "name": "password_login",
+                        "column": 65,
+                        "length": 14,
+                        "method": "login",
+                        "nodeID": 39517,
+                        "domType": "ParamDecl",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.password_login",
+                        "typeName": "String",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "MSmOGLj52rK6EKKANJTMDzTUzq8=",
+                        "line": 63,
+                        "name": "password_login",
+                        "column": 21,
+                        "length": 14,
+                        "method": "login",
+                        "nodeID": 39400,
+                        "domType": "UnknownReference",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.password_login",
+                        "typeName": "String",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "ogE7PvqIghqjQ+gIjwyUy8PXpZQ=",
+                        "line": 59,
+                        "name": "prepareStatement",
+                        "column": 38,
+                        "length": 1,
+                        "method": "login",
+                        "nodeID": 39389,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.connection.prepareStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "hgfFQ7qtYVL801yUa1A0OkzWg/s=",
+                        "line": 58,
+                        "name": "statement",
+                        "column": 25,
+                        "length": 9,
+                        "method": "login",
+                        "nodeID": 39385,
+                        "domType": "Declarator",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement",
+                        "typeName": "PreparedStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "7Nci6hR/VYUj+TB2XoyUncY/XnQ=",
+                        "line": 65,
+                        "name": "statement",
+                        "column": 29,
+                        "length": 9,
+                        "method": "login",
+                        "nodeID": 39409,
+                        "domType": "UnknownReference",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement",
+                        "typeName": "PreparedStatement",
+                        "methodLine": 49,
+                        "definitions": "1"
+                    },
+                    {
+                        "id": "pSrcWFrBQDSE5DjqElG2LhLTSeI=",
+                        "line": 65,
+                        "name": "executeQuery",
+                        "column": 51,
+                        "length": 1,
+                        "method": "login",
+                        "nodeID": 39412,
+                        "domType": "MethodInvokeExpr",
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/challenges/challenge5/Assignment5.java",
+                        "fullName": "org.owasp.webgoat.lessons.challenges.challenge5.Assignment5.login.statement.executeQuery",
+                        "typeName": "executeQuery",
+                        "methodLine": 49,
+                        "definitions": "0"
+                    }
+                ]
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": 89,
+                "cvss":
+                {},
+                "compliances":
+                [
+                    "OWASP Top 10 API",
+                    "OWASP Mobile Top 10 2016",
+                    "ASA Mobile Premium",
+                    "MOIS(KISA) Secure Coding 2021",
+                    "OWASP Top 10 2013",
+                    "FISMA 2014",
+                    "CWE top 25",
+                    "NIST SP 800-53",
+                    "Top Tier",
+                    "ASA Premium",
+                    "ASD STIG 5.3",
+                    "SANS top 25",
+                    "PCI DSS v4.0",
+                    "OWASP Top 10 2021",
+                    "OWASP ASVS",
+                    "Base Preset",
+                    "PCI DSS v3.2.1"
+                ]
+            }
+        },
+        {
+            "type": "kics",
+            "label": "IaC Security",
+            "id": "116516234",
+            "similarityId": "531bf8e9771fc9a38b866afcdc86e10dd80487262d98baf44f82522516f4db9e",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:25:09Z",
+            "firstFoundAt": "2023-04-25T09:32:08Z",
+            "foundAt": "2024-08-15T10:25:09Z",
+            "firstScanId": "a2a9edd0-5e9c-40dc-a2ba-c65a7b850f6f",
+            "description": "A user should be specified in the dockerfile, otherwise the image will run as root",
+            "descriptionHTML": "<p>A user should be specified in the dockerfile, otherwise the image will run as root</p>\n",
+            "data":
+            {
+                "queryId": "fd54f200-402c-4333-a5a4-36ef6709af2f [Taken from query_id]",
+                "queryName": "Missing User Instruction",
+                "group": "Build Process [Taken from category]",
+                "line": 1,
+                "platform": "Dockerfile",
+                "issueType": "MissingAttribute",
+                "expectedValue": "The 'Dockerfile' should contain the 'USER' instruction",
+                "value": "The 'Dockerfile' does not contain any 'USER' instruction",
+                "filename": "/Dockerfile_desktop"
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cvss":
+                {}
+            }
+        },
+        {
+            "type": "sca",
+            "scaType": "Vulnerability",
+            "label": "sca",
+            "id": "CVE-2013-7285",
+            "similarityId": "CVE-2013-7285",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:30:12Z",
+            "firstFoundAt": "2024-08-15T10:30:12Z",
+            "foundAt": "2024-08-15T10:30:12Z",
+            "firstScanId": "e1838db6-4950-4f98-9850-cc0df3660a9b",
+            "description": "Xstream API versions up to 1.4.6, if the security framework has not been initialized, may allow a remote attacker to run arbitrary shell commands by manipulating the processed input stream when unmarshaling XML or any supported format. e.g. JSON.",
+            "descriptionHTML": "<p>Xstream API versions up to 1.4.6, if the security framework has not been initialized, may allow a remote attacker to run arbitrary shell commands by manipulating the processed input stream when unmarshaling XML or any supported format. e.g. JSON.</p>\n",
+            "data":
+            {
+                "packageData":
+                [
+                    {
+                        "comment": "https://github.com/advisories/GHSA-f554-x222-wgf7",
+                        "type": "Advisory",
+                        "url": "https://github.com/advisories/GHSA-f554-x222-wgf7"
+                    },
+                    {
+                        "comment": "https://x-stream.github.io/CVE-2013-7285.html",
+                        "type": "Advisory",
+                        "url": "https://x-stream.github.io/CVE-2013-7285.html"
+                    },
+                    {
+                        "comment": "http://blog.diniscruz.com/2013/12/xstream-remote-code-execution-exploit.html",
+                        "type": "Disclosure",
+                        "url": "http://blog.diniscruz.com/2013/12/xstream-remote-code-execution-exploit.html"
+                    },
+                    {
+                        "comment": "https://www.mail-archive.com/user@xstream.codehaus.org/msg00604.html",
+                        "type": "Mail Thread",
+                        "url": "https://www.mail-archive.com/user@xstream.codehaus.org/msg00604.html"
+                    },
+                    {
+                        "comment": "https://www.mail-archive.com/user@xstream.codehaus.org/msg00607.html",
+                        "type": "Mail Thread",
+                        "url": "https://www.mail-archive.com/user@xstream.codehaus.org/msg00607.html"
+                    },
+                    {
+                        "comment": "https://github.com/x-stream/xstream/commit/94666ae6dfe839410c73bdfeeb211374f04a2059",
+                        "type": "Commit",
+                        "url": "https://github.com/x-stream/xstream/commit/94666ae6dfe839410c73bdfeeb211374f04a2059"
+                    }
+                ],
+                "packageIdentifier": "Maven-com.thoughtworks.xstream:xstream-1.4.5",
+                "scaPackageData":
+                {
+                    "id": "Maven-com.thoughtworks.xstream:xstream-1.4.5",
+                    "fixLink": "https://devhub.checkmarx.com/cve-details/CVE-2013-7285",
+                    "locations":
+                    [
+                        "pom.xml"
+                    ],
+                    "dependencyPaths":
+                    [
+                        [
+                            {
+                                "id": "Maven-com.thoughtworks.xstream:xstream-1.4.5",
+                                "name": "com.thoughtworks.xstream:xstream",
+                                "locations":
+                                [
+                                    "pom.xml"
+                                ]
+                            }
+                        ]
+                    ],
+                    "outdated": true,
+                    "supportsQuickFix": false,
+                    "isDirectDependency": true,
+                    "typeOfDependency": "Direct Dependency"
+                },
+                "recommendedVersion": "1.4.17.redhat-00001"
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": "CWE-78",
+                "cvssScore": 9.8,
+                "cveName": "CVE-2013-7285",
+                "cvss":
+                {
+                    "version": 3,
+                    "attackVector": "NETWORK",
+                    "availability": "HIGH",
+                    "confidentiality": "HIGH",
+                    "attackComplexity": "LOW"
+                }
+            }
+        },
+        {
+            "type": "sca",
+            "scaType": "Vulnerability",
+            "label": "sca",
+            "id": "CVE-2016-10707",
+            "similarityId": "CVE-2016-10707",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-15T10:30:12Z",
+            "firstFoundAt": "2024-08-15T10:30:12Z",
+            "foundAt": "2024-08-15T10:30:12Z",
+            "firstScanId": "e1838db6-4950-4f98-9850-cc0df3660a9b",
+            "description": "Versions prior to 3.0.0 in jQuery are vulnerable to Denial of Service (DoS) due to removing a logic that lowercased attribute names. Any attribute getter using a mixed-cased name for boolean attributes goes into an infinite recursion, exceeding the stack call limit.",
+            "descriptionHTML": "<p>Versions prior to 3.0.0 in jQuery are vulnerable to Denial of Service (DoS) due to removing a logic that lowercased attribute names. Any attribute getter using a mixed-cased name for boolean attributes goes into an infinite recursion, exceeding the stack call limit.</p>\n",
+            "data":
+            {
+                "packageData":
+                [
+                    {
+                        "comment": "https://www.npmjs.com/advisories/330",
+                        "type": "Advisory",
+                        "url": "https://www.npmjs.com/advisories/330"
+                    },
+                    {
+                        "comment": "https://github.com/jquery/jquery/issues/3133",
+                        "type": "Issue",
+                        "url": "https://github.com/jquery/jquery/issues/3133"
+                    },
+                    {
+                        "comment": "https://github.com/jquery/jquery/pull/3134",
+                        "type": "Pull request",
+                        "url": "https://github.com/jquery/jquery/pull/3134"
+                    },
+                    {
+                        "comment": "https://github.com/jquery/jquery/pull/3134/commits/e06fda69f00082b44fd39ce8e851f72d29999011",
+                        "type": "Commit",
+                        "url": "https://github.com/jquery/jquery/pull/3134/commits/e06fda69f00082b44fd39ce8e851f72d29999011"
+                    },
+                    {
+                        "comment": "https://github.com/advisories/GHSA-mhpp-875w-9cpv",
+                        "type": "Advisory",
+                        "url": "https://github.com/advisories/GHSA-mhpp-875w-9cpv"
+                    }
+                ],
+                "packageIdentifier": "Npm-jquery-2.1.4",
+                "scaPackageData":
+                {
+                    "id": "Npm-jquery-2.1.4",
+                    "fixLink": "https://devhub.checkmarx.com/cve-details/CVE-2016-10707",
+                    "locations":
+                    [
+                        "src/main/resources/webgoat/static/js/libs/jquery-2.1.4.min.js"
+                    ],
+                    "dependencyPaths":
+                    [
+                        [
+                            {
+                                "id": "Npm-jquery-2.1.4",
+                                "name": "jquery",
+                                "locations":
+                                [
+                                    "src/main/resources/webgoat/static/js/libs/jquery-2.1.4.min.js"
+                                ]
+                            }
+                        ]
+                    ],
+                    "outdated": true,
+                    "supportsQuickFix": false,
+                    "isDirectDependency": true,
+                    "typeOfDependency": "Direct Dependency"
+                },
+                "recommendedVersion": "3.5.0"
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": "CWE-674",
+                "cvssScore": 7.5,
+                "cveName": "CVE-2016-10707",
+                "cvss":
+                {
+                    "version": 3,
+                    "attackVector": "NETWORK",
+                    "availability": "HIGH",
+                    "confidentiality": "NONE",
+                    "attackComplexity": "LOW"
+                }
+            }
+        },
+        {
+            "type": "sca",
+            "scaType": "Vulnerability",
+            "label": "sca",
+            "id": "CVE-2005-2541",
+            "similarityId": "CVE-2005-2541",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-08T14:40:37Z",
+            "firstFoundAt": "2024-08-07T15:47:19Z",
+            "foundAt": "2024-08-08T14:40:37Z",
+            "firstScanId": "9589830b-3986-4082-a3ea-c1ac50dbf7bd",
+            "description": "Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges.",
+            "descriptionHTML": "<p>Tar 1.15.1 does not properly warn the user when extracting setuid or setgid files, which may allow local users or remote attackers to gain privileges.</p>\n",
+            "data":
+            {
+                "packageName": "tar",
+                "packageVersion": "1.34+dfsg-1+deb11u1"
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cweId": "NVD-CWE-Other",
+                "cvss":
+                {
+                    "attackVector": "NETWORK",
+                    "availability": "COMPLETE",
+                    "attackComplexity": "LOW",
+                    "integrityImpact": "COMPLETE"
+                }
+            }
+        },
+        {
+            "type": "kics",
+            "label": "IaC Security",
+            "id": "sZzpSZBOgluFm7HfxuClfXrS4MI=",
+            "similarityId": "e914e3bbbca66ba2a33a24ba42f35ef927d29988f5ffd9300d624e3d091f7ae1",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "HIGH",
+            "created": "2024-08-08T14:33:42Z",
+            "firstFoundAt": "2024-08-07T17:10:54Z",
+            "foundAt": "2024-08-08T14:33:42Z",
+            "firstScanId": "22a8082f-c0df-4d2e-b719-56e72fa76e21",
+            "description": "A user should be specified in the dockerfile, otherwise the image will run as root",
+            "descriptionHTML": "<p>A user should be specified in the dockerfile, otherwise the image will run as root</p>\n",
+            "data":
+            {
+                "queryId": "fd54f200-402c-4333-a5a4-36ef6709af2f [Taken from query_id]",
+                "queryName": "Missing User Instruction",
+                "group": "Build Process [Taken from category]",
+                "line": 1,
+                "platform": "Dockerfile",
+                "issueType": "MissingAttribute",
+                "expectedValue": "The 'Dockerfile' should contain the 'USER' instruction",
+                "value": "The 'Dockerfile' does not contain any 'USER' instruction",
+                "filename": "/src/Test.Test/Dockerfile"
+            },
+            "comments":
+            {},
+            "vulnerabilityDetails":
+            {
+                "cvss":
+                {}
+            }
+        }
+    ],
+    "totalCount": 69,
+    "scanID": "2bbbe034-7664-4117-8d1a-4b4eb01a569a"
+}

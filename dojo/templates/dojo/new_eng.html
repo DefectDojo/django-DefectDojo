@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load static %}
+{% block add_css %}
+    {{ block.super }}
+
+    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    {{ block.super }}
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+    .chosen-container.chosen-container-multi {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <h3> {{ title }} </h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+
+        {%  if jira_project_form %}
+            <h4> JIRA Project</h4>
+            <hr>
+            {% include "dojo/form_fields.html" with form=jira_project_form %}
+        {% endif %}
+
+        {%  if jira_epic_form %}
+                <h4> JIRA Epic</h4>
+                <hr>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        </i>
+                    </label>
+                    <div class="col-sm-10 form-control-static">
+                        {% if engagement.has_jira_issue %}
+                            <a href="{{ engagement | jira_issue_url }}"
+                            target="_blank"> {{ engagement | jira_issue_url }} </a>
+                        {% elif engagement %}
+                            <a href="{{ engagement | jira_project_url }}"
+                            target="_blank"> {{ engagement | jira_project_url }} </a>
+                        {% else %}
+                            <a href="{{ product_tab.product | jira_project_url }}"
+                            target="_blank"> {{ product_tab.product | jira_project_url }} </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% include "dojo/form_fields.html" with form=jira_epic_form %}
+            {% endif %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="_Import Scan Results" value="Import Scan Results"/>
+                <input class="btn btn-primary" type="submit" name="_Add Tests" value="Add Tests"/>
+                <input class="btn btn-primary" type="submit" value="Done"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
+    <script type="application/javascript">
+        $(function () {
+            $("textarea").each(function (index, elem) {
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                if(!$(elem).hasClass('select2-search__field')) {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        toolbar: ["bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link", "image", "|",
+                            "table", "horizontal-rule", "code", "|",
+                            "guide"
+                        ]
+                    });
+                    mde.render();
+                }
+            });
+        });
+    </script>
+    <script type="application/javascript">
+        $(function () {
+            $('[id$="inherit_from_product"]').click(function()  {
+                inherit_from_product = $(this)
+                checked = $(this).prop('checked')
+                $('[id^="id_jira-project-form-"]').each(function() {
+                    console.log('found field: ' + $(this).attr('id'))
+                    if (!$(this).is(inherit_from_product)) {
+                        console.log('disabling: ' + $(this).attr('id'))
+                        $(this).prop("disabled", checked)
+                        if (checked) {
+                            $(this).val('')
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

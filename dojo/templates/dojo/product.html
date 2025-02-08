@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Product List
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="Product options">
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user|can_add_product %}
+                                    <li role="presentation">
+                                        <a href="{% url 'new_product' %}" role="menuitem">
+                                            <i class="fa-solid fa-plus"></i> Add Product
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                <li role="presentation">
+                                    <a href="{% url 'product_findings_report' %}" role="menuitem">
+                                        <i class="fa-solid fa-file-lines"></i> Findings Report
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
+                </div>
+            </div>
+            {% if prod_list %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th> <!-- Action 3-dots hamburger menu button -->
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
+                            <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
+                            <th>Tags</th>
+                            <th> Criticality</th>
+                            <th> Metadata</th>
+                            <th class="text-center">Eng.</th>
+                            {% if system_settings.enable_jira %}
+                            <th class="text-center">Jira</th>
+                            {% endif %}
+                            {% if system_settings.enable_github %}
+                            <th class="text-center">GitHub</th>
+                            {% endif %}
+                            <th class="text-center">{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
+                            <th class="text-center"> Vulnerable Hosts / Endpoints</th>
+                            <th> Contact</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
+                            <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for prod in prod_list %}
+                            <tr>
+                                <td>
+                                  <div class="pull-left">
+                                    <div class="dropdown">
+                                      <a href="#" aria-expanded="false" aria-label="Product options menu" class="dropdown-toggle pull-left" data-toggle="dropdown" id="product-options-toggle" role="button">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b></a>
+                                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" role="menu">
+                                        <li role="presentation">
+                                          <a class="" href="{% url 'view_product' prod.id %}">
+                                              <i class="fa-solid fa-rectangle-list"></i> View
+                                          </a>
+                                        </li>
+                                        {% if prod|has_object_permission:"Product_Edit" %}
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'edit_product' prod.id %}">
+                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa-solid fa-calendar-days"></i> View Engagements</a></li>
+                                        {% if prod|has_object_permission:"Engagement_Add" %}
+                                          <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Engagement</a></li>
+                                        {% endif %}
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa-solid fa-rectangle-list"></i> View Open Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa-solid fa-triangle-exclamation"></i> View Critical Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa-solid fa-calendar-days"></i> View Last 7 Days Findings</a></li>
+                                        {% if prod|has_object_permission:"Finding_Add" %}
+                                          <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Finding</a></li>
+                                        {% endif %}
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Hosts</a></li>
+                                          <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                                          <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
+                                          <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li>
+                                        {% if prod|has_object_permission:"Endpoint_Add" %}
+                                          <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Endpoint</a></li>
+                                        {% endif %}
+                                        {% if prod|has_object_permission:"Product_Edit" %}
+                                          <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'add_meta_data' prod.id %}">
+                                                <i class="fa-solid fa-rectangle-list"></i> Add Custom Fields
+                                            </a>
+                                          </li>
+                                          <li role="presentation">
+                                            <a title="Edit Custom Fields" href="{% url 'edit_meta_data' prod.id %}">
+                                              <i class="fa-solid fa-pen-to-square"></i> Edit Custom Fields
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}  
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                              <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        <li role="presentation">
+                                            <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                              <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
+                                            </a>
+                                        </li>
+                                        {% if system_settings.enable_product_tracking_files %}
+                                          <li role="separator" class="divider"></li>
+                                          {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'new_object' prod.id %}">
+                                              <i class="fa-solid fa-rectangle-list"></i> Add Product Tracking Files
+                                            </a>
+                                          </li>
+                                          {% endif %}
+                                          {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
+                                          <li role="presentation">
+                                            <a href="{% url 'view_objects' prod.id %}">
+                                              <i class="fa-solid fa-clock-rotate-left"></i> View Product Tracking Files
+                                            </a>
+                                          </li>
+                                          {% endif %}
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        <li role="presentation">
+                                          <a href="{% url 'product_report' prod.id %}">
+                                            <i class="fa-solid fa-file-lines"></i> Product Report
+                                          </a>
+                                        </li>
+                                        {% if prod|has_object_permission:"Benchmark_Edit" %}
+                                          {% if system_settings.enable_benchmark and benchmark_type %}
+                                            <li role="separator" class="divider"></li>
+                                            {% for bt in benchmark_type %}
+                                              <li role="presentation">
+                                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
+                                                  <span class="fa-solid fa-list-ul"></span> {{ bt.name }} {{ bt.version }}
+                                                </a>
+                                              </li>
+                                            {% endfor %}
+                                          {% endif %}
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        <li role="presentation">
+                                          <a href="{% url 'action_history' prod|content_type prod.id %}">
+                                              <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                          </a>
+                                        </li>
+                                        {% if prod|has_object_permission:"Product_Delete" %}
+                                          <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                            <a class="text-danger" href="{% url 'delete_product' prod.id %}">
+                                              <i class="fa-solid fa-trash"></i> Delete
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                      </ul>
+                                    </div>
+                                   </div>
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
+                                    {% with grade=prod|product_grade %}
+                                      {% if grade %}
+                                        <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
+                                      {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <!-- Tags column -->
+                                <td>
+                                  {% include "dojo/snippets/tags.html" with tags=prod.tags.all %}
+                                </td>
+                                <!-- End of Tags Column -->
+                                <td class="text-center">{{ prod.business_criticality|business_criticality_icon }}</td>
+                                <td>
+                                  {{ prod.platform|platform_icon }}
+                                  {{ prod.lifecycle|lifecycle_icon }}
+                                  {{ prod.origin|origin_icon }}
+                                  {{ prod.external_audience|external_audience_icon }}
+                                  {{ prod.internet_accessible|internet_accessible_icon }}
+                                </td>
+                                <td class="text-center">
+                                  {% if prod.last_engagement_date %}
+                                    <i class="fa-solid fa-calendar-days happy-green-color has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    data-content="{{ prod.active_engagement_count }} Active,
+                                    {{ prod.closed_engagement_count }} Closed<br>
+                                    <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
+                                  {% else %}
+                                    <i class="fa-solid fa-calendar-days text-danger has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
+                                    data-content="No Engagements Exist"></i>
+                                  {% endif %}
+                                </td>
+                                {% if system_settings.enable_jira %}
+                                <td class="text-center">
+                                    {{ prod|jira_project_tag }}
+                                </td>
+                                {% endif %}
+
+                                {% if system_settings.enable_github %}
+                                <td class="text-center">
+                                {% for github_conf in prod.github_confs %}
+                                  {% if github_conf.git_conf is not None %}
+                                    <i class="fa-solid fa-bug has-popover" title="<i class='fa-solid fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                      data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
+                                      <b>Project Key:</b> {{ github_conf.git_project }}<br/>
+                                      <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                    </i>
+                                  {% endif %}
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+
+                                <td class="text-center">
+                                    {% if prod.findings_count %}
+                                        <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
+                                        &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
+                                    <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
+                                </td>
+                                <td>
+                                  {% if prod.product_manager %}
+                                    {% if prod.product_manager != "0" %}
+                                      {{ prod.product_manager }}, <i>Manager</i>
+                                        {% if prod.team_manager or prod.technical_contact %}<br>{% endif %}
+                                    {% endif %}
+                                  {% endif %}
+                                  {% if prod.team_manager %}
+                                    {% if prod.team_manager != "0" %}
+                                      {{ prod.team_manager }}, <i>Team Lead</i>
+                                        {% if prod.product_manager or prod.technical_contact %}<br>{% endif %}
+                                    {% endif %}
+                                  {% endif %}
+                                  {% if prod.technical_contact %}
+                                    {% if prod.technical_contact != "0" %}
+                                      {{ prod.technical_contact }}, <i>Technical</i>
+                                    {% endif %}
+                                  {% endif %}
+                                </td>
+                                <td> {{ prod.prod_type.name }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
+                </div>
+            {% else %}
+                <div id="no_products"><p class="text-center">No products found.</p></div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
+            var availableTags = [
+                {% for word in name_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_name").autocomplete({
+                source: availableTags
+            });
+        });
+    </script>
+    <script>
+        // DataTables setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Product_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(0))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Product List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            {% if enable_table_filtering %}
+              var dojoTable = $('#products').DataTable({
+                  drawCallback: function(){
+                      $('#products .has-popover').hover(
+                          function() { $(this).popover('show'); }, // hover
+                          function() { $(this).popover('hide'); } // unhover
+                      );
+                  },
+                  colReorder: true,
+                  "columns": [
+                      { "data": "action", "searchable": false },
+                      { "data": "product" },
+                      { "data": "tags" },
+                      { "data": "criticality" , render: function (data, type, row) {
+                        const criticals = {
+                          'Very High': 5,
+                          'High': 4,
+                          'Medium': 3,
+                          'Low': 2,
+                          'Very Low': 1,
+                          'None': 0
+                        };
+                        if (type === 'sort') {
+                          return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
+                        } else if (type === 'export') {
+                            return getDojoExportValueFromTag(data, 'i', 'data-content')
+                        } else if (data != undefined||data != null) {
+                            return data
+                        }
+                        return ""
+                      }},
+                      { "data": "metadata", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      } },
+                      { "data": "engagements", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% if system_settings.enable_jira %}
+                      { "data": "jira", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      {% if system_settings.enable_github %}
+                      { "data": "github", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      { "data": "findings" },
+                      { "data": "endpoints" },
+                      { "data": "contacts" },
+                      { "data": "product_type" },
+                  ],
+                  order: [],
+                  columnDefs: [
+                      {
+                          "orderable": false,
+                          "targets": [0]
+                      },
+                      {
+                          targets: [0],
+                          className: 'noVis'
+                      }
+                  ],
+                  dom: 'Bfrtip',
+                  paging: false,
+                  info: false,
+                  buttons: [
+                      {
+                          extend: 'colvis',
+                          columns: ':not(.noVis)'
+                      },
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'copy'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'excel',
+                          autoFilter: true,
+                          sheetName: 'Exported data',
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'csv'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'pdf',
+                          orientation: 'landscape',
+                          pageSize: 'LETTER'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'print'
+                      }),
+                  ],
+              });
+            {% endif %}
+        });
+    </script>
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

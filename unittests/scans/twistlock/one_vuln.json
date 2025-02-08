@@ -1,0 +1,47 @@
+{
+	"results": [
+		{
+			"id": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"distro": "Debian GNU/Linux 9 (stretch)",
+			"compliances": [
+				{
+					"title": "Sensitive information provided in environment variables",
+					"severity": "high",
+					"cause": "The environment variables DD_CELERY_BROKER_PASSWORD,DD_DATABASE_PASSWORD,DD_SECRET_KEY contain sensitive data"
+				}
+			],
+			"complianceDistribution": {
+				"critical": 0,
+				"high": 1,
+				"medium": 0,
+				"low": 0,
+				"total": 1
+			},
+			"vulnerabilities": [
+				{
+					"id": "CVE-2013-7459",
+					"cvss": 9.8,
+					"vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					"description": "Heap-based buffer overflow in the ALGnew function in block_templace.c in Python Cryptography Toolkit (aka pycrypto) allows remote attackers to execute arbitrary code as demonstrated by a crafted iv parameter to cryptmsg.py.",
+					"severity": "critical",
+					"packageName": "pycrypto",
+					"packageVersion": "2.6.1",
+					"link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-7459",
+					"riskFactors": {
+						"Attack complexity: low": {},
+						"Attack vector: network": {},
+						"Critical severity": {},
+						"Remote execution": {}
+					}
+				}
+			],
+			"vulnerabilityDistribution": {
+				"critical": 1,
+				"high": 0,
+				"medium": 0,
+				"low": 0,
+				"total": 1
+			}
+		}
+	]
+}

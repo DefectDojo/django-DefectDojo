@@ -1,0 +1,3698 @@
+[
+    {
+        "model": "dojo.language_type",
+        "pk": 1,
+        "fields": {
+            "language": "ActionScript",
+            "color": "#882B0F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 2,
+        "fields": {
+            "language": "Python",
+            "color": "#3572A5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 3,
+        "fields": {
+            "language": "Ruby",
+            "color": "#cd5c5c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 4,
+        "fields": {
+            "language": "ABAP",
+            "color": "#E8274B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 5,
+        "fields": {
+            "language": "Ada",
+            "color": "#02f88c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 6,
+        "fields": {
+            "language": "ADSO/IDSM",
+            "color": "#D98880"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 7,
+        "fields": {
+            "language": "Agda",
+            "color": "#315665"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 8,
+        "fields": {
+            "language": "AMPLE",
+            "color": "#C0392B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 9,
+        "fields": {
+            "language": "Ant",
+            "color": "#A93226"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 10,
+        "fields": {
+            "language": "ANTLR Grammar",
+            "color": "#641E16"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 11,
+        "fields": {
+            "language": "Apex Trigger",
+            "color": "#FDEDEC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 12,
+        "fields": {
+            "language": "Arduino Sketch",
+            "color": "#FADBD8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 13,
+        "fields": {
+            "language": "AsciiDoc",
+            "color": "#F1948A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 14,
+        "fields": {
+            "language": "ASP",
+            "color": "#E74C3C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 15,
+        "fields": {
+            "language": "ASP.NET",
+            "color": "#9400ff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 16,
+        "fields": {
+            "language": "AspectJ",
+            "color": "#a957b0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 17,
+        "fields": {
+            "language": "Assembly",
+            "color": "#6E4C13"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 18,
+        "fields": {
+            "language": "AutoHotkey",
+            "color": "#6594b9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 19,
+        "fields": {
+            "language": "awk",
+            "color": "#c30e9b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 20,
+        "fields": {
+            "language": "Blade",
+            "color": "#f7523f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 21,
+        "fields": {
+            "language": "Bourne Again Shell",
+            "color": "#C39BD3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 22,
+        "fields": {
+            "language": "Bourne Shell",
+            "color": "#AF7AC5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 23,
+        "fields": {
+            "language": "BrightScript",
+            "color": "#884EA0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 24,
+        "fields": {
+            "language": "C",
+            "color": "#555555"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 25,
+        "fields": {
+            "language": "C Shell",
+            "color": "#5B2C6F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 26,
+        "fields": {
+            "language": "C#",
+            "color": "#178600"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 27,
+        "fields": {
+            "language": "C++",
+            "color": "#f34b7d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 28,
+        "fields": {
+            "language": "C/C++ Header",
+            "color": "#E8DAEF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 29,
+        "fields": {
+            "language": "CCS",
+            "color": "#D2B4DE"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 30,
+        "fields": {
+            "language": "Chapel",
+            "color": "#8dc63f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 31,
+        "fields": {
+            "language": "Clean",
+            "color": "#3F85AF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 32,
+        "fields": {
+            "language": "Clojure",
+            "color": "#db5855"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 33,
+        "fields": {
+            "language": "ClojureC",
+            "color": "#7D3C98"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 34,
+        "fields": {
+            "language": "ClojureScript",
+            "color": "#5B2C6F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 35,
+        "fields": {
+            "language": "CMake",
+            "color": "#4A235A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 36,
+        "fields": {
+            "language": "COBOL",
+            "color": "#EAF2F8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 37,
+        "fields": {
+            "language": "CoffeeScript",
+            "color": "#244776"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 38,
+        "fields": {
+            "language": "ColdFusion",
+            "color": "#ed2cd6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 39,
+        "fields": {
+            "language": "ColdFusion CFScript",
+            "color": "#A9CCE3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 40,
+        "fields": {
+            "language": "Coq",
+            "color": "#7FB3D5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 41,
+        "fields": {
+            "language": "Crystal",
+            "color": "#000100"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 42,
+        "fields": {
+            "language": "CSON",
+            "color": "#244776"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 43,
+        "fields": {
+            "language": "CSS",
+            "color": "#563d7c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 44,
+        "fields": {
+            "language": "Cucumber",
+            "color": "#D4E6F1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 45,
+        "fields": {
+            "language": "CUDA",
+            "color": "#3A4E3A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 46,
+        "fields": {
+            "language": "Cython",
+            "color": "#5499C7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 47,
+        "fields": {
+            "language": "D",
+            "color": "#ba595e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 48,
+        "fields": {
+            "language": "DAL",
+            "color": "#2471A3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 49,
+        "fields": {
+            "language": "Dart",
+            "color": "#00B4AB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 50,
+        "fields": {
+            "language": "diff",
+            "color": "#154360"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 51,
+        "fields": {
+            "language": "DITA",
+            "color": "#EBF5FB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 52,
+        "fields": {
+            "language": "DOORS Extension Language",
+            "color": "#D6EAF8"
+          }
+        },
+        {
+          "model": "dojo.language_type",
+          "pk": 465,
+          "fields": {
+                 "language": "DOS Batch",
+            "color": "#AED6F1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 53,
+        "fields": {
+            "language": "Drools",
+            "color": "#85C1E9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 54,
+        "fields": {
+            "language": "DTD",
+            "color": "#5DADE2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 55,
+        "fields": {
+            "language": "dtrace",
+            "color": "#2980B9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 56,
+        "fields": {
+            "language": "ECPP",
+            "color": "#2471A3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 57,
+        "fields": {
+            "language": "EEx",
+            "color": "#1F618D"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 58,
+        "fields": {
+            "language": "Elixir",
+            "color": "#6e4a7e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 59,
+        "fields": {
+            "language": "Elm",
+            "color": "#60B5CC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 60,
+        "fields": {
+            "language": "ERB",
+            "color": "#D6EAF8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 61,
+        "fields": {
+            "language": "Erlang",
+            "color": "#B83998"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 62,
+        "fields": {
+            "language": "Expect",
+            "color": "#85C1E9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 63,
+        "fields": {
+            "language": "F#",
+            "color": "#b845fc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 64,
+        "fields": {
+            "language": "F# Script",
+            "color": "#3498DB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 65,
+        "fields": {
+            "language": "Fish Shell",
+            "color": "#2E86C1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 66,
+        "fields": {
+            "language": "Focus",
+            "color": "#2874A6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 67,
+        "fields": {
+            "language": "Forth",
+            "color": "#341708"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 68,
+        "fields": {
+            "language": "Fortran 77",
+            "color": "#E8F8F5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 69,
+        "fields": {
+            "language": "Fortran 90",
+            "color": "#D1F2EB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 70,
+        "fields": {
+            "language": "Freemarker Template",
+            "color": "#"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 71,
+        "fields": {
+            "language": "GDScript",
+            "color": "#355570"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 72,
+        "fields": {
+            "language": "Gencat NLS",
+            "color": "#76D7C4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 73,
+        "fields": {
+            "language": "Glade",
+            "color": "#48C9B0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 74,
+        "fields": {
+            "language": "GLSL",
+            "color": "#1ABC9C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 75,
+        "fields": {
+            "language": "Go",
+            "color": "#00ADD8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 76,
+        "fields": {
+            "language": "Grails",
+            "color": "#148F77"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 77,
+        "fields": {
+            "language": "GraphQL",
+            "color": "#e10098"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 78,
+        "fields": {
+            "language": "Groovy",
+            "color": "#e69f56"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 79,
+        "fields": {
+            "language": "Haml",
+            "color": "#ece2a9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 80,
+        "fields": {
+            "language": "Handlebars",
+            "color": "#f7931e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 81,
+        "fields": {
+            "language": "Harbour",
+            "color": "#0e60e3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 82,
+        "fields": {
+            "language": "Haskell",
+            "color": "#5e5086"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 83,
+        "fields": {
+            "language": "Haxe",
+            "color": "#df7900"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 84,
+        "fields": {
+            "language": "HCL",
+            "color": "#17A589"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 85,
+        "fields": {
+            "language": "HLSL",
+            "color": "#148F77"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 86,
+        "fields": {
+            "language": "HTML",
+            "color": "#e34c26"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 87,
+        "fields": {
+            "language": "IDL",
+            "color": "#a3522f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 88,
+        "fields": {
+            "language": "Idris",
+            "color": "#b30000"
+        }
+    },
+    {
+      "model": "dojo.language_type",
+      "pk": 89,
+      "fields": {
+        "language": "INI",
+        "color": "#E9F7EF"
+          }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 466,
+        "fields": {
+            "language": "InstallShield",
+            "color": "#D4EFDF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 90,
+        "fields": {
+            "language": "Java",
+            "color": "#b07219"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 91,
+        "fields": {
+            "language": "JavaScript",
+            "color": "#f1e05a"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 92,
+        "fields": {
+            "language": "JavaServer Faces",
+            "color": "#52BE80"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 93,
+        "fields": {
+            "language": "JCL",
+            "color": "#27AE60"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 94,
+        "fields": {
+            "language": "JSON",
+            "color": "#229954"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 95,
+        "fields": {
+            "language": "JSP",
+            "color": "#1E8449"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 97,
+        "fields": {
+            "language": "JSX",
+            "color": "#196F3D"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 98,
+        "fields": {
+            "language": "Julia",
+            "color": "#a270ba"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 99,
+        "fields": {
+            "language": "Kermit",
+            "color": "#800000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 100,
+        "fields": {
+            "language": "Korn Shell",
+            "color": "#A52A2A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 101,
+        "fields": {
+            "language": "Kotlin",
+            "color": "#A97BFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 102,
+        "fields": {
+            "language": "Lean",
+            "color": "#8B4513"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 103,
+        "fields": {
+            "language": "LESS",
+            "color": "#1d365d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 104,
+        "fields": {
+            "language": "lex",
+            "color": "#DBCA00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 105,
+        "fields": {
+            "language": "LFE",
+            "color": "#4C3023"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 106,
+        "fields": {
+            "language": "liquid",
+            "color": "#67b8de"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 107,
+        "fields": {
+            "language": "Lisp",
+            "color": "#BC8F8F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 108,
+        "fields": {
+            "language": "Literate Idris",
+            "color": "#D2B48C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 109,
+        "fields": {
+            "language": "LiveLink OScript",
+            "color": "#DEB887"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 110,
+        "fields": {
+            "language": "Logtalk",
+            "color": "#F5DEB3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 111,
+        "fields": {
+            "language": "Lua",
+            "color": "#000080"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 112,
+        "fields": {
+            "language": "m4",
+            "color": "#FFE4C4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 113,
+        "fields": {
+            "language": "make",
+            "color": "#FFEBCD"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 114,
+        "fields": {
+            "language": "Mako",
+            "color": "#FFF8DC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 115,
+        "fields": {
+            "language": "Markdown",
+            "color": "#083fa1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 116,
+        "fields": {
+            "language": "Mathematica",
+            "color": "#708090"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 117,
+        "fields": {
+            "language": "MATLAB",
+            "color": "#e16737"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 118,
+        "fields": {
+            "language": "Maven",
+            "color": "#696969"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 119,
+        "fields": {
+            "language": "Modula3",
+            "color": "#808080"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 120,
+        "fields": {
+            "language": "MSBuild script",
+            "color": "#A9A9A9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 121,
+        "fields": {
+            "language": "MUMPS",
+            "color": "#FFE4E1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 122,
+        "fields": {
+            "language": "Mustache",
+            "color": "#724b3b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 123,
+        "fields": {
+            "language": "MXML",
+            "color": "#FAEBD7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 124,
+        "fields": {
+            "language": "NAnt script",
+            "color": "#FFFFF0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 125,
+        "fields": {
+            "language": "NASTRAN DMAP",
+            "color": "#FFFAF0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 126,
+        "fields": {
+            "language": "Nemerle",
+            "color": "#3d3c6e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 127,
+        "fields": {
+            "language": "Nim",
+            "color": "#ffc200"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 128,
+        "fields": {
+            "language": "Objective C",
+            "color": "#cc00cc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 129,
+        "fields": {
+            "language": "Objective C++",
+            "color": "#ff9966"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 130,
+        "fields": {
+            "language": "OCaml",
+            "color": "#3be133"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 131,
+        "fields": {
+            "language": "OpenCL",
+            "color": "#F0F8FF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 132,
+        "fields": {
+            "language": "Oracle Forms",
+            "color": "#F0FFFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 133,
+        "fields": {
+            "language": "Oracle PL/SQL",
+            "color": "#F5FFFA"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 134,
+        "fields": {
+            "language": "Oracle Reports",
+            "color": "#F0FFF0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 135,
+        "fields": {
+            "language": "Pascal",
+            "color": "#E3F171"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 136,
+        "fields": {
+            "language": "Pascal/Puppet",
+            "color": "#C71585"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 137,
+        "fields": {
+            "language": "Patran Command Language",
+            "color": "#DB7093"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 138,
+        "fields": {
+            "language": "Perl",
+            "color": "#0298c3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 139,
+        "fields": {
+            "language": "PHP",
+            "color": "#4F5D95"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 140,
+        "fields": {
+            "language": "PHP/Pascal",
+            "color": "#FFB6C1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 141,
+        "fields": {
+            "language": "PL/I",
+            "color": "#FFC0CB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 143,
+        "fields": {
+            "language": "PL/M",
+            "color": "#4B0082"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 144,
+        "fields": {
+            "language": "PowerBuilder",
+            "color": "#8f0f8d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 145,
+        "fields": {
+            "language": "PowerShell",
+            "color": "#012456"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 146,
+        "fields": {
+            "language": "ProGuard",
+            "color": "#9932CC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 147,
+        "fields": {
+            "language": "Prolog",
+            "color": "#74283c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 148,
+        "fields": {
+            "language": "Protocol Buffers",
+            "color": "#8A2BE2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 149,
+        "fields": {
+            "language": "Pug",
+            "color": "#a86454"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 150,
+        "fields": {
+            "language": "PureScript",
+            "color": "#1D222D"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 151,
+        "fields": {
+            "language": "QML",
+            "color": "#44a51c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 152,
+        "fields": {
+            "language": "Qt",
+            "color": "#FF00FF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 153,
+        "fields": {
+            "language": "Qt Linguist",
+            "color": "#DA70D6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 154,
+        "fields": {
+            "language": "Qt Project",
+            "color": "#EE82EE"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 155,
+        "fields": {
+            "language": "R",
+            "color": "#198CE7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 156,
+        "fields": {
+            "language": "Racket",
+            "color": "#3c5caa"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 157,
+        "fields": {
+            "language": "RAML",
+            "color": "#77d9fb"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 158,
+        "fields": {
+            "language": "RapydScript",
+            "color": "#483D8B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 159,
+        "fields": {
+            "language": "Razor",
+            "color": "#6A5ACD"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 160,
+        "fields": {
+            "language": "Rexx",
+            "color": "#7B68EE"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 161,
+        "fields": {
+            "language": "RobotFramework",
+            "color": "#191970"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 163,
+        "fields": {
+            "language": "Ruby HTML",
+            "color": "#00008B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 164,
+        "fields": {
+            "language": "Rust",
+            "color": "#dea584"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 165,
+        "fields": {
+            "language": "SAS",
+            "color": "#B34936"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 166,
+        "fields": {
+            "language": "Sass",
+            "color": "#a53b70"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 167,
+        "fields": {
+            "language": "Scala",
+            "color": "#c22d40"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 168,
+        "fields": {
+            "language": "Scheme",
+            "color": "#1e4aec"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 169,
+        "fields": {
+            "language": "sed",
+            "color": "#64b970"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 170,
+        "fields": {
+            "language": "SKILL",
+            "color": "#B0C4DE"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 171,
+        "fields": {
+            "language": "SKILL++",
+            "color": "#00BFFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 172,
+        "fields": {
+            "language": "Skylark",
+            "color": "#87CEEB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 173,
+        "fields": {
+            "language": "Slice",
+            "color": "#003fa2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 174,
+        "fields": {
+            "language": "Slim",
+            "color": "#2b2b2b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 175,
+        "fields": {
+            "language": "Smalltalk",
+            "color": "#596706"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 176,
+        "fields": {
+            "language": "Smarty",
+            "color": "#008080"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 177,
+        "fields": {
+            "language": "Softbridge Basic",
+            "color": "#008B8B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 179,
+        "fields": {
+            "language": "Solidity",
+            "color": "#AA6746"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 180,
+        "fields": {
+            "language": "Specman e",
+            "color": "#20B2AA"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 181,
+        "fields": {
+            "language": "SQL",
+            "color": "#00CED1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 182,
+        "fields": {
+            "language": "SQL Data",
+            "color": "#48D1CC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 183,
+        "fields": {
+            "language": "SQL Stored Procedure",
+            "color": "#40E0D0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 184,
+        "fields": {
+            "language": "Standard ML",
+            "color": "#dc566d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 185,
+        "fields": {
+            "language": "Stata",
+            "color": "#66CDAA"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 186,
+        "fields": {
+            "language": "Stylus",
+            "color": "#ff6347"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 187,
+        "fields": {
+            "language": "Swift",
+            "color": "#ffac45"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 188,
+        "fields": {
+            "language": "SWIG",
+            "color": "#00FFFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 189,
+        "fields": {
+            "language": "Tcl/Tk",
+            "color": "#E0FFFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 190,
+        "fields": {
+            "language": "Teamcenter met",
+            "color": "#6B8E23"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 191,
+        "fields": {
+            "language": "Teamcenter mth",
+            "color": "#556B2F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 192,
+        "fields": {
+            "language": "TeX",
+            "color": "#3D6117"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 193,
+        "fields": {
+            "language": "TITAN Project File Information",
+            "color": "#2E8B57"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 194,
+        "fields": {
+            "language": "Titanium Style Sheet",
+            "color": "#3CB371"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 195,
+        "fields": {
+            "language": "TOML",
+            "color": "#8FBC8F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 196,
+        "fields": {
+            "language": "TTCN",
+            "color": "#00FA9A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 197,
+        "fields": {
+            "language": "Twig",
+            "color": "#c1d026"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 198,
+        "fields": {
+            "language": "TypeScript",
+            "color": "#2b7489"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 199,
+        "fields": {
+            "language": "Unity-Prefab",
+            "color": "#00FF00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 200,
+        "fields": {
+            "language": "Vala",
+            "color": "#fbe5cd"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 201,
+        "fields": {
+            "language": "Vala Header",
+            "color": "#FFFF00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 202,
+        "fields": {
+            "language": "Velocity Template Language",
+            "color": "#BDB76B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 203,
+        "fields": {
+            "language": "Verilog-SystemVerilog",
+            "color": "#F0E68C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 204,
+        "fields": {
+            "language": "VHDL",
+            "color": "#adb2cb"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 205,
+        "fields": {
+            "language": "vim script",
+            "color": "#199f4b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 206,
+        "fields": {
+            "language": "Visual Basic",
+            "color": "#FFE4B5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 207,
+        "fields": {
+            "language": "Visual Fox Pro",
+            "color": "#FFEFD5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 208,
+        "fields": {
+            "language": "Visualforce Component",
+            "color": "#FAFAD2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 209,
+        "fields": {
+            "language": "Visualforce Page",
+            "color": "#FFFACD"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 210,
+        "fields": {
+            "language": "Vuejs Component",
+            "color": "#FFFFE0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 211,
+        "fields": {
+            "language": "Windows Message File",
+            "color": "#FF8C00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 212,
+        "fields": {
+            "language": "Windows Module Definition",
+            "color": "#FFA500"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 213,
+        "fields": {
+            "language": "Windows Resource File",
+            "color": "#FFD700"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 214,
+        "fields": {
+            "language": "WiX include",
+            "color": "#FF4500"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 215,
+        "fields": {
+            "language": "WiX source",
+            "color": "#FF6347"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 216,
+        "fields": {
+            "language": "WiX string localization",
+            "color": "#FF7F50"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 217,
+        "fields": {
+            "language": "XAML",
+            "color": "#8B0000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 218,
+        "fields": {
+            "language": "xBase",
+            "color": "#403a40"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 219,
+        "fields": {
+            "language": "xBase Header",
+            "color": "#B22222"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 220,
+        "fields": {
+            "language": "XHTML",
+            "color": "#DC143C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 221,
+        "fields": {
+            "language": "XMI",
+            "color": "#CD5C5C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 222,
+        "fields": {
+            "language": "XML",
+            "color": "#F08080"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 223,
+        "fields": {
+            "language": "XQuery",
+            "color": "#5232e7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 224,
+        "fields": {
+            "language": "XSD",
+            "color": "#FA8072"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 225,
+        "fields": {
+            "language": "XSLT",
+            "color": "#EB8CEB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 226,
+        "fields": {
+            "language": "yacc",
+            "color": "#4B6C4B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 227,
+        "fields": {
+            "language": "YAML",
+            "color": "#cb171e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 228,
+        "fields": {
+            "language": "zsh",
+            "color": "#8b7d6b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 229,
+        "fields": {
+            "language": "1C Enterprise",
+            "color": "#814CCC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 230,
+        "fields": {
+            "language": "ABAP CDS",
+            "color": "#555e25"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 231,
+        "fields": {
+            "language": "AGS Script",
+            "color": "#B9D9FF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 232,
+        "fields": {
+            "language": "AIDL",
+            "color": "#34EB6B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 233,
+        "fields": {
+            "language": "AL",
+            "color": "#3AA2B5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 234,
+        "fields": {
+            "language": "Alloy",
+            "color": "#64C800"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 235,
+        "fields": {
+            "language": "AMPL",
+            "color": "#E6EFBB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 236,
+        "fields": {
+            "language": "AngelScript",
+            "color": "#C7D7DC"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 237,
+        "fields": {
+            "language": "ANTLR",
+            "color": "#9DC3FF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 238,
+        "fields": {
+            "language": "Apex",
+            "color": "#1797c0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 239,
+        "fields": {
+            "language": "API Blueprint",
+            "color": "#2ACCA8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 240,
+        "fields": {
+            "language": "APL",
+            "color": "#5A8164"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 241,
+        "fields": {
+            "language": "Apollo Guidance Computer",
+            "color": "#0B3D91"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 242,
+        "fields": {
+            "language": "AppleScript",
+            "color": "#101F1F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 243,
+        "fields": {
+            "language": "Arc",
+            "color": "#aa2afe"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 244,
+        "fields": {
+            "language": "Asymptote",
+            "color": "#ff0000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 245,
+        "fields": {
+            "language": "ATS",
+            "color": "#1ac620"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 246,
+        "fields": {
+            "language": "AutoIt",
+            "color": "#1C3552"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 247,
+        "fields": {
+            "language": "Ballerina",
+            "color": "#FF5000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 248,
+        "fields": {
+            "language": "BASIC",
+            "color": "#ff0000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 249,
+        "fields": {
+            "language": "Batchfile",
+            "color": "#C1F12E"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 250,
+        "fields": {
+            "language": "Beef",
+            "color": "#a52f4e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 251,
+        "fields": {
+            "language": "Bicep",
+            "color": "#519aba"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 252,
+        "fields": {
+            "language": "Bison",
+            "color": "#6A463F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 253,
+        "fields": {
+            "language": "BlitzMax",
+            "color": "#cd6400"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 254,
+        "fields": {
+            "language": "Boo",
+            "color": "#d4bec1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 255,
+        "fields": {
+            "language": "Boogie",
+            "color": "#c80fa0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 256,
+        "fields": {
+            "language": "Brainfuck",
+            "color": "#2F2530"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 257,
+        "fields": {
+            "language": "Browserslist",
+            "color": "#ffd539"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 258,
+        "fields": {
+            "language": "Ceylon",
+            "color": "#dfa535"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 259,
+        "fields": {
+            "language": "Cirru",
+            "color": "#ccccff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 260,
+        "fields": {
+            "language": "Clarion",
+            "color": "#db901e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 261,
+        "fields": {
+            "language": "Classic ASP",
+            "color": "#6a40fd"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 262,
+        "fields": {
+            "language": "Click",
+            "color": "#E4E6F3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 263,
+        "fields": {
+            "language": "Closure Templates",
+            "color": "#0d948f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 264,
+        "fields": {
+            "language": "ColdFusion CFC",
+            "color": "#ed2cd6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 265,
+        "fields": {
+            "language": "Common Lisp",
+            "color": "#3fb68b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 266,
+        "fields": {
+            "language": "Common Workflow Language",
+            "color": "#B5314C"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 267,
+        "fields": {
+            "language": "Component Pascal",
+            "color": "#B0CE4E"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 268,
+        "fields": {
+            "language": "CUE",
+            "color": "#5886E1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 269,
+        "fields": {
+            "language": "Dafny",
+            "color": "#FFEC25"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 270,
+        "fields": {
+            "language": "DataWeave",
+            "color": "#003a52"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 271,
+        "fields": {
+            "language": "Dhall",
+            "color": "#dfafff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 272,
+        "fields": {
+            "language": "DM",
+            "color": "#447265"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 273,
+        "fields": {
+            "language": "Dockerfile",
+            "color": "#384d54"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 274,
+        "fields": {
+            "language": "Dogescript",
+            "color": "#cca760"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 275,
+        "fields": {
+            "language": "Dylan",
+            "color": "#6c616e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 276,
+        "fields": {
+            "language": "E",
+            "color": "#ccce35"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 277,
+        "fields": {
+            "language": "eC",
+            "color": "#913960"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 278,
+        "fields": {
+            "language": "ECL",
+            "color": "#8a1267"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 279,
+        "fields": {
+            "language": "Eiffel",
+            "color": "#4d6977"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 280,
+        "fields": {
+            "language": "EJS",
+            "color": "#a91e50"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 281,
+        "fields": {
+            "language": "Emacs Lisp",
+            "color": "#c065db"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 282,
+        "fields": {
+            "language": "EmberScript",
+            "color": "#FFF4F3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 283,
+        "fields": {
+            "language": "EQ",
+            "color": "#a78649"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 284,
+        "fields": {
+            "language": "F*",
+            "color": "#572e30"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 285,
+        "fields": {
+            "language": "Factor",
+            "color": "#636746"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 286,
+        "fields": {
+            "language": "Fancy",
+            "color": "#7b9db4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 287,
+        "fields": {
+            "language": "Fantom",
+            "color": "#14253c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 288,
+        "fields": {
+            "language": "Faust",
+            "color": "#c37240"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 289,
+        "fields": {
+            "language": "Fluent",
+            "color": "#ffcc33"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 290,
+        "fields": {
+            "language": "FLUX",
+            "color": "#88ccff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 291,
+        "fields": {
+            "language": "Fortran",
+            "color": "#4d41b1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 292,
+        "fields": {
+            "language": "FreeBasic",
+            "color": "#867db1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 293,
+        "fields": {
+            "language": "FreeMarker",
+            "color": "#0050b2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 294,
+        "fields": {
+            "language": "Frege",
+            "color": "#00cafe"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 295,
+        "fields": {
+            "language": "Futhark",
+            "color": "#5f021f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 296,
+        "fields": {
+            "language": "G-code",
+            "color": "#D08CF2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 297,
+        "fields": {
+            "language": "Game Maker Language",
+            "color": "#71b417"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 298,
+        "fields": {
+            "language": "GAML",
+            "color": "#FFC766"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 299,
+        "fields": {
+            "language": "Gemfile.lock",
+            "color": "#701516"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 300,
+        "fields": {
+            "language": "Genie",
+            "color": "#fb855d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 301,
+        "fields": {
+            "language": "Gherkin",
+            "color": "#5B2063"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 302,
+        "fields": {
+            "language": "Glyph",
+            "color": "#c1ac7f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 303,
+        "fields": {
+            "language": "Gnuplot",
+            "color": "#f0a9f0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 304,
+        "fields": {
+            "language": "Golo",
+            "color": "#88562A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 305,
+        "fields": {
+            "language": "Gosu",
+            "color": "#82937f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 306,
+        "fields": {
+            "language": "Grammatical Framework",
+            "color": "#ff0000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 307,
+        "fields": {
+            "language": "Hack",
+            "color": "#878787"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 308,
+        "fields": {
+            "language": "HiveQL",
+            "color": "#dce200"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 309,
+        "fields": {
+            "language": "HolyC",
+            "color": "#ffefaf"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 310,
+        "fields": {
+            "language": "Hy",
+            "color": "#7790B2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 311,
+        "fields": {
+            "language": "IGOR Pro",
+            "color": "#0000cc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 312,
+        "fields": {
+            "language": "ImageJ Macro",
+            "color": "#99AAFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 313,
+        "fields": {
+            "language": "Io",
+            "color": "#a9188d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 314,
+        "fields": {
+            "language": "Ioke",
+            "color": "#078193"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 315,
+        "fields": {
+            "language": "Isabelle",
+            "color": "#FEFE00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 316,
+        "fields": {
+            "language": "J",
+            "color": "#9EEDFF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 317,
+        "fields": {
+            "language": "JFlex",
+            "color": "#DBCA00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 318,
+        "fields": {
+            "language": "Jinja",
+            "color": "#a52a22"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 319,
+        "fields": {
+            "language": "Jolie",
+            "color": "#843179"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 320,
+        "fields": {
+            "language": "jq",
+            "color": "#c7254e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 321,
+        "fields": {
+            "language": "JSONiq",
+            "color": "#40d47e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 322,
+        "fields": {
+            "language": "Jsonnet",
+            "color": "#0064bd"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 323,
+        "fields": {
+            "language": "Jupyter Notebook",
+            "color": "#DA5B0B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 324,
+        "fields": {
+            "language": "Kaitai Struct",
+            "color": "#773b37"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 325,
+        "fields": {
+            "language": "KRL",
+            "color": "#28430A"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 326,
+        "fields": {
+            "language": "Lark",
+            "color": "#2980B9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 327,
+        "fields": {
+            "language": "Lasso",
+            "color": "#999999"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 328,
+        "fields": {
+            "language": "Latte",
+            "color": "#f2a542"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 329,
+        "fields": {
+            "language": "LilyPond",
+            "color": "#9ccc7c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 330,
+        "fields": {
+            "language": "LiveScript",
+            "color": "#499886"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 331,
+        "fields": {
+            "language": "LLVM",
+            "color": "#185619"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 332,
+        "fields": {
+            "language": "LOLCODE",
+            "color": "#cc9900"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 333,
+        "fields": {
+            "language": "LookML",
+            "color": "#652B81"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 334,
+        "fields": {
+            "language": "LSL",
+            "color": "#3d9970"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 335,
+        "fields": {
+            "language": "Macaulay2",
+            "color": "#d8ffff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 336,
+        "fields": {
+            "language": "Makefile",
+            "color": "#427819"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 337,
+        "fields": {
+            "language": "Marko",
+            "color": "#42bff2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 338,
+        "fields": {
+            "language": "Mask",
+            "color": "#f97732"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 339,
+        "fields": {
+            "language": "Max",
+            "color": "#c4a79c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 340,
+        "fields": {
+            "language": "MAXScript",
+            "color": "#00a6a6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 341,
+        "fields": {
+            "language": "mcfunction",
+            "color": "#E22837"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 342,
+        "fields": {
+            "language": "Mercury",
+            "color": "#ff2b2b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 343,
+        "fields": {
+            "language": "Meson",
+            "color": "#007800"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 344,
+        "fields": {
+            "language": "Metal",
+            "color": "#8f14e9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 345,
+        "fields": {
+            "language": "Mirah",
+            "color": "#c7a938"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 346,
+        "fields": {
+            "language": "mIRC Script",
+            "color": "#3d57c3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 347,
+        "fields": {
+            "language": "MLIR",
+            "color": "#5EC8DB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 348,
+        "fields": {
+            "language": "Modula-3",
+            "color": "#223388"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 349,
+        "fields": {
+            "language": "MQL4",
+            "color": "#62A8D6"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 350,
+        "fields": {
+            "language": "MQL5",
+            "color": "#4A76B8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 351,
+        "fields": {
+            "language": "MTML",
+            "color": "#b7e1f4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 352,
+        "fields": {
+            "language": "NCL",
+            "color": "#28431f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 353,
+        "fields": {
+            "language": "Nearley",
+            "color": "#990000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 354,
+        "fields": {
+            "language": "nesC",
+            "color": "#94B0C7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 355,
+        "fields": {
+            "language": "NetLinx",
+            "color": "#0aa0ff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 356,
+        "fields": {
+            "language": "NetLinx+ERB",
+            "color": "#747faa"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 357,
+        "fields": {
+            "language": "NetLogo",
+            "color": "#ff6375"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 358,
+        "fields": {
+            "language": "NewLisp",
+            "color": "#87AED7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 359,
+        "fields": {
+            "language": "Nextflow",
+            "color": "#3ac486"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 360,
+        "fields": {
+            "language": "Nit",
+            "color": "#009917"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 361,
+        "fields": {
+            "language": "Nix",
+            "color": "#7e7eff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 362,
+        "fields": {
+            "language": "Nu",
+            "color": "#c9df40"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 363,
+        "fields": {
+            "language": "NumPy",
+            "color": "#9C8AF9"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 364,
+        "fields": {
+            "language": "Nunjucks",
+            "color": "#3d8137"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 365,
+        "fields": {
+            "language": "NWScript",
+            "color": "#111522"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 366,
+        "fields": {
+            "language": "Objective-C",
+            "color": "#438eff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 367,
+        "fields": {
+            "language": "Objective-C++",
+            "color": "#6866fb"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 368,
+        "fields": {
+            "language": "Objective-J",
+            "color": "#ff0c5a"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 369,
+        "fields": {
+            "language": "ObjectScript",
+            "color": "#424893"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 370,
+        "fields": {
+            "language": "Odin",
+            "color": "#60AFFE"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 371,
+        "fields": {
+            "language": "Omgrofl",
+            "color": "#cabbff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 372,
+        "fields": {
+            "language": "ooc",
+            "color": "#b0b77e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 373,
+        "fields": {
+            "language": "Opal",
+            "color": "#f7ede0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 374,
+        "fields": {
+            "language": "OpenQASM",
+            "color": "#AA70FF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 375,
+        "fields": {
+            "language": "Org",
+            "color": "#77aa99"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 376,
+        "fields": {
+            "language": "Oxygene",
+            "color": "#cdd0e3"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 377,
+        "fields": {
+            "language": "Oz",
+            "color": "#fab738"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 378,
+        "fields": {
+            "language": "P4",
+            "color": "#7055b5"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 379,
+        "fields": {
+            "language": "Pan",
+            "color": "#cc0000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 380,
+        "fields": {
+            "language": "Papyrus",
+            "color": "#6600cc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 381,
+        "fields": {
+            "language": "Parrot",
+            "color": "#f3ca0a"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 382,
+        "fields": {
+            "language": "Pawn",
+            "color": "#dbb284"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 383,
+        "fields": {
+            "language": "PEG.js",
+            "color": "#234d6b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 384,
+        "fields": {
+            "language": "Pep8",
+            "color": "#C76F5B"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 385,
+        "fields": {
+            "language": "PigLatin",
+            "color": "#fcd7de"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 386,
+        "fields": {
+            "language": "Pike",
+            "color": "#005390"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 387,
+        "fields": {
+            "language": "PLSQL",
+            "color": "#dad8d8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 388,
+        "fields": {
+            "language": "PogoScript",
+            "color": "#d80074"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 389,
+        "fields": {
+            "language": "PostScript",
+            "color": "#da291c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 390,
+        "fields": {
+            "language": "Prisma",
+            "color": "#0c344b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 391,
+        "fields": {
+            "language": "Processing",
+            "color": "#0096D8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 392,
+        "fields": {
+            "language": "Propeller Spin",
+            "color": "#7fa2a7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 393,
+        "fields": {
+            "language": "Puppet",
+            "color": "#302B6D"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 394,
+        "fields": {
+            "language": "PureBasic",
+            "color": "#5a6986"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 395,
+        "fields": {
+            "language": "q",
+            "color": "#0040cd"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 396,
+        "fields": {
+            "language": "Q#",
+            "color": "#fed659"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 397,
+        "fields": {
+            "language": "Qt Script",
+            "color": "#00b841"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 398,
+        "fields": {
+            "language": "Quake",
+            "color": "#882233"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 399,
+        "fields": {
+            "language": "Ragel",
+            "color": "#9d5200"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 400,
+        "fields": {
+            "language": "Raku",
+            "color": "#0000fb"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 401,
+        "fields": {
+            "language": "Rascal",
+            "color": "#fffaa0"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 402,
+        "fields": {
+            "language": "Reason",
+            "color": "#ff5847"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 403,
+        "fields": {
+            "language": "Rebol",
+            "color": "#358a5b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 404,
+        "fields": {
+            "language": "Record Jar",
+            "color": "#0673ba"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 405,
+        "fields": {
+            "language": "Red",
+            "color": "#f50000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 406,
+        "fields": {
+            "language": "Regular Expression",
+            "color": "#009a00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 407,
+        "fields": {
+            "language": "Ren'Py",
+            "color": "#ff7f7f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 408,
+        "fields": {
+            "language": "ReScript",
+            "color": "#ed5051"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 409,
+        "fields": {
+            "language": "Ring",
+            "color": "#2D54CB"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 410,
+        "fields": {
+            "language": "Riot",
+            "color": "#A71E49"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 411,
+        "fields": {
+            "language": "Roff",
+            "color": "#ecdebe"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 412,
+        "fields": {
+            "language": "Rouge",
+            "color": "#cc0088"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 413,
+        "fields": {
+            "language": "RUNOFF",
+            "color": "#665a4e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 414,
+        "fields": {
+            "language": "SaltStack",
+            "color": "#646464"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 415,
+        "fields": {
+            "language": "Scaml",
+            "color": "#bd181a"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 416,
+        "fields": {
+            "language": "SCSS",
+            "color": "#c6538c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 417,
+        "fields": {
+            "language": "Self",
+            "color": "#0579aa"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 418,
+        "fields": {
+            "language": "Shell",
+            "color": "#89e051"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 419,
+        "fields": {
+            "language": "Shen",
+            "color": "#120F14"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 420,
+        "fields": {
+            "language": "Singularity",
+            "color": "#64E6AD"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 421,
+        "fields": {
+            "language": "Slash",
+            "color": "#007eff"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 422,
+        "fields": {
+            "language": "SmPL",
+            "color": "#c94949"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 423,
+        "fields": {
+            "language": "SourcePawn",
+            "color": "#f69e1d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 424,
+        "fields": {
+            "language": "SQF",
+            "color": "#3F3F3F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 425,
+        "fields": {
+            "language": "Squirrel",
+            "color": "#800000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 426,
+        "fields": {
+            "language": "SRecode Template",
+            "color": "#348a34"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 427,
+        "fields": {
+            "language": "Stan",
+            "color": "#b2011d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 428,
+        "fields": {
+            "language": "Starlark",
+            "color": "#76d275"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 429,
+        "fields": {
+            "language": "StringTemplate",
+            "color": "#3fb34f"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 430,
+        "fields": {
+            "language": "SuperCollider",
+            "color": "#46390b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 431,
+        "fields": {
+            "language": "Svelte",
+            "color": "#ff3e00"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 432,
+        "fields": {
+            "language": "SVG",
+            "color": "#ff9900"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 433,
+        "fields": {
+            "language": "SystemVerilog",
+            "color": "#DAE1C2"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 434,
+        "fields": {
+            "language": "Tcl",
+            "color": "#e4cc98"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 435,
+        "fields": {
+            "language": "Terra",
+            "color": "#00004c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 436,
+        "fields": {
+            "language": "TextMate Properties",
+            "color": "#df66e4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 437,
+        "fields": {
+            "language": "TI Program",
+            "color": "#A0AA87"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 438,
+        "fields": {
+            "language": "Turing",
+            "color": "#cf142b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 439,
+        "fields": {
+            "language": "Unified Parallel C",
+            "color": "#4e3617"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 440,
+        "fields": {
+            "language": "Uno",
+            "color": "#9933cc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 441,
+        "fields": {
+            "language": "UnrealScript",
+            "color": "#a54c4d"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 442,
+        "fields": {
+            "language": "V",
+            "color": "#4f87c4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 443,
+        "fields": {
+            "language": "Valve Data Format",
+            "color": "#f26025"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 444,
+        "fields": {
+            "language": "VBA",
+            "color": "#867db1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 445,
+        "fields": {
+            "language": "VBScript",
+            "color": "#15dcdc"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 446,
+        "fields": {
+            "language": "VCL",
+            "color": "#148AA8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 447,
+        "fields": {
+            "language": "Verilog",
+            "color": "#b2b7f8"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 448,
+        "fields": {
+            "language": "Visual Basic .NET",
+            "color": "#945db7"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 449,
+        "fields": {
+            "language": "Volt",
+            "color": "#1F1F1F"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 450,
+        "fields": {
+            "language": "Vue",
+            "color": "#41b883"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 451,
+        "fields": {
+            "language": "wdl",
+            "color": "#42f1f4"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 452,
+        "fields": {
+            "language": "WebAssembly",
+            "color": "#04133b"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 453,
+        "fields": {
+            "language": "wisp",
+            "color": "#7582D1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 454,
+        "fields": {
+            "language": "Wollok",
+            "color": "#a23738"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 455,
+        "fields": {
+            "language": "X10",
+            "color": "#4B6BEF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 456,
+        "fields": {
+            "language": "XC",
+            "color": "#99DA07"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 457,
+        "fields": {
+            "language": "Xonsh",
+            "color": "#285EEF"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 458,
+        "fields": {
+            "language": "YARA",
+            "color": "#220000"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 459,
+        "fields": {
+            "language": "YASnippet",
+            "color": "#32AB90"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 460,
+        "fields": {
+            "language": "ZAP",
+            "color": "#0d665e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 461,
+        "fields": {
+            "language": "ZenScript",
+            "color": "#00BCD1"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 462,
+        "fields": {
+            "language": "Zephir",
+            "color": "#118f9e"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 463,
+        "fields": {
+            "language": "Zig",
+            "color": "#ec915c"
+        }
+    },
+    {
+        "model": "dojo.language_type",
+        "pk": 464,
+        "fields": {
+            "language": "ZIL",
+            "color": "#dc75e5"
+        }
+    }
+]

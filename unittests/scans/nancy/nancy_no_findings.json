@@ -1,0 +1,225 @@
+{
+   "audited":[
+      {
+         "Coordinates":"pkg:golang/github.com/bitly/oauth2_proxy@0.1",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/bitly/oauth2_proxy@0.1",
+         "Vulnerabilities":[
+            {
+               "Id":"9eb9a5bc-8310-4104-bf85-3a820d28ba79",
+               "Title":"[CVE-2017-1000070]  URL Redirection to Untrusted Site (\"Open Redirect\")",
+               "Description":"The Bitly oauth2_proxy in version 2.1 and earlier was affected by an open redirect vulnerability during the start and termination of the 2-legged OAuth flow. This issue was caused by improper input validation and a violation of RFC-6819",
+               "CvssScore":"6.1",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+               "Cve":"CVE-2017-1000070",
+               "Reference":"https://ossindex.sonatype.org/vuln/9eb9a5bc-8310-4104-bf85-3a820d28ba79",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/cockroachdb/cockroach@2.1.4",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/cockroachdb/cockroach@2.1.4",
+         "Vulnerabilities":[
+            
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/ethereum/go-ethereum@1.8.15",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/ethereum/go-ethereum@1.8.15",
+         "Vulnerabilities":[
+            {
+               "Id":"4efaed86-e62e-4c0c-b812-36c07e61ede4",
+               "Title":"CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')",
+               "Description":"The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.",
+               "CvssScore":"7.5",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+               "Cve":"",
+               "Reference":"https://ossindex.sonatype.org/vuln/4efaed86-e62e-4c0c-b812-36c07e61ede4",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/elastic/beats@5.6.3",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/elastic/beats@5.6.3",
+         "Vulnerabilities":[
+            {
+               "Id":"8e4d562d-517b-4d00-a845-a7a3e2be41db",
+               "Title":"[CVE-2017-11480]  Improper Access Control",
+               "Description":"Packetbeat versions prior to 5.6.4 are affected by a denial of service flaw in the PostgreSQL protocol handler. If Packetbeat is listening for PostgreSQL traffic and a user is able to send arbitrary network traffic to the monitored port, the attacker could prevent Packetbeat from properly logging other PostgreSQL traffic.",
+               "CvssScore":"7.5",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+               "Cve":"CVE-2017-11480",
+               "Reference":"https://ossindex.sonatype.org/vuln/8e4d562d-517b-4d00-a845-a7a3e2be41db",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/etcd-io/etcd@3.3.0",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/etcd-io/etcd@3.3.0",
+         "Vulnerabilities":[
+            {
+               "Id":"5c876f5e-2814-4822-baf0-1092fc63ec25",
+               "Title":"[CVE-2018-1098]  Cross-Site Request Forgery (CSRF)",
+               "Description":"A cross-site request forgery flaw was found in etcd 3.3.1 and earlier. An attacker can set up a website that tries to send a POST request to the etcd server and modify a key. Adding a key is done with PUT so it is theoretically safe (can't PUT from an HTML form or such) but POST allows creating in-order keys that an attacker can send.",
+               "CvssScore":"8.8",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+               "Cve":"CVE-2018-1098",
+               "Reference":"https://ossindex.sonatype.org/vuln/5c876f5e-2814-4822-baf0-1092fc63ec25",
+               "Excluded":false
+            },
+            {
+               "Id":"8a190129-526c-4ee0-b663-92f38139c165",
+               "Title":"[CVE-2018-1099]  Improper Input Validation",
+               "Description":"DNS rebinding vulnerability found in etcd 3.3.1 and earlier. An attacker can control his DNS records to direct to localhost, and trick the browser into sending requests to localhost (or any other address).",
+               "CvssScore":"5.5",
+               "CvssVector":"CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+               "Cve":"CVE-2018-1099",
+               "Reference":"https://ossindex.sonatype.org/vuln/8a190129-526c-4ee0-b663-92f38139c165",
+               "Excluded":false
+            },
+            {
+               "Id":"69b9f08b-8eda-4125-8e84-b7d67a7c9ee5",
+               "Title":"[CVE-2018-16886]  Improper Authentication",
+               "Description":"etcd versions 3.2.x before 3.2.26 and 3.3.x before 3.3.11 are vulnerable to an improper authentication issue when role-based access control (RBAC) is used and client-cert-auth is enabled. If an etcd client server TLS certificate contains a Common Name (CN) which matches a valid RBAC username, a remote attacker may authenticate as that user with any valid (trusted) client certificate in a REST API request to the gRPC-gateway.",
+               "CvssScore":"8.1",
+               "CvssVector":"CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+               "Cve":"CVE-2018-16886",
+               "Reference":"https://ossindex.sonatype.org/vuln/69b9f08b-8eda-4125-8e84-b7d67a7c9ee5",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/github/hub@2.0.0",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/github/hub@2.0.0",
+         "Vulnerabilities":[
+            
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/gogs/gogs@0.9.45",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/gogs/gogs@0.9.45",
+         "Vulnerabilities":[
+            {
+               "Id":"a4c682fa-9c9f-4e9e-b218-720d5125b17f",
+               "Title":"CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+               "Description":"The software constructs all or part of an SQL command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended SQL command when it is sent to a downstream component.",
+               "CvssScore":"9.9",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+               "Cve":"",
+               "Reference":"https://ossindex.sonatype.org/vuln/a4c682fa-9c9f-4e9e-b218-720d5125b17f",
+               "Excluded":false
+            },
+            {
+               "Id":"304fa9e0-012e-4385-88b2-88c0c5ec3247",
+               "Title":"[CVE-2018-15192] An SSRF vulnerability in webhooks in Gitea through 1.5.0-rc2 and Gogs through 0....",
+               "Description":"An SSRF vulnerability in webhooks in Gitea through 1.5.0-rc2 and Gogs through 0.11.53 allows remote attackers to access intranet services.",
+               "CvssScore":"8.6",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N",
+               "Cve":"CVE-2018-15192",
+               "Reference":"https://ossindex.sonatype.org/vuln/304fa9e0-012e-4385-88b2-88c0c5ec3247",
+               "Excluded":false
+            },
+            {
+               "Id":"a8c20c84-1f6a-472a-ba1b-3eaedb2a2a14",
+               "Title":"[CVE-2018-20303]  Improper Limitation of a Pathname to a Restricted Directory (\"Path Traversal\")",
+               "Description":"In pkg/tool/path.go in Gogs before 0.11.82.1218, a directory traversal in the file-upload functionality can allow an attacker to create a file under data/sessions on the server, a similar issue to CVE-2018-18925.",
+               "CvssScore":"7.5",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+               "Cve":"CVE-2018-20303",
+               "Reference":"https://ossindex.sonatype.org/vuln/a8c20c84-1f6a-472a-ba1b-3eaedb2a2a14",
+               "Excluded":false
+            },
+            {
+               "Id":"bcb0c38d-0d35-44ee-b7a7-8f77183d1ae2",
+               "Title":"[CVE-2018-18925] Gogs 0.11.66 allows remote code execution because it does not properly validate ...",
+               "Description":"Gogs 0.11.66 allows remote code execution because it does not properly validate session IDs, as demonstrated by a \"..\" session-file forgery in the file session provider in file.go. This is related to session ID handling in the go-macaron/session code for Macaron.",
+               "CvssScore":"9.8",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+               "Cve":"CVE-2018-18925",
+               "Reference":"https://ossindex.sonatype.org/vuln/bcb0c38d-0d35-44ee-b7a7-8f77183d1ae2",
+               "Excluded":false
+            },
+            {
+               "Id":"bbbdbb94-f65a-475c-9e9f-6793778fbd9b",
+               "Title":"[CVE-2018-15178]  URL Redirection to Untrusted Site (\"Open Redirect\")",
+               "Description":"Open redirect vulnerability in Gogs before 0.12 allows remote attackers to redirect users to arbitrary websites and conduct phishing attacks via an initial /\\ substring in the user/login redirect_to parameter, related to the function isValidRedirect in routes/user/auth.go.",
+               "CvssScore":"6.1",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+               "Cve":"CVE-2018-15178",
+               "Reference":"https://ossindex.sonatype.org/vuln/bbbdbb94-f65a-475c-9e9f-6793778fbd9b",
+               "Excluded":false
+            },
+            {
+               "Id":"fc70a115-52cc-44ea-a33d-793267f860dd",
+               "Title":"CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+               "Description":"The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+               "CvssScore":"6.1",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+               "Cve":"",
+               "Reference":"https://ossindex.sonatype.org/vuln/fc70a115-52cc-44ea-a33d-793267f860dd",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/goharbor/harbor@1.7.2",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/goharbor/harbor@1.7.2",
+         "Vulnerabilities":[
+            
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/gophish/gophish@0.1.1",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/gophish/gophish@0.1.1",
+         "Vulnerabilities":[
+            {
+               "Id":"0416e202-2705-431d-9915-8ed93334ca58",
+               "Title":"CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+               "Description":"The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+               "CvssScore":"6.1",
+               "CvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+               "Cve":"",
+               "Reference":"https://ossindex.sonatype.org/vuln/0416e202-2705-431d-9915-8ed93334ca58",
+               "Excluded":false
+            }
+         ],
+         "InvalidSemVer":false
+      },
+      {
+         "Coordinates":"pkg:golang/github.com/ipfs/go-ipfs@0.4.18",
+         "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/ipfs/go-ipfs@0.4.18",
+         "Vulnerabilities":[
+            
+         ],
+         "InvalidSemVer":false
+      }
+   ],
+   "exclusions":[
+      
+   ],
+   "invalid":[
+      {
+         "Coordinates":"pkg:golang/github.com/go-gitea/gitea@1.3.0.rc1",
+         "Reference":"",
+         "Vulnerabilities":null,
+         "InvalidSemVer":true
+      }
+   ],
+   "num_audited":10,
+   "num_vulnerable":0,
+   "version":"development",
+   "vulnerable":[
+      
+   ]
+}

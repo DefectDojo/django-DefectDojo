@@ -1,0 +1,24 @@
+{
+  "vulnerabilities": [],
+  "ok": true,
+  "dependencyCount": 0,
+  "org": "myorg",
+  "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.19.0\nignore: {}\npatch: {}\n",
+  "isPrivate": true,
+  "licensesPolicy": {
+    "severities": {},
+    "orgLicenseRules": {}
+  },
+  "packageManager": "maven",
+  "ignoreSettings": {
+    "adminOnly": false,
+    "reasonRequired": false,
+    "disregardFilesystemIgnores": false
+  },
+  "summary": "No known vulnerabilities",
+  "filesystemPolicy": false,
+  "uniqueCount": 0,
+  "projectName": "com.test:maven-profiles",
+  "displayTargetFile": "pom.xml",
+  "path": "C:\\workspace"
+}

@@ -1,0 +1,542 @@
+interactions:
+- request:
+    body: '{"description": "Event engagement_added has occurred.", "title": "Engagement
+      created for &quot;Python How-to&quot;: new engagement", "user": null, "url_ui":
+      "http://localhost:8080/engagement/7", "url_api": "http://localhost:8080/api/v2/engagements/7/",
+      "product_type": {"name": "books", "id": 1, "url_ui": "http://localhost:8080/product/type/1",
+      "url_api": "http://localhost:8080/api/v2/product_types/1/"}, "product": {"name":
+      "Python How-to", "id": 1, "url_ui": "http://localhost:8080/product/1", "url_api":
+      "http://localhost:8080/api/v2/products/1/"}, "engagement": {"name": "new engagement",
+      "id": 7, "url_ui": "http://localhost:8080/engagement/7", "url_api": "http://localhost:8080/api/v2/engagements/7/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '710'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.42.3
+      X-DefectDojo-Event:
+      - engagement_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"710\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.42.3\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"engagement_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n
+        \     \"http://localhost:8080\"\n    ]\n  },\n  \"method\": \"POST\",\n  \"origin\":
+        \"172.18.0.2:48456\",\n  \"url\": \"http://webhook.endpoint:8080/post\",\n
+        \ \"data\": \"{\\\"description\\\": \\\"Event engagement_added has occurred.\\\",
+        \\\"title\\\": \\\"Engagement created for &quot;Python How-to&quot;: new engagement\\\",
+        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/engagement/7\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/7/\\\", \\\"product_type\\\":
+        {\\\"name\\\": \\\"books\\\", \\\"id\\\": 1, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/1\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/1/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Python How-to\\\", \\\"id\\\": 1, \\\"url_ui\\\": \\\"http://localhost:8080/product/1\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/1/\\\"}, \\\"engagement\\\":
+        {\\\"name\\\": \\\"new engagement\\\", \\\"id\\\": 7, \\\"url_ui\\\": \\\"http://localhost:8080/engagement/7\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/7/\\\"}}\",\n
+        \ \"files\": {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Event
+        engagement_added has occurred.\",\n    \"engagement\": {\n      \"id\": 7,\n
+        \     \"name\": \"new engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/7/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/7\"\n    },\n    \"product\":
+        {\n      \"id\": 1,\n      \"name\": \"Python How-to\",\n      \"url_api\":
+        \"http://localhost:8080/api/v2/products/1/\",\n      \"url_ui\": \"http://localhost:8080/product/1\"\n
+        \   },\n    \"product_type\": {\n      \"id\": 1,\n      \"name\": \"books\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/product_types/1/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/type/1\"\n    },\n    \"title\": \"Engagement
+        created for &quot;Python How-to&quot;: new engagement\",\n    \"url_api\":
+        \"http://localhost:8080/api/v2/engagements/7/\",\n    \"url_ui\": \"http://localhost:8080/engagement/7\",\n
+        \   \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:18 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA5yQUUvDMBDHv0te3bqkS2mXN5ngFJ1Cu5eJSJpcMJompUkHY+y7m+DQ+aa+HXe/
+        //2OO6CWe9gMBjH0GkLv2WwmQYEI0r25jAfDvdfcZhYCmiCpfW/4/h98DcNOC5Dg31dg+iXYAMNf
+        lyydVWYEK+B3yR0MXjsbYYIxyXCGp/X68rFePTTf0/XYtbFC7ClBEzzBz9EJvXH7Ll7Z7PtkWxo3
+        yhhqR23kZwSxGMjL8tS84iGBOc6LKSbTvGoIZZSweZVhjC9whGPexz/A0OjuB7tocsJowUiVUUK/
+        WNHdWOUiqIqCAJRz0koQVAgOwElbSUUWJVeERoFqC8jPBMEkw60eeHohKD6acOcET+0DMqcKgX3Z
+        1Oh4ftjW2TS5vm/Q8QMAAP//AwDv8BdOIAIAAA==
+    headers:
+      Atl-Request-Id:
+      - 0142053b-a7dc-4dfd-b59f-77a77e6ddd88
+      Atl-Traceid:
+      - 0142053ba7dc4dfdb59f77a77e6ddd88
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:18 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=170,atl-edge-internal;dur=16,atl-edge-upstream;dur=155,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - fdc0e3fa7a97f7656746ccc3405af67e
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xW32/TMBD+V6I8V03bVWOqhBBiICbQhLRuL9OETHJZb3OcYDttyrT/nXPixO5a
+        RjpgvCxP9vl+fOf77uK7EKqCiSSchYXMbyDWKhy45ezyzimgUiXodQFGRQFPSbbQulCzKEogJYMk
+        v8mHTHOmFDIxFKAjCUpHrMBoElmv0XhEH7lA47Td3MKadqfz92dz2gmWAW3PBWpNDkxAtmSayXPJ
+        CdVdOD2qpkd7xi8FLkEqxr82vqIlwioyCXXQ7MF4NB29opiTaTWZ/tsobxT+gNcqY5xTwPFhNT58
+        joBVG/FgUh1MniNiBgmWWXg/8Hlk+PUEJnUeai5NfC6ZTQIqllhozAVJ3wZ1roMgQaVRxDooEGII
+        8jRY5fJ2aKzjXBCz9kTxyDU4gN1FHIyPNi6iI/mcqVvalUJLJhRnGpLTjRNVftNmNUsZVzAIFwiS
+        yXix/gxLINCjgevRFIEnpl3sglpFlVnG5NosJXwvUQIpalmSJxUvIGPmxGAlc6UlimsTc600ZEZi
+        re87vGdW0vZsq0HAmDqGlJVcXzBeQgc4LwiwqYYpONVbh1c+DXohc9oeOCd08E6MLJg3mg1C37YX
+        xisaN5znK0hqpReePsLGxvCE8qptd9Dz3lS7YBKE3iy19bC71hxFHa6ttXXgCv2lEbRFtuc9K9yx
+        MM6zIhdkWffK77ExKZnhOhIqMnH2PlbPqcP7zglbzJ5eX9wsSUwkMPEkZPkSwh1sNZltsKtPatvN
+        77twiRx70jYTX7NvKm0J7D+j1xhodX1iWJHHjE7JUqPb7wFs+1KfNAL+7NFjrc00+9QM2zzVK2K6
+        uQDMCo40511JX95IfzPg/3sj1RMzxeqCPDSk7NO/D0eTid/0Y9crvk/XLx+wCqyym02+6j6NM7Aj
+        6vHhVEjMJeoHr5JfZdZpb7S9lfl936m1jd8JthJoBsw2/h2An9j4TexobErS/8eNGbsGFRkL1TpB
+        EizwekHeh2ppRrTN+GMj/AkAAP//vJfBboMwDIZfpeqht8K60sskVO2wwyR22rmagFrARoERoq6H
+        vvviOIFQOo01aMe6cfLFNs5vPEH2FREMO1ipUaaBHZJqzHtrzPU0mPS99UFftOyRqGtrVG8aVFGR
+        fc6gPGpIzxpyMxnkoEQDadOom/l5h9LE/BLt0P+zFFAvctaUBzldvYlnfOWN62BhgU2InOdS+DnV
+        6StjTlIDFGlZiT7kvGd1+JCkS6iyeKn0L7mQvBandc3uSSyaBbRIqckB2pW292Pfxq6chxGQdhhx
+        o4vXZqge1W4dckAGzav+F/2WNyWq4xwaGJnGthJWzp1LG7mMJyK1zfaTQ33yR1/+mqIWzGHThHF6
+        GD20XMbD8DdiYli7uDyaSyk2Pe9x96AbxGV16sZrLKIb82n4G/yG1cir+A37mZy8u/T2NrBJsZqj
+        XVHwH1BvY17jpKdE/vPeX7C0PL7yCAdUGgp9fNxNMyOLcpWgQk/7Bc/zxU3l0oYZgZMCZBv7Pcic
+        Qd0rB+1tFIM2taXQGeyiiIe7tFsY5eAywDF9q+SoL8eQv0aDOgcK1t35GwAA//8DAFZhNg1MFgAA
+    headers:
+      Atl-Request-Id:
+      - 1f2a65fd-a609-4604-a5b0-57706c020c82
+      Atl-Traceid:
+      - 1f2a65fda6094604a5b057706c020c82
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:18 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=288,atl-edge-internal;dur=15,atl-edge-upstream;dur=270,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Warning:
+      - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
+        June 03, 2024)'
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - a2c7004340d79a5385a3da9a87056ab4
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA5yQUUvDMBDHv0te3bpc19ItbzLBKTqFdi+KSJpcMJompUkHY+y7m6Cw+aa+HXe/
+        //2OO5CWe9wOhjDyFkLv2WwmUaEI0r27jAfDvdfcZhYDmRCpfW/4/h98jcNOC5ToP9Zo+hXagMNf
+        l6ycVWZEK/B3yR0OXjsbYaAUMprRab25fKzXD81puhm7NlaEPSdoQif0JTqxN27fxSubfZ9sK+NG
+        GUPtqI38ihAWA3lVfTeveEhgTvNySmGaLxooWAFsvsgopRc0wjHv4x9waHT3g102ObCiZLDMoDqx
+        oruxykVQlSUgVnNoJYpCCI7IoV1IBcuKKyiiQLUl5meCYJLhVg88vRAVH024c4Kn9oGY74qgfd3W
+        5Hh+2JOzaXJ935DjJwAAAP//AwCGwdS4IAIAAA==
+    headers:
+      Atl-Request-Id:
+      - a128a453-82a5-46fe-a051-0d622a2f0da1
+      Atl-Traceid:
+      - a128a45382a546fea0510d622a2f0da1
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:19 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=162,atl-edge-internal;dur=14,atl-edge-upstream;dur=149,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - 4c5701eb45fee93086d2d076d9db96b1
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Epic&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWW0/bMBT+K1aeS0JLxVClaZqASWwTmsTlZULIbU5bg2NnttMmQ/3vO6e5OKVs
+        S9nGXshTfHIu37G/88UPAeQpV3EwClKj72DibNDzr6OvD95BWJuBK1IgFwtyira5c6kdRVEMUwyI
+        9Z0OuZPcWsFVqMBFBqyLeCqiQVRljfr7+GAKQUnrxT0UuDq/PL24xJXiCeDySgnnMAEV5AvuuLky
+        ElE9BMOjfHi0Y/1MiQUYy+VtmStaCFhG1FADrfrQ3x/uv8Gag2E+GP7bKu+s+A5vbcKlxIL9w7x/
+        +BIF87riwSA/GLxExQRikSXBqtfmEfHrGUxqMjzNpRjsxIjUCa3Q+p6NxYxlFgyzTpuCuTl3TAHE
+        ljnNxsDGRt+DYrFeqpAdG+AOYjYu2EdhOLvQU7fkBtgeOjClHcNGHNOGxSDBQUjVJ1ohM7t0IRI+
+        AxtRhPV92AhSMQntYubJf4oWXGXKGa6sJFDnG19sNnbc3gejKZcWesFcgOFmMi8+wwIQTL/nZ3cq
+        QMY0RtULjpDNkoSbgl4NfMuEAXR0JsNMdjKHhNMXAofh1hmhCJstrIOELFX0qsF7UVnqWa49EBi3
+        JzDlmXTXXGbQANYpAqZTIiIgD1xw06ZHJ2TeuwXOGz28M7Kxy9KzRNiO7YTxBmVISr2EeO30yt8O
+        /P0tS1d06BOdpFqBon9O+9SroK1j58ZwopbAA8cQH9+mQSup58GxN9Y8aPl1JELA45gqAdUzkOgF
+        BE+QgzrbOMwurW3PWjuFb+SkZa07aXt2baWeu0q6O01d7dsCWZs8wC+NUwnOB+0AbHtTnzVxf3b3
+        qKJJPD6V2lYNFW2ASFIpUFb9kb5eVf5mwf93VSmVKUPVTda/zVskTL+/4xSX8cFaZcK0yIUNZwZA
+        zXWKbA/vUKNHs/ke6eee5GOgTsuYM0y/ruhHijSVrW8BjXZtwdtpvFZ0I8ivcYtKc5fWHmsvbXAp
+        OI0YtHN69B9EzipnL75t112g9yoN/rX6pkZoI9yjW87POmu8N3StsrWFrXGrla0xbDVQKug2/icA
+        P1PZhP4BAAD//7xYwW6DMAz9lx16XLaWHhHabZOYVKm79kAZAlQGGxBVPfTfZ8cJOINJlKAea7Dz
+        Yr/afuDZAis/d5DrIDkYsjzNILo9y1/JiCeoxgnJcAO7Xg7sEKmBuXaGuVkGJjUUG+g7NRkNdeMM
+        1VsGKjDSxhlWZwPScwa5XQzkgKKhshmo24frAXcv/k90g35PKoyMHW9aB4tKbEI3zZy8PHUuZuR4
+        f0ZOSC+Njxxk3qDt/du3sSurOTdz2gzXYx2thxySweDVz6HfyrbC9R9lz8Qydkx4fnwSFEg0MoXS
+        tsGPTOqLP/nyY5IBMEdtG8XZF0qXWflg/iwnzNrn5YW/SrmxvKfdg24QV9+XXq4jiWbWk/kz/MzK
+        6gq/QdkqJd+X1wrgUmKtywUQ/pTUQSzrGvKiVczbp79qsuq8l8cPkLO7CJ/5ONy5uSGLdlVAQTD4
+        pSyK1Sy6dGlGwCmI/mlJxq8FFh2MNyODMXVU6A1uWcTDBUWLjkUimgT1fqD3bV/prFuzQZ0DN/LD
+        9RcAAP//AwBwEqjntBYAAA==
+    headers:
+      Atl-Request-Id:
+      - 73c8b0f9-1d75-4368-acd7-aa0789b267cf
+      Atl-Traceid:
+      - 73c8b0f91d754368acd7aa0789b267cf
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:19 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=297,atl-edge-internal;dur=15,atl-edge-upstream;dur=282,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Warning:
+      - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
+        June 03, 2024)'
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - ad710f2110169e1ee2d8b1c8c01707f3
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "new engagement", "description":
+      "new engagement", "issuetype": {"name": "Epic"}, "customfield_10011": "new engagement"}}'
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '173'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"16611","key":"NTEST-1828","self":"https://defectdojo.atlassian.net/rest/api/2/issue/16611"}'
+    headers:
+      Atl-Request-Id:
+      - e5d301a0-db46-476e-a680-b2b0eb8a1db6
+      Atl-Traceid:
+      - e5d301a0db46476ea680b2b0eb8a1db6
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:20 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=750,atl-edge-internal;dur=13,atl-edge-upstream;dur=737,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - 4476e86ab623cefcadc29c6eea3b1844
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1828
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      Atl-Request-Id:
+      - fc062cd3-da38-4d95-8b00-ecc24bb3dcb2
+      Atl-Traceid:
+      - fc062cd3da384d958b00ecc24bb3dcb2
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Wed, 29 Jan 2025 20:45:20 GMT
+      Nel:
+      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - atl-edge;dur=271,atl-edge-internal;dur=14,atl-edge-upstream;dur=258,atl-edge-pop;desc="aws-us-east-1"
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Arequestid:
+      - 446c00b1e72bcc391857513273a2fa6a
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

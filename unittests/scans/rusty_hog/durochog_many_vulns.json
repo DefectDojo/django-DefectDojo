@@ -1,0 +1,38 @@
+[
+    {
+       "stringsFound":[
+          "password = getEncryptedPass()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":7712,
+       "diff":"$password = getEncryptedPass();"
+    },
+    {
+       "stringsFound":[
+          "password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"password (Password)",
+       "linenum":3738,
+       "diff":"        \"user=\" + uname + \"&amp;password=\" + password);"
+    },
+    {
+       "stringsFound":[
+          "pass = '\" . $pass . \"'\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"pass (Password)",
+       "linenum":1052,
+       "diff":"    $query = \"SELECT * FROM users WHERE login = '\" . $login . \"' AND pass = '\" . $pass . \"'\"; // Unsafe"
+    },
+    {
+       "stringsFound":[
+          "password: \"\""
+       ],
+       "path":"/scan_folder/helm/defectdojo/values.yaml",
+       "reason":"password (Password)",
+       "linenum":274,
+       "diff":"    password: \"\""
+    }
+ ]

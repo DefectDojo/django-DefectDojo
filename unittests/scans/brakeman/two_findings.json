@@ -1,0 +1,154 @@
+{
+  "scan_info": {
+    "app_path": "/Users/steevebarbeau/public_code/ruby-on-rails-sample-app",
+    "rails_version": "5.1.6",
+    "security_warnings": 2,
+    "start_time": "2020-04-11 16:51:43 -0700",
+    "end_time": "2020-04-11 16:51:44 -0700",
+    "duration": 0.451518,
+    "checks_performed": [
+      "BasicAuth",
+      "BasicAuthTimingAttack",
+      "ContentTag",
+      "CookieSerialization",
+      "CreateWith",
+      "CrossSiteScripting",
+      "DefaultRoutes",
+      "Deserialize",
+      "DetailedExceptions",
+      "DigestDoS",
+      "DynamicFinders",
+      "EscapeFunction",
+      "Evaluation",
+      "Execute",
+      "FileAccess",
+      "FileDisclosure",
+      "FilterSkipping",
+      "ForgerySetting",
+      "HeaderDoS",
+      "I18nXSS",
+      "JRubyXML",
+      "JSONEncoding",
+      "JSONParsing",
+      "LinkTo",
+      "LinkToHref",
+      "MailTo",
+      "MassAssignment",
+      "MimeTypeDoS",
+      "ModelAttrAccessible",
+      "ModelAttributes",
+      "ModelSerialize",
+      "NestedAttributes",
+      "NestedAttributesBypass",
+      "NumberToCurrency",
+      "PermitAttributes",
+      "QuoteTableName",
+      "Redirect",
+      "RegexDoS",
+      "Render",
+      "RenderDoS",
+      "RenderInline",
+      "ResponseSplitting",
+      "RouteDoS",
+      "SQL",
+      "SQLCVEs",
+      "SSLVerify",
+      "SafeBufferManipulation",
+      "SanitizeMethods",
+      "SelectTag",
+      "SelectVulnerability",
+      "Send",
+      "SendFile",
+      "SessionManipulation",
+      "SessionSettings",
+      "SimpleFormat",
+      "SingleQuotes",
+      "SkipBeforeFilter",
+      "SprocketsPathTraversal",
+      "StripTags",
+      "SymbolDoSCVE",
+      "TranslateBug",
+      "UnsafeReflection",
+      "ValidationRegex",
+      "WithoutProtection",
+      "XMLDoS",
+      "YAMLParsing"
+    ],
+    "number_of_controllers": 8,
+    "number_of_models": 4,
+    "number_of_templates": 31,
+    "ruby_version": "2.4.6",
+    "brakeman_version": "4.7.2"
+  },
+  "warnings": [
+    {
+      "warning_type": "Dynamic Render Path",
+      "warning_code": 15,
+      "fingerprint": "518c8b9dc22e0e30a72f5e39e79c33ec6c3640f86bf95c5ce2472e6399072f71",
+      "check_name": "Render",
+      "message": "Render path contains parameter value",
+      "file": "app/views/users/show_follow.html.erb",
+      "line": 25,
+      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
+      "code": "render(action => User.find(params[:id]).followers.paginate(:page => params[:page]), {})",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "UsersController",
+          "method": "followers",
+          "line": 63,
+          "file": "app/controllers/users_controller.rb",
+          "rendered": {
+            "name": "users/show_follow",
+            "file": "app/views/users/show_follow.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "users/show_follow"
+      },
+      "user_input": "params[:page]",
+      "confidence": "Weak"
+    },
+    {
+      "warning_type": "Dynamic Render Path",
+      "warning_code": 15,
+      "fingerprint": "c3605328cbf58f728428c048651f761c2bbf123ec2e23f601ab285ae38b96092",
+      "check_name": "Render",
+      "message": "Render path contains parameter value",
+      "file": "app/views/users/show.html.erb",
+      "line": 19,
+      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
+      "code": "render(action => User.find(params[:id]).microposts.paginate(:page => params[:page]), {})",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "UsersController",
+          "method": "show",
+          "line": 15,
+          "file": "app/controllers/users_controller.rb",
+          "rendered": {
+            "name": "users/show",
+            "file": "app/views/users/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "users/show"
+      },
+      "user_input": "params[:page]",
+      "confidence": "Weak"
+    }
+  ],
+  "ignored_warnings": [
+
+  ],
+  "errors": [
+
+  ],
+  "obsolete": [
+
+  ]
+}

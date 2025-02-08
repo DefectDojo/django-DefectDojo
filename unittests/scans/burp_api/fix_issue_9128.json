@@ -1,0 +1,74 @@
+{
+    "scan_metrics": {
+      "current_url": "",
+      "crawl_requests_made": 38451,
+      "crawl_network_errors": 8,
+      "crawl_unique_locations_visited": 82,
+      "crawl_requests_queued": 0,
+      "audit_queue_items_completed": 0,
+      "audit_queue_items_waiting": 64,
+      "audit_requests_made": 2140789,
+      "audit_network_errors": 131,
+      "issue_events": 1,
+      "crawl_and_audit_caption": "Auditing. 54m estimated time remaining.",
+      "crawl_and_audit_progress": 95,
+      "total_elapsed_time": 67898
+    },
+    "issue_events": [
+      
+      {
+        "id": "74",
+        "type": "issue_found",
+        "issue": {
+          "name": "Content type incorrectly stated",
+          "type_index": 8389632,
+          "serial_number": "8825325317190135808",
+          "origin": "https://pentest-website.com",
+          "path": "",
+          "severity": "low",
+          "confidence": "firm",
+          "description": "Description of Issue",
+          "issue_background": "<p>Issue background data</p>",
+          "remediation_background": "<p>remediation background data</p>",
+          "caption": "",
+          "evidence": [
+            {
+              "type": "FirstOrderEvidence",
+              "detail": {
+                "band_flags": [
+                  "in_band"
+                ]
+              },
+              "request_response": {
+                "url": "https://pentest-website.com",
+                "request": [
+                  {
+                    "type": "DataSegment",
+                    "data": "R0VUIC9mb250cy9mYS1icmFuZHMtNzc3LmFhYTIgSFRUUC8yDQpIb3N0OiBwZW50ZXN0LXdlYnNpdGUuY29tDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUsIGJyDQpBY2NlcHQ6IHRleHQvaHRtbCxhcHBsaWNhdGlvbi94aHRtbCt4bWwsYXBwbGljYXRpb24veG1sO3E9MC45LGltYWdlL2F2aWYsaW1hZ2Uvd2VicCxpbWFnZS9hcG5nLCovKjtxPTAuOCxhcHBsaWNhdGlvbi9zaWduZWQtZXhjaGFuZ2U7dj1iMztxPTAuNw0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUztxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzExOS4wLjYwNDUuMTk5IFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCkNvb2tpZTogbXBfNmI2NDFhOWVmODRiYmZiYjJjZDYwYjI4MjJkYzRmMDdfbWl4cGFuZWw9JTdCJTIyZGlzdGluY3RfaWQlMjIlM0ElMjAlMjIlMjRkZXZpY2UlM0ExOGMzYTk3ZjZmZTYwZi0wMjk0ZjcwOWY0ZTZmZC02ZDMyNWU1My03NTMwMC0xOGMzYTk3ZjZmZjYwZiUyMiUyQyUyMiUyNGRldmljZV9pZCUyMiUzQSUyMCUyMjE4YzNhOTdmNmZlNjBmLTAyOTRmNzA5ZjRlNmZkLTZkMzI1ZTUzLTc1MzAwLTE4YzNhOTdmNmZmNjBmJTIyJTJDJTIyJTI0aW5pdGlhbF9yZWZlcnJlciUyMiUzQSUyMCUyMiUyNGRpcmVjdCUyMiUyQyUyMiUyNGluaXRpYWxfcmVmZXJyaW5nX2RvbWFpbiUyMiUzQSUyMCUyMiUyNGRpcmVjdCUyMiUyQyUyMlN1YmRvbWFpbiUyMiUzQSUyMCUyMnBlbnRlc3QtcmMlMjIlMkMlMjJQbGF0Zm9ybSUyMiUzQSUyMCUyMldlYkFwcCUyMiUyQyUyMnN1cGVyX3N1YmRvbWFpbiUyMiUzQSUyMCUyMnBlbnRlc3QtcmMlMjIlMkMlMjJzdXBlcl9wbGF0Zm9ybSUyMiUzQSUyMCUyMldlYkFwcCUyMiU3RA0KVXBncmFkZS1JbnNlY3VyZS1SZXF1ZXN0czogMQ0KU2VjLUNILVVBOiAiLk5vdC9BKUJyYW5kIjt2PSI5OSIsICJHb29nbGUgQ2hyb21lIjt2PSIxMTkiLCAiQ2hyb21pdW0iO3Y9IjExOSINClNlYy1DSC1VQS1QbGF0Zm9ybTogV2luZG93cw0KU2VjLUNILVVBLU1vYmlsZTogPzANCg0K",
+                    "length": 1150
+                  }
+                ],
+                "response": [
+                  
+                  {
+                    "type": "DataSegment",
+                    "data": "DQpDb250ZW50LUxlbmd0aDogNjUzODQNClNlcnZlcjogZW52b3kNCkRhdGU6IFR1ZSwgMDUgRGVjIDIwMjMgMTM6Mjg6NDcgR01UDQpFeHBpcmVzOiBUdWUsIDA1IERlYyAyMDIzIDE0OjI4OjQ3IEdNVA0KTGFzdC1Nb2RpZmllZDogV2VkLCAyOSBOb3YgMjAyMyAwODowOToyNyBHTVQNCkV0YWc6ICI3YWE3YTc3N2FhNzdhYTc3N2E3NzdhN2FhNzdhYTc3YSINCkFjY2VwdC1SYW5nZXM6IGJ5dGVzDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTMwMDAwMDAsIHB1YmxpYywgcy1tYXhhZ2U9MzAwMDAwMA0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpDb250ZW50LVNlY3VyaXR5LVBvbGljeTogZnJhbWUtcGFyZW50ICdzZWxmJzsNClN0cmljdC1UcmFuc3BvcnQtU2VjdXJpdHk6IG1heC1hZ2U9Nzc3NzcwMDA7IGluY2x1ZGVTdWJEb21haW5zOyBwcmVsb2FkDQpWaWE6IDEuMSBnb29nbGUsIDEuMSA3YWFhN2FhYWFhYTdhYTc3YTdhYWFhNzdhNzc3N2FhNy5jbG91ZGZyb250Lm5ldCAoQ2xvdWRGcm9udCkNClgtQ2FjaGU6IEhpdCBmcm9tIGNsb3VkZnJvbnQNClgtQW16LUNmLVBvcDogQUFBNzctQTINClgtQW16LUNmLUlkOiA3N2FhLUE3QUFhLWFBN2E3YUFhQTc3YTdBQTdhYTdBQTdhNzc3ZGhCQWVoWEhTNG9Lb3NUM1E9PQ0KQWdlOiA3MTYxDQoNCndPRjIAAQAAAAD/aAALAAAAAc8cAAD/FAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAABxUBlYAszAKhqpkhOt4ATYCJAOLeAuFfgAEIAWGKgejf1vsa3Gn8GB/szQodVeV33O+bgdnRQd02DiANpCNFh2IPQ6UotZk/////xuSiYxZcsAladsCoADiNufPF5q5ChPXSXIBVUw1ZeKIwhGYl6nOy5okg5vwDgk5hK3tx/l4oEu17Qi5VFB2oY6knlG+rnS/WjkepZze",
+                    "length": 858
+                  }
+            
+                ],
+                "was_redirect_followed": false,
+                "request_time": "1701790182891"
+              }
+            }
+          ],
+          "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiMjQiOiIxIiwiMjUiOiIsIjI2IjoiIiwiMjciOiJJbnRlcm5ldCBFeHBsb3JlciAxMadJbnRlcm5ldCBFeHBsb3JlciAxMSAoQ29tcGF0aWJpbGl0eSBNb2RlKaciLCI3IjoiZm9udC93b2ZmMiJ9fQ=="
+        }
+      }
+    
+    ],
+    "task_id": "18",
+    "scan_status": "auditing",
+    "message": "",
+    "error_code": 0
+  }

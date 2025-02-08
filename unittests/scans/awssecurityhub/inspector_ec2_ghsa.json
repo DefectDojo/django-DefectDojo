@@ -1,0 +1,112 @@
+{
+  "Findings": [
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:012345678912:finding/e07acd3c1cac9df14b96604ceef247be",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "012345678912",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-09-07T17:20:26Z",
+      "LastObservedAt": "2023-09-07T17:20:26Z",
+      "CreatedAt": "2023-09-07T17:20:26Z",
+      "UpdatedAt": "2023-09-07T17:20:26Z",
+      "Severity": {
+        "Label": "MEDIUM",
+        "Normalized": 40
+      },
+      "Title": "GHSA-p98r-538v-jgw5 - kernel-5.15",
+      "Description": "An out-of-bounds read issue was found in the Linux kernel’s crc16 implementation in lib/crc16.c when called from fs/ext4/super.c. ext4_group_desc_csum does not properly check an offset which may lead to out-of-bounds read.",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/instanceId": "i-07c11cc535d830123",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "BOTTLEROCKET",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:012345678912:finding/e07acd3c1cac9df14b96604ceef247be",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEc2Instance",
+          "Id": "arn:aws:ec2:eu-central-1:012345678912:instance/i-07c11cc535d830123",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Tags": {
+            "EKS_GROUP_NAME": "EKS managed node group",
+            "aws:eks:cluster-name": "eks01",
+            "eks:cluster-name": "eks01",
+            "kubernetes.io/cluster/eks01": "owned",
+            "aws:ec2launchtemplate:version": "3",
+            "k8s.io/cluster-autoscaler/enabled": "true",
+            "NODE_ROLE": "tester",
+            "k8s.io/cluster-autoscaler/eks01": "owned",
+            "Name": "eks01-testers",
+            "Role": "kubernetes",
+            "aws:autoscaling:groupName": "eks-eks01-testers-20230322111111111100000001-10c38473-1b1c-e880-202d-e076e43e6ece",
+            "aws:ec2:fleet-id": "fleet-2e2437ad-ea95-e13c-2c92-0e8875e53bff",
+            "eks:nodegroup-name": "eks01-testers-20230322103837516200000001",
+            "aws:ec2launchtemplate:id": "lt-040e834ea0c57553b"
+          },
+          "Details": {
+            "AwsEc2Instance": {
+              "Type": "c4.4xlarge",
+              "ImageId": "ami-0b4a5f1e4bcfe46a3",
+              "IpV4Addresses": ["123.123.123.123"],
+              "IamInstanceProfileArn": "arn:aws:iam::012345678912:instance-profile/eks-10c38473-1b1c-e880-202d-e076e43e6ece",
+              "VpcId": "vpc-11111111111111111",
+              "SubnetId": "subnet-11111111111111111",
+              "LaunchedAt": "2023-09-07T17:19:47Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "GHSA-p98r-538v-jgw5",
+          "VulnerablePackages": [
+            {
+              "Name": "kernel-5.15",
+              "Version": "1.14.1",
+              "Epoch": "0",
+              "Release": "842c7134",
+              "Architecture": "X86_64",
+              "PackageManager": "OS",
+              "FixedInVersion": "0:1.14.2-0",
+              "Remediation": "apiclient update check && apiclient update apply"
+            }
+          ],
+          "RelatedVulnerabilities": ["GHSA-p98r-538v-jgw5", "CVE-2023-34256"],
+          "Vendor": {
+            "Name": "BOTTLEROCKET",
+            "Url": "https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5",
+            "VendorSeverity": "medium",
+            "VendorCreatedAt": "2023-07-07T20:56:55Z",
+            "VendorUpdatedAt": "2023-07-07T20:56:55Z"
+          },
+          "FixAvailable": "YES",
+          "ExploitAvailable": "NO"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "MEDIUM"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    }
+  ]
+}

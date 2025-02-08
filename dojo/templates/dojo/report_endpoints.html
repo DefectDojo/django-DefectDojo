@@ -1,0 +1,56 @@
+{% load navigation_tags %}
+<div data-multiple='true' class="panel panel-available-widget" >
+    <div class="panel-heading tight" title="Click and drag to move" data-toggle="tooltip">
+        <div class="clearfix">
+            <h5 class="pull-left">Vulnerable Endpoints</h5>
+            <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="panel panel-available-widget">
+            <div class="panel-heading">
+                <h6>Filters</h6>
+            </div>
+            <div class="panel-body">
+                {% if extra_help %}
+                    <div class="alert alert-info" role="alert">
+                        {{ extra_help }}
+                    </div>
+                {% endif %}
+                {% include "dojo/report_filter_snippet.html" with form=filtered.form title=title%}
+            </div>
+        </div>
+
+        {% if endpoints %}
+            <div class="clearfix endpoint-pagination">
+                {% include "dojo/paging_snippet.html" with page=endpoints page_size=False %}
+            </div>
+            <div class="table-responsive">
+                <table id="open_findings"
+                       class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Product</th>
+                        <th nowrap="nowrap">Open Findings</th>
+                    </tr>
+                    <tbody>
+                    {% for e in endpoints %}
+                        <tr>
+                            <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
+                            <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
+                            <td>
+                              <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="clearfix endpoint-pagination">
+                {% include "dojo/paging_snippet.html" with page=endpoints page_size=False %}
+            </div>
+
+        {% endif %}
+    </div>
+</div>

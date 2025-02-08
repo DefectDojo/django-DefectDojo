@@ -1,0 +1,8 @@
+[
+  {"rule": "Content-Security-Policy", "severity": "high", "message": "Must-Contain-One directive missed", "expected": ["default-src 'none'", "default-src 'self'"], "delimiter": ";", "value": "upgrade-insecure-requests", "anomaly": ["default-src 'none'", "default-src 'self'"]},
+  {"rule": "Strict-Transport-Security", "severity": "high", "message": "Header not included in response", "expected": ["max-age=31536000", "includesubdomains"], "delimiter": ";"},
+  {"rule": "X-Frame-Options", "severity": "high", "message": "Header not included in response", "expected": ["sameorigin", "deny"], "delimiter": ";"},
+  {"rule": "Referrer-Policy", "severity": "high", "message": "Header not included in response"},
+  {"rule": "Cache-Control", "severity": "high", "message": "Value does not match security policy", "expected": ["no-cache", "no-store", "must-revalidate"], "delimiter": ",", "value": "no-cache,must-revalidate,max-age=0,no-store,private"},
+  {"rule": "Pragma", "severity": "high", "message": "Header not included in response", "expected": ["no-cache"], "delimiter": ";"}
+]

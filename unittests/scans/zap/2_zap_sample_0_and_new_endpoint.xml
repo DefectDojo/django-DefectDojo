@@ -1,0 +1,180 @@
+<?xml version="1.0"?><OWASPZAPReport version="2.9.0" generated="Tue, 12 May 2020 20:57:30">
+  <site name="https://mainsite.com" host="mainsite.com" port="443" ssl="true"><alerts><alertitem>
+    <pluginid>10011</pluginid>
+    <alert>zap1: Cookie Without Secure Flag</alert>
+    <name>Cookie Without Secure Flag</name>
+    <riskcode>1</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A cookie has been set without the secure flag, which means that the cookie can be accessed via unencrypted connections.</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: opvc</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>dmid</param>
+    <evidence>Set-Cookie: dmid</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>sitevisitscookie</param>
+    <evidence>Set-Cookie: sitevisitscookie</evidence>
+    </instance>
+    <instance>
+    <uri>https://othersite.com</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: NEW_END_POINT</evidence>
+    </instance>
+    </instances>
+    <count>3</count>
+    <solution>Whenever a cookie contains sensitive information or is a session token, then it should always be passed using an encrypted channel. Ensure that the secure flag is set for cookies containing such sensitive information.</solution>
+    <reference>http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)</reference>
+    <cweid>614</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  <alertitem>
+    <pluginid>10054</pluginid>
+    <alert>zap2: Cookie Without SameSite Attribute</alert>
+    <name>Cookie Without SameSite Attribute</name>
+    <riskcode>1</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a &apos;cross-site&apos; request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>sitevisitscookie</param>
+    <evidence>Set-Cookie: sitevisitscookie</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>dmid</param>
+    <evidence>Set-Cookie: dmid</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>JSESSIONID</param>
+    <evidence>Set-Cookie: JSESSIONID</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: opvc</evidence>
+    </instance>
+    </instances>
+    <count>4</count>
+    <solution>Ensure that the SameSite attribute is set to either &apos;lax&apos; or ideally &apos;strict&apos; for all cookies.</solution>
+    <reference>https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site</reference>
+    <cweid>16</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  <alertitem>
+    <pluginid>10055</pluginid>
+    <alert>zap3: CSP Scanner: Wildcard Directive</alert>
+    <name>CSP Scanner: Wildcard Directive</name>
+    <riskcode>2</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Medium (Medium)</riskdesc>
+    <desc>The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined: script-src, script-src-elem, script-src-attr, style-src, style-src-elem, style-src-attr, img-src, connect-src, frame-src, font-src, media-src, object-src, manifest-src, worker-src, prefetch-src</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>Content-Security-Policy</param>
+    <evidence>frame-ancestors &apos;self&apos;;</evidence>
+    </instance>
+    </instances>
+    <count>1</count>
+    <solution>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</solution>
+    <reference>http://www.w3.org/TR/CSP2/http://www.w3.org/TR/CSP/http://caniuse.com/#search=content+security+policyhttp://content-security-policy.com/https://github.com/shapesecurity/salvation</reference>
+    <cweid>16</cweid>
+    <wascid>15</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  <!-- <alertitem>
+    <pluginid>10010</pluginid>
+    <alert>zap4: Cookie No HttpOnly Flag</alert>
+    <name>Cookie No HttpOnly Flag</name>
+    <riskcode>1</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A cookie has been set without the HttpOnly flag, which means that the cookie can be accessed by JavaScript. If a malicious script can be run on this page then the cookie will be accessible and can be transmitted to another site. If this is a session cookie then session hijacking may be possible.</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: opvc</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>dmid</param>
+    <evidence>Set-Cookie: dmid</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>sitevisitscookie</param>
+    <evidence>Set-Cookie: sitevisitscookie</evidence>
+    </instance>
+    </instances>
+    <count>3</count>
+    <solution>Ensure that the HttpOnly flag is set for all cookies.</solution>
+    <reference>http://www.owasp.org/index.php/HttpOnly</reference>
+    <cweid>16</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem> -->
+  <alertitem>
+    <pluginid>10096</pluginid>
+    <alert>zap5: Timestamp Disclosure - Unix</alert>
+    <name>Timestamp Disclosure - Unix</name>
+    <riskcode>1</riskcode>
+    <confidence>1</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A timestamp was disclosed by the application/web server - Unix</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <evidence>265151019</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <evidence>398525181</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <evidence>153792000</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <evidence>1028274645</evidence>
+    </instance>
+    </instances>
+    <count>4</count>
+    <solution>Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.</solution>
+    <otherinfo>265151019, which evaluates to: 1978-05-27 22:03:39</otherinfo>
+    <reference>https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposurehttp://projects.webappsec.org/w/page/13246936/Information%20Leakage</reference>
+    <cweid>200</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  </alerts></site></OWASPZAPReport>

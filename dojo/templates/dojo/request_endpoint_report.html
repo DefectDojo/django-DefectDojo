@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Generate Product Endpoint Report
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
+                    <div class="dojo-filter-heading">Filters</div>
+                    <div class="filter-set">
+
+                        {% include "dojo/filter_snippet.html" with form=filtered.form %}
+
+                    </div>
+                    <br/>
+
+                    <div class="alert alert-info" role="alert">
+                        <span class="fa-solid fa-lightbulb" aria-hidden="true"></span>
+                        <span class=""><b>Hint:</b></span>
+                        To generate a report of all mitigated findings in endpoints select: Active: Either,
+                        Verified: Either, Mitigated: Yes
+                    </div>
+                    <div class="dojo-report-heading">Report Options</div>
+                    <div class="filter-set">
+                        {% include "dojo/filter_snippet.html" with form=report_form submit='report' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if filtered %}
+                <div class="panel panel-default table-responsive">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <tr>
+                            <th>Endpoint</th>
+                            <th nowrap="nowrap">Open Findings</th>
+                        </tr>
+
+                        {% for e in endpoints %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_endpoints %}
+                </div>
+            {% else %}
+                <p class="text-center"> No endpoints found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block postscript %}
+    {{ block.super }}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

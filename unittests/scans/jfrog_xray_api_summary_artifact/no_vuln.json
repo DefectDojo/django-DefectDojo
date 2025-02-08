@@ -1,0 +1,14 @@
+{
+    "artifacts": [{
+            "general": {
+                "name": "artifact1:1.0",
+                "component_id": "artifact1:1.0",
+                "pkg_type": "Docker",
+                "path": "artifact_path/artifact1/1.0/",
+                "sha256": "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
+            },
+            "issues": [],
+            "licenses": []
+        }
+    ]
+}

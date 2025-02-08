@@ -1,0 +1,98 @@
+{     
+   "total_count": 3,
+   "data": [
+      {
+         "id": "",
+         "severity": "High",
+         "summary": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",
+         "issue_type": "security",
+         "provider": "JFrog",
+         "component": "debian:stretch:libx11",
+         "source_id": "deb://debian:stretch:libx11",
+         "source_comp_id": "deb://debian:stretch:libx11:2:1.6.4-3",
+         "component_versions": {
+            "id": "debian:stretch:libx11",
+            "vulnerable_versions": [
+               "< 2:1.6.4-3+deb9u1"
+            ],
+            "fixed_versions": [
+               "≥ 2:1.6.4-3+deb9u1"
+            ],
+            "more_details": {
+               "cves": [
+                  {
+                     "cve": "CVE-2018-14600",
+                     "cwe": [
+                        "CWE-787"
+                     ],
+                     "cvss_v2": "7.5/CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                     "cvss_v3": "9.8/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                  }
+               ],
+               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",                                                                                                                            
+               "provider": "JFrog"
+            }
+         },
+         "edited": "2019-05-14T00:21:16Z"
+      },
+      {                      
+         "id": "",           
+         "severity": "High", 
+         "summary": "Apache MINA SFTP Server Absolute Path Traversal Remote File Disclosure",                                        
+         "issue_type": "security",
+         "provider": "JFrog",
+         "component": "org.apache.sshd:sshd-core",
+         "source_id": "gav://org.apache.sshd:sshd-core",
+         "source_comp_id": "gav://org.apache.sshd:sshd-core:1.0.0",
+         "component_versions": {
+            "id": "org.apache.sshd:sshd-core",
+            "vulnerable_versions": [
+               "1.0.0 ≤ Version ≤ 1.2.0"
+            ],                
+            "fixed_versions": [
+               "1.3.0"       
+            ],               
+            "more_details": {
+               "cves": [     
+                  {          
+                     "cvss_v2": "7.8/AV:N/AC:L/Au:N/C:C/I:N/A:N"
+                  }          
+               ],            
+               "description": "Apache MINA contains a flaw that allows traversing outside of a restricted path. The issue is due to SFTP servers failing to properly sanitizing user input, specifically absolute paths. With a specially crafted request, a remote attacker can gain access to arbitrary files.",
+               "provider": "JFrog"
+            }                 
+         }
+	 },
+         {    
+		 "id": "",
+		 "severity": "Low",
+		 "summary": "Denial of Service (DoS)",
+		 "issue_type": "security",
+		 "provider": "Snyk",
+		 "component": "io.netty:netty",
+		 "source_id": "gav://io.netty:netty",
+		 "source_comp_id": "gav://io.netty:netty:3.6.6.Final",
+		 "component_versions": {
+		    "id": "io.netty:netty",
+		    "vulnerable_versions": [
+		       "≤ 3.9.1.Final"
+		    ],
+		    "more_details": {
+		       "cves": [
+		          {
+		             "cve": "CVE-2014-3488",
+		             "cwe": [
+		                "CWE-119"
+		             ],
+		             "cvss_v2": "5.0/CVSS:2.0/AV:N/AC:L/Au:N/C:N/I:N/A:P",
+		             "cvss_v3": "5.3/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+		          }
+		       ],
+		       "description": "Denial of Service (DoS)",
+		       "provider": "Snyk"
+		    }
+		 },
+	"edited": "2018-11-25T21:49:03Z"
+      }
+   ]
+}

@@ -1,0 +1,45 @@
+{
+    "status": "OK",
+    "dawn_version": "1.6.9",
+    "scan_started": "2019-04-01 21:14:32 +0000",
+    "scan_duration": "17.601 sec",
+    "target": "/code",
+    "mvc": "rails",
+    "mvc_version": "5.2.1",
+    "applied_checks_count": 235,
+    "skipped_checks_count": 0,
+    "vulnerabilities_count": 4,
+    "mitigated_issues_count": 0,
+    "reflected_xss_count": 0,
+    "vulnerabilities": [{
+        "name": "CVE-2016-6316",
+        "cve_link": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-6316",
+        "severity": "medium",
+        "cvss_score": 4.3,
+        "message": "Text declared as \"HTML safe\" when passed as an attribute value to a tag helper will not have quotes escaped which can lead to an XSS attack.",
+        "remediation": "Please upgrade actionview gem to version 3.2.22.3, 4.2.7.1, 5.0.0.1 or install latest version."
+    }, {
+        "name": "CVE-2016-6317",
+        "cve_link": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-6317",
+        "severity": "medium",
+        "cvss_score": 5.0,
+        "message": "Due to the way Active Record interprets parameters in combination with the way that JSON parameters are parsed, it is possible for an attacker to issue unexpected database queries with “IS NULL” or empty where clauses. This issue does not let an attacker insert arbitrary values into an SQL query, however they can cause the query to check for NULL or eliminate a WHERE clause when most users wouldn’t expect it.",
+        "remediation": "Please upgrade activerecord gem to version 4.2.7.1. Please note that versions 5.0.0 or later are not affected."
+    }, {
+        "name": "Owasp Ror CheatSheet: Cross Site Request Forgery",
+        "cve_link": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=Owasp Ror CheatSheet: Cross Site Request Forgery",
+        "severity": "info",
+        "cvss_score": "    ",
+        "message": "Ruby on Rails has specific, built in support for CSRF tokens. To enable it, or ensure that it is enabled, find the base ApplicationController and look for the protect_from_forgery directive. Note that by default Rails does not provide CSRF protection for any HTTP GET request.",
+        "remediation": "Make sure you are using Rails protect_from_forgery facilities in application_controller.rMake sure you are using Rails protect_from_forgery facilities in application_controller.rb"
+    }, {
+        "name": "Owasp Ror CheatSheet: Security Related Headers",
+        "cve_link": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=Owasp Ror CheatSheet: Security Related Headers",
+        "severity": "info",
+        "cvss_score": "    ",
+        "message": "To set a header value, simply access the response.headers object as a hash inside your controller (often in a before/after_filter). Rails 4 provides the \"default_headers\" functionality that will automatically apply the values supplied. This works for most headers in almost all cases.",
+        "remediation": "Use response headers like X-Frame-Options, X-Content-Type-Options, X-XSS-Protection in your project."
+    }],
+    "mitigated_vuln": [],
+    "reflected_xss": []
+}

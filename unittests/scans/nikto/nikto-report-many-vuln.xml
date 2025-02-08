@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "docs/nikto.dtd">
+<niktoscan>
+
+<niktoscan hoststest="0" options="-Format xml -output nikto.xml -h -" version="2.1.6" scanstart="Sat Nov 14 19:00:19 2020" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="192.168.0.24" targethostname="192.168.0.24" targetport="443" targetbanner="Apache Tomcat" starttime="2020-11-14 19:24:57" sitename="https://192.168.0.24:443/" siteip="https://192.168.0.24:443/" hostheader="192.168.0.24" errors="0" checks="6953">
+<ssl ciphers="ECDHE-RSA-AES256-GCM-SHA384" issuers="/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3" info="/CN=jamf.example.com" altnames="jamf-dmz-01.mwea.de, jamf.example.com" />
+
+<item id="999970" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[CDATA[Finding 1.1]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.24:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.24:443/]]></iplink>
+</item>
+<statistics elapsed="4218" itemsfound="1" itemstested="6953" endtime="2020-11-14 20:35:15" />
+</scandetails>
+
+</niktoscan>
+
+<niktoscan hoststest="1" options="-Format xml -output nikto.xml -h -" version="2.1.6" scanstart="Sat Nov 14 19:00:19 2020" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="192.168.0.20" targethostname="192.168.0.20" targetport="443" targetbanner="Microsoft-IIS/8.5" starttime="2020-11-14 20:35:15" sitename="https://192.168.0.20:443/" siteip="https://192.168.0.20:443/" hostheader="192.168.0.20" errors="0" checks="6953">
+<ssl ciphers="TLS_AES_256_GCM_SHA384" issuers="/C=GB/ST=Greater Manchester/L=Salford/O=Sectigo Limited/CN=Sectigo RSA Domain Validation Secure Server CA" info="/CN=mail.example.com" altnames="mail.example.com, autodiscover.example.com, ehic.example.com" />
+
+<item id="999957" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 2.1]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.20:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.20:443/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 2.2]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.20:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.20:443/]]></iplink>
+</item>
+
+<statistics elapsed="1895" itemsfound="2" itemstested="6953" endtime="2020-11-14 21:06:50" />
+</scandetails>
+
+</niktoscan>
+
+<niktoscan hoststest="2" options="-Format xml -output nikto.xml -h -" version="2.1.6" scanstart="Sat Nov 14 19:00:19 2020" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="192.168.0.65" targethostname="192.168.0.65" targetport="443" targetbanner="Apache" starttime="2020-11-14 21:06:50" sitename="https://192.168.0.65:443/" siteip="https://192.168.0.65:443/" hostheader="192.168.0.65" errors="0" checks="6953">
+<ssl ciphers="ECDHE-RSA-AES256-GCM-SHA384" issuers="/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3" info="/CN=issues.example.com" altnames="issues.example.com" />
+
+<item id="999961" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 3.1]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.65:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.65:443/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 3.2]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.65:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.65:443/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 3.3]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.65:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.65:443/]]></iplink>
+</item>
+<statistics elapsed="1291" itemsfound="3" itemstested="6953" endtime="2020-11-14 21:28:21" />
+</scandetails>
+
+</niktoscan>
+
+<niktoscan hoststest="3" options="-Format xml -output nikto.xml -h -" version="2.1.6" scanstart="Sat Nov 14 19:00:19 2020" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="192.168.0.49" targethostname="192.168.0.49" targetport="443" targetbanner="Apache" starttime="2020-11-14 21:28:21" sitename="https://192.168.0.49:443/" siteip="https://192.168.0.49:443/" hostheader="192.168.0.49" errors="0" checks="6953">
+<ssl ciphers="ECDHE-RSA-AES256-GCM-SHA384" issuers="/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3" info="/CN=software.example.com" altnames="deploy.example.com, software.example.com" />
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 4.1]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.49:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.49:443/]]></iplink>
+</item>
+
+<item id="999955" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 4.2]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.49:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.49:443/]]></iplink>
+</item>
+
+<item id="999993" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Finding 4.3]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.49:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.49:443/]]></iplink>
+</item>
+
+<item id="001885" osvdbid="3092" osvdblink="https://vulners.com/osvdb/OSVDB:3092" method="GET">
+<description><![CDATA[Finding 4.4]]></description>
+<uri><![CDATA[/system/]]></uri>
+<namelink><![CDATA[https://192.168.0.49:443/system/]]></namelink>
+<iplink><![CDATA[https://192.168.0.49:443/system/]]></iplink>
+</item>
+
+<statistics elapsed="1729" itemsfound="4" itemstested="6953" endtime="2020-11-14 21:57:10" />
+</scandetails>
+
+</niktoscan>
+
+</niktoscan>

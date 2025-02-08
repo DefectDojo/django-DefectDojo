@@ -1,0 +1,1 @@
+[{"key": "pip password", "value": "hardcoded", "file": "src/pip.conf", "line": 2, "rule_id": "pip", "message": "pip.conf Password", "severity": "CRITICAL"}]

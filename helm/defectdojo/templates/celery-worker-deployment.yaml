@@ -1,0 +1,183 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-celery-worker
+  labels:
+    defectdojo.org/component: celery
+    defectdojo.org/subcomponent: worker
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- if .Values.celery.annotations }}
+  annotations:
+{{- with .Values.celery.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  replicas: {{ .Values.celery.worker.replicas }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
+  selector:
+    matchLabels:
+      defectdojo.org/component: celery
+      defectdojo.org/subcomponent: worker
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: celery
+        defectdojo.org/subcomponent: worker
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+      {{- with .Values.celery.worker.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ $fullName }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      {{- if  .Values.localsettingspy }}
+      - name: localsettingspy
+        configMap:
+          name: {{ $fullName }}-localsettingspy
+      {{- end }}
+      {{- if  .Values.django.uwsgi.certificates.enabled }}
+      - name: cert-mount
+        configMap:
+          name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
+      {{- range .Values.celery.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
+      {{- if or .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled }}
+      initContainers:
+      {{- end }}
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
+      {{- end }}
+      {{- if .Values.dbMigrationChecker.enabled }}
+      {{$data := dict "fullName" $fullName }}
+      {{- $newContext := merge . (dict "fullName" $fullName) }}
+      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
+      {{- end }}
+      containers:
+      - name: celery
+        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
+        command: ['/entrypoint-celery-worker.sh']
+        volumeMounts:
+        {{- if  .Values.localsettingspy }}
+        - name: localsettingspy
+          readOnly: true
+          mountPath: /app/dojo/settings/local_settings.py
+          subPath: file
+        {{- end }}
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}  
+        {{- range .Values.celery.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
+        env:
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+            {{- if eq .Values.celery.broker "redis" }}
+              name: {{ .Values.redis.auth.existingSecret| default "defectdojo-redis-specific" }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
+            {{- end }}
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if eq .Values.database "postgresql" }}
+                name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+                key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+              {{- else if eq .Values.database "postgresqlha" }}
+                name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
+                key: postgresql-postgres-password
+              {{- end }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.celery.worker.resources | nindent 10 }}
+      {{- with .Values.celery.worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.celery.worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.celery.worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,3 @@
+Rule code,Rule,Priority,CWE,Software characteristic,Vulnerability type,Language,Effort,File,Line number,Line text,Source file,Source line number,Source line text,Muted,Normative,Status,CWE Scope,Framework
+OPT.JAVASCRIPT.ERRORCOMUN.UnusedLocalVar,Avoid unused local variable,High,101,Maintainability,Other,Typescript,03m,file.js,12,self = this,,,,No,"Agile Alliance:Concise-CDED,CWE:563",none,,
+OPT.JAVASCRIPT.ERRORCOMUN.UnusedLocalVar,Avoid unused local variable,High,101,Maintainability,Other,Typescript,03m,another-file.js,12,self = this,,,,No,"Agile Alliance:Concise-CDED,CWE:563",none,,

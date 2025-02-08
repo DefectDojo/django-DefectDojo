@@ -1,0 +1,45 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-django
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- if .Values.django.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.django.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+spec:
+  selector:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - name: http
+    protocol: TCP
+    {{- if .Values.django.nginx.tls.enabled }}
+    port: 443
+    {{- else }}
+    port: 80
+    {{- end }}
+    targetPort: http
+    {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+  - name: http-metrics
+    protocol: TCP
+    port: 9113
+    targetPort: http-metrics
+    {{- end }}
+{{- if .Values.django.service.type }}
+  type: {{ .Values.django.service.type }}
+{{- else if .Values.gke.useGKEIngress }}
+  type: NodePort
+{{- end }}

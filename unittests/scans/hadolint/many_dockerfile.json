@@ -1,0 +1,98 @@
+[
+    {
+        "line":9,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        },
+    {
+        "line":9,
+        "code":"DL3015",
+        "message":"Avoid additional packages by specifying `--no-install-recommends`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"info"
+        },
+    {
+        "line":25,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        },
+    {
+        "line":44,
+        "code":"DL3013",
+        "message":"Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.django",
+        "level":"warning"
+        },
+    {
+        "line":8,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+        },
+    {
+        "line":8,
+        "code":"DL3015",
+        "message":"Avoid additional packages by specifying `--no-install-recommends`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"info"
+        },
+    {
+        "line":24,
+        "code":"DL3002",
+        "message":"Last USER should not be root",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+        },
+    {
+        "line":25,
+        "code":"DL3008",
+        "message":"Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+        },
+    {
+        "line":25,
+        "code":"DL3015",
+        "message":"Avoid additional packages by specifying `--no-install-recommends`",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"info"
+        },
+    {
+        "line":25,
+        "code":"DL4006",
+        "message":"Set the SHELL option -o pipefail before RUN with a pipe in it",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+        },
+    {
+        "line":50,
+        "code":"DL3003",
+        "message":"Use WORKDIR to switch to a directory",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+        },
+    {
+        "line":57,
+        "code":"DL3006",
+        "message":"Always tag the version of an image explicitly",
+        "column":1,
+        "file":"django-DefectDojo\\Dockerfile.nginx",
+        "level":"warning"
+    }
+]

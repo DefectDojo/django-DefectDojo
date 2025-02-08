@@ -1,0 +1,111 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "nodejsscan",
+          "rules": [
+            {
+              "id": "node_insecure_random_generator",
+              "name": "NodeInsecureRandomGenerator",
+              "helpUri": "https://ajinabraham.github.io/nodejsscan/#node_insecure_random_generator"
+            },
+            {
+              "id": "node_password",
+              "name": "NodePassword",
+              "helpUri": "https://ajinabraham.github.io/nodejsscan/#node_password"
+            }
+          ],
+          "version": "0.2.3",
+          "informationUri": "https://github.com/ajinabraham/njsscan",
+          "semanticVersion": "0.2.3"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "endTimeUtc": "2021-03-23T00:10:48Z"
+        }
+      ],
+      "results": [
+        {
+          "message": {
+            "text": "crypto.pseudoRandomBytes()/Math.random() is a cryptographically weak random number generator."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);"
+                  },
+                  "endColumn": 34,
+                  "endLine": 321,
+                  "startColumn": 21,
+                  "startLine": 321
+                },
+                "artifactLocation": {
+                  "uri": "file:///src/index.js"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp": "A9: Using Components with Known Vulnerabilities",
+            "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+          },
+          "ruleId": "node_insecure_random_generator",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "text": "A hardcoded password in plain text is identified. Store it properly in an environment variable."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "        passwdInput.type = \"text\";"
+                  },
+                  "endColumn": 34,
+                  "endLine": 235,
+                  "startColumn": 9,
+                  "startLine": 235
+                },
+                "artifactLocation": {
+                  "uri": "file:///src/index.js"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "        passwdInput.type = \"password\";"
+                  },
+                  "endColumn": 38,
+                  "endLine": 239,
+                  "startColumn": 9,
+                  "startLine": 239
+                },
+                "artifactLocation": {
+                  "uri": "file:///src/index.js"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp": "A3: Sensitive Data Exposure",
+            "cwe": "CWE-798: Use of Hard-coded Credentials"
+          },
+          "ruleId": "node_password",
+          "ruleIndex": 1
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
+}

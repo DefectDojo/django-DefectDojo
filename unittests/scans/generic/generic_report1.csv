@@ -1,0 +1,6 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+28/02/2021,ASDF,1,https://vulnerable.endpoint.com/resource1/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE
+28/02/2021,ASDF,2,https://vulnerable.endpoint.com/resource2/qwerty,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE
+28/02/2021,ASDF,3,https://vulnerable.endpoint.com/resource3/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE
+28/02/2021,ASDF,4,https://vulnerable.endpoint.com/resource4/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE
+28/02/2021,ASDF,5,https://vulnerable.endpoint.com/resource5/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE

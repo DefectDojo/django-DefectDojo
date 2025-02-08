@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% load static %}
+{% block add_styles %}
+    {{ block.super }}
+    .tooltip-inner {
+      max-width: 350px;
+    }
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+          {% include "dojo/snippets/engagement_list.html" with engs=engs filter=engs_filter count=engs_count prefix="engs" status="open" type=engagement_type recent_test_day_count=recent_test_day_count %}
+          {% include "dojo/snippets/engagement_list.html" with engs=queued_engs filter=queued_engs_filter count=queued_engs_count prefix="queued_engs" status="paused" type=engagement_type recent_test_day_count=recent_test_day_count %}
+          {% include "dojo/snippets/engagement_list.html" with engs=inactive_engs filter=inactive_engs_filter count=inactive_engs_count prefix="inactive_engs" status="closed" type=engagement_type recent_test_day_count=recent_test_day_count %}
+    </div>
+    <div class="protip">
+       <i class="fa-solid fa-lightbulb"></i> <strong>ProTip!</strong> Type <kbd>a</kbd> to add a new engagement.
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            document.addEventListener('keydown', function(e) {
+                // return immediately if any of the search box is in focus while doing the keypress
+                if (e.target.getAttribute('type') === 'search' || e.target.id === 'simple_search') {
+                  return;
+                }
+
+                if (e.key =='a') {
+                  {% if engagement_type == "CI/CD" %}
+                      window.location.assign('{% url 'new_eng_for_prod_cicd' prod.id %}');
+                  {% else %}
+                      window.location.assign('{% url 'new_eng_for_prod' prod.id %}');
+                  {% endif %}
+                }
+            });
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+            if (document.referrer.indexOf('simple_search') > 0) {
+                var terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
+
+                    for (var i = 0; i < terms.length; i++) {
+                        $('body').highlight(terms[i]);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+          });
+    </script>
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

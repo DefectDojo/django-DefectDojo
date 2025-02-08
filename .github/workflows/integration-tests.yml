@@ -1,0 +1,91 @@
+name: Integration tests
+
+on:
+  workflow_call:
+
+jobs:
+  integration_tests:
+    # run tests with docker compose
+    name: User Interface Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-case: [
+          "tests/finding_test.py",
+          "tests/report_builder_test.py",
+          "tests/notes_test.py",
+          "tests/regulations_test.py",
+          "tests/product_type_test.py",
+          "tests/product_test.py",
+          "tests/endpoint_test.py",
+          "tests/engagement_test.py",
+          "tests/environment_test.py",
+          "tests/test_test.py",
+          "tests/user_test.py",
+          "tests/group_test.py",
+          "tests/product_group_test.py",
+          "tests/product_type_group_test.py",
+          "tests/product_member_test.py",
+          "tests/product_type_member_test.py",
+          "tests/ibm_appscan_test.py",
+          "tests/search_test.py",
+          "tests/file_test.py",
+          "tests/dedupe_test.py",
+          "tests/check_various_pages.py",
+          "tests/notifications_test.py",
+          "tests/tool_config.py",
+          "openapi-validatator",
+        ]
+        os: [alpine, debian]
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          path: built-docker-image
+          pattern: built-docker-image-*
+          merge-multiple: true
+
+      - name: Load docker images
+        timeout-minutes: 10
+        run: |-
+             docker load -i built-docker-image/nginx-${{ matrix.os }}_img
+             docker load -i built-docker-image/django-${{ matrix.os }}_img
+             docker load -i built-docker-image/integration-tests-debian_img
+             docker images
+
+      - name: Set integration-test mode
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
+
+      - name: Start Dojo 
+        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
+
+      - name: Initialize
+        timeout-minutes: 10
+        run: docker compose up --no-deps --exit-code-from initializer initializer
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
+
+      - name: Integration tests
+        timeout-minutes: 10
+        run: docker compose up --no-deps --exit-code-from integration-tests integration-tests
+        env:
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
+          INTEGRATION_TESTS_VERSION: debian
+
+      - name: Logs
+        if: always()
+        run: docker compose logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down

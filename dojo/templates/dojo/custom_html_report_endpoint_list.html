@@ -1,0 +1,201 @@
+{% load static %}
+{% load display_tags %}
+{% load humanize %}
+{% load get_endpoint_status %}
+{% load get_note_status %}
+{% load get_notetype_availability %}
+{% load event_tags %}
+
+{% if endpoints %}
+    <h1>{{ title }}</h1>
+    <h3 id="findings">Endpoint Findings</h3>
+    <p>
+        A total of {{ endpoints|length|apnumber }} endpoint{{ endpoints|length|pluralize }} with findings
+        of varying severity are represented in this report.
+    </p>
+{% endif %}
+
+<div id="endpoint_content" class="endpoint_content report_widget">
+    {% for endpoint in endpoints %}
+        <div class="panel panel-default panel-warning">
+            <div class="panel-heading">
+                <h4 class="report_endpoint">
+                    Endpoint: {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }}
+                    active findings
+                </h4>
+            </div>
+        </div>
+
+        {% for finding in endpoint.active_findings %}
+            {% ifchanged finding.severity %}
+                <h4 class="report_findings_severity">{{ finding.severity|capfirst }}</h4>
+            {% endifchanged %}
+            <div class="panel panel-default">
+                <div class="panel-heading finding-title">
+                    <div class="clearfix">
+                        <h5 class="report_findings_entry">
+                            Finding {{ forloop.counter }}: {{ finding.title }}
+                            {% if finding.tags %}
+                                <sup>
+                                    {% for tag in finding.tags.all %}
+                                    {{ tag }}
+                                    {% endfor %}
+                                </sup>
+                            {% endif %}
+                        </h5>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="heading" class="table-striped table table-condensed table-hover centered">
+                        <tr>
+                            <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
+                            <th>Status</th>
+                            {% if finding.risk_acceptance_set.all %}
+                                <th>Acceptance</th>
+                            {% endif %}
+                            <th>Date discovered</th>
+                            <th>Age</th>
+                            <th>Reporter</th>
+                            {% if finding.mitigated %}
+                                <th>Date Mitigated</th>
+                                <th>Mitigated By</th>
+                            {% endif %}
+                            {% if finding.cwe > 0 %}
+                                <th>CWE</th>
+                            {% endif %}
+                            <th>Dojo ID</th>
+                        </tr>
+                        <tr>
+                            <td>
+                            <span class="label severity severity-{{ finding.severity }}">
+                                {% if finding.severity %}
+                                    {{ finding.severity }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </span>
+                            </td>
+                            <td>
+                                {{ finding.epss_score|format_epss }}
+                                /
+                                {{ finding.epss_percentile|format_epss }}
+                            </td>
+                            <td>{{ finding.status }}</td>
+                            {% if finding.risk_acceptance_set.all %}
+                                <td>
+                                    {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                    {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                        <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                        class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                    {% endfor %}
+                                </td>
+                            {% endif %}
+                            <td>{{ finding.date }}</td>
+                            <td>{{ finding.age }} days</td>
+                            <td>{{ finding.reporter }}</td>
+                            {% if finding.mitigated %}
+                                <td>{{ finding.mitigated }}</td>
+                                <td>{{ finding.mitigated_by }}</td>
+                            {% endif %}
+                            {% if finding.cwe > 0 %}
+                                <td>
+                                    <a target="_blank"
+                                        href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                            <td>{{ finding.id }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
+
+            {% if finding.cvssv3 %}
+                <h6>CVSS v3</h6>
+                <pre>{{ finding.cvssv3|markdown_render }}</pre>
+            {% endif %}
+
+            <h6>Description</h6>
+            <pre>{{ finding.description|markdown_render }}</pre>
+
+            <h6>Mitigation</h6>
+            <pre>{{ finding.mitigation|markdown_render }}</pre>
+            {% if finding.get_report_requests %}
+                <h6>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h6>
+                {% for req in finding.get_report_requests %}
+                    <b>Request {{forloop.counter}} </b>
+                    <pre class="raw_request">{{ req.get_request }}</pre>
+                    {% if req.get_response != "" %}
+                        <b>Response {{forloop.counter}}</b>
+                        <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+            <h6>Impact</h6>
+            <pre>{{ finding.impact|markdown_render }}</pre>
+            {% if finding.steps_to_reproduce %}
+            <h6>Steps to Reproduce</h6>
+            <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+            {% endif %}
+            {% if finding.severity_justification %}
+            <h6>Severity Justification</h6>
+            <pre>{{ finding.severity_justification|markdown_render }}</pre>
+            {% endif %}
+            {% if finding.references %}
+            <h6>References</h6>
+            <pre>{{ finding.references|markdown_render }}</pre>
+            {% endif %}
+            {% if include_finding_images %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="INLINE" %}
+            {% endif %}
+            {% if include_finding_notes %}
+                {% with notes=finding.notes.all|get_public_notes %}
+                    {% if notes.count > 0 %}
+                        <h6>Notes</h6>
+                        <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    {% with notes_with_type=notes|get_notetype_notes_count %}
+                                        {% if notes_with_type > 0 %}
+                                            <th>Note Type</th>
+                                        {% endif %}
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in notes reversed %}
+                                    <tr>
+                                        <td>
+                                            {{ note.author.username }}
+                                        </td>
+                                        <td>
+                                            {{ note.date }}
+                                        </td>
+                                        {% if notes_with_type > 0 %}
+                                        <td>
+                                            {% if note.note_type != None %}
+                                                {{ note.note_type }}
+                                            {% endif %}
+                                        </td>
+                                        {% endif %}
+                                        <td>
+                                            {{ note|linebreaks }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            {% endwith %}
+                        </table>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</div>

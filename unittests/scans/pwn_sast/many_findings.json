@@ -1,0 +1,38 @@
+{
+  "report_name":"mock_unittest",
+  "data":[
+    {
+      "timestamp": "2022-07-08 09:11:52.913858476 -0600",
+      "security_references": {
+        "sast_module": "PWN::SAST::Eval",
+        "section": "MALICIOUS CODE PROTECTION",
+        "nist_800_53_uri": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#/control/?version=5.1&number=SI-3",
+        "cwe_id": "95",
+        "cwe_uri": "https://cwe.mitre.org/data/definitions/95.html"
+      },
+      "filename": {
+        "git_repo_root_uri": "https://mock_unittest.local/mock_binary/tree/dev",
+        "entry": "request.php"
+      },
+      "line_no_and_contents": [
+        {
+          "line_no": "1430",
+          "contents": "eval($_REQUEST['search'])",
+          "author": "Author: Mock User <46459665+mock_user@users.noreply.github.com>\n"
+        },
+        {
+          "line_no": "8036",
+          "contents": "eval($_REQUEST['first_name'])",
+          "author": "Author: Mock Usertwo <99459665+mock_usertwo@users.noreply.github.com\n"
+        },
+        {
+          "line_no": "8414",
+          "contents": "eval($_REQUEST['last_name'])",
+          "author": "Author: Mock Userthree <89723465+mock_userthree@users.noreply.github.com>\n"
+        }
+      ],
+      "raw_content": "1430:eval($_REQUEST['search']),\n8036:eval($_REQUEST['first_name'])\n8414:eval($_REQUEST['last_name'])\n",
+      "test_case_filter": "\n              grep -n 'eval(' ./request.php\n            "
+    }
+  ]
+}

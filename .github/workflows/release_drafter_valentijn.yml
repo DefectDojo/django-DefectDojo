@@ -1,0 +1,28 @@
+name: Release Drafter Valentijn
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          The version of the next release that is being created or updated.
+          This will override any version calculated by the release-drafter.
+        required: false
+      previous-version:
+        description: |
+          The version (tag_name) of the previous release to use when calculating changsets. 
+          For bugfix releases this should be the latest patch release (i.e. 1.11.1) for normal/minor releases
+          this should be the latest minor release (i.e. 1.11.0)
+          This will override any version calculated by the release-drafter.
+        required: false
+
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: valentijnscholten/release-drafter@master  # TODO: not maintained anymore - missing part is maybe already solved in the upstream
+        with:
+          version: ${{github.event.inputs.version}}  
+          previous-version: ${{github.event.inputs.previous-version}} 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

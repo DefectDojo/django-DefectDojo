@@ -1,0 +1,122 @@
+{
+    "version": "3.0.0",
+    "vulnerabilities": [
+      {
+        "id": "38e1bf843be70b01cd6847ba877897acb4185d3445256f818871a4b66c0af712",
+        "category": "sast",
+        "name": "Servlet reflected cross site scripting vulnerability",
+        "message": "Servlet reflected cross site scripting vulnerability",
+        "description": "HTTP parameter written to Servlet output in servlets.module.lesson.XssLesson.doPost(HttpServletRequest, HttpServletResponse)",
+        "cve": "3e7ef723fe684a84eb7f9a94b27d1ea2:XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER:src/main/java/servlets/module/lesson/XssLesson.java:96",
+        "severity": "High",
+        "confidence": "Medium",
+        "scanner": {
+          "id": "find_sec_bugs",
+          "name": "Find Security Bugs"
+        },
+        "location": {
+          "file": "src/main/java/servlets/module/lesson/XssLesson.java",
+          "start_line": 96,
+          "end_line": 96,
+          "class": "servlets.module.lesson.XssLesson",
+          "method": "doPost"
+        },
+        "identifiers": [
+          {
+            "type": "find_sec_bugs_type",
+            "name": "Find Security Bugs-XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER",
+            "value": "XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER",
+            "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#xss-servlet-reflected-cross-site-scripting-vulnerability-xss-request-parameter-to-servlet-writer"
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-79",
+            "value": "79",
+            "url": "https://cwe.mitre.org/data/definitions/79.html"
+          }
+        ]
+      },
+      {
+        "id": "41be9454f42f7effeefe0ca644a74c2ba64cfe7ad1990c4efd60904afbe94b3c",
+        "category": "sast",
+        "name": "Nonconstant string passed to execute or addBatch method on an SQL statement",
+        "message": "Nonconstant string passed to execute or addBatch method on an SQL statement",
+        "description": "servlets.module.lesson.SqlInjectionLesson.getSqlInjectionResult(String, String) passes a nonconstant String to an execute or addBatch method on an SQL statement",
+        "cve": "10b6dd4f1881b067a00b77b2b910e433:SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE:src/main/java/servlets/module/lesson/SqlInjectionLesson.java:136",
+        "severity": "Medium",
+        "confidence": "High",
+        "scanner": {
+          "id": "find_sec_bugs",
+          "name": "Find Security Bugs"
+        },
+        "location": {
+          "file": "src/main/java/servlets/module/lesson/SqlInjectionLesson.java",
+          "start_line": 136,
+          "end_line": 136,
+          "class": "servlets.module.lesson.SqlInjectionLesson",
+          "method": "getSqlInjectionResult"
+        },
+        "identifiers": [
+          {
+            "type": "find_sec_bugs_type",
+            "name": "Find Security Bugs-SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+            "value": "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+            "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#sql-nonconstant-string-passed-to-execute-or-addbatch-method-on-an-sql-statement-sql-nonconstant-string-passed-to-execute"
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-89",
+            "value": 89,
+            "url": "https://cwe.mitre.org/data/definitions/89.html"
+          }
+        ]
+      },
+      {
+        "id": "46af6f74b3a85f6b9009268e97027b75b378053ee8f81fc9aa8930d65ec2d468",
+        "category": "sast",
+        "name": "node_nosqli_injection",
+        "message": "Untrusted user input in findOne() function can result in NoSQL Injection.",
+        "description": "Untrusted user input in findOne() function can result in NoSQL Injection.",
+        "cve": "routes/likeProductReviews.js:13:node_nosqli_injection:CWE-943",
+        "severity": "High",
+        "confidence": "Experimental",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/likeProductReviews.js",
+          "start_line": 13,
+          "end_line": 56
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_nosqli_injection",
+            "value": "Untrusted user input in findOne() function can result in NoSQL Injection."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-943",
+            "value": "node_nosqli_injection"
+          }
+        ]
+      }
+    ],
+    "remediations": [],
+    "scan": {
+      "scanner": {
+        "id": "find_sec_bugs",
+        "name": "Find Security Bugs",
+        "url": "https://spotbugs.github.io",
+        "vendor": {
+          "name": "GitLab"
+        },
+        "version": "4.2.0"
+      },
+      "type": "sast",
+      "start_time": "2020-12-21T17:33:58",
+      "end_time": "2020-12-21T17:38:43",
+      "status": "success"
+    }
+  }

@@ -1,0 +1,7 @@
+{
+    "key": "ruby:S2068",
+    "name": "Hard-coded credentials are security-sensitive",
+    "securityCategory": "auth",
+    "vulnerabilityProbability": "HIGH",
+    "vulnerabilityDescription": "<h2>Ask Yourself Whether</h2>\n<ul>\n  <li> Credentials allows access to a sensitive component like a database, a file storage, an API or a service. </li>\n  <li> Credentials are used in production environments. </li>\n  <li> Application re-distribution is required before updating the credentials. </li>\n</ul>\n<p>There is a risk if you answered yes to any of those questions.</p>\n"
+}

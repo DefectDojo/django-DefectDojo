@@ -1,0 +1,15 @@
+---
+services:
+  nginx:
+    environment:
+      USE_TLS: 'true'
+      GENERATE_TLS_CERTIFICATE: 'true'
+    ports:
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
+        protocol: tcp
+        mode: host
+  uwsgi:
+    environment:
+      DD_SESSION_COOKIE_SECURE: 'True'
+      DD_CSRF_COOKIE_SECURE: 'True'

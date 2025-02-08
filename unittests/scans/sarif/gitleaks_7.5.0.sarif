@@ -1,0 +1,386 @@
+{
+ "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+ "version": "2.1.0",
+ "runs": [
+  {
+   "tool": {
+    "driver": {
+     "name": "Gitleaks",
+     "semanticVersion": "v7.4.0",
+     "rules": [
+      {
+       "id": "AWS Access Key",
+       "name": "AWS Access Key"
+      },
+      {
+       "id": "AWS Secret Key",
+       "name": "AWS Secret Key"
+      },
+      {
+       "id": "AWS MWS key",
+       "name": "AWS MWS key"
+      },
+      {
+       "id": "Facebook Secret Key",
+       "name": "Facebook Secret Key"
+      },
+      {
+       "id": "Facebook Client ID",
+       "name": "Facebook Client ID"
+      },
+      {
+       "id": "Twitter Secret Key",
+       "name": "Twitter Secret Key"
+      },
+      {
+       "id": "Twitter Client ID",
+       "name": "Twitter Client ID"
+      },
+      {
+       "id": "Github Personal Access Token",
+       "name": "Github Personal Access Token"
+      },
+      {
+       "id": "Github OAuth Access Token",
+       "name": "Github OAuth Access Token"
+      },
+      {
+       "id": "Github App Token",
+       "name": "Github App Token"
+      },
+      {
+       "id": "Github Refresh Token",
+       "name": "Github Refresh Token"
+      },
+      {
+       "id": "LinkedIn Client ID",
+       "name": "LinkedIn Client ID"
+      },
+      {
+       "id": "LinkedIn Secret Key",
+       "name": "LinkedIn Secret Key"
+      },
+      {
+       "id": "Slack",
+       "name": "Slack"
+      },
+      {
+       "id": "Asymmetric Private Key",
+       "name": "Asymmetric Private Key"
+      },
+      {
+       "id": "Google API key",
+       "name": "Google API key"
+      },
+      {
+       "id": "Google (GCP) Service Account",
+       "name": "Google (GCP) Service Account"
+      },
+      {
+       "id": "Heroku API key",
+       "name": "Heroku API key"
+      },
+      {
+       "id": "MailChimp API key",
+       "name": "MailChimp API key"
+      },
+      {
+       "id": "Mailgun API key",
+       "name": "Mailgun API key"
+      },
+      {
+       "id": "PayPal Braintree access token",
+       "name": "PayPal Braintree access token"
+      },
+      {
+       "id": "Picatic API key",
+       "name": "Picatic API key"
+      },
+      {
+       "id": "SendGrid API Key",
+       "name": "SendGrid API Key"
+      },
+      {
+       "id": "Slack Webhook",
+       "name": "Slack Webhook"
+      },
+      {
+       "id": "Stripe API key",
+       "name": "Stripe API key"
+      },
+      {
+       "id": "Square access token",
+       "name": "Square access token"
+      },
+      {
+       "id": "Square OAuth secret",
+       "name": "Square OAuth secret"
+      },
+      {
+       "id": "Twilio API key",
+       "name": "Twilio API key"
+      },
+      {
+       "id": "Dynatrace ttoken",
+       "name": "Dynatrace ttoken"
+      },
+      {
+       "id": "Shopify shared secret",
+       "name": "Shopify shared secret"
+      },
+      {
+       "id": "Shopify access token",
+       "name": "Shopify access token"
+      },
+      {
+       "id": "Shopify custom app access token",
+       "name": "Shopify custom app access token"
+      },
+      {
+       "id": "Shopify private app access token",
+       "name": "Shopify private app access token"
+      },
+      {
+       "id": "PyPI upload token",
+       "name": "PyPI upload token"
+      }
+     ]
+    }
+   },
+   "results": [
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "6d127980966808f7413935678e079dcd7fedf9c2",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-15T22:00:32+07:00",
+      "author": "Bhurinat Wangsutthitham",
+      "email": "nate.bwangsut@gmail.com",
+      "commitMessage": "feat: added GitLab secret detection report parser (#4605)\n\n* feat: added GitLab secret detection report parser\r\n\r\n* fix: Flake8 compliance\r\n\r\n* fix: remove entry from test_type.json\r\n\r\n* fix: change severity on parser\r\n\r\n* fix: update findings description field for raw_source_code\r\n\r\n* fix: add unique_id_from_tool for findings\r\n\r\n* fix: remove autoimported module\r\n\r\n* fix: typo\r\n\r\n* test: added unittests for unique_id_from_tool field\r\n\r\n* fix: Flake8 compliant\r\n\r\n* test: add testing for findings date\r\n\r\n* fix: datetime bug parser",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json"
+        },
+        "region": {
+         "startLine": 13,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "8bbcdfd743c5695bdd7d3bc21aa9417131a7ab12",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-27T11:19:31-05:00",
+      "author": "Cody Maffucci",
+      "email": "46459665+Maffooch@users.noreply.github.com",
+      "commitMessage": "Merge pull request #4877 from DefectDojo/release/2.1.0\n\nRelease/2.1.0",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json"
+        },
+        "region": {
+         "startLine": 13,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "Asymmetric Private Key secret detected"
+     },
+     "properties": {
+      "commit": "8bbcdfd743c5695bdd7d3bc21aa9417131a7ab12",
+      "offender": "-----BEGIN OPENSSH PRIVATE KEY-----",
+      "date": "2021-07-27T11:19:31-05:00",
+      "author": "Cody Maffucci",
+      "email": "46459665+Maffooch@users.noreply.github.com",
+      "commitMessage": "Merge pull request #4877 from DefectDojo/release/2.1.0\n\nRelease/2.1.0",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
+        },
+        "region": {
+         "startLine": 13,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"-----BEGIN OPENSSH PRIVATE KEY-----\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "8bbcdfd743c5695bdd7d3bc21aa9417131a7ab12",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-27T11:19:31-05:00",
+      "author": "Cody Maffucci",
+      "email": "46459665+Maffooch@users.noreply.github.com",
+      "commitMessage": "Merge pull request #4877 from DefectDojo/release/2.1.0\n\nRelease/2.1.0",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
+        },
+        "region": {
+         "startLine": 44,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "8bbcdfd743c5695bdd7d3bc21aa9417131a7ab12",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-27T11:19:31-05:00",
+      "author": "Cody Maffucci",
+      "email": "46459665+Maffooch@users.noreply.github.com",
+      "commitMessage": "Merge pull request #4877 from DefectDojo/release/2.1.0\n\nRelease/2.1.0",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py"
+        },
+        "region": {
+         "startLine": 37,
+         "snippet": {
+          "text": "        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)"
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "Asymmetric Private Key secret detected"
+     },
+     "properties": {
+      "commit": "6d127980966808f7413935678e079dcd7fedf9c2",
+      "offender": "-----BEGIN OPENSSH PRIVATE KEY-----",
+      "date": "2021-07-15T22:00:32+07:00",
+      "author": "Bhurinat Wangsutthitham",
+      "email": "nate.bwangsut@gmail.com",
+      "commitMessage": "feat: added GitLab secret detection report parser (#4605)\n\n* feat: added GitLab secret detection report parser\r\n\r\n* fix: Flake8 compliance\r\n\r\n* fix: remove entry from test_type.json\r\n\r\n* fix: change severity on parser\r\n\r\n* fix: update findings description field for raw_source_code\r\n\r\n* fix: add unique_id_from_tool for findings\r\n\r\n* fix: remove autoimported module\r\n\r\n* fix: typo\r\n\r\n* test: added unittests for unique_id_from_tool field\r\n\r\n* fix: Flake8 compliant\r\n\r\n* test: add testing for findings date\r\n\r\n* fix: datetime bug parser",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
+        },
+        "region": {
+         "startLine": 13,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"-----BEGIN OPENSSH PRIVATE KEY-----\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "6d127980966808f7413935678e079dcd7fedf9c2",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-15T22:00:32+07:00",
+      "author": "Bhurinat Wangsutthitham",
+      "email": "nate.bwangsut@gmail.com",
+      "commitMessage": "feat: added GitLab secret detection report parser (#4605)\n\n* feat: added GitLab secret detection report parser\r\n\r\n* fix: Flake8 compliance\r\n\r\n* fix: remove entry from test_type.json\r\n\r\n* fix: change severity on parser\r\n\r\n* fix: update findings description field for raw_source_code\r\n\r\n* fix: add unique_id_from_tool for findings\r\n\r\n* fix: remove autoimported module\r\n\r\n* fix: typo\r\n\r\n* test: added unittests for unique_id_from_tool field\r\n\r\n* fix: Flake8 compliant\r\n\r\n* test: add testing for findings date\r\n\r\n* fix: datetime bug parser",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
+        },
+        "region": {
+         "startLine": 44,
+         "snippet": {
+          "text": "      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\","
+         }
+        }
+       }
+      }
+     ]
+    },
+    {
+     "message": {
+      "text": "AWS Access Key secret detected"
+     },
+     "properties": {
+      "commit": "6d127980966808f7413935678e079dcd7fedf9c2",
+      "offender": "AKIAIOSFODNN7EXAMPLE",
+      "date": "2021-07-15T22:00:32+07:00",
+      "author": "Bhurinat Wangsutthitham",
+      "email": "nate.bwangsut@gmail.com",
+      "commitMessage": "feat: added GitLab secret detection report parser (#4605)\n\n* feat: added GitLab secret detection report parser\r\n\r\n* fix: Flake8 compliance\r\n\r\n* fix: remove entry from test_type.json\r\n\r\n* fix: change severity on parser\r\n\r\n* fix: update findings description field for raw_source_code\r\n\r\n* fix: add unique_id_from_tool for findings\r\n\r\n* fix: remove autoimported module\r\n\r\n* fix: typo\r\n\r\n* test: added unittests for unique_id_from_tool field\r\n\r\n* fix: Flake8 compliant\r\n\r\n* test: add testing for findings date\r\n\r\n* fix: datetime bug parser",
+      "repo": "."
+     },
+     "locations": [
+      {
+       "physicalLocation": {
+        "artifactLocation": {
+         "uri": "dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py"
+        },
+        "region": {
+         "startLine": 37,
+         "snippet": {
+          "text": "        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)"
+         }
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

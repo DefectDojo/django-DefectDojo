@@ -1,0 +1,512 @@
+<report id="39f62b85-f870-4ccc-a052-3dc57e315016" extension="xml" format_id="a994b278-1f62-11e1-96ac-406186ea4fc5" content_type="text/xml"><owner><name>gps</name></owner><name>metasploitable2-scan</name><comment></comment><creation_time>2023-09-29T11:36:37.717132Z</creation_time><modification_time></modification_time><writable>0</writable><in_use>0</in_use><task id="e007e316-18f0-4607-93cc-f169d2a08062"><name>metasploitable2-scan</name></task><report_format id="e4d061be-cbbf-4e9f-be44-f9f60bf86d72"><name>XML</name></report_format><report id="c827dcd6-b6e5-4106-bdb7-94213b500669"><gmp><version>9.0</version></gmp><sort><field><order>descending</order>severity</field></sort><filters id="0"><term>apply_overrides=0 levels=hml rows=-1 min_qod=70 first=1 sort-reverse=severity notes=1 overrides=1</term><keywords/></filters><severity_class id="d4c74cda-89e1-11e3-9c29-406186ea4fc5"><name>nist</name><full_name>NVD Vulnerability Severity Ratings</full_name><severity_range><name>None</name><min>0.0</min><max>0.0</max></severity_range><severity_range><name>Low</name><min>0.1</min><max>3.9</max></severity_range><severity_range><name>Medium</name><min>4.0</min><max>6.9</max></severity_range><severity_range><name>High</name><min>7.0</min><max>10.0</max></severity_range></severity_class><scan_run_status>Done</scan_run_status><hosts><count>1</count></hosts><closed_cves><count>0</count></closed_cves><vulns><count>44</count></vulns><os><count>0</count></os><apps><count>0</count></apps><ssl_certs><count>0</count></ssl_certs><task id="23acffdb-ddd8-4f09-9415-c4ca78379c27"><name>metasploitable2-scan</name><comment></comment><target id="693e1594-efae-4a26-abff-ea2ac98e0f0f"><trash>0</trash><name>Target</name><comment></comment></target><progress>100.0</progress></task><scan><task><slave id=""><name></name><host></host><port>0</port></slave><preferences><preference><name>Network Source Interface</name><value/><scanner_name>source_iface</scanner_name></preference></preferences></task></scan><timestamp>2023-09-26T10:50:34Z</timestamp><scan_start>2023-09-26T10:50:34Z</scan_start><timezone>Coordinated Universal Time</timezone><timezone_abbrev>UTC</timezone_abbrev><ports max="-1" start="1"><count>44</count><port>512/tcp<host>{v1}e2eec5b536a</host><severity>10.0</severity><threat>High</threat></port><port>1524/tcp<host>{v1}e2eec5b536a</host><severity>10.0</severity><threat>High</threat></port><port>8787/tcp<host>{v1}e2eec5b536a</host><severity>10.0</severity><threat>High</threat></port><port>general/tcp<host>{v1}e2eec5b536a</host><severity>10.0</severity><threat>High</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>10.0</severity><threat>High</threat></port><port>3632/tcp<host>{v1}e2eec5b536a</host><severity>9.3</severity><threat>High</threat></port><port>5900/tcp<host>{v1}e2eec5b536a</host><severity>9.0</severity><threat>High</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>9.0</severity><threat>High</threat></port><port>6667/tcp<host>{v1}e2eec5b536a</host><severity>8.1</severity><threat>High</threat></port><port>6697/tcp<host>{v1}e2eec5b536a</host><severity>8.1</severity><threat>High</threat></port><port>21/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>21/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>2121/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>22/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>6200/tcp<host>{v1}e2eec5b536a</host><severity>7.5</severity><threat>High</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>7.4</severity><threat>High</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>6.8</severity><threat>Medium</threat></port><port>21/tcp<host>{v1}e2eec5b536a</host><severity>6.4</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>6.1</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>6.1</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>6.0</severity><threat>Medium</threat></port><port>445/tcp<host>{v1}e2eec5b536a</host><severity>6.0</severity><threat>Medium</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>5.9</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>5.8</severity><threat>Medium</threat></port><port>22/tcp<host>{v1}e2eec5b536a</host><severity>5.3</severity><threat>Medium</threat></port><port>22/tcp<host>{v1}e2eec5b536a</host><severity>5.3</severity><threat>Medium</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>5.0</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>5.0</severity><threat>Medium</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>5.0</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>5.0</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>4.8</severity><threat>Medium</threat></port><port>5900/tcp<host>{v1}e2eec5b536a</host><severity>4.8</severity><threat>Medium</threat></port><port>21/tcp<host>{v1}e2eec5b536a</host><severity>4.8</severity><threat>Medium</threat></port><port>2121/tcp<host>{v1}e2eec5b536a</host><severity>4.8</severity><threat>Medium</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>4.3</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>4.3</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>4.3</severity><threat>Medium</threat></port><port>22/tcp<host>{v1}e2eec5b536a</host><severity>4.3</severity><threat>Medium</threat></port><port>80/tcp<host>{v1}e2eec5b536a</host><severity>4.3</severity><threat>Medium</threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>4.0</severity><threat></threat></port><port>5432/tcp<host>{v1}e2eec5b536a</host><severity>4.0</severity><threat></threat></port></ports><results start="1" max="-1"><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}467e39e554a</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717168Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>512/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.100111"><type>nvt</type><name>The rexec service is running</name><family>Useless services</family><cvss_base>10.0</cvss_base><tags>summary=This remote host is running a rexec service.|insight=rexec (remote execution client for an exec server) has the same
+  kind of functionality that rsh has: you can execute shell commands on a remote computer.
+
+  The main difference is that rexec authenticate by reading the username and password *unencrypted*
+  from the socket.|qodType=remote_banner|solution=Disable the rexec service and use alternatives like SSH
+instead.|solution_type=Mitigation|impact=|affected=</tags><refs><ref id="CVE-1999-0618" type="cve"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>10.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>The rexec service was detected on the target system.
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}530765cf437</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717208Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>1524/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103549"><type>nvt</type><name>Possible Backdoor: Ingreslock</name><family>Gain a shell remotely</family><cvss_base>10.0</cvss_base><tags>summary=A backdoor is installed on the remote host.|insight=|qodType=remote_vul|solution=A whole cleanup of the infected system is recommended.|solution_type=Workaround|impact=Attackers can exploit this issue to execute arbitrary commands in the
+  context of the application. Successful attacks will compromise the affected isystem.|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>10.0</severity><qod><value>99</value><type>remote_vul</type></qod><description>The service is answering to an 'id;' command with the following response: uid=0(root) gid=0(root)
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}5f5c7518c92</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717216Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>8787/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108010"><type>nvt</type><name>Distributed Ruby (dRuby/DRb) Multiple Remote Code Execution Vulnerabilities</name><family>Gain a shell remotely</family><cvss_base>10.0</cvss_base><tags>summary=Systems using Distributed Ruby (dRuby/DRb), which is available in Ruby versions 1.6
+and later, may permit unauthorized systems to execute distributed commands.|insight=|qodType=remote_vul|solution=Administrators of environments that rely on Distributed Ruby should ensure that
+appropriate controls are in place. Code-level controls may include:
+
+- Implementing taint on untrusted input
+
+- Setting $SAFE levels appropriately (>2 is recommended if untrusted hosts are allowed to submit Ruby commands, and >3 may be appropriate)
+
+- Including drb/acl.rb to set ACLEntry to restrict access to trusted hosts|solution_type=Mitigation|impact=By default, Distributed Ruby does not impose restrictions on allowed hosts or set the
+  $SAFE environment variable to prevent privileged activities. If other controls are not in place, especially if the
+  Distributed Ruby process runs with elevated privileges, an attacker could execute arbitrary system commands or Ruby
+  scripts on the Distributed Ruby server. An attacker may need to know only the URI of the listening Distributed Ruby
+  server to submit Ruby commands.|affected=</tags><refs><ref id="https://tools.cisco.com/security/center/viewAlert.x?alertId=22750" type="url"/><ref id="http://www.securityfocus.com/bid/47071" type="url"/><ref id="http://blog.recurity-labs.com/archives/2011/05/12/druby_for_penetration_testers/" type="url"/><ref id="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/drb/rdoc/DRb.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>10.0</severity><qod><value>99</value><type>remote_vul</type></qod><description>The service is running in $SAFE >= 1 mode. However it is still possible to run arbitrary syscall commands on the remote host. Sending an invalid syscall the service returned the following response:
+
+Flo:Errno::ENOSYS:bt["3/usr/lib/ruby/1.8/drb/drb.rb:1555:in `syscall'"0/usr/lib/ruby/1.8/drb/drb.rb:1555:in `send'"4/usr/lib/ruby/1.8/drb/drb.rb:1555:in `__send__'"A/usr/lib/ruby/1.8/drb/drb.rb:1555:in `perform_without_block'"3/usr/lib/ruby/1.8/drb/drb.rb:1515:in `perform'"5/usr/lib/ruby/1.8/drb/drb.rb:1589:in `main_loop'"0/usr/lib/ruby/1.8/drb/drb.rb:1585:in `loop'"5/usr/lib/ruby/1.8/drb/drb.rb:1585:in `main_loop'"1/usr/lib/ruby/1.8/drb/drb.rb:1581:in `start'"5/usr/lib/ruby/1.8/drb/drb.rb:1581:in `main_loop'"//usr/lib/ruby/1.8/drb/drb.rb:1430:in `run'"1/usr/lib/ruby/1.8/drb/drb.rb:1427:in `start'"//usr/lib/ruby/1.8/drb/drb.rb:1427:in `run'"6/usr/lib/ruby/1.8/drb/drb.rb:1347:in `initialize'"//usr/lib/ruby/1.8/drb/drb.rb:1627:in `new'"9/usr/lib/ruby/1.8/drb/drb.rb:1627:in `start_service'"%/usr/sbin/druby_timeserver.rb:12:errnoi+:mesg"Function not implemented
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}8c49cb44d75</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717246Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>general/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103674"><type>nvt</type><name>Operating System (OS) End of Life (EOL) Detection</name><family>General</family><cvss_base>10.0</cvss_base><tags>summary=The Operating System (OS) on the remote host has reached the End
+of Life (EOL) and should not be used anymore.|insight=|qodType=remote_banner|solution=Upgrade the OS on the remote host to a version which is still
+supported and receiving security updates by the vendor.|solution_type=Mitigation|impact=An EOL version of an OS is not receiving any security updates
+  from the vendor. Unfixed security vulnerabilities might be leveraged by an attacker to compromise
+  the security of this host.|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>10.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>The "Ubuntu" Operating System on the remote host has reached the end of life.
+
+CPE:               cpe:/o:canonical:ubuntu_linux:8.04
+Installed version,
+build or SP:       8.04
+EOL date:          2013-05-09
+EOL info:          https://wiki.ubuntu.com/Releases
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}22a938294ad</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717262Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.800320"><type>nvt</type><name>TWiki XSS and Command Execution Vulnerabilities</name><family>Web application abuses</family><cvss_base>10.0</cvss_base><tags>summary=TWiki is prone to Cross-Site Scripting (XSS) and Command Execution Vulnerabilities.|insight=The flaws are due to:
+
+  - %URLPARAM{}% variable is not properly sanitized which lets attackers
+    conduct cross-site scripting attack.
+
+  - %SEARCH{}% variable is not properly sanitised before being used in an
+    eval() call which lets the attackers execute perl code through eval
+    injection attack.|qodType=remote_banner|solution=Upgrade to version 4.2.4 or later.|solution_type=VendorFix|impact=Successful exploitation could allow execution of arbitrary script code or
+  commands. This could let attackers steal cookie-based authentication credentials or compromise the affected
+  application.|affected=TWiki, TWiki version prior to 4.2.4.</tags><refs><ref id="CVE-2008-5304" type="cve"/><ref id="CVE-2008-5305" type="cve"/><ref id="http://twiki.org/cgi-bin/view/Codev.SecurityAlert-CVE-2008-5304" type="url"/><ref id="http://www.securityfocus.com/bid/32668" type="url"/><ref id="http://www.securityfocus.com/bid/32669" type="url"/><ref id="http://twiki.org/cgi-bin/view/Codev/SecurityAlert-CVE-2008-5305" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>10.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 01.Feb.2003
+Fixed version:     4.2.4
+
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}9e2edd735b3</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717281Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>3632/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103553"><type>nvt</type><name>DistCC RCE Vulnerability (CVE-2004-2687)</name><family>Gain a shell remotely</family><cvss_base>9.3</cvss_base><tags>summary=DistCC is prone to a remote code execution (RCE)
+vulnerability.|insight=DistCC 2.x, as used in XCode 1.5 and others, when not configured
+  to restrict access to the server port, allows remote attackers to execute arbitrary commands via
+  compilation jobs, which are executed by the server without authorization checks.|qodType=remote_vul|solution=Vendor updates are available. Please see the references for
+more information.
+
+For more information about DistCC's security see the references.|solution_type=VendorFix|impact=DistCC by default trusts its clients completely that in turn
+  could allow a malicious client to execute arbitrary commands on the server.|affected=</tags><refs><ref id="CVE-2004-2687" type="cve"/><ref id="https://distcc.github.io/security.html" type="url"/><ref id="https://web.archive.org/web/20150511045306/http://archives.neohapsis.com:80/archives/bugtraq/2005-03/0183.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>9.3</severity><qod><value>99</value><type>remote_vul</type></qod><description>It was possible to execute the "id" command.
+
+Result: uid=1(daemon) gid=1(daemon)
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}0b02451a968</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717494Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5900/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.106056"><type>nvt</type><name>VNC Brute Force Login</name><family>Brute force attacks</family><cvss_base>9.0</cvss_base><tags>summary=Try to log in with given passwords via VNC protocol.|insight=This script tries to authenticate to a VNC server with the
+  passwords set in the password preference. It will also test and report if no authentication /
+  password is required at all.
+
+  Note: Some VNC servers have a blacklisting scheme that blocks IP addresses after five unsuccessful
+  connection attempts for a period of time. The script will abort the brute force attack if it
+  encounters that it gets blocked.
+
+  Note as well that passwords can be max. 8 characters long.|qodType=remote_active|solution=Change the password to something hard to guess or enable
+password protection at all.|solution_type=Mitigation|impact=|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>9.0</severity><qod><value>95</value><type>remote_active</type></qod><description>It was possible to connect to the VNC server with the password: password
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e93a2434477</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717503Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103552"><type>nvt</type><name>PostgreSQL Default Credentials (PostgreSQL Protocol)</name><family>Default Accounts</family><cvss_base>9.0</cvss_base><tags>summary=It was possible to login into the remote PostgreSQL as user
+postgres using weak credentials.|insight=|qodType=remote_vul|solution=Change the password as soon as possible.|solution_type=Mitigation|impact=|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>9.0</severity><qod><value>99</value><type>remote_vul</type></qod><description>It was possible to login as user postgres with password "postgres".
+
+
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}3723bfe0094</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717511Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>6667/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.809883"><type>nvt</type><name>UnrealIRCd Authentication Spoofing Vulnerability</name><family>General</family><cvss_base>8.1</cvss_base><tags>summary=UnrealIRCd is prone to authentication spoofing vulnerability.|insight=The flaw exists due to an error in
+  the 'm_authenticate' function in 'modules/m_sasl.c' script.|qodType=remote_banner|solution=Upgrade to UnrealIRCd 3.2.10.7,
+or 4.0.6, or later.|solution_type=VendorFix|impact=Successful exploitation of this vulnerability
+  will allows remote attackers to spoof certificate fingerprints and consequently
+  log in as another user.|affected=UnrealIRCd before 3.2.10.7 and
+  4.x before 4.0.6.</tags><refs><ref id="CVE-2016-7144" type="cve"/><ref id="http://seclists.org/oss-sec/2016/q3/420" type="url"/><ref id="http://www.securityfocus.com/bid/92763" type="url"/><ref id="http://www.openwall.com/lists/oss-security/2016/09/05/8" type="url"/><ref id="https://github.com/unrealircd/unrealircd/commit/f473e355e1dc422c4f019dbf86bc50ba1a34a766" type="url"/><ref id="https://bugs.unrealircd.org/main_page.php" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>8.1</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 127.0.0.1
+Fixed version:     127.0.0.1
+
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}3723bfe0094</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717520Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>6697/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.809883"><type>nvt</type><name>UnrealIRCd Authentication Spoofing Vulnerability</name><family>General</family><cvss_base>8.1</cvss_base><tags>summary=UnrealIRCd is prone to authentication spoofing vulnerability.|insight=The flaw exists due to an error in
+  the 'm_authenticate' function in 'modules/m_sasl.c' script.|qodType=remote_banner|solution=Upgrade to UnrealIRCd 3.2.10.7,
+or 4.0.6, or later.|solution_type=VendorFix|impact=Successful exploitation of this vulnerability
+  will allows remote attackers to spoof certificate fingerprints and consequently
+  log in as another user.|affected=UnrealIRCd before 3.2.10.7 and
+  4.x before 4.0.6.</tags><refs><ref id="CVE-2016-7144" type="cve"/><ref id="http://seclists.org/oss-sec/2016/q3/420" type="url"/><ref id="http://www.securityfocus.com/bid/92763" type="url"/><ref id="http://www.openwall.com/lists/oss-security/2016/09/05/8" type="url"/><ref id="https://github.com/unrealircd/unrealircd/commit/f473e355e1dc422c4f019dbf86bc50ba1a34a766" type="url"/><ref id="https://bugs.unrealircd.org/main_page.php" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>8.1</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 127.0.0.1
+Fixed version:     127.0.0.1
+
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}a358693375b</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717529Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>21/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108718"><type>nvt</type><name>FTP Brute Force Logins Reporting</name><family>Brute force attacks</family><cvss_base>7.5</cvss_base><tags>summary=It was possible to login into the remote FTP server using
+weak/known credentials.|insight=The following devices are / software is known to be affected:
+
+  - CVE-2001-1594: Codonics printer FTP service as used in GE Healthcare eNTEGRA P&amp;R
+
+  - CVE-2013-7404: GE Healthcare Discovery NM 750b
+
+  - CVE-2018-19063, CVE-2018-19064: Foscam C2 and Opticam i5 devices
+
+  Note: As the VT 'FTP Brute Force Logins' (OID: 1.3.6.1.4.1.25623.1.0.108717) might run into a
+  timeout the actual reporting of this vulnerability takes place in this VT instead.|qodType=remote_active|solution=Change the password as soon as possible.|solution_type=Mitigation|impact=This issue may be exploited by a remote attacker to e.g. gain
+  access to sensitive information or modify system configuration.|affected=</tags><refs><ref id="CVE-1999-0501" type="cve"/><ref id="CVE-1999-0502" type="cve"/><ref id="CVE-1999-0507" type="cve"/><ref id="CVE-1999-0508" type="cve"/><ref id="CVE-2001-1594" type="cve"/><ref id="CVE-2013-7404" type="cve"/><ref id="CVE-2018-19063" type="cve"/><ref id="CVE-2018-19064" type="cve"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>95</value><type>remote_active</type></qod><description>It was possible to login with the following credentials &lt;User>:&lt;Password>
+
+msfadmin:msfadmin
+postgres:postgres
+service:service
+user:user
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}4ecebea5997</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717538Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.10498"><type>nvt</type><name>Test HTTP dangerous methods</name><family>Web Servers</family><cvss_base>7.5</cvss_base><tags>summary=Misconfigured web servers allows remote clients to perform
+dangerous HTTP methods such as PUT and DELETE.|insight=|qodType=remote_vul|solution=Use access restrictions to these dangerous HTTP methods
+or disable them completely.|solution_type=Mitigation|impact=- Enabled PUT method: This might allow an attacker to upload
+  and run arbitrary code on this web server.
+
+  - Enabled DELETE method: This might allow an attacker to delete additional files on this web
+  server.|affected=Web servers with enabled PUT and/or DELETE methods.</tags><refs><ref id="http://www.securityfocus.com/bid/12141" type="url"/><ref id="OWASP-CM-001" type="bid"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>99</value><type>remote_vul</type></qod><description>We could upload the following files via the PUT method at this web server:
+
+http://127.0.0.1/dav/puttest1462543653.html
+
+We could delete the following files via the DELETE method at this web server:
+
+http://127.0.0.1/dav/puttest1462543653.html
+
+
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}dcc8491b116</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717558Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>21/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103185"><type>nvt</type><name>vsftpd Compromised Source Packages Backdoor Vulnerability</name><family>Gain a shell remotely</family><cvss_base>7.5</cvss_base><tags>summary=vsftpd is prone to a backdoor vulnerability.|insight=|qodType=remote_vul|solution=The repaired package can be downloaded from
+the referenced link. Please validate the package with its signature.|solution_type=VendorFix|impact=Attackers can exploit this issue to execute arbitrary commands in the
+  context of the application. Successful attacks will compromise the affected application.|affected=The vsftpd 2.3.4 source package is affected.</tags><refs><ref id="http://www.securityfocus.com/bid/48539" type="url"/><ref id="http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html" type="url"/><ref id="https://security.appspot.com/vsftpd.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>99</value><type>remote_vul</type></qod><description></description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}a358693375b</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717575Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>2121/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108718"><type>nvt</type><name>FTP Brute Force Logins Reporting</name><family>Brute force attacks</family><cvss_base>7.5</cvss_base><tags>summary=It was possible to login into the remote FTP server using
+weak/known credentials.|insight=The following devices are / software is known to be affected:
+
+  - CVE-2001-1594: Codonics printer FTP service as used in GE Healthcare eNTEGRA P&amp;R
+
+  - CVE-2013-7404: GE Healthcare Discovery NM 750b
+
+  - CVE-2018-19063, CVE-2018-19064: Foscam C2 and Opticam i5 devices
+
+  Note: As the VT 'FTP Brute Force Logins' (OID: 1.3.6.1.4.1.25623.1.0.108717) might run into a
+  timeout the actual reporting of this vulnerability takes place in this VT instead.|qodType=remote_active|solution=Change the password as soon as possible.|solution_type=Mitigation|impact=This issue may be exploited by a remote attacker to e.g. gain
+  access to sensitive information or modify system configuration.|affected=</tags><refs><ref id="CVE-1999-0501" type="cve"/><ref id="CVE-1999-0502" type="cve"/><ref id="CVE-1999-0507" type="cve"/><ref id="CVE-1999-0508" type="cve"/><ref id="CVE-2001-1594" type="cve"/><ref id="CVE-2013-7404" type="cve"/><ref id="CVE-2018-19063" type="cve"/><ref id="CVE-2018-19064" type="cve"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>95</value><type>remote_active</type></qod><description>It was possible to login with the following credentials &lt;User>:&lt;Password>
+
+user:user
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}edca4d29119</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717584Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.11229"><type>nvt</type><name>phpinfo() output Reporting</name><family>Web application abuses</family><cvss_base>7.5</cvss_base><tags>summary=Many PHP installation tutorials instruct the user to create
+a file called phpinfo.php or similar containing the phpinfo() statement. Such a file is often
+left back in the webserver directory.|insight=|qodType=remote_banner|solution=Delete the listed files or restrict access to them.|solution_type=Workaround|impact=Some of the information that can be gathered from this file includes:
+
+  The username of the user running the PHP process, if it is a sudo user, the IP address of the host, the web server
+  version, the system version (Unix, Linux, Windows, ...), and the root directory of the web server.|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>80</value><type>remote_banner</type></qod><description>The following files are calling the function phpinfo() which disclose potentially sensitive information:
+
+http://127.0.0.1/mutillidae/phpinfo.php
+http://127.0.0.1/phpinfo.php
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}28996b2da9a</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717594Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103482"><type>nvt</type><name>PHP-CGI-based setups vulnerability when parsing query string parameters from php files.</name><family>Web application abuses</family><cvss_base>7.5</cvss_base><tags>summary=PHP is prone to an information-disclosure vulnerability.|insight=When PHP is used in a CGI-based setup (such as Apache's mod_cgid), the
+  php-cgi receives a processed query string parameter as command line arguments which allows command-line
+  switches, such as -s, -d or -c to be passed to the php-cgi binary, which can be exploited to disclose
+  source code and obtain arbitrary code execution.
+
+  An example of the -s command, allowing an attacker to view the source code of index.php is below:
+
+  http://example.com/index.php?-s|qodType=remote_active|solution=PHP has released version 5.4.3 and 5.3.13 to address this vulnerability.
+PHP is recommending that users upgrade to the latest version of PHP.|solution_type=VendorFix|impact=Exploiting this issue allows remote attackers to view the source code of files in the
+  context of the server process. This may allow the attacker to obtain sensitive information and to run arbitrary PHP code
+  on the affected computer. Other attacks are also possible.|affected=</tags><refs><ref id="CVE-2012-1823" type="cve"/><ref id="CVE-2012-2311" type="cve"/><ref id="CVE-2012-2336" type="cve"/><ref id="CVE-2012-2335" type="cve"/><ref id="Known Exploited Vulnerability (KEV) catalog" type="bid"/><ref id="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" type="url"/><ref id="http://www.h-online.com/open/news/item/Critical-open-hole-in-PHP-creates-risks-Update-1567532.html" type="url"/><ref id="http://www.kb.cert.org/vuls/id/520827" type="url"/><ref id="http://eindbazen.net/2012/05/php-cgi-advisory-cve-2012-1823/" type="url"/><ref id="https://bugs.php.net/bug.php?id=61910" type="url"/><ref id="http://www.php.net/manual/en/security.cgi-bin.php" type="url"/><ref id="http://www.securityfocus.com/bid/53388" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>95</value><type>remote_active</type></qod><description>By doing the following HTTP POST request:
+
+"HTTP POST" body : &lt;?php phpinfo();?>
+URL              : http://127.0.0.1/cgi-bin/php?%2D%64+%61%6C%6C%6F%77%5F%75%72%6C%5F%69%6E%63%6C%75%64%65%3D%6F%6E+%2D%64+%73%61%66%65%5F%6D%6F%64%65%3D%6F%66%66+%2D%64+%73%75%68%6F%73%69%6E%2E%73%69%6D%75%6C%61%74%69%6F%6E%3D%6F%6E+%2D%64+%64%69%73%61%62%6C%65%5F%66%75%6E%63%74%69%6F%6E%73%3D%22%22+%2D%64+%6F%70%65%6E%5F%62%61%73%65%64%69%72%3D%6E%6F%6E%65+%2D%64+%61%75%74%6F%5F%70%72%65%70%65%6E%64%5F%66%69%6C%65%3D%70%68%70%3A%2F%2F%69%6E%70%75%74+%2D%64+%63%67%69%2E%66%6F%72%63%65%5F%72%65%64%69%72%65%63%74%3D%30+%2D%64+%63%67%69%2E%72%65%64%69%72%65%63%74%5F%73%74%61%74%75%73%5F%65%6E%76%3D%30+%2D%6E
+
+it was possible to execute the "&lt;?php phpinfo();?>" command.
+
+Result: &lt;title>phpinfo()&lt;/title>&lt;meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" />&lt;/head>
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}f209b933bd1</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717604Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>22/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.140001"><type>nvt</type><name>Riello NetMan 204 Default Credentials (SSH)</name><family>Default Accounts</family><cvss_base>7.5</cvss_base><tags>summary=The remote Riello NetMan 204 network card is using known default
+credentials for the SSH login.|insight=|qodType=exploit|solution=Change the password of the affected account(s).|solution_type=Workaround|impact=This issue may be exploited by a remote attacker to gain access
+  to sensitive information or modify system configuration.|affected=</tags><refs><ref id="https://www.exploit-db.com/exploits/41208" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>100</value><type>exploit</type></qod><description>It was possible to login as user 'user' with password 'user' and to execute 'cat /etc/passwd'. Result:
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+dhcp:x:101:102::/nonexistent:/bin/false
+syslog:x:102:103::/home/syslog:/bin/false
+klog:x:103:104::/home/klog:/bin/false
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+bind:x:105:113::/var/cache/bind:/bin/false
+postfix:x:106:115::/var/spool/postfix:/bin/false
+ftp:x:107:65534::/home/ftp:/bin/false
+postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+mysql:x:109:118:MySQL Server,,,:/var/lib/mysql:/bin/false
+tomcat55:x:110:65534::/usr/share/tomcat5.5:/bin/false
+distccd:x:111:65534::/:/bin/false
+user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+service:x:1002:1002:,,,:/home/service:/bin/bash
+telnetd:x:112:120::/nonexistent:/bin/false
+proftpd:x:113:65534::/var/run/proftpd:/bin/false
+statd:x:114:65534::/var/lib/nfs:/bin/false
+</description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}dcc8491b116</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717613Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>6200/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103185"><type>nvt</type><name>vsftpd Compromised Source Packages Backdoor Vulnerability</name><family>Gain a shell remotely</family><cvss_base>7.5</cvss_base><tags>summary=vsftpd is prone to a backdoor vulnerability.|insight=|qodType=remote_vul|solution=The repaired package can be downloaded from
+the referenced link. Please validate the package with its signature.|solution_type=VendorFix|impact=Attackers can exploit this issue to execute arbitrary commands in the
+  context of the application. Successful attacks will compromise the affected application.|affected=The vsftpd 2.3.4 source package is affected.</tags><refs><ref id="http://www.securityfocus.com/bid/48539" type="url"/><ref id="http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html" type="url"/><ref id="https://security.appspot.com/vsftpd.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.5</severity><qod><value>99</value><type>remote_vul</type></qod><description></description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}d803f61f444</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717621Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.105042"><type>nvt</type><name>SSL/TLS: OpenSSL CCS Man in the Middle Security Bypass Vulnerability</name><family>SSL and TLS</family><cvss_base>7.4</cvss_base><tags>summary=OpenSSL is prone to security-bypass vulnerability.|insight=OpenSSL does not properly restrict processing of ChangeCipherSpec
+  messages, which allows man-in-the-middle attackers to trigger use of a zero-length master key in
+  certain OpenSSL-to-OpenSSL communications, and consequently hijack sessions or obtain sensitive
+  information, via a crafted TLS handshake, aka the 'CCS Injection' vulnerability.|qodType=remote_analysis|solution=Updates are available. Please see the references for more information.|solution_type=VendorFix|impact=Successfully exploiting this issue may allow attackers to obtain
+  sensitive information by conducting a man-in-the-middle attack. This may lead to other attacks.|affected=OpenSSL before 0.9.8za, 1.0.0 before 1.0.0m and 1.0.1 before 1.0.1h.</tags><refs><ref id="CVE-2014-0224" type="cve"/><ref id="https://www.openssl.org/news/secadv/20140605.txt" type="url"/><ref id="http://www.securityfocus.com/bid/67899" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>High</threat><severity>7.4</severity><qod><value>70</value><type>remote_analysis</type></qod><description></description><original_threat>High</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e70046de17f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717637Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.801281"><type>nvt</type><name>TWiki Cross-Site Request Forgery Vulnerability - Sep10</name><family>Web application abuses</family><cvss_base>6.8</cvss_base><tags>summary=TWiki is prone to a cross-site request forgery (CSRF) vulnerability.|insight=Attack can be done by tricking an authenticated TWiki user into visiting
+  a static HTML page on another side, where a Javascript enabled browser will send an HTTP POST request
+  to TWiki, which in turn will process the request as the TWiki user.|qodType=remote_banner|solution=Upgrade to TWiki version 4.3.2 or later.|solution_type=VendorFix|impact=Successful exploitation will allow attacker to gain administrative
+  privileges on the target application and can cause CSRF attack.|affected=TWiki version prior to 4.3.2</tags><refs><ref id="CVE-2009-4898" type="cve"/><ref id="http://www.openwall.com/lists/oss-security/2010/08/03/8" type="url"/><ref id="http://www.openwall.com/lists/oss-security/2010/08/02/17" type="url"/><ref id="http://twiki.org/cgi-bin/view/Codev/SecurityAuditTokenBasedCsrfFix" type="url"/><ref id="http://twiki.org/cgi-bin/view/Codev/DownloadTWiki" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.8</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 01.Feb.2003
+Fixed version:     4.3.2
+
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}944cfcaaf66</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717645Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>21/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.900600"><type>nvt</type><name>Anonymous FTP Login Reporting</name><family>FTP</family><cvss_base>6.4</cvss_base><tags>summary=Reports if the remote FTP Server allows anonymous logins.|insight=A host that provides an FTP service may additionally provide
+  Anonymous FTP access as well. Under this arrangement, users do not strictly need an account on the
+  host. Instead the user typically enters 'anonymous' or 'ftp' when prompted for username. Although
+  users are commonly asked to send their email address as their password, little to no verification
+  is actually performed on the supplied data.
+
+  Remark: NIST don't see 'configuration issues' as software flaws so the referenced CVE has a
+  severity of 0.0. The severity of this VT has been raised by Greenbone to still report a
+  configuration issue on the target.|qodType=remote_banner|solution=If you do not want to share files, you should disable anonymous
+logins.|solution_type=Mitigation|impact=Based on the files accessible via this anonymous FTP login and
+  the permissions of this account an attacker might be able to:
+
+  - gain access to sensitive files
+
+  - upload or delete files.|affected=</tags><refs><ref id="CVE-1999-0497" type="cve"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.4</severity><qod><value>80</value><type>remote_banner</type></qod><description>It was possible to login to the remote FTP service with the following anonymous account(s):
+
+anonymous:anonymous@example.com
+ftp:anonymous@example.com
+
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}cc1c4db6d4f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717654Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.141636"><type>nvt</type><name>jQuery &lt; 1.9.0 XSS Vulnerability</name><family>Web application abuses</family><cvss_base>6.1</cvss_base><tags>summary=jQuery is prone to a cross-site scripting (XSS)
+vulnerability.|insight=The jQuery(strInput) function does not differentiate selectors
+  from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was
+  HTML by looking for the '&lt;' character anywhere in the string, giving attackers more flexibility
+  when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input
+  to be HTML if it explicitly starts with the '&lt;' character, limiting exploitability only to
+  attackers who can control the beginning of a string, which is far less common.|qodType=remote_banner|solution=Update to version 1.9.0 or later.|solution_type=VendorFix|impact=|affected=jQuery prior to version 1.9.0.</tags><refs><ref id="CVE-2012-6708" type="cve"/><ref id="https://bugs.jquery.com/ticket/11290" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.1</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 1.3.2
+Fixed version:     1.9.0
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 127.0.0.1.4.1.25127.0.0.1658 for more info):
+- Identified file: http://127.0.0.1/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://127.0.0.1/mutillidae/
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}44d224b77c4</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717662Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.141830"><type>nvt</type><name>TWiki &lt; 6.1.0 XSS Vulnerability</name><family>Web application abuses</family><cvss_base>6.1</cvss_base><tags>summary=bin/statistics in TWiki 6.0.2 allows XSS via the webs parameter.|insight=|qodType=remote_banner|solution=Update to version 6.1.0 or later.|solution_type=VendorFix|impact=|affected=TWiki version 6.0.2 and probably prior.</tags><refs><ref id="CVE-2018-20212" type="cve"/><ref id="https://seclists.org/fulldisclosure/2019/Jan/7" type="url"/><ref id="http://twiki.org/cgi-bin/view/Codev/DownloadTWiki" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.1</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 01.Feb.2003
+Fixed version:     6.1.0
+
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e70046de17f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717670Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.800400"><type>nvt</type><name>TWiki Cross-Site Request Forgery Vulnerability</name><family>Web application abuses</family><cvss_base>6.0</cvss_base><tags>summary=TWiki is prone to a cross-site request forgery (CSRF) vulnerability.|insight=Remote authenticated user can create a specially crafted image tag that,
+  when viewed by the target user, will update pages on the target system with the privileges of the target user
+  via HTTP requests.|qodType=remote_banner|solution=Upgrade to version 4.3.1 or later.|solution_type=VendorFix|impact=Successful exploitation will allow attacker to gain administrative
+  privileges on the target application and can cause CSRF attack.|affected=TWiki version prior to 4.3.1</tags><refs><ref id="CVE-2009-1339" type="cve"/><ref id="http://secunia.com/advisories/34880" type="url"/><ref id="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=526258" type="url"/><ref id="http://twiki.org/p/pub/Codev/SecurityAlert-CVE-2009-1339/TWiki-4.3.0-c-diff-cve-2009-1339.txt" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 01.Feb.2003
+Fixed version:     4.3.1
+
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}71c655fd352</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717677Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>445/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108011"><type>nvt</type><name>Samba MS-RPC Remote Shell Command Execution Vulnerability - Active Check</name><family>Gain a shell remotely</family><cvss_base>6.0</cvss_base><tags>summary=Samba is prone to a vulnerability that allows attackers to
+execute arbitrary shell commands because the software fails to sanitize user-supplied input.|insight=|qodType=remote_vul|solution=Updates are available. Please see the referenced vendor advisory.|solution_type=VendorFix|impact=An attacker may leverage this issue to execute arbitrary shell
+  commands on an affected system with the privileges of the application.|affected=This issue affects Samba 3.0.0 through 3.0.25rc3.</tags><refs><ref id="CVE-2007-2447" type="cve"/><ref id="http://www.securityfocus.com/bid/23972" type="url"/><ref id="https://www.samba.org/samba/security/CVE-2007-2447.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>6.0</severity><qod><value>99</value><type>remote_vul</type></qod><description></description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e79b358813f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717686Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.111012"><type>nvt</type><name>SSL/TLS: Deprecated SSLv2 and SSLv3 Protocol Detection</name><family>SSL and TLS</family><cvss_base>5.9</cvss_base><tags>summary=It was possible to detect the usage of the deprecated SSLv2
+and/or SSLv3 protocol on this system.|insight=The SSLv2 and SSLv3 protocols contain known cryptographic
+  flaws like:
+
+  - CVE-2014-3566: Padding Oracle On Downgraded Legacy Encryption (POODLE)
+
+  - CVE-2016-0800: Decrypting RSA with Obsolete and Weakened eNcryption (DROWN)|qodType=remote_app|solution=It is recommended to disable the deprecated SSLv2 and/or SSLv3
+protocols in favor of the TLSv1.2+ protocols. Please see the references for more information.|solution_type=Mitigation|impact=An attacker might be able to use the known cryptographic flaws to
+  eavesdrop the connection between clients and the service to get access to sensitive data
+  transferred within the secured connection.
+
+  Furthermore newly uncovered vulnerabilities in this protocols won't receive security updates
+  anymore.|affected=All services providing an encrypted communication using the
+  SSLv2 and/or SSLv3 protocols.</tags><refs><ref id="CVE-2016-0800" type="cve"/><ref id="CVE-2014-3566" type="cve"/><ref id="https://ssl-config.mozilla.org/" type="url"/><ref id="https://bettercrypto.org/" type="url"/><ref id="https://drownattack.com/" type="url"/><ref id="https://www.imperialviolet.org/2014/10/14/poodle.html" type="url"/><ref id="https://www.enisa.europa.eu/publications/algorithms-key-size-and-parameters-report-2014" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.9</severity><qod><value>98</value><type>remote_app</type></qod><description>In addition to TLSv1.0+ the service is also providing the deprecated SSLv3 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 127.0.0.1.4.1.25127.0.0.1067) VT.
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}75693259c28</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717697Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.11213"><type>nvt</type><name>HTTP Debugging Methods (TRACE/TRACK) Enabled</name><family>Web Servers</family><cvss_base>5.8</cvss_base><tags>summary=The remote web server supports the TRACE and/or TRACK
+methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.|insight=It has been shown that web servers supporting this methods
+  are subject to cross-site-scripting attacks, dubbed XST for Cross-Site-Tracing, when used in
+  conjunction with various weaknesses in browsers.|qodType=remote_vul|solution=Disable the TRACE and TRACK methods in your web server
+configuration.
+
+Please see the manual of your web server or the references for more information.|solution_type=Mitigation|impact=An attacker may use this flaw to trick your legitimate web
+  users to give him their credentials.|affected=Web servers with enabled TRACE and/or TRACK methods.</tags><refs><ref id="CVE-2003-1567" type="cve"/><ref id="CVE-2004-2320" type="cve"/><ref id="CVE-2004-2763" type="cve"/><ref id="CVE-2005-3398" type="cve"/><ref id="CVE-2006-4683" type="cve"/><ref id="CVE-2007-3008" type="cve"/><ref id="CVE-2008-7253" type="cve"/><ref id="CVE-2009-2823" type="cve"/><ref id="CVE-2010-0386" type="cve"/><ref id="CVE-2012-2223" type="cve"/><ref id="CVE-2014-7883" type="cve"/><ref id="http://www.kb.cert.org/vuls/id/288308" type="url"/><ref id="http://www.securityfocus.com/bid/11604" type="url"/><ref id="http://www.securityfocus.com/bid/15222" type="url"/><ref id="http://www.securityfocus.com/bid/19915" type="url"/><ref id="http://www.securityfocus.com/bid/24456" type="url"/><ref id="http://www.securityfocus.com/bid/33374" type="url"/><ref id="http://www.securityfocus.com/bid/36956" type="url"/><ref id="http://www.securityfocus.com/bid/36990" type="url"/><ref id="http://www.securityfocus.com/bid/37995" type="url"/><ref id="http://www.securityfocus.com/bid/9506" type="url"/><ref id="http://www.securityfocus.com/bid/9561" type="url"/><ref id="http://www.kb.cert.org/vuls/id/867593" type="url"/><ref id="https://httpd.apache.org/docs/current/en/mod/core.html#traceenable" type="url"/><ref id="https://techcommunity.microsoft.com/t5/iis-support-blog/http-track-and-trace-verbs/ba-p/784482" type="url"/><ref id="https://owasp.org/www-community/attacks/Cross_Site_Tracing" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.8</severity><qod><value>99</value><type>remote_vul</type></qod><description>The web server has the following HTTP methods enabled: TRACE
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}316b754124f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717709Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>22/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.150713"><type>nvt</type><name>Weak Key Exchange (KEX) Algorithm(s) Supported (SSH)</name><family>General</family><cvss_base>5.3</cvss_base><tags>summary=The remote SSH server is configured to allow / support weak key
+exchange (KEX) algorithm(s).|insight=- 1024-bit MODP group / prime KEX algorithms:
+
+  Millions of HTTPS, SSH, and VPN servers all use the same prime numbers for Diffie-Hellman key
+  exchange. Practitioners believed this was safe as long as new key exchange messages were generated
+  for every connection. However, the first step in the number field sieve-the most efficient
+  algorithm for breaking a Diffie-Hellman connection-is dependent only on this prime.
+
+  A nation-state can break a 1024-bit prime.|qodType=remote_banner|solution=Disable the reported weak KEX algorithm(s)
+
+- 1024-bit MODP group / prime KEX algorithms:
+
+Alternatively use elliptic-curve Diffie-Hellmann in general, e.g. Curve 25519.|solution_type=Mitigation|impact=An attacker can quickly break individual connections.|affected=</tags><refs><ref id="https://weakdh.org/sysadmin.html" type="url"/><ref id="https://www.rfc-editor.org/rfc/rfc9142.html" type="url"/><ref id="https://www.rfc-editor.org/rfc/rfc9142.html#name-summary-guidance-for-implem" type="url"/><ref id="https://datatracker.ietf.org/doc/html/rfc6194" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.3</severity><qod><value>80</value><type>remote_banner</type></qod><description>The remote SSH server supports the following weak KEX algorithm(s):
+
+KEX algorithm                      | Reason
+-------------------------------------------------------------------------------------------
+diffie-hellman-group-exchange-sha1 | Using SHA-1
+diffie-hellman-group1-sha1         | Using Oakley Group 2 (a 1024-bit MODP group) and SHA-1
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}79868c7d9b2</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717720Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>22/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.117687"><type>nvt</type><name>Weak Host Key Algorithm(s) (SSH)</name><family>General</family><cvss_base>5.3</cvss_base><tags>summary=The remote SSH server is configured to allow / support weak host
+key algorithm(s).|insight=|qodType=remote_banner|solution=Disable the reported weak host key algorithm(s).|solution_type=Mitigation|impact=|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.3</severity><qod><value>80</value><type>remote_banner</type></qod><description>The remote SSH server supports the following weak host key algorithm(s):
+
+host key algorithm | Description
+-----------------------------------------------------------------------------------------
+ssh-dss            | Digital Signature Algorithm (DSA) / Digital Signature Standard (DSS)
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e3e389ce2ba</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717728Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103440"><type>nvt</type><name>SSL/TLS: Report Weak Cipher Suites</name><family>SSL and TLS</family><cvss_base>5.0</cvss_base><tags>summary=This routine reports all Weak SSL/TLS cipher suites accepted
+by a service.
+
+NOTE: No severity for SMTP services with 'Opportunistic TLS' and weak cipher suites on port
+25/tcp is reported. If too strong cipher suites are configured for this service the alternative
+would be to fall back to an even more insecure cleartext communication.|insight=These rules are applied for the evaluation of the cryptographic
+  strength:
+
+  - RC4 is considered to be weak (CVE-2013-2566, CVE-2015-2808)
+
+  - Ciphers using 64 bit or less are considered to be vulnerable to brute force methods
+  and therefore considered as weak (CVE-2015-4000)
+
+  - 1024 bit RSA authentication is considered to be insecure and therefore as weak
+
+  - Any cipher considered to be secure for only the next 10 years is considered as medium
+
+  - Any other cipher is considered as strong|qodType=remote_app|solution=The configuration of this services should be changed so
+that it does not accept the listed weak cipher suites anymore.
+
+Please see the references for more resources supporting you with this task.|solution_type=Mitigation|impact=|affected=</tags><refs><ref id="CVE-2013-2566" type="cve"/><ref id="CVE-2015-2808" type="cve"/><ref id="CVE-2015-4000" type="cve"/><ref id="https://www.bsi.bund.de/SharedDocs/Warnmeldungen/DE/CB/warnmeldung_cb-k16-1465_update_6.html" type="url"/><ref id="https://bettercrypto.org/" type="url"/><ref id="https://mozilla.github.io/server-side-tls/ssl-config-generator/" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.0</severity><qod><value>98</value><type>remote_app</type></qod><description>'Weak' cipher suites accepted by this service via the SSLv3 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+'Weak' cipher suites accepted by this service via the TLSv1.0 protocol:
+
+TLS_RSA_WITH_RC4_128_SHA
+
+
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}66ec0c4c6a4</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717749Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.10056"><type>nvt</type><name>/doc directory browsable</name><family>Web application abuses</family><cvss_base>5.0</cvss_base><tags>summary=The /doc directory is browsable.
+/doc shows the content of the /usr/doc directory and therefore it shows which programs and - important! - the version of the installed programs.|insight=|qodType=remote_banner|solution=Use access restrictions for the /doc directory.
+If you use Apache you might use this in your access.conf:
+
+&lt;Directory /usr/doc>
+AllowOverride None
+order deny, allow
+deny from all
+allow from localhost
+&lt;/Directory>|solution_type=Mitigation|impact=|affected=</tags><refs><ref id="CVE-1999-0678" type="cve"/><ref id="http://www.securityfocus.com/bid/318" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>Vulnerable URL: http://127.0.0.1/doc/
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}fec842e796e</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717762Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103955"><type>nvt</type><name>SSL/TLS: Certificate Expired</name><family>SSL and TLS</family><cvss_base>5.0</cvss_base><tags>summary=The remote server's SSL/TLS certificate has already expired.|insight=This script checks expiry dates of certificates associated with
+  SSL/TLS-enabled services on the target and reports whether any have already expired.|qodType=remote_vul|solution=Replace the SSL/TLS certificate by a new one.|solution_type=Mitigation|impact=|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.0</severity><qod><value>99</value><type>remote_vul</type></qod><description>The certificate of the remote service expired on 2010-04-16 14:07:45.
+
+Certificate details:
+fingerprint (SHA-1)             | ED093088706603BFD5DC237399B498DA2D4D31C6
+fingerprint (SHA-256)           | E7A7FA0D63E457C7C4A59B38B70849C6A70BDA6F830C7AF1E32DEE436DE813CC
+issued by                       | 127.0.0.1127.0.0.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+public key size (bits)          | 1024
+serial                          | 00FAF93A4C7FB6B9CC
+signature algorithm             | sha1WithRSAEncryption
+subject                         | 127.0.0.1127.0.0.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+subject alternative names (SAN) | None
+valid from                      | 2010-03-17 14:07:45 UTC
+valid until                     | 2010-04-16 14:07:45 UTC
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}bccd1cd5b97</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717769Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.103210"><type>nvt</type><name>awiki &lt;= 20100125 Multiple LFI Vulnerabilities - Active Check</name><family>Web application abuses</family><cvss_base>5.0</cvss_base><tags>summary=awiki is prone to multiple local file include (LFI)
+vulnerabilities because it fails to properly sanitize user-supplied input.|insight=|qodType=remote_vul|solution=No known solution was made available for at least one year
+since the disclosure of this vulnerability. Likely none will be provided anymore. General
+solution options are to upgrade to a newer release, disable respective features, remove the
+product or replace the product by another one.|solution_type=WillNotFix|impact=An attacker can exploit this vulnerability to obtain potentially
+  sensitive information and execute arbitrary local scripts in the context of the webserver
+  process. This may allow the attacker to compromise the application and the host.|affected=awiki version 20100125 and prior.</tags><refs><ref id="https://www.exploit-db.com/exploits/36047/" type="url"/><ref id="http://www.securityfocus.com/bid/49187" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>5.0</severity><qod><value>99</value><type>remote_vul</type></qod><description>Vulnerable URL: http://127.0.0.1/mutillidae/index.php?page=/etc/passwd
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}68aaba31879</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717783Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108440"><type>nvt</type><name>Cleartext Transmission of Sensitive Information via HTTP</name><family>Web application abuses</family><cvss_base>4.8</cvss_base><tags>summary=The host / application transmits sensitive information (username, passwords) in
+cleartext via HTTP.|insight=|qodType=remote_banner|solution=Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+allowing to input sensitive data into the mentioned functions.|solution_type=Workaround|impact=An attacker could use this situation to compromise or eavesdrop on the
+  HTTP communication between the client and the server using a man-in-the-middle attack to get access to
+  sensitive data like usernames or passwords.|affected=Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.</tags><refs><ref id="https://www.owasp.org/index.php/Top_10_2013-A2-Broken_Authentication_and_Session_Management" type="url"/><ref id="https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure" type="url"/><ref id="https://cwe.mitre.org/data/definitions/319.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.8</severity><qod><value>80</value><type>remote_banner</type></qod><description>The following input fields were identified (URL:input name):
+
+http://127.0.0.1/dvwa/login.php:password
+http://127.0.0.1/phpMyAdmin/:pma_password
+http://127.0.0.1/phpMyAdmin/?D=A:pma_password
+http://127.0.0.1/tikiwiki/tiki-install.php:pass
+http://127.0.0.1/twiki/bin/view/TWiki/TWikiUserAuthentication:oldpassword
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}4406907af6b</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717794Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5900/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108529"><type>nvt</type><name>VNC Server Unencrypted Data Transmission</name><family>General</family><cvss_base>4.8</cvss_base><tags>summary=The remote host is running a VNC server providing one or more insecure or
+cryptographically weak Security Type(s) not intended for use on untrusted networks.|insight=|qodType=remote_analysis|solution=Run the session over an encrypted channel provided by IPsec [RFC4301] or SSH [RFC4254].
+Some VNC server vendors are also providing more secure Security Types within their products.|solution_type=Mitigation|impact=An attacker can uncover sensitive data by sniffing traffic to the
+  VNC server.|affected=</tags><refs><ref id="https://tools.ietf.org/html/rfc6143#page-10" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.8</severity><qod><value>70</value><type>remote_analysis</type></qod><description>The VNC server provides the following insecure or cryptographically weak Security Type(s):
+
+2 (VNC authentication)
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}1fa3ebb87ec</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717806Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>21/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108528"><type>nvt</type><name>FTP Unencrypted Cleartext Login</name><family>General</family><cvss_base>4.8</cvss_base><tags>summary=The remote host is running a FTP service that allows cleartext logins over
+unencrypted connections.|insight=|qodType=remote_analysis|solution=Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+the manual of the FTP service for more information.|solution_type=Mitigation|impact=An attacker can uncover login names and passwords by sniffing traffic to the
+  FTP service.|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.8</severity><qod><value>70</value><type>remote_analysis</type></qod><description>The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Please specify the password.
+Anonymous sessions:     331 Please specify the password.
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}1fa3ebb87ec</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717816Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>2121/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.108528"><type>nvt</type><name>FTP Unencrypted Cleartext Login</name><family>General</family><cvss_base>4.8</cvss_base><tags>summary=The remote host is running a FTP service that allows cleartext logins over
+unencrypted connections.|insight=|qodType=remote_analysis|solution=Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see
+the manual of the FTP service for more information.|solution_type=Mitigation|impact=An attacker can uncover login names and passwords by sniffing traffic to the
+  FTP service.|affected=</tags><refs/></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.8</severity><qod><value>70</value><type>remote_analysis</type></qod><description>The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):
+
+Non-anonymous sessions: 331 Password required for openvasvt
+Anonymous sessions:     331 Password required for anonymous
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}e79b358813f</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717825Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.117274"><type>nvt</type><name>SSL/TLS: Deprecated TLSv1.0 and TLSv1.1 Protocol Detection</name><family>SSL and TLS</family><cvss_base>4.3</cvss_base><tags>summary=It was possible to detect the usage of the deprecated TLSv1.0
+and/or TLSv1.1 protocol on this system.|insight=The TLSv1.0 and TLSv1.1 protocols contain known cryptographic
+  flaws like:
+
+  - CVE-2011-3389: Browser Exploit Against SSL/TLS (BEAST)
+
+  - CVE-2015-0204: Factoring Attack on RSA-EXPORT Keys Padding Oracle On Downgraded Legacy
+  Encryption (FREAK)|qodType=remote_app|solution=It is recommended to disable the deprecated TLSv1.0 and/or
+TLSv1.1 protocols in favor of the TLSv1.2+ protocols. Please see the references for more
+information.|solution_type=Mitigation|impact=An attacker might be able to use the known cryptographic flaws
+  to eavesdrop the connection between clients and the service to get access to sensitive data
+  transferred within the secured connection.
+
+  Furthermore newly uncovered vulnerabilities in this protocols won't receive security updates
+  anymore.|affected=All services providing an encrypted communication using the
+  TLSv1.0 and/or TLSv1.1 protocols.</tags><refs><ref id="CVE-2011-3389" type="cve"/><ref id="CVE-2015-0204" type="cve"/><ref id="https://ssl-config.mozilla.org/" type="url"/><ref id="https://bettercrypto.org/" type="url"/><ref id="https://datatracker.ietf.org/doc/rfc8996/" type="url"/><ref id="https://vnhacker.blogspot.com/2011/09/beast.html" type="url"/><ref id="https://web.archive.org/web/20201108095603/https://censys.io/blog/freak" type="url"/><ref id="https://www.enisa.europa.eu/publications/algorithms-key-size-and-parameters-report-2014" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.3</severity><qod><value>98</value><type>remote_app</type></qod><description>The service is only providing the deprecated TLSv1.0 protocol and supports one or more ciphers. Those supported ciphers can be found in the 'SSL/TLS: Report Supported Cipher Suites' (OID: 127.0.0.1.4.1.25127.0.0.1067) VT.
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}9c322581ba5</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717836Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.801660"><type>nvt</type><name>phpMyAdmin 'error.php' Cross Site Scripting Vulnerability</name><family>Web application abuses</family><cvss_base>4.3</cvss_base><tags>summary=phpMyAdmin is prone to a cross-site scripting (XSS) vulnerability.|insight=The flaw is caused by input validation errors in the 'error.php'
+script when processing crafted BBcode tags containing '@' characters, which
+could allow attackers to inject arbitrary HTML code within the error page
+and conduct phishing attacks.|qodType=remote_vul|solution=No known solution was made available for at least one year since the disclosure
+of this vulnerability. Likely none will be provided anymore. General solution options are to upgrade to a newer
+release, disable respective features, remove the product or replace the product by another one.|solution_type=WillNotFix|impact=Successful exploitation will allow attackers to inject arbitrary
+HTML code within the error page and conduct phishing attacks.|affected=phpMyAdmin version 3.3.8.1 and prior.</tags><refs><ref id="CVE-2010-4480" type="cve"/><ref id="http://www.exploit-db.com/exploits/15699/" type="url"/><ref id="http://www.vupen.com/english/advisories/2010/3133" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.3</severity><qod><value>99</value><type>remote_vul</type></qod><description></description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}2b0831858b0</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717847Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.141637"><type>nvt</type><name>jQuery &lt; 1.6.3 XSS Vulnerability</name><family>Web application abuses</family><cvss_base>4.3</cvss_base><tags>summary=jQuery is prone to a cross-site scripting (XSS)
+vulnerability.|insight=Cross-site scripting (XSS) vulnerability in jQuery before 1.6.3,
+  when using location.hash to select elements, allows remote attackers to inject arbitrary web
+  script or HTML via a crafted tag.|qodType=remote_banner|solution=Update to version 1.6.3 or later.|solution_type=VendorFix|impact=|affected=jQuery prior to version 1.6.3.</tags><refs><ref id="CVE-2011-4969" type="cve"/><ref id="https://blog.jquery.com/2011/09/01/jquery-1-6-3-released/" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.3</severity><qod><value>80</value><type>remote_banner</type></qod><description>Installed version: 1.3.2
+Fixed version:     1.6.3
+Installation
+path / port:       /mutillidae/javascript/ddsmoothmenu/jquery.min.js
+
+Detection info (see OID: 127.0.0.1.4.1.25127.0.0.1658 for more info):
+- Identified file: http://127.0.0.1/mutillidae/javascript/ddsmoothmenu/jquery.min.js
+- Referenced at:   http://127.0.0.1/mutillidae/
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}55390940921</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717855Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>22/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.105611"><type>nvt</type><name>Weak Encryption Algorithm(s) Supported (SSH)</name><family>General</family><cvss_base>4.3</cvss_base><tags>summary=The remote SSH server is configured to allow / support weak
+encryption algorithm(s).|insight=- The 'arcfour' cipher is the Arcfour stream cipher with 128-bit
+  keys. The Arcfour cipher is believed to be compatible with the RC4 cipher [SCHNEIER]. Arcfour
+  (and RC4) has problems with weak keys, and should not be used anymore.
+
+  - The 'none' algorithm specifies that no encryption is to be done. Note that this method provides
+  no confidentiality protection, and it is NOT RECOMMENDED to use it.
+
+  - A vulnerability exists in SSH messages that employ CBC mode that may allow an attacker to
+  recover plaintext from a block of ciphertext.|qodType=remote_active|solution=Disable the reported weak encryption algorithm(s).|solution_type=Mitigation|impact=|affected=</tags><refs><ref id="https://www.rfc-editor.org/rfc/rfc4253#section-6.3" type="url"/><ref id="https://www.kb.cert.org/vuls/id/958563" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.3</severity><qod><value>95</value><type>remote_active</type></qod><description>The remote SSH server supports the following weak client-to-server encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+
+
+The remote SSH server supports the following weak server-to-client encryption algorithm(s):
+
+3des-cbc
+aes128-cbc
+aes192-cbc
+aes256-cbc
+arcfour
+arcfour128
+arcfour256
+blowfish-cbc
+cast128-cbc
+rijndael-cbc@lysator.liu.se
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}1fe916ed11d</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717864Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>80/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.802391"><type>nvt</type><name>TWiki 'organization' Cross-Site Scripting Vulnerability</name><family>Web application abuses</family><cvss_base>4.3</cvss_base><tags>summary=TWiki is prone to a cross-site scripting (XSS) vulnerability.|insight=The flaw is due to an improper validation of user-supplied input
+  to the 'organization' field when registering or editing a user, which allows attackers to execute
+  arbitrary HTML and script code in a user's browser session in the context of an affected site.|qodType=remote_analysis|solution=No known solution was made available for at least one year
+since the disclosure of this vulnerability. Likely none will be provided anymore. General solution
+options are to upgrade to a newer release, disable respective features, remove the product or
+replace the product by another one.|solution_type=WillNotFix|impact=Successful exploitation will allow remote attackers to insert
+  arbitrary HTML and script code, which will be executed in a user's browser
+  session in the context of an affected site.|affected=TWiki version 5.1.1 and prior</tags><refs><ref id="CVE-2012-0979" type="cve"/><ref id="http://secunia.com/advisories/47784" type="url"/><ref id="http://xforce.iss.net/xforce/xfdb/72821" type="url"/><ref id="http://www.securitytracker.com/id?1026604" type="url"/><ref id="http://www.securityfocus.com/bid/51731" type="url"/><ref id="http://packetstormsecurity.org/files/109246/twiki-xss.txt" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat>Medium</threat><severity>4.3</severity><qod><value>70</value><type>remote_analysis</type></qod><description>Vulnerable URL: http://127.0.0.1/twiki/bin/view/Main/CccCcc
+</description><original_threat>Medium</original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}101c559718c</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717875Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.106223"><type>nvt</type><name>SSL/TLS: Diffie-Hellman Key Exchange Insufficient DH Group Strength Vulnerability</name><family>SSL and TLS</family><cvss_base>4.0</cvss_base><tags>summary=The SSL/TLS service uses Diffie-Hellman groups with insufficient strength
+(key size &lt; 2048).|insight=The Diffie-Hellman group are some big numbers that are used as base for
+  the DH computations. They can be, and often are, fixed. The security of the final secret depends on the size
+  of these parameters. It was found that 512 and 768 bits to be weak, 1024 bits to be breakable by really
+  powerful attackers like governments.|qodType=remote_banner|solution=Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE) or use
+a 2048-bit or stronger Diffie-Hellman group (see the references).
+
+For Apache Web Servers:
+Beginning with version 2.4.7, mod_ssl will use DH parameters which include primes with lengths of more than 1024 bits.|solution_type=Workaround|impact=An attacker might be able to decrypt the SSL/TLS communication offline.|affected=</tags><refs><ref id="https://weakdh.org/" type="url"/><ref id="https://weakdh.org/sysadmin.html" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat></threat><severity>4.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>Server Temporary Key Size: 1024 bits
+
+</description><original_threat></original_threat><original_severity>5</original_severity></result><result id="b87d3a32-8ff8-4010-aada-4b4f578b084d"><name>{v1}fec842e796e</name><owner><name>gps</name></owner><modification_time></modification_time><creation_time>2023-09-29T11:36:37.717887Z</creation_time><host>{v1}e2eec5b536a<asset/><hostname>{v1}b6b9f466d63</hostname></host><port>5432/tcp</port><nvt oid="1.3.6.1.4.1.25623.1.0.105880"><type>nvt</type><name>SSL/TLS: Certificate Signed Using A Weak Signature Algorithm</name><family>SSL and TLS</family><cvss_base>4.0</cvss_base><tags>summary=The remote service is using a SSL/TLS certificate in the certificate chain that has been signed using a
+cryptographically weak hashing algorithm.|insight=The following hashing algorithms used for signing SSL/TLS certificates are considered cryptographically weak
+  and not secure enough for ongoing use:
+
+  - Secure Hash Algorithm 1 (SHA-1)
+
+  - Message Digest 5 (MD5)
+
+  - Message Digest 4 (MD4)
+
+  - Message Digest 2 (MD2)
+
+  Beginning as late as January 2017 and as early as June 2016, browser developers such as Microsoft and Google will begin warning users when visiting
+  web sites that use SHA-1 signed Secure Socket Layer (SSL) certificates.
+
+  NOTE: The script preference allows to set one or more custom SHA-1 fingerprints of CA certificates which are trusted by this routine. The fingerprints
+  needs to be passed comma-separated and case-insensitive:
+
+  Fingerprint1
+
+  or
+
+  fingerprint1, Fingerprint2|qodType=remote_banner|solution=Servers that use SSL/TLS certificates signed with a weak SHA-1, MD5, MD4 or MD2 hashing algorithm will need to obtain new
+SHA-2 signed SSL/TLS certificates to avoid web browser SSL/TLS certificate warnings.|solution_type=Mitigation|impact=|affected=</tags><refs><ref id="https://blog.mozilla.org/security/2014/09/23/phasing-out-certificates-with-sha-1-based-signature-algorithms/" type="url"/></refs></nvt><scan_nvt_version></scan_nvt_version><threat></threat><severity>4.0</severity><qod><value>80</value><type>remote_banner</type></qod><description>The following certificates are part of the certificate chain but using insecure signature algorithms:
+
+Subject:              127.0.0.1127.0.0.1=#726F6F74407562756E74753830342D626173652E6C6F63616C646F6D61696E,CN=ubuntu804-base.localdomain,OU=Office for Complication of Otherwise Simple Affairs,O=OCOSA,L=Everywhere,ST=There is no such thing outside US,C=XX
+Signature Algorithm:  sha1WithRSAEncryption
+
+
+</description><original_threat></original_threat><original_severity>5</original_severity></result></results><result_count>0<full>0</full><filtered>0</filtered><debug><full>0</full><filtered>0</filtered></debug><hole><full>0</full><filtered>0</filtered></hole><info><full>0</full><filtered>0</filtered></info><log><full>0</full><filtered>0</filtered></log><warning><full>0</full><filtered>0</filtered></warning><false_positive><full>0</full><filtered>0</filtered></false_positive></result_count><severity><full>0</full><filtered>0</filtered></severity><host><ip>{v1}e2eec5b536a</ip><asset asset_id=""/><start>2023-09-26T10:50:34Z</start><end>2023-09-26T13:04:00Z</end><port_count><page>44</page></port_count><result_count><page>42</page><hole><page>0</page></hole><warning><page>19</page></warning><info><page>23</page></info><log><page>0</page></log><false_positive><page>0</page></false_positive></result_count><detail/></host><errors/><scan_end>2023-09-26T13:04:00Z</scan_end><report_format></report_format></report></report>

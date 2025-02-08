@@ -1,0 +1,859 @@
+{
+  "image": "your_image:latest",
+  "scan_started": {
+    "seconds": 1567784942,
+    "nanos": 28041437
+  },
+  "scan_duration": 25,
+  "image_size": 565733981,
+  "digest": "54bc57e4e876533bc61ba7bf229f0f9f96d137b787614c3d0d5c70c3578fe867",
+  "os": "alpine",
+  "version": "3.9.4",
+  "resources": [
+    {
+      "resource": {
+        "format": "apk",
+        "name": "musl",
+        "version": "1.1.20-r4",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:musl:1.1.20-r4",
+        "license": "MIT"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-14697",
+          "description": "musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application's source code.",
+          "nvd_score": 7.5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697",
+          "vendor_score": 7.5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "vendor_severity": "high",
+          "publish_date": "2019-08-06",
+          "modification_date": "2019-08-14",
+          "fix_version": "1.1.20-r5",
+          "solution": "Upgrade package musl to version 1.1.20-r5 or above.",
+          "nvd_score_v3": 9.8,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "nvd_severity_v3": "critical",
+          "vendor_score_v3": 9.8,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "vendor_severity_v3": "critical",
+          "aqua_score": 7.5,
+          "aqua_severity": "high",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 328701
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "libtasn1",
+        "version": "4.13-r0",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:libtasn1:4.13-r0",
+        "license": "GPL-3.0,LGPL"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2018-1000654",
+          "description": "GNU Libtasn1-4.13 libtasn1-4.13 version libtasn1-4.13, libtasn1-4.12 contains a DoS, specifically CPU usage will reach 100% when running asn1Paser against the POC due to an issue in _asn1_expand_object_id(p_tree), after a long time, the program will be killed. This attack appears to be exploitable via parsing a crafted file.",
+          "nvd_score": 7.1,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-1000654",
+          "vendor_score": 7.1,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+          "vendor_severity": "high",
+          "publish_date": "2018-08-20",
+          "modification_date": "2019-06-05",
+          "fix_version": "4.14-r0",
+          "solution": "Upgrade package libtasn1 to version 4.14-r0 or above.",
+          "nvd_score_v3": 5.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 5.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 7.1,
+          "aqua_severity": "high",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 328695
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "libbz2",
+        "version": "1.0.6-r6",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:libbz2:1.0.6-r6",
+        "license": "BSD"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-12900",
+          "description": "BZ2_decompress in decompress.c in bzip2 through 1.0.6 has an out-of-bounds write when there are many selectors.",
+          "nvd_score": 7.5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-12900",
+          "vendor_score": 7.5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "vendor_severity": "high",
+          "publish_date": "2019-06-19",
+          "modification_date": "2019-06-24",
+          "fix_version": "1.0.6-r7",
+          "solution": "Upgrade package libbz2 to version 1.0.6-r7 or above.",
+          "nvd_score_v3": 9.8,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "nvd_severity_v3": "critical",
+          "vendor_score_v3": 9.8,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "vendor_severity_v3": "critical",
+          "aqua_score": 7.5,
+          "aqua_severity": "high",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 322576
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "giflib",
+        "version": "5.1.4-r2",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:giflib:5.1.4-r2",
+        "license": "MIT"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-15133",
+          "description": "In GIFLIB before 2019-02-16, a malformed GIF file triggers a divide-by-zero exception in the decoder function DGifSlurp in dgif_lib.c if the height field of the ImageSize data structure is equal to zero.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-15133",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2019-08-17",
+          "modification_date": "2019-08-29",
+          "nvd_score_v3": 6.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 6.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "libjpeg-turbo",
+        "version": "1.5.3-r4",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:libjpeg-turbo:1.5.3-r4",
+        "license": "IJG"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2018-14498",
+          "description": "get_8bit_row in rdbmp.c in libjpeg-turbo through 1.5.90 and MozJPEG through 3.3.1 allows attackers to cause a denial of service (heap-based buffer over-read and application crash) via a crafted 8-bit BMP in which one or more of the color indices is out of range for the number of palette entries.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-14498",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2019-03-07",
+          "modification_date": "2019-05-08",
+          "fix_version": "1.5.3-r5",
+          "solution": "Upgrade package libjpeg-turbo to version 1.5.3-r5 or above.",
+          "nvd_score_v3": 6.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 6.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 328694
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "libssh2",
+        "version": "1.8.2-r0",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:libssh2:1.8.2-r0",
+        "license": "BSD"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-13115",
+          "description": "In libssh2 before 1.9.0, kex_method_diffie_hellman_group_exchange_sha256_key_exchange in kex.c has an integer overflow that could lead to an out-of-bounds read in the way packets are read from the server. A remote attacker who compromises a SSH server may be able to disclose sensitive information or cause a denial of service condition on the client system when a user connects to the server. This is related to an _libssh2_check_length mistake, and is different from the various issues fixed in 1.8.1, such as CVE-2019-3855.",
+          "nvd_score": 5.8,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:P/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-13115",
+          "vendor_score": 5.8,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:P/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2019-07-16",
+          "modification_date": "2019-07-25",
+          "nvd_score_v3": 8.1,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:H",
+          "nvd_severity_v3": "high",
+          "vendor_score_v3": 8.1,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:H",
+          "vendor_severity_v3": "high",
+          "aqua_score": 5.8,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:P/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "libcurl",
+        "version": "7.64.0-r2",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:libcurl:7.64.0-r2",
+        "license": "MIT"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-5436",
+          "description": "A heap buffer overflow in the TFTP receiving code allows for DoS or arbitrary code execution in libcurl versions 7.19.4 through 7.64.1.",
+          "nvd_score": 4.6,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-5436",
+          "vendor_score": 4.6,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2019-05-28",
+          "modification_date": "2019-06-09",
+          "nvd_score_v3": 7.8,
+          "nvd_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "nvd_severity_v3": "high",
+          "vendor_score_v3": 7.8,
+          "vendor_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "vendor_severity_v3": "high",
+          "aqua_score": 4.6,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "python2",
+        "version": "2.7.16-r1",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:python2:2.7.16-r1",
+        "license": "custom"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2010-3492",
+          "description": "The asyncore module in Python before 3.2 does not properly handle unsuccessful calls to the accept function, and does not have accompanying documentation describing how daemon applications should handle unsuccessful calls to the accept function, which makes it easier for remote attackers to conduct denial of service attacks that terminate these applications via network connections.",
+          "nvd_score": 5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2010-3492",
+          "vendor_score": 5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2010-10-19",
+          "modification_date": "2017-09-19",
+          "aqua_score": 5,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2015-5652",
+          "description": "Untrusted search path vulnerability in python.exe in Python through 3.5.0 on Windows allows local users to gain privileges via a Trojan horse readline.pyd file in the current working directory.  NOTE: the vendor says \"It was determined that this is a longtime behavior of Python that cannot really be altered at this point.\"",
+          "nvd_score": 7.2,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:L/AC:L/Au:N/C:C/I:C/A:C",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2015-5652",
+          "vendor_score": 7.2,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:L/AC:L/Au:N/C:C/I:C/A:C",
+          "vendor_severity": "high",
+          "publish_date": "2015-10-06",
+          "modification_date": "2016-11-28",
+          "aqua_score": 7.2,
+          "aqua_severity": "high",
+          "aqua_vectors": "AV:L/AC:L/Au:N/C:C/I:C/A:C",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2017-17522",
+          "description": "** DISPUTED ** Lib/webbrowser.py in Python through 3.6.3 does not validate strings before launching the program specified by the BROWSER environment variable, which might allow remote attackers to conduct argument-injection attacks via a crafted URL. NOTE: a software maintainer indicates that exploitation is impossible because the code relies on subprocess.Popen and the default shell=False setting.",
+          "nvd_score": 6.8,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2017-17522",
+          "vendor_score": 6.8,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2017-12-14",
+          "modification_date": "2017-12-28",
+          "nvd_score_v3": 8.8,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+          "nvd_severity_v3": "high",
+          "vendor_score_v3": 8.8,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+          "vendor_severity_v3": "high",
+          "aqua_score": 6.8,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2017-18207",
+          "description": "** DISPUTED ** The Wave_read._read_fmt_chunk function in Lib/wave.py in Python through 3.6.4 does not ensure a nonzero channel value, which allows attackers to cause a denial of service (divide-by-zero and exception) via a crafted wav format audio file. NOTE: the vendor disputes this issue because Python applications \"need to be prepared to handle a wide variety of exceptions.\"",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2017-18207",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2018-03-01",
+          "modification_date": "2018-03-23",
+          "nvd_score_v3": 6.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 6.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2018-20852",
+          "description": "http.cookiejar.DefaultPolicy.domain_return_ok in Lib/http/cookiejar.py in Python before 3.7.3 does not correctly validate the domain: it can be tricked into sending existing cookies to the wrong server. An attacker may abuse this flaw by using a server with a hostname that has another valid hostname as a suffix (e.g., pythonicexample.com to steal cookies for example.com). When a program uses http.cookiejar.DefaultPolicy and tries to do an HTTP connection to an attacker-controlled server, existing cookies can be leaked to the attacker. This affects 2.x through 2.7.16, 3.x before 3.4.10, 3.5.x before 3.5.7, 3.6.x before 3.6.9, and 3.7.x before 3.7.3.",
+          "nvd_score": 5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-20852",
+          "vendor_score": 5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+          "vendor_severity": "medium",
+          "publish_date": "2019-07-13",
+          "modification_date": "2019-08-17",
+          "nvd_score_v3": 5.3,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 5.3,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 5,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2019-9740",
+          "description": "An issue was discovered in urllib2 in Python 2.x through 2.7.16 and urllib in Python 3.x through 3.7.3. CRLF injection is possible if the attacker controls a url parameter, as demonstrated by the first argument to urllib.request.urlopen with \\r\\n (specifically in the query string after a ? character) followed by an HTTP header or a Redis command.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-9740",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "vendor_severity": "medium",
+          "publish_date": "2019-03-13",
+          "modification_date": "2019-05-28",
+          "nvd_score_v3": 6.1,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 6.1,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2019-9947",
+          "description": "An issue was discovered in urllib2 in Python 2.x through 2.7.16 and urllib in Python 3.x through 3.7.3. CRLF injection is possible if the attacker controls a url parameter, as demonstrated by the first argument to urllib.request.urlopen with \\r\\n (specifically in the path component of a URL that lacks a ? character) followed by an HTTP header or a Redis command. This is similar to the CVE-2019-9740 query string issue.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-9947",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "vendor_severity": "medium",
+          "publish_date": "2019-03-23",
+          "modification_date": "2019-05-28",
+          "nvd_score_v3": 6.1,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 6.1,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+          "aqua_scoring_system": "CVSS V2"
+        }
+      ]
+    },
+    {
+      "resource": {
+        "format": "apk",
+        "name": "unzip",
+        "version": "6.0-r4",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:unzip:6.0-r4",
+        "license": "custom"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2018-18384",
+          "description": "Info-ZIP UnZip 6.0 has a buffer overflow in list.c, when a ZIP archive has a crafted relationship between the compressed-size value and the uncompressed-size value, because a buffer size is 10 and is supposed to be 12.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-18384",
+          "vendor_score": 4.3,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2018-10-16",
+          "modification_date": "2019-04-02",
+          "nvd_score_v3": 5.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 5.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        },
+        {
+          "name": "CVE-2019-13232",
+          "description": "Info-ZIP UnZip 6.0 mishandles the overlapping of files inside a ZIP container, leading to denial of service (resource consumption), aka a \"better zip bomb\" issue.",
+          "nvd_score": 5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-13232",
+          "vendor_score": 5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "vendor_severity": "medium",
+          "publish_date": "2019-07-04",
+          "modification_date": "2019-07-29",
+          "nvd_score_v3": 7.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "high",
+          "vendor_score_v3": 7.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "high",
+          "aqua_score": 5,
+          "aqua_severity": "medium",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "aqua_scoring_system": "CVSS V2"
+        }
+      ]
+    },
+    {
+      "resource": {
+        "type": 1,
+        "path": "/usr/lib/python2.7/ssl.py",
+        "cpe": "file:/11a5a0e290925f6e1cf59749d8d90e9f77b29b7c",
+        "hash": "sha1:11a5a0e290925f6e1cf59749d8d90e9f77b29b7c"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2013-2099",
+          "description": "Algorithmic complexity vulnerability in the ssl.match_hostname function in Python 3.2.x, 3.3.x, and earlier, and unspecified versions of python-backports-ssl_match_hostname as used for older Python versions, allows remote attackers to cause a denial of service (CPU consumption) via multiple wildcard characters in the common name in a certificate.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-2099",
+          "vendor_score": 4.3,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "http://bugs.python.org/issue17980",
+          "publish_date": "2013-10-09",
+          "modification_date": "2016-06-09",
+          "fix_version": "3.3.2-r1, 3.2.5-r1, 2.6.8, 2.7.3-r1",
+          "solution": "All Python 3.3 users should upgrade to the latest version \u003e= python-3.3.2-r1\nAll Python 3.2 users should upgrade to the latest version \u003e= python-3.2.5-r1\nAll Python 2.6 users should upgrade to the latest version \u003e= python-2.6.8\nAll Python 2.7 users should upgrade to the latest version \u003e= python-2.7.3-r1\n\n3.4",
+          "aqua_score": 4.3,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 329598
+        }
+      ]
+    },
+    {
+      "resource": {
+        "type": 1,
+        "path": "/usr/share/myapp/myapp.war:WEB-INF/lib/commons-compress-1.10.jar",
+        "cpe": "file:/5eeb27c57eece1faf2d837868aeccc94d84dcc9a",
+        "hash": "sha1:5eeb27c57eece1faf2d837868aeccc94d84dcc9a"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2018-11771",
+          "description": "When reading a specially crafted ZIP archive, the read method of Apache Commons Compress 1.7 to 1.17's ZipArchiveInputStream can fail to return the correct EOF indication after the end of the stream has been reached. When combined with a java.io.InputStreamReader this can lead to an infinite stream, which can be used to mount a denial of service attack against services that use Compress' zip package.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-11771",
+          "vendor_score": 5.5,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "http://www.securityfocus.com/bid/105139",
+          "publish_date": "2018-08-16",
+          "modification_date": "2019-05-30",
+          "fix_version": "1.18\nThe vendor has issued a fix (1.18).\n\nThe vendor advisory is available at:\n\nhttps://commons.apache.org/proper/commons-compress/security-reports.html#Apache_Commons_Compress_Security_Vulnerabilities",
+          "solution": "1.18\nThe vendor has issued a fix (1.18).\n\nThe vendor advisory is available at:\n\nhttps://commons.apache.org/proper/commons-compress/security-reports.html#Apache_Commons_Compress_Security_Vulnerabilities",
+          "nvd_score_v3": 5.5,
+          "nvd_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 5.5,
+          "vendor_vectors_v3": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 5.5,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 276586
+        }
+      ]
+    },
+    {
+      "resource": {
+        "type": 1,
+        "path": "/usr/share/myapp/myapp.war:WEB-INF/lib/commons-codec-1.9.jar",
+        "cpe": "file:/9ce04e34240f674bc72680f8b843b1457383161a",
+        "hash": "sha1:9ce04e34240f674bc72680f8b843b1457383161a"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "WS-2009-0001",
+          "description": "Not all \"business\" method implementations of public API in Apache Commons Codec 1.x are thread safe, which might disclose the wrong data or allow an attacker to change non-private fields.\n\nUpdated 2018-10-07 - an additional review by WhiteSource research team could not indicate on a clear security vulnerability",
+          "nvd_score_version": "Aqua",
+          "nvd_severity": "low",
+          "nvd_url": "https://issues.apache.org/jira/browse/CODEC-55",
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "low",
+          "vendor_url": "https://issues.apache.org/jira/browse/CODEC-55",
+          "aqua_severity": "low",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 265600
+        }
+      ]
+    },
+    {
+      "resource": {
+        "type": 1,
+        "path": "/usr/share/myapp/myapp.war:WEB-INF/lib/spring-web-2.5.6.SEC03.jar",
+        "cpe": "file:/699f171339f20126f1d09dde2dd17d6db2943fce",
+        "hash": "sha1:699f171339f20126f1d09dde2dd17d6db2943fce"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2011-2730",
+          "description": "VMware SpringSource Spring Framework before 2.5.6.SEC03, 2.5.7.SR023, and 3.x before 3.0.6, when a container supports Expression Language (EL), evaluates EL expressions in tags twice, which allows remote attackers to obtain sensitive information via a (1) name attribute in a (a) spring:hasBindErrors tag; (2) path attribute in a (b) spring:bind or (c) spring:nestedpath tag; (3) arguments, (4) code, (5) text, (6) var, (7) scope, or (8) message attribute in a (d) spring:message or (e) spring:theme tag; or (9) var, (10) scope, or (11) value attribute in a (f) spring:transform tag, aka \"Expression Language Injection.\"",
+          "nvd_score": 7.5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2730",
+          "vendor_score": 7.5,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "high",
+          "vendor_url": "https://docs.google.com/document/d/1dc1xxO8UMFaGLOwgkykYdghGWm_2Gn0iCrxFsympqcE/edit",
+          "publish_date": "2012-12-05",
+          "modification_date": "2017-08-09",
+          "fix_version": "The vendor has issued a fix (2.0).\n\nThe vendor's advisory is available at:\n\nhttp://support.citrix.com/article/CTX139050\n3.0.6",
+          "solution": "The vendor has issued a fix (2.0).\n\nThe vendor's advisory is available at:\n\nhttp://support.citrix.com/article/CTX139050\n3.0.6",
+          "aqua_score": 7.5,
+          "aqua_severity": "high",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 267023
+        },
+        {
+          "name": "CVE-2013-6429",
+          "description": "The SourceHttpMessageConverter in Spring MVC in Spring Framework before 3.2.5 and 4.0.0.M1 through 4.0.0.RC1 does not disable external entity resolution, which allows remote attackers to read arbitrary files, cause a denial of service, and conduct CSRF attacks via crafted XML, aka an XML External Entity (XXE) issue, and a different vulnerability than CVE-2013-4152 and CVE-2013-7315.",
+          "nvd_score": 6.8,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-6429",
+          "vendor_score": 6.8,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "https://jira.springsource.org/browse/SPR-11078?page=com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel",
+          "publish_date": "2014-01-26",
+          "modification_date": "2019-06-05",
+          "fix_version": "Users of affected versions should apply the following mitigation:\n\tUsers of 3.x should upgrade to 3.2.5 or later\n\tUsers of 4.x should upgrade to 4.0.0 or later (This is also fixed in 4.0.0-RC2 but users are recommended to use 4.0.0 or later)\n\tTo fully mit",
+          "solution": "Users of affected versions should apply the following mitigation:\n\tUsers of 3.x should upgrade to 3.2.5 or later\n\tUsers of 4.x should upgrade to 4.0.0 or later (This is also fixed in 4.0.0-RC2 but users are recommended to use 4.0.0 or later)\n\tTo fully mitigate this issue (including CVE-2014-0054), users of 3.x should upgrade to 3.2.8 or later and users of 4.x should upgrade to 4.0.2 or later.\n3.2.5",
+          "aqua_score": 6.8,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 267768
+        },
+        {
+          "name": "CVE-2013-7315",
+          "description": "The Spring MVC in Spring Framework before 3.2.4 and 4.0.0.M1 through 4.0.0.M2 does not disable external entity resolution for the StAX XMLInputFactory, which allows context-dependent attackers to read arbitrary files, cause a denial of service, and conduct CSRF attacks via crafted XML with JAXB, aka an XML External Entity (XXE) issue, and a different vulnerability than CVE-2013-4152.  NOTE: this issue was SPLIT from CVE-2013-4152 due to different affected versions.",
+          "nvd_score": 6.8,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-7315",
+          "vendor_score": 6.8,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "https://jira.springsource.org/browse/SPR-10806",
+          "publish_date": "2014-01-23",
+          "modification_date": "2016-11-28",
+          "fix_version": "3.2.4, 4.0.0.M3\nUsers of affected versions should apply the following mitigation:\n\tUsers of 3.x should upgrade to 3.2.4 or later\n\tUsers of 4.x should upgrade to 4.0.0.M2 or later\n3.2.4,4.0 M3\nSpring Framework 3.2.4",
+          "solution": "3.2.4, 4.0.0.M3\nUsers of affected versions should apply the following mitigation:\n\tUsers of 3.x should upgrade to 3.2.4 or later\n\tUsers of 4.x should upgrade to 4.0.0.M2 or later\n3.2.4,4.0 M3\nSpring Framework 3.2.4",
+          "aqua_score": 6.8,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 267404
+        },
+        {
+          "name": "CVE-2014-0054",
+          "description": "The Jaxb2RootElementHttpMessageConverter in Spring MVC in Spring Framework before 3.2.8 and 4.0.0 before 4.0.2 does not disable external entity resolution, which allows remote attackers to read arbitrary files, cause a denial of service, and conduct CSRF attacks via crafted XML, aka an XML External Entity (XXE) issue.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2013-4152, CVE-2013-7315, and CVE-2013-6429.",
+          "nvd_score": 6.8,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-0054",
+          "vendor_score": 6.8,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "https://jira.spring.io/browse/SPR-11376",
+          "publish_date": "2014-04-17",
+          "modification_date": "2018-04-20",
+          "fix_version": "3.2.8,4.0.2\n3.2.8,4.0.2",
+          "solution": "3.2.8,4.0.2\n3.2.8,4.0.2",
+          "aqua_score": 6.8,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 267823
+        }
+      ]
+    },
+    {
+      "resource": {
+        "type": 1,
+        "path": "/usr/share/web/myapp.war:WEB-INF/lib/guava-11.0.1.jar",
+        "cpe": "file:/57b40a943725d43610c898ac0169adf1b2d55742",
+        "hash": "sha1:57b40a943725d43610c898ac0169adf1b2d55742"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2018-10237",
+          "description": "Unbounded memory allocation in Google Guava 11.0 through 24.x before 24.1.1 allows remote attackers to conduct denial of service attacks against servers that depend on this library and deserialize attacker-provided data, because the AtomicDoubleArray class (when serialized with Java serialization) and the CompoundOrdering class (when serialized with GWT serialization) perform eager allocation without appropriate checks on what a client has sent and whether the data size is reasonable.",
+          "nvd_score": 4.3,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+          "nvd_severity": "medium",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-10237",
+          "vendor_score": 5.9,
+          "vendor_score_version": "Aqua",
+          "vendor_severity": "medium",
+          "vendor_url": "https://groups.google.com/d/topic/guava-announce/xqWALw4W1vs/discussion",
+          "publish_date": "2018-04-26",
+          "modification_date": "2019-06-12",
+          "fix_version": "24.1.1\nRed Hat has issued a fix.\n\nThe Red Hat advisory is available at:\n\nhttps://access.redhat.com/errata/RHSA-2018:2740\nhttps://access.redhat.com/errata/RHSA-2018:2741\nhttps://access.redhat.com/errata/RHSA-2018:2742\nhttps://access.redhat.com/errata/RHSA-",
+          "solution": "24.1.1\nRed Hat has issued a fix.\n\nThe Red Hat advisory is available at:\n\nhttps://access.redhat.com/errata/RHSA-2018:2740\nhttps://access.redhat.com/errata/RHSA-2018:2741\nhttps://access.redhat.com/errata/RHSA-2018:2742\nhttps://access.redhat.com/errata/RHSA-2018:2743",
+          "nvd_score_v3": 5.9,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "nvd_severity_v3": "medium",
+          "vendor_score_v3": 5.9,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "vendor_severity_v3": "medium",
+          "aqua_score": 5.9,
+          "aqua_severity": "medium",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 275658
+        }
+      ]
+    }
+  ],
+  "image_assurance_results": {
+    "disallowed": true,
+    "audit_required": true,
+    "policy_failures": [
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "blocking": true,
+        "controls": [
+          "max_severity"
+        ]
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "blocking": true,
+        "controls": [
+          "max_score"
+        ]
+      }
+    ],
+    "checks_performed": [
+      {
+        "failed": true,
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "max_severity",
+        "maximum_severity_allowed": "high",
+        "maximum_severity_found": "high",
+        "maximum_fixable_severity_found": "high",
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "malware"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "root_user"
+      },
+      {
+        "failed": true,
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "max_score",
+        "maximum_score_allowed": 7,
+        "maximum_score_found": 7.5,
+        "maximum_fixable_score_found": 7.5,
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "malware"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "root_user"
+      }
+    ],
+    "block_required": true
+  },
+  "vulnerability_summary": {
+    "total": 24,
+    "high": 5,
+    "medium": 18,
+    "low": 1,
+    "negligible": 0,
+    "sensitive": 0,
+    "malware": 0,
+    "score_average": 5.454168,
+    "max_score": 7.5,
+    "max_fixable_score": 7.5,
+    "max_fixable_severity": "high"
+  },
+  "scan_options": {
+    "scan_sensitive_data": true,
+    "scan_malware": true,
+    "scan_timeout": 3600000000000,
+    "manual_pull_fallback": true,
+    "save_adhoc_scans": true
+  },
+  "initiating_user": "chk",
+  "data_date": 1567724137,
+  "pull_name": "your_image:latest",
+  "changed_result": false,
+  "required_image_platform": "amd64:::",
+  "scanned_image_platform": "amd64::linux:"
+}

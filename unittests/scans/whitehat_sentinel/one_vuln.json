@@ -1,0 +1,147 @@
+{
+  "collection": [
+    {
+      "unreachable": null,
+      "risk": 3,
+      "threat": "5",
+      "site_name": "SiteName",
+      "mitigated_by": null,
+      "found": "2020-01-09T00:53:16Z",
+      "mitigated": 1,
+      "severity": "1",
+      "status": "closed",
+      "retest_state": "automatic_retest_available",
+      "bla_id": "",
+      "class": "Information Leakage",
+      "reason": null,
+      "id": "52440000",
+      "solution": {
+        "solution": "<p>Information leakage generally occurs in two categories: globally or resource specific. Vulnerabilities based on global information leakages are often related to verbose error messages or server / application framework version disclosers. These leakages can often be solved by a configuration setting. Resource-specific information leakage issues are related to the disclosure of developer comments, files or sensitive personal information. Resource-specific leakages often require direct mitigation each time they occur.</p>\r\n\r\n<p>The padding oracle crypto attack is an example of what can frequently be a high-risk information leakage. Certain uses of AES can contain bugs that reveal error messages, making it easier for an attacker to decrypt AES encrypted data. In certain situations, AES cipher text can be changed, causing the vulnerable application to generate a specific error message, which gives the attacker information about the encryption methodology used. Attackers can use this method to gather data that reduces the number of guesses required to successfully find the encryption key. Stopping this attack is simple: As a developer, do not reveal specific crypto-error messages to your users, and return only generic &quot;failed&quot; messages.</p>\r\n\r\n<p>Login forms also have the potential to expose unnecessary information. If a login failure message states that a login attempt failed due to &quot;bad username&quot; or &quot;bad password,&quot; then the application will reveal to attackers whether a username is valid or invalid (i.e., a username harvesting attack). If the programmer displays only generic login error messages, such as &quot;login failed,&quot; this class of attack is at least partially mitigated.</p>\r\n\r\n<h2>References</h2>\r\n\r\n<p><a href=\"https://cwe.mitre.org/data/definitions/200.html\">cwe.mitre.org/data/definitions/200.html</a><br />\r\n<a href=\"https://cwe.mitre.org/data/definitions/209.html\">cwe.mitre.org/data/definitions/209.html</a><br />\r\n<a href=\"https://capec.mitre.org/data/definitions/118.html\">capec.mitre.org/data/definitions/118.html</a></p>\r\n",
+        "solution_prepend": "In order to prevent the disclosure of private IP addresses, configure BIG-IP cookie encryption.\n\nhttps://support.f5.com/csp/article/K23254150",
+        "omit_default_solution": null
+      },
+      "custom_risk": null,
+      "href": "/api/vuln/52440000",
+      "description": {
+        "description": "<p>Information Leakage is an application weakness where an application reveals sensitive data, such as technical details of the web application, environment, or user-specific data. Sensitive data may be used by an attacker to exploit the target web application, its hosting network, or its users. Therefore, leakage of sensitive data should be limited or prevented whenever possible. Information Leakage, in its most common form, is the result of one or more of the following conditions: A failure to scrub out HTML/Script comments containing sensitive information, improper application or server configurations, or differences in page responses for valid versus invalid data.</p>\r\n\r\n<h2>References</h2>\r\n\r\n<div><a href=\"https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure\">https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure</a></div>\r\n\r\n<div><a href=\"https://owasp-aasvs.readthedocs.io/en/latest/requirement-8.1.html\">https://owasp-aasvs.readthedocs.io/en/latest/requirement-8.1.html</a></div>\r\n\r\n<div><a href=\"https://cwe.mitre.org/data/definitions/200.html\">https://cwe.mitre.org/data/definitions/200.html</a></div>\r\n\r\n<div><a href=\"https://cwe.mitre.org/data/definitions/209.html\">cwe.mitre.org/data/definitions/209.html</a></div>\r\n\r\n<div><a href=\"https://capec.mitre.org/data/definitions/118.html\">capec.mitre.org/data/definitions/118.html</a></div>\r\n",
+        "description_prepend": "This application uses a BIG-IP cookie that can be easily decoded to reveal a private IP address.\n\n",
+        "omit_default_description": null
+      },
+      "modified": "2020-01-09T23:41:15Z",
+      "accepted": 0,
+      "closed": "2020-01-09T16:30:24Z",
+      "attack_vectors": [
+        {
+          "request": {
+            "method": "GET",
+            "headers": [
+              {
+                "value": "image/webp,image/apng,image/*,*/*;q=0.8",
+                "name": "Accept"
+              },
+              {
+                "value": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+                "name": "Accept-Charset"
+              },
+              {
+                "name": "Accept-Language",
+                "value": "en-us,en;q=0.5"
+              },
+              {
+                "name": "Referer",
+                "value": "https://site.com/"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:54.0) Gecko/20100101 Firefox/54.0 WhiteHat Security"
+              }
+            ],
+            "url": "https://site.com/images/footer_logo.svg",
+            "param_value": null,
+            "param_name": null
+          },
+          "state": "closed",
+          "tested": "2020-01-09T16:30:24Z",
+          "closed": "2020-01-09T16:30:24Z",
+          "flagged": 0,
+          "opened": "2020-01-09T15:13:48Z",
+          "found": "2020-01-09T15:13:48Z",
+          "has_notes": 0,
+          "auth_details": "unauth",
+          "notes": [],
+          "scanner_tags": [
+            "BIG-IP",
+            "CWE-310",
+            "private_ip"
+          ],
+          "unreachable": null,
+          "id": "123000000",
+          "response": {
+            "headers": [
+              {
+                "name": "Cache-Control",
+                "value": "public"
+              },
+              {
+                "value": "Thu, 09 May 2019 16:30:18 GMT",
+                "name": "Date"
+              },
+              {
+                "value": "bytes",
+                "name": "Accept-Ranges"
+              },
+              {
+                "value": "4788",
+                "name": "Content-Length"
+              },
+              {
+                "name": "Content-Type",
+                "value": "image/svg+xml"
+              },
+              {
+                "name": "Expires",
+                "value": "Thu, 09 May 2019 17:30:18 GMT"
+              },
+              {
+                "value": "Mon, 06 May 2019 21:09:56 GMT",
+                "name": "Last-Modified"
+              },
+              {
+                "value": "/C=US/O=DigiCert Inc/CN=DigiCert SHA2 Secure Server CA",
+                "name": "Client-SSL-Cert-Issuer"
+              },
+              {
+                "value": "/C=US/ST=NY/L=New York/O=SiteCo/CN=*.site.com",
+                "name": "Client-SSL-Cert-Subject"
+              },
+              {
+                "name": "Client-SSL-Cipher",
+                "value": "ECDHE-RSA-AES256-GCM-SHA384"
+              },
+              {
+                "name": "Client-SSL-Socket-Class",
+                "value": "IO::Socket::SSL"
+              },
+              {
+                "name": "Client-SSL-Warning",
+                "value": "Peer certificate not verified"
+              }
+            ],
+            "status": 200,
+            "body_match": {
+              "content": "&lt;svg&nbsp;height=&quot;100&quot;&nbsp;width=&quot;100&quot;&gt;\n&nbsp;&nbsp;&lt;circle&nbsp;cx=&quot;50&quot;&nbsp;cy=&quot;50&quot;&nbsp;r=&quot;40&quot;&nbsp;stroke=&quot;black&quot;&nbsp;stroke&#45;width=&quot;3&quot;&nbsp;fill=&quot;red&quot;&nbsp;/&gt;&lt;/svg&gt;"
+            }
+          }
+        }
+      ],
+      "auth_details": "unauth",
+      "score": 6,
+      "site": "69858",
+      "is_manual": 0,
+      "url": "site.com",
+      "opened": "2020-01-09T00:52:16Z",
+      "service_level_abbr": "PE",
+      "out_of_scope_reasons": ""
+    }
+  ]
+}

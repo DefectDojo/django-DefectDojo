@@ -1,0 +1,28 @@
+{
+	"results": [
+		{
+			"id": "sha256:184c9823bc3e7795040025a33d174987897783ee9296545abcb1a1937f12d391",
+			"distro": "",
+			"compliances": [
+				{
+					"title": "(CIS_Docker_CE_v1.1.0 - 4.6) Add HEALTHCHECK instruction to the container image",
+					"severity": "medium"
+				}
+			],
+			"complianceDistribution": {
+				"critical": 0,
+				"high": 0,
+				"medium": 1,
+				"low": 0,
+				"total": 1
+			},
+			"vulnerabilityDistribution": {
+				"critical": 0,
+				"high": 0,
+				"medium": 0,
+				"low": 0,
+				"total": 0
+			}
+		}
+	]
+}

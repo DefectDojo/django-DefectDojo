@@ -1,0 +1,557 @@
+---
+# Global settings
+# create defectdojo specific secret
+createSecret: false
+# create redis secret in defectdojo chart, outside of redis chart
+createRedisSecret: false
+# create postgresql secret in defectdojo chart, outside of postgresql chart
+createPostgresqlSecret: false
+# create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaSecret: false
+# create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaPgpoolSecret: false
+# Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
+# can be:
+# - disabled, default
+# - enabled, enables tracking configuration changes based on SHA256
+# trackConfig: disabled
+
+# extraLabels: {}
+# Add extra labels for k8s
+
+# Enables application network policy
+# For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
+networkPolicy:
+  enabled: false
+  # if additional labels need to be allowed (e.g. prometheus scraper)
+  ingressExtend: []
+  # ingressExtend:
+  #  - podSelector:
+  #      matchLabels:
+  #      app.kubernetes.io/instance: defectdojo-prometheus
+  # For more detailed configuration with ports and peers. It will ignore ingressExtend
+  ingress: []
+  # ingress:
+  #  - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo-prometheus
+  #    ports:
+  #    - protocol: TCP
+  #      port: 8443
+  egress: []
+  # egress:
+  # - to:
+  #   - ipBlock:
+  #       cidr: 10.0.0.0/24
+  #   ports:
+  #   - protocol: TCP
+  #     port: 443
+  annotations: {}
+
+# Configuration value to select database type
+# Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
+database: postgresql
+# Primary hostname of instance
+host: defectdojo.default.minikube.local
+
+# The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
+# siteUrl: 'https://<yourdomain>'
+
+# optional list of alternative hostnames to use that gets appended to
+# DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
+# the global hostname.
+# alternativeHosts:
+#  - defectdojo.example.com
+imagePullPolicy: Always
+# Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
+repositoryPrefix: defectdojo
+# When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
+# Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
+# imagePullSecrets: defectdojoregistrykey
+tag: latest
+
+# Additional labels to add to the pods:
+# podLabels:
+#   key: value
+podLabels: {}
+
+# Allow overriding of revisionHistoryLimit across all deployments.
+# revisionHistoryLimit: 10
+
+securityContext:
+  enabled: true
+  djangoSecurityContext:
+    # django dockerfile sets USER=1001
+    runAsUser: 1001
+  nginxSecurityContext:
+    # nginx dockerfile sets USER=1001
+    runAsUser: 1001
+
+dbMigrationChecker:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+tests:
+  unitTests:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+admin:
+  user: admin
+  password:
+  firstName: Administrator
+  lastName: User
+  mail: admin@defectdojo.local
+  secretKey:
+  credentialAes256Key:
+  metricsHttpAuthPassword:
+
+monitoring:
+  enabled: false
+  # Add the nginx prometheus exporter sidecar
+  prometheus:
+    enabled: false
+    image: nginx/nginx-prometheus-exporter:1.4.1
+    imagePullPolicy: IfNotPresent
+
+annotations: {}
+
+# Components
+celery:
+  broker: redis
+  # To use an external celery broker, set the hostname here
+  brokerHost: ""
+  logLevel: INFO
+  annotations: {}
+  beat:
+    annotations: {}
+    affinity: {}
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 256Mi
+    tolerations: []
+  worker:
+    annotations: {}
+    affinity: {}
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+    tolerations: []
+    appSettings:
+      poolType: solo
+      # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
+      # Comment out the "solo" line, and uncomment the following lines.
+      # poolType: prefork
+      # autoscaleMin: 2
+      # autoscaleMax: 8
+      # concurrency: 8
+      # prefetchMultiplier: 128
+
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /tmp
+  #     hostPath: /tmp
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
+django:
+  annotations: {}
+  service:
+    annotations: {}
+    type: ""
+  affinity: {}
+  ingress:
+    enabled: true
+    ingressClassName: ""
+    activateTLS: true
+    secretName: defectdojo-tls
+    annotations: {}
+      # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
+      # kubernetes.io/ingress.class: nginx
+      # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
+      # nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+      # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+  nginx:
+    tls:
+      enabled: false
+      generateCertificate: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 256Mi
+  nodeSelector: {}
+  replicas: 1
+  tolerations: []
+  uwsgi:
+    livenessProbe:
+      # Enable liveness checks on uwsgi container.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    readinessProbe:
+      # Enable readiness checks on uwsgi container.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    startupProbe:
+      # Enable startup checks on uwsgi container.
+      enabled: true
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+    appSettings:
+      processes: 2
+      threads: 2
+      # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
+    enableDebug: false  # this also requires DD_DEBUG to be set to True
+    certificates:
+    # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
+    # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+    # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
+      enabled: false
+      configName: defectdojo-ca-certs
+      certMountPath: /certs/
+      certFileName: ca.crt
+
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     container: uwsgi
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /app/dojo/settings/
+  #     hostPath: /var/run
+  #     container: uwsgi
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `container` -  defines where volume needs to be mounted, must be uwsgi or nginx
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
+  # This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume
+  mediaPersistentVolume:
+    enabled: true
+    fsGroup: 1001
+    # any name
+    name: media
+    # could be emptyDir (not for production) or pvc
+    type: emptyDir
+    # in case if pvc specified, should point to the already existing pvc
+    persistentVolumeClaim:
+      # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
+      create: false
+      name:
+      size: 5Gi
+      accessModes:
+      - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
+      storageClassName:
+
+initializer:
+  run: true
+  jobAnnotations: {}
+  annotations: {}
+  labels: {}
+  keepSeconds: 60  # A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.
+  affinity: {}
+  nodeSelector: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 512Mi
+
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /tmp
+  #     hostPath: /tmp
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
+  # staticName defines whether name of the job will be the same (e.g., "defectdojo-initializer")
+  # or different every time - generated based on current time (e.g., "defectdojo-initializer-2024-11-11-18-57")
+  # This might be handy for ArgoCD deployments
+  staticName: false
+
+postgresql:
+  enabled: true
+  auth:
+    username: defectdojo
+    password: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-specific
+    secretKeys:
+      adminPasswordKey: postgresql-postgres-password
+      userPasswordKey: postgresql-password
+      replicationPasswordKey: postgresql-replication-password
+  architecture: standalone
+  primary:
+    name: primary
+    persistence:
+      enabled: true
+    service:
+      ports:
+        postgresql: 5432
+    podSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      fsGroup: 1001
+    containerSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      runAsUser: 1001
+    affinity: {}
+    nodeSelector: {}
+  volumePermissions:
+    enabled: false
+    # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
+    containerSecurityContext:
+      runAsUser: 1001
+  shmVolume:
+    chmod:
+      enabled: false
+
+  # To use an external PostgreSQL instance, set enabled to false and uncomment
+  # the line below:
+  # postgresServer: "127.0.0.1"
+
+postgresqlha:
+  enabled: false
+  global:
+    pgpool:
+      existingSecret: defectdojo-postgresql-ha-pgpool
+  serviceAccount:
+    create: true
+  postgresql:
+    replicaCount: 3
+    username: defectdojo
+    password: ""
+    repmgrPassword: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-ha-specific
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+  pgpool:
+    replicaCount: 3
+    adminPassword: ""
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+  volumePermissions:
+    enabled: true
+    securityContext:
+      runAsUser: 1001
+  persistence:
+    enabled: true
+  service:
+    ports:
+      postgresql: 5432
+
+# Google CloudSQL support in GKE via gce-proxy
+cloudsql:
+  # To use CloudSQL in GKE set 'enable: true'
+  enabled: false
+  # By default, the proxy has verbose logging. Set this to false to make it less verbose
+  verbose: true
+  image:
+    # set repo and image tag of gce-proxy
+    repository: gcr.io/cloudsql-docker/gce-proxy
+    tag: 1.37.4
+    pullPolicy: IfNotPresent
+  # set CloudSQL instance: 'project:zone:instancename'
+  instance: ""
+  # use IAM database authentication
+  enable_iam_login: false
+  # whether to use a private IP to connect to the database
+  use_private_ip: false
+
+# Settings to make running the chart on GKE simpler
+gke:
+  # Set to true to configure the Ingress to use the GKE provided ingress controller
+  useGKEIngress: false
+  # Set to true to have GKE automatically provision a TLS certificate for the host specified
+  # Requires useGKEIngress to be set to true
+  # When using this option, be sure to set django.ingress.activateTLS to false
+  useManagedCertificate: false
+  # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
+  workloadIdentityEmail: ""
+
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
+redis:
+  enabled: true
+  scheme: "redis"
+  transportEncryption:
+    enabled: false
+    params: ''
+  auth:
+    existingSecret: defectdojo-redis-specific
+    existingSecretPasswordKey: redis-password
+    password: ""
+  architecture: standalone
+  # To use an external Redis instance, set enabled to false and uncomment
+  # the line below:
+  # redisServer: myrediscluster
+  # To use a different port for Redis (default: 6379) add a port number and uncomment the lines below:
+  # master:
+  #   service:
+  #     ports:
+  #       redis: xxxx
+
+# To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
+# NOTE  Do not store any kind of sensitive information inside of it
+# extraConfigs:
+#   DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
+#   DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
+#   DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+
+# Extra secrets can be created inside of extraSecrets block:
+# NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+# extraSecrets:
+#   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
+extraConfigs: {}
+
+# To add (or override) extra variables which need to be pulled from another configMap, you can
+# use extraEnv. For example:
+# extraEnv:
+# - name: DD_DATABASE_HOST
+#   valueFrom:
+#     configMapKeyRef:
+#       name: my-other-postgres-configmap
+#       key: cluster_endpoint
+
+# To add code snippet which would extend setting functionality, you might add it here
+# It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
+# For more see: https://documentation.defectdojo.com/getting_started/configuration/
+# For example:
+# localsettingspy: |
+#   INSTALLED_APPS += (
+#     'debug_toolbar',
+#   )
+#   MIDDLEWARE = [
+#       'debug_toolbar.middleware.DebugToolbarMiddleware',
+#   ] + MIDDLEWARE

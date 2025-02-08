@@ -1,0 +1,514 @@
+{
+  "discovery_summary": {
+    "discovery": [
+      {
+        "createTime": "2023-08-23T16:57:29.302830Z",
+        "discovery": {
+          "analysisCompleted": {
+            "analysisType": [
+              "OS",
+              "GO",
+              "MAVEN",
+              "PYPI",
+              "NPM"
+            ]
+          },
+          "analysisStatus": "FINISHED_SUCCESS",
+          "continuousAnalysis": "ACTIVE",
+          "lastScanTime": "2023-08-23T16:57:34.358092699Z"
+        },
+        "kind": "DISCOVERY",
+        "name": "projects/test/occurrences/1ae41139-7c9c-4c43-817e-9186d7583563",
+        "noteName": "projects/goog-analysis/notes/PACKAGE_VULNERABILITY",
+        "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+        "updateTime": "2023-08-23T16:57:34.487918Z"
+      }
+    ]
+  },
+  "image_summary": {
+    "digest": "sha256:d2eecb48a0d1c6be1ec96d2d0a52c3b95936c4cdde2208299c04d6106b769658",
+    "fully_qualified_digest": "northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+    "registry": "northamerica-northeast1-docker.pkg.dev",
+    "repository": "testing",
+    "slsa_build_level": "unknown"
+  },
+  "package_vulnerability_summary": {
+    "vulnerabilities": {
+      "CRITICAL": [
+        {
+          "createTime": "2023-08-23T16:57:34.258042Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/17762f5b-88a9-4e15-b92d-ce5b4de56519",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-29405",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.258042Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.19.10",
+                  "kind": "NORMAL",
+                  "name": "1.19.10"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2023-29405"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-29405"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-29405"
+          }
+        },
+        {
+          "createTime": "2023-08-23T16:57:34.195901Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/9375502a-c7a7-4605-88f7-caf1ca8137ae",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-29402",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.195901Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.19.10",
+                  "kind": "NORMAL",
+                  "name": "1.19.10"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2023-29402"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-29402"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-29402"
+          }
+        },
+        {
+          "createTime": "2023-08-23T16:57:34.291202Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/94d3ba5b-8ea5-4df9-9e4b-6719f3549046",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-29404",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.291202Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.19.10",
+                  "kind": "NORMAL",
+                  "name": "1.19.10"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2023-29404"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-29404"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-29404"
+          }
+        },
+        {
+          "createTime": "2023-08-23T16:57:34.110140Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/9534a1c6-84cf-4141-b5d2-3b80fb6935cb",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-24540",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.110140Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.19.9",
+                  "kind": "NORMAL",
+                  "name": "1.19.9"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2023-24540"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-24540"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-24540"
+          }
+        },
+        {
+          "createTime": "2023-08-23T16:57:34.290433Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/99c6aa0f-018a-4cc9-bb93-1d90b0dbc97e",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-24538",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.290433Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.19.8",
+                  "kind": "NORMAL",
+                  "name": "1.19.8"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2023-24538"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-24538"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-24538"
+          }
+        },
+        {
+          "createTime": "2023-08-23T16:57:33.746649Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/b0e9e452-35cd-4c14-b929-3b5e6b270903",
+          "noteName": "projects/goog-vulnz/notes/CVE-2022-23806",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:33.746649Z",
+          "vulnerability": {
+            "cvssScore": 9.1,
+            "cvssV2": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "authentication": "AUTHENTICATION_NONE",
+              "availabilityImpact": "IMPACT_PARTIAL",
+              "baseScore": 6.4,
+              "confidentialityImpact": "IMPACT_NONE",
+              "integrityImpact": "IMPACT_PARTIAL"
+            },
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.1,
+              "confidentialityImpact": "IMPACT_NONE",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.2,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.17.7",
+                  "kind": "NORMAL",
+                  "name": "1.17.7"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2022-23806"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-23806"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2022-23806"
+          }
+        }
+      ],
+      "HIGH": [
+        {
+          "createTime": "2023-08-23T16:57:34.166285Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/test/occurrences/0339e7f1-7a8a-4a89-b121-65040b8d3c84",
+          "noteName": "projects/goog-vulnz/notes/CVE-2022-41715",
+          "resourceUri": "https://northamerica-northeast1-docker.pkg.dev/testing/test-docker/test-image@sha256:deadbeef0000000000000000000000000000000000",
+          "updateTime": "2023-08-23T16:57:34.166285Z",
+          "vulnerability": {
+            "cvssScore": 7.5,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 7.5,
+              "confidentialityImpact": "IMPACT_NONE",
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6,
+              "integrityImpact": "IMPACT_NONE",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "HIGH",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "affectedPackage": "go",
+                "affectedVersion": {
+                  "fullName": "1.17.6",
+                  "kind": "NORMAL",
+                  "name": "1.17.6"
+                },
+                "effectiveSeverity": "HIGH",
+                "fileLocation": [
+                  {
+                    "filePath": "/tmp/pdscan"
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:debian:debian_linux:12",
+                "fixedPackage": "go",
+                "fixedVersion": {
+                  "fullName": "1.18.7",
+                  "kind": "NORMAL",
+                  "name": "1.18.7"
+                },
+                "packageType": "GO_STDLIB"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.debian.org/tracker/CVE-2022-41715"
+              },
+              {
+                "label": "More Info",
+                "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-41715"
+              }
+            ],
+            "severity": "HIGH",
+            "shortDescription": "CVE-2022-41715"
+          }
+        }
+      ]
+    }
+  }
+}

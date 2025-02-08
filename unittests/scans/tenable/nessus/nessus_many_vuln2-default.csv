@@ -1,0 +1,535 @@
+Plugin ID,CVE,CVSS,Risk,Host,Protocol,Port,Name,Synopsis,Description,Solution,See Also,Plugin Output
+"10107","","","None","52.208.101.182","tcp","80","HTTP Server Type and Version","A web server is running on the remote host.","This plugin attempts to determine the type and the version of the
+  remote web server.","n/a","","The remote web server type is :
+
+Cowboy"
+"10107","","","None","52.208.101.182","tcp","443","HTTP Server Type and Version","A web server is running on the remote host.","This plugin attempts to determine the type and the version of the
+  remote web server.","n/a","","The remote web server type is :
+
+Cowboy"
+"10287","","","None","52.208.101.182","udp","0","Traceroute Information","It was possible to obtain traceroute information.","Makes a traceroute to the remote host.","n/a","","For your information, here is the traceroute from 192.168.1.150 to 52.208.101.182 : 
+192.168.1.150
+192.168.1.254
+194.149.169.240
+?
+52.95.218.164
+52.93.16.70
+52.93.16.77
+?
+150.222.240.32
+?
+
+Hop Count: 9
+"
+"10863","","","None","52.208.101.182","tcp","443","SSL Certificate Information","This plugin displays the SSL certificate.","This plugin connects to every SSL-related port and attempts to 
+extract and dump the X.509 certificate.","n/a","","Subject Name: 
+
+Country: US
+State/Province: California
+Locality: San Francisco
+Organization: Heroku, Inc.
+Common Name: *.herokuapp.com
+
+Issuer Name: 
+
+Country: US
+Organization: DigiCert Inc
+Organization Unit: www.digicert.com
+Common Name: DigiCert SHA2 High Assurance Server CA
+
+Serial Number: 0D 57 D1 0B 11 29 2A 3C 66 DF CD CF 3A E8 BE 65 
+
+Version: 3
+
+Signature Algorithm: SHA-256 With RSA Encryption
+
+Not Valid Before: Jun 15 00:00:00 2020 GMT
+Not Valid After: Jul 07 12:00:00 2021 GMT
+
+Public Key Info: 
+
+Algorithm: RSA Encryption
+Key Length: 2048 bits
+Public Key: 00 C9 CD D6 B1 F8 39 B6 2E 63 93 47 6F EC 55 E1 55 77 D1 9F 
+            9D C6 99 12 71 61 56 CA 2E 32 37 CE 9E 4C E0 3D F4 0F 45 76 
+            E0 B4 D1 40 E0 B4 CC 1A 0C 3F EB E8 B5 5F B6 56 98 D3 29 8A 
+            29 AE 3E 3B 6E 0F 10 7E 4C AE A4 7D D7 DC 89 35 2D A2 FA 59 
+            49 D3 14 07 B6 19 4A B1 6F 46 1E EC B2 78 E8 BA 66 92 BB 70 
+            F1 AE 6A D4 7E 67 98 30 8C 6C 4F A0 C1 32 B7 5B 33 31 7F 01 
+            51 9A 6C 1F EF FD 48 9D B3 94 2D 29 4E 6D CF D3 A4 0E 65 B9 
+            10 13 38 90 C2 D3 96 3E 3E F6 F3 96 59 50 61 C2 71 F6 FF D5 
+            D6 23 26 9C 54 8A C9 BC A7 D4 C0 21 99 D6 E9 48 19 E3 CE EB 
+            EB 5D 87 14 96 05 7D 2D DB 08 79 D2 E0 9B 24 4E C4 94 83 B0 
+            2E 27 3E CF C7 8E 80 00 AB 86 27 C0 A8 57 D0 35 18 70 2A D2 
+            78 05 C2 98 7B 8B AB 50 22 00 31 4A C9 E2 5C 7C FD E3 F2 60 
+            66 29 A3 E6 B9 F5 D1 D6 D7 53 6F 13 8E 95 D0 75 81 
+Exponent: 01 00 01 
+
+Signature Length: 256 bytes / 2048 bits
+Signature: 00 69 14 80 6F 21 BC 90 9A A7 6F 89 7C 82 31 45 00 EA 23 11 
+           98 05 7A A9 9A 64 72 50 96 C2 8B 7F 1A BA 0D C3 6F 5E 6C 03 
+           19 0F F1 0E 68 B5 1A 7C E3 13 9C 00 B2 39 53 6D F0 08 C5 4C 
+           2C 3E DD 2E 26 23 33 C3 D9 4E 35 C4 C0 59 11 DD D9 CD 42 3E 
+           BB 33 FE 96 62 BC 64 68 FC EE 7A D0 C0 28 B6 00 6D 6B 4E 7B 
+           5B 8C C9 61 44 22 A9 53 D4 8E 38 60 FF 9B 0C E4 AD 40 4D 1E 
+           15 0E AB D5 D4 D1 16 52 53 28 63 5A D0 A2 0C E5 16 9D 73 E7 
+           A2 F8 13 52 8F 9D 70 72 23 D9 A1 8A 01 6E 84 EB 27 A9 AF 44 
+           90 38 10 1E 60 65 D1 85 F4 ED 72 5E 1A D8 2F 37 2B C6 4E 66 
+           A6 2E 40 4B 74 1E 75 11 1B DD D1 D8 BA 7F 6A 62 5A F3 99 54 
+           49 70 9A 2C 0E FC 88 56 4A 2A 2D 3B A6 58 9D 85 F0 DA A5 32 
+           0C E7 87 48 A1 C0 5D 93 EA 18 FA 01 F7 86 C6 64 1D CE A9 BC 
+           58 9F 60 E4 16 26 71 15 58 13 8A FE FF 8F 38 A7 AA 
+
+Extension: Authority Key Identifier (2.5.29.35)
+Critical: 0
+Key Identifier: 51 68 FF 90 AF 02 07 75 3C CC D9 65 64 62 A2 12 B8 59 72 3B 
+
+
+Extension: Subject Key Identifier (2.5.29.14)
+Critical: 0
+Subject Key Identifier: 8B F5 13 D3 FC FB 0A AD A0 AF 9F 6F C2 42 C4 D8 47 4C CB E5 
+
+
+Extension: Subject Alternative Name (2.5.29.17)
+Critical: 0
+DNS: *.herokuapp.com
+DNS: herokuapp.com
+
+
+Extension: Key Usage (2.5.29.15)
+Critical: 1
+Key Usage: Digital Signature, Key Encipherment
+
+
+Extension: Extended Key Usage (2.5.29.37)
+Critical: 0
+Purpose#1: Web Server Authentication (1.3.6.1.5.5.7.3.1)
+Purpose#2: Web Client Authentication (1.3.6.1.5.5.7.3.2)
+
+
+Extension: CRL Distribution Points (2.5.29.31)
+Critical: 0
+URI: http://crl3.digicert.com/sha2-ha-server-g6.crl
+URI: http://crl4.digicert.com/sha2-ha-server-g6.crl
+
+
+Extension: Policies (2.5.29.32)
+Critical: 0
+Policy ID #1: 2.16.840.1.114412.1.1
+Qualifier ID #1: Certification Practice Statement (1.3.6.1.5.5.7.2.1)
+CPS URI: https://www.digicert.com/CPS
+Policy ID #2: 2.23.140.1.2.2
+
+
+Extension: Authority Information Access (1.3.6.1.5.5.7.1.1)
+Critical: 0
+Method#1: Online Certificate Status Protocol
+URI: http://ocsp.digicert.com
+Method#2: Certificate Authority Issuers
+URI: http://cacerts.digicert.com/DigiCertSHA2HighAssuranceServerCA.crt
+
+
+Extension: Basic Constraints (2.5.29.19)
+Critical: 1
+
+
+Extension: 1.3.6.1.4.1.11129.2.4.2
+Critical: 0
+Data: 04 81 F2 00 F0 00 76 00 F6 5C 94 2F D1 77 30 22 14 54 18 08 
+      30 94 56 8E E3 4D 13 19 33 BF DF 0C 2F 20 0B CC 4E F1 64 E3 
+      00 00 01 72 B9 14 F9 59 00 00 04 03 00 47 30 45 02 20 39 8A 
+      E8 8C 54 92 F6 92 D9 5A F0 F1 C7 C2 DC 3D FB 3B 1B 54 EA DC 
+      18 6B 1C 29 40 7C BA 1A B0 E3 02 21 00 8F 79 3E 70 23 A5 78 
+      4C 6C 66 2C C2 C8 4B 57 D7 5E DD 4A 7A FC 86 58 9E EC D3 C8 
+      F2 1D 1A 37 91 00 76 00 5C DC 43 92 FE E6 AB 45 44 B1 5E 9A 
+      D4 56 E6 10 37 FB D5 FA 47 DC A1 73 94 B2 5E E6 F6 C7 0E CA 
+      00 00 01 72 B9 14 F9 77 00 00 04 03 00 47 30 45 02 21 00 B6 
+      46 D0 D7 26 A0 16 70 A1 34 B1 45 30 73 B3 64 1A 9C D2 55 0A 
+      E2 8B 15 E9 34 97 7A B1 7E E6 37 02 20 4C 3D D5 A0 04 FF FA 
+      A3 21 43 78 82 8C 6C 8F 43 C2 92 52 8F 44 92 27 04 55 65 48 
+      28 88 72 E8 27 
+
+
+Fingerprints : 
+
+SHA-256 Fingerprint: 82 6F E8 01 13 78 A9 2A 76 2B B6 9F 2F 8C EB 11 D2 4E 2E 4D 
+                     9F 66 FA 71 E8 C7 88 55 FB C2 BB AB 
+SHA-1 Fingerprint: 94 FC F6 23 6C 37 D5 E7 92 78 3C 0B 5F AD 0C E4 9E FD 9E A8 
+MD5 Fingerprint: 91 A3 72 2F ED A2 E8 69 3E EC A5 24 E8 38 F5 61 
+
+
+PEM certificate : 
+
+-----BEGIN CERTIFICATE-----
+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
+-----END CERTIFICATE-----"
+"11219","","","None","52.208.101.182","tcp","80","Nessus SYN scanner","It is possible to determine which TCP ports are open.","This plugin is a SYN 'half-open' port scanner.  It shall be reasonably
+quick even against a firewalled target. 
+
+Note that SYN scans are less intrusive than TCP (full connect) scans
+against broken services, but they might cause problems for less robust
+firewalls and also leave unclosed connections on the remote target, if
+the network is loaded.","Protect your target with an IP filter.","","Port 80/tcp was found to be open"
+"11219","","","None","52.208.101.182","tcp","443","Nessus SYN scanner","It is possible to determine which TCP ports are open.","This plugin is a SYN 'half-open' port scanner.  It shall be reasonably
+quick even against a firewalled target. 
+
+Note that SYN scans are less intrusive than TCP (full connect) scans
+against broken services, but they might cause problems for less robust
+firewalls and also leave unclosed connections on the remote target, if
+the network is loaded.","Protect your target with an IP filter.","","Port 443/tcp was found to be open"
+"11936","","","None","52.208.101.182","tcp","0","OS Identification","It is possible to guess the remote operating system.","Using a combination of remote probes (e.g., TCP/IP, SMB, HTTP, NTP,
+SNMP, etc.), it is possible to guess the name of the remote operating
+system in use. It is also possible sometimes to guess the version of
+the operating system.","n/a","","
+Remote operating system : Microsoft Windows Server 2012 R2
+Confidence level : 56
+Method : MLSinFP
+
+ 
+The remote host is running Microsoft Windows Server 2012 R2"
+"12053","","","None","52.208.101.182","tcp","0","Host Fully Qualified Domain Name (FQDN) Resolution","It was possible to resolve the name of the remote host.","Nessus was able to resolve the fully qualified domain name (FQDN) of
+the remote host.","n/a","","
+52.208.101.182 resolves as ec2-52-208-101-182.eu-west-1.compute.amazonaws.com.
+"
+"19506","","","None","52.208.101.182","tcp","0","Nessus Scan Information","This plugin displays information about the Nessus scan.","This plugin displays, for each tested host, information about the
+scan itself :
+
+  - The version of the plugin set.
+  - The type of scanner (Nessus or Nessus Home).
+  - The version of the Nessus Engine.
+  - The port scanner(s) used.
+  - The port range scanned.
+  - Whether credentialed or third-party patch management
+    checks are possible.
+  - Whether the display of superseded patches is enabled
+  - The date of the scan.
+  - The duration of the scan.
+  - The number of hosts scanned in parallel.
+  - The number of checks done in parallel.","n/a","","Information about this scan : 
+
+Nessus version : 8.13.1
+Plugin feed version : 202101230522
+Scanner edition used : Nessus
+Scan type : Normal
+Scan policy used : Basic Network Scan
+Scanner IP : 192.168.1.150
+Port scanner(s) : nessus_syn_scanner 
+Port range : default
+Thorough tests : no
+Experimental tests : no
+Paranoia level : 1
+Report verbosity : 1
+Safe checks : yes
+Optimize the test : yes
+Credentialed checks : no
+Patch management checks : None
+Display superseded patches : yes (supersedence plugin launched)
+CGI scanning : disabled
+Web application tests : disabled
+Max hosts : 30
+Max checks : 4
+Recv timeout : 5
+Backports : None
+Allow post-scan editing: Yes
+Scan Start Date : 2021/1/25 18:40 Romance Standard Time
+Scan duration : 519 sec
+"
+"21643","","","None","52.208.101.182","tcp","443","SSL Cipher Suites Supported","The remote service encrypts communications using SSL.","This plugin detects which SSL ciphers are supported by the remote
+service for encrypting communications.","n/a","https://www.openssl.org/docs/man1.1.0/apps/ciphers.html
+http://www.nessus.org/u?3a040ada","
+Here is the list of SSL ciphers supported by the remote server :
+Each group is reported per SSL Version.
+
+SSL Version : TLSv12
+  High Strength Ciphers (>= 112-bit key)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-AES128-SHA256       0xC0, 0x2F       ECDH          RSA      AES-GCM(128)           SHA256
+    ECDHE-RSA-AES256-SHA384       0xC0, 0x30       ECDH          RSA      AES-GCM(256)           SHA384
+    RSA-AES128-SHA256             0x00, 0x9C       RSA           RSA      AES-GCM(128)           SHA256
+    RSA-AES256-SHA384             0x00, 0x9D       RSA           RSA      AES-GCM(256)           SHA384
+    ECDHE-RSA-AES128-SHA          0xC0, 0x13       ECDH          RSA      AES-CBC(128)           SHA1
+    ECDHE-RSA-AES256-SHA          0xC0, 0x14       ECDH          RSA      AES-CBC(256)           SHA1
+    AES128-SHA                    0x00, 0x2F       RSA           RSA      AES-CBC(128)           SHA1
+    AES256-SHA                    0x00, 0x35       RSA           RSA      AES-CBC(256)           SHA1
+    ECDHE-RSA-AES128-SHA256       0xC0, 0x27       ECDH          RSA      AES-CBC(128)           SHA256
+    ECDHE-RSA-AES256-SHA384       0xC0, 0x28       ECDH          RSA      AES-CBC(256)           SHA384
+    RSA-AES128-SHA256             0x00, 0x3C       RSA           RSA      AES-CBC(128)           SHA256
+    RSA-AES256-SHA256             0x00, 0x3D       RSA           RSA      AES-CBC(256)           SHA256
+
+
+SSL Version : TLSv11
+  High Strength Ciphers (>= 112-bit key)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-AES128-SHA          0xC0, 0x13       ECDH          RSA      AES-CBC(128)           SHA1
+    ECDHE-RSA-AES256-SHA          0xC0, 0x14       ECDH          RSA      AES-CBC(256)           SHA1
+    AES128-SHA                    0x00, 0x2F       RSA           RSA      AES-CBC(128)           SHA1
+    AES256-SHA                    0x00, 0x35       RSA           RSA      AES-CBC(256)           SHA1
+
+
+SSL Version : TLSv1
+  High Strength Ciphers (>= 112-bit key)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-AES128-SHA          0xC0, 0x13       ECDH          RSA      AES-CBC(128)           SHA1
+    ECDHE-RSA-AES256-SHA          0xC0, 0x14       ECDH          RSA      AES-CBC(256)           SHA1
+    AES128-SHA                    0x00, 0x2F       RSA           RSA      AES-CBC(128)           SHA1
+    AES256-SHA                    0x00, 0x35       RSA           RSA      AES-CBC(256)           SHA1
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}
+"
+"22964","","","None","52.208.101.182","tcp","80","Service Detection","The remote service could be identified.","Nessus was able to identify the remote service by its banner or by
+looking at the error message it sends when it receives an HTTP
+request.","n/a","","A web server is running on this port."
+"22964","","","None","52.208.101.182","tcp","443","Service Detection","The remote service could be identified.","Nessus was able to identify the remote service by its banner or by
+looking at the error message it sends when it receives an HTTP
+request.","n/a","","A TLSv1 server answered on this port.
+"
+"22964","","","None","52.208.101.182","tcp","443","Service Detection","The remote service could be identified.","Nessus was able to identify the remote service by its banner or by
+looking at the error message it sends when it receives an HTTP
+request.","n/a","","A web server is running on this port through TLSv1."
+"24260","","","None","52.208.101.182","tcp","80","HyperText Transfer Protocol (HTTP) Information","Some information about the remote HTTP configuration can be extracted.","This test gives some information about the remote HTTP protocol - the
+version used, whether HTTP Keep-Alive and HTTP pipelining are enabled,
+etc... 
+
+This test is informational only and does not denote any security
+problem.","n/a","","
+Response Code : HTTP/1.1 404 Not Found
+
+Protocol version : HTTP/1.1
+SSL : no
+Keep-Alive : no
+Options allowed : (Not implemented)
+Headers :
+
+  Connection: close
+  Server: Cowboy
+  Date: Mon, 25 Jan 2021 17:46:16 GMT
+  Content-Length: 494
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: no-cache, no-store
+  
+Response Body :
+
+"
+"24260","","","None","52.208.101.182","tcp","443","HyperText Transfer Protocol (HTTP) Information","Some information about the remote HTTP configuration can be extracted.","This test gives some information about the remote HTTP protocol - the
+version used, whether HTTP Keep-Alive and HTTP pipelining are enabled,
+etc... 
+
+This test is informational only and does not denote any security
+problem.","n/a","","
+Response Code : HTTP/1.1 404 Not Found
+
+Protocol version : HTTP/1.1
+SSL : yes
+Keep-Alive : no
+Options allowed : (Not implemented)
+Headers :
+
+  Connection: close
+  Server: Cowboy
+  Date: Mon, 25 Jan 2021 17:46:17 GMT
+  Content-Length: 494
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: no-cache, no-store
+  
+Response Body :
+
+"
+"25220","","","None","52.208.101.182","tcp","0","TCP/IP Timestamps Supported","The remote service implements TCP timestamps.","The remote host implements TCP timestamps, as defined by RFC1323.  A
+side effect of this feature is that the uptime of the remote host can
+sometimes be computed.","n/a","http://www.ietf.org/rfc/rfc1323.txt",""
+"45410","","","None","52.208.101.182","tcp","443","SSL Certificate 'commonName' Mismatch","The 'commonName' (CN) attribute in the SSL certificate does not match
+the hostname.","The service running on the remote host presents an SSL certificate for
+which the 'commonName' (CN) attribute does not match the hostname on
+which the service listens.","If the machine has several names, make sure that users connect to the
+service through the DNS hostname that matches the common name in the
+certificate.","","
+The host name known by Nessus is :
+
+  ec2-52-208-101-182.eu-west-1.compute.amazonaws.com
+
+The Common Name in the certificate is :
+
+  *.herokuapp.com
+
+The Subject Alternate Names in the certificate are :
+
+  *.herokuapp.com
+  herokuapp.com
+"
+"45590","","","None","52.208.101.182","tcp","0","Common Platform Enumeration (CPE)","It was possible to enumerate CPE names that matched on the remote
+system.","By using information obtained from a Nessus scan, this plugin reports
+CPE (Common Platform Enumeration) matches for various hardware and
+software products found on a host. 
+
+Note that if an official CPE is not available for the product, this
+plugin computes the best possible CPE based on the information
+available from the scan.","n/a","http://cpe.mitre.org/
+https://nvd.nist.gov/products/cpe","
+The remote operating system matched the following CPE : 
+
+  cpe:/o:microsoft:windows_server_2012:r2
+"
+"50845","","","None","52.208.101.182","tcp","443","OpenSSL Detection","The remote service appears to use OpenSSL to encrypt traffic.","Based on its response to a TLS request with a specially crafted
+server name extension, it seems that the remote service is using the
+OpenSSL library to encrypt traffic.
+
+Note that this plugin can only detect OpenSSL implementations that
+have enabled support for TLS extensions (RFC 4366).","n/a","https://www.openssl.org/",""
+"51891","","","None","52.208.101.182","tcp","443","SSL Session Resume Supported","The remote host allows resuming SSL sessions.","This script detects whether a host allows resuming SSL sessions by
+performing a full SSL handshake to receive a session ID, and then
+reconnecting with the previously used session ID.  If the server
+accepts the session ID in the second connection, the server maintains
+a cache of sessions that can be resumed.","n/a","","
+This port supports resuming TLSv1 / TLSv1 / TLSv1 sessions.
+"
+"54615","","","None","52.208.101.182","tcp","0","Device Type","It is possible to guess the remote device type.","Based on the remote operating system, it is possible to determine
+what the remote system type is (eg: a printer, router, general-purpose
+computer, etc).","n/a","","Remote device type : unknown
+Confidence level : 56
+"
+"56984","","","None","52.208.101.182","tcp","443","SSL / TLS Versions Supported","The remote service encrypts communications.","This plugin detects which SSL and TLS versions are supported by the
+remote service for encrypting communications.","n/a","","
+This port supports TLSv1.0/TLSv1.1/TLSv1.2.
+"
+"57041","","","None","52.208.101.182","tcp","443","SSL Perfect Forward Secrecy Cipher Suites Supported","The remote service supports the use of SSL Perfect Forward Secrecy
+ciphers, which maintain confidentiality even if the key is stolen.","The remote host supports the use of SSL ciphers that offer Perfect
+Forward Secrecy (PFS) encryption.  These cipher suites ensure that
+recorded SSL traffic cannot be broken at a future date if the server's
+private key is compromised.","n/a","https://www.openssl.org/docs/manmaster/man1/ciphers.html
+https://en.wikipedia.org/wiki/Diffie-Hellman_key_exchange
+https://en.wikipedia.org/wiki/Perfect_forward_secrecy","
+Here is the list of SSL PFS ciphers supported by the remote server :
+
+  High Strength Ciphers (>= 112-bit key)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-AES128-SHA256       0xC0, 0x2F       ECDH          RSA      AES-GCM(128)           SHA256
+    ECDHE-RSA-AES256-SHA384       0xC0, 0x30       ECDH          RSA      AES-GCM(256)           SHA384
+    ECDHE-RSA-AES128-SHA          0xC0, 0x13       ECDH          RSA      AES-CBC(128)           SHA1
+    ECDHE-RSA-AES256-SHA          0xC0, 0x14       ECDH          RSA      AES-CBC(256)           SHA1
+    ECDHE-RSA-AES128-SHA256       0xC0, 0x27       ECDH          RSA      AES-CBC(128)           SHA256
+    ECDHE-RSA-AES256-SHA384       0xC0, 0x28       ECDH          RSA      AES-CBC(256)           SHA384
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}
+"
+"70544","","","None","52.208.101.182","tcp","443","SSL Cipher Block Chaining Cipher Suites Supported","The remote service supports the use of SSL Cipher Block Chaining
+ciphers, which combine previous blocks with subsequent ones.","The remote host supports the use of SSL ciphers that operate in Cipher
+Block Chaining (CBC) mode.  These cipher suites offer additional
+security over Electronic Codebook (ECB) mode, but have the potential to
+leak information if used improperly.","n/a","https://www.openssl.org/docs/manmaster/man1/ciphers.html
+http://www.nessus.org/u?cc4a822a
+https://www.openssl.org/~bodo/tls-cbc.txt","
+Here is the list of SSL CBC ciphers supported by the remote server :
+
+  High Strength Ciphers (>= 112-bit key)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-AES128-SHA          0xC0, 0x13       ECDH          RSA      AES-CBC(128)           SHA1
+    ECDHE-RSA-AES256-SHA          0xC0, 0x14       ECDH          RSA      AES-CBC(256)           SHA1
+    AES128-SHA                    0x00, 0x2F       RSA           RSA      AES-CBC(128)           SHA1
+    AES256-SHA                    0x00, 0x35       RSA           RSA      AES-CBC(256)           SHA1
+    ECDHE-RSA-AES128-SHA256       0xC0, 0x27       ECDH          RSA      AES-CBC(128)           SHA256
+    ECDHE-RSA-AES256-SHA384       0xC0, 0x28       ECDH          RSA      AES-CBC(256)           SHA384
+    RSA-AES128-SHA256             0x00, 0x3C       RSA           RSA      AES-CBC(128)           SHA256
+    RSA-AES256-SHA256             0x00, 0x3D       RSA           RSA      AES-CBC(256)           SHA256
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}
+"
+"84502","","","None","52.208.101.182","tcp","443","HSTS Missing From HTTPS Server","The remote web server is not enforcing HSTS.","The remote HTTPS server is not enforcing HTTP Strict Transport Security (HSTS). 
+HSTS is an optional response header that can be configured on the server to instruct 
+the browser to only communicate via HTTPS. The lack of HSTS allows downgrade attacks,
+SSL-stripping man-in-the-middle attacks, and weakens cookie-hijacking protections.","Configure the remote web server to use HSTS.","https://tools.ietf.org/html/rfc6797","
+  The remote HTTPS server does not send the HTTP
+  ""Strict-Transport-Security"" header.
+"
+"94761","","","None","52.208.101.182","tcp","443","SSL Root Certification Authority Certificate Information","A root Certification Authority certificate was found at the top of the
+certificate chain.","The remote service uses an SSL certificate chain that contains a
+self-signed root Certification Authority certificate at the top of the
+chain.","Ensure that use of this root Certification Authority certificate
+complies with your organization's acceptable use and security
+policies.","https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2003/cc778623(v=ws.10)","
+The following root Certification Authority certificate was found :
+
+|-Subject             : C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV Root CA
+|-Issuer              : C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV Root CA
+|-Valid From          : Nov 10 00:00:00 2006 GMT
+|-Valid To            : Nov 10 00:00:00 2031 GMT
+|-Signature Algorithm : SHA-1 With RSA Encryption
+"
+"95631","CVE-2004-2761","","None","52.208.101.182","tcp","443","SSL Certificate Signed Using Weak Hashing Algorithm (Known CA)","A known CA SSL certificate in the certificate chain has been signed
+using a weak hashing algorithm.","The remote service uses a known CA certificate in the SSL certificate
+chain that has been signed using a cryptographically weak hashing
+algorithm (e.g., MD2, MD4, MD5, or SHA1). These signature algorithms
+are known to be vulnerable to collision attacks. An attacker can
+exploit this to generate another certificate with the same digital
+signature, allowing the attacker to masquerade as the affected
+service.
+
+Note that this plugin reports all SSL certificate chains signed with
+SHA-1 that expire after January 1, 2017 as vulnerable. This is in
+accordance with Google's gradual sunsetting of the SHA-1 cryptographic
+hash algorithm.","Contact the Certificate Authority to have the certificate reissued.","https://tools.ietf.org/html/rfc3279
+https://docs.microsoft.com/en-us/security-updates/SecurityAdvisories/2008/961509","
+The following known CA certificates were part of the certificate
+chain sent by the remote host, but contain hashes that are considered
+to be weak.
+
+|-Subject             : C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV Root CA
+|-Signature Algorithm : SHA-1 With RSA Encryption
+|-Valid From          : Nov 10 00:00:00 2006 GMT
+|-Valid To            : Nov 10 00:00:00 2031 GMT
+"
+"104743","","6.1","Medium","52.208.101.182","tcp","443","TLS Version 1.0 Protocol Detection","The remote service encrypts traffic using an older version of TLS.","The remote service accepts connections encrypted using TLS 1.0. TLS 1.0 has a
+number of cryptographic design flaws. Modern implementations of TLS 1.0
+mitigate these problems, but newer versions of TLS like 1.2 and 1.3 are
+designed against these flaws and should be used whenever possible.
+
+As of March 31, 2020, Endpoints that aren’t enabled for TLS 1.2
+and higher will no longer function properly with major web browsers and major vendors.
+
+PCI DSS v3.2 requires that TLS 1.0 be disabled entirely by June 30,
+2018, except for POS POI terminals (and the SSL/TLS termination
+points to which they connect) that can be verified as not being
+susceptible to any known exploits.","Enable support for TLS 1.2 and 1.3, and disable support for TLS 1.0.","https://tools.ietf.org/html/draft-ietf-tls-oldversions-deprecate-00","TLSv1 is enabled and the server supports at least one cipher."
+"121010","","","None","52.208.101.182","tcp","443","TLS Version 1.1 Protocol Detection","The remote service encrypts traffic using an older version of TLS.","The remote service accepts connections encrypted using TLS 1.1.
+TLS 1.1 lacks support for current and recommended cipher suites.
+Ciphers that support encryption before MAC computation, and
+authenticated encryption modes such as GCM cannot be used with
+TLS 1.1
+
+As of March 31, 2020, Endpoints that are not enabled for TLS 1.2 
+and higher will no longer function properly with major web browsers and major vendors.","Enable support for TLS 1.2 and/or 1.3, and disable support for TLS 1.1.","https://tools.ietf.org/html/draft-ietf-tls-oldversions-deprecate-00
+http://www.nessus.org/u?c8ae820d","TLSv1.1 is enabled and the server supports at least one cipher."
+"136318","","","None","52.208.101.182","tcp","443","TLS Version 1.2 Protocol Detection","The remote service encrypts traffic using a version of TLS.","The remote service accepts connections encrypted using TLS 1.2.","N/A","https://tools.ietf.org/html/rfc5246","TLSv1.2 is enabled and the server supports at least one cipher."

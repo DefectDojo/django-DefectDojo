@@ -1,0 +1,58 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- if .Values.annotations }}
+  annotations:
+{{- with .Values.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+data:
+  DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
+  DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
+  DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
+  DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
+  DD_ALLOWED_HOSTS: {{ include "django.allowed_hosts" . }}
+  DD_SITE_URL: {{ .Values.siteUrl | default "http://localhost:8080" }}
+  DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
+  DD_CELERY_BROKER_USER: ''
+  DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
+  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{- if ( hasKey .Values.redis "master" ) -}}{{ .Values.redis.master.service.ports.redis }}{{ else }}6379{{ end }}{{- end -}}'
+  DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
+  DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
+  DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
+  DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.appSettings.poolType | default "solo" }}
+  DD_CELERY_WORKER_AUTOSCALE_MIN: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscaleMin | default "2" }}{{ end }}'
+  DD_CELERY_WORKER_AUTOSCALE_MAX: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscaleMax | default "8" }}{{ end }}'
+  DD_CELERY_WORKER_CONCURRENCY: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.concurrency | default "8" }}{{ end }}'
+  DD_CELERY_WORKER_PREFETCH_MULTIPLIER: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.prefetchMultiplier | default "128" }}{{ end }}'
+  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "postgresqlha" }}postgresql{{ end }}
+  DD_DATABASE_HOST: {{ if eq .Values.database "postgresql" }}{{ template "postgresql.hostname" . }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ template "postgresqlha.hostname" . }}{{ end }}
+  DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.primary.service.ports.postgresql }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.service.ports.postgresql }}{{ end }}'
+  DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}
+  DD_DATABASE_NAME: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.database }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.database }}{{ end }}
+  DD_INITIALIZE: '{{ .Values.initializer.run }}'
+  DD_UWSGI_ENDPOINT: /run/defectdojo/uwsgi.sock
+  DD_UWSGI_HOST: localhost
+  DD_UWSGI_PASS: unix:///run/defectdojo/uwsgi.sock
+  DD_UWSGI_NUM_OF_PROCESSES: '{{ .Values.django.uwsgi.appSettings.processes | default 2 }}'
+  DD_UWSGI_NUM_OF_THREADS: '{{ .Values.django.uwsgi.appSettings.threads | default 2 }}'
+  DD_UWSGI_MAX_FD: '{{ .Values.django.uwsgi.appSettings.maxFd }}'
+  DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
+  NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
+  METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}
+{{- if  .Values.django.uwsgi.certificates.enabled }}
+  REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
+{{- end }}
+{{- with .Values.extraConfigs  }}
+  {{- toYaml . | nindent 2 }}{{- end }}

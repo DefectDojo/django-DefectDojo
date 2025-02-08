@@ -1,0 +1,158 @@
+[
+  {
+    "model": "dojo.regulation",
+    "pk": 1,
+    "fields": {
+      "name": "Payment Card Industry Data Security Standard",
+      "acronym": "PCI DSS",
+      "category": "finance",
+      "jurisdiction": "United States",
+      "description": "The Payment Card Industry Data Security Standard (PCI DSS) is a proprietary information security standard for organizations that handle branded credit cards from the major card schemes including Visa, MasterCard, American Express, Discover, and JCB.",
+      "reference": "http://en.wikipedia.org/wiki/Payment_Card_Industry_Data_Security_Standard"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 2,
+    "fields": {
+      "name": "Health Insurance Portability and Accountability Act",
+      "acronym": "HIPAA",
+      "category": "medical",
+      "jurisdiction": "United States",
+      "description": "The Health Insurance Portability and Accountability Act of 1996 (HIPAA) was enacted by the United States Congress and signed by President Bill Clinton in 1996. It has been known as the Kennedy–Kassebaum Act or Kassebaum-Kennedy Act after two of its leading sponsors. Title I of HIPAA protects health insurance coverage for workers and their families when they change or lose their jobs. Title II of HIPAA, known as the Administrative Simplification (AS) provisions, requires the establishment of national standards for electronic health care transactions and national identifiers for providers, health insurance plans, and employers.",
+      "reference": "http://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 3,
+    "fields": {
+      "name": "Family Educational Rights and Privacy Act",
+      "acronym": "FERPA",
+      "category": "education",
+      "jurisdiction": "United States",
+      "description": "The Family Educational Rights and Privacy Act of 1974 (FERPA) is a United States federal law that gives parents access to their child's education records, an opportunity to seek to have the records amended, and some control over the disclosure of information from the records. With several exceptions, schools must have a student's consent prior to the disclosure of education records after that student is 18 years old. The law applies only to educational agencies and institutions that receive funding under a program administered by the U.S. Department of Education. Other regulations under this act, effective starting January 3, 2012, allow for greater disclosures of personal and directory student identifying information and regulate student IDs and e-mail addresses.",
+      "reference": "http://en.wikipedia.org/wiki/Family_Educational_Rights_and_Privacy_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 4,
+    "fields": {
+      "name": "Sarbanes–Oxley Act",
+      "acronym": "SOX",
+      "category": "finance",
+      "jurisdiction": "United States",
+      "description": "The Sarbanes–Oxley Act of 2002 (SOX) is a United States federal law that set new or enhanced standards for all U.S. public company boards, management and public accounting firms. There are also a number of provisions of the Act that also apply to privately held companies, for example the willful destruction of evidence to impede a Federal investigation.",
+      "reference": "http://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 5,
+    "fields": {
+      "name": "Gramm–Leach–Bliley Act",
+      "acronym": "GLBA",
+      "category": "finance",
+      "jurisdiction": "United States",
+      "description": "The Gramm–Leach–Bliley Act (GLBA) is an act of the 106th United States Congress. It repealed part of the Glass–Steagall Act of 1933, removing barriers in the market among banking companies, securities companies and insurance companies that prohibited any one institution from acting as any combination of an investment bank, a commercial bank, and an insurance company. With the bipartisan passage of the Gramm–Leach–Bliley Act, commercial banks, investment banks, securities firms, and insurance companies were allowed to consolidate. Furthermore, it failed to give to the SEC or any other financial regulatory agency the authority to regulate large investment bank holding companies.",
+      "reference": "http://en.wikipedia.org/wiki/Gramm%E2%80%93Leach%E2%80%93Bliley_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 6,
+    "fields": {
+      "name": "Personal Information Protection and Electronic Documents Act",
+      "acronym": "PIPEDA",
+      "category": "privacy",
+      "jurisdiction": "Canada",
+      "description": "The Personal Information Protection and Electronic Documents Act (PIPEDA) is a Canadian law relating to data privacy. It governs how private sector organizations collect, use and disclose personal information in the course of commercial business. In addition, the Act contains various provisions to facilitate the use of electronic documents. PIPEDA became law on 13 April 2000 to promote consumer trust in electronic commerce. The act was also intended to reassure the European Union that the Canadian privacy law was adequate to protect the personal information of European citizens.",
+      "reference": "http://en.wikipedia.org/wiki/Personal_Information_Protection_and_Electronic_Documents_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 7,
+    "fields": {
+      "name": "Data Protection Act 1998",
+      "acronym": "DPA",
+      "category": "privacy",
+      "jurisdiction": "United Kingdom",
+      "description": "The Data Protection Act 1998 (DPA) is an Act of Parliament of the United Kingdom of Great Britain and Northern Ireland which defines UK law on the processing of data on identifiable living people. It is the main piece of legislation that governs the protection of personal data in the UK. Although the Act itself does not mention privacy, it was enacted to bring British law into line with the EU data protection directive of 1995 which required Member States to protect people's fundamental rights and freedoms and in particular their right to privacy with respect to the processing of personal data. In practice it provides a way for individuals to control information about themselves. Most of the Act does not apply to domestic use, for example keeping a personal address book. Anyone holding personal data for other purposes is legally obliged to comply with this Act, subject to some exemptions. The Act defines eight data protection principles. It also requires companies and individuals to keep personal information to themselves.",
+      "reference": "http://en.wikipedia.org/wiki/Data_Protection_Act_1998"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 8,
+    "fields": {
+      "name": "Children's Online Privacy Protection Act",
+      "acronym": "COPPA",
+      "category": "privacy",
+      "jurisdiction": "United States",
+      "description": "The Children's Online Privacy Protection Act of 1998 (COPPA) is a United States federal law that applies to the online collection of personal information by persons or entities under U.S. jurisdiction from children under 13 years of age. It details what a website operator must include in a privacy policy, when and how to seek verifiable consent from a parent or guardian, and what responsibilities an operator has to protect children's privacy and safety online including restrictions on the marketing to those under 13. While children under 13 can legally give out personal information with their parents' permission, many websites disallow underage children from using their services altogether due to the amount of cash and work involved in the law compliance.",
+      "reference": "http://en.wikipedia.org/wiki/Children%27s_Online_Privacy_Protection_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 9,
+    "fields": {
+      "name": "California Security Breach Information Act",
+      "acronym": "CA SB-1386",
+      "category": "privacy",
+      "jurisdiction": "United States, California",
+      "description": "In the United States, the California Security Breach Information Act (SB-1386) is a California state law requiring organizations that maintain personal information about individuals to inform those individuals if the security of their information is compromised. The Act stipulates that if there's a security breach of a database containing personal data, the responsible organization must notify each individual for whom it maintained information. The Act, which went into effect July 1, 2003, was created to help stem the increasing incidence of identity theft.",
+      "reference": "http://en.wikipedia.org/wiki/California_S.B._1386"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 10,
+    "fields": {
+      "name": "California Online Privacy Protection Act",
+      "acronym": "OPPA",
+      "category": "privacy",
+      "jurisdiction": "United States, California",
+      "description": "The California Online Privacy Protection Act of 2003 (OPPA), effective as of July 1, 2004, is a California State Law. According to this law, operators of commercial websites that collect Personally identifiable information from California's residents are required to conspicuously post and comply with a privacy policy that meets certain requirements.",
+      "reference": "http://en.wikipedia.org/wiki/Online_Privacy_Protection_Act"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 11,
+    "fields": {
+      "name": "Data Protection Directive",
+      "acronym": "Directive 95/46/EC",
+      "category": "privacy",
+      "jurisdiction": "European Union",
+      "description": "The Data Protection Directive (officially Directive 95/46/EC on the protection of individuals with regard to the processing of personal data and on the free movement of such data) is a European Union directive adopted in 1995 which regulates the processing of personal data within the European Union. It is an important component of EU privacy and human rights law.",
+      "reference": "http://en.wikipedia.org/wiki/Data_Protection_Directive"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 12,
+    "fields": {
+      "name": "Directive on Privacy and Electronic Communications",
+      "acronym": "Directive 2002/58/EC",
+      "category": "privacy",
+      "jurisdiction": "European Union",
+      "description": "Directive 2002/58 on Privacy and Electronic Communications, otherwise known as E-Privacy Directive, is an EU directive on data protection and privacy in the digital age. It presents a continuation of earlier efforts, most directly the Data Protection Directive. It deals with the regulation of a number of important issues such as confidentiality of information, treatment of traffic data, spam and cookies. This Directive has been amended by Directive 2009/136, which introduces several changes, especially in what concerns cookies, that are now subject to prior consent.",
+      "reference": "http://en.wikipedia.org/wiki/Directive_on_Privacy_and_Electronic_Communications"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 13,
+    "fields": {
+      "name": "General Data Protection Regulation",
+      "acronym": "GDPR",
+      "category": "privacy",
+      "jurisdiction": "EU & EU Data Extra-Territorial Applicability",
+      "description": "The General Data Protection Regulation (GDPR) (EU) 2016/679 is a regulation in EU law on data protection and privacy for all individuals within the European Union (EU) and the European Economic Area (EEA). It also addresses the export of personal data outside the EU and EEA. The GDPR aims primarily to give control to citizens and residents over their personal data and to simplify the regulatory environment for international business by unifying the regulation within the EU.\r\n\r\nSuperseding the Data Protection Directive 95/46/EC, the regulation contains provisions and requirements pertaining to the processing of personally identifiable information of data subjects inside the European Union, and applies to all enterprises, regardless of location, that are doing business with the European Economic Area. Business processes that handle personal data must be built with data protection by design and by default, meaning that personal data must be stored using pseudonymisation or full anonymisation, and use the highest-possible privacy settings by default, so that the data is not available publicly without explicit consent, and cannot be used to identify a subject without additional information stored separately. No personal data may be processed unless it is done under a lawful basis specified by the regulation, or if the data controller or processor has received explicit, opt-in consent from the data's owner. The data owner has the right to revoke this permission at any time.",
+      "reference": "https://www.eugdpr.org/"
+    }
+  }
+]

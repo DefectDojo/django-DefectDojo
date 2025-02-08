@@ -1,0 +1,164 @@
+{{- if .Values.initializer.run }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "initializer.jobname" . }}
+  labels:
+    defectdojo.org/component: initializer
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.initializer.jobAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if and (int .Values.initializer.keepSeconds) (gt (int .Values.initializer.keepSeconds) 0) }}
+  ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: initializer
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end -}}
+        {{- with .Values.initializer.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+      {{- with .Values.initializer.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ $fullName }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      {{- if  .Values.localsettingspy }}
+      - name: localsettingspy
+        configMap:
+          name: {{ $fullName }}-localsettingspy
+      {{- end }}
+      {{- range .Values.initializer.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
+      initContainers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
+      {{- end }}
+      - name: wait-for-db
+        command:
+        - '/bin/bash'
+        - '-c'
+        - '/wait-for-it.sh ${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432} -t 300 -s -- /bin/echo Database is up'
+        image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}
+            optional: true
+        env:
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+      - name: initializer
+        image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- if  .Values.localsettingspy }}
+        - name: localsettingspy
+          readOnly: true
+          mountPath: /app/dojo/settings/local_settings.py
+          subPath: file
+        {{- end }}
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        command:
+          - /entrypoint-initializer.sh
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}
+        env:
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if eq .Values.database "postgresql" }}
+              name: {{ .Values.postgresql.auth.existingSecret }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else if eq .Values.database "postgresqlha" }}
+              name: {{ .Values.postgresqlha.postgresql.existingSecret }}
+              key: postgresql-postgres-password
+              {{- end }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.initializer.resources | nindent 10 }}
+      restartPolicy: Never
+      {{- with .Values.initializer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initializer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initializer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  backoffLimit: 1
+{{- end }}

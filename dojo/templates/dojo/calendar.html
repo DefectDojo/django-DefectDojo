@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <form method="GET" id="calfilter" action="/calendar">
+        <div class="container-fluid chosen-container side-by-side">
+            <div class="row">
+                <div style="display: inline-block;">
+                    <select data-placeholder="Calendar type" id="caltype" class="chosen-select">
+                        <option value="engagements">Engagements</option>
+                        <option value="tests">Tests</option>
+                    </select>
+                </div>
+                <div style="display: inline-block;">
+                    <select data-placeholder="All users" multiple id="lead" name="lead" class="chosen-select">
+                        <option value="0">All users</option>
+                        <option value="-1">Unassigned</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="display: inline-block;">
+                    <input class="btn btn-primary" type="submit" value="Apply" />
+                </div>
+            </div>
+        </div>
+    </form>
+    <br/><br/>
+    <div id="calendar"></div>
+    <br/><br/>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            $('#caltype').change(function() {
+                $('#calfilter').attr('action', '/calendar/' + $(this).val());
+            });
+            if (caltype) {
+                $('#caltype').val('{{ caltype }}');
+                $('#caltype').trigger('change');
+            }
+            $('#lead').val([{% for lead in leads %} '{{ lead }}', {% endfor %}]);
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,basicWeek,basicDay'
+                },
+                editable: false,
+                eventLimit: true, // allow "more" link when too many events
+                events: [
+                    {% if caltype == 'tests' %}
+                        {% for t in tests %}
+                            {
+                                title: '{{t.engagement.product.name}}: {{ t.engagement.name|default:"Unknown" }} - {{ t.test_type }} ({{ t.lead|default:"Unassigned" }})',
+                                start: '{{t.target_start|date:"c"}}',
+                                end: '{{t.target_end|date:"c"}}',
+                                url: '{% url 'view_test' t.id %}',
+                                color: {%  if t.engagement.active %}'#337ab7'{% else %}'#b9b9b9'{% endif %},
+                                overlap: true
+                            },
+                        {%  endfor %}
+                    {% else %}
+                        {% for e in engagements %}
+                            {
+                                title: '{{e.product.name}}: {{ e.name|default:"Unknown" }} ({{ e.lead|default:"Unassigned" }})',
+                                start: '{{e.target_start|date:"c"}}',
+                                end: '{{e.target_end|date:"c"}}',
+                                url: '{% url 'view_engagement' e.id %}',
+                                color: {%  if e.active %}'#337ab7'{% else %}'#b9b9b9'{% endif %},
+                                overlap: true
+                            },
+                        {%  endfor %}
+                    {% endif %}
+                ]
+            });
+        });
+    </script>
+{% endblock %}

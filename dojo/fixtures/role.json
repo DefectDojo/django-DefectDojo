@@ -1,0 +1,46 @@
+[
+    {
+        "model": "dojo.role",
+        "pk": 1,
+        "fields": {
+            "name": "API_Importer",
+            "is_owner": false
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 2,
+        "fields": {
+            "name": "Writer",
+            "is_owner": false
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 3,
+        "fields": {
+            "name": "Maintainer",
+            "is_owner": false
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 4,
+        "fields": {
+            "name": "Owner",
+            "is_owner": true
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 5,
+        "fields": {
+            "name": "Reader",
+            "is_owner": false
+
+        }
+    }
+]

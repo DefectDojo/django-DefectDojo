@@ -1,0 +1,69 @@
+name-template: '$RESOLVED_VERSION 🌈'
+tag-template: '$RESOLVED_VERSION'
+
+branches:
+  - master
+
+categories:
+  - title: '💣 Breaking changes'
+    labels:
+      - 'Breaking Changes'
+  - title: '🚩 Changes to `settings.dist.py` / `local_settings.py`'
+    labels:
+      - 'settings_changes'
+  - title: '🚩 Database migration'
+    labels:
+      - 'New Migration'
+  - title: '🚩 Requires hash code recomputation'
+    labels:
+      - 'hashcode-update-needed'
+  - title: '🚩 Security'
+    labels:
+      - 'security'
+  - title: '🚀 New importers'
+    labels:
+      - 'Import Scans'
+  - title: '🚀 General features and enhancements'
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'performance'
+  - title: '🚀 API features and enhancements'
+    label: 'apiv2'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: 📝 Documentation updates
+    label: 'documentation'
+  - title: '🖌 Updates in UI'
+    label: 'ui'
+  - title: '🗣 Updates in localization'
+    label: 'localization'
+  - title: '🧰 Maintenance'
+    collapse-after: 3
+    labels:
+      - 'dependencies'
+      - 'maintenance'
+exclude-labels:
+  - 'skip-changelog'
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+template: |
+  Please consult the [Upgrade notes in the documentation ](https://docs.defectdojo.com/en/open_source/upgrading/upgrading_guide/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
+
+  ## Changes since $PREVIOUS_TAG
+  $CHANGES
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Generate
+                        {% if product_type %}
+                            Product Type
+                        {% elif product %}
+                            Product
+                        {% elif engagement %}
+                            Engagement
+                        {% elif test %}
+                            Test
+                        {% endif %}
+                        Report
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
+
+                    </h3>
+                </div>
+
+                <div id="the-filters" class="is-filters panel-body {% if findings.form.has_changed %}in{% endif %}">
+                    <div class="dojo-filter-heading">Filters</div>
+                    <div class="filter-set">
+
+                        {% include "dojo/filter_snippet.html" with form=findings.form %}
+
+                    </div>
+                    <br/>
+
+                    <div class="alert alert-info" role="alert">
+                        <span class="fa-solid fa-lightbulb" aria-hidden="true"></span>
+                        <span class=""><b>Hint:</b></span>
+                        To generate a report of all mitigated findings select: Active: Either, Verified: Either,
+                        Mitigated: Yes
+                    </div>
+                    <div class="dojo-report-heading">Report Options</div>
+                    <div class="filter-set">
+                        {% include "dojo/filter_snippet.html" with form=report_form submit='report' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% if findings %}
+                <div class="well">
+                    <p>
+                        The findings listed below will be included in the report. Use the filters above to fine tune the results.
+                    </p>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_findings %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Mitigated</th>
+                            <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
+                            <th>Product</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for finding in paged_findings %}
+                            <tr>
+                                <td>
+                                    <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
+                                </td>
+                                <td class="nowrap">{{ finding.date }}</td>
+                                <td class="">{{ finding.status }}</td>
+                                <td class="">{{ finding.mitigated }}</td>
+                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                    <p class="text-error">
+                                {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>
+                                    {{ finding.epss_score|format_epss }}
+                                    /
+                                    {{ finding.epss_percentile|format_epss }}
+                                </td>
+                                <td>{{ finding.test.engagement.product }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_findings %}
+                </div>
+            {% else %}
+                <p class="text-center">No findings found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

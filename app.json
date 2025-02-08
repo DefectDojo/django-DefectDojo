@@ -1,0 +1,5 @@
+{
+    "name": "Application Name",
+    "repository": "https://github.com/DefectDojo/django-DefectDojo",
+    "image": "appsecpipeline/django-defectdojo"
+}

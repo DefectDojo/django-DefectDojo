@@ -1,0 +1,115 @@
+{
+    "id": "80019f59-f4a4-4d29-a4da-b0b15b898aa3",
+    "projects": null,
+    "createdAt": "2024-07-22T09:03:01.610132857Z",
+    "startedAt": "0001-01-01T00:00:00Z",
+    "createdBy": {
+      "serviceAccount": {
+        "id": "12312312312312312"
+      }
+    },
+    "status": {
+      "state": "SUCCESS",
+      "verdict": "PASSED_BY_POLICY"
+    },
+    "policies": [
+      {
+        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
+        "name": "Default vulnerabilities policy",
+        "description": "Default built-in policy",
+        "type": "VULNERABILITIES",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "BLOCK",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamsvulnerabilities",
+          "severity": "CRITICAL",
+          "packageCountThreshold": 1,
+          "ignoreUnfixed": true,
+          "packageAllowList": [],
+          "detectionMethods": null,
+          "fixGracePeriodHours": 0,
+          "publishGracePeriodHours": 0
+        }
+      },
+      {
+        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
+        "name": "Default sensitive data policy",
+        "description": "Default built-in policy for sensitive data scanning",
+        "type": "SENSITIVE_DATA",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssensitivedata",
+          "dataFindingSeverityThreshold": "",
+          "countThreshold": 0
+        }
+      }
+    ],
+    "extraInfo": null,
+    "tags": null,
+    "outdatedPolicies": [],
+    "taggedResource": null,
+    "scanOriginResource": {
+      "__typename": "CICDScanOriginDirectory",
+      "name": "/Users/osama/Documents/testing"
+    },
+    "result": {
+      "__typename": "CICDDiskScanResult",
+      "osPackages": null,
+      "libraries": null,
+      "applications": null,
+      "cpes": null,
+      "secrets": null,
+      "dataFindings": null,
+      "vulnerableSBOMArtifactsByNameVersion": null,
+      "hostConfiguration": null,
+      "failedPolicyMatches": [],
+      "analytics": {
+        "vulnerabilities": {
+          "infoCount": 0,
+          "lowCount": 0,
+          "mediumCount": 0,
+          "highCount": 0,
+          "criticalCount": 0,
+          "unfixedCount": 0,
+          "totalCount": 0
+        },
+        "secrets": {
+          "privateKeyCount": 0,
+          "publicKeyCount": 0,
+          "passwordCount": 0,
+          "certificateCount": 0,
+          "cloudKeyCount": 0,
+          "sshAuthorizedKeyCount": 0,
+          "dbConnectionStringCount": 0,
+          "gitCredentialCount": 0,
+          "presignedURLCount": 0,
+          "saasAPIKeyCount": 0,
+          "totalCount": 0
+        },
+        "hostConfiguration": null,
+        "filesScannedCount": 0,
+        "directoriesScannedCount": 1
+      }
+    },
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans#%7E%28cicd_scan%7E%2780019f59-f4a4-4d29-a4da-b0b15b898aa3%29"
+  }
+  

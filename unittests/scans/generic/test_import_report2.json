@@ -1,0 +1,38 @@
+{
+    "name": "Unicorn",
+    "type": "Unicorn",
+    "findings": [
+        {
+            "title": "Henry Smith",
+            "description": "small",
+            "severity": "Critical",
+            "active": false,
+            "verified": false,
+            "is_mitigated": true
+        },
+        {
+            "title": "Henry Smith",
+            "description": "small",
+            "severity": "Critical",
+            "active": false,
+            "verified": false,
+            "is_mitigated": true
+        },
+        {
+            "title": "Henry Smith",
+            "description": "small",
+            "severity": "Critical",
+            "active": false,
+            "verified": false,
+            "is_mitigated": true
+        },
+        {
+            "title": "Henry Smith",
+            "description": "small",
+            "severity": "Critical",
+            "active": true,
+            "verified": true,
+            "is_mitigated": false
+        }
+    ]
+}

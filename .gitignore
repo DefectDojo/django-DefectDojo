@@ -1,0 +1,148 @@
+# Docker container persistent data
+docker/data/
+docker/static/
+
+# docker-compose override symbolic link
+docker-compose.override.yml
+
+# VS Code
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+.ruff_cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+.settings
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+**/local_settings.py
+
+# Vim swapfiles
+*.swp
+*.swo
+
+# Sphinx documentation
+docs/_build/
+
+#others
+.DS_Store
+*.crt
+*.csr
+*.key
+dojo/migrations
+dojo/static/img/threat/*
+dojo/uploads/risk/*
+dojo/uploads/reports/*
+dojo/scans/scan*
+dojo/uploads/threat/*
+# dojo/fixtures/initial_surveys.json
+.idea
+*.sqlite
+*.db
+celerybeat.pid
+*.env*
+!docker/environments/*.env
+
+weekly.txt
+Monthly.txt
+Quarterly.txt
+
+# Vagrant
+.vagrant
+
+# yarn
+components/*
+!components/package.json
+!components/yarn.lock
+# dojo/static/*
+!dojo/static/dojo/*
+dojo/media
+/static
+/media
+
+# virtualenv
+.venv/
+venv/
+ENV/
+quick.bash
+*.tgz
+
+#visual studio code
+*.code-workspace
+
+# pipenv
+Pipfile
+Pipfile*
+
+
+#ignore locally added certs
+docker/certs/*
+!docker/certs/readme.txt
+
+#ignore locally added extra fixtures
+docker/extra_fixtures/*
+!docker/extra_fixtures/readme.txt
+docker/extra_settings/*
+!docker/extra_settings/README.md
+
+
+# Helm dependencies
+helm/defectdojo/charts
+
+# generates files for github pages
+docs/public
+docs/node_modules
+docs/resources
+docs/hugo_stats.json
+docs/.gitpod.yml
+docs/.npmignore
+docs/.npmrc
+docs/.prettierignore
+docs/.prettierrc.yaml
+docs/.codesandbox/tasks.json
+docs/.devcontainer/devcontainer.json
+docs/.devcontainer/Dockerfile
+docs/LICENSE
+docs/.hugo_build.lock

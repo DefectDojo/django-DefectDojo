@@ -1,0 +1,51 @@
+{
+	"results": [
+		{
+			"id": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"distro": "Debian GNU/Linux 9 (stretch)",
+			"compliances": [
+				{
+					"title": "Sensitive information provided in environment variables",
+					"severity": "high",
+					"cause": "The environment variables DD_CELERY_BROKER_PASSWORD,DD_DATABASE_PASSWORD,DD_SECRET_KEY contain sensitive data"
+				}
+			],
+			"complianceDistribution": {
+				"critical": 0,
+				"high": 1,
+				"medium": 0,
+				"low": 0,
+				"total": 1
+			},
+			"vulnerabilities": [
+                {
+                    "id": "PRISMA-2021-0013",
+                    "status": "fixed in 1.1.1",
+                    "description": "marked package prior to 1.1.1 are vulnerable to  Regular Expression Denial of Service (ReDoS). The regex within src/rules.js file have multiple unused capture groups which could lead to a denial of service attack if user input is reachable.  Origin: https://github.com/markedjs/marked/commit/bd4f8c464befad2b304d51e33e89e567326e62e0",
+                    "severity": "medium",
+                    "packageName": "marked",
+                    "packageVersion": "0.3.9",
+                    "riskFactors": [
+                        "DoS",
+                        "Has fix",
+                        "Medium severity"
+                    ],
+                    "impactedVersions": [
+                        "\u003c1.1.1"
+                    ],
+                    "publishedDate": "2021-01-14T10:29:35Z",
+                    "discoveredDate": "2022-11-16T07:38:50Z",
+                    "fixDate": "2021-01-14T10:29:35Z",
+                    "layerTime": "1970-01-01T00:00:00Z"
+                }
+			],
+			"vulnerabilityDistribution": {
+				"critical": 1,
+				"high": 0,
+				"medium": 0,
+				"low": 0,
+				"total": 1
+			}
+		}
+	]
+}

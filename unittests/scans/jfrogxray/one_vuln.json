@@ -1,0 +1,39 @@
+{     
+   "total_count": 1,
+   "data": [
+      {
+         "id": "",
+         "severity": "High",
+         "summary": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",
+         "issue_type": "security",
+         "provider": "JFrog",
+         "component": "debian:stretch:libx11",
+         "source_id": "deb://debian:stretch:libx11",
+         "source_comp_id": "deb://debian:stretch:libx11:2:1.6.4-3",
+         "component_versions": {
+            "id": "debian:stretch:libx11",
+            "vulnerable_versions": [
+               "< 2:1.6.4-3+deb9u1"
+            ],
+            "fixed_versions": [
+               "≥ 2:1.6.4-3+deb9u1"
+            ],
+            "more_details": {
+               "cves": [
+                  {
+                     "cve": "CVE-2018-14600",
+                     "cwe": [
+                        "CWE-787"
+                     ],
+                     "cvss_v2": "7.5/CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                     "cvss_v3": "9.8/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                  }
+               ],
+               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",                                                                                                                            
+               "provider": "JFrog"
+            }
+         },
+         "edited": "2019-05-14T00:21:16Z"
+      }
+   ]
+}

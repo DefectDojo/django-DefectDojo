@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+.chosen-container {
+    width: 70% !important;
+}
+{% endblock add_styles %}
+
+{% block content %}
+    {{ block.super }}
+    {% block status %}
+        <div class="row">
+            <h3> System Status </h3>
+            <br>
+            <div id="test-strategy" class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {% if celery_bool %}
+                        <h4> Celery <span class="label label-success">{{celery_status}}</span> </h4>
+                        {% else %}
+                        <h4> Celery <span class="label label-danger">{{celery_status}}</span> </h4>
+                        {% endif %}
+                    </div>
+                    <div class="panel-body text-left">
+                        {{celery_msg}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock status %}
+    <hr>
+    {% block settings %}
+    <div class="row">
+        <h3> System Settings </h3>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            {% block form %}
+                {% include "dojo/form_fields.html" with form=form %}
+            {% endblock form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" name="edit_settings" value="Submit"/>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endblock settings %}
+{% endblock content %}
+{comment}
+Django forms are very rigid so without crispy-forms we're forced to use javascript to add some flavour...
+{endcomment}
+{% block postscript %}
+    {{ block.super }}
+    <script>
+        function updatenotificationsgroup(group) {
+           if ($('#id_enable_' + group + "_notifications").is(':checked')) {
+                $("[id^='id_" + group + "']").closest('.form-group').show();
+            } else {
+                $("[id^='id_" + group + "']").closest('.form-group').hide();
+            }
+        }
+
+        $(function () {
+            $.each(['slack','msteams','mail','webhooks','grade'], function (index, value) {
+                updatenotificationsgroup(value);
+                $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
+            });
+        });
+
+        $(function () {
+            var jira_url = $('<span style="display: inline-block;height: 34px;padding-top: 7px;">'+ absolutePath('/jira/webhook/') + '</span>')
+            $(jira_url).css('padding-right', '1px')
+            $(jira_url).parent().height('34px')            
+            $('#id_jira_webhook_secret').before(jira_url);
+
+            var generate_secret = $('<i id="id_generate_secret" class="fa-solid fa-arrows-rotate has-popover" data-trigger="hover" data-content="Click to generate a new secret" data-placement="right" data-container="body" data-original-title="" title=""></i>')
+            $('#id_jira_webhook_secret').css('display', 'inline-block');
+            $('#id_jira_webhook_secret').width('25%')            
+            $('#id_jira_webhook_secret').after(generate_secret);
+            $(generate_secret).css('padding-left', '5px')
+            $(generate_secret).popover()
+
+            $(generate_secret).click(generate_new_secret)
+
+            $('#id_disable_jira_webhook_secret').change(show_hide_jira_webhook_secret)
+
+            show_hide_jira_webhook_secret()
+        });
+
+        function generate_new_secret() {
+            $('#id_jira_webhook_secret').val(generateGUID())
+        }
+
+        function show_hide_jira_webhook_secret() {
+            if ($('#id_disable_jira_webhook_secret').is(':checked')) {
+                <!-- alert('checked') -->
+                $('#id_jira_webhook_secret').css('display', 'none');
+                $('#id_generate_secret').css('display', 'none');
+                if (!$('#id_jira_webhook_secret').val()){
+                    <!-- field is mandatory so generat a value even if using secret is disabled -->
+                    generate_new_secret()
+                }
+            } else {
+                <!-- alert('not checked')                 -->
+                $('#id_jira_webhook_secret').css('display', 'inline-block');
+                $('#id_generate_secret').css('display', 'inline-block');
+            }
+        }
+
+    </script>
+{% endblock %}

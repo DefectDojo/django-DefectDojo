@@ -1,0 +1,200 @@
+{
+    "scan": {
+        "algorithm_version": 2,
+        "end_time": "Wed, 05 May 2021 07:57:28 GMT",
+        "grade": "D",
+        "hidden": false,
+        "likelihood_indicator": "MEDIUM",
+        "response_headers": {
+            "Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
+            "Content-Length": "13396",
+            "Content-Type": "text/html; charset=utf-8",
+            "Date": "Wed, 05 May 2021 07:57:21 GMT",
+            "Expires": "Wed, 05 May 2021 07:57:21 GMT",
+            "Server": "Caddy, nginx/1.19.10",
+            "Set-Cookie": "csrftoken=T2n9jWXAlyEoDh7Rx3FMDVO8nGhlTEy0YEbBqvYfa7YpsWSDPVaoft8PNCfkPNdk; expires=Wed, 04 May 2022 07:57:21 GMT; HttpOnly; Max-Age=31449600; Path=/; SameSite=Lax",
+            "Vary": "Cookie",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "SAMEORIGIN",
+            "X-Xss-Protection": "1; mode=block"
+        },
+        "scan_id": 19008337,
+        "score": 35,
+        "start_time": "Wed, 05 May 2021 07:57:11 GMT",
+        "state": "FINISHED",
+        "status_code": 200,
+        "tests_failed": 3,
+        "tests_passed": 9,
+        "tests_quantity": 12
+    },
+    "tests": {
+        "content-security-policy": {
+            "expectation": "csp-implemented-with-no-unsafe",
+            "name": "content-security-policy",
+            "output": {
+                "data": null,
+                "http": false,
+                "meta": false,
+                "policy": null
+            },
+            "pass": false,
+            "result": "csp-not-implemented",
+            "score_description": "Content Security Policy (CSP) header not implemented",
+            "score_modifier": -25
+        },
+        "contribute": {
+            "expectation": "contribute-json-only-required-on-mozilla-properties",
+            "name": "contribute",
+            "output": {
+                "data": null
+            },
+            "pass": true,
+            "result": "contribute-json-only-required-on-mozilla-properties",
+            "score_description": "Contribute.json isn't required on websites that don't belong to Mozilla",
+            "score_modifier": 0
+        },
+        "cookies": {
+            "expectation": "cookies-secure-with-httponly-sessions",
+            "name": "cookies",
+            "output": {
+                "data": {
+                    "csrftoken": {
+                        "domain": "demo.defectdojo.org",
+                        "expires": 1651651042,
+                        "httponly": true,
+                        "max-age": null,
+                        "path": "/",
+                        "port": null,
+                        "samesite": "Lax",
+                        "secure": false
+                    }
+                },
+                "sameSite": null
+            },
+            "pass": false,
+            "result": "cookies-without-secure-flag",
+            "score_description": "Cookies set without using the Secure flag or set over HTTP",
+            "score_modifier": -20
+        },
+        "cross-origin-resource-sharing": {
+            "expectation": "cross-origin-resource-sharing-not-implemented",
+            "name": "cross-origin-resource-sharing",
+            "output": {
+                "data": {
+                    "acao": null,
+                    "clientaccesspolicy": null,
+                    "crossdomain": null
+                }
+            },
+            "pass": true,
+            "result": "cross-origin-resource-sharing-not-implemented",
+            "score_description": "Content is not visible via cross-origin resource sharing (CORS) files or headers",
+            "score_modifier": 0
+        },
+        "public-key-pinning": {
+            "expectation": "hpkp-not-implemented",
+            "name": "public-key-pinning",
+            "output": {
+                "data": null,
+                "includeSubDomains": false,
+                "max-age": null,
+                "numPins": null,
+                "preloaded": false
+            },
+            "pass": true,
+            "result": "hpkp-not-implemented",
+            "score_description": "HTTP Public Key Pinning (HPKP) header not implemented",
+            "score_modifier": 0
+        },
+        "redirection": {
+            "expectation": "redirection-to-https",
+            "name": "redirection",
+            "output": {
+                "destination": "https://demo.defectdojo.org/login?next=/",
+                "redirects": true,
+                "route": [
+                    "http://demo.defectdojo.org/",
+                    "https://demo.defectdojo.org/",
+                    "https://demo.defectdojo.org/login?next=/"
+                ],
+                "status_code": 200
+            },
+            "pass": true,
+            "result": "redirection-to-https",
+            "score_description": "Initial redirection is to HTTPS on same host, final destination is HTTPS",
+            "score_modifier": 0
+        },
+        "referrer-policy": {
+            "expectation": "referrer-policy-private",
+            "name": "referrer-policy",
+            "output": {
+                "data": null,
+                "http": false,
+                "meta": false
+            },
+            "pass": true,
+            "result": "referrer-policy-not-implemented",
+            "score_description": "Referrer-Policy header not implemented",
+            "score_modifier": 0
+        },
+        "strict-transport-security": {
+            "expectation": "hsts-implemented-max-age-at-least-six-months",
+            "name": "strict-transport-security",
+            "output": {
+                "data": null,
+                "includeSubDomains": false,
+                "max-age": null,
+                "preload": false,
+                "preloaded": false
+            },
+            "pass": false,
+            "result": "hsts-not-implemented",
+            "score_description": "HTTP Strict Transport Security (HSTS) header not implemented",
+            "score_modifier": -20
+        },
+        "subresource-integrity": {
+            "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+            "name": "subresource-integrity",
+            "output": {
+                "data": {}
+            },
+            "pass": true,
+            "result": "sri-not-implemented-but-all-scripts-loaded-from-secure-origin",
+            "score_description": "Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin",
+            "score_modifier": 0
+        },
+        "x-content-type-options": {
+            "expectation": "x-content-type-options-nosniff",
+            "name": "x-content-type-options",
+            "output": {
+                "data": "nosniff"
+            },
+            "pass": true,
+            "result": "x-content-type-options-nosniff",
+            "score_description": "X-Content-Type-Options header set to \"nosniff\"",
+            "score_modifier": 0
+        },
+        "x-frame-options": {
+            "expectation": "x-frame-options-sameorigin-or-deny",
+            "name": "x-frame-options",
+            "output": {
+                "data": "SAMEORIGIN"
+            },
+            "pass": true,
+            "result": "x-frame-options-sameorigin-or-deny",
+            "score_description": "X-Frame-Options (XFO) header set to SAMEORIGIN or DENY",
+            "score_modifier": 0
+        },
+        "x-xss-protection": {
+            "expectation": "x-xss-protection-1-mode-block",
+            "name": "x-xss-protection",
+            "output": {
+                "data": "1; mode=block"
+            },
+            "pass": true,
+            "result": "x-xss-protection-enabled-mode-block",
+            "score_description": "X-XSS-Protection header set to \"1; mode=block\"",
+            "score_modifier": 0
+        }
+    }
+}

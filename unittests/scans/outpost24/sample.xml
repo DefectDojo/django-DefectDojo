@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE main SYSTEM "https://outscan.outpost24.com/dtd/XMLReport.dtd">
+<main>
+   <report>OUTSCAN Security Report</report>
+   <reportinfo>
+      <type>Vulnerability</type>
+      <id>1234567891234567891234567890ab</id>
+      <reportdate>2019-10-04 19:00</reportdate>
+      <timezone>GMT+0:00</timezone>
+      <creator>Matt Sicker</creator>
+      <date>2019-10-01 19:01 - 2019-10-01 19:01</date>
+      <test>1</test>
+      <threat>20</threat>
+   </reportinfo>
+   <!-- data in this report was modified to make a smaller sample without updating summary statistics -->
+   <hostlist>
+      <host>
+         <ip>localhost</ip>
+         <name/>
+         <platform/>
+         <high>4</high>
+         <medium>28</medium>
+         <low>18</low>
+         <info>13</info>
+         <port>1</port>
+         <start>2019-10-01 19:01</start>
+         <end>2019-10-01 19:11</end>
+         <updated>2019-10-03 23:35</updated>
+         <template>Normal with webapp</template>
+         <completescan>true</completescan>
+      </host>
+   </hostlist>
+   <portlist>
+      <portlist-host>
+         <ip>localhost</ip>
+         <name/>
+         <date>2019-10-01 19:01</date>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+            <history>
+               <firstseen>2019-09-10 19:01</firstseen>
+            </history>
+         </portinfo>
+      </portlist-host>
+   </portlist>
+   <detaillist>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377090</id>
+         <name>Fake Product: Cross-Site Request Forgery Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.1</cvss_score>
+         <cvss_vector>(AV:N/AC:H/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with advanced skills and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>By default, CSRF tokens in Fake Product only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10353</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380637</id>
+         <name>Fake Product LTS: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product LTS</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product LTS, 1.1.176.4, is less than or equal to 1.1.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 1.1.176.2 or later of Fake Product LTS</solutiontitle>
+         <solution>Upgrade to version 1.1.176.2 or later of Fake Product LTS.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/download/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381851</id>
+         <name>Fake Product: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10405</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381851</id>
+         <name>Fake Product: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10405</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380638</id>
+         <name>Fake Product: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377085</id>
+         <name>Fake Product: Permission Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A vulnerability in the Spring web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-07-17/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10354</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377087</id>
+         <name>Fake Product: Path Traversal Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/fake_product/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10352</id>
+         </cve>
+         <bug>
+            <id>109299</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380638</id>
+         <name>Fake Product: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377087</id>
+         <name>Fake Product: Path Traversal Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/fake_product/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10352</id>
+         </cve>
+         <bug>
+            <id>109299</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377085</id>
+         <name>Fake Product: Permission Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A vulnerability in the Spring web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-07-17/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10354</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377090</id>
+         <name>Fake Product: Cross-Site Request Forgery Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.1</cvss_score>
+         <cvss_vector>(AV:N/AC:H/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with advanced skills and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>By default, CSRF tokens in Fake Product only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10353</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380635</id>
+         <name>Fake Product LTS: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product LTS</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product LTS, 1.1.176.4, is less than or equal to 1.1.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 1.1.176.2 or later of Fake Product LTS</solutiontitle>
+         <solution>Upgrade to version 1.1.176.2 or later of Fake Product LTS.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/download/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381853</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not restrict or filter values set as Fake Product URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10406</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381849</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(2)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10404</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381843</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10401</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380636</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381845</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10402</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381853</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not restrict or filter values set as Fake Product URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10406</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380636</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381847</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(1)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10403</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381845</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10402</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381843</id>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10401</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381847</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(1)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10403</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>localhost</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>127.0.0.1</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381849</id>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(2)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2008-10404</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+   </detaillist>
+</main>
