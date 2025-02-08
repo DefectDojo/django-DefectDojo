@@ -28,7 +28,8 @@ class ZapParser:
 
     def get_findings(self, file, test):
         if not file.name.endswith(".xml"):
-            raise ValueError("Internal error: Wrong file format, please use xml.")
+            msg = "Internal error: Wrong file format, please use xml."
+            raise ValueError(msg)
         tree = ET.parse(file)
         items = []
         for node in tree.findall("site"):
