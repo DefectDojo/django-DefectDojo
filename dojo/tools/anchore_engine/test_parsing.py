@@ -1,10 +1,15 @@
+'''
+This is a test script to ensure that the parser actually parses. The idea behind the namedtupl
+'''
+
 import json
-from dojo.models import Finding
+from collections import namedtuple
+
+# nampedtuple is used to replicate the functionality of the Finding class inside models.
+Test = namedtuple("Test", [])
+
 
 class AnchoreEngineParser():
-    '''
-    This has been updated to support the latest output types for Anchore engine scans. 
-    '''
     def get_scan_types(self):
         return ['Anchore Engine Scan']
 
@@ -17,11 +22,8 @@ class AnchoreEngineParser():
     def get_findings(self, filename, test):
         dupes = {}
         
-        try:                                                # If this is a real file
-            data = json.load(filename)
-        except AttributeError:
-            with open(filename, "r") as file:               # If it's a filename
-                data = json.load(file)
+        with open(filename, "r") as file:
+            data = json.load(file)
 
         metadata = data.get('metadata', {})
 
@@ -85,3 +87,8 @@ class AnchoreEngineParser():
                 dupes[dupe_key] = find
 
         return list(dupes.values())
+
+parser = AnchoreEngineParser()
+json_file_path = "/home/purge/Downloads/Vulnerability_Report_2025-01-13T10_09_59.971Z.json"
+
+findings = parser.get_findings(json_file_path, Test())
