@@ -263,6 +263,17 @@ class TwistlockCSVParser:
             ).hexdigest()
         return key, finding
 
+    def validate_content(self, content):
+        try:
+            if not content or not isinstance(content, str):
+                return None
+            lines = content.splitlines()
+            if not lines:
+                return None
+            return lines[0]
+        except IndexError:
+            return None
+
     def parse(self, filename, test):
         if filename is None:
             return None
@@ -270,7 +281,10 @@ class TwistlockCSVParser:
         dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
-        first_line = content.splitlines()[0]
+
+        first_line = self.validate_content(content)
+        if first_line is None:
+            first_line = ''
         delimiter = ';' if ';' in first_line else ','
         reader = csv.DictReader(
             io.StringIO(content),
