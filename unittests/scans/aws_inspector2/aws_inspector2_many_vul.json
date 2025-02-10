@@ -80,7 +80,7 @@
                 }
             ],
             "severity": "MEDIUM",
-            "status": "ACTIVE",
+            "status": "CLOSED",
             "title": "CVE-2021-3744 - linux",
             "type": "PACKAGE_VULNERABILITY",
             "updatedAt": "2024-06-14T04:03:53.051000+02:00"
