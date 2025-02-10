@@ -34,7 +34,7 @@ def on_exception_html_source_logger(func):
     return wrapper
 
 
-def set_suite_settings(suite, jira=False, github=False, block_execution=False):
+def set_suite_settings(suite, *, jira=False, github=False, block_execution=False):
     if jira:
         suite.addTest(BaseTestCase("enable_jira"))
     else:
@@ -258,12 +258,12 @@ class BaseTestCase(unittest.TestCase):
 
         return False
 
-    def is_element_by_id_present(self, id):
+    def is_element_by_id_present(self, elem_id):
         try:
-            self.driver.find_element(By.ID, id)
-            return True
+            self.driver.find_element(By.ID, elem_id)
         except NoSuchElementException:
             return False
+        return True
 
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-success", text=text)
@@ -285,24 +285,24 @@ class BaseTestCase(unittest.TestCase):
         body = self.driver.find_element(By.TAG_NAME, "body")
         return re.search(text, body.text)
 
-    def element_exists_by_id(self, id):
-        elems = self.driver.find_elements(By.ID, id)
+    def element_exists_by_id(self, elem_id):
+        elems = self.driver.find_elements(By.ID, elem_id)
         return len(elems) > 0
 
-    def change_system_setting(self, id, enable=True):
-        logger.info("changing system setting " + id + " enable: " + str(enable))
+    def change_system_setting(self, setting_id, *, enable=True):
+        logger.info("changing system setting " + setting_id + " enable: " + str(enable))
         driver = self.driver
         driver.get(self.base_url + "system_settings")
 
-        is_enabled = driver.find_element(By.ID, id).is_selected()
+        is_enabled = driver.find_element(By.ID, setting_id).is_selected()
         if (enable and not is_enabled) or (not enable and is_enabled):
-            # driver.find_element(By.XPATH, '//*[@id=' + id + ']').click()
-            driver.find_element(By.ID, id).click()
+            # driver.find_element(By.XPATH, '//*[@id=' + setting_id + ']').click()
+            driver.find_element(By.ID, setting_id).click()
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
 
-        is_enabled = driver.find_element(By.ID, id).is_selected()
+        is_enabled = driver.find_element(By.ID, setting_id).is_selected()
 
         if enable:
             self.assertTrue(is_enabled)
@@ -312,11 +312,11 @@ class BaseTestCase(unittest.TestCase):
 
         return is_enabled
 
-    def enable_system_setting(self, id):
-        return self.change_system_setting(id, enable=True)
+    def enable_system_setting(self, setting_id):
+        return self.change_system_setting(setting_id, enable=True)
 
-    def disable_system_setting(self, id):
-        return self.change_system_setting(id, enable=False)
+    def disable_system_setting(self, setting_id):
+        return self.change_system_setting(setting_id, enable=False)
 
     def enable_jira(self):
         return self.enable_system_setting("id_enable_jira")
@@ -330,7 +330,7 @@ class BaseTestCase(unittest.TestCase):
     def enable_github(self):
         return self.enable_system_setting("id_enable_github")
 
-    def set_block_execution(self, block_execution=True):
+    def set_block_execution(self, *, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
         logger.info(f"setting block execution to: {block_execution}")

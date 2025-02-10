@@ -928,7 +928,7 @@ class ImportScanResultsView(View):
                 closed_finding_count=closed_finding_count,
             ))
         except Exception as e:
-            logger.exception(e)
+            logger.exception("An exception error occurred during the report import")
             return f"An exception error occurred during the report import: {e}"
         return None
 
@@ -1202,10 +1202,10 @@ def add_risk_acceptance(request, eid, fid=None):
                 # we sometimes see a weird exception here, but are unable to reproduce.
                 # we add some logging in case it happens
                 risk_acceptance = form.save()
-            except Exception as e:
+            except Exception:
                 logger.debug(vars(request.POST))
                 logger.error(vars(form))
-                logger.exception(e)
+                logger.exception("Creation of Risk Acc. is not possible")
                 raise
 
             # attach note to risk acceptance object now in database
@@ -1255,7 +1255,7 @@ def edit_risk_acceptance(request, eid, raid):
 
 
 # will only be called by view_risk_acceptance and edit_risk_acceptance
-def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
+def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
@@ -1540,9 +1540,9 @@ def engagement_ics(request, eid):
     return response
 
 
-def get_list_index(list, index):
+def get_list_index(full_list, index):
     try:
-        element = list[index]
+        element = full_list[index]
     except Exception:
         element = None
     return element
