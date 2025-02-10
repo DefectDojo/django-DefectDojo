@@ -103,8 +103,8 @@ EARLIEST_FINDING = None
 
 def custom_filter(queryset, name, value):
     values = value.split(",")
-    filter = (f"{name}__in")
-    return queryset.filter(Q(**{filter: values}))
+    cust_filter = (f"{name}__in")
+    return queryset.filter(Q(**{cust_filter: values}))
 
 
 def custom_vulnerability_id_filter(queryset, name, value):
@@ -364,7 +364,7 @@ def get_tags_label_from_model(model):
     return "Tags (Unknown)"
 
 
-def get_finding_filterset_fields(metrics=False, similar=False, filter_string_matching=False):
+def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_matching=False):
     fields = []
 
     if similar:

@@ -155,7 +155,7 @@ class MonthYearWidget(Widget):
     month_field = "%s_month"
     year_field = "%s_year"
 
-    def __init__(self, attrs=None, years=None, required=True):
+    def __init__(self, attrs=None, years=None, *, required=True):
         # years is an optional list/tuple of years to use in the
         # "year" select box.
         self.attrs = attrs or {}
@@ -3063,9 +3063,10 @@ class JIRAFindingForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 
@@ -3166,9 +3167,10 @@ class JIRAImportScanForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 

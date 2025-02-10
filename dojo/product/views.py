@@ -1044,7 +1044,7 @@ def delete_product(request, pid):
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, "pid")
-def new_eng_for_app(request, pid, cicd=False):
+def new_eng_for_app(request, pid, *, cicd=False):
     jira_project_form = None
     jira_epic_form = None
 
@@ -1757,7 +1757,7 @@ def add_api_scan_configuration(request, pid):
                     return HttpResponseRedirect(reverse("add_api_scan_configuration", args=(pid,)))
                 return HttpResponseRedirect(reverse("view_api_scan_configurations", args=(pid,)))
             except Exception as e:
-                logger.exception(e)
+                logger.exception("Unable to add API Scan Configuration")
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
