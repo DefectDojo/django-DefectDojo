@@ -83,6 +83,7 @@ class AnchoreEngineParser():
             else:
                 find = Finding(
                     title=title,
+                    test=test,
                     cve=item.get("cves"),
                     cvssv3_score=cvssv3_base_score,
                     date=item.get("detectedAt"),
