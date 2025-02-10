@@ -5,6 +5,8 @@ from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -149,6 +151,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("IMPORT_SCAN: Done")
         return self.test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history
 
+    @dojo_async_task
+    @app.task(ignore_result=False)
     def process_findings(
         self,
         parsed_findings: list[Finding],
