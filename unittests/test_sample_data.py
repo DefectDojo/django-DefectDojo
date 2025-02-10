@@ -11,6 +11,7 @@ class TestSampleData(DojoTestCase):
         python3 manage.py dumpdata \
             --exclude auth.permission \
             --exclude contenttypes \
+            --exclude auditlog.logentry \
             --natural-foreign \
             --natural-primary \
             --indent 2 \
