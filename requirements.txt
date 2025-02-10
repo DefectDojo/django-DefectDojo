@@ -27,7 +27,7 @@ html2text==2024.2.26
 humanize==4.11.0
 jira==3.8.0
 PyGithub==1.58.2
-lxml==5.3.0
+lxml==5.3.1
 Markdown==3.7
 openpyxl==3.1.5
 Pillow==11.1.0  # required by django-imagekit
