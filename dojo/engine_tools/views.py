@@ -256,8 +256,6 @@ def review_finding_exclusion_request(
     return redirect('finding_exclusion', fxid=fxid)
     
 
-
-
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
         raise PermissionDenied
@@ -389,7 +387,23 @@ def edit_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRespo
     
     return redirect('edit_finding_exclusion', fxid=fxid)
         
-        
+
+def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+    
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    finding_exclusion.delete()
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion deleted.",
+            extra_tags="alert-success")
+    
+    return redirect('finding_exclusions')
+
+   
 def execute_priorization_check(request: HttpRequest) -> HttpResponse:
     """Execute the priorization check task inmediately"""
     if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):

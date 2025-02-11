@@ -42,4 +42,7 @@ urlpatterns = [
     re_path(r"^engine_tools/execute-priorization-check$",
             views.execute_priorization_check,
             name="execute_priorization_check"),
+    re_path(r"^engine_tools/finding_exclusions/(?P<fxid>[\w-]+)/delete/$",
+            views.delete_finding_exclusion,
+            name="delete_finding_exclusion"),
 ]
