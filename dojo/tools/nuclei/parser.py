@@ -81,7 +81,7 @@ class NucleiParser:
             if info.get("tags"):
                 finding.unsaved_tags = info.get("tags")
             if settings.DD_CUSTOM_TAG_PARSER.get("nuclei"):
-                finding.unsaved_tags = settings.DD_CUSTOM_TAG_PARSER.get("nuclei") if not finding.unsaved_tags else finding.unsaved_tags + settings.DD_CUSTOM_TAG_PARSER.get("nuclei")
+                finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("nuclei")] if not finding.unsaved_tags else finding.unsaved_tags + [settings.DD_CUSTOM_TAG_PARSER.get("nuclei")]
             if info.get("reference"):
                 reference = info.get("reference")
                 if isinstance(reference, list):

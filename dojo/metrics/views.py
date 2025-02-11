@@ -23,6 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_has_role_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
@@ -263,6 +264,7 @@ def metrics_panel(request):
        'user': user,
     })
 
+@user_has_role_permission(Permissions.Metrics_DevSecOps)
 def metrics_devsecops(request):
     page_name = _('Metrics DevSecOps')
     role = Role.objects.get(id=Roles.Maintainer)
@@ -277,6 +279,7 @@ def metrics_devsecops(request):
        'user': user,
     })
 
+@user_has_role_permission(Permissions.Metrics_Panel_Admin)
 def metrics_panel_admin(request):
     page_name = _('Metrics Panel Admin')
     role = Role.objects.get(id=Roles.Maintainer)

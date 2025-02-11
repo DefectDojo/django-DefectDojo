@@ -449,7 +449,7 @@ env = environ.FileAwareEnv(
     # Finding exclusion - request expiration days
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
     DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS=(int, 1),
-    DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS=(int, 1),
+    DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS=(int, 1),
     
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
@@ -1460,7 +1460,7 @@ CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
 CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
-CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS")
+CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
@@ -1517,9 +1517,9 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
         'schedule': timedelta(days=CELERY_EXPIRING_FINDINGEXCLUSION_DAYS),
     },
-    "check_new_findings_to_whitelist": {
-        'task': 'dojo.engine_tools.helpers.check_new_findings_to_whitelist',
-        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS),
+    "check_new_findings_to_exclusion_list": {
+        'task': 'dojo.engine_tools.helpers.check_new_findings_to_exclusion_list',
+        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS),
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",

@@ -773,11 +773,13 @@ def finding_display_status(finding):
     ra = finding.risk_acceptance
     reverse_risk_acceptance = None
     reverse_whitelist = None
+    
     if ra:
         reverse_risk_acceptance = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
     if finding.risk_status == "On Whitelist" or finding.risk_status == "On Blacklist":
         finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, status="Accepted").first()
         reverse_whitelist = reverse('finding_exclusion', args=(finding_exclusion.pk,))
+
     dict_rule_reverse = {
         "view_transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
         "view_risk": reverse_risk_acceptance, 
@@ -785,7 +787,8 @@ def finding_display_status(finding):
         "view_finding": reverse("view_finding", args=(finding.id, )),
         "view_exclusion": reverse_whitelist
     }
-    
+
+
     dict_rule_display_status = {
         "Under Review, Active, Risk pending": ["Under Review", "view_review", "Red"],
         "Active, Verified, Risk pending": ["Risk Pending", "view_risk", "Red"],

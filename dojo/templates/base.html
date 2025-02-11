@@ -401,7 +401,7 @@
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
                                                 </li> --> 
-                                                <li>
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
                                                     </a>
@@ -410,22 +410,22 @@
                                                     <a rel="noopener noreferrer" href="{% url 'metrics_product_type' %}?date=1">
                                                         {% trans "Product Type Metrics" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_type_counts' %}">
                                                         {% trans "Product Type Counts" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a href="{% url 'product_tag_counts' %}">
                                                         {% trans "Product Tag Counts" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'simple_metrics' %}">
                                                         {% trans "Simple Metrics" %}
                                                     </a>
-                                                </li>
+                                                </li> -->
                                                 <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
@@ -436,10 +436,10 @@
                                                         {% trans "Metrics Panel" %}
                                                     </a>
                                                 </li> 
-                                                {% if "Metrics_Panel_Admin"|has_global_permission %}
+                                                {% if "Metrics_Panel_Admin"|has_role_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
-                                                            {% trans "Metrics Panel Admin" %}
+                                                            {% trans "Metrics Panel Administrative" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}  
