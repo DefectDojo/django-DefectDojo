@@ -5,8 +5,8 @@ from django.urls import reverse
 from django.conf import settings
 from celery.utils.log import get_task_logger
 from enum import Enum
-from datetime import timedelta
 from io import StringIO
+from bs4 import BeautifulSoup
 import csv
 import requests
 
@@ -278,7 +278,22 @@ def get_risk_score(finding) -> int:
 
 
 def get_tenable_risk_score(finding) -> int:
-    ...
+    if not finding.description:
+        return 0
+    
+    soup = BeautifulSoup(finding.description, "html.parser")
+    
+    rating_label = soup.find("strong", string="Vulnerabiltity Priority Rating:")
+    
+    if rating_label:
+        rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+        
+        try:
+            return int(rating_text)
+        except ValueError:
+            return 0
+    
+    return 0
 
 
 def calculate_vulnerability_priority(finding) -> float:
