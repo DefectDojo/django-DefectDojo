@@ -36,6 +36,8 @@ from dojo.models import (
     ExclusivePermission)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.engine_tools.models import FindingExclusion
+
 
 logger = logging.getLogger(__name__)
 
@@ -750,6 +752,12 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
+    if "On Whitelist" in display_status:
+        finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, status="Accepted").first()
+        if finding_exclusion:
+            url = reverse("finding_exclusion", args=(finding_exclusion.pk, ))
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="On Whitelist"><span style="color: #030303;">On Whitelist</span></a>'
+            display_status = display_status.replace("On Whitelist", link)
     if "Transfer Rejected" in display_status:
         url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
         link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: #b97a0c;">Transfer Rejected</span></a>'
