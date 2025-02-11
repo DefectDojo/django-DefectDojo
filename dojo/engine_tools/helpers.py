@@ -228,6 +228,15 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
         
     Finding.objects.bulk_update(findings_to_update, ["risk_status", "priority"], 1000)
     logger.info(f"{findings_to_update.count()} findings added to blacklist.")
+    
+    blacklist_message = f"New findings added to the blacklist. CVE: {unique_id_from_tool}."
+    create_notification(
+        event="finding_exclusion_request",
+        title=blacklist_message,
+        description=blacklist_message,
+        url=relative_url,
+        recipients=get_reviewers_members() + get_approvers_members()
+    )
 
 
 def get_resource_type(finding) -> str:
@@ -243,7 +252,7 @@ def get_resource_type(finding) -> str:
         return "function"
     
     return ""
-    
+
 
 def get_risk_score(finding) -> int:
     auth = (settings.TWISTLOCK_ACCESS_KEY, settings.TWISTLOCK_SECRET_KEY)
@@ -266,6 +275,10 @@ def get_risk_score(finding) -> int:
                     return 0
     except requests.exceptions.RequestException as e:
         logger.error(f"Error on twistlock api request: {e}")
+
+
+def get_tenable_risk_score(finding) -> int:
+    ...
 
 
 def calculate_vulnerability_priority(finding) -> float:
@@ -298,7 +311,13 @@ def calculate_vulnerability_priority(finding) -> float:
     severity_score = severity_map.get(finding.severity, 0)
 
     # Risk Score (0-100)
-    risk_score = get_risk_score(finding) or 1
+    if "prisma" in finding.tags:
+        risk_score = get_risk_score(finding) or 1
+    elif "tenable" in finding.tags:
+        risk_score = get_tenable_risk_score(finding) or 1
+    else:
+        risk_score = 1
+    
     
     # CVSS Score (0-10 multiplied by 10)
     cvss_score = (finding.cvssv3_score or 0) * 10

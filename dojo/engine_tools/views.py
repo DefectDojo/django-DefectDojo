@@ -98,6 +98,15 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 
                 relative_url = reverse("finding_exclusion", args=[str(exclusion.pk)])
                 add_findings_to_blacklist.apply_async(args=(exclusion.unique_id_from_tool, relative_url,))
+                
+                blacklist_message = f"New findings added to the blacklist. CVE: {exclusion.unique_id_from_tool}."
+                create_notification(
+                    event="finding_exclusion_request",
+                    title=blacklist_message,
+                    description=blacklist_message,
+                    url=relative_url,
+                    recipients=get_reviewers_members() + get_approvers_members()
+                )
             exclusion.practice = default_practice
             exclusion.created_by = request.user
             exclusion.save()
