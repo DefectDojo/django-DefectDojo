@@ -13,7 +13,7 @@ import requests
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes
 from dojo.group.queries import get_group_members_for_group
-from dojo.engine_tools.models import FindingExclusion
+from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.queries import tag_filter, blacklist_tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
@@ -353,6 +353,18 @@ def calculate_vulnerability_priority(finding) -> float:
     return round(priority, 2)
 
 
+def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
+    system_user = get_user(settings.SYSTEM_USER)
+    content = "Created by the vulnerability prioritization check."
+    
+    discussion = FindingExclusionDiscussion(
+        finding_exclusion=finding_exclusion,
+        author=system_user,
+        content=content
+    )
+    discussion.save()
+
+
 def identify_critical_vulnerabilities(findings) -> int:
     """
     Identifies vulnerabilities with a prioritization greater than 90 points.
@@ -373,7 +385,7 @@ def identify_critical_vulnerabilities(findings) -> int:
         Finding.objects.filter(cve=finding.cve, active=True).filter(blacklist_tag_filter).update(priority=priority)
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
-            finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
+            finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list", status="Accepted")
             
             if not finding_exclusion.exists():
                 new_finding_exclusion = FindingExclusion(
@@ -401,6 +413,9 @@ def identify_critical_vulnerabilities(findings) -> int:
         finding_list.append(finding)
         
     FindingExclusion.objects.bulk_create(finding_exclusion_list)
+    
+    for finding_exclusion in finding_exclusion_list:
+        add_discussion_to_finding_exclusion(finding_exclusion)
             
     return len(finding_exclusion_list)
 
