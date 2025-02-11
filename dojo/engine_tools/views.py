@@ -36,7 +36,7 @@ def finding_exclusions(request: HttpRequest):
                                                 queryset=finding_exclusions)
     paged_finding_exclusion = get_page_items(request,
                                              finding_exclusions.qs,
-                                             25)
+                                             10)
 
     add_breadcrumb(title="FindingExclusion", top_level=True, request=request)
     return render(request, "dojo/view_finding_exclusion.html", {
