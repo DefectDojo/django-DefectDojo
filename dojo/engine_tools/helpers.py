@@ -1,5 +1,6 @@
 # Utils
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
@@ -118,7 +119,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             is_active = True if expired_fex.type == "black_list" else False
             
             findings = Finding.objects.filter(
-                cve=expired_fex.unique_id_from_tool,
+                Q(cve=expired_fex.unique_id_from_tool) | Q(vuln_id_from_tool=expired_fex.unique_id_from_tool),
                 active=is_active,
                 tags__name__icontains=expired_fex.type
             ).prefetch_related("tags", "notes")
@@ -167,7 +168,7 @@ def check_expiring_findingexclusions():
 @app.task
 def add_findings_to_whitelist(unique_id_from_tool, relative_url):
     findings_to_update = Finding.objects.filter(
-        cve=unique_id_from_tool,
+        Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
         active=True
     ).exclude(
         risk_status=Constants.ON_WHITELIST.value
@@ -207,7 +208,7 @@ def check_new_findings_to_exclusion_list():
 @app.task
 def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
     findings_to_update = Finding.objects.filter(
-        cve=unique_id_from_tool,
+        Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
         active=True
     ).exclude(
         risk_status=Constants.ON_BLACKLIST.value
@@ -384,7 +385,10 @@ def identify_critical_vulnerabilities(findings) -> int:
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
         
-        Finding.objects.filter(cve=finding.cve, active=True).filter(blacklist_tag_filter).update(priority=priority)
+        Finding.objects.filter(
+            Q(cve=finding.cve) | Q(vuln_id_from_tool=finding.cve), 
+            active=True
+        ).filter(blacklist_tag_filter).update(priority=priority)
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list", status="Accepted")
