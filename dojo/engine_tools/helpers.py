@@ -270,6 +270,8 @@ def get_risk_score(finding) -> int:
             if row.get("Impacted resource type") == resource_type:
                 try:
                     risk_score = float(row.get("Highest risk score"))
+                    if finding.cvssv3_score == 0:
+                        finding.cvssv3_score = float(row.get("Highest CVSS", 0))
                     return risk_score if risk_score else 0
                 except Exception:
                     return 0
