@@ -550,7 +550,7 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = (
     get_secret(env("DD_SECRET_APP"))["dd_secret_key"]
-    if os.getenv("DD_USE_SECRETS_MANAGER") == None
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
     else env("DD_SECRET_KEY")
 )
 
@@ -587,7 +587,7 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv("DD_USE_SECRETS_MANAGER") == None:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_database = get_secret(env("DD_SECRET_DATABASE"))
     DATABASES = {
         "default": {
@@ -643,7 +643,7 @@ else:
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
 # ------------------------------------------------------------------------------
-if os.getenv("DD_USE_SECRETS_MANAGER") == None:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
     PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
     # Twistlock API
@@ -813,7 +813,7 @@ AZUREAD_TENANT_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLE
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY")
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = (
     get_secret(env("DD_SECRET_APP"))["dd_azuread_secret"]
-    if os.getenv("DD_USE_SECRETS_MANAGER") == None
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
     else env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET")
 )
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID")
@@ -826,7 +826,7 @@ AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSIO
 AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
 AZURE_DEVOPS_TOKEN = (
     get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
-    if os.getenv("DD_USE_SECRETS_MANAGER") == None
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
     else env("DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN")
 )
 AZURE_DEVOPS_MAIN_SECURITY_GROUP = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP")
@@ -1043,7 +1043,7 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # ------------------------------------------------------------------------------
 
 # Credential Key
-if os.getenv("DD_USE_SECRETS_MANAGER") == None:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_app = get_secret(env("DD_SECRET_APP"))
     CREDENTIAL_AES_256_KEY = secret_app["dd_credential_aes_key"]
     DB_KEY = secret_app["dd_credential_aes_key"]
@@ -1422,7 +1422,7 @@ if AUTH_REMOTEUSER_ENABLED:
 # ------------------------------------------------------------------------------
 
 # Celery settings
-if os.getenv("DD_USE_SECRETS_MANAGER") == None:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_broker = get_secret(env("DD_SECRET_BROKER"))
     CELERY_BROKER_URL = generate_url(
         scheme=env("DD_CELERY_BROKER_SCHEME"),
@@ -2238,7 +2238,7 @@ TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIE
 if os.getenv("DD_USE_CACHE_REDIS") == "true":
     LOCATION_CACHE = "redis://127.0.0.1:6379"
     OPTIONS_CACHE = {"CLIENT_CLASS": "django_redis.client.DefaultClient"}
-    if os.getenv("DD_USE_SECRETS_MANAGER") == None:
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         secret_redis = get_secret(env("DD_SECRET_REDIS"))
         LOCATION_CACHE = [
             f"rediss://{secret_redis['username']}@{secret_redis['host']}:{secret_redis['port']}",
