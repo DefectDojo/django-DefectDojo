@@ -143,7 +143,7 @@ class UniqueUploadNameProvider:
     the filename extension will be dropped.
     """
 
-    def __init__(self, directory=None, keep_basename=False, keep_ext=True):
+    def __init__(self, directory=None, *, keep_basename=False, keep_ext=True):
         self.directory = directory
         self.keep_basename = keep_basename
         self.keep_ext = keep_ext
@@ -941,8 +941,8 @@ class DojoMeta(models.Model):
                self.finding_id]
         ids_count = 0
 
-        for id in ids:
-            if id is not None:
+        for obj_id in ids:
+            if obj_id is not None:
                 ids_count += 1
 
         if ids_count == 0:
@@ -1033,7 +1033,7 @@ class SLA_Configuration(models.Model):
             if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
                 severities.append("Low")
             # if severities have changed, update finding sla expiration dates with those severities
-            if len(severities):
+            if severities:
                 # set the async updating flag to true for this sla config
                 self.async_updating = True
                 super().save(*args, **kwargs)
@@ -1602,7 +1602,7 @@ class Engagement(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Product.DoesNotExist):
@@ -2668,8 +2668,8 @@ class Finding(models.Model):
     def __str__(self):
         return self.title
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
         from dojo.finding import helper as finding_helper
 
@@ -2773,7 +2773,7 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d finding delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
@@ -3085,9 +3085,9 @@ class Finding(models.Model):
         try:
             # Attempt to access the github issue if it exists. If not, an exception will be caught
             _ = self.github_issue
-            return True
         except GITHUB_Issue.DoesNotExist:
             return False
+        return True
 
     def github_conf(self):
         try:

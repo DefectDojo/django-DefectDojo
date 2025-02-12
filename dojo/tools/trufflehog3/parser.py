@@ -125,7 +125,7 @@ class TruffleHog3Parser:
             if len(commit_message.split("\n")) > 1:
                 description += (
                     "**Commit message:** "
-                    + "\n```\n"
+                    "\n```\n"
                     + commit_message.replace("```", "\\`\\`\\`")
                     + "\n```\n"
                 )
