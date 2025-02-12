@@ -67,190 +67,190 @@ if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     fi
 
 else
-    # test="Finding integration tests"
-    # echo "Running: $test"
-    # if python3 tests/finding_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Finding integration tests"
+    echo "Running: $test"
+    if python3 tests/finding_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Report Builder tests"
-    # echo "Running: $test"
-    # if python3 tests/report_builder_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Report Builder tests"
+    echo "Running: $test"
+    if python3 tests/report_builder_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Notes integration tests"
-    # echo "Running: $test"
-    # if python3 tests/notes_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Notes integration tests"
+    echo "Running: $test"
+    if python3 tests/notes_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Regulation integration tests"
-    # echo "Running: $test"
-    # if python3 tests/regulations_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Regulation integration tests"
+    echo "Running: $test"
+    if python3 tests/regulations_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product type integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_type_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product type integration tests"
+    echo "Running: $test"
+    if python3 tests/product_type_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product integration tests"
+    echo "Running: $test"
+    if python3 tests/product_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Endpoint integration tests"
-    # echo "Running: $test"
-    # if python3 tests/endpoint_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Endpoint integration tests"
+    echo "Running: $test"
+    if python3 tests/endpoint_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Engagement integration tests"
-    # echo "Running: $test"
-    # if python3 tests/engagement_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Engagement integration tests"
+    echo "Running: $test"
+    if python3 tests/engagement_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Environment integration tests"
-    # echo "Running: $test"
-    # if python3 tests/environment_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Environment integration tests"
+    echo "Running: $test"
+    if python3 tests/environment_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Test integration tests"
-    # echo "Running: $test"
-    # if python3 tests/test_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Test integration tests"
+    echo "Running: $test"
+    if python3 tests/test_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="User integration tests"
-    # echo "Running: $test"
-    # if python3 tests/user_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="User integration tests"
+    echo "Running: $test"
+    if python3 tests/user_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Group integration tests"
-    # echo "Running: $test"
-    # if python3 tests/group_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Group integration tests"
+    echo "Running: $test"
+    if python3 tests/group_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product Group integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_group_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product Group integration tests"
+    echo "Running: $test"
+    if python3 tests/product_group_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product Type Group integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_type_group_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product Type Group integration tests"
+    echo "Running: $test"
+    if python3 tests/product_type_group_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product member integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_member_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product member integration tests"
+    echo "Running: $test"
+    if python3 tests/product_member_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Product type member integration tests"
-    # echo "Running: $test"
-    # if python3 tests/product_type_member_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Product type member integration tests"
+    echo "Running: $test"
+    if python3 tests/product_type_member_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Ibm Appscan integration test"
-    # echo "Running: $test"
-    # if python3 tests/ibm_appscan_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Ibm Appscan integration test"
+    echo "Running: $test"
+    if python3 tests/ibm_appscan_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
 
-    # test="Search integration test"
-    # echo "Running: $test"
-    # if python3 tests/search_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Search integration test"
+    echo "Running: $test"
+    if python3 tests/search_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="File Upload tests"
-    # echo "Running: $test"
-    # if python3 tests/file_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="File Upload tests"
+    echo "Running: $test"
+    if python3 tests/file_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Dedupe integration tests"
-    # echo "Running: $test"
-    # if python3 tests/dedupe_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/dedupe_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Global Announcement Banner tests"
-    # echo "Running: $test"
-    # if python3 tests/announcement_banner_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Global Announcement Banner tests"
+    echo "Running: $test"
+    if python3 tests/announcement_banner_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Close Old Findings with dedupe integration tests"
-    # echo "Running: $test"
-    # if python3 tests/close_old_findings_dedupe_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Close Old Findings with dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_dedupe_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
-    # test="Close Old Findings without dedupe integration tests"
-    # echo "Running: $test"
-    # if python3 tests/close_old_findings_test.py ; then
-    #     success "$test"
-    # else
-    #     fail "$test"
-    # fi
+    test="Close Old Findings without dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
 
     test="False Positive History tests"
     echo "Running: $test"
