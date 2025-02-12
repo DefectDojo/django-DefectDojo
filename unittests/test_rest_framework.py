@@ -607,7 +607,7 @@ class BaseClass:
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
-                if key not in ["push_to_jira", "ssh", "password", "api_key"]:
+                if key not in {"push_to_jira", "ssh", "password", "api_key"}:
                     # Convert data to sets to avoid problems with lists
                     clean_value = set(value) if isinstance(value, list) else value
                     if isinstance(response.data[key], list):

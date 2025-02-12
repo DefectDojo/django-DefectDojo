@@ -20,7 +20,7 @@ class SonarQubeSoprasteriaHelper:
             return "Medium"
         if sev == "minor":
             return "Low"
-        if sev in ["high", "medium", "low"]:
+        if sev in {"high", "medium", "low"}:
             return sev.capitalize()
         return "Info"
 

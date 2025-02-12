@@ -145,7 +145,7 @@ def engagement_calendar(request):
 
 def get_filtered_engagements(request, view):
 
-    if view not in ["all", "active"]:
+    if view not in {"all", "active"}:
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
 
@@ -1562,7 +1562,7 @@ def get_engagements(request):
         raise ValidationError(msg)
 
     view = query = None
-    if get_list_index(path_items, 1) in ["active", "all"]:
+    if get_list_index(path_items, 1) in {"active", "all"}:
         view = get_list_index(path_items, 1)
         query = get_list_index(path_items, 2)
     else:

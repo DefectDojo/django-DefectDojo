@@ -126,7 +126,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
     new_model_instance = model_in_database.__class__()
     for field in model_in_database._meta.fields:
-        if field.name not in ["id", *exclude_fields]:
+        if field.name not in {"id", *exclude_fields}:
             setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
     return new_model_instance
 
@@ -2009,10 +2009,10 @@ class Endpoint(models.Model):
         query_string = "&".join(query_parts)
 
         protocol = url.scheme if url.scheme != "" else None
-        userinfo = ":".join(url.userinfo) if url.userinfo not in [(), ("",)] else None
+        userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
         host = url.host if url.host != "" else None
         port = url.port
-        path = "/".join(url.path)[:500] if url.path not in [None, (), ("",)] else None
+        path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
         query = query_string[:1000] if query_string is not None and query_string != "" else None
         fragment = url.fragment[:500] if url.fragment is not None and url.fragment != "" else None
 
@@ -3246,7 +3246,7 @@ class Finding(models.Model):
     def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
-        intermediate_path = "/blob/" if scm_type in ["github", "gitlab"] else "/src/"
+        intermediate_path = "/blob/" if scm_type in {"github", "gitlab"} else "/src/"
 
         link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
@@ -3308,7 +3308,7 @@ class Finding(models.Model):
         if (self.test.engagement.source_code_management_uri is not None):
             if scm_type == "bitbucket-standalone":
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type in ["github", "gitlab", "gitea", "codeberg", "bitbucket"]:
+            elif scm_type in {"github", "gitlab", "gitea", "codeberg", "bitbucket"}:
                 link = self.git_public_prepare_scm_link(link, scm_type)
             elif "https://github.com/" in self.test.engagement.source_code_management_uri:
                 link = self.git_public_prepare_scm_link(link, "github")
@@ -3319,7 +3319,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type in ["github", "gitlab", "gitea", "codeberg"] or "https://github.com/" in self.test.engagement.source_code_management_uri:
+            if scm_type in {"github", "gitlab", "gitea", "codeberg"} or "https://github.com/" in self.test.engagement.source_code_management_uri:
                 link = link + "#L" + str(self.line)
             elif scm_type == "bitbucket-standalone":
                 link = link + "#" + str(self.line)

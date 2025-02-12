@@ -138,6 +138,6 @@ class MSDefenderParser:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastExternalIpAddress"])))
 
     def severity_check(self, severity_input):
-        if severity_input in ["Informational", "Low", "Medium", "High", "Critical"]:
+        if severity_input in {"Informational", "Low", "Medium", "High", "Critical"}:
             return severity_input
         return "Informational"
