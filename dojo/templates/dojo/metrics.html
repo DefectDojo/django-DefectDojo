@@ -110,6 +110,10 @@
     *border-left-color: #ffffff;
     }
 
+    h3 {
+        margin-bottom: 10px; 
+    }
+
     #opened_per_month_2, #active_per_month, #accepted_per_month_2, #opened_per_week_2, #accepted_per_week_2 {height: 300px}
 {% endblock %}
 {% block content %}
@@ -163,7 +167,7 @@
                     {% for c_prod in critical_prods %}
                         <div class='col-md-4' align="center">
                             <h3>{{ c_prod.name }} </h3>
-                            <div aria-labelledby="gauge-description-{{ c_prod.id }}" style="display:inline-block;" class="gaugeloop 200x160px"
+                            <div aria-label="Health gauge for {{ c_prod.name }}" aria-describedby="gauge-description-{{ c_prod.id }}" style="display:inline-block;" class="gaugeloop 200x160px"
                                 name="{{ c_prod.name }}" id="{{ c_prod.name }}{{ c_prod.id }}" role="img" start="{{ c_prod.calc_health }}"
                                 tabindex="0">
                             </div>
