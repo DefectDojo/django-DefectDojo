@@ -1586,6 +1586,7 @@ def get_foreign_keys():
 
 
 def csv_export(request):
+    logger.debug("starting csv_export")
     engagements, test_counts = get_engagements(request)
 
     response = HttpResponse(content_type="text/csv")
@@ -1619,10 +1620,12 @@ def csv_export(request):
 
             writer.writerow(fields)
 
+    logger.debug("csv_export done")
     return response
 
 
 def excel_export(request):
+    logger.debug("starting excel_export")
     engagements, test_counts = get_engagements(request)
 
     workbook = Workbook()
@@ -1668,4 +1671,5 @@ def excel_export(request):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     response["Content-Disposition"] = "attachment; filename=engagements.xlsx"
+    logger.debug("excel_export done")
     return response
