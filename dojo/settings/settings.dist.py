@@ -884,7 +884,7 @@ if env("DD_WHITENOISE"):
         # https://warehouse.python.org/project/whitenoise/
         "whitenoise.middleware.WhiteNoiseMiddleware",
     ]
-    MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
+    MIDDLEWARE += WHITE_NOISE
 
 EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")

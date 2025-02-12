@@ -118,9 +118,7 @@ def return_score(queryset):
     for item in queryset:
         if item["pass_fail"]:
             asvs_level_1_score = item["pass_fail__count"]
-        asvs_level_1_benchmark = (
-            asvs_level_1_benchmark + item["pass_fail__count"]
-        )
+        asvs_level_1_benchmark += item["pass_fail__count"]
 
     return asvs_level_1_benchmark, asvs_level_1_score
 

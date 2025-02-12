@@ -334,8 +334,7 @@ class DojoFilter(FilterSet):
                 # we defer applying the select2 autocomplete because there can be multiple forms on the same page
                 # and form.js would then apply select2 multiple times, resulting in duplicated fields
                 # the initialization now happens in filter_js_snippet.html
-                self.form.fields[field].widget.tag_options = \
-                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
+                self.form.fields[field].widget.tag_options += tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
                 tagged_model, exclude = get_tags_model_from_field_name(field)
                 if tagged_model:  # only if not the normal tags field
                     self.form.fields[field].label = get_tags_label_from_model(tagged_model)
@@ -1592,7 +1591,7 @@ class PercentageFilter(NumberFilter):
         super().__init__(*args, **kwargs)
 
     def filter_percentage(self, queryset, name, value):
-        value = value / decimal.Decimal("100.0")
+        value /= decimal.Decimal("100.0")
         # Provide some wiggle room for filtering since the UI rounds to two places (and because floats):
         # a user may enter 0.15, but we'll return everything in [0.0015, 0.0016).
         # To do this, add to our value 1^(whatever the exponent for our least significant digit place is), but ensure

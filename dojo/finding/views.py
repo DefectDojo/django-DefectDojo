@@ -1379,9 +1379,9 @@ def defect_finding_review(request, fid):
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 if defect_choice == "Close Finding":
-                    new_note.entry = new_note.entry + "\nJira issue set to resolved."
+                    new_note.entry += "\nJira issue set to resolved."
                 else:
-                    new_note.entry = new_note.entry + "\nJira issue re-opened."
+                    new_note.entry += "\nJira issue re-opened."
                 jira_helper.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
