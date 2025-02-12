@@ -54,7 +54,7 @@ def create_notification(
     no_users: bool = False,  # noqa: FBT001, FBT002
     url: str | None = None,
     url_api: str | None = None,
-    alert_only: bool = False,  # noqa: FBT001
+    alert_only: bool = False,  # noqa: FBT001, FBT002
     **kwargs: dict,
 ) -> None:
     """Create an instance of a NotificationManager and dispatch the notification."""
