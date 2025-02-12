@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
 
+
 class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     # This set of tests is similar to close_old_findings_dedupe_test.py, but does not rely on deduplication

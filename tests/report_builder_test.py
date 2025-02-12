@@ -1,7 +1,5 @@
-import os
 import sys
 import unittest
-from pathlib import Path
 
 from base_test_class import BaseTestCase
 from product_test import ProductTest
@@ -9,6 +7,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+
 
 class ReportBuilderTest(BaseTestCase):
 

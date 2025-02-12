@@ -14,6 +14,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
 
+
 class CloseOldDedupeTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     # Taken from dedupe_test.py
