@@ -229,7 +229,7 @@
                         Severity{% endblocktrans %}</div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div aria-describedby="top-ten-description" class="graph" id="top-ten" role="img" tabindex="0"></div>
+                        <div aria-labelledby="top-ten-title" aria-describedby="top-ten-description" class="graph" id="top-ten" role="img" tabindex="0"></div>
                     </div>
                     <div class="sr-only">
                         <h3 id="top-ten-title">{% trans "Top Products By Bug Severity" %}</h3>
@@ -275,7 +275,7 @@
                 <div class="panel-heading">{% trans "Total Findings In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div aria-describedby="opened-in-period-description" class="graph" id="opened_in_period" role="img"
+                    <div aria-labelledby="severity-pie-title" aria-describedby="opened-in-period-description" class="graph" id="opened_in_period" role="img"
                         tabindex="0"></div>
                 </div>
                 <div class="sr-only">
@@ -297,7 +297,7 @@
                 <div class="panel-heading">{% trans "Total Findings Risk Accepted In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div aria-describedby="total-accepted-in-period-description" class="graph" id="total_accepted_in_period"
+                    <div aria-labelledby="total-accepted-severity-pie-title" aria-describedby="total-accepted-in-period-description" class="graph" id="total_accepted_in_period"
                         role="img" tabindex="0">
                     </div>
                     <div class="sr-only">
@@ -322,7 +322,8 @@
                 <div class="panel-heading">{% trans "Total Findings Closed In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div aria-describedby="total-closed-in-period-description" class="graph" id="total_closed_in_period"
+                    <div
+                    aria-labelledby="total-accepted-severity-pie-title" aria-describedby="total-closed-in-period-description" class="graph" id="total_closed_in_period"
                         role="img" tabindex="0">
                     </div>
                     <div class="sr-only">
@@ -348,7 +349,8 @@
                         {% trans "Weekly activity, displayed by day, of findings reported.*" %}
                     </div>
                     <div class="panel-body">
-                        <div aria-describedby="punchcard-description" class="graph-500" id="punchcard" role="img" tabindex="0">
+                        <div
+                        aria-labelledby="punchcard-title" aria-describedby="punchcard-description" class="graph-500" id="punchcard" role="img" tabindex="0">
                         </div>
                         <div class="sr-only">
                             <h3 id="punchcard-title">{% trans "Weekly Activity of Findings Reported" %}</h3>
