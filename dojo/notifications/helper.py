@@ -51,7 +51,7 @@ def create_notification(
     requested_by: Dojo_User | None = None,
     reviewers: list[Dojo_User] | list[str] | None = None,
     recipients: list[Dojo_User] | list[str] | None = None,
-    no_users: bool = False,  # noqa: FBT001
+    no_users: bool = False,  # noqa: FBT001, FBT002
     url: str | None = None,
     url_api: str | None = None,
     alert_only: bool = False,  # noqa: FBT001
@@ -244,7 +244,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
                     )
 
         except Exception as exception:
-            logger.exception(exception)
+            logger.exception("Unable to send Slack notification")
             self._log_alert(
                 exception,
                 "Slack Notification",
@@ -350,7 +350,7 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
                         "Webhook URL for Microsoft Teams not configured: skipping system notification",
                     )
         except Exception as exception:
-            logger.exception(exception)
+            logger.exception("Unable to send Microsoft Teams Notification")
             self._log_alert(
                 exception,
                 "Microsoft Teams Notification",
@@ -399,7 +399,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
             email.send(fail_silently=False)
 
         except Exception as exception:
-            logger.exception(exception)
+            logger.exception("Unable to send Email Notification")
             self._log_alert(
                 exception,
                 "Email Notification",
@@ -462,7 +462,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             except Exception as exception:
                 error = self.ERROR_PERMANENT
                 endpoint.note = f"Exception: {exception}"[:1000]
-                logger.exception(exception)
+                logger.exception("Unable to send Webhooks Notification")
                 self._log_alert(exception, "Webhooks Notification")
 
             now = get_current_datetime()
@@ -603,7 +603,7 @@ class AlertNotificationManger(NotificationManagerHelpers):
             alert.clean_fields(exclude=["url"])
             alert.save()
         except Exception as exception:
-            logger.exception(exception)
+            logger.exception("Unable to create Alert Notification")
             self._log_alert(
                 exception,
                 "Alert Notification",

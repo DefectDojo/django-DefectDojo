@@ -290,9 +290,9 @@ class SchemaChecker:
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
-    def _with_prefix(self, prefix, callable, *args):
+    def _with_prefix(self, prefix, callable_function, *args):
         self._push_prefix(prefix)
-        callable(*args)
+        callable_function(*args)
         self._pop_prefix()
 
     def check(self, schema, obj):
@@ -388,7 +388,7 @@ class BaseClass:
             # print(vars(schema_checker))
             schema_checker.check(self.schema, obj)
 
-        def check_schema_response(self, method, status_code, response, detail=False):
+        def check_schema_response(self, method, status_code, response, *, detail=False):
             detail_path = "{id}/" if detail else ""
             endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
             schema = endpoints_schema[method]["responses"][status_code]["content"]["application/json"]["schema"]

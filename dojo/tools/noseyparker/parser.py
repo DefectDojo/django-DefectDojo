@@ -16,8 +16,10 @@ class NoseyParkerParser:
         return "Nosey Parker Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Nosey Parker report file can be imported in JSON Lines format (option --jsonl). " \
-               "Supports v0.16.0 and v0.22.0 of https://github.com/praetorian-inc/noseyparker"
+        return (
+            "Nosey Parker report file can be imported in JSON Lines format (option --jsonl). "
+            "Supports v0.16.0 and v0.22.0 of https://github.com/praetorian-inc/noseyparker"
+        )
 
     def get_findings(self, file, test):
         """
@@ -61,14 +63,15 @@ class NoseyParkerParser:
             title = f"Secret(s) Found in Repository with Commit ID {json_path['commit_provenance']['commit_metadata']['commit_id']}"
             filepath = json_path["commit_provenance"]["blob_path"]
             line_num = match["location"]["source_span"]["start"]["line"]
-            description = f"Secret found of type:   {rule_name} \n" \
-                            f"SECRET starts with:  '{secret[:3]}' \n" \
-                            f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n" \
-                            f"Committer Email: {json_path['commit_provenance']['commit_metadata']['committer_email']} \n" \
-                            f"Commit ID: {json_path['commit_provenance']['commit_metadata']['commit_id']}  \n" \
-                            f"Location: {filepath} line #{line_num} \n" \
-                            f"Line #{line_num} \n"
-
+            description = (
+                f"Secret found of type:   {rule_name} \n"
+                f"SECRET starts with:  '{secret[:3]}' \n"
+                f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n"
+                f"Committer Email: {json_path['commit_provenance']['commit_metadata']['committer_email']} \n"
+                f"Commit ID: {json_path['commit_provenance']['commit_metadata']['commit_id']}  \n"
+                f"Location: {filepath} line #{line_num} \n"
+                f"Line #{line_num} \n"
+            )
             # Internal de-duplication
             key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
 
@@ -127,7 +130,6 @@ class NoseyParkerParser:
                                 f"Rule Text ID: '{rule_text_id}' \n" \
                                 f"Location: {filepath} line #{line_num} \n" \
                                 f"Line #{line_num} \n"
-
             # Internal de-duplication
             key = hashlib.md5((filepath + "|" + rule_text_id + "|" + str(line_num)).encode("utf-8")).hexdigest()
 
