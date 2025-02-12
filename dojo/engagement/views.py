@@ -1369,9 +1369,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
         logger.error("errors found")
 
-    else:
-        if edit_mode:
-            risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+    elif edit_mode:
+        risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)

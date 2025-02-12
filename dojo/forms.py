@@ -1375,11 +1375,10 @@ class FindingForm(forms.ModelForm):
         # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk acceptance
         if not hasattr(self.instance, "test") or (not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance):
             del self.fields["risk_accepted"]
-        else:
-            if self.instance.risk_accepted:
-                self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
-            elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
-                self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.risk_accepted:
+            self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
 
         # self.fields['tags'].widget.choices = t
         if req_resp:
@@ -3677,12 +3676,11 @@ class ConfigurationPermissionsForm(forms.Form):
             else:
                 msg = "Neither user or group are set"
                 raise Exception(msg)
+        # Checkbox is unset
+        elif self.user:
+            self.user.user_permissions.remove(self.permissions[codename])
+        elif self.group:
+            self.group.auth_group.permissions.remove(self.permissions[codename])
         else:
-            # Checkbox is unset
-            if self.user:
-                self.user.user_permissions.remove(self.permissions[codename])
-            elif self.group:
-                self.group.auth_group.permissions.remove(self.permissions[codename])
-            else:
-                msg = "Neither user or group are set"
-                raise Exception(msg)
+            msg = "Neither user or group are set"
+            raise Exception(msg)

@@ -89,9 +89,8 @@ class VeracodeJSONParser:
                 if settings.USE_FIRST_SEEN:
                     if first_found_date := finding_status.get("first_found_date"):
                         finding.date = parser.parse(first_found_date)
-                else:
-                    if last_found_date := finding_status.get("last_found_date"):
-                        finding.date = parser.parse(last_found_date)
+                elif last_found_date := finding_status.get("last_found_date"):
+                    finding.date = parser.parse(last_found_date)
             # Generate the description
             finding = self.parse_description(finding, vuln.get("description"), scan_type)
             finding.nb_occurences = vuln.get("count", 1)
