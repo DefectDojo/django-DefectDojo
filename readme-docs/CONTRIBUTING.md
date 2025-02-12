@@ -54,7 +54,7 @@ feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](htt
 
 ## Writing a New Parser
 
-Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
+Please see [the parser guide](https://documentation.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
 ## Modifying DefectDojo and Testing
 
