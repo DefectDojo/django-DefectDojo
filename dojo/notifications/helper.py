@@ -426,10 +426,10 @@ class WebhookNotificationManger(NotificationManagerHelpers):
     ):
         for endpoint in self._get_webhook_endpoints(user=user):
             error = None
-            if endpoint.status not in [
+            if endpoint.status not in {
                 Notification_Webhooks.Status.STATUS_ACTIVE,
                 Notification_Webhooks.Status.STATUS_ACTIVE_TMP,
-            ]:
+            }:
                 logger.info(
                     f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})",
                 )

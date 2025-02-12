@@ -411,7 +411,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         error_message = e.text if hasattr(e, "text") else e.message if hasattr(e, "message") else e.args[0]
 
-        if e.status_code in [401, 403]:
+        if e.status_code in {401, 403}:
             log_jira_generic_alert("JIRA Authentication Error", error_message)
         else:
             log_jira_generic_alert("Unknown JIRA Connection Error", error_message)

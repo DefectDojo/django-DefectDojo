@@ -196,11 +196,11 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                 else:
                     finding.is_mitigated = False
 
-                finding.active = report_finding["Vuln Status"] in (
+                finding.active = report_finding["Vuln Status"] in {
                     "Active",
                     "Re-Opened",
                     "New",
-                )
+                }
 
                 if finding.active:
                     finding.mitigated = None

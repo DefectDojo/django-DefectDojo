@@ -47,19 +47,19 @@ def update_benchmark(request, pid, _type):
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
 
-        if field in [
+        if field in {
             "enabled",
             "pass_fail",
             "notes",
             "get_notes",
             "delete_notes",
-        ]:
+        }:
             bench = Benchmark_Product.objects.get(id=bench_id)
             if field == "enabled":
                 bench.enabled = value
             elif field == "pass_fail":
                 bench.pass_fail = value
-            elif field in ["notes", "get_notes", "delete_notes"]:
+            elif field in {"notes", "get_notes", "delete_notes"}:
                 if field == "notes":
                     bench.notes.create(entry=value, author=get_current_user())
                 if field == "delete_notes":
@@ -94,7 +94,7 @@ def update_benchmark_summary(request, pid, _type, summary):
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
 
-        if field in ["publish", "desired_level"]:
+        if field in {"publish", "desired_level"}:
             summary = Benchmark_Product_Summary.objects.get(id=summary)
             data = {}
             if field == "publish":

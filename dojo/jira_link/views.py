@@ -86,7 +86,7 @@ def webhook(request, secret=None):
     try:
         parsed = json.loads(request.body.decode("utf-8"))
         # Check if the events supplied are supported
-        if parsed.get("webhookEvent") not in ["comment_created", "jira:issue_updated"]:
+        if parsed.get("webhookEvent") not in {"comment_created", "jira:issue_updated"}:
             return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
 
         if parsed.get("webhookEvent") == "jira:issue_updated":

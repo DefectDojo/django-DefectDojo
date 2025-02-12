@@ -33,22 +33,22 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def is_confirmed(state):
-        return state.lower() in [
+        return state.lower() in {
             "confirmed",
             "accepted",
             "detected",
-        ]
+        }
 
     @staticmethod
     def is_closed(state):
-        return state.lower() in [
+        return state.lower() in {
             "resolved",
             "falsepositive",
             "wontfix",
             "closed",
             "dismissed",
             "rejected",
-        ]
+        }
 
     @staticmethod
     def is_reviewed(state):
