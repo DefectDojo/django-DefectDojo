@@ -58,7 +58,7 @@ vcrpy==7.0.0
 vcrpy-unittest==0.1.7
 django-tagulous==2.1.0
 PyJWT==2.10.1
-cvss==3.3
+cvss==3.4
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
 django-test-migrations==1.4.0
