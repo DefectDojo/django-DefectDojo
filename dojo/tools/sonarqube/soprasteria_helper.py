@@ -97,7 +97,7 @@ class SonarQubeSoprasteriaHelper:
             find = dupes[aggregateKeys]
             find.description = f"{find.description}\n{descriptionOneOccurence}"
             find.mitigation = f"{find.mitigation}\n______\n{vuln_mitigation}"
-            find.nb_occurences = find.nb_occurences + 1
+            find.nb_occurences += 1
 
     # Process one vuln from the report for "SonarQube Scan detailed"
     # Create the finding and add it into the dupes list

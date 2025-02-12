@@ -789,7 +789,7 @@ def answer_empty_survey(request, esid):
             survey.responder = request.user if not request.user.is_anonymous else None
             survey.answered_on = date.today()
             survey.save()
-            general_survey.num_responses = general_survey.num_responses + 1
+            general_survey.num_responses += 1
             general_survey.save()
             if request.user.is_anonymous:
                 message = "Your responses have been recorded."

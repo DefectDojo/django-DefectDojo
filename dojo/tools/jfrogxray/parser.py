@@ -94,7 +94,7 @@ def get_item(vulnerability, test):
 
     if "fixed_versions" in vulnerability["component_versions"]:
         mitigation = "**Versions containing a fix:**\n"
-        mitigation = mitigation + "\n".join(
+        mitigation += "\n".join(
             vulnerability["component_versions"]["fixed_versions"],
         )
 

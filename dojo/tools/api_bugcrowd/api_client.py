@@ -136,7 +136,7 @@ class BugcrowdAPI:
             api_scan_configuration.service_key_2,
         )
         for page in submission_gen:
-            submissions = submissions + page
+            submissions += page
         submission_number = len(submissions)
         return (
             f'You have access to "{submission_number}" submissions (no duplicates)'
