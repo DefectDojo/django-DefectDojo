@@ -807,14 +807,6 @@ function updatePunchcardTable(punchcardData, ticks) {
     });
 }
 
-
-
-
-
-
-
-
-
 /*
         product_metrics.html
 */

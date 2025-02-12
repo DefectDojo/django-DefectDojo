@@ -368,9 +368,9 @@
 
             {% if punchcard %}
                 let punchcardData = {{ punchcard|safe }};
-                let ticks = {{ ticks|safe }};
-                punchcard("#punchcard", punchcardData, ticks);
-                updatePunchcardTable(punchcardData, ticks);
+                let ticksData = {{ ticks|safe }};
+                punchcard("#punchcard", punchcardData, ticksData);
+                updatePunchcardTable(punchcardData, ticksData);
             {% endif %}
         });
 
