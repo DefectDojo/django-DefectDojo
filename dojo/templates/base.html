@@ -159,7 +159,7 @@
                                     {% if request.user.is_authenticated %}
                                         <li>
                                             <a href="{% url 'view_profile' %}">
-                                                <i class="fa-solid fa-user fa-fw"></i> 
+                                                <i class="fa-solid fa-user fa-fw"></i>
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
@@ -438,7 +438,7 @@
                                                 </a>
                                                 <ul class="nav nav-second-level">
                                                     {% if "auth.view_user"|has_configuration_permission:request %}
-                                                        <li>    
+                                                        <li>
                                                             <a href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
@@ -666,7 +666,7 @@
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
-                                                    {% if product_tab.engagements > 0 %} 
+                                                    {% if product_tab.engagements > 0 %}
                                                         <span class="badge">{{ product_tab.engagements }}</span>
                                                     {% endif %}
                                                 </span>
@@ -1136,6 +1136,9 @@
                 {% endif %}
 
                 function htmlEscape(str) {
+                    if (!str) {
+                        return '';
+                    }
                     return str
                         .replace(/\n/g, " ")
                         .replace(/&/g, '&amp;')
