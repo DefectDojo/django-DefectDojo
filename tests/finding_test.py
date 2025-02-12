@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
 logger = logging.getLogger(__name__)
-dir_path = Path(os.path.realpath(__file__)).parent
+dir_path = str(Path(os.path.realpath(__file__)).parent)
 
 
 class FindingTest(BaseTestCase):

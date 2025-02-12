@@ -10,9 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-dir_path = Path(os.path.realpath(__file__)).parent
-
-
 class ReportBuilderTest(BaseTestCase):
 
     # Move the report blocks from Available Widgets to Report Format

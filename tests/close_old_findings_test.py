@@ -13,9 +13,6 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
 
-dir_path = Path(os.path.realpath(__file__)).parent
-
-
 class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     # This set of tests is similar to close_old_findings_dedupe_test.py, but does not rely on deduplication
@@ -23,7 +20,7 @@ class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
-        self.relative_path = Path(os.path.realpath(__file__)).parent
+        self.relative_path = str(Path(os.path.realpath(__file__)).parent)
 
     @on_exception_html_source_logger
     def test_delete_findings(self):

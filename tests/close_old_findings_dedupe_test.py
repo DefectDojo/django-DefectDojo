@@ -14,9 +14,6 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
 
-dir_path = Path(os.path.realpath(__file__)).parent
-
-
 class CloseOldDedupeTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     # Taken from dedupe_test.py
@@ -25,7 +22,7 @@ class CloseOldDedupeTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
-        self.relative_path = Path(os.path.realpath(__file__)).parent
+        self.relative_path = str(Path(os.path.realpath(__file__)).parent)
 
     def check_nb_duplicates(self, expected_number_of_duplicates):
         logger.debug("checking duplicates...")
