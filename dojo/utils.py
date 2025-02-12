@@ -769,9 +769,8 @@ def add_breadcrumb(parent=None,
                             crumbs = crumbs[:crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
-                    else:
-                        if crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                    elif crumb in crumbs:
+                        crumbs = crumbs[:crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 

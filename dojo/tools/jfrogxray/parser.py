@@ -137,17 +137,16 @@ def get_item(vulnerability, test):
                 + ":"
                 + component_version
             )
+    elif vulnerability["id"]:
+        title = (
+            vulnerability["id"]
+            + " - "
+            + component_name
+            + ":"
+            + component_version
+        )
     else:
-        if vulnerability["id"]:
-            title = (
-                vulnerability["id"]
-                + " - "
-                + component_name
-                + ":"
-                + component_version
-            )
-        else:
-            title = "No CVE - " + component_name + ":" + component_version
+        title = "No CVE - " + component_name + ":" + component_version
 
     # create the finding object
     finding = Finding(
