@@ -1602,7 +1602,7 @@ class Engagement(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Product.DoesNotExist):
@@ -2773,7 +2773,7 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d finding delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
