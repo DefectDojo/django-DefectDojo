@@ -2983,7 +2983,7 @@ def finding_bulk_update_all(request, pid=None):
                         ) = jira_helper.can_be_pushed_to_jira(group)
                         if not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
-                            jira_helper.log_jira_alert(error_message, group)
+                            jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
                         else:
                             logger.debug(
                                 "pushing to jira from finding.finding_bulk_update_all()",
@@ -3033,10 +3033,10 @@ def finding_bulk_update_all(request, pid=None):
                                 "finding already pushed as part of Finding Group"
                             )
                             error_counts[error_message] += 1
-                            jira_helper.log_jira_alert(error_message, finding)
+                            jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
                         elif not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
-                            jira_helper.log_jira_alert(error_message, finding)
+                            jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
                         else:
                             logger.debug(
                                 "pushing to jira from finding.finding_bulk_update_all()",

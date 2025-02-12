@@ -514,8 +514,8 @@ def get_jira_comments(finding):
     return None
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
+    """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title=title,
@@ -524,8 +524,8 @@ def log_jira_generic_alert(title, description):
         source="JIRA")
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, obj):
+    """Creates a notification for JIRA errors when handling a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
@@ -534,6 +534,19 @@ def log_jira_alert(error, obj):
         icon="bullseye",
         source="Push to JIRA",
         obj=obj)
+
+
+def log_jira_cannot_be_pushed_reason(error, obj):
+    """Creates an Alert for GUI display  when handling a specific (finding/group/epic) object"""
+    create_notification(
+        event="jira_update",
+        title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
+        description=obj.__class__.__name__ + ": " + error,
+        url=obj.get_absolute_url(),
+        icon="bullseye",
+        source="Push to JIRA",
+        obj=obj,
+        alert_only=True)
 
 
 # Displays an alert for Jira notifications
@@ -787,10 +800,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
         else:
-            log_jira_alert(error_message, obj)
+            log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
         return False
