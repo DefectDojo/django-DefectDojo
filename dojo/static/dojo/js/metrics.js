@@ -739,7 +739,7 @@ function accepted_per_week_2(critical, high, medium, low) {
 }
 
 
-// This function is valid besides metrics.js also for the dashboard-metrics.html, 
+// This function is valid besides metrics.html also for the dashboard-metrics.html, 
 // dashboard.html, and product-metrics.html
 function updatePunchcardTable(punchcardData, ticks) {
     let tableBody = $("#punchcard-table tbody");
