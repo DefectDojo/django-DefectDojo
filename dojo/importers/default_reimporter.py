@@ -709,6 +709,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
+
+        # Update the finding with the new information
+        finding.found_by.add(finding_from_report.test.test_type)
+        finding.severity = finding_from_report.severity
+        finding.vuln_id_from_tool = finding_from_report.vuln_id_from_tool
+        finding.unique_id_from_tool = finding_from_report.unique_id_from_tool
+        finding.description = finding_from_report.description
+        finding.impact = finding_from_report.impact
+        finding.references = finding_from_report.references
+        finding.cvssv3_score = finding_from_report.cvssv3_score
+        finding.severity_justification = finding_from_report.severity_justification
+
         # Process vulnerability IDs
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
