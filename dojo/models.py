@@ -2420,7 +2420,7 @@ class Finding(models.Model):
                                   verbose_name=_("References"),
                                   help_text=_("The external documentation available for this flaw."))
     test = models.ForeignKey(Test,
-                             editable=False,
+                             editable=True,
                              on_delete=models.CASCADE,
                              verbose_name=_("Test"),
                              help_text=_("The test that is associated with this flaw."))
