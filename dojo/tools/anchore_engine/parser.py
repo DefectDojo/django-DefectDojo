@@ -19,22 +19,17 @@ class AnchoreEngineParser:
         try:
             data = json.load(filename)
         except AttributeError:
-            with open(filename, "r") as file:
+            with open(filename, encoding="utf-8") as file:
                 data = json.load(file)
 
         metadata = data.get("metadata", {})
-        details = f"**Image hash**: {metadata.get("imageDigest", metadata.get("image_digest", "None"))} \n\n"
-        
+        details = f"**Image hash**: {metadata.get('imageDigest', metadata.get('image_digest', 'None'))} \n\n"
+
         for item in data.get("securityEvaluation", []):
             vulnerability_id = item.get("vulnerabilityId", "Unknown")
 
             title = (
-                vulnerability_id
-                + "-"
-                + item.get("package", "Unknown")
-                + "("
-                + item.get("packageType", "Unknown")
-                + ")"
+                vulnerability_id + "-" + item.get("package", "Unknown") + "(" + item.get("packageType", "Unknown") + ")"
             )
 
             details += f"**Package**: {item.get('package', 'Unknown')}\n\n"
@@ -53,20 +48,22 @@ class AnchoreEngineParser:
                 mitigation += f"URL: {item.get('link', 'None')}"
             cvssv3_base_score = item.get("nvdCvssBaseScore")
 
-            if isinstance(cvssv3_base_score, str) and cvssv3_base_score.replace('.', '', 1).isdigit():
+            if isinstance(cvssv3_base_score, str) and cvssv3_base_score.replace(".", "", 1).isdigit():
                 cvssv3_base_score = float(cvssv3_base_score)
-            elif not isinstance(cvssv3_base_score, (int, float)):
+            elif not isinstance(cvssv3_base_score, int | float):
                 cvssv3_base_score = None
 
-            references = item.get('link')
+            references = item.get("link")
 
-            dupe_key = "|".join([
-                item.get("cves", "None"),
-                item.get("package", "None"),
-                item.get("packageType", "None"),
-                item.get("path", "None"),
-                item.get("severity", "None"),
-            ])
+            dupe_key = "|".join(
+                [
+                    item.get("cves", "None"),
+                    item.get("package", "None"),
+                    item.get("packageType", "None"),
+                    item.get("path", "None"),
+                    item.get("severity", "None"),
+                ],
+            )
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
