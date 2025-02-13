@@ -167,7 +167,7 @@ class ImportStatisticsSerializer(serializers.Serializer):
     )
     delta = DeltaStatisticsSerializer(
         required=False,
-        help_text="Finding statistics of modifications made by the reimport. Only available when TRACK_IMPORT_HISTORY hass not disabled.",
+        help_text="Finding statistics of modifications made by the reimport. Only available when TRACK_IMPORT_HISTORY has not been disabled.",
     )
     after = SeverityStatusStatisticsSerializer(
         help_text="Finding statistics as stored in Defect Dojo after the import",
