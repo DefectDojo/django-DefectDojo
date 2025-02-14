@@ -169,7 +169,7 @@ class EndpointManager:
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
+            logger.debug(f"Split endpoints into {len(chunked_list)} chunks")
             # First kick off all the workers
             for endpoint_status_list in chunked_list:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=False)
@@ -194,7 +194,7 @@ class EndpointManager:
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
+            logger.debug(f"Split endpoints into {len(chunked_list)} chunks")
             # First kick off all the workers
             for endpoint_status_list in chunked_list:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
