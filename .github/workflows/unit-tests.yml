@@ -25,6 +25,23 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Validate requirements.txt
+        run: |
+          if [ -f "requirements.txt" ]; then
+            echo "Validating dependencies in requirements.txt..."
+            while IFS= read -r line; do
+              if [[ $line == Django* ]]; then
+                django_version=$(echo "$line" | cut -d '=' -f 3)
+                if ! pip index versions Django | grep -q "$django_version"; then
+                  echo "Invalid Django version specified: $django_version"
+                  exit 1
+                fi
+              fi
+            done < requirements.txt
+          else
+            echo "requirements.txt not found! Skipping dependency validation."
+          fi
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -39,8 +56,18 @@ jobs:
         run: |
           echo "Validating installed packages..."
           pip list
-          if ! pip show flask; then
-            echo "Flask is not installed!"
+          if ! pip show django; then
+            echo "Django is not installed!"
+            exit 1
+          fi
+
+      - name: Check Django version
+        run: |
+          echo "Checking Django version..."
+          INSTALLED_VERSION=$(pip show django | grep Version | cut -d ' ' -f 2)
+          REQUIRED_VERSION="4.2.4"  # Укажите желаемую версию Django
+          if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
+            echo "Incorrect Django version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
             exit 1
           fi
 
