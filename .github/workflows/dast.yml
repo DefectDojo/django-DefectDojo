@@ -29,8 +29,8 @@ jobs:
       - name: Check if target URL is reachable
         run: |
           if ! curl -s --head --fail ${{ secrets.DAST_TARGET_URL }} > /dev/null; then
-            echo "Target URL is not reachable!"
-            exit 1
+            echo "Target URL is not reachable! Skipping DAST scan."
+            exit 0  # Продолжаем выполнение пайплайна без ошибки
           fi
 
       # Запуск OWASP ZAP
@@ -42,6 +42,14 @@ jobs:
           active-scan: true  # Включить активное сканирование
           generate-html-report: true  # Генерировать HTML-отчет
           exit-code: 0  # Не завершать пайплайн с ошибкой, даже если найдены уязвимости
+
+      # Проверка наличия отчета OWASP ZAP
+      - name: Check ZAP Report
+        run: |
+          if [ ! -f "./zap/wrk/report.html" ]; then
+            echo "OWASP ZAP report not found!"
+            exit 1  # Если отчет не создан, завершаем пайплайн с ошибкой
+          fi
 
       # Сохранение отчетов как артефактов
       - name: Upload DAST report
@@ -58,6 +66,6 @@ jobs:
               -d @./zap/wrk/report.json \
               ${{ secrets.VULN_MANAGEMENT_API }}
           else
-            echo "DAST report not found!"
+            echo "DAST report not found! Skipping sending results."
           fi
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
