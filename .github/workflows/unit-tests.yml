@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Используем Python 3.10, так как он совместим с Django 4.2.4
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
@@ -54,9 +54,17 @@ jobs:
       - name: Configure Django settings for testing
         run: |
           echo "Configuring Django settings for testing..."
-          cp .env.example .env  # Создаем файл окружения (если используется django-environ)
-          sed -i 's/DATABASE_URL=.*$/DATABASE_URL=postgres:\/\/postgres:postgres@localhost:5432\/testdb/' .env
-          export $(grep -v '^#' .env | xargs)  # Импортируем переменные окружения
+          # Создаем файл .env, если он не существует
+          if [ ! -f ".env" ]; then
+            echo "Creating .env file for testing..."
+            cat <<-EOF > .env
+            DEBUG=True
+            SECRET_KEY=your_secret_key_for_testing
+            DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
+            EOF
+          fi
+          # Импортируем переменные окружения из .env
+          export $(grep -v '^#' .env | xargs)
 
       - name: Run database migrations
         run: |
@@ -71,7 +79,7 @@ jobs:
         run: |
           if command -v python manage.py &>/dev/null; then
             echo "Collecting static files..."
-            python manage.py collectstatic --noinput
+            python manage.py collectstatic --noinput --clear
           else
             echo "manage.py not found. Skipping static collection."
           fi
