@@ -50,10 +50,10 @@ jobs:
         run: |
           mkdir -p reports
           echo "Running Nikto scan on ${{ secrets.DAST_TARGET_URL }}"
-          nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt || echo "Nikto scan failed or no issues found."
+          nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt || true
           if [ ! -f "reports/nikto_report.txt" ]; then
-            echo "Nikto report not found! Continuing without it."
-            touch reports/nikto_report.txt  # Создаем пустой файл, чтобы избежать ошибок
+            echo "Nikto report not found! Creating an empty report."
+            echo "No issues found during Nikto scan." > reports/nikto_report.txt
           fi
 
       # Запуск Arachni для активного сканирования (только если URL доступен)
@@ -62,10 +62,10 @@ jobs:
         run: |
           mkdir -p reports
           echo "Running Arachni scan on ${{ secrets.DAST_TARGET_URL }}"
-          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json || echo "Arachni scan failed or no issues found."
+          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json || true
           if [ ! -f "reports/arachni_report.json" ]; then
-            echo "Arachni report not found! Continuing without it."
-            touch reports/arachni_report.json  # Создаем пустой файл, чтобы избежать ошибок
+            echo "Arachni report not found! Creating an empty report."
+            echo '{}' > reports/arachni_report.json
           fi
 
       # Сохранение отчетов как артефактов
@@ -80,7 +80,7 @@ jobs:
       - name: Send results to vulnerability management system
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
         run: |
-          if [ -s "reports/nikto_report.txt" ] || [ -s "reports/arachni_report.json" ]; then
+          if [ -f "reports/nikto_report.txt" ] && [ -f "reports/arachni_report.json" ]; then
             curl -X POST -H "Content-Type: multipart/form-data" \
               -F "nikto=@reports/nikto_report.txt" \
               -F "arachni=@reports/arachni_report.json" \
