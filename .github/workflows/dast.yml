@@ -1,4 +1,4 @@
-name: DAST Analysis
+name: DAST Analysis with Nikto and Arachni
 
 on:
   push:
@@ -15,6 +15,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Установка необходимых инструментов
+      - name: Install DAST tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nikto arachni
 
       # Запуск вашего приложения (если необходимо)
       - name: Start application
@@ -33,60 +39,42 @@ jobs:
             exit 0  # Продолжаем выполнение пайплайна без ошибки
           fi
 
-      # Запуск OWASP ZAP с дополнительной обработкой ошибок
-      - name: Run OWASP ZAP
-        id: zap-scan
-        uses: zaproxy/action-full-scan@v0.8.0
-        with:
-          target: ${{ secrets.DAST_TARGET_URL }}  # URL вашего приложения
-          spider: true  # Включить паучий поиск
-          active-scan: true  # Включить активное сканирование
-          generate-html-report: true  # Генерировать HTML-отчет
-          exit-code: 0  # Не завершать пайплайн с ошибкой, даже если найдены уязвимости
-        continue-on-error: true  # Продолжать выполнение пайплайна, даже если шаг завершился с ошибкой
-
-      # Проверка наличия директории с результатами OWASP ZAP
-      - name: Check ZAP Results Directory
+      # Запуск Nikto для проверки веб-сервера
+      - name: Run Nikto Scan
         run: |
-          if [ ! -d "./zap/wrk" ]; then
-            echo "OWASP ZAP results directory not found! Possible reasons:"
-            echo "- The scan failed to complete successfully."
-            echo "- The results directory was not created."
-            echo "Skipping further steps due to missing results directory."
-            exit 0  # Продолжаем выполнение пайплайна без ошибки
+          mkdir -p reports
+          nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt
+          if [ ! -f "reports/nikto_report.txt" ]; then
+            echo "Nikto report not found!"
+            exit 1
           fi
 
-      # Проверка наличия отчета OWASP ZAP
-      - name: Check ZAP Report
+      # Запуск Arachni для активного сканирования
+      - name: Run Arachni Scan
         run: |
-          if [ ! -f "./zap/wrk/report.html" ]; then
-            echo "OWASP ZAP HTML report not found! Possible reasons:"
-            echo "- The scan failed to generate the HTML report."
-            echo "- The report file is missing."
-            echo "Skipping further steps due to missing HTML report."
-            exit 0  # Продолжаем выполнение пайплайна без ошибки
-          fi
-
-          if [ ! -f "./zap/wrk/report.json" ]; then
-            echo "OWASP ZAP JSON report not found! Possible reasons:"
-            echo "- The scan failed to generate the JSON report."
-            echo "- The report file is missing."
-            echo "Skipping sending results to vulnerability management system."
+          mkdir -p reports
+          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json
+          if [ ! -f "reports/arachni_report.json" ]; then
+            echo "Arachni report not found!"
+            exit 1
           fi
 
       # Сохранение отчетов как артефактов
-      - name: Upload DAST report
-        if: exists('./zap/wrk/report.html')  # Выполняем только если отчет существует
+      - name: Upload DAST reports
         uses: actions/upload-artifact@v4
         with:
-          name: dast-report
-          path: ./zap/wrk/report.html  # Путь к сгенерированному отчету
+          name: dast-reports
+          path: reports/
 
       # Опционально: Отправка результатов в систему управления уязвимостями
       - name: Send results to vulnerability management system
-        if: exists('./zap/wrk/report.json')  # Выполняем только если отчет существует
         run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d @./zap/wrk/report.json \
-            ${{ secrets.VULN_MANAGEMENT_API }}
+          if [ -f "reports/nikto_report.txt" ] && [ -f "reports/arachni_report.json" ]; then
+            curl -X POST -H "Content-Type: multipart/form-data" \
+              -F "nikto=@reports/nikto_report.txt" \
+              -F "arachni=@reports/arachni_report.json" \
+              ${{ secrets.VULN_MANAGEMENT_API }}
+          else
+            echo "DAST reports not found! Skipping sending results."
+          fi
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
