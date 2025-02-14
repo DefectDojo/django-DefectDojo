@@ -3075,7 +3075,7 @@ class Finding(models.Model):
         if self.risk_status == "Transfer Rejected":
             status += ["Transfer Rejected"]
         if self.risk_status == "Risk Pending":
-            status += ["Risk pending"]
+            status += ["Risk Pending"]
         if self.risk_status == "Risk Rejected":
             status += ["Risk Rejected"]
         if self.risk_status == "On Whitelist":
