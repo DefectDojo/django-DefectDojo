@@ -1,0 +1,68 @@
+name: SAST Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Установка Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Установка инструментов SAST
+      - name: Install SAST tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      # Запуск Bandit для анализа кода
+      - name: Run Bandit
+        run: |
+          bandit -r . -ll --output bandit_report.json --format json
+        id: bandit
+        continue-on-error: false  # Если проверка не проходит, пайплайн завершается с ошибкой
+
+      # Запуск Safety для проверки зависимостей
+      - name: Run Safety
+        run: |
+          safety check --full-report
+        id: safety
+        continue-on-error: false  # Если проверка не проходит, пайплайн завершается с ошибкой
+
+      # Сохранение отчетов как артефактов
+      - name: Upload SAST report
+        uses: actions/upload-artifact@v3
+        with:
+          name: sast-report
+          path: bandit_report.json
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Запуск CodeQL для анализа кода
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
