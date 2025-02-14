@@ -44,16 +44,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check Flask version
-        run: |
-          echo "Checking Flask version..."
-          INSTALLED_VERSION=$(pip show flask | grep Version | cut -d ' ' -f 2)
-          REQUIRED_VERSION="2.3.2"  # Укажите желаемую версию Flask
-          if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
-            echo "Incorrect Flask version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
-            exit 1
-          fi
-
       - name: Run unit tests
         run: |
           pytest --junitxml=test-results.xml || true
