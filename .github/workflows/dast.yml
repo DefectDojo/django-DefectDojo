@@ -43,7 +43,7 @@ jobs:
       - name: Run Nikto Scan
         run: |
           mkdir -p reports
-          nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt
+          nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt || true
           if [ ! -f "reports/nikto_report.txt" ]; then
             echo "Nikto report not found!"
             exit 1
@@ -53,7 +53,7 @@ jobs:
       - name: Run Arachni Scan
         run: |
           mkdir -p reports
-          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json
+          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json || true
           if [ ! -f "reports/arachni_report.json" ]; then
             echo "Arachni report not found!"
             exit 1
@@ -61,6 +61,7 @@ jobs:
 
       # Сохранение отчетов как артефактов
       - name: Upload DAST reports
+        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
         uses: actions/upload-artifact@v4
         with:
           name: dast-reports
@@ -68,6 +69,7 @@ jobs:
 
       # Опционально: Отправка результатов в систему управления уязвимостями
       - name: Send results to vulnerability management system
+        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
         run: |
           if [ -f "reports/nikto_report.txt" ] && [ -f "reports/arachni_report.json" ]; then
             curl -X POST -H "Content-Type: multipart/form-data" \
@@ -77,4 +79,3 @@ jobs:
           else
             echo "DAST reports not found! Skipping sending results."
           fi
-        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
