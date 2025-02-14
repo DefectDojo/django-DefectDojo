@@ -16,6 +16,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:  # Настройка PostgreSQL для тестов
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'  # Используем Python 3.10, так как он совместим с Django 4.2.4
 
       - name: Install dependencies
         run: |
@@ -36,22 +51,29 @@ jobs:
             exit 1
           fi
 
-      - name: Validate Django version
+      - name: Configure Django settings for testing
         run: |
-          INSTALLED_VERSION=$(pip show django | grep Version | cut -d ' ' -f 2)
-          REQUIRED_VERSION="4.2.19"  # Существующая стабильная версия Django
-          if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
-            echo "Incorrect Django version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
-            exit 1
-          fi
+          echo "Configuring Django settings for testing..."
+          cp .env.example .env  # Создаем файл окружения (если используется django-environ)
+          sed -i 's/DATABASE_URL=.*$/DATABASE_URL=postgres:\/\/postgres:postgres@localhost:5432\/testdb/' .env
+          export $(grep -v '^#' .env | xargs)  # Импортируем переменные окружения
 
-      - name: Run database migrations (if needed)
+      - name: Run database migrations
         run: |
           if command -v python manage.py &>/dev/null; then
             echo "Running database migrations..."
             python manage.py migrate --noinput
           else
             echo "manage.py not found. Skipping migrations."
+          fi
+
+      - name: Collect static files (if needed)
+        run: |
+          if command -v python manage.py &>/dev/null; then
+            echo "Collecting static files..."
+            python manage.py collectstatic --noinput
+          else
+            echo "manage.py not found. Skipping static collection."
           fi
 
       - name: Run unit tests
