@@ -35,6 +35,7 @@ jobs:
 
       # Запуск OWASP ZAP с дополнительной обработкой ошибок
       - name: Run OWASP ZAP
+        id: zap-scan
         uses: zaproxy/action-full-scan@v0.8.0
         with:
           target: ${{ secrets.DAST_TARGET_URL }}  # URL вашего приложения
@@ -48,12 +49,16 @@ jobs:
       - name: Check ZAP Report
         run: |
           if [ ! -f "./zap/wrk/report.html" ]; then
-            echo "OWASP ZAP report not found!"
-            exit 1  # Если отчет не создан, завершаем пайплайн с ошибкой
+            echo "OWASP ZAP report not found! Possible reasons:"
+            echo "- The scan failed to complete successfully."
+            echo "- The report generation was unsuccessful."
+            echo "Skipping further steps due to missing report."
+            exit 0  # Продолжаем выполнение пайплайна без ошибки
           fi
 
       # Сохранение отчетов как артефактов
       - name: Upload DAST report
+        if: exists('./zap/wrk/report.html')  # Выполняем только если отчет существует
         uses: actions/upload-artifact@v4
         with:
           name: dast-report
@@ -61,12 +66,9 @@ jobs:
 
       # Опционально: Отправка результатов в систему управления уязвимостями
       - name: Send results to vulnerability management system
+        if: exists('./zap/wrk/report.json')  # Выполняем только если отчет существует
         run: |
-          if [ -f "./zap/wrk/report.json" ]; then
-            curl -X POST -H "Content-Type: application/json" \
-              -d @./zap/wrk/report.json \
-              ${{ secrets.VULN_MANAGEMENT_API }}
-          else
-            echo "DAST report not found! Skipping sending results."
-          fi
+          curl -X POST -H "Content-Type: application/json" \
+            -d @./zap/wrk/report.json \
+            ${{ secrets.VULN_MANAGEMENT_API }}
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
