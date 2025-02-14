@@ -4,13 +4,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
 
 permissions:
   contents: read  # Только чтение содержимого репозитория
@@ -40,20 +36,10 @@ jobs:
             exit 1
           fi
 
-      - name: Validate installed packages
+      - name: Validate Django version
         run: |
-          echo "Validating installed packages..."
-          pip list
-          if ! pip show django; then
-            echo "Django is not installed!"
-            exit 1
-          fi
-
-      - name: Check Django version
-        run: |
-          echo "Checking Django version..."
           INSTALLED_VERSION=$(pip show django | grep Version | cut -d ' ' -f 2)
-          REQUIRED_VERSION="4.2.19"  # Требуемая версия Django
+          REQUIRED_VERSION="4.2.19"  # Существующая стабильная версия Django
           if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
             echo "Incorrect Django version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
             exit 1
