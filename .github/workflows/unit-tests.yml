@@ -56,7 +56,10 @@ jobs:
 
       - name: Run unit tests
         run: |
-          pytest --junitxml=test-results.xml || true
+          pytest --junitxml=test-results.xml || { 
+            echo "Tests failed! Creating empty test-results.xml...";
+            touch test-results.xml;  # Создаем пустой файл, если тесты не прошли
+          }
         id: run-tests
 
       - name: Check test results
