@@ -1,0 +1,85 @@
+name: Security Gateway
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read  # Чтение содержимого репозитория
+  pull-requests: write  # Запись в pull request для добавления комментариев
+
+jobs:
+  security-gateway:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found! Skipping dependency installation."
+          fi
+
+      - name: Scan for vulnerabilities with Trivy
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs  # Сканирование файловой системы
+          severity: CRITICAL,HIGH  # Проверка только критических и высоких угроз
+          exit-code: '1'  # Возвращает ошибку, если найдены уязвимости
+
+      - name: Check Trivy results and stop release if vulnerabilities found
+        if: steps.trivy-scan.outcome == 'failure'
+        run: |
+          echo "Critical or high vulnerabilities found! Stopping the release."
+          exit 1  # Останавливаем пайплайн, если найдены критические уязвимости
+
+      - name: Generate Trivy report
+        if: always()  # Выполняется всегда, даже если предыдущие шаги завершились с ошибкой
+        run: |
+          trivy result --format json --output trivy-report.json .
+          if [ -f "trivy-report.json" ]; then
+            echo "Trivy report generated successfully."
+          else
+            echo "Trivy report not found!"
+          fi
+
+      - name: Upload Trivy report as artifact
+        if: always()  # Выполняется всегда
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
+
+      - name: Comment on PR with Trivy findings
+        if: github.event_name == 'pull_request' && steps.trivy-scan.outcome == 'failure'
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: |
+            ### Security Gateway Alert
+
+            Critical or high vulnerabilities have been detected by Trivy:
+
+            $(cat trivy-report.json | jq -r '.Results[] | .Vulnerabilities[] | "\(.PkgName): \(.VulnerabilityID) - \(.Severity)"' || echo "No detailed vulnerabilities found.")
+
+            Please address these issues before merging this PR.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:python"  # Анализ кода на Python
