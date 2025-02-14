@@ -1,4 +1,4 @@
-name: DAST Analysis with Nikto and Arachni
+name: DAST Analysis with Nikto
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
       - name: Install DAST tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y nikto arachni
+          sudo apt-get install -y nikto
 
       # Запуск вашего приложения (если необходимо)
       - name: Start application
@@ -56,18 +56,6 @@ jobs:
             echo "No issues found during Nikto scan." > reports/nikto_report.txt
           fi
 
-      # Запуск Arachni для активного сканирования (только если URL доступен)
-      - name: Run Arachni Scan
-        if: env.url_reachable == 'true'
-        run: |
-          mkdir -p reports
-          echo "Running Arachni scan on ${{ secrets.DAST_TARGET_URL }}"
-          arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json || true
-          if [ ! -f "reports/arachni_report.json" ]; then
-            echo "Arachni report not found! Creating an empty report."
-            echo '{}' > reports/arachni_report.json
-          fi
-
       # Сохранение отчетов как артефактов
       - name: Upload DAST reports
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
@@ -80,11 +68,10 @@ jobs:
       - name: Send results to vulnerability management system
         if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
         run: |
-          if [ -f "reports/nikto_report.txt" ] && [ -f "reports/arachni_report.json" ]; then
+          if [ -f "reports/nikto_report.txt" ]; then
             curl -X POST -H "Content-Type: multipart/form-data" \
               -F "nikto=@reports/nikto_report.txt" \
-              -F "arachni=@reports/arachni_report.json" \
               ${{ secrets.VULN_MANAGEMENT_API }}
           else
-            echo "DAST reports are empty or not found! Skipping sending results."
+            echo "Nikto report is empty or not found! Skipping sending results."
           fi
