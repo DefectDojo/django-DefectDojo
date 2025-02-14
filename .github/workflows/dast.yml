@@ -45,15 +45,33 @@ jobs:
           exit-code: 0  # Не завершать пайплайн с ошибкой, даже если найдены уязвимости
         continue-on-error: true  # Продолжать выполнение пайплайна, даже если шаг завершился с ошибкой
 
+      # Проверка наличия директории с результатами OWASP ZAP
+      - name: Check ZAP Results Directory
+        run: |
+          if [ ! -d "./zap/wrk" ]; then
+            echo "OWASP ZAP results directory not found! Possible reasons:"
+            echo "- The scan failed to complete successfully."
+            echo "- The results directory was not created."
+            echo "Skipping further steps due to missing results directory."
+            exit 0  # Продолжаем выполнение пайплайна без ошибки
+          fi
+
       # Проверка наличия отчета OWASP ZAP
       - name: Check ZAP Report
         run: |
           if [ ! -f "./zap/wrk/report.html" ]; then
-            echo "OWASP ZAP report not found! Possible reasons:"
-            echo "- The scan failed to complete successfully."
-            echo "- The report generation was unsuccessful."
-            echo "Skipping further steps due to missing report."
+            echo "OWASP ZAP HTML report not found! Possible reasons:"
+            echo "- The scan failed to generate the HTML report."
+            echo "- The report file is missing."
+            echo "Skipping further steps due to missing HTML report."
             exit 0  # Продолжаем выполнение пайплайна без ошибки
+          fi
+
+          if [ ! -f "./zap/wrk/report.json" ]; then
+            echo "OWASP ZAP JSON report not found! Possible reasons:"
+            echo "- The scan failed to generate the JSON report."
+            echo "- The report file is missing."
+            echo "Skipping sending results to vulnerability management system."
           fi
 
       # Сохранение отчетов как артефактов
