@@ -1,21 +1,4 @@
-name: "Build Docker Images For Testing"
-
-on:
-  workflow_dispatch:
-  workflow_call:
-
-jobs:
-  build:
-    # build with docker so we can use layer caching
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        docker-image: [django, nginx, integration-tests]
-        os: [alpine, debian]
-        exclude:
-          - docker-image: integration-tests
-            os: alpine
+build-docker-images-for-testing.yml
 
     steps:
       - name: Checkout
