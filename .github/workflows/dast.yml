@@ -1,0 +1,43 @@
+name: DAST Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Запуск OWASP ZAP
+      - name: Run OWASP ZAP
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: ${{ secrets.DAST_TARGET_URL }}  # URL вашего приложения
+          config: zap-config.yaml  # Необязательный файл конфигурации
+          spider: true  # Включить паучий поиск
+          active-scan: true  # Включить активное сканирование
+          generate-html-report: true  # Генерировать HTML-отчет
+          exit-code: 1  # Завершить пайплайн с ошибкой, если найдены критические уязвимости
+
+      # Сохранение отчетов как артефактов
+      - name: Upload DAST report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-report
+          path: ./zap/wrk/report.html  # Путь к сгенерированному отчету
+
+      # Опционально: Отправка результатов в систему управления уязвимостями
+      - name: Send results to vulnerability management system
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d @./zap/wrk/report.json \
+            ${{ secrets.VULN_MANAGEMENT_API }}
+        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
