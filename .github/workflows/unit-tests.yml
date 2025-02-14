@@ -48,7 +48,7 @@ jobs:
         run: |
           echo "Checking Django version..."
           INSTALLED_VERSION=$(pip show django | grep Version | cut -d ' ' -f 2)
-          REQUIRED_VERSION="5.0a1"  # Экспериментальная версия Django
+          REQUIRED_VERSION="4.2.12"  # Экспериментальная версия Django
           if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
             echo "Incorrect Django version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
             exit 1
