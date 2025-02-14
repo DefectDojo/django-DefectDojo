@@ -41,22 +41,14 @@ jobs:
           scan-type: fs  # Сканирование файловой системы
           severity: CRITICAL,HIGH  # Проверка только критических и высоких угроз
           exit-code: '1'  # Возвращает ошибку, если найдены уязвимости
+          format: json  # Форматирует результаты в JSON
+          output: trivy-report.json  # Сохраняет результаты в файл
 
       - name: Check Trivy results and stop release if vulnerabilities found
         if: steps.trivy-scan.outcome == 'failure'
         run: |
           echo "Critical or high vulnerabilities found! Stopping the release."
           exit 1  # Останавливаем пайплайн, если найдены критические уязвимости
-
-      - name: Generate Trivy report
-        if: always()  # Выполняется всегда, даже если предыдущие шаги завершились с ошибкой
-        run: |
-          trivy result --format json --output trivy-report.json .
-          if [ -f "trivy-report.json" ]; then
-            echo "Trivy report generated successfully."
-          else
-            echo "Trivy report not found!"
-          fi
 
       - name: Upload Trivy report as artifact
         if: always()  # Выполняется всегда
@@ -74,7 +66,7 @@ jobs:
 
             Critical or high vulnerabilities have been detected by Trivy:
 
-            $(cat trivy-report.json | jq -r '.Results[] | .Vulnerabilities[] | "\(.PkgName): \(.VulnerabilityID) - \(.Severity)"' || echo "No detailed vulnerabilities found.")
+            $(cat trivy-report.json | jq -r '.Results[]?.Vulnerabilities[]? | "\(.PkgName): \(.VulnerabilityID) - \(.Severity)"' || echo "No detailed vulnerabilities found.")
 
             Please address these issues before merging this PR.
           token: ${{ secrets.GITHUB_TOKEN }}
