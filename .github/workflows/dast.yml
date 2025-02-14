@@ -33,14 +33,20 @@ jobs:
 
       # Проверка доступности целевого URL
       - name: Check if target URL is reachable
+        id: url-check
         run: |
-          if ! curl -s --head --fail ${{ secrets.DAST_TARGET_URL }} > /dev/null; then
+          if curl -s --head --fail ${{ secrets.DAST_TARGET_URL }} > /dev/null; then
+            echo "URL is reachable."
+            echo "url_reachable=true" >> $GITHUB_ENV
+          else
             echo "Target URL is not reachable! Skipping DAST scan."
+            echo "url_reachable=false" >> $GITHUB_ENV
             exit 0  # Продолжаем выполнение пайплайна без ошибки
           fi
 
-      # Запуск Nikto для проверки веб-сервера
+      # Запуск Nikto для проверки веб-сервера (только если URL доступен)
       - name: Run Nikto Scan
+        if: env.url_reachable == 'true'
         run: |
           mkdir -p reports
           nikto -host ${{ secrets.DAST_TARGET_URL }} -output reports/nikto_report.txt -Format txt || true
@@ -49,8 +55,9 @@ jobs:
             exit 1
           fi
 
-      # Запуск Arachni для активного сканирования
+      # Запуск Arachni для активного сканирования (только если URL доступен)
       - name: Run Arachni Scan
+        if: env.url_reachable == 'true'
         run: |
           mkdir -p reports
           arachni ${{ secrets.DAST_TARGET_URL }} --report-save-path=reports/arachni_report.json || true
