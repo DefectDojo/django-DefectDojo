@@ -1,21 +1,30 @@
 name: PR Labeler
 
-# run on pull_request_target because we need write access to the GItHub API
-# don't run any code from PR here!
 on:
-  pull_request_target:
-    types:
-      [opened, synchronize, reopened]
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read  # Чтение содержимого репозитория
+  pull-requests: write  # Запись в pull request для добавления меток
 
 jobs:
   labeler:
-    permissions:
-      contents: read
-      pull-requests: write
-    name: "Autolabeler"
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Apply labels to PR
+        uses: actions/github-script@v6
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          sync-labels: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = ['needs-review', 'automated'];
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: labels,
+            });
