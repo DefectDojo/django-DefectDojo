@@ -73,3 +73,19 @@ The following variables are set in the `.env` file created by the pipeline:
 - Ensure that your project contains test files (e.g., `tests.py`) with valid test cases.
 - If you encounter issues with database migrations, verify your database settings in `settings.py`.
 - Review the logs in the GitHub Actions tab for detailed error messages.
+
+# Security Gateway Pipeline
+
+## Overview
+This pipeline ensures that any critical or high vulnerabilities detected during the CI process will block the release. It also leaves comments in pull requests with details about the vulnerabilities and uploads a report for further analysis.
+
+### Key Features
+- **Vulnerability Scanning**: Uses Trivy to scan for critical and high vulnerabilities.
+- **PR Comments**: Automatically adds a comment to the pull request if vulnerabilities are found.
+- **Artifact Upload**: Saves the Trivy report as an artifact for further review.
+- **CodeQL Analysis**: Performs static code analysis using GitHub's CodeQL tool.
+
+## Debugging Tips
+- Ensure all package versions in `requirements.txt` exist in PyPI.
+- Review the logs in the GitHub Actions tab for detailed error messages.
+- If no vulnerabilities are found, the pipeline will proceed normally.
