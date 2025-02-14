@@ -1,0 +1,69 @@
+name: Security Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Проверка репозитория на секреты с помощью TruffleHog
+      - name: Scan repository for secrets with TruffleHog
+        run: |
+          sudo apt-get update && sudo apt-get install -y git
+          pip install trufflehog
+          trufflehog git --entropy=False $GITHUB_WORKSPACE || true
+        id: secret-scan
+        continue-on-error: true  # Продолжать выполнение, даже если найдены секреты
+
+      # Проверка Docker-образа с помощью Trivy
+      - name: Scan Docker image with Trivy
+        if: success() || failure()  # Выполнять этот шаг всегда
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy image --exit-code 0 --severity HIGH,CRITICAL ${{ secrets.DOCKER_IMAGE_NAME }} || true
+        id: docker-scan
+        continue-on-error: true  # Продолжать выполнение, даже если найдены уязвимости
+
+      # Проверка конфигурационных файлов с помощью Checkov
+      - name: Scan configuration files with Checkov
+        if: success() || failure()  # Выполнять этот шаг всегда
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .  # Сканируем весь репозиторий
+          skip_checks: ""  # Опционально: пропустить определенные проверки
+          quiet: false  # Выводить подробные результаты
+
+      # Сохранение отчетов как артефактов
+      - name: Upload security reports
+        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            trufflehog-report.txt
+            trivy-report.txt
+            checkov-report.txt
+
+      # Опционально: Отправка результатов в систему управления уязвимостями
+      - name: Send results to vulnerability management system
+        if: always()  # Выполнить этот шаг всегда, независимо от успеха предыдущих шагов
+        run: |
+          if [ -f "trufflehog-report.txt" ] || [ -f "trivy-report.txt" ] || [ -f "checkov-report.txt" ]; then
+            curl -X POST -H "Content-Type: multipart/form-data" \
+              -F "trufflehog=@trufflehog-report.txt" \
+              -F "trivy=@trivy-report.txt" \
+              -F "checkov=@checkov-report.txt" \
+              ${{ secrets.VULN_MANAGEMENT_API }}
+          else
+            echo "No security reports found! Skipping sending results."
+          fi
