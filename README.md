@@ -24,6 +24,14 @@ This repository contains the source code and configuration for a CI/CD pipeline 
 
 2. Ensure that the remote server has Docker installed and is accessible via SSH.
 
-## Troubleshooting
-- Check workflow logs for detailed error messages.
-- Verify SSH keys and firewall rules on the remote server.
+# Troubleshooting
+
+## Common Issues
+- **Missing `requirements.txt`**: If the `requirements.txt` file is missing, the Safety check will be skipped.
+- **Bandit Report Not Found**: Ensure that Bandit generates the `bandit_report.json` file during execution.
+- **CodeQL Language Support**: Make sure your project contains Python code for CodeQL analysis.
+
+## Debugging Tips
+- Review the logs in the GitHub Actions tab for detailed error messages.
+- Ensure all required files (e.g., `requirements.txt`) are present in the repository.
+- Update dependencies to fix vulnerabilities reported by Safety.
