@@ -57,11 +57,11 @@ jobs:
           # Создаем файл .env, если он не существует
           if [ ! -f ".env" ]; then
             echo "Creating .env file for testing..."
-            cat <<-EOF > .env
-            DEBUG=True
-            SECRET_KEY=your_secret_key_for_testing
-            DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
-            EOF
+            cat <<EOF > .env
+DEBUG=True
+SECRET_KEY=your_secret_key_for_testing
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
+EOF
           fi
           # Импортируем переменные окружения из .env
           export $(grep -v '^#' .env | xargs)
