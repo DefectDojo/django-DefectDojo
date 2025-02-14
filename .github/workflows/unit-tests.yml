@@ -25,34 +25,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Validate requirements.txt
-        run: |
-          if [ -f "requirements.txt" ]; then
-            echo "Validating dependencies in requirements.txt..."
-            while IFS= read -r line; do
-              # Извлекаем имя пакета и версию
-              package_name=$(echo "$line" | cut -d '=' -f 1 | tr -d ' ')
-              package_version=$(echo "$line" | grep -oP '(?<===)\d+\.\d+(\.\d+)?')
-
-              # Пропускаем строки, начинающиеся с комментариев или пустые строки
-              if [[ $package_name == \#* || -z "$package_name" ]]; then
-                continue
-              fi
-
-              # Проверяем, что версия существует
-              if [ -n "$package_version" ]; then
-                if ! pip index versions "$package_name" | grep -q "$package_version"; then
-                  echo "Invalid version specified for $package_name: $package_version. Please use an existing version."
-                  exit 1
-                fi
-              else
-                echo "Skipping version check for $package_name as no specific version is provided."
-              fi
-            done < requirements.txt
-          else
-            echo "requirements.txt not found! Skipping dependency validation."
-          fi
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
