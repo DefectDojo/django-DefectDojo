@@ -35,6 +35,14 @@ jobs:
         id: bandit
         continue-on-error: false  # Если проверка не проходит, пайплайн завершается с ошибкой
 
+      # Проверка наличия файла отчета Bandit
+      - name: Check Bandit Report
+        run: |
+          if [ ! -f "bandit_report.json" ]; then
+            echo "Bandit report file not found!"
+            exit 1
+          fi
+
       # Запуск Safety для проверки зависимостей
       - name: Run Safety
         run: |
@@ -58,11 +66,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Запуск CodeQL для анализа кода
+      # Инициализация CodeQL
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: python
 
+      # Выполнение анализа CodeQL
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
