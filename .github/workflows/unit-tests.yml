@@ -32,8 +32,9 @@ jobs:
             while IFS= read -r line; do
               if [[ $line == Django* ]]; then
                 django_version=$(echo "$line" | cut -d '=' -f 3)
+                # Проверяем, что версия Django существует
                 if ! pip index versions Django | grep -q "$django_version"; then
-                  echo "Invalid Django version specified: $django_version"
+                  echo "Invalid Django version specified: $django_version. Please use a valid version (e.g., Django==4.2.4)."
                   exit 1
                 fi
               fi
