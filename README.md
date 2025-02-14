@@ -35,3 +35,25 @@ This repository contains the source code and configuration for a CI/CD pipeline 
 - Review the logs in the GitHub Actions tab for detailed error messages.
 - Ensure all required files (e.g., `requirements.txt`) are present in the repository.
 - Update dependencies to fix vulnerabilities reported by Safety.
+
+# DAST Integration with Nikto
+
+## Overview
+This project integrates Dynamic Application Security Testing (DAST) into the GitHub Actions CI/CD pipeline using Nikto.
+
+## Tools Used
+- **Nikto**: For scanning web servers for known vulnerabilities.
+
+## Workflow
+1. **Application Scanning**: Nikto scans the web server for vulnerabilities.
+2. **Report Generation**: Results are saved as a text file in the `reports/` directory.
+3. **Optional**: Results can be sent to a vulnerability management system for further analysis.
+
+## Results
+- DAST reports are available in the GitHub Actions logs.
+- Reports can be downloaded from artifacts for further analysis.
+
+## Troubleshooting
+- Ensure that the `DAST_TARGET_URL` secret points to a valid and accessible URL.
+- Verify that your application is fully started and accessible at the specified URL.
+- Update the `sleep` duration in the pipeline if your application requires more time to start.
