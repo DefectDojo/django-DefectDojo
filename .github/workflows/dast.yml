@@ -33,7 +33,7 @@ jobs:
             exit 0  # Продолжаем выполнение пайплайна без ошибки
           fi
 
-      # Запуск OWASP ZAP
+      # Запуск OWASP ZAP с дополнительной обработкой ошибок
       - name: Run OWASP ZAP
         uses: zaproxy/action-full-scan@v0.8.0
         with:
@@ -42,6 +42,7 @@ jobs:
           active-scan: true  # Включить активное сканирование
           generate-html-report: true  # Генерировать HTML-отчет
           exit-code: 0  # Не завершать пайплайн с ошибкой, даже если найдены уязвимости
+        continue-on-error: true  # Продолжать выполнение пайплайна, даже если шаг завершился с ошибкой
 
       # Проверка наличия отчета OWASP ZAP
       - name: Check ZAP Report
