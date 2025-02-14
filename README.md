@@ -57,3 +57,19 @@ This project integrates Dynamic Application Security Testing (DAST) into the Git
 - Ensure that the `DAST_TARGET_URL` secret points to a valid and accessible URL.
 - Verify that your application is fully started and accessible at the specified URL.
 - Update the `sleep` duration in the pipeline if your application requires more time to start.
+
+# Unit Tests Workflow for Django
+
+## Environment Configuration
+The pipeline now creates a `.env` file automatically during testing using proper `here-document` syntax. This ensures that the pipeline works without requiring a separate `.env.example` file.
+
+### Example `.env` Content
+The following variables are set in the `.env` file created by the pipeline:
+- `DEBUG=True`
+- `SECRET_KEY=your_secret_key_for_testing`
+- `DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb`
+
+## Debugging Tips
+- Ensure that your project contains test files (e.g., `tests.py`) with valid test cases.
+- If you encounter issues with database migrations, verify your database settings in `settings.py`.
+- Review the logs in the GitHub Actions tab for detailed error messages.
