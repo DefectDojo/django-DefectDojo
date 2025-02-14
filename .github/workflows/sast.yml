@@ -50,9 +50,9 @@ jobs:
         id: safety
         continue-on-error: false  # Если проверка не проходит, пайплайн завершается с ошибкой
 
-      # Сохранение отчетов как артефактов
+      # Сохранение отчетов как артефактов (используем v4)
       - name: Upload SAST report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Обновлено на v4
         with:
           name: sast-report
           path: bandit_report.json
