@@ -36,6 +36,21 @@ jobs:
             exit 1
           fi
 
+      - name: Configure Django settings for testing
+        run: |
+          echo "Configuring Django settings for testing..."
+          # Создаем файл .env, если он не существует
+          if [ ! -f ".env" ]; then
+            echo "Creating .env file for testing..."
+            cat <<EOF > .env
+DEBUG=True
+SECRET_KEY=your_secret_key_for_testing
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
+EOF
+          fi
+          # Импортируем переменные окружения из .env
+          export $(grep -v '^#' .env | xargs)
+
       - name: Scan for vulnerabilities with Trivy
         id: trivy-scan
         uses: aquasecurity/trivy-action@master
