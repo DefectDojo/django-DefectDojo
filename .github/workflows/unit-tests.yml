@@ -35,6 +35,25 @@ jobs:
             echo "requirements.txt not found! Skipping dependency installation."
           fi
 
+      - name: Validate installed packages
+        run: |
+          echo "Validating installed packages..."
+          pip list
+          if ! pip show django; then
+            echo "Django is not installed!"
+            exit 1
+          fi
+
+      - name: Check Django version
+        run: |
+          echo "Checking Django version..."
+          INSTALLED_VERSION=$(pip show django | grep Version | cut -d ' ' -f 2)
+          REQUIRED_VERSION="5.0a1"  # Экспериментальная версия Django
+          if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
+            echo "Incorrect Django version installed: $INSTALLED_VERSION. Required: $REQUIRED_VERSION"
+            exit 1
+          fi
+
       - name: Run unit tests
         run: |
           pytest --junitxml=test-results.xml || true
