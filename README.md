@@ -74,6 +74,27 @@ The following variables are set in the `.env` file created by the pipeline:
 - If you encounter issues with database migrations, verify your database settings in `settings.py`.
 - Review the logs in the GitHub Actions tab for detailed error messages.
 
+# Security and Unit Tests Workflow
+
+## Overview
+This workflow ensures that the project is secure and all tests pass before any changes are merged into the main branch. It includes:
+- Running unit tests for Django.
+- Scanning the repository for accidentally committed secrets with TruffleHog.
+- Analyzing configuration files for insecure practices with Checkov.
+- Scanning Docker images for vulnerabilities with Trivy.
+
+### Steps
+1. **Unit Tests**: Runs tests using `pytest` and generates a JUnit XML report (`test-results.xml`).
+2. **Secret Scanning**: Uses TruffleHog to detect secrets such as API keys, passwords, or tokens.
+3. **Configuration Analysis**: Uses Checkov to analyze configuration files (e.g., Dockerfile, Terraform, Kubernetes).
+4. **Image Scanning**: Uses Trivy to scan Docker images for critical and high vulnerabilities.
+5. **Artifact Upload**: All generated reports are uploaded as artifacts for further review.
+
+### Debugging Tips
+- Ensure all required tools (TruffleHog, Checkov, Trivy) are correctly installed and configured.
+- Review the logs in the GitHub Actions tab for detailed error messages.
+- If you encounter issues with secrets, remove them from the repository and use environment variables instead.
+
 # Security Improvements in GitHub Actions Workflows
 
 ## Overview
