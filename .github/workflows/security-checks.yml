@@ -1,0 +1,92 @@
+name: Security Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read  # Чтение содержимого репозитория
+  packages: read  # Чтение пакетов (если используется Docker)
+  security-events: write  # Запись результатов безопасности
+
+jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install TruffleHog for secret scanning
+        run: |
+          pip install trufflehog
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt || { echo "Dependency installation failed!"; exit 1; }
+          fi
+
+      - name: Scan repository for secrets with TruffleHog
+        id: secret-scan
+        run: |
+          trufflehog git --entropy=False $GITHUB_WORKSPACE || true
+          if [[ $(cat trufflehog-report.json 2>/dev/null) ]]; then
+            echo "Secrets found in the repository!"
+            cat trufflehog-report.json
+            exit 1  # Останавливаем пайплайн, если найдены секреты
+          else
+            echo "No secrets found in the repository."
+          fi
+
+      - name: Scan configuration files with Checkov
+        id: checkov-scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .  # Сканируем весь проект
+          skip_checks: ""  # Не пропускаем никакие проверки
+          quiet: false  # Выводим подробные результаты
+
+      - name: Check Checkov results and stop pipeline if issues found
+        if: steps.checkov-scan.outcome == 'failure'
+        run: |
+          echo "Configuration issues found by Checkov!"
+          exit 1  # Останавливаем пайплайн, если найдены проблемы
+
+      - name: Install Trivy for image scanning
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy --version
+
+      - name: Scan Docker image with Trivy
+        id: trivy-scan
+        run: |
+          if docker images defectdojo:$GITHUB_SHA --format '{{.Repository}}:{{.Tag}}' | grep -q 'defectdojo'; then
+            echo "Scanning Docker image with Trivy..."
+            trivy image --exit-code 0 --severity HIGH,CRITICAL defectdojo:$GITHUB_SHA || true
+            if [[ $(cat trivy-report.json 2>/dev/null) ]]; then
+              echo "Vulnerabilities found in the Docker image!"
+              cat trivy-report.json
+              exit 1  # Останавливаем пайплайн, если найдены уязвимости
+            else
+              echo "No vulnerabilities found in the Docker image."
+            fi
+          else
+            echo "Docker image not found. Skipping Trivy scan."
+          fi
+
+      - name: Upload security reports as artifacts
+        if: always()  # Выполняется всегда, даже при ошибках
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            trufflehog-report.json
+            checkov_report.json
+            trivy-report.json
