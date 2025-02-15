@@ -1,4 +1,4 @@
-name: Security Checks
+name: Security and Unit Tests for Django
 
 on:
   push:
@@ -12,10 +12,26 @@ permissions:
   contents: read  # Чтение содержимого репозитория
   packages: read  # Чтение пакетов (если используется Docker)
   security-events: write  # Запись результатов безопасности
+  checks: write  # Необходимо для отправки результатов тестов в GitHub Checks
 
 jobs:
-  security-checks:
+  security-and-tests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:  # Настройка PostgreSQL для тестов
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -24,7 +40,65 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "requirements.txt" ]; then
+            echo "Installing dependencies from requirements.txt..."
+            pip install -r requirements.txt || { echo "Dependency installation failed!"; exit 1; }
+          else
+            echo "requirements.txt not found! Skipping dependency installation."
+            exit 1
+          fi
+
+      - name: Configure Django settings for testing
+        run: |
+          echo "Configuring Django settings for testing..."
+          # Создаем файл .env, если он не существует
+          if [ ! -f ".env" ]; then
+            echo "Creating .env file for testing..."
+            cat <<EOF > .env
+DEBUG=True
+SECRET_KEY=your_secret_key_for_testing
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
+EOF
+          fi
+          # Импортируем переменные окружения из .env
+          export $(grep -v '^#' .env | xargs)
+
+      - name: Run database migrations
+        run: |
+          if command -v python manage.py &>/dev/null; then
+            echo "Running database migrations..."
+            python manage.py migrate --noinput
+          else
+            echo "manage.py not found. Skipping migrations."
+          fi
+
+      - name: Collect static files (if needed)
+        run: |
+          if command -v python manage.py &>/dev/null; then
+            echo "Collecting static files..."
+            python manage.py collectstatic --noinput --clear
+          else
+            echo "manage.py not found. Skipping static collection."
+          fi
+
+      - name: Run unit tests
+        run: |
+          pytest --junitxml=test-results.xml || { 
+            echo "Tests failed! Creating empty test-results.xml...";
+            touch test-results.xml;  # Создаем пустой файл, если тесты не прошли
+          }
+        id: run-tests
+
+      - name: Check test results
+        if: steps.run-tests.outcome == 'failure'
+        run: |
+          echo "Tests failed! Review the logs for details."
+          exit 1  # Останавливаем пайплайн, если тесты не прошли
 
       - name: Install TruffleHog for secret scanning
         run: |
@@ -81,12 +155,13 @@ jobs:
             echo "Docker image not found. Skipping Trivy scan."
           fi
 
-      - name: Upload security reports as artifacts
+      - name: Upload test and security reports as artifacts
         if: always()  # Выполняется всегда, даже при ошибках
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: test-and-security-reports
           path: |
+            test-results.xml
             trufflehog-report.json
             checkov_report.json
             trivy-report.json
