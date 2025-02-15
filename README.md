@@ -74,6 +74,23 @@ The following variables are set in the `.env` file created by the pipeline:
 - If you encounter issues with database migrations, verify your database settings in `settings.py`.
 - Review the logs in the GitHub Actions tab for detailed error messages.
 
+# Security Improvements in GitHub Actions Workflows
+
+## Overview
+We have updated the GitHub Actions workflows to ensure minimal permissions are used, addressing the issue `CKV2_GHA_1: Ensure top-level permissions are not set to write-all`.
+
+### Changes Made
+- Replaced `write-all` permissions with specific permissions such as:
+  - `contents: read`
+  - `pull-requests: write`
+  - `packages: write`
+- Added detailed comments to explain the purpose of each permission.
+
+### Debugging Tips
+- Ensure that all required permissions are explicitly defined in the workflow files.
+- Review the logs in the GitHub Actions tab for detailed error messages.
+- Use tools like Checkov or CodeQL to scan your workflows for security issues and generate SARIF reports for further analysis.
+
 # Security Gateway Pipeline
 
 ## Overview
