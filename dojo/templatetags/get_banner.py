@@ -17,7 +17,7 @@ def get_banner_conf(attribute):
             if attribute == "banner_message":
                 # only admin can edit login banner, so we allow html, but still bleach it
                 allowed_attributes = bleach.ALLOWED_ATTRIBUTES
-                allowed_attributes["a"] = allowed_attributes["a"] + ["style", "target"]
+                allowed_attributes["a"] += ["style", "target"]
                 return mark_safe(bleach.clean(
                     value,
                     attributes=allowed_attributes,

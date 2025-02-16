@@ -54,6 +54,7 @@ def create_notification(
     no_users: bool = False,  # noqa: FBT001, FBT002
     url: str | None = None,
     url_api: str | None = None,
+    alert_only: bool = False,  # noqa: FBT001, FBT002
     **kwargs: dict,
 ) -> None:
     """Create an instance of a NotificationManager and dispatch the notification."""
@@ -86,6 +87,7 @@ def create_notification(
         no_users=no_users,
         url=url,
         url_api=url_api,
+        alert_only=alert_only,
         **kwargs,
     )
 
@@ -228,18 +230,17 @@ class SlackNotificationManger(NotificationManagerHelpers):
                         "The user %s does not have a email address informed for Slack in profile.",
                         user,
                     )
+            # System scope slack notifications, and not personal would still see this go through
+            elif self.system_settings.slack_channel is not None:
+                channel = self.system_settings.slack_channel
+                logger.info(
+                    f"Sending system notification to system channel {channel}.",
+                )
+                self._post_slack_message(event, user, channel, **kwargs)
             else:
-                # System scope slack notifications, and not personal would still see this go through
-                if self.system_settings.slack_channel is not None:
-                    channel = self.system_settings.slack_channel
-                    logger.info(
-                        f"Sending system notification to system channel {channel}.",
-                    )
-                    self._post_slack_message(event, user, channel, **kwargs)
-                else:
-                    logger.debug(
-                        "slack_channel not configured: skipping system notification",
-                    )
+                logger.debug(
+                    "slack_channel not configured: skipping system notification",
+                )
 
         except Exception as exception:
             logger.exception("Unable to send Slack notification")
@@ -424,10 +425,10 @@ class WebhookNotificationManger(NotificationManagerHelpers):
     ):
         for endpoint in self._get_webhook_endpoints(user=user):
             error = None
-            if endpoint.status not in [
+            if endpoint.status not in {
                 Notification_Webhooks.Status.STATUS_ACTIVE,
                 Notification_Webhooks.Status.STATUS_ACTIVE_TMP,
-            ]:
+            }:
                 logger.info(
                     f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})",
                 )
@@ -802,53 +803,9 @@ class NotificationManager(NotificationManagerHelpers):
         )
         logger.debug("process notifications for %s", notifications.user)
 
-        if self.system_settings.enable_slack_notifications and "slack" in getattr(
-            notifications,
-            event,
-            getattr(notifications, "other"),
-        ):
-            logger.debug("Sending Slack Notification")
-            self._get_manager_instance("slack").send_slack_notification(
-                event,
-                user=notifications.user,
-                **kwargs,
-            )
-
-        if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
-            notifications,
-            event,
-            getattr(notifications, "other"),
-        ):
-            logger.debug("Sending MSTeams Notification")
-            self._get_manager_instance("msteams").send_msteams_notification(
-                event,
-                user=notifications.user,
-                **kwargs,
-            )
-
-        if self.system_settings.enable_mail_notifications and "mail" in getattr(
-            notifications,
-            event,
-            getattr(notifications, "other"),
-        ):
-            logger.debug("Sending Mail Notification")
-            self._get_manager_instance("mail").send_mail_notification(
-                event,
-                user=notifications.user,
-                **kwargs,
-            )
-
-        if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
-            notifications,
-            event,
-            getattr(notifications, "other"),
-        ):
-            logger.debug("Sending Webhooks Notification")
-            self._get_manager_instance("webhooks").send_webhooks_notification(
-                event,
-                user=notifications.user,
-                **kwargs,
-            )
+        alert_only = kwargs.get("alert_only", False)
+        if alert_only:
+            logger.debug("sending alert only")
 
         if "alert" in getattr(notifications, event, getattr(notifications, "other")):
             logger.debug(f"Sending Alert to {notifications.user}")
@@ -857,6 +814,57 @@ class NotificationManager(NotificationManagerHelpers):
                 user=notifications.user,
                 **kwargs,
             )
+
+        # Some errors should not be pushed to all channels, only to alerts.
+        # For example reasons why JIRA Issues: https://github.com/DefectDojo/django-DefectDojo/issues/11575
+        if not alert_only:
+            if self.system_settings.enable_slack_notifications and "slack" in getattr(
+                notifications,
+                event,
+                getattr(notifications, "other"),
+            ):
+                logger.debug("Sending Slack Notification")
+                self._get_manager_instance("slack").send_slack_notification(
+                    event,
+                    user=notifications.user,
+                    **kwargs,
+                )
+
+            if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
+                notifications,
+                event,
+                getattr(notifications, "other"),
+            ):
+                logger.debug("Sending MSTeams Notification")
+                self._get_manager_instance("msteams").send_msteams_notification(
+                    event,
+                    user=notifications.user,
+                    **kwargs,
+                )
+
+            if self.system_settings.enable_mail_notifications and "mail" in getattr(
+                notifications,
+                event,
+                getattr(notifications, "other"),
+            ):
+                logger.debug("Sending Mail Notification")
+                self._get_manager_instance("mail").send_mail_notification(
+                    event,
+                    user=notifications.user,
+                    **kwargs,
+                )
+
+            if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
+                notifications,
+                event,
+                getattr(notifications, "other"),
+            ):
+                logger.debug("Sending Webhooks Notification")
+                self._get_manager_instance("webhooks").send_webhooks_notification(
+                    event,
+                    user=notifications.user,
+                    **kwargs,
+                )
 
 
 @app.task(ignore_result=True)

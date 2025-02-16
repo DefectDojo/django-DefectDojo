@@ -1491,7 +1491,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method in ["PUT", "PATCH"]:
+        if request.method in {"PUT", "PATCH"}:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)

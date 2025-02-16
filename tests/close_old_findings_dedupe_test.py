@@ -80,8 +80,7 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                        "Timed out waiting for finding delete "
-                                        + "confirmation popup to appear.")
+                "Timed out waiting for finding delete confirmation popup to appear.")
             driver.switch_to.alert.accept()
         except TimeoutException:
             self.fail("Confirmation dialogue not shown, cannot delete previous findings")

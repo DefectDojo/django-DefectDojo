@@ -145,7 +145,7 @@ def engagement_calendar(request):
 
 def get_filtered_engagements(request, view):
 
-    if view not in ["all", "active"]:
+    if view not in {"all", "active"}:
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
 
@@ -1369,9 +1369,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
         logger.error("errors found")
 
-    else:
-        if edit_mode:
-            risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+    elif edit_mode:
+        risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
@@ -1562,7 +1561,7 @@ def get_engagements(request):
         raise ValidationError(msg)
 
     view = query = None
-    if get_list_index(path_items, 1) in ["active", "all"]:
+    if get_list_index(path_items, 1) in {"active", "all"}:
         view = get_list_index(path_items, 1)
         query = get_list_index(path_items, 2)
     else:

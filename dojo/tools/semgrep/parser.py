@@ -141,11 +141,11 @@ class SemgrepParser:
         upper_value = val.upper()
         if upper_value == "CRITICAL":
             return "Critical"
-        if upper_value in ["WARNING", "MEDIUM"]:
+        if upper_value in {"WARNING", "MEDIUM"}:
             return "Medium"
-        if upper_value in ["ERROR", "HIGH"]:
+        if upper_value in {"ERROR", "HIGH"}:
             return "High"
-        if upper_value in ["LOW", "INFO"]:
+        if upper_value in {"LOW", "INFO"}:
             return "Low"
         msg = f"Unknown value for severity: {val}"
         raise ValueError(msg)

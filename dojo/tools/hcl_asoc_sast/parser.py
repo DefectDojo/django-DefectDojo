@@ -122,7 +122,7 @@ class HCLASoCSASTParser:
                                             for codeitem in codeblock:
                                                 if codeitem.tag == "item" and codeitem.attrib["type"] == "string":
                                                     if codeitem.text is None:
-                                                        recommendations = recommendations + "\n"
+                                                        recommendations += "\n"
                                                     else:
                                                         recommendations = recommendations + self.xmltreehelper(codeitem) + "\n"
 

@@ -86,7 +86,7 @@ class AWSInspector2Parser:
             is_mitigated = True
             active = False
             if (last_observed := raw_finding.get("lastObservedAt")) is not None:
-                mitigated = date_parser(last_observed)
+                mitigated = date_parser.parse(last_observed)
             else:
                 mitigated = datetime.now(UTC)
         finding.active = active
@@ -102,11 +102,11 @@ class AWSInspector2Parser:
         vulnerability_packages_descriptions = "\n".join(
             [
                 (
-                    f'*Vulnerable package*: {vulnerability_package.get("name", "N/A")}\n'
-                    f'\tpackage manager: {vulnerability_package.get("packageManager", "N/A")}\n'
-                    f'\tversion: {vulnerability_package.get("version", "N/A")}\n'
-                    f'\tfixed version: {vulnerability_package.get("fixedInVersion", "N/A")}\n'
-                    f'\tremediation: {vulnerability_package.get("remediation", "N/A")}\n'
+                    f"*Vulnerable package*: {vulnerability_package.get('name', 'N/A')}\n"
+                    f"\tpackage manager: {vulnerability_package.get('packageManager', 'N/A')}\n"
+                    f"\tversion: {vulnerability_package.get('version', 'N/A')}\n"
+                    f"\tfixed version: {vulnerability_package.get('fixedInVersion', 'N/A')}\n"
+                    f"\tremediation: {vulnerability_package.get('remediation', 'N/A')}\n"
                 )
                 for vulnerability_package in vulnerability_details.get("vulnerablePackages", [])
             ],
@@ -165,7 +165,7 @@ class AWSInspector2Parser:
         network_path_steps = network_path_info.get("steps", [])
         steps_descriptions = "\n".join(
             [
-                f'steps:\n{step_number}: {step.get("componentId", "N/A")} {step.get("componentType", "N/A")}'
+                f"steps:\n{step_number}: {step.get('componentId', 'N/A')} {step.get('componentType', 'N/A')}"
                 for step_number, step in enumerate(network_path_steps)
             ],
         )

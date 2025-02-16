@@ -76,10 +76,10 @@ def get_item(vuln):
     risk_accepted = (
         review_status == "intentional"
     )  # not confirmed, not a bug, there are some reasons to make this code in this manner
-    false_positive = review_status in [
+    false_positive = review_status in {
         "false_positive",
         "suppressed",
-    ]  # this finding is false positive
+    }  # this finding is false positive
     active = not false_positive and not risk_accepted
 
     unique_id = (

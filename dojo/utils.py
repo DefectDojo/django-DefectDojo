@@ -101,8 +101,10 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-        + "that were previously marked as false positive",
+        (
+            "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
+            "that were previously marked as false positive"
+        ),
         len(existing_fp_findings),
     )
 
@@ -767,9 +769,8 @@ def add_breadcrumb(parent=None,
                             crumbs = crumbs[:crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
-                    else:
-                        if crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                    elif crumb in crumbs:
+                        crumbs = crumbs[:crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 
@@ -1629,11 +1630,11 @@ def get_work_days(start: date, end: date):
     """
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
-        start = start + timedelta(days=7 - start.weekday())
+        start += timedelta(days=7 - start.weekday())
 
     # if the end date is on a weekend, rewind the date to the previous Friday
     if end.weekday() > WEEKDAY_FRIDAY:
-        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
+        end -= timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
 
     if start > end:
         return 0
@@ -1644,7 +1645,7 @@ def get_work_days(start: date, end: date):
     remainder = end.weekday() - start.weekday() + 1
 
     if remainder != 0 and end.weekday() < start.weekday():
-        remainder = 5 + remainder
+        remainder += 5
 
     return weeks * 5 + remainder
 
