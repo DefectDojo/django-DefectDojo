@@ -8,7 +8,7 @@ import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
-from dojo.importers.utils import get_or_create_component
+from dojo.importers.utils import get_or_create_component, decode_datetime, encode_datetime
 from dojo.models import (
     Development_Environment,
     Finding,
@@ -381,19 +381,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 serial_untouched_findings,
             ) = results
             new_findings += [
-                next(deserialize("json", finding)).object
+                next(deserialize("json", decode_datetime(finding))).object
                 for finding in serial_new_findings
             ]
             reactivated_findings += [
-                next(deserialize("json", finding)).object
+                next(deserialize("json", decode_datetime(finding))).object
                 for finding in serial_reactivated_findings
             ]
             findings_to_mitigate += [
-                next(deserialize("json", finding)).object
+                next(deserialize("json", decode_datetime(finding))).object
                 for finding in serial_findings_to_mitigate
             ]
             untouched_findings += [
-                next(deserialize("json", finding)).object
+                next(deserialize("json", decode_datetime(finding))).object
                 for finding in serial_untouched_findings
             ]
             logger.debug("REIMPORT_SCAN: All Findings Collected")
@@ -767,16 +767,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         """
         if not kwargs.get("sync", False):
             serialized_new_items = [
-                serialize("json", [finding]) for finding in self.new_items
+                serialize("json", [encode_datetime(finding)]) for finding in self.new_items
             ]
             serialized_reactivated_items = [
-                serialize("json", [finding]) for finding in self.reactivated_items
+                serialize("json", [encode_datetime(finding)]) for finding in self.reactivated_items
             ]
             serialized_to_mitigate = [
-                serialize("json", [finding]) for finding in self.to_mitigate
+                serialize("json", [encode_datetime(finding)]) for finding in self.to_mitigate
             ]
             serialized_untouched = [
-                serialize("json", [finding]) for finding in self.untouched
+                serialize("json", [encode_datetime(finding)]) for finding in self.untouched
             ]
             return (
                 serialized_new_items,
