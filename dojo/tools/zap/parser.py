@@ -86,3 +86,39 @@ class ZapParser:
                     )
                 items.append(finding)
         return items
+
+def get_fields(self) -> list[str]:
+    """Return the list of fields used in the Zap Parser.
+
+    Fields:
+    - title: Set to name from Zap Scanner.
+    - description: Custom description made from data outputted by Zap Scanner.
+    - severity: Set to severity from Zap Scanner that has been mapped to Defect Dojo's format.
+    - scanner_confidence: Set to scanner confidence values that has been mapped to Defect Dojo's format.
+    - mitigation: Set to solution from Zap Scanner.
+    - vuln_id_from_tool: Set to pluginid from scanner.
+    - cwe: Set to cwe from Zap Scanner.
+    """
+    return [
+        "title",
+        "description",
+        "severity",
+        "scanner_confidence",
+        "mitigation",
+        "vuln_in_from_tool",
+        "cwe",
+    ]
+
+def get_dedupe_fields(self) -> list[str]:
+    """Return the list of fields used for deduplication in the Zap Parser.
+
+    Fields:
+    - title: Set to name from Zap Scanner.
+    - cwe: Set to cwe from Zap Scanner.
+    - severity: Set to severity from Zap Scanner.
+    """
+    return [
+        "title",
+        "cwe",
+        "severity",
+    ]

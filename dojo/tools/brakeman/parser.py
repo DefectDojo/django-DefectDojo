@@ -73,3 +73,41 @@ class BrakemanParser:
                 dupes[dupe_key] = find
 
         return list(dupes.values())
+
+def get_fields(self) -> list[str]:
+    """Return the list of fields used in the Brakeman Parser.
+
+    Fields:
+    - title: Made by joining warning_type and message provided by Brakeman Scanner.
+    - description: Made by joining filename, line number, issue confidence, code, user input, and render path provided by Brakeman Scanner.
+    - severity: Set to Medium regardless of context.
+    - file_path: Set to file from Brakeman Scanner.
+    - line: Set to line from Brakeman Scanner.
+    - date: Set to end_date from Brakeman Scanner.
+    """
+    return [
+        "title",
+        "description",
+        "severity",
+        "file_path",
+        "line",
+        "date",
+    ]
+
+def get_dedupe_fields(self) -> list[str]:
+    """Return the list of fields used for deduplication in the Brakeman Parser.
+
+    Fields:
+    - title: Made by joining warning_type and message provided by Brakeman Scanner.
+    - line: Set to line from Brakeman Scanner.
+    - file_path: Set to file from Brakeman Scanner.
+    - description: Made by joining filename, line number, issue confidence, code, user input, and render path provided by Brakeman Scanner.
+    
+    NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+    """
+    return [
+        "title",
+        "line",
+        "file_path",
+        "description",
+    ]

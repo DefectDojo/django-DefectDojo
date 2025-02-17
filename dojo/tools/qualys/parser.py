@@ -308,3 +308,47 @@ class QualysParser:
         if file.name.lower().endswith(".csv"):
             return csv_parser.parse_csv(file)
         return qualys_parser(file)
+
+def get_fields(self) -> list[str]:
+    """Return the list of fields used in the Qualys Parser.
+
+    Fields:
+    - title: Set to gid and vulnerability name from Qualys Scanner
+    - mitigation: Set to solution from Qualys Scanner
+    - description: Custom description made from: description, category, QID, port, result evidence, first found, last found, and times found.
+    - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+    - impact: Set to impact from Qualys Scanner.
+    - date: Set to datetime from Qualys Scanner.
+    - vuln_id_from_tool: Set to gid from Qualys Scanner.
+    - mitigated: Set to the mitigation_date from Qualys Scanner
+    - is_mitigated: Set to true or false based on pressence of "mitigated" in Qualys Scanner output.
+    - active: Set to true if status equals active, re-opened, or new; else set to false.
+    - cvssv3: Set to CVSS_vector if not null.
+    """
+    return [
+        "title",
+        "mitigation",
+        "description",
+        "severity",
+        "impact",
+        "date",
+        "vuln_id_from_tool",
+        "mitigated",
+        "is_mitigated",
+        "active",
+        "cvssv3",
+    ]
+
+def get_dedupe_fields(self) -> list[str]:
+    """Return the list of fields used for deduplication in the Qualys Parser.
+
+    Fields:
+    - title: Set to gid and vulnerability name from Qualys Scanner
+    - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+    
+    #NOTE: endpoints is not provided by parser
+    """
+    return [
+        "title",
+        "severity",
+    ]
