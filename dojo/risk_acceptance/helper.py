@@ -31,17 +31,20 @@ def expire_now(risk_acceptance):
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
         for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:
-                logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
-              
-                finding.risk_accepted = False
-                finding.risk_status = "Risk Active"
-                finding.acceptances_confirmed = 0
-                finding.accepted_by = ""
+            if finding.active is True and finding.risk_status == "Risk Active":
+                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
-                if not finding.mitigated:
-                    finding.active = True
+            else:
+                if finding.is_mitigated is True:
+                    logger.debug(f"Finding is mitigated {finding.is_mitigated}")
                     finding.risk_status = "Risk Expired"
+                else:
+                    logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
+                    finding.risk_status = "Risk Active"
+                    finding.active = True
+                    finding.risk_accepted = False
+                    finding.acceptances_confirmed = 0
+                    finding.accepted_by = ""
                 
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
@@ -53,14 +56,13 @@ def expire_now(risk_acceptance):
                 # reactivate finding realted (transfer finding)
                 system_settings = System_Settings.objects.get()
                 if system_settings.enable_transfer_finding:
-                    hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
-                                                    parent_finding=finding,
-                                                    notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
-                                                    send_notification=False)
+                    hp_transfer_finding.close_or_reactive_related_finding(
+                        event="reactive",
+                        parent_finding=finding,
+                        notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                        send_notification=False)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
-            else:
-                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
         # best effort JIRA integration, no status changes
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)

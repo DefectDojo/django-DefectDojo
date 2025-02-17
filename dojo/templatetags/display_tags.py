@@ -781,9 +781,9 @@ def finding_display_status(finding):
     }
 
     dict_rule_display_status = {
-        "Under Review, Active, Risk pending": ["Under Review", "view_review", "Red"],
-        "Active, Verified, Risk pending": ["Risk Pending", "view_risk", "Red"],
-        "Inactive, Verified, Mitigated, Risk pending": ["Closed", "view_transfer", "Green"],
+        "Under Review, Active, Risk Pending": ["Under Review", "view_review", "Red"],
+        "Active, Verified, Risk Pending": ["Risk Pending", "view_risk", "Red"],
+        "Inactive, Verified, Mitigated, Risk Pending": ["Closed", "view_transfer", "Green"],
         "Active, Verified, Risk Rejected": ["Open", "view_transfer", "Red"],
         "Inactive, Mitigated, False Positive, Risk Rejected": ["Closed", "view_transfer", "Green"],
         "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
@@ -804,10 +804,11 @@ def finding_display_status(finding):
         "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Closed", "view_transfer", "Green"],
         "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
         "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_transfer", "Green"],
+        "Inactive, Verified, Mitigated, Risk Expired": ["Closed", "view_risk", "Green"],
         "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
-        "Under Review, Active, Verified, Risk pending": ["Under Review", "view_review", "Red"],
+        "Under Review, Active, Verified, Risk Pending": ["Under Review", "view_review", "Red"],
         "Under Review, Active": ["Under Review", "view_review", "Red"],
-        "Under Review, Inactive, Mitigated, Risk pending": ["Closed", "view_review", "Green"],
+        "Under Review, Inactive, Mitigated, Risk Pending": ["Closed", "view_review", "Green"],
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
