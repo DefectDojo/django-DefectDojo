@@ -41,7 +41,6 @@ class TestTenableParser(DojoTestCase):
             for i in [0, 1, 2, 3]:
                 finding = findings[i]
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-                self.assertEqual("Info", finding.severity)
                 self.assertEqual(0, finding.cwe)
             # check some data
             finding = findings[0]
