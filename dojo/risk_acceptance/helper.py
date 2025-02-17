@@ -3,8 +3,6 @@ import crum
 import requests
 import json
 from datetime import timedelta
-from azure.devops.connection import Connection
-from msrest.authentication import BasicAuthentication
 from django.conf import settings
 from contextlib import suppress
 
@@ -18,10 +16,9 @@ from dojo.celery import app
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings, PermissionKey, Dojo_User
-from dojo.user import queries as user_queries
 from dojo.transfer_findings import helper as hp_transfer_finding
 from dojo.risk_acceptance.notification import Notification
-from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
+from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -478,13 +475,6 @@ def risk_accept_provider(
 def get_matching_value(list_a, list_b):
     matches = [item.name for item in list_a if item in list_b]
     return matches[0] if matches else None
-
-
-def get_config_risk():
-    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
-    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
-
 
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
