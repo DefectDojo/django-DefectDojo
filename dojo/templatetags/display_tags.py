@@ -23,6 +23,7 @@ from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
+from dojo.engine_tools.models import FindingExclusion
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
 
@@ -771,14 +772,22 @@ def finding_display_status(finding):
         <span style="background-color: {{color_background}};" class="pass_fail Pass">{{current_status}}</span></a>'''
     ra = finding.risk_acceptance
     reverse_risk_acceptance = None
+    reverse_whitelist = None
+    
     if ra:
         reverse_risk_acceptance = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
+    if finding.risk_status == "On Whitelist" or finding.risk_status == "On Blacklist":
+        finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, status="Accepted").first()
+        reverse_whitelist = reverse('finding_exclusion', args=(finding_exclusion.pk,))
+
     dict_rule_reverse = {
         "view_transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
         "view_risk": reverse_risk_acceptance, 
         "view_review": reverse("clear_finding_review", args=(finding.id, )),
         "view_finding": reverse("view_finding", args=(finding.id, )),
+        "view_exclusion": reverse_whitelist
     }
+
 
     dict_rule_display_status = {
         "Under Review, Active, Risk Pending": ["Under Review", "view_review", "Red"],
@@ -793,10 +802,11 @@ def finding_display_status(finding):
         "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
         "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
         "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
-        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_finding", "Orange"],
-        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_finding", "Green"],
-        "Active, Verified, On Blacklist": ["On Blacklist", "view_finding", "Red"],
-        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_finding", "Red"],
+        "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
+        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
+        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_exclusion", "Green"],
+        "Active, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
+        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
         "Inactive, Verified, Mitigated, On Blacklist": ["Closed", "view_finding", "Green"],
         "Active, Verified, Transfer Pending": ["Transfer Pending", "view_transfer", "Red"],
         "Active, Verified, Transfer Rejected": ["Open", "view_transfer", "Red"],

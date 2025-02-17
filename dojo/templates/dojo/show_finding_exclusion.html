@@ -160,6 +160,13 @@
                                 </li>
                                 {% endif %}
                             {% endif %}
+                            {% if request.user|is_in_reviewer_group %}
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'delete_finding_exclusion' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-xmark"></i> Delete Finding Exclusion
+                                    </a>
+                                </li>
+                            {% endif %}
                         </ul>  
                     </div>
             </div>

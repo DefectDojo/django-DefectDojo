@@ -35,6 +35,9 @@ class EditFindingExclusionForm(forms.ModelForm):
     class Meta:
         model = FindingExclusion
         fields = ["type", "unique_id_from_tool", "reason", "expiration_date", "status"]
+        widgets = {
+            'expiration_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

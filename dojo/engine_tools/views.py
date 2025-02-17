@@ -14,7 +14,8 @@ from dojo.engine_tools.helpers import (
     send_mail_to_cybersecurity,
     check_priorization,
     has_valid_comments,
-    add_findings_to_blacklist
+    add_findings_to_blacklist,
+    remove_findings_from_deleted_finding_exclusions
 )
 
 # Utils
@@ -36,13 +37,13 @@ def finding_exclusions(request: HttpRequest):
                                                 queryset=finding_exclusions)
     paged_finding_exclusion = get_page_items(request,
                                              finding_exclusions.qs,
-                                             25)
+                                             10)
 
-    add_breadcrumb(title="FindingExclusion", top_level=True, request=request)
+    add_breadcrumb(title="Vulnerability Black & White Lists", top_level=True, request=request)
     return render(request, "dojo/view_finding_exclusion.html", {
         "exclusions": paged_finding_exclusion,
         "filtered": finding_exclusions,
-        "name": "Finding Exclusions",
+        "name": "Vulnerability Black & White Lists",
     })
 
 
@@ -86,6 +87,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         
         if form.is_valid():        
             exclusion: FindingExclusion = form.save(commit=False)
+            exclusion.practice = default_practice
+            exclusion.created_by = request.user
             if list_type == "black_list":
                 if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
                     raise PermissionDenied
@@ -95,24 +98,26 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 exclusion.accepted_by = request.user
                 exclusion.status_updated_at = timezone.now()
                 exclusion.status_updated_by = request.user
-                
+                exclusion.save()
                 relative_url = reverse("finding_exclusion", args=[str(exclusion.pk)])
                 add_findings_to_blacklist.apply_async(args=(exclusion.unique_id_from_tool, relative_url,))
-            exclusion.practice = default_practice
-            exclusion.created_by = request.user
-            exclusion.save()
-            
-            cve = request.POST.get(key="unique_id_from_tool")
-            
-            reviewers = get_reviewers_members()
-            
-            create_notification(
-                event="finding_exclusion_request",
-                title=f"A new request has been created to add {cve} to the {list_type}.",
-                description=f"A new request has been created to add {cve} to the {list_type}.",
-                url=reverse("finding_exclusion", args=[str(exclusion.pk)]),
-                recipients=reviewers
-            )
+            else:  
+                exclusion.save()
+                
+                cve = request.POST.get(key="unique_id_from_tool")
+                
+                reviewers = get_reviewers_members()
+                
+                create_notification(
+                    event="finding_exclusion_request",
+                    subject=f"🙋‍♂️New {list_type} Request🙏",
+                    title=f"A new request has been created to add {cve} to the {list_type}.",
+                    description=f"A new request has been created to add {cve} to the {list_type}.",
+                    url=reverse("finding_exclusion", args=[str(exclusion.pk)]),
+                    recipients=reviewers,
+                    icon="check-circle",
+                    color_icon="#28a745"
+                )
             
             messages.add_message(
                 request,
@@ -223,20 +228,26 @@ def review_finding_exclusion_request(
     finding_exclusion.save()
     
     create_notification(event="finding_exclusion_request",
+                        subject="✅Review applied to the whitelisting request",
                         title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
                         description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                        recipients=[finding_exclusion.created_by.username])
+                        recipients=[finding_exclusion.created_by.username],
+                        icon="check-circle",
+                        color_icon="#28a745")
     
     approvers = get_approvers_members()
     
+    message = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}"
     create_notification(event="finding_exclusion_request",
-                        title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
-                        description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}.",
+                        subject="🙋‍♂️Eligibility Assessment Vulnerability Whitelist",
+                        title=message,
+                        description=message,
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                        recipients=approvers)
+                        recipients=approvers,
+                        color_icon="#52A3FA")
     
-    send_mail_to_cybersecurity(finding_exclusion)
+    send_mail_to_cybersecurity(finding_exclusion, message)
     
     messages.add_message(
             request,
@@ -246,8 +257,6 @@ def review_finding_exclusion_request(
         
     return redirect('finding_exclusion', fxid=fxid)
     
-
-
 
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
@@ -287,10 +296,13 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     maintainers = get_reviewers_members()
     
     create_notification(event="finding_exclusion_approved",
+                        subject="✅Whitelisting request accepted",
                         title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                         description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                        recipients=[finding_exclusion.created_by.username] + maintainers)
+                        recipients=[finding_exclusion.created_by.username] + maintainers,
+                        icon="check-circle",
+                        color_icon="#28a745")
     
     messages.add_message(
             request,
@@ -324,10 +336,13 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     
     create_notification(
         event="finding_exclusion_rejected",
+        subject="❌Whitelisting request rejected",
         title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
         description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}.",
         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-        recipients=[finding_exclusion.created_by.username]
+        recipients=[finding_exclusion.created_by.username],
+        icon="xmark-circle",
+        color_icon="#FA0101"
     )
     
     messages.add_message(
@@ -367,6 +382,13 @@ def edit_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
         if form.is_valid():
             form.save()
             
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding Exclusion updated.",
+                extra_tags="alert-success"
+            )
+            
             return redirect('finding_exclusion', fxid=fxid)
     else:
         form = EditFindingExclusionForm(instance=finding_exclusion)
@@ -380,7 +402,25 @@ def edit_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRespo
     
     return redirect('edit_finding_exclusion', fxid=fxid)
         
-        
+
+def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+    
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    remove_findings_from_deleted_finding_exclusions.apply_async(
+        args=(finding_exclusion.unique_id_from_tool, finding_exclusion.type))
+    finding_exclusion.delete()
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion deleted.",
+            extra_tags="alert-success")
+    
+    return redirect('finding_exclusions')
+
+   
 def execute_priorization_check(request: HttpRequest) -> HttpResponse:
     """Execute the priorization check task inmediately"""
     if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
