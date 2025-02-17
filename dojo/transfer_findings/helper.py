@@ -90,6 +90,32 @@ def expire_now(transfer_finding: TransferFinding):
             raise ApiError.internal_server_error(detail=str(e))
 
 
+def get_or_create_tes_to_scan_type(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
+    test: Test = None
+    test = Test.objects.filter(
+        test_type=origin_finding.test.test_type,
+        engagement=transfer_finding.destination_engagement,
+        tags__name="transferred")
+    if test.exists():
+        if test.count() > 1:
+            logger.warning(f"More than one test with the same type of scan and tagged with transfer: {test.count()}")
+        test = test.first()
+    else:
+
+        origin_tags = list(origin_finding.test.tags.all().values_list("name", flat=True))
+        origin_tags.append("Transferred")
+        test = Test.objects.create(
+            engagement=transfer_finding.destination_engagement,
+            test_type=origin_finding.test.test_type,
+            scan_type=origin_finding.test.scan_type,
+            target_start=origin_finding.test.target_start,
+            target_end=origin_finding.test.target_end,
+            tags=origin_tags
+        )
+        test.save()
+    return test
+
+
 def transfer_findings(transfer_finding_findings: TransferFindingFinding, serializer):
 
     """Transfer Findign update Status
@@ -100,7 +126,6 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
     """
 
     request_findings = serializer.validated_data["findings"]
-    test = None
     transfer_finding_obj = None
     system_settings = System_Settings.objects.get()
     if transfer_finding_findings:
@@ -120,14 +145,14 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                         "Risk Expired",]):
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
-                    if not test:
+                    if not transfer_finding_obj.destination_engagement:
                         engagement = Engagement.objects.get(id=serializer.validated_data["engagement_id"])
                         transfer_finding_obj.destination_engagement = engagement
                         transfer_finding_obj.save()
-                        test = created_test(
-                            origin_finding=finding,
-                            transfer_finding=transfer_finding_finding.transfer_findings,
-                        )
+                    test = get_or_create_tes_to_scan_type(
+                        origin_finding=finding,
+                        transfer_finding=transfer_finding_finding.transfer_findings,
+                    )
                     transfer_finding(
                         origin_finding=finding,
                         finding_related_id=dict_findings["related_finding"] if dict_findings.get("related_finding", None) else None,
@@ -144,19 +169,6 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
             logger.warning(f"Finding not Found: {finding.id}")
 
     NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
-
-
-def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
-    test: Test = None
-    test = Test.objects.create(
-        engagement=transfer_finding.destination_engagement,
-        test_type=origin_finding.test.test_type,
-        target_start=origin_finding.test.target_start,
-        target_end=origin_finding.test.target_end,
-    )
-    test.save()
-    return test
-
 
 def transfer_finding(
     origin_finding: Finding,

@@ -803,6 +803,7 @@ def finding_display_status(finding):
         "Active, Verified, Transfer Expired": ["Open", "view_transfer", "Red"],
         "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Closed", "view_transfer", "Green"],
         "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
+        "Inactive, Mitigated, Out Of Scope, Transfer Accepted": ["Closed", "view_transfer", "Green"],
         "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_transfer", "Green"],
         "Inactive, Verified, Mitigated, Risk Expired": ["Closed", "view_risk", "Green"],
         "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
