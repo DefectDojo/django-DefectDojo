@@ -802,6 +802,7 @@ def finding_display_status(finding):
         "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
         "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
         "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
+        "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
         "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
         "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_exclusion", "Green"],
         "Active, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],

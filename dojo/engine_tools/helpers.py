@@ -65,7 +65,7 @@ def has_valid_comments(finding_exclusion, user) -> bool:
     return False
 
 
-def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
+def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion, message: str) -> None:
     email_notification_manager = EmailNotificationManger()
     recipient = None
     practice = finding_exclusion.practice
@@ -81,8 +81,8 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
     
     devsecops_email = cyber_providers.get("devsecops", "")
     
-    title = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}"
-    description = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}."
+    title = message
+    description = message
     
     email_notification_manager.send_mail_notification(
         event="finding_exclusion_request",
@@ -141,7 +141,9 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
                 description=f"All findings added via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the {expired_fex.type}.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
-                recipients=maintainers + approvers + [expired_fex.created_by.username]
+                recipients=maintainers + approvers + [expired_fex.created_by.username],
+                icon="exclamation-triangle",
+                color_icon="#FABC5C"
             )
     except Exception as e:
         logger.error(
@@ -230,14 +232,21 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
     Finding.objects.bulk_update(findings_to_update, ["risk_status", "priority"], 1000)
     logger.info(f"{findings_to_update.count()} findings added to blacklist.")
     
-    blacklist_message = f"New findings added to the blacklist. CVE: {unique_id_from_tool}."
+    blacklist_message = f"{findings_to_update.count()} findings added to the blacklist. CVE: {unique_id_from_tool}."
     create_notification(
         event="finding_exclusion_request",
         title=blacklist_message,
         description=blacklist_message,
         url=relative_url,
-        recipients=get_reviewers_members() + get_approvers_members()
+        recipients=get_reviewers_members() + get_approvers_members(),
+        color_icon="#52A3FA"
     )
+    finding_exclusion = FindingExclusion.objects.filter(
+        unique_id_from_tool=unique_id_from_tool, 
+        type="black_list", 
+        status="Accepted"
+    ).first()
+    send_mail_to_cybersecurity(finding_exclusion, blacklist_message)
 
 
 def get_resource_type(finding) -> str:
@@ -286,7 +295,7 @@ def get_tenable_risk_score(finding) -> int:
     
     soup = BeautifulSoup(finding.description, "html.parser")
     
-    rating_label = soup.find("strong", string="Vulnerabiltity Priority Rating:")
+    rating_label = soup.find("strong", string="Vulnerability Priority Rating:")
     
     if rating_label:
         rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
@@ -378,7 +387,6 @@ def identify_critical_vulnerabilities(findings) -> int:
     Returns:
         int: Number of critical vulnerabilities
     """
-    finding_list = []
     finding_exclusion_list = []
     system_user = get_user(settings.SYSTEM_USER)
     
@@ -388,7 +396,11 @@ def identify_critical_vulnerabilities(findings) -> int:
         Finding.objects.filter(
             Q(cve=finding.cve) | Q(vuln_id_from_tool=finding.cve), 
             active=True
-        ).filter(blacklist_tag_filter).update(priority=priority)
+        ).exclude(
+            cve__isnull=True, vuln_id_from_tool__isnull=True
+        ).filter(
+            blacklist_tag_filter
+        ).update(priority=priority)
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list", status="Accepted")
@@ -415,8 +427,6 @@ def identify_critical_vulnerabilities(findings) -> int:
                 fx = finding_exclusion.first()
                 relative_url = reverse("finding_exclusion", args=[str(fx.pk)])
                 add_findings_to_blacklist.apply_async(args=(fx.unique_id_from_tool, relative_url, priority,))
-                
-        finding_list.append(finding)
         
     FindingExclusion.objects.bulk_create(finding_exclusion_list)
     
@@ -443,3 +453,33 @@ def check_priorization():
     return {
         "message": f"{blacklist_new_items} added to blacklist"
     }
+
+
+@app.task
+def remove_findings_from_deleted_finding_exclusions(unique_id_from_tool: str, fx_type: str) -> None:
+    try:
+        with transaction.atomic():
+            system_user = get_user(settings.SYSTEM_USER)
+            note = get_note(system_user, f"Finding has been removed from the {fx_type} as it has deleted.")
+            
+            is_active = True if fx_type == "black_list" else False
+            
+            findings = Finding.objects.filter(
+                Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
+                active=is_active,
+                tags__name__icontains=fx_type
+            ).prefetch_related("tags", "notes")
+            
+            findings_to_update = []
+            
+            for finding in findings:
+                finding = remove_finding_from_list(finding, note, fx_type)
+                findings_to_update.append(finding)
+                logger.info(f"Removed finding {finding.id} from {fx_type}.")
+            
+            Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
+            
+    except Exception as e:
+        logger.error(
+            f"Error processing deleted exclusion {unique_id_from_tool}: {str(e)}"
+        )
