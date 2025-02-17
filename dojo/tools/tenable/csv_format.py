@@ -92,7 +92,6 @@ class TenableCSVParser:
         data_last_observed = row.get("Last Observed", "")
         data_exploit_frameworks = row.get("Exploit Frameworks", "")
         data_synopsis = row.get("Synopsis", "")
-        data_description = row.get("Description", "")
         data_solution = row.get("Solution", "")
         data_see_also = row.get("See Also", "")
         data_risk_factor = row.get("Risk Factor", "")
@@ -104,7 +103,6 @@ class TenableCSVParser:
         data_cvss_v3_temporal = row.get("CVSS V3 Temporal Score", "")
         data_cvss_v2_vector = row.get("CVSS V2 Vector", "")
         data_cvss_v3_vector = row.get("CVSS V3 Vector", "")
-        data_cpe = row.get("CPE", "")
         data_cve = row.get("CVE", "")
         data_bid = row.get("BID", "")
         data_cross_references = row.get("Cross References", "")
@@ -133,7 +131,6 @@ class TenableCSVParser:
         + "<p><strong>Last Observed:</strong> " + str(data_last_observed) + "</p>"
         + "<p><strong>Exploit Frameworks:</strong> " + str(data_exploit_frameworks) + "</p>"
         + "<p><strong>Synopsis:</strong> " + str(data_synopsis) + "</p>"
-        + "<p><strong>Description:</strong> " + str(data_description) + "</p>"
         + "<p><strong>Solution:</strong> " + str(data_solution) + "</p>"
         + "<p><strong>See Also:</strong> " + str(data_see_also) + "</p>"
         + "<p><strong>Risk Factor:</strong> " + str(data_risk_factor) + "</p>"
@@ -145,7 +142,6 @@ class TenableCSVParser:
         + "<p><strong>CVSS V3 Temporal Score:</strong> " + str(data_cvss_v3_temporal) + "</p>"
         + "<p><strong>CVSS V2 Vector:</strong> " + str(data_cvss_v2_vector) + "</p>"
         + "<p><strong>CVSS V3 Vector:</strong> " + str(data_cvss_v3_vector) + "</p>"
-        + "<p><strong>CPE:</strong> " + str(data_cpe) + "</p>"
         + "<p><strong>CVE:</strong> " + str(data_cve) + "</p>"
         + "<p><strong>BID:</strong> " + str(data_bid) + "</p>"
         + "<p><strong>Cross References:</strong> " + str(data_cross_references) + "</p>"
@@ -159,7 +155,7 @@ class TenableCSVParser:
         + "<p><strong>Custom Id:</strong> " + str(data_custom_id) + "</p>"
     )
 
-    def get_severity_by_vpr(self, vpr_score: int):
+    def get_severity_by_vpr(self, vpr_score: float):
         severity_mapping = {
             1: "Info",
             2: "Low",
@@ -168,13 +164,14 @@ class TenableCSVParser:
             5: "Critical",
         }
         try:
-            if vpr_score >= 9:
+            score = float(vpr_score) if vpr_score not in (None, '') else 0.0
+            if score >= 9.0:
                 return severity_mapping.get(5)
-            if vpr_score >= 7:
+            if score >= 7.0:
                 return severity_mapping.get(4)
-            if vpr_score >= 4:
+            if score >= 4.0:
                 return severity_mapping.get(3)
-            if vpr_score > 0:
+            if score > 0.0:
                 return severity_mapping.get(2)
             return severity_mapping.get(1)
         except:
@@ -302,6 +299,6 @@ class TenableCSVParser:
             endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
-            find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("tenable")]
+            find.unsaved_tags = [row.get("Custom Tag", settings.DD_CUSTOM_TAG_PARSER.get("tenable"))]
 
         return list(dupes.values())
