@@ -86,6 +86,7 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion, message: str
     
     email_notification_manager.send_mail_notification(
         event="finding_exclusion_request",
+        subject=f"✅{message}",
         user=None,
         title=title,
         description=description,
@@ -138,6 +139,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             
             create_notification(
                 event="finding_exclusion_expired",
+                subject="⚠️Finding Exclusion Expired",
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
                 description=f"All findings added via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the {expired_fex.type}.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
@@ -235,6 +237,7 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
     blacklist_message = f"{findings_to_update.count()} findings added to the blacklist. CVE: {unique_id_from_tool}."
     create_notification(
         event="finding_exclusion_request",
+        subject="✅Findings added to blacklist",
         title=blacklist_message,
         description=blacklist_message,
         url=relative_url,
@@ -394,10 +397,8 @@ def identify_critical_vulnerabilities(findings) -> int:
         priority = calculate_vulnerability_priority(finding)
         
         Finding.objects.filter(
-            Q(cve=finding.cve) | Q(vuln_id_from_tool=finding.cve), 
+            (Q(cve=finding.cve) & ~Q(cve=None)) | (Q(vuln_id_from_tool=finding.cve) & ~Q(vuln_id_from_tool=None)),
             active=True
-        ).exclude(
-            cve__isnull=True, vuln_id_from_tool__isnull=True
         ).filter(
             blacklist_tag_filter
         ).update(priority=priority)
