@@ -32,7 +32,7 @@
                         <th>Version</th>
                         <th>Engagement Name</th>
                         <th class="text-center">Active Findings</th>
-                        <th class="text-center">Duplicate Findings</th>
+                        <th class="text-center">Closed Findings</th>
                         <th class="text-center">Total Findings</th>
                     </tr>
                 </thead>
@@ -60,9 +60,9 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if result.duplicate_findings %}
+                            {% if result.closed_findings %}
                             <a href="{% url 'all_findings' %}?component_id={{ result.id }}&duplicate=1&test__engagement__product={{result.engagement.product.id}}">
-                                <b>{{ result.duplicate_findings }}</b>
+                                <b>{{ result.closed_findings }}</b>
                             </a>
                             {% else %}
                             0
@@ -140,7 +140,7 @@
                 { "data": "Version" },
                 { "data": "Engagement_name"},
                 { "data": "Active" },
-                { "data": "Duplicate" },
+                { "data": "Closed" },
                 { "data": "Total" },
             ],
             order: [],  // Default order (can be customized)
