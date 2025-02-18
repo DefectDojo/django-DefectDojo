@@ -1381,6 +1381,7 @@ class AdHocFindingView(View):
             finding.reporter = request.user
             finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
             finding.tags = context["form"].cleaned_data["tags"]
+            finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
             # Save and add new endpoints
             finding_helper.add_endpoints(finding, context["form"])
@@ -1865,7 +1866,7 @@ def delete_api_scan_configuration(request, pid, pascid):
 
 @user_is_authorized(Product_Group, Permissions.Product_Group_Edit, "groupid")
 def edit_product_group(request, groupid):
-    logger.exception(groupid)
+    logger.error(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Edit_Product_Group_Form(instance=group)
 
