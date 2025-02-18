@@ -21,7 +21,8 @@ The Universal Parser is currently in Beta.  See our [announcement presentation](
 
 * A comprehensive replacement for open source parsers, Connectors, or carefully-massaged "Generic Findings Import" reports
 * Capable of handling nuanced, branching logic to structure findings
-* Universal Parser configuration is only available in the beta UI, though you can still import scans using a Universal Parser via the old UI or API
+
+The Universal Parser configuration is only available in the beta UI, though you can still import scans using a Universal Parser via the old UI or API.
 
 ## Step 1: Creating a new Universal Parser
 
