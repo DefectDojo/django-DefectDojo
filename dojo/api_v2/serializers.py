@@ -167,7 +167,7 @@ class ImportStatisticsSerializer(serializers.Serializer):
     )
     delta = DeltaStatisticsSerializer(
         required=False,
-        help_text="Finding statistics of modifications made by the reimport. Only available when TRACK_IMPORT_HISTORY hass not disabled.",
+        help_text="Finding statistics of modifications made by the reimport. Only available when TRACK_IMPORT_HISTORY has not been disabled.",
     )
     after = SeverityStatusStatisticsSerializer(
         help_text="Finding statistics as stored in Defect Dojo after the import",
@@ -1920,43 +1920,42 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        # remove tags from validated data and store them seperately
+        # Pop off of some fields that should not be sent to the model at this time
         to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        # pop push_to_jira so it won't get send to the model as a field
-        push_to_jira = validated_data.pop("push_to_jira")
-
-        # Save vulnerability ids and pop them
-        if "vulnerability_id_set" in validated_data:
-            vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-        else:
-            vulnerability_id_set = None
-
-        # first save, so we have an instance to get push_all_to_jira from
-        new_finding = super(TaggitSerializer, self).create(validated_data)
-
-        if vulnerability_id_set:
-            vulnerability_ids = []
-            for vulnerability_id in vulnerability_id_set:
-                vulnerability_ids.append(vulnerability_id["vulnerability_id"])
-            validated_data["cve"] = vulnerability_ids[0]
-            save_vulnerability_ids(new_finding, vulnerability_ids)
-            new_finding.save()
-
+        push_to_jira = validated_data.pop("push_to_jira", False)
+        notes = validated_data.pop("notes", None)
+        found_by = validated_data.pop("found_by", None)
+        reviewers = validated_data.pop("reviewers", None)
+        # Process the vulnerability IDs specially
+        parsed_vulnerability_ids = []
+        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            for vulnerability_id in vulnerability_ids:
+                parsed_vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            validated_data["cve"] = parsed_vulnerability_ids[0]
+        # Create a findings in memory so that we have access to unsaved_vulnerability_ids
+        new_finding = Finding(**validated_data)
+        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids
+        new_finding.save()
+        # Deal with all of the many to many things
+        if notes:
+            new_finding.notes.set(notes)
+        if found_by:
+            new_finding.found_by.set(found_by)
+        if reviewers:
+            new_finding.reviewers.set(reviewers)
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
         # TODO: JIRA can we remove this is_push_all_issues, already checked in
         # apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(
             new_finding,
         )
-
         # If we need to push to JIRA, an extra save call is needed.
         # TODO: try to combine create and save, but for now I'm just fixing a
         # bug and don't want to change to much
         if push_to_jira or new_finding:
             new_finding.save(push_to_jira=push_to_jira)
-
-        # not sure why we are returning a tag_object, but don't want to change
-        # too much now as we're just fixing a bug
+        # This final call will save the finding again and return it
         return self._save_tags(new_finding, to_be_tagged)
 
     def validate(self, data):
