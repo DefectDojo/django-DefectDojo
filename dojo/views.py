@@ -84,9 +84,8 @@ def action_history(request, cid, oid):
             raise PermissionDenied
     elif ct.model == "user":
         user_has_configuration_permission_or_403(request.user, "auth.view_user")
-    else:
-        if not request.user.is_superuser:
-            raise PermissionDenied
+    elif not request.user.is_superuser:
+        raise PermissionDenied
 
     product_tab = None
     if product_id:
@@ -189,7 +188,7 @@ def manage_files(request, oid, obj_type):
 
 
 @login_required
-def protected_serve(request, path, document_root=None, show_indexes=False):
+def protected_serve(request, path, document_root=None, *, show_indexes=False):
     """Serve the file only after verifying the user is supposed to see the file."""
     file = FileUpload.objects.get(file=path)
     if not file:
@@ -210,7 +209,7 @@ def protected_serve(request, path, document_root=None, show_indexes=False):
     return generate_file_response(file)
 
 
-def access_file(request, fid, oid, obj_type, url=False):
+def access_file(request, fid, oid, obj_type, *, url=False):
     def check_file_belongs_to_object(file, object_manager, object_id):
         if not object_manager.filter(id=object_id).exists():
             raise PermissionDenied
