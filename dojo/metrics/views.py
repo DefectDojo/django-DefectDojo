@@ -296,6 +296,24 @@ def metrics_panel_admin(request):
        'role': role,
        'user': user,
     })
+    
+@user_has_role_permission(Permissions.Metrics_Vultracker)    
+def metrics_vultracker(request):
+    page_name = _('Metrics Vultracker')
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    mf_vultracker_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_vultracker.html', {
+       'name': page_name,
+       'mf_vultracker_url': settings.MF_VULTRACKER_URL,
+       'mf_vultracker_path': settings.MF_VULTRACKER_PATH.get("metrics_vultracker"),
+       'mf_vultracker_params': mf_vultracker_params,
+       'role': role,
+       'user': user,
+    })
 
 # @cache_page(60 * 5)  # cache for 5 minutes
 # @vary_on_cookie

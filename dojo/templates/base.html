@@ -449,7 +449,14 @@
                                                             {% trans "Metrics DevSecOps" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}                                           
+                                                {% endif %}
+                                                {% if "Metrics_Vultracker"|has_role_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_vultracker' %}">
+                                                            {% trans "Metrics Vultracker" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}                                                 
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -1141,8 +1148,14 @@
 
         <!-- /#wrapper -->
 
+        <!-- chat_widget.html -->
+        {% comment %} <div id="chat-widget-container"></div> {% endcomment %}
+
         <!-- our JS -->
         <script src="{% static "dojo/js/index.js" %}"></script>
+
+        <!-- chat_widget.js -->
+        {% comment %} <script src="{% static "dojo/js/chat.js" %}"></script> {% endcomment %}
 
         <!-- our CVSS stuff -->
         <script src="{% static "dojo/js/cvsscalc31_helptext.js" %}"></script>
