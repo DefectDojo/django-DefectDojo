@@ -61,7 +61,7 @@ class TestAquaParser(DojoTestCase):
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
-                    nb_cvssv3 = nb_cvssv3 + 1
+                    nb_cvssv3 += 1
 
             self.assertEqual(0, nb_cvssv3)
 
@@ -72,7 +72,7 @@ class TestAquaParser(DojoTestCase):
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
-                    nb_cvssv3 = nb_cvssv3 + 1
+                    nb_cvssv3 += 1
 
             self.assertEqual(16, nb_cvssv3)
 
