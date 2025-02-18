@@ -7,7 +7,7 @@
 # Ref: https://devguide.python.org/#branchstatus
 FROM node:23.8.0-alpine3.20@sha256:1b4d82a2bee3b5ea9a9048bd3b326220ac77065a84cbef339a8f41c698f0ec66 AS node
 
-FROM python:3.11.9-alpine3.20@sha256:f9ce6fe33d9a5499e35c976df16d24ae80f6ef0a28be5433140236c2ca482686 AS base
+FROM python:3.13.2-alpine3.20@sha256:e885b40c1ed9f3134030e99a27bd61e98e376bf6d6709cccfb3c0aa6e856f56a AS base
 
 FROM base AS build
 WORKDIR /app
