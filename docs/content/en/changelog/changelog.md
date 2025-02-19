@@ -16,6 +16,14 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ### Feb 10, 2025: v2.43.1
 
+- **(Beta UI)** Added 'Has Jira' (True/False) as a filter, to filter Findings, Products or Engagements that have associated Jira data.
+- **(Beta UI)** Notes can now be added to Engagement / Findings / Tests from All Engagements / Findings / Tests lists as well as View Engagement / Findings / Tests pages.
+- **(Beta UI)** Added ability to Close Finding from a Finding List, without needing to first open the Edit Finding form.
+- **(CLI Tools)** Improved help text for Universal Importer / DefectDojo CLI. Many guides and examples are now in our [docs](/en/connecting_your_tools/external_tools/) instead of being displayed in the CLI itself.
+- **(Tools)** Updated Burp scan to use Hashcode Deduplication.  Default hashcode forms are `title`, `file_path`, `severity`, and `vuln_id_from_tool`.
+- **(Tools)** Corrected issue with AWS Inspector2 OSS parser related to `mitigated date` being handled incorrectly.
+
+
 ### Feb 3, 2025: v2.43.0
 
 - **(Beta UI)** Users can now upload local SAML metadata when configuring SAML.
