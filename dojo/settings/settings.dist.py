@@ -346,9 +346,9 @@ env = environ.FileAwareEnv(
     DD_GRAFANA_PATH=(dict, {}),
     DD_GRAFANA_PARAMS=(str, ""),
     DD_MICROSOFT_LOGIN_URL=(str, ""),
-    # --------------- MF Vultracker ---------------
-    DD_MF_VULTRACKER_URL=(str, ""),
-    DD_MF_VULTRACKER_PATH=(str, ""),
+    # --------------- MF FRONTEND DEFECT DOJO ---------------
+    DD_MF_FRONTEND_DEFECT_DOJO_URL=(str, ""),
+    DD_MF_FRONTEND_DEFECT_DOJO_PATH=(str, ""),
     
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
@@ -2266,14 +2266,14 @@ GRAFANA_PATH = env('DD_GRAFANA_PATH')
 GRAFANA_PARAMS = env('DD_GRAFANA_PARAMS')
 MICROSOFT_LOGIN_URL = env('DD_MICROSOFT_LOGIN_URL')
 
-MF_VULTRACKER_URL = env('DD_MF_VULTRACKER_URL')
-MF_VULTRACKER_PATH = env('DD_MF_VULTRACKER_PATH')
+MF_FRONTEND_DEFECT_DOJO_URL = env('DD_MF_FRONTEND_DEFECT_DOJO_URL')
+MF_FRONTEND_DEFECT_DOJO_PATH = env('DD_MF_FRONTEND_DEFECT_DOJO_PATH')
 
 CSP_FRAME_SRC = [
     "'self'",
     GRAFANA_URL,
     MICROSOFT_LOGIN_URL,
-    MF_VULTRACKER_URL,
+    MF_FRONTEND_DEFECT_DOJO_URL,
     "http://localhost:5173/"
 ]
 # ------------------------------------------------------------------------------
