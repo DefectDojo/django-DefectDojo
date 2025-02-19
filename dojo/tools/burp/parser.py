@@ -281,3 +281,51 @@ def get_item(item_node, test):
     if len(cwes) > 0:
         finding.cwe = cwes[0]
     return finding
+
+def get_fields(self) -> list[str]:
+    """Return the list of fields used in the Burp Parser
+
+    Fields:
+    - title: Made using Burp scanner output's name.
+    - url: URL outputted by Burp Scanner.
+    - severity: Severity outputted by Burp Scanner.
+    - param: Burp parameters combined to form param.
+    - scanner_confidence: Converted from Burp format (Certain, Firm, or Tentative) into Defect Dojo integer format.
+    - description: Made by combining URL, url_host, path, and detail.
+    - mitigation: Made using Remediation that was ouputted by Burp scanner
+    - impact: Set to background returned by Burp Scanner.
+    - unique_id_from_tool: Set to serial_number returned by Burp Scanner.
+    - vuln_id_from_tool: Taken from output of Burp Scanner.
+    - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+    """
+
+    return [
+        "title",
+        "url",
+        "severity",
+        "param",
+        "scanner_confidence",
+        "description",
+        "mitigation",
+        "impact",
+        "unique_id_from_tool",
+        "vuln_id_from_tool",
+        "cwe",
+    ]
+
+
+def get_dedupe_fields(self) -> list[str]:
+    """Return the list of dedupe fields used in the Burp Parser
+
+    Fields:
+    - title: Made using Burp scanner output's name.
+    - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+    - description: Made by combining URL, url_host, path, and detail.
+
+    NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+    """
+    return [
+        "title",
+        "cwe",
+        "description",
+    ]
