@@ -449,7 +449,14 @@
                                                             {% trans "Metrics DevSecOps" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}                                           
+                                                {% endif %}
+                                                {% if "Metrics_Regulatory"|has_role_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_regulatory' %}">
+                                                            {% trans "Metrics Regulatory" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}                                                 
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>

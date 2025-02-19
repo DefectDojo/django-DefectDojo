@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+{% load event_tags %}
+{% load i18n %}
+{% load display_tags %}
+{% block add_styles %}
+    .embed-responsive .embed-responsive-item, .embed-responsive
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <div class="embed-responsive embed-responsive-16by9">
+        <iframe class="embed-responsive-item" src="{{ mf_frontend_defect_dojo_url }}{{ mf_frontend_defect_dojo_path }}{{ mf_frontend_defect_dojo_params }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <hr/>
+{% endblock %}
