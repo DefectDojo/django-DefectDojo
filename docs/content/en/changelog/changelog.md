@@ -14,6 +14,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ### Feb 12, 2025: v2.43.2
 
+- **(Beta UI)** Tests and Risk Acceptances can now be added directly from the All Tests / All Risk Acceptances lists.
+- **(Connectors)** Users of Burp, SonarQube and Dependency-Track Connectors can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(API)** Fixed issue where Findings created by API with methods other than `/import` / `/reimport` were not being identified as duplicates.
+- **(Findings)** 'Close Old Findings' will now apply 'Unique ID From Tool' deduplication, if this algorithm is in use for a set of Findings.
+
 ### Feb 10, 2025: v2.43.1
 
 - **(Beta UI)** Added 'Has Jira' (True/False) as a filter, to filter Findings, Products or Engagements that have associated Jira data.
