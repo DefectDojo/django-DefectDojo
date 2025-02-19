@@ -1,11 +1,30 @@
 ---
 title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
+exclude_search: true
 ---
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
+
+## Feb 2025: v2.43
+
+### Feb 19, 2025: v2.43.3
+
+### Feb 12, 2025: v2.43.2
+
+### Feb 10, 2025: v2.43.1
+
+### Feb 3, 2025: v2.43.0
+
+- **(Beta UI)** Users can now upload local SAML metadata when configuring SAML.
+- **(Beta UI)** Added new section on Risk Acceptance Form to allow users to upload 'Proof'; any relevant files that can be used to support a Risk Acceptance (emails, screenshots of communication, policies, etc).
+- **(Connectors)** Users of Semgrep and Tenable Connectors can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(Reimport)** Clarified 'no change' state in Import History with message 'There were no findings created, closed, or modified'.
+- **(Jira)** Next-Gen Epic creation from an Engagement no longer requires an Epic Name to be set, and will instead use an Epic ID value if Epic Name fails.
+- **(Jira)** Removed HTML encoding from strings that are sent to Jira, to prevent escape characters from being added to issue descriptions unnecessarily.
+- **(System Settings)** Split up the 'Disclaimer' function, allowing boilerplate 'Disclaimer' text to be displayed in Notifications, Reports, or Notes.
 
 ## Jan 2025: v2.42
 
