@@ -12,9 +12,13 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ### Feb 19, 2025: v2.43.3
 
+- **(API)** `/audit_log` has been added as an API endpoint for DefectDojo Pro, which can return a JSON report of all user activity, or filter by object ID. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
+- **(Beta UI)** Vulnerability ID can now be edited for a given Finding, using the Edit Finding page.  This allows users to manually identify duplicates by assigning a matching Vulnerability ID to an additional Finding.
+
 ### Feb 12, 2025: v2.43.2
 
 - **(Beta UI)** Tests and Risk Acceptances can now be added directly from the All Tests / All Risk Acceptances lists.
+- **(CLI Tools)** Added a `background-import` flag to allow for asynchronous imports or reimports.
 - **(Connectors)** Users of Burp, SonarQube and Dependency-Track Connectors can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
 - **(API)** Fixed issue where Findings created by API with methods other than `/import` / `/reimport` were not being identified as duplicates.
 - **(Findings)** 'Close Old Findings' will now apply 'Unique ID From Tool' deduplication, if this algorithm is in use for a set of Findings.
@@ -27,7 +31,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(CLI Tools)** Improved help text for Universal Importer / DefectDojo CLI. Many guides and examples are now in our [docs](/en/connecting_your_tools/external_tools/) instead of being displayed in the CLI itself.
 - **(Tools)** Updated Burp scan to use Hashcode Deduplication.  Default hashcode forms are `title`, `file_path`, `severity`, and `vuln_id_from_tool`.
 - **(Tools)** Corrected issue with AWS Inspector2 OSS parser related to `mitigated date` being handled incorrectly.
-
 
 ### Feb 3, 2025: v2.43.0
 
