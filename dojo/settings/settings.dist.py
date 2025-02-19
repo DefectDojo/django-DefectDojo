@@ -348,7 +348,7 @@ env = environ.FileAwareEnv(
     DD_MICROSOFT_LOGIN_URL=(str, ""),
     # --------------- MF FRONTEND DEFECT DOJO ---------------
     DD_MF_FRONTEND_DEFECT_DOJO_URL=(str, ""),
-    DD_MF_FRONTEND_DEFECT_DOJO_PATH=(str, ""),
+    DD_MF_FRONTEND_DEFECT_DOJO_PATH=(dict, {}),
     
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
