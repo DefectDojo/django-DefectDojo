@@ -131,6 +131,9 @@ monitoring:
 
 annotations: {}
 
+# Add annotations for secret resources
+secretAnnotations: {}
+
 # Components
 celery:
   broker: redis
