@@ -1762,7 +1762,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             user=request.user)
 
     accepted_findings = accepted_findings.order_by("-risk_status")
-    fpage = get_page_items(request, accepted_findings, 15)
+    fpage = get_page_items(request, accepted_findings, 25)
 
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),

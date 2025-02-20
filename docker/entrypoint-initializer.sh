@@ -174,4 +174,11 @@ EOD
 
   create_announcement_banner
   initialize_data
+
+  # Tmp
+  if [ "${DD_UPDATE_HASHCODE}" = true ]
+  then
+   python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
+  fi
+
 fi
