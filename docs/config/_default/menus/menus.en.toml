@@ -3,9 +3,14 @@
   url = "/en/about_defectdojo/about_docs/"
   weight = 10
 
-  [[main]]
+[[main]]
   name = "Changelog"
   url = "/en/changelog/changelog/"
+  weight = 11
+
+[[main]]
+  name = "Pro Features"
+  url = "/en/about_defectdojo/pro_features"
   weight = 11
 
 [[social]]
