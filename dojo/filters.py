@@ -141,7 +141,7 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
         if not value:
             return queryset
         # Do the filtering
-        objects = value.split(",")
+        objects = set(value.split(","))
         return (
             queryset.filter(**{f"{self.field_name}__in": objects})
             .annotate(object_count=Count(self.field_name))
