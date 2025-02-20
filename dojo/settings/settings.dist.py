@@ -442,7 +442,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(Path(DOJO_ROOT).parent, "components", "node_modules"),
+    Path(DOJO_ROOT).parent / "components" / "node_modules",
 )
 
 # List of finder classes that know how to find static files in
@@ -884,7 +884,7 @@ if env("DD_WHITENOISE"):
         # https://warehouse.python.org/project/whitenoise/
         "whitenoise.middleware.WhiteNoiseMiddleware",
     ]
-    MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
+    MIDDLEWARE += WHITE_NOISE
 
 EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
@@ -901,10 +901,10 @@ vars().update(EMAIL_CONFIG)
 # https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
 
 
-def saml2_attrib_map_format(dict):
+def saml2_attrib_map_format(din):
     dout = {}
-    for i in dict:
-        dout[i] = (dict[i],)
+    for i in din:
+        dout[i] = (din[i],)
     return dout
 
 
@@ -912,8 +912,6 @@ SAML2_ENABLED = env("DD_SAML2_ENABLED")
 SAML2_LOGIN_BUTTON_TEXT = env("DD_SAML2_LOGIN_BUTTON_TEXT")
 SAML2_LOGOUT_URL = env("DD_SAML2_LOGOUT_URL")
 if SAML2_ENABLED:
-    from os import path
-
     import saml2
     import saml2.saml
     # SSO_URL = env('DD_SSO_URL')
@@ -949,7 +947,7 @@ if SAML2_ENABLED:
         "entityid": str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
-        "attribute_map_dir": path.join(BASEDIR, "attribute-maps"),
+        "attribute_map_dir": str(Path(BASEDIR) / "attribute-maps"),
         # do now discard attributes not specified in attribute-maps
         "allow_unknown_attributes": SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
@@ -1147,6 +1145,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
     },
+    "trigger_evaluate_pro_proposition": {
+        "task": "dojo.tasks.evaluate_pro_proposition",
+        "schedule": timedelta(hours=8),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1200,6 +1202,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
     "Burp Enterprise Scan": ["title", "severity", "cwe"],
+    "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
@@ -1423,6 +1426,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
     "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp Scan": DEDUPE_ALGO_HASH_CODE,
     "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Checkmarx Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1767,7 +1771,9 @@ VULNERABILITY_URLS = {
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
+    "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
     "PYSEC-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/PYSEC-2024-48
     "RHBA-": "https://access.redhat.com/errata/",  # e.g. https://access.redhat.com/errata/RHBA-2024:2406
     "RHEA-": "https://access.redhat.com/errata/",  # e.g. https://access.redhat.com/errata/RHEA-2024:8857
@@ -1778,6 +1784,7 @@ VULNERABILITY_URLS = {
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
     "TEMP-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
+    "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
     "VNS": "https://vulners.com/",
 }
@@ -1796,6 +1803,9 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TWO_STEP_MIGRATION = False
+AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 

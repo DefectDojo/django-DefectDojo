@@ -1283,7 +1283,7 @@ div.custom-search-form {
 }
 
 .dojo-filter-set.form-inline .filter-form-control {
-    width: auto!important;
+    width: 100%!important;
     vertical-align: middle;
 }
 
@@ -1854,4 +1854,11 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.table th, .table td {
+    border-right: 1px solid #ddd;
+}
+.table th:last-child, .table td:last-child {
+    border-right: none; 
 }

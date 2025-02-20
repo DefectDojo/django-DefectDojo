@@ -113,9 +113,8 @@ def split_cvss(value, _temp):
             _temp["CVSS_vector"] = CVSS3(
                 "CVSS:3.0/" + split[1][:-1],
             ).clean_vector()
-    else:
-        if _temp.get("CVSS_value") is None:
-            _temp["CVSS_value"] = float(value)
+    elif _temp.get("CVSS_value") is None:
+        _temp["CVSS_value"] = float(value)
 
 
 def parse_finding(host, tree):
@@ -153,9 +152,8 @@ def parse_finding(host, tree):
             if settings.USE_FIRST_SEEN:
                 if date := vuln_details.findtext("FIRST_FOUND"):
                     temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
-            else:
-                if date := vuln_details.findtext("LAST_FOUND"):
-                    temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+            elif date := vuln_details.findtext("LAST_FOUND"):
+                temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
         except Exception:
             temp["date"] = None
 

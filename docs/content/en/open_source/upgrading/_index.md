@@ -41,9 +41,8 @@ The generic upgrade method for docker compose are as follows:
     ```
 
 -   Go to the directory where your docker-compose.yml file lives
--   Stop DefectDojo: `./dc-stop.sh`
--   Re-start DefectDojo, allowing for container recreation:
-    `./dc-up-d.sh`
+-   Stop DefectDojo: `docker compose stop`
+-   Re-start DefectDojo, allowing for container recreation: `docker compose up -d`
 -   Database migrations will be run automatically by the initializer.
     Check the output via `docker compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the

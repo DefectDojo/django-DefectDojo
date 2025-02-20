@@ -40,11 +40,39 @@ class AnchoreCTLVulnsParser:
 
             mitigation = f"Upgrade to {vuln.get('fix', vuln.get('fixAvailable', 'No fix available'))}\n"
             mitigation += f"URL: {vuln.get('url', vuln.get('link', 'N/A'))}\n"
+cvss_base_score = None
+if vuln.get("feed") in ["nvdv2", "vulnerabilities"]:
+    if vuln.get("nvdData") and len(vuln["nvdData"]) > 0:
+        cvss_base_score = vuln["nvdData"][0].get("cvssV3", {}).get("baseScore")
+# Handling vendorData if available
+elif "vendorData" in vuln and len(vuln["vendorData"]) > 0:
+    if (
+        "cvssV3" in vuln["vendorData"][0]
+        and vuln["vendorData"][0]["cvssV3"]["baseScore"] != -1
+    ):
+        cvss_base_score = vuln["vendorData"][0]["cvssV3"]["baseScore"]
+    elif len(vuln["vendorData"]) > 1:
+        if (
+            "cvssV3" in vuln["vendorData"][1]
+            and vuln["vendorData"][1]["cvssV3"]["baseScore"] != -1
+        ):
+            cvss_base_score = vuln["vendorData"][1]["cvssV3"]["baseScore"]
 
-            cvss_base_score = None
-            if vuln.get("feed") in ["nvdv2", "vulnerabilities"]:
-                if vuln.get("nvdData"):
-                    cvss_base_score = vuln["nvdData"][0].get("cvssV3", {}).get("baseScore")
+references = vuln.get("url", "N/A")
+
+dupe_key = "|".join([
+    vuln.get("imageDigest", "None"),
+    vuln["feed"],
+    vuln["feedGroup"],
+    vuln["package"],
+    vuln.get("packageVersion", "Unknown"),
+    vuln.get("path", vuln.get("packagePath", "N/A")),
+    vuln.get("vulnerabilityId", vuln.get("vuln")),
+])
+
+if dupe_key in dupes:
+    find = dupes[dupe_key]
+
             else:
                 for vendor in vuln.get("vendorData", []):
                     if vendor.get("cvssV3", {}).get("baseScore", -1) != -1:

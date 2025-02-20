@@ -3,9 +3,8 @@
 # - Fail if migrations are not created
 # - Exit container after running tests to allow exit code to propagate as test result
 # set -x
-# set -e
+set -e
 # set -v
-
 
 . /secret-file-loader.sh
 . /reach_database.sh
@@ -64,7 +63,7 @@ You made changes to the models without creating a DB migration for them.
 
 If you're not familiar with migrations in Django, please read the
 great documentation thoroughly:
-https://docs.djangoproject.com/en/1.11/topics/migrations/
+https://docs.djangoproject.com/en/5.0/topics/migrations/
 
 ********************************************************************************
 
@@ -82,8 +81,8 @@ echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
 python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-    exit 1; 
+    exit 1;
 }
 python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-    exit 1; 
+    exit 1;
 }

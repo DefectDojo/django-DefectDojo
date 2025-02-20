@@ -160,7 +160,7 @@
                     {% endif %}
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
-                        <td>{{ test.total_reimport_count }}</td>
+                        <td class="text-right">{{ test.total_reimport_count }}</td>
                     {% endif %}
                     {% if test.api_scan_configuration %}
                         <td>
@@ -277,6 +277,8 @@
                                             {% for action in finding_action_list %}
                                                 {{ action.list|length }} {{ action.grouper }}
                                                 {% if not forloop.last %},{% endif %}
+                                            {% empty %}
+                                                There were no findings created, closed, or modified
                                             {% endfor %}
                                         </a>
                                     </td>

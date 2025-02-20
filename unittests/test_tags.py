@@ -4,7 +4,7 @@ import random
 from dojo.models import Finding, Test
 from dojo.product.helpers import propagate_tags_on_product_sync
 
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +15,8 @@ class TagTests(DojoAPITestCase):
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
-        self.scans_path = "/scans/zap/"
-        self.zap_sample5_filename = self.scans_path + "5_zap_sample_one.xml"
+        self.scans_path = get_unit_tests_scans_path("zap")
+        self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
 
     def create_finding_with_tags(self, tags):
         finding_id = Finding.objects.all().first().id
@@ -251,13 +251,13 @@ class InheritedTagsTests(DojoAPITestCase):
         self.login_as_admin()
         self.system_settings(enable_product_tag_inehritance=True)
         self.product = self.create_product("Inherited Tags Test", tags=["inherit", "these", "tags"])
-        self.scans_path = "/scans/zap/"
-        self.zap_sample5_filename = f"{self.scans_path}5_zap_sample_one.xml"
+        self.scans_path = get_unit_tests_scans_path("zap")
+        self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
 
     def _convert_instance_tags_to_list(self, instance) -> list:
         return [tag.name for tag in instance.tags.all()]
 
-    def _import_and_return_objects(self, test_id=None, reimport=False, tags=None) -> dict:
+    def _import_and_return_objects(self, test_id=None, *, reimport=False, tags=None) -> dict:
         # Import some findings to create all objects
         engagement = self.create_engagement("Inherited Tags Engagement", self.product)
         if reimport:
