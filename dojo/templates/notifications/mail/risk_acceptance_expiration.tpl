@@ -24,7 +24,7 @@
 		{%block findings%}
 			{% for finding in risk_acceptance.accepted_findings.all %}
 				{% url 'view_finding' finding.id as finding_url %}
-				<a href="{{ finding_url|full_url }}">{{ finding.title }}</a> ({{ finding.severity }}) {{ finding.status }}
+				<a href="{{ finding_url|full_url }}">{{ finding.title }}</a> {{ finding.severity }} {{ finding|finding_display_status:"email" }}
 			{% endfor %}
 			<br/>
 		{%endblock%}
@@ -46,8 +46,8 @@
 			clicking on the following link will automatically accept or reject all findings. use this functionality responsibly.
 				{% for permission_key in permission_keys %}
 					{% if permission_key.username == user.username%}
-						<center><a href="{{permission_key.url_accept}}" class="proton-button-actions-accept" target="_blank">Accept</a></center>
-						<center><a href="{{permission_key.url_reject}}" class="proton-button-actions-reject" target="_blank">Reject</a></center>
+						<center><a href="{{permission_key.url_accept}}" class="proton-button-actions-accept button-accept" target="_blank">Accept</a></center>
+						<center><a href="{{permission_key.url_reject}}" class="proton-button-actions-reject button-reject" target="_blank">Reject</a></center>
 					{% endif %}
 				{% endfor %}
 		{% endif %}
