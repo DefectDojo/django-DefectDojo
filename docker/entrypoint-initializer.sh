@@ -39,6 +39,16 @@ EOD
 fi
 }
 
+update_hash_code()
+{
+    echo "Hashcode is updated ? -> ${DD_UPDATE_HASHCODE}"
+    if [ "${DD_UPDATE_HASHCODE}" = true ]
+    then
+        echo "Updating hash_code for parser ${DD_PARSER_TOUPDATE_HASHCODE}"
+        python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
+    fi
+}
+
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
 NUM_FILES=$(echo "$FILES" | wc -w)
@@ -118,6 +128,7 @@ then
     echo "$ docker compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
     create_announcement_banner
     initialize_data
+    update_hash_code
     exit
 fi
 
@@ -134,14 +145,6 @@ then
   DD_JIRA_WEBHOOK_SECRET="$(uuidgen)"
   export DD_JIRA_WEBHOOK_SECRET
   echo "JIRA Webhook Secret: ${DD_JIRA_WEBHOOK_SECRET}"
-fi
-
-# Tmp
-echo "Updating hash_code ${DD_UPDATE_HASHCODE}"
-if [ "${DD_UPDATE_HASHCODE}" = true ]
-then
-    echo "Updating hash_code for parser ${DD_PARSER_TOUPDATE_HASHCODE}"
-    python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
 fi
 
 if [ -z "${ADMIN_EXISTS}" ]
@@ -182,5 +185,5 @@ EOD
 
   create_announcement_banner
   initialize_data
-
+  update_hash_code
 fi
