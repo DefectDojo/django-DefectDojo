@@ -136,6 +136,12 @@ then
   echo "JIRA Webhook Secret: ${DD_JIRA_WEBHOOK_SECRET}"
 fi
 
+# Tmp
+if [ "${DD_UPDATE_HASHCODE}" = true ]
+then
+    python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
+fi
+
 if [ -z "${ADMIN_EXISTS}" ]
 then
 cat <<EOD | python manage.py shell
@@ -174,11 +180,5 @@ EOD
 
   create_announcement_banner
   initialize_data
-
-  # Tmp
-  if [ "${DD_UPDATE_HASHCODE}" = true ]
-  then
-   python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
-  fi
 
 fi
