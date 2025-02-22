@@ -73,7 +73,6 @@ class AnchoreEngineParser:
                     test=test,
                     cve=item.get("cves"),
                     cvssv3_score=cvssv3_base_score,
-                    date=item.get("detectedAt"),
                     description=details,
                     severity=severity,
                     mitigation=mitigation,
