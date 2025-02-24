@@ -131,8 +131,9 @@ monitoring:
 
 annotations: {}
 
-# Add annotations for secret resources
-secretAnnotations: {}
+secrets:
+  # Add annotations for secret resources
+  annotations: {}
 
 # Components
 celery:
