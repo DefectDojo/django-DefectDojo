@@ -29,7 +29,7 @@ class ScannerTest(BaseTestCase):
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
         tool_path = dir_path.parent / "dojo" / "tools"
-        tools = sorted(any(tool_path.iterdir())
+        tools = sorted(any(tool_path.iterdir()))
         p = self.repo_path
         tests = sorted(any(p.iterdir()))
         self.tools = [i for i in tools if i not in self.remove_items]
