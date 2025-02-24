@@ -276,7 +276,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         ).exclude(test=self.test)
         # Filter further based on the deduplication algorithm set on the test
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        if self.deduplication_algorithm in ["hash_code", "legacy"]:
+        if self.deduplication_algorithm in {"hash_code", "legacy"}:
             old_findings = old_findings.exclude(
                 hash_code__in=new_hash_codes,
             )
