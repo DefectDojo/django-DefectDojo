@@ -2731,8 +2731,9 @@ class FindingToFilesSerializer(serializers.Serializer):
             )
         return {"finding_id": finding.id, "files": new_files}
 
-
+    
 class FindingCloseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     is_mitigated = serializers.BooleanField(required=False)
     mitigated = serializers.DateTimeField(required=False)
     false_p = serializers.BooleanField(required=False)
@@ -2742,12 +2743,17 @@ class FindingCloseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finding
         fields = (
+            "id",
             "is_mitigated",
             "mitigated",
             "false_p",
             "out_of_scope",
             "duplicate",
         )
+
+
+class FindingCloseBulkSerializer(serializers.Serializer):
+    findings = FindingCloseSerializer(many=True)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

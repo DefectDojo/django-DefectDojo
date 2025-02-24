@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db import transaction
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -36,6 +37,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 from dojo import engagement
+from dojo.api_v2.api_error import ApiError
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -1034,11 +1036,92 @@ class FindingViewSet(
                 )
         serialized_finding = serializers.FindingCloseSerializer(finding)
         return Response(serialized_finding.data)
-
+    
     @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.TagSerializer},
+        methods=["POST"],
+        request=serializers.FindingCloseBulkSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseBulkSerializer},
     )
+    @action(detail=True, methods=["post"])
+    def bulk_close(self, request, pk=None):
+        # finding = self.get_object()
+
+        if request.method == "POST":
+            findings_close = serializers.FindingCloseBulkSerializer(
+                data=request.data,
+            )
+            if findings_close.is_valid():
+                try:
+                    findings = []
+                    for finding_close in findings_close:
+                        finding = Finding.objects.get(id=finding_close["id"])
+                        finding.is_mitigated = finding_close.validated_data[
+                            "is_mitigated"
+                        ]
+                        if settings.EDITABLE_MITIGATED_DATA:
+                            finding.mitigated = (
+                                finding_close.validated_data["mitigated"]
+                                or timezone.now()
+                            )
+                        else:
+                            finding.mitigated = timezone.now()
+                        finding.mitigated_by = request.user
+                        finding.active = False
+                        finding.false_p = finding_close.validated_data.get(
+                            "false_p", False,
+                        )
+                        finding.duplicate = finding_close.validated_data.get(
+                            "duplicate", False,
+                        )
+                        finding.out_of_scope = finding_close.validated_data.get(
+                            "out_of_scope", False,
+                        )
+
+                        endpoints_status = finding.status_finding.all()
+                        for e_status in endpoints_status:
+                            e_status.mitigated_by = request.user
+                            if settings.EDITABLE_MITIGATED_DATA:
+                                e_status.mitigated_time = (
+                                    finding_close.validated_data["mitigated"]
+                                    or timezone.now()
+                                )
+                            else:
+                                e_status.mitigated_time = timezone.now()
+                            e_status.mitigated = True
+                            e_status.last_modified = timezone.now()
+                            e_status.save()
+                        findings.append(finding) 
+                        system_settings = System_Settings.objects.get()
+                        if system_settings.enable_transfer_finding:
+                            helper_tf.close_or_reactive_related_finding(
+                                event="close",
+                                parent_finding=finding,
+                                notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                send_notification=False)
+                except Exception as e:
+                    return ApiError.internal_server_error(detail=str(e))
+                
+                try:
+                    with transaction.atomic():
+                        Finding.objects.bulk_update(findings, ["is_mitigated",
+                                                               "mitigated",
+                                                               "mitigated_by",
+                                                               "active",
+                                                               "false_p",
+                                                               "duplicate",
+                                                               "out_of_scope"])
+                        return http_response.ok(
+                            message="Findings closed successfully")
+
+                except Exception as e:
+                    ApiError.internal_server_error(
+                        detail=str(f"Error Closed finding bulk: {e}"))
+            else:
+                return Response(
+                    findings_close.errors, status=status.HTTP_400_BAD_REQUEST,
+                )
+            serialized_finding = serializers.FindingCloseBulkSerializer(findings_close)
+            return Response(serialized_finding.data)
     @extend_schema(
         methods=["POST"],
         request=serializers.TagSerializer,
