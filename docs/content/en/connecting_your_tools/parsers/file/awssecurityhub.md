@@ -15,5 +15,8 @@ AWS Security Hub integrates with multiple AWS Tools. Thus, you can retrieve find
 - AWS Security Hub GuardDuty: <br>`aws securityhub get-findings --filters ProductName="[{Value=GuardDuty,Comparison=EQUALS}]" | jq "." > output.json`
 - AWS Security Hub Inspector: <br>`aws securityhub get-findings --filters ProductName="[{Value=Inspector,Comparison=EQUALS}]" | jq "." > output.json`
 
+### Important note
+AWS Security Hub Parser does import the affected service ARNs as hosts to DefectDojo. However, as ARNs contain invalid digits for hosts, the ARN is changed slightly. ":", " " & "/" are replaced by "_".
+
 ### Sample Scan Data
 Sample scan data for testing purposes can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/awssecurityhub).
