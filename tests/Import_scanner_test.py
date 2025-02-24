@@ -22,10 +22,10 @@ class ScannerTest(BaseTestCase):
     def setUp(self):
         super().setUp(self)
         self.repo_path = dir_path / "scans"
-        if self.repo_pathpyt.is_dir():
-            shutil.rmtree(str(self.repo_path))
+        if self.repo_path.is_dir():
+            shutil.rmtree(self.repo_path)
         self.repo_path.mkdir()
-        git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", str(self.repo_path))
+        git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
         tool_path = dir_path.parent / "dojo" / "tools"
@@ -221,7 +221,7 @@ class ScannerTest(BaseTestCase):
 
     def tearDown(self):
         super().tearDown(self)
-        shutil.rmtree(str(self.repo_path))
+        shutil.rmtree(self.repo_path)
 
 
 def suite():
