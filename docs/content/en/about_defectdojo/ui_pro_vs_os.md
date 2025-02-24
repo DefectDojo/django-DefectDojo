@@ -41,6 +41,11 @@ The Enterprise settings section contains the System Settings, Jira Instances, De
 
 6. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 
+## Filtering the Table
+In this screenshot we are filtering for all Findings that are in 'Product One'.  Once we apply this filter (by clicking outside of the Filters menu), the contents of this Finding list will automatically update to reflect the filter applied.
+
+![image](images/rules_engine_3.png)
+
 ## New Dashboards
 
 New metrics visualizations are included in the Beta UI.  All of these reports can be filtered and exported as PDF to share them with a wider audience.
