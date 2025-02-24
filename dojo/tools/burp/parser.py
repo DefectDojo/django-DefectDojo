@@ -50,7 +50,6 @@ class BurpParser:
             "cwe",
         ]
 
-
     def get_dedupe_fields(self) -> list[str]:
         """
         Return the list of dedupe fields used in the Burp Parser
@@ -67,7 +66,6 @@ class BurpParser:
             "cwe",
             "description",
         ]
-
 
     def get_scan_types(self):
         return ["Burp Scan"]
