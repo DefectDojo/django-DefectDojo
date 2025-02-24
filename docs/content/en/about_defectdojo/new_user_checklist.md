@@ -1,5 +1,5 @@
 ---
-title: "New User Checklist"
+title: "☑️ New User Checklist"
 description: "Get Started With DefectDojo"
 draft: "false"
 weight: 2
