@@ -135,7 +135,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_endpoint_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -152,7 +152,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_endpoint_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -174,7 +174,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_and_close_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_and_close_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="1 findings and closed 2 findings"))
@@ -242,7 +242,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_endpoint_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -259,7 +259,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_endpoint_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -281,7 +281,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_and_close_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_and_close_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="1 findings and closed 2 findings"))
