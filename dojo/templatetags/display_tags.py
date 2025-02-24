@@ -763,13 +763,15 @@ def system_setting_enabled(name):
 
 
 @register.filter
-def finding_display_status(finding):
+def finding_display_status(finding, event="view"):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     html_url = '''
         <a href="{{reverse}}" class="has-popover" data-trigger="hover"
         data-placement="right" data-container="body" data-original-title="{{display_status}}">
         <span style="background-color: {{color_background}};" class="pass_fail Pass">{{current_status}}</span></a>'''
+    
+    html_email = '<span class="proton-button button-status" style="background: {{color_background}}" button-status">{{display_status}}</span>'
     ra = finding.risk_acceptance
     reverse_risk_acceptance = None
     reverse_whitelist = None
@@ -778,7 +780,8 @@ def finding_display_status(finding):
         reverse_risk_acceptance = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
     if finding.risk_status == "On Whitelist" or finding.risk_status == "On Blacklist":
         finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, status="Accepted").first()
-        reverse_whitelist = reverse('finding_exclusion', args=(finding_exclusion.pk,))
+        if finding_exclusion:
+            reverse_whitelist = reverse('finding_exclusion', args=(finding_exclusion.pk,))
 
     dict_rule_reverse = {
         "view_transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
@@ -828,13 +831,22 @@ def finding_display_status(finding):
 
     display_status = finding.status()
     status = dict_rule_display_status.get(display_status, (display_status, "view_finding", "Red"))
-    template_object = template.Template(html_url)
-    context = {
-        "current_status": status[0],
-        "reverse": dict_rule_reverse.get(status[1]),
-        "color_background": StatusColor.get_color(status[2]),
-        "display_status": display_status
-    }
+    context = {}
+    template_object = None
+    if event == "email":
+        template_object = template.Template(html_email)
+        context = {
+            "display_status": status[0],
+            "color_background": StatusColor.get_color(status[2])
+        }
+    else:
+        template_object = template.Template(html_url)
+        context = {
+            "current_status": status[0],
+            "reverse": dict_rule_reverse.get(status[1]),
+            "color_background": StatusColor.get_color(status[2]),
+            "display_status": display_status
+        }
     context_object = template.Context(context)
     html_render = template_object.render(context_object)
     return html_render
