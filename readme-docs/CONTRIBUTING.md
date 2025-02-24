@@ -31,7 +31,7 @@ for approval, please file an issue to get pre-approval before beginning work on 
 `enhancement-approved` label to your issue and you can begin building it out.
 
 Below are some representative examples of what we will and won't support going forward. If you have suggestions or other
-feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp-slack.herokuapp.com/).
+feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp.org/slack/invite).
 
 **Acceptable examples:**
 
@@ -54,7 +54,7 @@ feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](htt
 
 ## Writing a New Parser
 
-Please see [the parser guide](https://documentation.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
+Please see [the parser guide](https://docs.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
 ## Modifying DefectDojo and Testing
 
