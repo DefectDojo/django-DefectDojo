@@ -79,7 +79,7 @@ and see what is in effect.
 
 #### Asynchronous Import
 
-**Please note: Asynchronous Import is currently an experimental feature.  Please exercise caution with this method as results may be inconsistent.**
+<span style="background-color:rgba(242, 86, 29, 0.3)">This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release).  Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.</span>
 
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
 processing especially large scans. It works by batching Findings and Endpoints by a 

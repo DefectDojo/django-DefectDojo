@@ -10,6 +10,12 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Feb 2025: v2.43
 
+### Feb 24, 2025: v2.43.4
+
+- **(API)** API can now filter Findings by tag using AND, in addition to OR.  This can be done with the `tags__and` API filter.
+- **(Connectors)** Users of AWS Security Hub, Snyk can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(Pro Metrics)** Tool Insights can now be filtered with specific Date values, rather than simply 'past 30 days', etc.
+
 ### Feb 19, 2025: v2.43.3
 
 - **(API)** `/audit_log` has been added as an API endpoint for DefectDojo Pro, which can return a JSON report of all user activity, or filter by object ID. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
