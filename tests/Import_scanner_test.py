@@ -21,16 +21,16 @@ logger = logging.getLogger(__name__)
 class ScannerTest(BaseTestCase):
     def setUp(self):
         super().setUp(self)
-        self.repo_path = dir_path + "/scans"
-        if Path(self.repo_path).is_dir():
+        self.repo_path = dir_path / "scans"
+        if self.repo_path.is_dir():
             shutil.rmtree(self.repo_path)
-        Path(self.repo_path).mkdir()
+        self.repo_path.mkdir()
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
-        tool_path = Path(dir_path[:-5] + "dojo/tools")
+        tool_path = dir_path.parent / "dojo" / "tools"
         tools = sorted(any(tool_path.iterdir()))
-        p = Path(self.repo_path)
+        p = self.repo_path
         tests = sorted(any(p.iterdir()))
         self.tools = [i for i in tools if i not in self.remove_items]
         self.tests = [i for i in tests if i not in self.remove_items]
@@ -44,7 +44,7 @@ class ScannerTest(BaseTestCase):
         missing_tests += ["\nNO TEST FILES"]
 
         for test in self.tests:
-            p = Path(self.repo_path + "/" + test)
+            p = self.repo_path / test
             cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0 and tool not in missing_tests:
@@ -60,7 +60,7 @@ class ScannerTest(BaseTestCase):
         self.assertEqual(len(missing_tests), 0)
 
     def test_check_for_forms(self):
-        forms_path = dir_path[:-5] + "dojo/forms.py"
+        forms_path = dir_path.parent / "dojo" / "forms.py"
         file = open(forms_path, "r+", encoding="utf-8")
         forms = file.readlines()
         file.close()
@@ -98,7 +98,7 @@ class ScannerTest(BaseTestCase):
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
-        template_path = dir_path[:-5] + "dojo/templates/dojo/import_scan_results.html"
+        template_path = dir_path.parent / "dojo" / "templates" / "dojo" / "import_scan_results.html"
         file = open(template_path, "r+", encoding="utf-8")
         templates = file.readlines()
         file.close()
@@ -179,7 +179,7 @@ class ScannerTest(BaseTestCase):
 
         failed_tests = []
         for test in self.tests:
-            p = Path(self.repo_path + "/" + test)
+            p = self.repo_path / test
             cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0:
@@ -195,8 +195,8 @@ class ScannerTest(BaseTestCase):
                     driver.find_element(By.ID, "id_verified").get_attribute("checked")
                     scan_type = scan_map[test]
                     Select(driver.find_element(By.ID, "id_scan_type")).select_by_visible_text(scan_type)
-                    test_location = self.repo_path + "/" + test + "/" + case
-                    driver.find_element(By.ID, "id_file").send_keys(test_location)
+                    test_location = self.repo_path / test / case
+                    driver.find_element(By.ID, "id_file").send_keys(str(test_location))
                     driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
                     EngagementTXT = "".join(driver.find_element(By.TAG_NAME, "BODY").text).split("\n")
                     reg = re.compile(r"processed, a total of")
