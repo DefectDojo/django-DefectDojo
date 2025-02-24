@@ -322,7 +322,7 @@ def view_product_components(request, pid):
     component_query = component_query.annotate(
         total_findings=Count('finding__id', distinct=True),
         active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
-        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        closed_findings=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True),
         engagement_name=F('engagement__name')
     )
 

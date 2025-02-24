@@ -1263,13 +1263,9 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         findings = form.cleaned_data['accepted_findings']
         form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
-        white_list_final = None
-        len_white_list = 0
-        findings_not_on_white_list = []
-        conf_risk = ra_helper.get_config_risk()
         for finding in findings:
             if (
-                rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng)
+                rp_helper.validate_list_findings("black_list", finding)
                 and (
                     request.user.is_superuser
                     or rp_helper.role_has_exclusive_permissions(request.user)
@@ -1283,20 +1279,6 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                     extra_tags="alert-danger",
                 )
                 return render(request, "dojo/add_risk_acceptance.html", {"form": form})
-            white_list = rp_helper.validate_list_findings(
-                conf_risk, "white_list", finding, eng
-            )
-            if white_list:
-                white_list_final = white_list
-                len_white_list = len_white_list + 1
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    f"The finding {finding.id} is on the white list",
-                    extra_tags="alert-warning",
-                )
-            else:
-                findings_not_on_white_list.append(finding.id)
 
             abuse_control_result = rp_helper.abuse_control(
                 request.user, finding, product, product_type
@@ -1313,13 +1295,6 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                         request, "dojo/add_risk_acceptance.html", {"form": form}
                     )
 
-        if len_white_list != len(findings) and white_list_final:
-            messages.add_message(request,
-            messages.WARNING,
-            f'The findings {findings_not_on_white_list} are not on the white list, not is possible to continue with the risk acceptance',
-            extra_tags='alert-danger')
-            return render(request, "dojo/add_risk_acceptance.html", {"form": form})
-
         try:
             risk_acceptance = form.save()
             id_risk_acceptance = risk_acceptance.id
@@ -1332,25 +1307,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         if notes:
             risk_acceptance.notes.add(notes)
 
-        if white_list_final:
-            risk_acceptance.recommendation = Risk_Acceptance.TREATMENT_AVOID
-            risk_acceptance.decision = Risk_Acceptance.TREATMENT_AVOID
-            actual_date = timezone.now().date()
-            expired_date = datetime.strptime(
-                white_list_final.get("expired_date", actual_date), "%d%m%Y"
-            )
-            difference_date = expired_date.date() - actual_date
-            risk_acceptance.expiration_date = actual_date + relativedelta(
-                days=difference_date.days
-            )
-            risk_acceptance.recommendation_details = f"{risk_acceptance.recommendation_details}\nHU: {white_list_final.get('hu', '')} - {white_list_final.get('reason', '')}"
-
         eng.risk_acceptance.add(risk_acceptance)
 
         if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True
                 or rp_helper.role_has_exclusive_permissions(request.user)
-                or white_list_final
                 or get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
@@ -1739,7 +1700,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
                 if settings.RISK_PENDING:
-                    conf_risk = ra_helper.get_config_risk()
                     if risk_acceptance.decision == Risk_Acceptance.TREATMENT_AVOID:
                         messages.add_message(
                             request,
@@ -1751,7 +1711,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                             request, reverse("view_risk_acceptance", args=(eid, raid))
                         )
                     for finding in findings:
-                        if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
+                        if rp_helper.validate_list_findings("black_list", finding):
                             messages.add_message(
                                 request,
                                 messages.WARNING,
@@ -1802,7 +1762,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             user=request.user)
 
     accepted_findings = accepted_findings.order_by("-risk_status")
-    fpage = get_page_items(request, accepted_findings, 15)
+    fpage = get_page_items(request, accepted_findings, 25)
 
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),

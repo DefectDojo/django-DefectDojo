@@ -2767,21 +2767,6 @@ def generate_file_response_from_file_path(
     response["Content-Length"] = file_size
     return response
 
-
-def get_remote_json_config(connection: Connection, path_file: str):
-    try:
-        git_client = connection.clients.get_git_client()
-        file_content = git_client.get_item_text(
-            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
-            path=path_file,
-            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
-        )
-        data = json.loads(b"".join(file_content).decode("utf-8"))
-        return data
-    except Exception as e:
-        logger.error("Error getting remote configuration file: " + str(e))
-        raise e
-    
 def validate_group_role(request, user, ptid, viewname, role):
     if settings.DD_VALIDATE_ROLE_USER:
         valid_group = settings.DD_ROLES_MAP_GROUPS.get(role)
