@@ -200,7 +200,7 @@ def view_questionnaire(request, eid, sid):
     })
 
 
-def get_answered_questions(survey=None, read_only=False):
+def get_answered_questions(survey=None, *, read_only=False):
     if survey is None:
         return None
 
@@ -468,8 +468,8 @@ def create_question(request):
         choiceQuestionFrom = CreateChoiceQuestionForm(request.POST)
 
         if form.is_valid():
-            type = form.cleaned_data["type"]
-            if type == "text":
+            question_type = form.cleaned_data["type"]
+            if question_type == "text":
                 if textQuestionForm.is_valid():
                     created_question = TextQuestion.objects.create(
                         optional=form.cleaned_data["optional"],
@@ -483,7 +483,7 @@ def create_question(request):
                     return HttpResponseRedirect(reverse("questions"))
                 error = True
 
-            elif type == "choice":
+            elif question_type == "choice":
                 if choiceQuestionFrom.is_valid():
                     created_question = ChoiceQuestion.objects.create(
                         optional=form.cleaned_data["optional"],
@@ -537,11 +537,12 @@ def edit_question(request, qid):
                 "This question is part of an already answered survey. If you change it, the responses "
                 "may no longer be valid.",
                 extra_tags="alert-info")
-    type = str(ContentType.objects.get_for_model(question))
+    content_type = str(ContentType.objects.get_for_model(question))
 
     if type in {"dojo | text question", "Defect Dojo | text question"}:
         form = EditTextQuestionForm(instance=question)
     elif type in {"dojo | choice question", "Defect Dojo | choice question"}:
+
         form = EditChoiceQuestionForm(instance=question)
     else:
         raise Http404
@@ -789,7 +790,7 @@ def answer_empty_survey(request, esid):
             survey.responder = request.user if not request.user.is_anonymous else None
             survey.answered_on = date.today()
             survey.save()
-            general_survey.num_responses = general_survey.num_responses + 1
+            general_survey.num_responses += 1
             general_survey.save()
             if request.user.is_anonymous:
                 message = "Your responses have been recorded."

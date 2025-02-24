@@ -170,9 +170,8 @@ class VeracodeXMLParser:
             if settings.USE_FIRST_SEEN:
                 if date := xml_node.get("date_first_occurrence", None):
                     finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
-            else:
-                if date := xml_node.get("date_last_occurrence", None):
-                    finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
+            elif date := xml_node.get("date_last_occurrence", None):
+                finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
         except Exception:
             finding.date = test.target_start
 

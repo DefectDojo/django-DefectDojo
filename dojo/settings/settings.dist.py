@@ -884,7 +884,7 @@ if env("DD_WHITENOISE"):
         # https://warehouse.python.org/project/whitenoise/
         "whitenoise.middleware.WhiteNoiseMiddleware",
     ]
-    MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
+    MIDDLEWARE += WHITE_NOISE
 
 EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
@@ -901,10 +901,10 @@ vars().update(EMAIL_CONFIG)
 # https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
 
 
-def saml2_attrib_map_format(dict):
+def saml2_attrib_map_format(din):
     dout = {}
-    for i in dict:
-        dout[i] = (dict[i],)
+    for i in din:
+        dout[i] = (din[i],)
     return dout
 
 
@@ -1149,6 +1149,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.tasks.evaluate_pro_proposition",
         "schedule": timedelta(hours=8),
     },
+    "clear_sessions": {
+        "task": "dojo.tasks.clear_sessions",
+        "schedule": crontab(hour=0, minute=0, day_of_week=0),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1202,6 +1206,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
     "Burp Enterprise Scan": ["title", "severity", "cwe"],
+    "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
@@ -1425,6 +1430,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
     "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp Scan": DEDUPE_ALGO_HASH_CODE,
     "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Checkmarx Scan": DEDUPE_ALGO_HASH_CODE,
