@@ -1,0 +1,8 @@
+format: table
+exit-code: 1
+severity: CRITICAL,HIGH,MEDIUM,LOW
+scan:
+  skip-dirs:
+    - unittests/scans
+vulnerability:
+  ignore-unfixed: true
