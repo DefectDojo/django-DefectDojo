@@ -237,6 +237,7 @@ django:
         memory: 256Mi
   nodeSelector: {}
   replicas: 1
+  strategy: {}
   tolerations: []
   uwsgi:
     livenessProbe:

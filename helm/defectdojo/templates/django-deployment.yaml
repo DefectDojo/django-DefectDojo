@@ -20,6 +20,10 @@ metadata:
 {{- end }}
 spec:
   replicas: {{ .Values.django.replicas }}
+  {{- with .Values.django.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if .Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- end }}
