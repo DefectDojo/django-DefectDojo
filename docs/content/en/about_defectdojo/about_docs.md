@@ -54,7 +54,7 @@ DefectDojo Inc. hosts a commercial edition of this software, which includes:
 - cloud hosting, with regular backups, updates and maintenance
 - premium support and implementation guidance
 
-For more information, please visit [defectdojo.com](https://www.defectdojo.com/).
+For more information, please visit [defectdojo.com](https://defectdojo.com/pricing).
 
 DefectDojo Inc. maintains this documentation to support both the Community and Pro editions of DefectDojo.
 
