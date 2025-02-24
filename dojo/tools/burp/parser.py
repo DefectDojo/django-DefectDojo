@@ -20,8 +20,8 @@ class BurpParser:
     """
 
     def get_fields(self) -> list[str]:
-
-        """Return the list of fields used in the Burp Parser
+        """
+        Return the list of fields used in the Burp Parser
 
         Fields:
         - title: Made using Burp scanner output's name.
@@ -35,8 +35,7 @@ class BurpParser:
         - unique_id_from_tool: Set to serial_number returned by Burp Scanner.
         - vuln_id_from_tool: Taken from output of Burp Scanner.
         - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
-        """ 
-
+        """
         return [
             "title",
             "url",
@@ -53,8 +52,8 @@ class BurpParser:
 
 
     def get_dedupe_fields(self) -> list[str]:
-
-        """Return the list of dedupe fields used in the Burp Parser
+        """
+        Return the list of dedupe fields used in the Burp Parser
 
         Fields:
         - title: Made using Burp scanner output's name.
@@ -63,7 +62,6 @@ class BurpParser:
 
         NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
         """
-
         return [
             "title",
             "cwe",
