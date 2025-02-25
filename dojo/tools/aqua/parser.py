@@ -2,6 +2,7 @@ import json
 
 from dojo.models import Finding
 
+
 class AquaParser:
 
     def get_fields(self) -> list[str]:
@@ -43,7 +44,6 @@ class AquaParser:
 
         Fields:
         - severity: Severity converted from Aqua format into Defect Dojo format.
-        - vulnerability_ids: 
         - component_name: Set to name returned from Aqua Scanner.
         - component_version: Set to version returned from Aqua Scanner.
 
@@ -55,41 +55,43 @@ class AquaParser:
             "component_version",
         ]
 
-    #Jino This get_fields was written for the Aque Parser v2 (based off of "get_iten_v2")
-    #What do we do with the seperate versions of this parser?
-    #def get_fields(self) -> list[str]:
-    #    """Return the list of fields used in the Aqua Parser V2
+    # Jino This get_fields was written for the Aque Parser v2 (based off of "get_iten_v2")
+    # What do we do with the seperate versions of this parser?
+    # def get_fields(self) -> list[str]:
+    #     """
+    #     Return the list of fields used in the Aqua Parser V2
     #
-    #    Fields:
-    #    - title: Created by combining the finding's cve and file_path
-    #    - description: Text describing finding
-    #    - url: Url associated with the finding
-    #    - severity: Severity rating converted from Aqua's integer format into DefectDojo's format.
-    #      #Jino: On line 106 it calls severity_of instead of aqua_severity_of. get_item v1 uses aqua_severity_of#
-    #    - impact: Impact rating of finding. Same as the finding severity.
-    #    - mitigation: If solution is true, mitigation equals true. If fix_version is true, mitigation equals 'Upgrade to True'.If neither are true mitigation equals 'No known mitigation'.
-    #    """
-    #    return [
-    #        "title",
-    #        "description",
-    #        "url",
-    #        "severity",
-    #        "impact",
-    #        "mitigation",
-    #    ]
+    #     Fields:
+    #     - title: Created by combining the finding's cve and file_path
+    #     - description: Text describing finding
+    #     - url: Url associated with the finding
+    #     - severity: Severity rating converted from Aqua's integer format into DefectDojo's format.
+    #       #Jino: On line 106 it calls severity_of instead of aqua_severity_of. get_item v1 uses aqua_severity_of#
+    #     - impact: Impact rating of finding. Same as the finding severity.
+    #     - mitigation: If solution is true, mitigation equals true. If fix_version is true, mitigation equals 'Upgrade to True'.If neither are true mitigation equals 'No known mitigation'.
+    #     """
+    #     return [
+    #         "title",
+    #         "description",
+    #         "url",
+    #         "severity",
+    #         "impact",
+    #         "mitigation",
+    #     ]
     # Dedupe for v2 based on default dedupe values
-    #def get_dedupe_fields(self) -> list[str]:
-    #    """Return the list of fields used for deduplication in the Aqua Parser V2.
+    # def get_dedupe_fields(self) -> list[str]:
+    #     """
+    #     Return the list of fields used for deduplication in the Aqua Parser V2.
     #
-    #    Fields:
-    #    - title: Created by combining the finding's cve and file_path
-    #    - description: Text describing finding
-    #    """
-    #    #NOTE: vulnerability_ids is not provided by parser
-    #    return [
-    #        "title",
-    #        "description",
-    #    ]
+    #     Fields:
+    #     - title: Created by combining the finding's cve and file_path
+    #     - description: Text describing finding
+    #     """
+    #     #NOTE: vulnerability_ids is not provided by parser
+    #     return [
+    #         "title",
+    #         "description",
+    #     ]
     def get_scan_types(self):
         return ["Aqua Scan"]
 
