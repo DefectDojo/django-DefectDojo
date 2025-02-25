@@ -31,9 +31,7 @@ def get_serializer_ref_name(serializer):
     if hasattr(serializer_meta, "ref_name"):
         ref_name = serializer_meta.ref_name
     else:
-        ref_name = serializer_name
-        if ref_name.endswith("Serializer"):
-            ref_name = ref_name[:-len("Serializer")]
+        ref_name = serializer_name.removesuffix("Serializer")
     return ref_name
 
 
