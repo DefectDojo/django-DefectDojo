@@ -52,6 +52,7 @@ sensitiveCodepaths:
   - 'docker/entrypoint-celery-beat.sh'
   - 'docker/entrypoint-celery-worker.sh'
   - 'docker/entrypoint-initializer.sh'
+  - 'docker/entrypoint-first-boot.sh'
   - 'docker/entrypoint-nginx.sh'
   - 'docker/entrypoint-uwsgi.sh'
   - 'docker/wait-for-it.sh'
@@ -67,6 +68,7 @@ allowedAuthors:
     - dsever
     - dogboat
     - hblankenship
+    - valentijnscholten
 notificationList:
   - '@mtesauro'
   - '@grendel513'

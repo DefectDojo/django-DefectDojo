@@ -74,7 +74,7 @@ class CheckmarxParser:
                     if language not in language_list:
                         language_list[language] = 1
                     else:
-                        language_list[language] = language_list[language] + 1
+                        language_list[language] += 1
 
                 if group is not None:
                     findingdetail = f"{findingdetail}**Group:** {group}\n"
@@ -177,7 +177,7 @@ class CheckmarxParser:
             # We have already created a finding for this aggregate: updates the
             # description and the nb_occurences
             find = dupes[aggregateKeys]
-            find.nb_occurences = find.nb_occurences + 1
+            find.nb_occurences += 1
             if find.nb_occurences == 2:
                 find.description = f"### 1. {find.title}\n{find.description}"
             find.description = f"{find.description}\n\n-----\n### {find.nb_occurences}. {title}\n{findingdetail}\n{description}"

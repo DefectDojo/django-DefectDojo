@@ -40,12 +40,8 @@ class ArachniParser:
             item = self.get_item(node, report_date)
             dupe_key = item.severity + item.title
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = (
-                    items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                )
-                items[dupe_key].unsaved_req_resp = (
-                    items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-                )
+                items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp += item.unsaved_req_resp
                 items[dupe_key].nb_occurences += 1
             else:
                 items[dupe_key] = item

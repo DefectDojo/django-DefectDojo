@@ -51,7 +51,7 @@ An attacker that manages to execute code on the resource can use the publicly kn
    * For private images, check the Finding for detailed information regarding the vulnerability.
    * Build a new image with the fixed vulnerability and replace it in the resource.
 * If you cannot use the latest version, prioritize patching resources in your environment according to the attack surface they are exposed to and the potential impact of this resource’s compromise (based on the Issue severity).",Wiz - Demo-Scenarios,https://demo.wiz.io/issues#~(issue~'027155e3-56a2-4916-9697-0c2202b9f5d1),https://portal.azure.com/#@wizsectest.onmicrosoft.com/resource//subscriptions/fee3535b-9616-486f-a476-6a500a08a02b/resourcegroups/us2eastrg/providers/microsoft.compute/virtualmachines/ms2012datacenterv001,{},,,
-2023-01-25T00:19:57Z,AKS user/service accounts with the privileges to create pods,INFORMATIONAL,OPEN,"#### Description
+2023-01-25T00:19:57Z,AKS user/service accounts with the privileges to create pods,INFORMATIONAL,IN_PROGRESS,"#### Description
 This account is assigned the permission to create new pods.
 
 #### Potential impact
@@ -73,7 +73,7 @@ Publicly exposed resources are more easily accessible for an attacker than inter
 * Sensitive information should not be directly accessible from the internet, or accessible by easily-compromised principals.
 * Limit the data access to only those who need it. Minimize the attack surface of users with access to sensitive data to protect from breaches.
 * Make sure that the data is encrypted at rest.",Wiz - Demo-Scenarios,https://demo.wiz.io/issues#~(issue~'02ab10b7-e431-4349-b1ea-96db0aece24d),,{},,,
-2024-01-24T11:02:11Z,AKS cluster contains a pod running containers with added capabilities,INFORMATIONAL,OPEN,"#### Description
+2024-01-24T11:02:11Z,AKS cluster contains a pod running containers with added capabilities,INFORMATIONAL,RESOLVED,"#### Description
 This cluster contains a pod running containers with added capabilities.
 
 #### Potential impact
@@ -87,7 +87,7 @@ Containers run with a default set of capabilities as assigned by the Container R
 * Avoid running privileged containers.
 * Avoid sharing namespaces from the host to the container.
 * Assign a network policy to namespaces so proper network segmentation is in place in case of a compromised container.",Wiz - Demo-Scenarios,https://demo.wiz.io/issues#~(issue~'02fd8a0d-16fa-4da0-aa49-a99694365d41),https://portal.azure.com/#@wizsectest.onmicrosoft.com/resource//subscriptions/fee3535b-9616-486f-a476-6a500a08a02b/resourcegroups/laliv_rg/providers/microsoft.containerservice/managedclusters/lalivaks,{},,,
-2023-08-30T18:52:52Z,Container using an image with high/critical severity network vulnerabilities with a known exploit,LOW,OPEN,"#### Description
+2023-08-30T18:52:52Z,Container using an image with high/critical severity network vulnerabilities with a known exploit,LOW,IGNORED,"#### Description
 This container has a critical/high severity network vulnerability [based on CVSS](https://docs.wiz.io/wiz-docs/docs/controls-issues#control-severity) with a known exploit in the wild. 
 
 #### Potential impact
@@ -97,7 +97,7 @@ An attacker that manages to execute code on the public container can exploit the
    * For private images, check the Finding for detailed information regarding the vulnerability.
    * Build a new image with the fixed vulnerability and replace it in the resource.
 * If you cannot use the latest version, prioritize patching resources in your environment according to the attack surface they are exposed to and the potential impact of this resource’s compromise (based on the Issue severity).",Wiz - Demo-Scenarios,https://demo.wiz.io/issues#~(issue~'030c78d3-0509-4565-8083-d83cd8c0dc96),,"{""app.kubernetes.io/instance"": ""sb-nginx-aks""}",,,
-2023-01-24T22:09:36Z,Container using an image with high/critical severity network vulnerabilities with a known exploit,LOW,OPEN,"#### Description
+2023-01-24T22:09:36Z,Container using an image with high/critical severity network vulnerabilities with a known exploit,LOW,IGNORED,"#### Description
 This container has a critical/high severity network vulnerability [based on CVSS](https://docs.wiz.io/wiz-docs/docs/controls-issues#control-severity) with a known exploit in the wild. 
 
 #### Potential impact

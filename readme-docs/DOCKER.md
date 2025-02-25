@@ -32,16 +32,22 @@ When running the application without building images, the application will run b
 
 # Setup via Docker Compose
 
+## Commands
+
+Short summary of useful commands:
+
+- `docker compose build` - Build the docker images, it can take additional parameters to be used in the build process, e.g. `docker compose build --no-cache`.
+- `docker compose up` - Start the docker containers in the foreground.
+- `docker compose up -d` - Start the docker containers in the background.
+- `docker compose stop` - Stop the docker containers, it can take additional parameters to be used in the stop process.
+- `docker compose down` - Stop and remove the docker containers, it can take additional parameters to be used in the stop and remove process.
+
 ## Scripts
 
-6 shell scripts make life easier and avoid typing long commands:
+2 shell scripts make life easier:
 
-- `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
-- `./dc-up.sh` - Start the docker containers in the foreground.
-- `./dc-up-d.sh` - Start the docker containers in the background.
-- `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
-- `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
-- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.
+- `./run-unittest.sh` - Utility script to aid in running a specific unit test class.
+- `./run-integration-tests.sh` - Utility script to aid in running a specific integration test.
 
 
 # Setup via Docker Compose - Building and running the application
@@ -51,18 +57,18 @@ When running the application without building images, the application will run b
 To build images and put them in your local docker cache, run:
 
 ```zsh
-./dc-build.sh
+docker compose build
 ```
 
 To build a single image, run:
 
 ```zsh
-./dc-build.sh uwsgi
+docker compose build uwsgi
 ```
 or
 
 ```
-./dc-build.sh nginx
+docker compose build nginx
 ```
 
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
@@ -72,7 +78,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh
+docker compose up
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -86,8 +92,8 @@ For development, use:
 
 ```zsh
 docker/setEnv.sh dev
-./dc-build.sh
-./dc-up.sh
+docker compose build
+docker compose up
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
@@ -198,13 +204,13 @@ aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"
 Removes all containers
 
 ```zsh
-./dc-down.sh
+docker compose down
 ```
 
 Removes all containers, networks and the database volume
 
 ```zsh
-./dc-down.sh --volumes
+docker compose down --volumes
 ```
 
 # Run with Docker Compose using https
@@ -231,7 +237,7 @@ chmod 400 nginx/*.key
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-./dc-up.sh
+docker compose up
 ```
 
 ## Create credentials on the fly
@@ -241,7 +247,7 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-./dc-up.sh
+docker compose up
 ```
 
 The default https port is 8443.
@@ -267,14 +273,14 @@ This will run all unit-tests and leave the uwsgi container up:
 
 ```
 docker/setEnv.sh unit_tests
-./dc-up.sh
+docker compose up
 ```
 
 ### Limited tests
 If you want to enter the container to run more tests or a single test case, leave setEnv in normal or dev mode:
 ```
 docker/setEnv.sh dev
-./dc-up.sh
+docker compose up
 ```
 Then 
 ```
@@ -300,11 +306,11 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
+For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class. 
 You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests
@@ -312,10 +318,10 @@ This will run all integration-tests and leave the containers up:
 
 ```
 docker/setEnv.sh integration_tests
-./dc-up.sh
+docker compose up
 ```
 
-NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `./dc-up.sh`
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker compose up`
 
 Check the logs with:
 ```

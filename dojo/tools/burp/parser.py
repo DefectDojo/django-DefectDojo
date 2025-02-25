@@ -41,12 +41,8 @@ class BurpParser:
             item = get_item(node, test)
             dupe_key = item.vuln_id_from_tool
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = (
-                    items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                )
-                items[dupe_key].unsaved_req_resp = (
-                    items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-                )
+                items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp += item.unsaved_req_resp
 
                 # Description details of the finding are added
                 items[dupe_key].description = (

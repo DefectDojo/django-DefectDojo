@@ -351,7 +351,7 @@ def identify_view(request):
     if view:
         # value of view is reflected in the template, make sure it's valid
         # although any XSS should be catch by django autoescape, we see people sometimes using '|safe'...
-        if view in ["Endpoint", "Finding"]:
+        if view in {"Endpoint", "Finding"}:
             return view
         msg = 'invalid view, view must be "Endpoint" or "Finding"'
         raise ValueError(msg)
@@ -546,7 +546,7 @@ def view_product_metrics(request, pid):
     end_date = filters["end_date"]
 
     r = relativedelta(end_date, start_date)
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    weeks_between = ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7))
     if weeks_between <= 0:
         weeks_between += 2
 
@@ -598,7 +598,7 @@ def view_product_metrics(request, pid):
         unix_timestamp = (tcalendar.timegm(date.timetuple()) * 1000)
 
         # Open findings
-        if open_findings_dict.get(finding.get("id", None), None):
+        if open_findings_dict.get(finding.get("id", None)):
             if unix_timestamp not in critical_weekly:
                 critical_weekly[unix_timestamp] = {"count": 0, "week": html_date}
             if unix_timestamp not in high_weekly:
@@ -651,7 +651,7 @@ def view_product_metrics(request, pid):
                 open_objs_by_severity[finding.get("severity")] += 1
 
         # Close findings
-        elif closed_findings_dict.get(finding.get("id", None), None):
+        elif closed_findings_dict.get(finding.get("id", None)):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]["closed"] += 1
             else:
@@ -662,7 +662,7 @@ def view_product_metrics(request, pid):
                 closed_objs_by_severity[finding.get("severity")] += 1
 
         # Risk Accepted findings
-        if accepted_findings_dict.get(finding.get("id", None), None):
+        if accepted_findings_dict.get(finding.get("id", None)):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]["accepted"] += 1
             else:
@@ -1044,7 +1044,7 @@ def delete_product(request, pid):
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, "pid")
-def new_eng_for_app(request, pid, cicd=False):
+def new_eng_for_app(request, pid, *, cicd=False):
     jira_project_form = None
     jira_epic_form = None
 
@@ -1381,6 +1381,7 @@ class AdHocFindingView(View):
             finding.reporter = request.user
             finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
             finding.tags = context["form"].cleaned_data["tags"]
+            finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
             # Save and add new endpoints
             finding_helper.add_endpoints(finding, context["form"])
@@ -1757,7 +1758,7 @@ def add_api_scan_configuration(request, pid):
                     return HttpResponseRedirect(reverse("add_api_scan_configuration", args=(pid,)))
                 return HttpResponseRedirect(reverse("view_api_scan_configurations", args=(pid,)))
             except Exception as e:
-                logger.exception(e)
+                logger.exception("Unable to add API Scan Configuration")
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
@@ -1865,7 +1866,7 @@ def delete_api_scan_configuration(request, pid, pascid):
 
 @user_is_authorized(Product_Group, Permissions.Product_Group_Edit, "groupid")
 def edit_product_group(request, groupid):
-    logger.exception(groupid)
+    logger.error(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Edit_Product_Group_Form(instance=group)
 

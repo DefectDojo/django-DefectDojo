@@ -11,7 +11,7 @@ from django.views import View
 
 from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
 from dojo.models import Notification_Webhooks, Notifications
-from dojo.notifications.helper import test_webhooks_notification
+from dojo.notifications.helper import NotificationManagerHelpers, WebhookNotificationManger
 from dojo.utils import add_breadcrumb, get_enabled_notifications_list, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -58,11 +58,7 @@ class SystemNotificationsView(View):
     def process_form(self, request: HttpRequest, context: dict):
         if context["form"].is_valid():
             context["form"].save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                _("Settings saved."),
-                extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Settings saved."), extra_tags="alert-success")
             return request, True
         return request, False
 
@@ -135,6 +131,8 @@ class TemplateNotificationsView(SystemNotificationsView):
 
 
 class NotificationWebhooksView(View):
+    def get_webhook_manager_instance(self) -> NotificationManagerHelpers:
+        return WebhookNotificationManger()
 
     def check_webhooks_enabled(self):
         if not get_system_setting("enable_webhooks_notifications"):
@@ -216,7 +214,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
         form = context["form"]
         if form.is_valid():
             try:
-                test_webhooks_notification(form.instance)
+                self.get_webhook_manager_instance()._test_webhooks_notification(form.instance)
             except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,
@@ -296,22 +294,23 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
             nwh.note = "Deactivate from UI"
             nwh.save()
             messages.add_message(
-                                    request,
-                                    messages.SUCCESS,
-                                    _("Notification Webhook deactivated successfully."),
-                                    extra_tags="alert-success",
-                                )
+                request,
+                messages.SUCCESS,
+                _("Notification Webhook deactivated successfully."),
+                extra_tags="alert-success",
+            )
             return request, True
 
         if form.is_valid():
             try:
-                test_webhooks_notification(form.instance)
+                self.get_webhook_manager_instance()._test_webhooks_notification(form.instance)
             except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,
                     messages.ERROR,
                     _("Test of endpoint was not successful: %(error)s") % {"error": str(e)},
-                    extra_tags="alert-danger")
+                    extra_tags="alert-danger",
+                )
                 return request, False
             else:
                 # correct definition reset defaults

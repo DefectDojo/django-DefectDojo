@@ -88,7 +88,7 @@ class ReportBuilder(View):
                                             finding__duplicate=False,
                                             finding__out_of_scope=False,
                                             )
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
 
         endpoints = endpoints.distinct()
@@ -132,6 +132,10 @@ class CustomReport(View):
         self.host = report_url_resolver(request)
         self.selected_widgets = self.get_selected_widgets(request)
         self.widgets = list(self.selected_widgets.values())
+        self.include_disclaimer = get_system_setting("disclaimer_reports_forced", 0)
+        self.disclaimer = get_system_setting("disclaimer_reports")
+        if self.include_disclaimer and len(self.disclaimer) == 0:
+            self.disclaimer = "Please configure in System Settings."
 
     def get_selected_widgets(self, request):
         selected_widgets = report_widget_factory(json_data=request.POST["json"], request=request, host=self.host,
@@ -164,7 +168,10 @@ class CustomReport(View):
             "host": self.host,
             "finding_notes": self.finding_notes,
             "finding_images": self.finding_images,
-            "user_id": self.request.user.id}
+            "user_id": self.request.user.id,
+            "include_disclaimer": self.include_disclaimer,
+            "disclaimer": self.disclaimer,
+        }
 
 
 def report_findings(request):
@@ -194,7 +201,7 @@ def report_endpoints(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         )
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         endpoints = endpoints.filter(finding__active=True)
 
     endpoints = endpoints.distinct()
@@ -271,7 +278,7 @@ def product_endpoint_report(request, pid):
                                          finding__duplicate=False,
                                          finding__out_of_scope=False)
 
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         endpoint_ids = endpoints.filter(finding__active=True).values_list("id", flat=True)
 
     endpoint_ids = endpoints.values_list("id", flat=True)
@@ -285,8 +292,8 @@ def product_endpoint_report(request, pid):
     include_finding_images = int(request.GET.get("include_finding_images", 0))
     include_executive_summary = int(request.GET.get("include_executive_summary", 0))
     include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
-    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
-    disclaimer = get_system_setting("disclaimer")
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0)) or (get_system_setting("disclaimer_reports_forced", 0))
+    disclaimer = get_system_setting("disclaimer_reports")
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
     generate = "_generate" in request.GET
@@ -328,7 +335,7 @@ def product_endpoint_report(request, pid):
                    })
 
 
-def generate_report(request, obj, host_view=False):
+def generate_report(request, obj, *, host_view=False):
     user = Dojo_User.objects.get(id=request.user.id)
     product_type = None
     product = None
@@ -363,8 +370,8 @@ def generate_report(request, obj, host_view=False):
     include_finding_images = int(request.GET.get("include_finding_images", 0))
     include_executive_summary = int(request.GET.get("include_executive_summary", 0))
     include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
-    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
-    disclaimer = get_system_setting("disclaimer")
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0)) or (get_system_setting("disclaimer_reports_forced", 0))
+    disclaimer = get_system_setting("disclaimer_reports")
 
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
@@ -535,7 +542,7 @@ def generate_report(request, obj, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
-    elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
+    elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = "Finding"
         template = "dojo/finding_pdf_report.html"
@@ -643,9 +650,9 @@ def prefetch_related_endpoints_for_report(endpoints):
                                      )
 
 
-def get_list_index(list, index):
+def get_list_index(full_list, index):
     try:
-        element = list[index]
+        element = full_list[index]
     except Exception:
         element = None
     return element
@@ -873,9 +880,7 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                num_endpoints = 0
                 for endpoint in finding.endpoints.all():
-                    num_endpoints += 1
                     endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
@@ -883,9 +888,7 @@ class CSVExportView(View):
                 fields.append(endpoint_value)
 
                 vulnerability_ids_value = ""
-                num_vulnerability_ids = 0
-                for vulnerability_id in finding.vulnerability_ids:
-                    num_vulnerability_ids += 1
+                for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break
@@ -896,9 +899,7 @@ class CSVExportView(View):
                 fields.append(vulnerability_ids_value)
                 # Tags
                 tags_value = ""
-                num_tags = 0
-                for tag in finding.tags.all():
-                    num_tags += 1
+                for num_tags, tag in enumerate(finding.tags.all()):
                     if num_tags > 5:
                         tags_value += "..."
                         break
@@ -1022,9 +1023,7 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                num_endpoints = 0
                 for endpoint in finding.endpoints.all():
-                    num_endpoints += 1
                     endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
@@ -1033,9 +1032,7 @@ class ExcelExportView(View):
                 col_num += 1
 
                 vulnerability_ids_value = ""
-                num_vulnerability_ids = 0
-                for vulnerability_id in finding.vulnerability_ids:
-                    num_vulnerability_ids += 1
+                for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break

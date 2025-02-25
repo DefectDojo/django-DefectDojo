@@ -14,7 +14,7 @@ For further information, please visit the package documentation [Django Ratelimi
 
 #### Enable Rate Limiting
 
-To enable and configure rate limiting, edit the settings (see [Configuration](../../os_getting_started/configuration) and edit/replace the following information:
+To enable and configure rate limiting, edit the settings (see [Configuration](../../open_source/installation/configuration) and edit/replace the following information:
 
 {{< highlight python >}}
 DD_RATE_LIMITER_ENABLED=(bool, True),
@@ -25,7 +25,7 @@ DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, True),
 
 #### Rate Limit
 
-The frequency at which the request will be limited can be set to 
+The frequency at which the request will be limited can be set to
 
 * seconds - `1s`
 * minutes - `5m`
@@ -38,18 +38,18 @@ Extended configuration can be found [here](https://django-ratelimit.readthedocs.
 
 By default, rate limiting is set to record offenses, but does not actually block requests and enforce the limit.
 
-Setting `DD_RATE_LIMITER_BLOCK` will block all incoming requests at the configured frequncy once that frequency has been exceeded. 
+Setting `DD_RATE_LIMITER_BLOCK` will block all incoming requests at the configured frequncy once that frequency has been exceeded.
 
-#### Account Lockout 
+#### Account Lockout
 
-In the event of a brute force attack, a users credentials could potentially be comprimised. 
+In the event of a brute force attack, a users credentials could potentially be comprimised.
 
-In an attempt to circumvent that event, setting `DD_RATE_LIMITER_ACCOUNT_LOCKOUT` will force a user to reset their password upon the next attempted login. 
+In an attempt to circumvent that event, setting `DD_RATE_LIMITER_ACCOUNT_LOCKOUT` will force a user to reset their password upon the next attempted login.
 
 #### Multi-Process Behavior
 
 When using configurations with multiple uwsgi processes, the rate limiting package uses the default cache that is memory based and local to a process.
 
-#### Extra Configuation 
+#### Extra Configuation
 
 For further information, please visit the package documentation [Django Ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html)

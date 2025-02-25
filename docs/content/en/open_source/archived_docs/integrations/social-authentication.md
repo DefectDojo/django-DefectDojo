@@ -3,6 +3,7 @@ title: "Authentication via OAuth2/SAML2"
 description: "OAuth2/SAML2 let users authenticate against enterprise directories."
 draft: false
 weight: 3
+exclude_search: true
 ---
 
 ## Auth0
@@ -20,7 +21,7 @@ leverage Auth0 to authenticate users on DefectDojo.
     -   Domain
     -   Client ID
     -   Client Secret
-4.  Now, edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+4.  Now, edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
     information:
 
     {{< highlight python >}}
@@ -71,7 +72,7 @@ to be created. Closely follow the steps below to guarantee success.
 
    ![image](images/google_3.png)
 
-7. Edit the settings (see [Configuration](../../os_getting_started/configuration) with the following
+7. Edit the settings (see [Configuration](../../open_source/installation/configuration) with the following
    information:
 
     {{< highlight python >}}
@@ -141,7 +142,7 @@ carries the same attributes and a similar procedure. Follow along below.
 
     ![image](images/okta_5.png)
 
-8. Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+8. Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
    information:
 
     {{< highlight python >}}
@@ -189,7 +190,7 @@ user, such as 'superuser'.
     -   **OR**
     -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/**
 
-4.  Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+4.  Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
     information:
 
     {{< highlight python >}}
@@ -213,7 +214,7 @@ This will ensure the user is added to all the groups found in the Azure AD Token
 
 The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
 token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any
-groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
+groups. To update the format of the token, add a group claim that applies to whatever group type you are using.
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD
 "Token configuration" page.
 
@@ -256,7 +257,7 @@ Follow along below.
 
     -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/**
 
-4. Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+4. Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
     information:
 
     {{< highlight python >}}
@@ -336,7 +337,7 @@ You can also optionally set the following:
     {{< /highlight >}}
 
 ### Configure Defect Dojo
-Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
    information:
 
    {{< highlight python >}}
@@ -373,7 +374,7 @@ Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order t
 3. For the Redirect URI, enter the DefectDojo URL with the following
     format
     -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/**
-4. Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+4. Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
     information:
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),
@@ -391,7 +392,7 @@ perogative to SSO. For definitions of terms used and more information,
 see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2).
 
 1.  Navigate to your SAML IdP and find your metadata
-2.  Edit the settings (see [Configuration](../../os_getting_started/configuration)) with the following
+2.  Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
     information:
 
     {{< highlight python >}}

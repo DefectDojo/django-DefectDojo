@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" $ }}
-    {{- with .Values.extraLabels }}
+    {{- with $.Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
   name: {{ $fullName }}

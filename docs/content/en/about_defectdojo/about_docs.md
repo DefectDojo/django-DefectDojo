@@ -19,6 +19,8 @@ cascade:
 
 ![image](images/dashboard.png)
 
+<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>
+
 ### What is DefectDojo?
 
 DefectDojo is a DevSecOps platform. DefectDojo streamlines DevSecOps by serving as an aggregator and single pane of glass for your security tools. DefectDojo has smart features to enhance and tune the results from your security tools including the ability to merge findings, remember false positives, and distill duplicates. DefectDojo also integrates with JIRA, provides metrics / reports, and can also be used for traditional pen test management.
@@ -52,7 +54,7 @@ DefectDojo Inc. hosts a commercial edition of this software, which includes:
 - cloud hosting, with regular backups, updates and maintenance
 - premium support and implementation guidance
 
-For more information, please visit [defectdojo.com](https://www.defectdojo.com/).
+For more information, please visit [defectdojo.com](https://defectdojo.com/pricing).
 
 DefectDojo Inc. maintains this documentation to support both the Community and Pro editions of DefectDojo.
 

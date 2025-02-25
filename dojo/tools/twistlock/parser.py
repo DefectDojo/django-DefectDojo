@@ -184,7 +184,7 @@ def convert_severity(severity):
         return "High"
     if severity.lower() == "moderate":
         return "Medium"
-    if severity.lower() in ["information", "informational", ""]:
+    if severity.lower() in {"information", "informational", ""}:
         return "Info"
     return severity.title()
 

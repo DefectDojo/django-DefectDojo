@@ -15,10 +15,10 @@ class FortifyXMLParser:
         meta_pair = ({}, {})
         issue_pair = ([], [])
         for ReportSection in root.findall("ReportSection"):
-            if ReportSection.findtext("Title") in [
+            if ReportSection.findtext("Title") in {
                 "Results Outline",
                 "Issue Count by Category",
-            ]:
+            }:
                 place = (
                     0
                     if ReportSection.findtext("Title") == "Results Outline"

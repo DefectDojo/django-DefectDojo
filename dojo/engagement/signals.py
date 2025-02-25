@@ -23,7 +23,7 @@ def engagement_post_save(sender, instance, created, **kwargs):
 def engagement_pre_save(sender, instance, **kwargs):
     old = sender.objects.filter(pk=instance.pk).first()
     if old and instance.status != old.status:
-        if instance.status in ["Cancelled", "Completed"]:
+        if instance.status in {"Cancelled", "Completed"}:
             create_notification(event="engagement_closed",
                                 title=_("Closure of %s") % instance.name,
                                 description=_('The engagement "%s" was closed') % (instance.name),

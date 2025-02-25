@@ -45,7 +45,7 @@ class HackerOneVulnerabilityDisclosureProgram:
             # Build the severity of the Dojo finding
             try:
                 severity = content["relationships"]["severity"]["data"]["attributes"]["rating"].capitalize()
-                if severity not in ["Low", "Medium", "High", "Critical"]:
+                if severity not in {"Low", "Medium", "High", "Critical"}:
                     severity = "Info"
             except Exception:
                 severity = "Info"
@@ -56,7 +56,7 @@ class HackerOneVulnerabilityDisclosureProgram:
             references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
-            active = content["attributes"]["state"] in ["triaged", "new"]
+            active = content["attributes"]["state"] in {"triaged", "new"}
 
             # Set CWE of the Dojo finding
             try:
@@ -215,7 +215,7 @@ class HackerOneBugBountyProgram:
         """Convert the severity from the parser from the string value, or CVSS score."""
         # Try to use the string severity first
         if (severity := entry.get("severity_rating")) is not None:
-            if severity in ["critical", "high", "medium", "low"]:
+            if severity in {"critical", "high", "medium", "low"}:
                 return severity.capitalize()
         # Fall back to "severity_score" which I assume is CVSS Score
         if (severity_score := entry.get("severity_score")) is not None:

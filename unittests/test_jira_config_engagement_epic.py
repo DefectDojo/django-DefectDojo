@@ -27,7 +27,7 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
         my_vcr.record_mode = "once"
         my_vcr.path_transformer = VCR.ensure_suffix(".yaml")
         my_vcr.filter_headers = ["Authorization", "X-Atlassian-Token"]
-        my_vcr.cassette_library_dir = get_unit_tests_path() + "/vcr/jira/"
+        my_vcr.cassette_library_dir = str(get_unit_tests_path() / "vcr" / "jira")
         # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
         my_vcr.before_record_request = self.before_record_request
         my_vcr.before_record_response = self.before_record_response
@@ -64,7 +64,7 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
             "jira-epic-form-push_to_jira": "on",
         }
 
-    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_with_jira_project_data_and_epic_mapping(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def test_add_engagement_with_jira_project_and_epic_mapping(self):

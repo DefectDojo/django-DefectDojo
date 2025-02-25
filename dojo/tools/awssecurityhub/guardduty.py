@@ -42,7 +42,7 @@ class GuardDuty:
         hosts = []
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
-            if component_name in ("AwsEcrContainerImage", "AwsEc2Instance"):
+            if component_name in {"AwsEcrContainerImage", "AwsEc2Instance"}:
                 hosts.append(Endpoint(host=f"{component_name} {resource.get('Id')}"))
             if component_name == "AwsEcrContainerImage":
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
@@ -53,6 +53,7 @@ class GuardDuty:
                         f"Registry: {details.get('RegistryId')}",
                         f"Repository: {details.get('RepositoryName')}",
                         f"Image digest: {details.get('ImageDigest')}",
+                        f"Image tags: {','.join(details.get('ImageTags', []))}",
                     ))
                 title_suffix = f" - Image: {arn.split('/', 1)[1]}"  # repo-name/sha256:digest
             else:  # generic implementation

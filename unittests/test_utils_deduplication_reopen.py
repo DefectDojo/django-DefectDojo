@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Finding
+from dojo.models import Finding, _copy_model_util
 from dojo.utils import set_duplicate
 
 from .dojo_test_case import DojoTestCase
@@ -14,34 +14,28 @@ class TestDuplicationReopen(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        self.finding_a = Finding.objects.get(id=2)
-        self.finding_a.pk = None
+        self.finding_a = _copy_model_util(Finding.objects.get(id=2), exclude_fields=["duplicate_finding"])
         self.finding_a.duplicate = False
         self.finding_a.mitigated = datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC)
         self.finding_a.is_mitigated = True
         self.finding_a.false_p = True
         self.finding_a.active = False
-        self.finding_a.duplicate_finding = None
         self.finding_a.save()
-        self.finding_b = Finding.objects.get(id=3)
-        self.finding_b.pk = None
+
+        self.finding_b = _copy_model_util(Finding.objects.get(id=3), exclude_fields=["duplicate_finding"])
         self.finding_a.active = True
         self.finding_b.duplicate = False
-        self.finding_b.duplicate_finding = None
         self.finding_b.save()
 
-        self.finding_c = Finding.objects.get(id=4)
+        self.finding_c = _copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
         self.finding_c.duplicate = False
         self.finding_c.out_of_scope = True
         self.finding_c.active = False
-        self.finding_c.duplicate_finding = None
-        self.finding_c.pk = None
         logger.debug("creating finding_c")
         self.finding_c.save()
-        self.finding_d = Finding.objects.get(id=5)
+
+        self.finding_d = _copy_model_util(Finding.objects.get(id=5), exclude_fields=["duplicate_finding"])
         self.finding_d.duplicate = False
-        self.finding_d.duplicate_finding = None
-        self.finding_d.pk = None
         logger.debug("creating finding_d")
         self.finding_d.save()
 

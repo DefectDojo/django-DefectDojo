@@ -85,7 +85,7 @@ class GitlabDepScanParser:
                 )
 
         severity = vuln["severity"]
-        if severity in ["Undefined", "Unknown"]:
+        if severity in {"Undefined", "Unknown"}:
             # Severity can be "Undefined" or "Unknown" in report
             # In that case we set it as Info and specify the initial severity
             # in the title

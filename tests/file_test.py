@@ -35,9 +35,9 @@ class FileUploadTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Manage Files").click()
         # select first file input field: form-0-image
         # Set full image path for image file 'strange.png
-        image_path = os.path.join(dir_path, "finding_image.png")
+        image_path = dir_path / "finding_image.png"
         driver.find_element(By.ID, "id_form-0-title").send_keys("Finding Title")
-        driver.find_element(By.ID, "id_form-0-file").send_keys(image_path)
+        driver.find_element(By.ID, "id_form-0-file").send_keys(str(image_path))
         # Save uploaded image
         with WaitForPageLoad(driver, timeout=50):
             driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
@@ -76,9 +76,9 @@ class FileUploadTest(BaseTestCase):
         driver.find_element(By.NAME, "Manage Files").click()
         # select first file input field: form-0-image
         # Set full image path for image file 'strange.png
-        image_path = os.path.join(dir_path, "finding_image.png")
+        image_path = dir_path / "finding_image.png"
         driver.find_element(By.ID, "id_form-0-title").send_keys("Test Title")
-        driver.find_element(By.ID, "id_form-0-file").send_keys(image_path)
+        driver.find_element(By.ID, "id_form-0-file").send_keys(str(image_path))
         # Save uploaded image
         with WaitForPageLoad(driver, timeout=50):
             driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
@@ -116,9 +116,9 @@ class FileUploadTest(BaseTestCase):
         driver.find_element(By.NAME, "Manage Files").click()
         # select first file input field: form-0-image
         # Set full image path for image file 'strange.png
-        image_path = os.path.join(dir_path, "finding_image.png")
+        image_path = dir_path / "finding_image.png"
         driver.find_element(By.ID, "id_form-0-title").send_keys("Engagement Title")
-        driver.find_element(By.ID, "id_form-0-file").send_keys(image_path)
+        driver.find_element(By.ID, "id_form-0-file").send_keys(str(image_path))
         # Save uploaded image
         with WaitForPageLoad(driver, timeout=50):
             driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()

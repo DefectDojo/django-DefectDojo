@@ -172,13 +172,15 @@ class DependencyTrackParser:
             component_description = f"Version {component_version} of the {component_name} component"
         else:
             component_description = f"The {component_name} component"
-        vulnerability_description = "You are using a component with a known vulnerability. " \
-                f"{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
-                f"identified by {source}."
+        vulnerability_description = (
+            "You are using a component with a known vulnerability. "
+            f"{component_description} is affected by the vulnerability with an id of {vuln_id} as "
+            f"identified by {source}."
+        )
         # Append purl info if it is present
         if "purl" in dependency_track_finding["component"] and dependency_track_finding["component"]["purl"] is not None:
             component_purl = dependency_track_finding["component"]["purl"]
-            vulnerability_description = vulnerability_description + f"\nThe purl of the affected component is: {component_purl}."
+            vulnerability_description += f"\nThe purl of the affected component is: {component_purl}."
             # there is no file_path in the report, but defect dojo needs it otherwise it skips deduplication:
             # see https://github.com/DefectDojo/django-DefectDojo/issues/3647
             # might be no longer needed in the future, and is not needed if people use the default
@@ -189,11 +191,11 @@ class DependencyTrackParser:
 
         # Append other info about vulnerability description info if it is present
         if "title" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["title"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding["vulnerability"]["title"])
+            vulnerability_description += "\nVulnerability Title: {title}".format(title=dependency_track_finding["vulnerability"]["title"])
         if "subtitle" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["subtitle"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
+            vulnerability_description += "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
         if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
+            vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
         if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
             vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
 

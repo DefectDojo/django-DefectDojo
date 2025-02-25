@@ -132,15 +132,14 @@ class MeterianParser:
                 severity = "High"
             else:
                 severity = "Critical"
+        elif (
+            advisory["severity"] == "SUGGEST"
+            or advisory["severity"] == "NA"
+            or advisory["severity"] == "NONE"
+        ):
+            severity = "Info"
         else:
-            if (
-                advisory["severity"] == "SUGGEST"
-                or advisory["severity"] == "NA"
-                or advisory["severity"] == "NONE"
-            ):
-                severity = "Info"
-            else:
-                severity = advisory["severity"].title()
+            severity = advisory["severity"].title()
 
         return severity
 

@@ -1,14 +1,13 @@
 import json
-import os.path
 from datetime import datetime
 
 from dojo.models import Endpoint, Test
 from dojo.tools.asff.parser import AsffParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 def sample_path(file_name):
-    return os.path.join(get_unit_tests_path(), "scans/asff", file_name)
+    return get_unit_tests_scans_path("asff") / file_name
 
 
 class TestAsffParser(DojoTestCase):
@@ -16,7 +15,7 @@ class TestAsffParser(DojoTestCase):
         with open(sample_path(file_name), encoding="utf-8") as file:
             return json.load(file)
 
-    def common_check_finding(self, finding, data, index, guarddutydate=False):
+    def common_check_finding(self, finding, data, index, *, guarddutydate=False):
         parser = AsffParser()
         resource_arns = parser.get_item_resource_arns(data[index])
         resource_arn_strings = ", ".join(resource_arns)

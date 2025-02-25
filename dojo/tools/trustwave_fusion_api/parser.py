@@ -76,9 +76,8 @@ def get_item(vuln, test):
         and location["domain"] != "None"
     ):
         endpoint = Endpoint(host=str(location["domain"]))
-    else:  # no domain, use ip instead
-        if "ip" in location and location["ip"] and location["ip"] != "None":
-            endpoint = Endpoint(host=str(location["ip"]))
+    elif "ip" in location and location["ip"] and location["ip"] != "None":
+        endpoint = Endpoint(host=str(location["ip"]))
     # check for protocol
     if (
         "applicationProtocol" in location

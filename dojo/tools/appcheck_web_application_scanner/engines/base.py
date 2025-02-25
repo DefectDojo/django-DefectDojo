@@ -54,17 +54,16 @@ def cvss_score_to_severity(score: float, version: int) -> str:
             severity = "Medium"
         else:
             severity = "Low"
+    elif cvss_score >= 9.0:
+        severity = "Critical"
+    elif cvss_score >= 7.0:
+        severity = "High"
+    elif cvss_score >= 4.0:
+        severity = "Medium"
+    elif cvss_score >= 0.1:
+        severity = "Low"
     else:
-        if cvss_score >= 9.0:
-            severity = "Critical"
-        elif cvss_score >= 7.0:
-            severity = "High"
-        elif cvss_score >= 4.0:
-            severity = "Medium"
-        elif cvss_score >= 0.1:
-            severity = "Low"
-        else:
-            severity = "Info"
+        severity = "Info"
 
     return severity
 

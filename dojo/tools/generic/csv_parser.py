@@ -66,6 +66,12 @@ class GenericCSVParser:
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
 
+            if "epss_score" in row:
+                finding.epss_score = float(row["epss_score"])
+
+            if "epss_percentile" in row:
+                finding.epss_percentile = float(row["epss_percentile"])
+
             if "CVSSV3" in row:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
                 if len(cvss_objects) > 0:
@@ -102,7 +108,7 @@ class GenericCSVParser:
     def _convert_bool(self, val):
         return val.lower()[0:1] == "t"  # bool False by default
 
-    def get_severity(self, input):
-        if input in ["Info", "Low", "Medium", "High", "Critical"]:
-            return input
+    def get_severity(self, severity_input):
+        if severity_input in {"Info", "Low", "Medium", "High", "Critical"}:
+            return severity_input
         return "Info"

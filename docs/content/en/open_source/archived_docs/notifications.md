@@ -3,6 +3,7 @@ title: "Notifications"
 description: "DefectDojo can inform you about changes on different channels."
 draft: false
 weight: 6
+exclude_search: true
 ---
 
 ## Notifications

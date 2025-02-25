@@ -78,8 +78,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                        "Timed out waiting for finding delete "
-                                        + "confirmation popup to appear.")
+                "Timed out waiting for finding delete confirmation popup to appear.")
             driver.switch_to.alert.accept()
         except TimeoutException:
             self.fail("Confirmation dialogue not shown, cannot delete previous findings")
@@ -507,7 +506,7 @@ class DedupeTest(BaseTestCase):
         self.check_nb_duplicates(0)
 
 
-def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+def add_dedupe_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase("test_login"))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 

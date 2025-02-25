@@ -12,7 +12,7 @@ from django import forms
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import JSONField, Q
+from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -21,6 +21,7 @@ from django_filters import (
     CharFilter,
     DateFilter,
     DateFromToRangeFilter,
+    DateTimeFilter,
     FilterSet,
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
@@ -102,8 +103,8 @@ EARLIEST_FINDING = None
 
 def custom_filter(queryset, name, value):
     values = value.split(",")
-    filter = (f"{name}__in")
-    return queryset.filter(Q(**{filter: values}))
+    cust_filter = (f"{name}__in")
+    return queryset.filter(Q(**{cust_filter: values}))
 
 
 def custom_vulnerability_id_filter(queryset, name, value):
@@ -132,6 +133,20 @@ class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
 class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
     def __init__(self, *args, **kwargs):
         super(CharFilter, self).__init__(*args, **kwargs)
+
+
+class CharFieldFilterANDExpression(CharFieldInFilter):
+    def filter(self, queryset, value):
+        # Catch the case where a value if not supplied
+        if not value:
+            return queryset
+        # Do the filtering
+        objects = set(value.split(","))
+        return (
+            queryset.filter(**{f"{self.field_name}__in": objects})
+            .annotate(object_count=Count(self.field_name))
+            .filter(object_count=len(objects))
+        )
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -333,8 +348,7 @@ class DojoFilter(FilterSet):
                 # we defer applying the select2 autocomplete because there can be multiple forms on the same page
                 # and form.js would then apply select2 multiple times, resulting in duplicated fields
                 # the initialization now happens in filter_js_snippet.html
-                self.form.fields[field].widget.tag_options = \
-                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
+                self.form.fields[field].widget.tag_options += tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
                 tagged_model, exclude = get_tags_model_from_field_name(field)
                 if tagged_model:  # only if not the normal tags field
                     self.form.fields[field].label = get_tags_label_from_model(tagged_model)
@@ -363,7 +377,7 @@ def get_tags_label_from_model(model):
     return "Tags (Unknown)"
 
 
-def get_finding_filterset_fields(metrics=False, similar=False, filter_string_matching=False):
+def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_matching=False):
     fields = []
 
     if similar:
@@ -1203,11 +1217,20 @@ class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper,
 class ApiEngagementFilter(DojoFilter):
     product__prod_type = NumberInFilter(field_name="product__prod_type", lookup_expr="in")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-    product__tags = CharFieldInFilter(field_name="product__tags__name",
-                                            lookup_expr="in",
-                                            help_text="Comma separated list of exact tags present on product")
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
+    product__tags = CharFieldInFilter(
+        field_name="product__tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags present on product (uses OR for multiple values)")
+    product__tags__and = CharFieldFilterANDExpression(
+        field_name="product__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on product")
 
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
@@ -1364,9 +1387,13 @@ class ApiProductFilter(DojoFilter):
     regulations = NumberInFilter(field_name="regulations", lookup_expr="in")
 
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                                  help_text="Comma separated list of exact tags not present on product", exclude="True")
@@ -1409,6 +1436,15 @@ class ApiProductFilter(DojoFilter):
             ("user_records", "user_records"),
         ),
     )
+
+
+class PercentageRangeFilter(RangeFilter):
+    def filter(self, qs, value):
+        if value is not None:
+            start = value.start / decimal.Decimal("100.0") if value.start else None
+            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
+            value = slice(start, stop)
+        return super().filter(qs, value)
 
 
 class ApiFindingFilter(DojoFilter):
@@ -1456,13 +1492,30 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", method="filter_mitigated_on")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
     endpoints = NumberInFilter(field_name="endpoints", lookup_expr="in")
+    epss_score = PercentageRangeFilter(
+        field_name="epss_score",
+        label="EPSS score range",
+        help_text=(
+            "The range of EPSS score percentages to filter on; the min input is a lower bound, "
+            "the max is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
+            "the min bound input empty will filter only on the max bound -- filtering on "
+            '"less than or equal"). Leading 0 required.'
+        ))
+    epss_percentile = PercentageRangeFilter(
+        field_name="epss_percentile",
+        label="EPSS percentile range",
+        help_text=(
+            "The range of EPSS percentiles to filter on; the min input is a lower bound, the max "
+            "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the min bound "
+            'input empty will filter only on the max bound -- filtering on "less than or equal"). Leading 0 required.'
+        ))
     found_by = NumberInFilter(field_name="found_by", lookup_expr="in")
     id = NumberInFilter(field_name="id", lookup_expr="in")
     last_reviewed_by = NumberInFilter(field_name="last_reviewed_by", lookup_expr="in")
@@ -1484,16 +1537,34 @@ class ApiFindingFilter(DojoFilter):
     risk_acceptance = extend_schema_field(OpenApiTypes.NUMBER)(ReportRiskAcceptanceFilter())
 
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-    test__tags = CharFieldInFilter(field_name="test__tags__name", lookup_expr="in", help_text="Comma separated list of exact tags present on test")
-    test__engagement__tags = CharFieldInFilter(field_name="test__engagement__tags__name", lookup_expr="in",
-                                               help_text="Comma separated list of exact tags present on engagement")
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
+    test__tags = CharFieldInFilter(
+        field_name="test__tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags present on test (uses OR for multiple values)")
+    test__tags__and = CharFieldFilterANDExpression(
+        field_name="test__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on test")
+    test__engagement__tags = CharFieldInFilter(
+        field_name="test__engagement__tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags present on engagement (uses OR for multiple values)")
+    test__engagement__tags__and = CharFieldFilterANDExpression(
+        field_name="test__engagement__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on engagement")
     test__engagement__product__tags = CharFieldInFilter(
         field_name="test__engagement__product__tags__name",
         lookup_expr="in",
-        help_text="Comma separated list of exact tags present on product")
-
+        help_text="Comma separated list of exact tags present on product (uses OR for multiple values)")
+    test__engagement__product__tags__and = CharFieldFilterANDExpression(
+        field_name="test__engagement__product__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on product")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                                  help_text="Comma separated list of exact tags not present on model", exclude="True")
@@ -1544,6 +1615,20 @@ class ApiFindingFilter(DojoFilter):
         exclude = ["url", "thread_id", "notes", "files",
                    "line", "cve"]
 
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
+
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+
+        return queryset.filter(mitigated=value)
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1551,7 +1636,7 @@ class PercentageFilter(NumberFilter):
         super().__init__(*args, **kwargs)
 
     def filter_percentage(self, queryset, name, value):
-        value = value / decimal.Decimal("100.0")
+        value /= decimal.Decimal("100.0")
         # Provide some wiggle room for filtering since the UI rounds to two places (and because floats):
         # a user may enter 0.15, but we'll return everything in [0.0015, 0.0016).
         # To do this, add to our value 1^(whatever the exponent for our least significant digit place is), but ensure
@@ -1562,15 +1647,6 @@ class PercentageFilter(NumberFilter):
             f"{name}__gte": value,
             f"{name}__lt": max_val}
         return queryset.filter(**lookup_kwargs)
-
-
-class PercentageRangeFilter(RangeFilter):
-    def filter(self, qs, value):
-        if value is not None:
-            start = value.start / decimal.Decimal("100.0") if value.start else None
-            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
-            value = slice(start, stop)
-        return super().filter(qs, value)
 
 
 class FindingFilterHelper(FilterSet):
@@ -1587,9 +1663,9 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
@@ -1704,6 +1780,20 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
+
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
+
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+
+        return queryset.filter(mitigated=value)
 
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
@@ -2072,9 +2162,13 @@ class TemplateFindingFilter(DojoFilter):
 
 class ApiTemplateFindingFilter(DojoFilter):
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                                  help_text="Comma separated list of exact tags not present on model", exclude="True")
@@ -2649,9 +2743,13 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
 
 class ApiEndpointFilter(DojoFilter):
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                                  help_text="Comma separated list of exact tags not present on model", exclude="True")
@@ -2805,13 +2903,27 @@ class EngagementTestFilterWithoutObjectLookups(EngagementTestFilterHelper):
 
 class ApiTestFilter(DojoFilter):
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-    engagement__tags = CharFieldInFilter(field_name="engagement__tags__name", lookup_expr="in",
-                                               help_text="Comma separated list of exact tags present on engagement")
-    engagement__product__tags = CharFieldInFilter(field_name="engagement__product__tags__name",
-                                                              lookup_expr="in",
-                                                              help_text="Comma separated list of exact tags present on product")
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
+    engagement__tags = CharFieldInFilter(
+        field_name="engagement__tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags present on engagement (uses OR for multiple values)")
+    engagement__tags__and = CharFieldFilterANDExpression(
+        field_name="engagement__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on engagement")
+    engagement__product__tags = CharFieldInFilter(
+        field_name="engagement__product__tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags present on product (uses OR for multiple values)")
+    engagement__product__tags__and = CharFieldFilterANDExpression(
+        field_name="engagement__product__tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression present on product")
 
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
@@ -2859,9 +2971,13 @@ class ApiTestFilter(DojoFilter):
 
 class ApiAppAnalysisFilter(DojoFilter):
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
-    tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
-                             help_text="Comma separated list of exact tags")
-
+    tags = CharFieldInFilter(
+        field_name="tags__name",
+        lookup_expr="in",
+        help_text="Comma separated list of exact tags (uses OR for multiple values)")
+    tags__and = CharFieldFilterANDExpression(
+        field_name="tags__name",
+        help_text="Comma separated list of exact tags to match with an AND expression")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Not Tag name contains", exclude="True")
     not_tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                                  help_text="Comma separated list of exact tags not present on model", exclude="True")
@@ -3212,6 +3328,7 @@ class GroupFilter(DojoFilter):
         exclude = ["users"]
 
 
+# This class is used exclusively by Findings
 class TestImportFilter(DojoFilter):
     version = CharFilter(field_name="version", lookup_expr="icontains")
     version_exact = CharFilter(field_name="version", lookup_expr="iexact", label="Version Exact")
@@ -3238,6 +3355,7 @@ class TestImportFilter(DojoFilter):
         fields = []
 
 
+# This class is used exclusively by Findings
 class TestImportFindingActionFilter(DojoFilter):
     action = MultipleChoiceFilter(choices=IMPORT_ACTIONS)
     o = OrderingFilter(
@@ -3250,6 +3368,35 @@ class TestImportFindingActionFilter(DojoFilter):
     class Meta:
         model = Test_Import_Finding_Action
         fields = []
+
+
+# Used within the TestImport API
+class TestImportAPIFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("id", "id"),
+            ("created", "created"),
+            ("modified", "modified"),
+            ("version", "version"),
+            ("branch_tag", "branch_tag"),
+            ("build_id", "build_id"),
+            ("commit_hash", "commit_hash"),
+
+        ),
+    )
+
+    class Meta:
+        model = Test_Import
+        fields = ["test",
+        "findings_affected",
+        "version",
+        "branch_tag",
+        "build_id",
+        "commit_hash",
+        "test_import_finding_action__action",
+        "test_import_finding_action__finding",
+        "test_import_finding_action__created"]
 
 
 class LogEntryFilter(DojoFilter):

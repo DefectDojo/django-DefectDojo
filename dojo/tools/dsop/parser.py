@@ -39,7 +39,7 @@ class DsopParser:
                 for i in range(len(row)):
                     headers[row[i]] = i
             else:
-                if row[headers["result"]] not in ("fail", "notchecked"):
+                if row[headers["result"]] not in {"fail", "notchecked"}:
                     continue
                 title = row[headers["title"]]
                 unique_id = row[headers["ruleid"]]
@@ -224,7 +224,6 @@ class DsopParser:
                     severity = "Critical"
                 else:
                     severity = "Info"
-                severity = severity
                 mitigation = "To be investigated"
                 description = "Gate: {} (Trigger: {}): {}".format(
                     row[headers["gate"]],

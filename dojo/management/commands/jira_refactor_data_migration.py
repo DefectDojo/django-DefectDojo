@@ -10,8 +10,10 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
 
-    help = "Command to move data from some tables to other tables as part of https://github.com/DefectDojo/django-DefectDojo/pull/3200" + \
+    help = (
+        "Command to move data from some tables to other tables as part of https://github.com/DefectDojo/django-DefectDojo/pull/3200"
         "Should normally be handled by the migration in that PR, but if that causes errors, this command can help to get the data migrated anyway."
+    )
 
     def move_jira_creation_changed(self):
         logger.info("migrating finding.jira_creation and jira_change fields to JIRA_Issue model")

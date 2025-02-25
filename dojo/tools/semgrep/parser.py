@@ -35,6 +35,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -99,6 +103,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -133,11 +141,11 @@ class SemgrepParser:
         upper_value = val.upper()
         if upper_value == "CRITICAL":
             return "Critical"
-        if upper_value in ["WARNING", "MEDIUM"]:
+        if upper_value in {"WARNING", "MEDIUM"}:
             return "Medium"
-        if upper_value in ["ERROR", "HIGH"]:
+        if upper_value in {"ERROR", "HIGH"}:
             return "High"
-        if upper_value in ["LOW", "INFO"]:
+        if upper_value in {"LOW", "INFO"}:
             return "Low"
         msg = f"Unknown value for severity: {val}"
         raise ValueError(msg)
@@ -149,6 +157,9 @@ class SemgrepParser:
         description += f"**Result message:** {message}\n"
 
         snippet = item["extra"].get("lines")
+        if snippet == "requires login":
+            snippet = None  # Treat "requires login" as no snippet
+
         if snippet is not None:
             if "<![" in snippet:
                 snippet = snippet.replace("<![", "<! [")

@@ -148,8 +148,6 @@ class MobSFParser:
                             "file_path": None,
                         }
                         mobsf_findings.append(mobsf_item)
-                    else:
-                        pass
 
         # Manifest Analysis
         if "manifest_analysis" in data:
@@ -305,7 +303,7 @@ class MobSFParser:
                 file_path = None
 
                 if "path" in finding:
-                    description = description + "\n\n**Files:**\n"
+                    description += "\n\n**Files:**\n"
                     for path in finding["path"]:
                         if file_path is None:
                             file_path = path
@@ -337,7 +335,7 @@ class MobSFParser:
             file_path = None
             if mobsf_finding["category"]:
                 description += "**Category:** " + mobsf_finding["category"] + "\n\n"
-            description = description + html2text(mobsf_finding["description"])
+            description += html2text(mobsf_finding["description"])
             finding = Finding(
                 title=title,
                 cwe=919,  # Weaknesses in Mobile Applications

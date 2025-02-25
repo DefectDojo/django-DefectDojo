@@ -60,3 +60,8 @@ localization:
     - any-glob-to-any-file:
       - dojo/locale/*
       - dojo/locale/**/*
+
+lint:
+  - changed-files:
+    - any-glob-to-any-file:
+      - ruff.toml

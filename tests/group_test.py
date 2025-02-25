@@ -43,7 +43,7 @@ class GroupTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Group Name")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed group is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuGroup").click()
         driver.find_element(By.ID, "editGroup").click()
@@ -139,7 +139,7 @@ class GroupTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Another Name")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed group is now available, proceed with clicking 'Delete' button
         driver.find_element(By.ID, "dropdownMenuGroup").click()
         driver.find_element(By.ID, "deleteGroup").click()

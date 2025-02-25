@@ -65,10 +65,9 @@ def attach_unique_extras(
         finding.param = param
         finding.payload = payload
         finding.test = test
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         parsedUrl = urlparse(endpoint)
@@ -123,10 +122,9 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
@@ -186,7 +184,7 @@ def get_request_response(payloads):
 
 
 def get_unique_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False,
+    vulnerabilities, test, *, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -250,7 +248,7 @@ def get_unique_vulnerabilities(
 # Traverse and retreive any information in the VULNERABILITY_LIST
 # section of the report. This includes all endpoints and request/response pairs
 def get_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False,
+    vulnerabilities, test, *, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -295,14 +293,14 @@ def get_vulnerabilities(
 
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
-def get_glossary_item(glossary, finding, is_info=False, enable_weakness=False):
+def get_glossary_item(glossary, finding, *, is_info=False, enable_weakness=False):
     title = glossary.findtext("TITLE")
     if title is not None:
         finding.title = str(title)
     severity = glossary.findtext("SEVERITY")
     if severity is not None:
         group = glossary.findtext("GROUP")
-        if is_info and (not enable_weakness or group in ("DIAG", "IG")):
+        if is_info and (not enable_weakness or group in {"DIAG", "IG"}):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
@@ -337,6 +335,7 @@ def get_unique_items(
     glossary,
     is_app_report,
     test,
+    *,
     enable_weakness=False,
 ):
     ig_qid_list = [int(ig.findtext("QID")) for ig in info_gathered]
@@ -377,6 +376,7 @@ def get_items(
     glossary,
     is_app_report,
     test,
+    *,
     enable_weakness=False,
 ):
     ig_qid_list = [int(ig.findtext("QID")) for ig in info_gathered]
@@ -410,7 +410,7 @@ def get_items(
     return findings
 
 
-def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
+def qualys_webapp_parser(qualys_xml_file, test, unique, *, enable_weakness=False):
     if qualys_xml_file is None:
         return []
 
@@ -443,7 +443,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 glossary,
                 is_app_report,
                 test,
-                enable_weakness,
+                enable_weakness=enable_weakness,
             ).values(),
         )
     else:
@@ -454,7 +454,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 glossary,
                 is_app_report,
                 test,
-                enable_weakness,
+                enable_weakness=enable_weakness,
             ).values(),
         )
 
@@ -475,5 +475,5 @@ class QualysWebAppParser:
         self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN,
     ):
         return qualys_webapp_parser(
-            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness,
+            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness=enable_weakness,
         )

@@ -2158,8 +2158,8 @@
     "fields": {
       "configuration_name": "Happy little JIRA 2",
       "url": "https://defectdojo.atlassian.net/",
-      "username": "YOUR USERNAME",
-      "password": "YOU API TOKEN",
+      "username": "[YOUR USERNAME]",
+      "password": "[YOUR API TOKEN]",
       "default_issue_type": "Task",
       "epic_name_id": 10011,
       "open_status_key": 11,
@@ -2253,7 +2253,7 @@
       "component": "",
       "enable_engagement_epic_mapping": true,
       "jira_instance": 2,
-      "project_key": "key1"
+      "project_key": "NTEST"
     }
   },
   {

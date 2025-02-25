@@ -1,5 +1,5 @@
 ---
-title: "API Documentation"
+title: "🤖 API Documentation"
 description: ""
 summary: ""
 date: 2023-09-07T16:06:50+02:00
@@ -12,4 +12,5 @@ seo:
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
+exclude_search: true
 ---

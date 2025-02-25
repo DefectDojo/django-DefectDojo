@@ -1,0 +1,1220 @@
+{
+  "projectId": "6",
+  "team": "CxServer",
+  "project": "some-example",
+  "link": "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6",
+  "files": "1",
+  "loc": "268",
+  "scanType": "Full",
+  "version":"8.9.0.210",
+  "additionalDetails": {
+    "flow-summary": {
+      "High": 4
+    },
+    "scanId": "1000026",
+    "scanStartDate": "Sunday, January 19, 2020 2:40:11 AM"
+  },
+  "xissues": [
+    {
+      "vulnerability": "Reflected_XSS_All_Clients",
+      "vulnerabilityStatus": "TO VERIFY",
+      "similarityId": "14660819",
+      "cwe": "79",
+      "description": "",
+      "language": "Java",
+      "severity": "High",
+      "link": "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=2",
+      "filename": "DOS_Login.java",
+      "gitUrl": "",
+      "falsePositiveCount": 0,
+      "details": {
+        "88": {
+          "falsePositive": false,
+          "codeSnippet": "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "comment": ""
+        },
+        "89": {
+          "falsePositive": false,
+          "codeSnippet": "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "comment": ""
+        }
+      },
+      "additionalDetails": {
+        "recommendedFix": "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=591&queryVersionCode=56110529&queryTitle=Reflected_XSS_All_Clients",
+        "categories": "PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)",
+        "results": [
+          {
+            "sink": {
+              "file": "DOS_Login.java",
+              "line": "108",
+              "column": "20",
+              "object": "StringElement",
+              "length" : "3",
+              "snippet" : "\t    ec.addElement(new StringElement(query));"
+            },
+            "state": "0",
+            "source": {
+              "file": "DOS_Login.java",
+              "line": "88",
+              "column": "46",
+              "object": "getRawParameter",
+              "length" : "1",
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);"
+            },
+            "1" : {
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+              "file" : "DOS_Login.java",
+              "line" : "88",
+              "column" : "46",
+              "length" : "1",
+              "object" : "getRawParameter"
+            },
+            "2" : {
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+              "file" : "DOS_Login.java",
+              "line" : "88",
+              "column" : "6",
+              "length" : "8",
+              "object" : "username"
+            },
+            "3" : {
+              "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+              "file" : "DOS_Login.java",
+              "line" : "92",
+              "column" : "37",
+              "length" : "8",
+              "object" : "username"
+            },
+            "4" : {
+              "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+              "file" : "DOS_Login.java",
+              "line" : "92",
+              "column" : "10",
+              "length" : "8",
+              "object" : "username"
+            },
+            "5" : {
+              "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+              "file" : "DOS_Login.java",
+              "line" : "107",
+              "column" : "9",
+              "length" : "8",
+              "object" : "username"
+            },
+            "6" : {
+              "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+              "file" : "DOS_Login.java",
+              "line" : "106",
+              "column" : "13",
+              "length" : "5",
+              "object" : "query"
+            },
+            "7" : {
+              "snippet" : "\t    ec.addElement(new StringElement(query));",
+              "file" : "DOS_Login.java",
+              "line" : "108",
+              "column" : "38",
+              "length" : "5",
+              "object" : "query"
+            },
+            "8" : {
+              "snippet" : "\t    ec.addElement(new StringElement(query));",
+              "file" : "DOS_Login.java",
+              "line" : "108",
+              "column" : "20",
+              "length" : "3",
+              "object" : "StringElement"
+            }
+          },
+          {
+            "sink": {
+              "file": "DOS_Login.java",
+              "line": "108",
+              "column": "20",
+              "object": "StringElement",
+              "length" : "3",
+              "snippet" : "\t    ec.addElement(new StringElement(query));"
+            },
+            "state": "0",
+            "source": {
+              "file": "DOS_Login.java",
+              "line": "89",
+              "column": "46",
+              "object": "getRawParameter",
+              "length" : "1",
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);"
+            },
+            "1" : {
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+              "file" : "DOS_Login.java",
+              "line" : "89",
+              "column" : "46",
+              "length" : "1",
+              "object" : "getRawParameter"
+            },
+            "2" : {
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+              "file" : "DOS_Login.java",
+              "line" : "89",
+              "column" : "6",
+              "length" : "8",
+              "object" : "password"
+            },
+            "3" : {
+              "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+              "file" : "DOS_Login.java",
+              "line" : "107",
+              "column" : "43",
+              "length" : "8",
+              "object" : "password"
+            },
+            "4" : {
+              "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+              "file" : "DOS_Login.java",
+              "line" : "106",
+              "column" : "13",
+              "length" : "5",
+              "object" : "query"
+            },
+            "5" : {
+              "snippet" : "\t    ec.addElement(new StringElement(query));",
+              "file" : "DOS_Login.java",
+              "line" : "108",
+              "column" : "38",
+              "length" : "5",
+              "object" : "query"
+            },
+            "6" : {
+              "snippet" : "\t    ec.addElement(new StringElement(query));",
+              "file" : "DOS_Login.java",
+              "line" : "108",
+              "column" : "20",
+              "length" : "3",
+              "object" : "StringElement"
+            }
+          }
+        ]
+      },
+      "allFalsePositive": false
+    },
+    {
+      "vulnerability": "SQL_Injection",
+      "vulnerabilityStatus": "TO VERIFY",
+      "similarityId": "-1987639889",
+      "cwe": "89",
+      "description": "",
+      "language": "Java",
+      "severity": "High",
+      "link": "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=4",
+      "filename": "DOS_Login.java",
+      "falsePositiveCount": 0,
+      "details": {
+        "88": {
+          "falsePositive": false,
+          "codeSnippet": "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "comment": ""
+        },
+        "89": {
+          "falsePositive": false,
+          "codeSnippet": "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "comment": ""
+        }
+      },
+      "additionalDetails": {
+        "recommendedFix": "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=594&queryVersionCode=56142311&queryTitle=SQL_Injection",
+        "categories": "PCI DSS v3.2;PCI DSS (3.2) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A1-Injection,FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-10 Information Input Validation (P1),OWASP Top 10 2017;A1-Injection,OWASP Mobile Top 10 2016;M7-Client Code Quality",
+        "results": [
+          {
+            "sink": {
+              "file": "DOS_Login.java",
+              "line": "114",
+              "column": "45",
+              "object": "executeQuery",
+              "length" : "1",
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);"
+            },
+            "state": "0",
+            "source": {
+              "file": "DOS_Login.java",
+              "line": "88",
+              "column": "46",
+              "object": "getRawParameter",
+              "length" : "1",
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);"
+            },
+            "1" : {
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+              "file" : "DOS_Login.java",
+              "line" : "88",
+              "column" : "46",
+              "length" : "1",
+              "object" : "getRawParameter"
+            },
+            "2" : {
+              "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+              "file" : "DOS_Login.java",
+              "line" : "88",
+              "column" : "6",
+              "length" : "8",
+              "object" : "username"
+            },
+            "3" : {
+              "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+              "file" : "DOS_Login.java",
+              "line" : "92",
+              "column" : "37",
+              "length" : "8",
+              "object" : "username"
+            },
+            "4" : {
+              "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+              "file" : "DOS_Login.java",
+              "line" : "92",
+              "column" : "10",
+              "length" : "8",
+              "object" : "username"
+            },
+            "5" : {
+              "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+              "file" : "DOS_Login.java",
+              "line" : "107",
+              "column" : "9",
+              "length" : "8",
+              "object" : "username"
+            },
+            "6" : {
+              "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+              "file" : "DOS_Login.java",
+              "line" : "106",
+              "column" : "13",
+              "length" : "5",
+              "object" : "query"
+            },
+            "7" : {
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+              "file" : "DOS_Login.java",
+              "line" : "114",
+              "column" : "46",
+              "length" : "5",
+              "object" : "query"
+            },
+            "8" : {
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+              "file" : "DOS_Login.java",
+              "line" : "114",
+              "column" : "45",
+              "length" : "1",
+              "object" : "executeQuery"
+            }
+          },
+          {
+            "sink": {
+              "file": "DOS_Login.java",
+              "line": "114",
+              "column": "45",
+              "object": "executeQuery",
+              "length" : "1",
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);"
+            },
+            "state": "0",
+            "source": {
+              "file": "DOS_Login.java",
+              "line": "89",
+              "column": "46",
+              "object": "getRawParameter",
+              "length" : "1",
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);"
+            },
+            "1" : {
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+              "file" : "DOS_Login.java",
+              "line" : "89",
+              "column" : "46",
+              "length" : "1",
+              "object" : "getRawParameter"
+            },
+            "2" : {
+              "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+              "file" : "DOS_Login.java",
+              "line" : "89",
+              "column" : "6",
+              "length" : "8",
+              "object" : "password"
+            },
+            "3" : {
+              "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+              "file" : "DOS_Login.java",
+              "line" : "107",
+              "column" : "43",
+              "length" : "8",
+              "object" : "password"
+            },
+            "4" : {
+              "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+              "file" : "DOS_Login.java",
+              "line" : "106",
+              "column" : "13",
+              "length" : "5",
+              "object" : "query"
+            },
+            "5" : {
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+              "file" : "DOS_Login.java",
+              "line" : "114",
+              "column" : "46",
+              "length" : "5",
+              "object" : "query"
+            },
+            "6" : {
+              "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+              "file" : "DOS_Login.java",
+              "line" : "114",
+              "column" : "45",
+              "length" : "1",
+              "object" : "executeQuery"
+            }
+          }
+        ],
+        "CodeBashingLesson" : "https://cxa.codebashing.com/courses/"
+      },
+      "allFalsePositive": false
+    }
+  ],
+  "unFilteredIssues": [ {
+    "vulnerability" : "Reflected_XSS_All_Clients",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "similarityId" : "14660819",
+    "cwe" : "79",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "High",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=2",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "88" : {
+        "falsePositive" : false,
+        "comment" : ""
+      },
+      "89" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=591&queryVersionCode=56110529&queryTitle=Reflected_XSS_All_Clients",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        },
+        "2" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "6",
+          "length" : "8",
+          "object" : "username"
+        },
+        "3" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "37",
+          "length" : "8",
+          "object" : "username"
+        },
+        "4" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "10",
+          "length" : "8",
+          "object" : "username"
+        },
+        "5" : {
+          "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+          "file" : "DOS_Login.java",
+          "line" : "107",
+          "column" : "9",
+          "length" : "8",
+          "object" : "username"
+        },
+        "sink" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "6" : {
+          "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+          "file" : "DOS_Login.java",
+          "line" : "106",
+          "column" : "13",
+          "length" : "5",
+          "object" : "query"
+        },
+        "7" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "38",
+          "length" : "5",
+          "object" : "query"
+        },
+        "8" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        }
+      }, {
+        "1" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        },
+        "2" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "6",
+          "length" : "8",
+          "object" : "password"
+        },
+        "3" : {
+          "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+          "file" : "DOS_Login.java",
+          "line" : "107",
+          "column" : "43",
+          "length" : "8",
+          "object" : "password"
+        },
+        "4" : {
+          "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+          "file" : "DOS_Login.java",
+          "line" : "106",
+          "column" : "13",
+          "length" : "5",
+          "object" : "query"
+        },
+        "5" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "38",
+          "length" : "5",
+          "object" : "query"
+        },
+        "sink" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "6" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "SQL_Injection",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "similarityId" : "-1987639889",
+    "cwe" : "89",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "High",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=4",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "88" : {
+        "falsePositive" : false,
+        "comment" : ""
+      },
+      "89" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=594&queryVersionCode=56142311&queryTitle=SQL_Injection",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A1-Injection,FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-10 Information Input Validation (P1),OWASP Top 10 2017;A1-Injection,OWASP Mobile Top 10 2016;M7-Client Code Quality",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        },
+        "2" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "6",
+          "length" : "8",
+          "object" : "username"
+        },
+        "3" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "37",
+          "length" : "8",
+          "object" : "username"
+        },
+        "4" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "10",
+          "length" : "8",
+          "object" : "username"
+        },
+        "5" : {
+          "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+          "file" : "DOS_Login.java",
+          "line" : "107",
+          "column" : "9",
+          "length" : "8",
+          "object" : "username"
+        },
+        "sink" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "45",
+          "length" : "1",
+          "object" : "executeQuery"
+        },
+        "6" : {
+          "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+          "file" : "DOS_Login.java",
+          "line" : "106",
+          "column" : "13",
+          "length" : "5",
+          "object" : "query"
+        },
+        "7" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "46",
+          "length" : "5",
+          "object" : "query"
+        },
+        "8" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "45",
+          "length" : "1",
+          "object" : "executeQuery"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        }
+      }, {
+        "1" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        },
+        "2" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "6",
+          "length" : "8",
+          "object" : "password"
+        },
+        "3" : {
+          "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+          "file" : "DOS_Login.java",
+          "line" : "107",
+          "column" : "43",
+          "length" : "8",
+          "object" : "password"
+        },
+        "4" : {
+          "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+          "file" : "DOS_Login.java",
+          "line" : "106",
+          "column" : "13",
+          "length" : "5",
+          "object" : "query"
+        },
+        "5" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "46",
+          "length" : "5",
+          "object" : "query"
+        },
+        "sink" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "45",
+          "length" : "1",
+          "object" : "executeQuery"
+        },
+        "6" : {
+          "snippet" : "\t\tResultSet results = statement.executeQuery(query);",
+          "file" : "DOS_Login.java",
+          "line" : "114",
+          "column" : "45",
+          "length" : "1",
+          "object" : "executeQuery"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "Heap_Inspection",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "244",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Medium",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=1",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "87" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=3771&queryVersionCode=94850879&queryTitle=Heap_Inspection",
+      "categories" : "OWASP Top 10 2013;A6-Sensitive Data Exposure,FISMA 2014;Media Protection,NIST SP 800-53;SC-4 Information in Shared Resources (P1),OWASP Top 10 2017;A3-Sensitive Data Exposure",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    String password = \"\";",
+          "file" : "DOS_Login.java",
+          "line" : "87",
+          "column" : "13",
+          "length" : "8",
+          "object" : "password"
+        },
+        "sink" : {
+          "snippet" : "\t    String password = \"\";",
+          "file" : "DOS_Login.java",
+          "line" : "87",
+          "column" : "13",
+          "length" : "8",
+          "object" : "password"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    String password = \"\";",
+          "file" : "DOS_Login.java",
+          "line" : "87",
+          "column" : "13",
+          "length" : "8",
+          "object" : "password"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "Privacy_Violation",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "359",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Medium",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=10",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "89" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=639&queryVersionCode=56620121&queryTitle=Privacy_Violation",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A6-Sensitive Data Exposure,FISMA 2014;Identification And Authentication,NIST SP 800-53;SC-4 Information in Shared Resources (P1),OWASP Top 10 2017;A3-Sensitive Data Exposure",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "6",
+          "length" : "8",
+          "object" : "password"
+        },
+        "2" : {
+          "snippet" : "\t\t    + username + \"' and password = '\" + password + \"'\";",
+          "file" : "DOS_Login.java",
+          "line" : "107",
+          "column" : "43",
+          "length" : "8",
+          "object" : "password"
+        },
+        "3" : {
+          "snippet" : "\t    String query = \"SELECT * FROM user_system_data WHERE user_name = '\"",
+          "file" : "DOS_Login.java",
+          "line" : "106",
+          "column" : "13",
+          "length" : "5",
+          "object" : "query"
+        },
+        "4" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "38",
+          "length" : "5",
+          "object" : "query"
+        },
+        "5" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "sink" : {
+          "snippet" : "\t    ec.addElement(new StringElement(query));",
+          "file" : "DOS_Login.java",
+          "line" : "108",
+          "column" : "20",
+          "length" : "3",
+          "object" : "StringElement"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    password = s.getParser().getRawParameter(PASSWORD);",
+          "file" : "DOS_Login.java",
+          "line" : "89",
+          "column" : "6",
+          "length" : "8",
+          "object" : "password"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "XSRF",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "352",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Medium",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=11",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "88" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=648&queryVersionCode=56715926&queryTitle=XSRF",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.9 - Cross-site request forgery,OWASP Top 10 2013;A8-Cross-Site Request Forgery (CSRF),NIST SP 800-53;SC-23 Session Authenticity (P1)",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        },
+        "2" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "6",
+          "length" : "8",
+          "object" : "username"
+        },
+        "3" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "37",
+          "length" : "8",
+          "object" : "username"
+        },
+        "4" : {
+          "snippet" : "\t    if (username.equals(\"jeff\") || username.equals(\"dave\"))",
+          "file" : "DOS_Login.java",
+          "line" : "92",
+          "column" : "10",
+          "length" : "8",
+          "object" : "username"
+        },
+        "5" : {
+          "snippet" : "\t\t\t\t    + username",
+          "file" : "DOS_Login.java",
+          "line" : "130",
+          "column" : "11",
+          "length" : "8",
+          "object" : "username"
+        },
+        "sink" : {
+          "snippet" : "\t\t\t    statement.executeUpdate(insertData1);",
+          "file" : "DOS_Login.java",
+          "line" : "134",
+          "column" : "31",
+          "length" : "1",
+          "object" : "executeUpdate"
+        },
+        "6" : {
+          "snippet" : "\t\t\t    String insertData1 = \"INSERT INTO user_login VALUES ( '\"",
+          "file" : "DOS_Login.java",
+          "line" : "129",
+          "column" : "15",
+          "length" : "11",
+          "object" : "insertData1"
+        },
+        "7" : {
+          "snippet" : "\t\t\t    statement.executeUpdate(insertData1);",
+          "file" : "DOS_Login.java",
+          "line" : "134",
+          "column" : "32",
+          "length" : "11",
+          "object" : "insertData1"
+        },
+        "8" : {
+          "snippet" : "\t\t\t    statement.executeUpdate(insertData1);",
+          "file" : "DOS_Login.java",
+          "line" : "134",
+          "column" : "31",
+          "length" : "1",
+          "object" : "executeUpdate"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    username = s.getParser().getRawParameter(USERNAME);",
+          "file" : "DOS_Login.java",
+          "line" : "88",
+          "column" : "46",
+          "length" : "1",
+          "object" : "getRawParameter"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "Information_Exposure_Through_an_Error_Message",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "209",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Low",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=8",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "169" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=622&queryVersionCode=56439377&queryTitle=Information_Exposure_Through_an_Error_Message",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.5 - Improper error handling,OWASP Top 10 2013;A5-Security Misconfiguration,FISMA 2014;Configuration Management,NIST SP 800-53;SI-11 Error Handling (P2),OWASP Top 10 2017;A6-Security Misconfiguration",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t    catch (SQLException sqle)",
+          "file" : "DOS_Login.java",
+          "line" : "169",
+          "column" : "26",
+          "length" : "4",
+          "object" : "sqle"
+        },
+        "2" : {
+          "snippet" : "\t\tec.addElement(new P().addElement(sqle.getMessage()));",
+          "file" : "DOS_Login.java",
+          "line" : "171",
+          "column" : "36",
+          "length" : "4",
+          "object" : "sqle"
+        },
+        "3" : {
+          "snippet" : "\t\tsqle.printStackTrace();",
+          "file" : "DOS_Login.java",
+          "line" : "172",
+          "column" : "3",
+          "length" : "4",
+          "object" : "sqle"
+        },
+        "4" : {
+          "snippet" : "\t\tsqle.printStackTrace();",
+          "file" : "DOS_Login.java",
+          "line" : "172",
+          "column" : "23",
+          "length" : "1",
+          "object" : "printStackTrace"
+        },
+        "sink" : {
+          "snippet" : "\t\tsqle.printStackTrace();",
+          "file" : "DOS_Login.java",
+          "line" : "172",
+          "column" : "23",
+          "length" : "1",
+          "object" : "printStackTrace"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    catch (SQLException sqle)",
+          "file" : "DOS_Login.java",
+          "line" : "169",
+          "column" : "26",
+          "length" : "4",
+          "object" : "sqle"
+        }
+      }, {
+        "1" : {
+          "snippet" : "\t    catch (SQLException sqle)",
+          "file" : "DOS_Login.java",
+          "line" : "169",
+          "column" : "26",
+          "length" : "4",
+          "object" : "sqle"
+        },
+        "2" : {
+          "snippet" : "\t\tec.addElement(new P().addElement(sqle.getMessage()));",
+          "file" : "DOS_Login.java",
+          "line" : "171",
+          "column" : "36",
+          "length" : "4",
+          "object" : "sqle"
+        },
+        "3" : {
+          "snippet" : "\t\tec.addElement(new P().addElement(sqle.getMessage()));",
+          "file" : "DOS_Login.java",
+          "line" : "171",
+          "column" : "51",
+          "length" : "1",
+          "object" : "getMessage"
+        },
+        "4" : {
+          "snippet" : "\t\tec.addElement(new P().addElement(sqle.getMessage()));",
+          "file" : "DOS_Login.java",
+          "line" : "171",
+          "column" : "35",
+          "length" : "1",
+          "object" : "addElement"
+        },
+        "sink" : {
+          "snippet" : "\t\tec.addElement(new P().addElement(sqle.getMessage()));",
+          "file" : "DOS_Login.java",
+          "line" : "171",
+          "column" : "35",
+          "length" : "1",
+          "object" : "addElement"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t    catch (SQLException sqle)",
+          "file" : "DOS_Login.java",
+          "line" : "169",
+          "column" : "26",
+          "length" : "4",
+          "object" : "sqle"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "Improper_Resource_Shutdown_or_Release",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "404",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Low",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=6",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "103" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=600&queryVersionCode=56205902&queryTitle=Improper_Resource_Shutdown_or_Release",
+      "categories" : "NIST SP 800-53;SC-5 Denial of Service Protection (P1)",
+      "results" : [ {
+        "1" : {
+          "snippet" : "\t\tconnection = DatabaseUtilities.makeConnection(s);",
+          "file" : "DOS_Login.java",
+          "line" : "103",
+          "column" : "48",
+          "length" : "1",
+          "object" : "makeConnection"
+        },
+        "2" : {
+          "snippet" : "\t\tconnection = DatabaseUtilities.makeConnection(s);",
+          "file" : "DOS_Login.java",
+          "line" : "103",
+          "column" : "3",
+          "length" : "10",
+          "object" : "connection"
+        },
+        "3" : {
+          "snippet" : "\t\tStatement statement = connection.createStatement(",
+          "file" : "DOS_Login.java",
+          "line" : "111",
+          "column" : "25",
+          "length" : "10",
+          "object" : "connection"
+        },
+        "4" : {
+          "snippet" : "\t\tStatement statement = connection.createStatement(",
+          "file" : "DOS_Login.java",
+          "line" : "111",
+          "column" : "51",
+          "length" : "1",
+          "object" : "createStatement"
+        },
+        "sink" : {
+          "snippet" : "\t\tStatement statement = connection.createStatement(",
+          "file" : "DOS_Login.java",
+          "line" : "111",
+          "column" : "51",
+          "length" : "1",
+          "object" : "createStatement"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "\t\tconnection = DatabaseUtilities.makeConnection(s);",
+          "file" : "DOS_Login.java",
+          "line" : "103",
+          "column" : "48",
+          "length" : "1",
+          "object" : "makeConnection"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  }, {
+    "vulnerability" : "Use_Of_Hardcoded_Password",
+    "vulnerabilityStatus" : "TO VERIFY",
+    "cwe" : "259",
+    "description" : "",
+    "language" : "Java",
+    "severity" : "Low",
+    "link" : "http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6&pathid=7",
+    "filename" : "DOS_Login.java",
+    "gitUrl" : "",
+    "falsePositiveCount" : 0,
+    "details" : {
+      "64" : {
+        "falsePositive" : false,
+        "comment" : ""
+      }
+    },
+    "additionalDetails" : {
+      "recommendedFix" : "http://CX-FLOW-CLEAN/CxWebClient/ScanQueryDescription.aspx?queryID=604&queryVersionCode=56248316&queryTitle=Use_Of_Hardcoded_Password",
+      "categories" : "PCI DSS v3.2;PCI DSS (3.2) - 6.5.10 - Broken authentication and session management,OWASP Top 10 2013;A2-Broken Authentication and Session Management,FISMA 2014;Identification And Authentication,NIST SP 800-53;SC-28 Protection of Information at Rest (P1),OWASP Top 10 2017;A2-Broken Authentication,OWASP Mobile Top 10 2016;M9-Reverse Engineering",
+      "results" : [ {
+        "1" : {
+          "snippet" : "    protected final static String PASSWORD = \"Password\";",
+          "file" : "DOS_Login.java",
+          "line" : "64",
+          "column" : "35",
+          "length" : "8",
+          "object" : "PASSWORD"
+        },
+        "sink" : {
+          "snippet" : "    protected final static String PASSWORD = \"Password\";",
+          "file" : "DOS_Login.java",
+          "line" : "64",
+          "column" : "35",
+          "length" : "8",
+          "object" : "PASSWORD"
+        },
+        "state" : "0",
+        "source" : {
+          "snippet" : "    protected final static String PASSWORD = \"Password\";",
+          "file" : "DOS_Login.java",
+          "line" : "64",
+          "column" : "35",
+          "length" : "8",
+          "object" : "PASSWORD"
+        }
+      } ]
+    },
+    "allFalsePositive" : false
+  } ],
+  "reportCreationTime":"Sunday, January 19, 2020 2:41:53 AM",
+  "deepLink":"http://CX-FLOW-CLEAN/CxWebClient/ViewerMain.aspx?scanid=1000026&projectid=6",
+  "scanTime":"00h:01m:30s",
+  "sastResults": false
+}

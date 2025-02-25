@@ -29,7 +29,7 @@ class AcunetixJSONParser:
             else:
                 cwe = None
             sev = item["Severity"]
-            if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+            if sev not in {"Info", "Low", "Medium", "High", "Critical"}:
                 sev = "Info"
             if item["RemedialProcedure"] is not None:
                 mitigation = text_maker.handle(item.get("RemedialProcedure", ""))

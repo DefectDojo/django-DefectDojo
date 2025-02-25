@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: release-drafter/release-drafter@3f0f87098bd6b5c5b9a36d49c41d998ea58f9348 # v6.0.0
+        uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         with:
           version: ${{ github.event.inputs.version }}  
         env:

@@ -128,7 +128,7 @@ class GitleaksParser:
             if len(message.split("\n")) > 1:
                 description += (
                     "**Commit message:**"
-                    + "\n```\n"
+                    "\n```\n"
                     + message.replace("```", "\\`\\`\\`")
                     + "\n```\n"
                 )

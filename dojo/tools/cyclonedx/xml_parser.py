@@ -294,9 +294,6 @@ class CycloneDXXMLParser:
                             "b:detail", namespaces=ns,
                         )
                         if detail:
-                            finding.mitigation = (
-                                finding.mitigation
-                                + f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
-                            )
+                            finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
             findings.append(finding)
         return findings

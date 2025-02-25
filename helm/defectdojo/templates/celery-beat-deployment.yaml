@@ -13,6 +13,12 @@ metadata:
     {{- with .Values.extraLabels }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- if .Values.celery.annotations }}
+  annotations:
+{{- with .Values.celery.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 spec:
   replicas: {{ .Values.celery.beat.replicas }}
   {{- if .Values.revisionHistoryLimit }}
@@ -55,6 +61,11 @@ spec:
       volumes:
       - name: run
         emptyDir: {}
+      {{- if  .Values.localsettingspy }}
+      - name: localsettingspy
+        configMap:
+          name: {{ $fullName }}-localsettingspy
+      {{- end }}
       {{- if  .Values.django.uwsgi.certificates.enabled }}
       - name: cert-mount
         configMap:
@@ -113,6 +124,12 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- if  .Values.localsettingspy }}
+        - name: localsettingspy
+          readOnly: true
+          mountPath: /app/dojo/settings/local_settings.py
+          subPath: file
+        {{- end }}
         {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}

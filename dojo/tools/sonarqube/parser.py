@@ -46,7 +46,7 @@ class SonarQubeParser:
             return SonarQubeRESTAPIZIP().get_items(zipdata, test, self.mode)
         parser = etree.HTMLParser()
         tree = etree.parse(file, parser)
-        if self.mode not in [None, "detailed"]:
+        if self.mode not in {None, "detailed"}:
             raise ValueError(
                 "Internal error: Invalid mode "
                 + self.mode

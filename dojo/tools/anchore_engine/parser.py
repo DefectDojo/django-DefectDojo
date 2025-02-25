@@ -67,28 +67,27 @@ class AnchoreEngineParser:
                     cvssv3_base_score = item["nvd_data"][0]["cvss_v3"][
                         "base_score"
                     ]
-            else:
-                # there may be other keys, but taking a best guess here
-                if "vendor_data" in item and len(item["vendor_data"]) > 0:
-                    # sometimes cvssv3 in 1st element will have -1 for "not
-                    # set", but have data in the 2nd array item
+            # there may be other keys, but taking a best guess here
+            elif "vendor_data" in item and len(item["vendor_data"]) > 0:
+                # sometimes cvssv3 in 1st element will have -1 for "not
+                # set", but have data in the 2nd array item
+                if (
+                    "cvss_v3" in item["vendor_data"][0]
+                    and item["vendor_data"][0]["cvss_v3"]["base_score"]
+                    != -1
+                ):
+                    cvssv3_base_score = item["vendor_data"][0]["cvss_v3"][
+                        "base_score"
+                    ]
+                elif len(item["vendor_data"]) > 1:
                     if (
-                        "cvss_v3" in item["vendor_data"][0]
-                        and item["vendor_data"][0]["cvss_v3"]["base_score"]
+                        "cvss_v3" in item["vendor_data"][1]
+                        and item["vendor_data"][1]["cvss_v3"]["base_score"]
                         != -1
                     ):
-                        cvssv3_base_score = item["vendor_data"][0]["cvss_v3"][
-                            "base_score"
-                        ]
-                    elif len(item["vendor_data"]) > 1:
-                        if (
-                            "cvss_v3" in item["vendor_data"][1]
-                            and item["vendor_data"][1]["cvss_v3"]["base_score"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendor_data"][1][
-                                "cvss_v3"
-                            ]["base_score"]
+                        cvssv3_base_score = item["vendor_data"][1][
+                            "cvss_v3"
+                        ]["base_score"]
             # cvssv3 score spec states value should be between 0.0 and 10.0
             # anchorage provides a -1.0 in some situations which breaks spec
             if (cvssv3_base_score

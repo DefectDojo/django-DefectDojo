@@ -60,6 +60,7 @@ from dojo.filters import (
     ApiTestFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
+    TestImportAPIFilter,
 )
 from dojo.finding.queries import (
     get_authorized_findings,
@@ -666,12 +667,12 @@ class EngagementViewSet(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
                 )
-            return response
         except ValidationError:
             return Response(
                 {"error": "Bad Request!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        return response
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -1490,7 +1491,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method in ["PUT", "PATCH"]:
+        if request.method in {"PUT", "PATCH"}:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)
@@ -2259,17 +2260,9 @@ class TestImportViewSet(
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "test",
-        "findings_affected",
-        "version",
-        "branch_tag",
-        "build_id",
-        "commit_hash",
-        "test_import_finding_action__action",
-        "test_import_finding_action__finding",
-        "test_import_finding_action__created",
-    ]
+
+    filterset_class = TestImportAPIFilter
+
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasTestImportPermission,
@@ -2440,7 +2433,7 @@ class UserProfileView(GenericAPIView):
     @action(
         detail=True, methods=["get"], filter_backends=[], pagination_class=None,
     )
-    def get(self, request, format=None):
+    def get(self, request, _=None):
         user = get_current_user()
         user_contact_info = (
             user.usercontactinfo if hasattr(user, "usercontactinfo") else None
@@ -2691,6 +2684,24 @@ class NoteTypeViewSet(
 
     def get_queryset(self):
         return Note_Type.objects.all().order_by("id")
+
+
+class BurpRawRequestResponseViewSet(
+    DojoModelViewSet,
+):
+    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
+
+    def get_queryset(self):
+        results = BurpRawRequestResponse.objects.all()
+        empty_value = b""
+        results = results.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+        return results.order_by("id")
 
 
 # Authorization: superuser
