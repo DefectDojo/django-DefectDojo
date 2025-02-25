@@ -4,7 +4,7 @@ toc_hide: true
 ---
 
 ## File Types
-Trustwave vulnerability scan reports can be exported/importedin CSV format.
+Trustwave vulnerability scan reports can be exported/imported in CSV format.
 
 ### Total Fields in CSV: 13
 Fields in order of appearance:
