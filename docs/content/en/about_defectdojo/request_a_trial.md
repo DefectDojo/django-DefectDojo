@@ -14,7 +14,7 @@ At the end of this process, you'll be put in touch with our Sales team, who will
 
 # **Requesting your Trial**
 
-In order to sign up for a trial, you'll need to create an account on our Cloud Portal, and then click the New Subscription menu option from the sidebar.
+In order to sign up for a trial, you'll need to create an account on our [Cloud Portal](https://defectdojo.com/pricing), and then click the New Subscription menu option from the sidebar.
 
 ![image](images/request_a_trial_mg.png)
 
