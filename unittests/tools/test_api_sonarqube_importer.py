@@ -44,7 +44,7 @@ def dummy_many_hotspots(self, *args, **kwargs):
 
 
 def dummy_many_segurity_hotspots():
-    with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/security_hotspot.json') as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots/security_hotspot.json") as json_file:
         data = json.load(json_file)
         return data
     

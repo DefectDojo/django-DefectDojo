@@ -65,7 +65,7 @@ class TestTwistlockParser(DojoTestCase):
 
     def test_parse_file_prisma_twistlock_images_four_vulns_semicolon(self):
         testfile = open(
-            path.join(Path(__file__).parent, "../scans/twistlock/scan_report_prisma_twistlock_images_four_vulns_semicolon.csv"), encoding="utf-8",
+            get_unit_tests_scans_path("twistlock") / "scan_report_prisma_twistlock_images_four_vulns_semicolon.csv", encoding="utf-8",
         )
         parser = TwistlockParser()
         findings = parser.get_findings(testfile, Test())
