@@ -35,7 +35,7 @@ class MSDefenderParser:
             else:
                 input_zip = zipfile.ZipFile(file, "r")
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-            if zipdata.get("machines/") is None or zipdata.get("vulnerabilities/") is None:
+            if zipdata.get("vulnerabilities/") is None:
                 return []
             vulnerabilityfiles = []
             machinefiles = []

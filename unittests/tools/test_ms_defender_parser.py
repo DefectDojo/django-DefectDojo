@@ -90,3 +90,10 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual(421, len(findings))
         finding = findings[0]
         self.assertEqual(3, len(finding.unsaved_endpoints))
+
+    def test_parser_defender_empty_machines(self):
+        testfile = open(get_unit_tests_scans_path("ms_defender") / "empty_machines.zip", encoding="utf-8")
+        parser = MSDefenderParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(4, len(findings))
