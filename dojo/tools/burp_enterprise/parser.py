@@ -162,7 +162,7 @@ class BurpEnterpriseParser:
                     cleaned_item = item.split(":")[0]
                     if (
                         finding_details["cwe"] is None
-                        and (cwe_search := re.search("CWE-([0-9]*)", cleaned_item, re.IGNORECASE))
+                        and (cwe_search := re.search(r"CWE-([0-9]*)", cleaned_item, re.IGNORECASE))
                     ):
                         finding_details["cwe"] = int(cwe_search.group(1))
                     if "vulnerability_ids" not in finding_details:

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.timezone import make_aware
 
@@ -183,7 +184,7 @@ class BaseImporter(ImporterOptions):
         tests: list[Test],
     ) -> list[Finding]:
         """
-        currently we only support import one Test
+        Currently we only support import one Test
         so for parser that support multiple tests (like SARIF)
         we aggregate all the findings into one uniq test
         """
@@ -262,6 +263,13 @@ class BaseImporter(ImporterOptions):
             parsed_findings,
             **kwargs,
         )
+
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
 
     def update_test_meta(self):
         """
@@ -358,56 +366,79 @@ class BaseImporter(ImporterOptions):
             commit_hash=self.commit_hash,
             type=self.import_type,
         )
-        # Define all of the respective import finding actions for the test import object
-        test_import_finding_action_list = []
+
+        # Create a history record for each finding
         for finding in closed_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for closed finding: {finding.id}")
-            if Finding.objects.filter(id=finding.id).exists():
-                test_import_finding_action_list.append(Test_Import_Finding_Action(
-                    test_import=test_import,
-                    finding=finding,
-                    action=IMPORT_CLOSED_FINDING,
-                ))
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_CLOSED_FINDING,
+            ))
         for finding in new_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for created finding: {finding.id}")
-            if Finding.objects.filter(id=finding.id).exists():
-                test_import_finding_action_list.append(Test_Import_Finding_Action(
-                    test_import=test_import,
-                    finding=finding,
-                    action=IMPORT_CREATED_FINDING,
-                ))
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_CREATED_FINDING,
+            ))
         for finding in reactivated_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for reactivated finding: {finding.id}")
-            if Finding.objects.filter(id=finding.id).exists():
-                test_import_finding_action_list.append(Test_Import_Finding_Action(
-                    test_import=test_import,
-                    finding=finding,
-                    action=IMPORT_REACTIVATED_FINDING,
-                ))
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_REACTIVATED_FINDING,
+            ))
         for finding in untouched_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for untouched finding: {finding.id}")
-            if Finding.objects.filter(id=finding.id).exists():
-                test_import_finding_action_list.append(Test_Import_Finding_Action(
-                    test_import=test_import,
-                    finding=finding,
-                    action=IMPORT_UNTOUCHED_FINDING,
-                ))
-        # Bulk create all the defined objects
-        Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_UNTOUCHED_FINDING,
+            ))
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
             for finding in test_import.findings_affected.all():
                 for tag in self.tags:
-                    finding.tags.add(tag)
+                    self.add_tags_safe(finding, tag)
         # Add any tags to any endpoints of the findings imported if necessary
         if self.apply_tags_to_endpoints and self.tags:
             for finding in test_import.findings_affected.all():
                 for endpoint in finding.endpoints.all():
                     for tag in self.tags:
-                        endpoint.tags.add(tag)
+                        self.add_tags_safe(endpoint, tag)
 
         return test_import
+
+    def create_import_history_record_safe(
+        self,
+        test_import_finding_action,
+    ):
+        """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
+        logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
+        try:
+            test_import_finding_action.save()
+        except IntegrityError as e:
+            # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
+            logger.warning("Error creating Test_Import_Finding_Action: %s", e)
+            logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
+
+    def add_tags_safe(
+        self,
+        finding_or_endpoint,
+        tag,
+    ):
+        """Adds tags to a finding or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
+        if not isinstance(finding_or_endpoint, Finding) and not isinstance(finding_or_endpoint, Endpoint):
+            msg = "finding_or_endpoint must be a Finding or Endpoint object"
+            raise TypeError(msg)
+
+        msg = "finding" if isinstance(finding_or_endpoint, Finding) else "endpoint" if isinstance(finding_or_endpoint, Endpoint) else "unknown"
+        logger.debug(f" adding tag: {tag} to " + msg + f"{finding_or_endpoint.id}")
+
+        try:
+            finding_or_endpoint.tags.add(tag)
+        except IntegrityError as e:
+            # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
+            logger.warning("Error adding tag: %s", e)
+            logger.debug("Error adding tag, finding marked as duplicate and deleted ?")
 
     def construct_imported_message(
         self,

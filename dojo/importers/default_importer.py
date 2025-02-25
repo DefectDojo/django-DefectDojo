@@ -269,28 +269,44 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # First check if close old findings is desired
         if not self.close_old_findings_toggle:
             return []
-        logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
-        # Close old active findings that are not reported by this scan.
-        # Refactoring this to only call test.finding_set.values() once.
-        findings = findings.values()
-        mitigated_hash_codes = []
+
+        logger.debug("IMPORT_SCAN: Closing findings no longer present in scan report")
+        # Remove all the findings that are coming from the report already mitigated
         new_hash_codes = []
-        for finding in findings:
-            new_hash_codes.append(finding["hash_code"])
-            if finding.get("is_mitigated", None):
-                mitigated_hash_codes.append(finding["hash_code"])
-                for hash_code in new_hash_codes:
-                    if hash_code == finding["hash_code"]:
-                        new_hash_codes.remove(hash_code)
+        new_unique_ids_from_tool = []
+        for finding in findings.values():
+            # Do not process closed findings in the report
+            if finding.get("is_mitigated", False):
+                continue
+            # Grab the hash code
+            if (hash_code := finding.get("hash_code")) is not None:
+                new_hash_codes.append(hash_code)
+            if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
+                new_unique_ids_from_tool.append(unique_id_from_tool)
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
-        old_findings = Finding.objects.exclude(
-            test=self.test,
-        ).exclude(
-            hash_code__in=new_hash_codes,
-        ).filter(
+        old_findings = Finding.objects.filter(
             test__test_type=self.test.test_type,
-        ).filter(Q(active=True) | Q(risk_accepted=True))
+            active=True,
+        ).filter(Q(active=True) | Q(risk_accepted=True)).exclude(test=self.test)
+        # Filter further based on the deduplication algorithm set on the test
+        self.deduplication_algorithm = self.determine_deduplication_algorithm()
+        if self.deduplication_algorithm in ["hash_code", "legacy"]:
+            old_findings = old_findings.exclude(
+                hash_code__in=new_hash_codes,
+            )
+        if self.deduplication_algorithm == "unique_id_from_tool":
+            old_findings = old_findings.exclude(
+                unique_id_from_tool__in=new_unique_ids_from_tool,
+            )
+        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            old_findings = old_findings.exclude(
+                (Q(hash_code__isnull=False) & Q(hash_code__in=new_hash_codes))
+                | (
+                    Q(unique_id_from_tool__isnull=False)
+                    & Q(unique_id_from_tool__in=new_unique_ids_from_tool)
+                ),
+            )
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)

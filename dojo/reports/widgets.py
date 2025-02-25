@@ -379,7 +379,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                                                 finding__duplicate=False,
                                                 finding__out_of_scope=False,
                                                 )
-            if get_system_setting("enforce_verified_status", True):
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
                 endpoints = endpoints.filter(finding__verified=True)
 
             endpoints = endpoints.distinct()

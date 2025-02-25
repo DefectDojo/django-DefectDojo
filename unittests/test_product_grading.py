@@ -47,17 +47,41 @@ class ProductGradeTest(DojoTestCase):
         self.assertEqual(self.product.prod_numeric_grade, expected_grade)
 
     @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
-    def test_grade_change_with_enforced_verified_status_and_verified_is_true(self):
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", True)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_true_and_enforced_verified_product_grading_true_with_verified_is_true(self):
         self.create_single_critical_and_assert_grade(40, verified=True)
 
     @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
-    def test_grade_dose_not_change_with_enforced_verified_status_and_verified_is_false(self):
-        self.create_single_critical_and_assert_grade(100, verified=False)
-
-    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
-    def test_grade_change_without_enforced_verified_status_and_verified_is_true(self):
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", False)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_true_and_enforced_verified_product_grading_false_with_verified_is_true(self):
         self.create_single_critical_and_assert_grade(40, verified=True)
 
     @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
-    def test_grade_change_without_enforced_verified_status_and_verified_is_false(self):
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", True)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_false_and_enforced_verified_product_grading_true_with_verified_is_true(self):
+        self.create_single_critical_and_assert_grade(40, verified=True)
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", False)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_false_and_enforced_verified_product_grading_false_with_verified_is_true(self):
+        self.create_single_critical_and_assert_grade(40, verified=True)
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", True)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_true_and_enforced_verified_product_grading_true_with_verified_is_false(self):
+        self.create_single_critical_and_assert_grade(100, verified=False)
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", False)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_true_and_enforced_verified_product_grading_false_with_verified_is_false(self):
+        self.create_single_critical_and_assert_grade(100, verified=False)
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", True)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_false_and_enforced_verified_product_grading_true_with_verified_is_false(self):
+        self.create_single_critical_and_assert_grade(100, verified=False)
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_product_grading", False)  # noqa: FBT003
+    def test_grade_change_enforced_verified_globally_false_and_enforced_verified_product_grading_false_with_verified_is_false(self):
         self.create_single_critical_and_assert_grade(40, verified=False)

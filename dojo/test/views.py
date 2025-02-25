@@ -173,7 +173,7 @@ class ViewTest(View):
     def get_form(self, request: HttpRequest, context: dict):
         return (
             self.get_typed_note_form(request, context)
-            if context.get("note_type_activation", 0)
+            if context.get("note_type_activation")
             else self.get_note_form(request)
         )
 
@@ -538,6 +538,7 @@ class AddFindingView(View):
             finding.reporter = request.user
             finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
             finding.tags = context["form"].cleaned_data["tags"]
+            finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
             # Save and add new endpoints
             finding_helper.add_endpoints(finding, context["form"])
