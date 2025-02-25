@@ -1,6 +1,5 @@
 import json
 import logging
-import traceback
 import zipfile
 
 from dojo.models import Endpoint, Finding
