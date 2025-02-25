@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <h3>Edit Finding Exclusion</h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+
+                {% if finding_exclusion %}
+                    <input class="btn btn-primary" type="submit" label="Update exclusion" name="Update exclusion" value="Update Exclusion"/>
+                    <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"
+                           value="Edit Questions"/>
+                {% else %}
+                    <input class="btn btn-primary" type="submit" label="creat_exclusion" name="create exclusion" value="Save changes"/>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

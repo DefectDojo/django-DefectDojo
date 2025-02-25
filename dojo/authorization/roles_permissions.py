@@ -145,9 +145,9 @@ class Permissions(IntEnum):
     Credential_Edit = 2706
     Credential_Delete = 2707
     
-    Metrics_Panel = 2708
     Metrics_DevSecOps = 2709
     Metrics_Panel_Admin = 2710
+    Metrics_Regulatory = 2711
 
     Transfer_Finding_View = 2801
     Transfer_Finding_Edit = 2802
@@ -352,6 +352,8 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Regulatory
         },
         Roles.API_Importer: {
             Permissions.Product_Type_Add,
@@ -425,7 +427,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
-            Permissions.Finding_Code_Review
+            Permissions.Finding_Code_Review,
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -434,6 +436,7 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
+            Permissions.Product_Type_Delete,
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
@@ -512,9 +515,9 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
-            Permissions.Metrics_Panel,
             Permissions.Metrics_DevSecOps,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Regulatory,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Edit,
             Permissions.Transfer_Finding_Delete,
@@ -526,7 +529,7 @@ def get_roles_with_permissions():
             Permissions.Swagger_Documentation,
             Permissions.Api_v2_Key,
             Permissions.Defect_Dojo_Documentation,
-            Permissions.Finding_Code_Review
+            Permissions.Finding_Code_Review,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -614,7 +617,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
-            Permissions.Finding_Code_Review
+            Permissions.Finding_Code_Review,
         },
         Roles.Developer: {
             Permissions.Product_Type_View,
@@ -641,6 +644,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
+
         },
         Roles.Leader: {
             Permissions.Product_Type_View,
@@ -659,10 +663,7 @@ def get_roles_with_permissions():
             Permissions.Note_View_History,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
-            Permissions.Product_Member_Edit,
-            Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Role,
-            Permissions.Product_Tag_Red_Team,
             Permissions.Group_View,
             Permissions.Language_View,
             Permissions.Language_Add,
@@ -681,6 +682,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_Delete,
             Permissions.Transfer_Finding_Finding_Add,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Regulatory,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,
@@ -705,6 +707,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Finding_Code_Review,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Regulatory,
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
@@ -726,6 +729,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
             Permissions.Metrics_Panel_Admin,
+            Permissions.Metrics_Regulatory,
         },
     }
 

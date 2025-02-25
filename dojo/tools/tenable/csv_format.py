@@ -9,6 +9,7 @@ from cpe import CPE
 from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding, Test
+from django.conf import settings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class TenableCSVParser:
     def get_description(self, row):
         if not row:
             return None
-
+        data_desc = row.get("definition.description", "N/A")
         data_plugin = row.get("Plugin", "")
         data_plugin_name = row.get("Plugin Name", "")
         data_severity = row.get("Severity", "")
@@ -91,7 +92,6 @@ class TenableCSVParser:
         data_last_observed = row.get("Last Observed", "")
         data_exploit_frameworks = row.get("Exploit Frameworks", "")
         data_synopsis = row.get("Synopsis", "")
-        data_description = row.get("Description", "")
         data_solution = row.get("Solution", "")
         data_see_also = row.get("See Also", "")
         data_risk_factor = row.get("Risk Factor", "")
@@ -103,7 +103,6 @@ class TenableCSVParser:
         data_cvss_v3_temporal = row.get("CVSS V3 Temporal Score", "")
         data_cvss_v2_vector = row.get("CVSS V2 Vector", "")
         data_cvss_v3_vector = row.get("CVSS V3 Vector", "")
-        data_cpe = row.get("CPE", "")
         data_cve = row.get("CVE", "")
         data_bid = row.get("BID", "")
         data_cross_references = row.get("Cross References", "")
@@ -117,6 +116,7 @@ class TenableCSVParser:
         data_custom_id = row.get("Custom Id", "")
         return (
         "<p><strong>Plugin:</strong> " + str(data_plugin) + "</p>"
+        "<p><strong>Description:</strong> " + str(data_desc) + "</p>"
         + "<p><strong>Plugin Name:</strong> " + str(data_plugin_name) + "</p>"
         + "<p><strong>Severity:</strong> " + str(data_severity) + "</p>"
         + "<p><strong>IP Address:</strong> " + str(data_ip_address) + "</p>"
@@ -131,7 +131,6 @@ class TenableCSVParser:
         + "<p><strong>Last Observed:</strong> " + str(data_last_observed) + "</p>"
         + "<p><strong>Exploit Frameworks:</strong> " + str(data_exploit_frameworks) + "</p>"
         + "<p><strong>Synopsis:</strong> " + str(data_synopsis) + "</p>"
-        + "<p><strong>Description:</strong> " + str(data_description) + "</p>"
         + "<p><strong>Solution:</strong> " + str(data_solution) + "</p>"
         + "<p><strong>See Also:</strong> " + str(data_see_also) + "</p>"
         + "<p><strong>Risk Factor:</strong> " + str(data_risk_factor) + "</p>"
@@ -143,7 +142,6 @@ class TenableCSVParser:
         + "<p><strong>CVSS V3 Temporal Score:</strong> " + str(data_cvss_v3_temporal) + "</p>"
         + "<p><strong>CVSS V2 Vector:</strong> " + str(data_cvss_v2_vector) + "</p>"
         + "<p><strong>CVSS V3 Vector:</strong> " + str(data_cvss_v3_vector) + "</p>"
-        + "<p><strong>CPE:</strong> " + str(data_cpe) + "</p>"
         + "<p><strong>CVE:</strong> " + str(data_cve) + "</p>"
         + "<p><strong>BID:</strong> " + str(data_bid) + "</p>"
         + "<p><strong>Cross References:</strong> " + str(data_cross_references) + "</p>"
@@ -156,6 +154,28 @@ class TenableCSVParser:
         + "<p><strong>Version:</strong> " + str(data_version) + "</p>"
         + "<p><strong>Custom Id:</strong> " + str(data_custom_id) + "</p>"
     )
+
+    def get_severity_by_vpr(self, vpr_score: float):
+        severity_mapping = {
+            1: "Info",
+            2: "Low",
+            3: "Medium",
+            4: "High",
+            5: "Critical",
+        }
+        try:
+            score = float(vpr_score) if vpr_score not in (None, '') else 0.0
+            if score >= 9.0:
+                return severity_mapping.get(5)
+            if score >= 7.0:
+                return severity_mapping.get(4)
+            if score >= 4.0:
+                return severity_mapping.get(3)
+            if score > 0.0:
+                return severity_mapping.get(2)
+            return severity_mapping.get(1)
+        except:
+            return severity_mapping.get(1)
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
@@ -173,9 +193,7 @@ class TenableCSVParser:
             if title is None or title == "":
                 continue
             # severity: Could come from "Severity" or "Risk"
-            raw_severity = row.get("Risk", row.get("severity", ""))
-            if raw_severity == "":
-                raw_severity = row.get("Severity", "Info")
+            raw_severity = self.get_severity_by_vpr(row.get("Vulnerability Priority Rating", 0))
             # this could actually be a int, so try to convert
             # and swallow the exception if it's a string a move on
             with contextlib.suppress(ValueError):
@@ -186,7 +204,7 @@ class TenableCSVParser:
             # Other text fields
             description = self.get_description(row)
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
-            impact = row.get("Description", row.get("definition.description", "N/A"))
+            impact = row.get("Object Class", "No Class Defined")
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
             references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
@@ -281,5 +299,6 @@ class TenableCSVParser:
             endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
+            find.unsaved_tags = [row.get("Custom Tag", settings.DD_CUSTOM_TAG_PARSER.get("tenable"))]
 
         return list(dupes.values())

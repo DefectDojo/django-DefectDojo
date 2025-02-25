@@ -401,7 +401,7 @@
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
                                                 </li> --> 
-                                                <li>
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
                                                     </a>
@@ -410,22 +410,22 @@
                                                     <a rel="noopener noreferrer" href="{% url 'metrics_product_type' %}?date=1">
                                                         {% trans "Product Type Metrics" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_type_counts' %}">
                                                         {% trans "Product Type Counts" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a href="{% url 'product_tag_counts' %}">
                                                         {% trans "Product Tag Counts" %}
                                                     </a>
-                                                </li>
-                                                <li>
+                                                </li> -->
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'simple_metrics' %}">
                                                         {% trans "Simple Metrics" %}
                                                     </a>
-                                                </li>
+                                                </li> -->
                                                 <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
@@ -436,10 +436,10 @@
                                                         {% trans "Metrics Panel" %}
                                                     </a>
                                                 </li> 
-                                                {% if "Metrics_Panel_Admin"|has_global_permission %}
+                                                {% if "Metrics_Panel_Admin"|has_role_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
-                                                            {% trans "Metrics Panel Admin" %}
+                                                            {% trans "Metrics Panel Administrative" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}  
@@ -449,7 +449,14 @@
                                                             {% trans "Metrics DevSecOps" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}                                           
+                                                {% endif %}
+                                                {% if "Metrics_Regulatory"|has_role_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_regulatory' %}">
+                                                            {% trans "Metrics Regulatory" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}                                                 
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -514,6 +521,31 @@
                                                 </li>
                                             {% endif %}
                                         {% endif %}
+                                        <li>
+                                            <a rel="noopener noreferrer" href="#">
+                                                <i class="fa-solid fa fa-wrench fa-fw"></i>
+                                                <span>{% trans "Engine Tools" %}</span>
+                                                <span class="glyphicon arrow"></span>
+                                            </a>
+                                            <ul class="nav nav-second-level">
+                                                
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'finding_exclusions' %}">
+                                                        {% trans "Vulnerability Black & White Lists" %}
+                                                    </a>
+                                                </li>
+                                                {% if request.user|is_in_group:"Reviewers_Maintainer" %}
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'execute_priorization_check' %}">
+                                                        {% trans "Execute Priorization Check" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+
+                                            </ul>
+                                            <!-- /.nav-second-level -->
+                                        </li>
+                                        
                                         <li id="menu_configuration">
                                             <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>
@@ -783,7 +815,19 @@
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_closed_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-fire-extinguisher"></i>
-                                                        &nbsp;&nbsp;{% trans "View Closed Findings" %}
+                                                        {% trans "View Closed Findings" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'product_whitelisted_findings' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-list"></i>
+                                                        {% trans "View Whitelisted Findings" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'product_blacklisted_findings' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-circle"></i>
+                                                        {% trans "View Blacklisted Findings" %}
                                                     </a>
                                                 </li>
                                                 {% if product_tab.product|has_object_permission:"Finding_Add" %}

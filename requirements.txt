@@ -2,6 +2,7 @@
 py==1.11.0
 decorator==5.1.1
 asteval==1.0.6
+beautifulsoup4==4.13.3
 bleach==6.2.0
 bleach[css]
 celery==5.4.0

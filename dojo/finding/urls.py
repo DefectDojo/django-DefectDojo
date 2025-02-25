@@ -86,6 +86,16 @@ urlpatterns = [
         name="product_closed_findings",
     ),
     re_path(
+        r"^product/(?P<product_id>\d+)/finding/whitelisted$",
+        views.ListWhitelistedFindings.as_view(),
+        name="product_whitelisted_findings",
+    ),
+    re_path(
+        r"^product/(?P<product_id>\d+)/finding/blacklisted$",
+        views.ListBlacklistedFindings.as_view(),
+        name="product_blacklisted_findings",
+    ),
+    re_path(
         r"^product/(?P<product_id>\d+)/finding/false_positive$",
         views.ListFalsePositiveFindings.as_view(),
         name="product_false_positive_findings",

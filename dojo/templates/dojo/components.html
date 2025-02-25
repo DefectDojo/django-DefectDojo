@@ -3,7 +3,7 @@
 {% load display_tags %}
 {% load static %}
 {% block content %}
-    {{ block.super }}
+{{ block.super }}
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -11,7 +11,9 @@
                 <h3 class="has-filters">
                     Components
                     <div class="dropdown pull-right">
-                        <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                        <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters"
+                            class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i
+                                class="caret"></i> </button>
                     </div>
                 </h3>
             </div>
@@ -20,7 +22,7 @@
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=page_obj page_size=True %}
         </div>
         <div class="panel panel-default table-responsive">
             <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -28,60 +30,54 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th>Engagement Name</th>
+                        <th>Product Name</th>
                         <th class="text-center">Active Findings</th>
-                        <th class="text-center">Duplicate Findings</th>
+                        <th class="text-center">Closed Findings</th>
                         <th class="text-center">Total Findings</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    {% for result in result %}
-                    <tr>
-                        <td>
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.name }}">
-                                <b>{{ result.name }}</b>
-                            </a>
-                        </td>
-                        <td>{{ result.version }}</td>
-                        <td>
-                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom""> 
-                             {{ result.engagement_name }}
-                            </a></td>
-                        <td class="text-center">
-                            {% if result.active_findings %}
-                            <a href="{% url 'open_findings' %}?component_id={{ result.id }}">
-                                <b>{{ result.active_findings }}</b>
-                            </a>
-                            {% else %}
-                            0
-                            {% endif %}
-                        </td>
-                        <td class="text-center">
-                            {% if result.duplicate_findings %}
-                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}&duplicate=1">
-                                <b>{{ result.duplicate_findings }}</b>
-                            </a>
-                            {% else %}
-                            0
-                            {% endif %}
-                        </td>
-                        <td class="text-center">
-                            {% if result.total_findings %}
-                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}">
-                                <b>{{ result.total_findings }}</b>
-                            </a>
-                            {% else %}
-                            0
-                            {% endif %}
-                        </td>
-                    </tr>
+                    {% for item in page_obj %}
+                        <tr>
+                            <td>
+                                <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
+                                    <b>{{ item.name }}</b>
+                                </a>
+                            </td>
+                            <td>{{ item.version }}</td>
+                            <td>{{ item.product }}</td>
+                            <td class="text-center">
+                                {% if item.active_findings %}
+                                    <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
+                                        <b>{{ item.active_findings }}</b>
+                                    </a>
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.closed_findings %}
+                                    <a rel="noopener noreferrer" href="{% url 'closed_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
+                                        <b>{{ item.closed_findings }}</b>
+                                    </a>
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if item.total_findings %}
+                                    <b>{{ item.total_findings }}</b>
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=page_obj page_size=True %}
         </div>
     </div>
 </div>
@@ -136,9 +132,9 @@
                 "columns": [
                         { "data": "Component_name" },
                         { "data": "Version" },
-                        { "data": "Engagement_name"},
+                        { "data": "Product_name"},
                         { "data": "Active" },
-                        { "data": "Duplicate" },
+                        { "data": "Closed" },
                         { "data": "Total" },
                 ],
                 order: [],

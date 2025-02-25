@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 from watson import search as watson
 
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag 
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -133,6 +134,9 @@ def simple_search(request):
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
+            if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+                authorized_findings = exclude_test_or_finding_with_tag(authorized_findings)
+                authorized_tests = exclude_test_or_finding_with_tag(authorized_tests)
             findings = authorized_findings
             tests = authorized_tests
             engagements = authorized_engagements
@@ -181,7 +185,6 @@ def simple_search(request):
                 logger.debug("prefetching findings")
 
                 findings = get_page_items(request, findings, 25)
-
                 findings.object_list = prefetch_for_findings(findings.object_list)
 
                 # some over the top tag displaying happening...

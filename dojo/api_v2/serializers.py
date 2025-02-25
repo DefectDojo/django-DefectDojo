@@ -37,6 +37,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.engine_tools.models import FindingExclusion
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
@@ -3253,3 +3254,8 @@ class NotificationWebhooksSerializer(serializers.ModelSerializer):
         model = Notification_Webhooks
         fields = "__all__"
 
+
+class FindingExclusionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FindingExclusion
+        fields = ["uuid", "unique_id_from_tool", "type", "create_date", "expiration_date"]

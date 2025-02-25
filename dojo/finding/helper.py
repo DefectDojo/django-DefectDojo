@@ -23,9 +23,12 @@ from dojo.models import (
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
+    ExclusivePermission,
 )
 from dojo.notes.helper import delete_related_notes
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
+from dojo.authorization.roles_permissions import Permissions
+from dojo.utils import get_current_user, mass_model_updater, to_str_typed, get_product
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -40,6 +43,8 @@ NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
+WHITELISTED_FINDINGS_QUERY = Q(risk_status="On Whitelist")
+BLACKLISTED_FINDINGS_QUERY = Q(risk_status="On Blacklist")
 
 
 # this signal is triggered just before a finding is getting saved

@@ -3,8 +3,6 @@ import crum
 import requests
 import json
 from datetime import timedelta
-from azure.devops.connection import Connection
-from msrest.authentication import BasicAuthentication
 from django.conf import settings
 from contextlib import suppress
 
@@ -18,10 +16,9 @@ from dojo.celery import app
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings, PermissionKey, Dojo_User
-from dojo.user import queries as user_queries
 from dojo.transfer_findings import helper as hp_transfer_finding
 from dojo.risk_acceptance.notification import Notification
-from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
+from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +28,20 @@ def expire_now(risk_acceptance):
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
         for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:  # not sure why this is important
-                logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
-              
-                finding.risk_accepted = False
-                finding.risk_status = "Risk Active"
-                finding.acceptances_confirmed = 0
-                finding.accepted_by = ""
+            if finding.active is True and finding.risk_status == "Risk Active":
+                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
-                if not finding.mitigated:
-                    finding.active = True
+            else:
+                if finding.is_mitigated is True:
+                    logger.debug(f"Finding is mitigated {finding.is_mitigated}")
                     finding.risk_status = "Risk Expired"
+                else:
+                    logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
+                    finding.risk_status = "Risk Active"
+                    finding.active = True
+                    finding.risk_accepted = False
+                    finding.acceptances_confirmed = 0
+                    finding.accepted_by = ""
                 
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
@@ -55,13 +55,12 @@ def expire_now(risk_acceptance):
                 # reactivate finding realted (transfer finding)
                 system_settings = System_Settings.objects.get()
                 if system_settings.enable_transfer_finding:
-                    hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
-                                                    parent_finding=finding,
-                                                    notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
-                                                    send_notification=False)
+                    hp_transfer_finding.close_or_reactive_related_finding(
+                        event="reactive",
+                        parent_finding=finding,
+                        notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                        send_notification=False)
                 reactivated_findings.append(finding)
-            else:
-                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
 
@@ -490,16 +489,9 @@ def get_matching_value(list_a, list_b):
     matches = [item.name for item in list_a if item in list_b]
     return matches[0] if matches else None
 
-
-def get_config_risk():
-    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
-    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
-
-
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
-    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"] and  kwargs["finding"].severity != "Info"
     and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False

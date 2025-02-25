@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load event_tags %}
+{% block add_styles %}
+<style>
+    .filters .form-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .filters .form-control {
+        width: 100%;
+        max-width: 500px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+                {% if filtered.form %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {% for field in filtered.form.visible_fields %}
+                            <div class="form-group">
+                                {{ field.errors }}
+                                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                                {% with placeholder="placeholder:"|add:field.label %}
+                                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
+                        <div class="text-center">
+                            <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
+                            <a href="{% url 'finding_exclusions' %}"> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% if request.user|is_in_reviewer_group %}
+                    <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
+                {% endif %}
+                {{ name }}
+            </div>
+        </div>
+        {% if exclusions %}
+        <div class="panel panel-default table-responsive">
+            <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>UUID</th>
+                        <th>Vulnerability Id</th>
+                        <th>Type</th>
+                        <th>Create Date</th>
+                        <th>Expired Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                        {% for exclusion in exclusions %}
+                            <tr>
+                                <td><a href="{% url 'finding_exclusion' exclusion.uuid %}">{{ exclusion.uuid }}</a></td>
+                                <td>{{exclusion.unique_id_from_tool}}</td>
+                                <td>{{exclusion.type}}</td>
+                                <td>{{exclusion.create_date}}</td>
+                                <td>{{exclusion.expiration_date}}</td>
+                                <td>{{exclusion.reason}}</td>
+                                <td>
+                                    {% if exclusion.status in "Pending,Accepted,Rejected,Reviewed,Expired" %}
+                                        <span style="background-color: 
+                                            {% if exclusion.status == 'Pending' %}#1B30DE
+                                            {% elif exclusion.status == 'Accepted' %}#096C11
+                                            {% elif exclusion.status == 'Rejected' %}#d11d38
+                                            {% elif exclusion.status == 'Expired' %}#d11d38
+                                            {% else %}#b97a0c
+                                            {% endif %}" 
+                                            class="pass_fail Pass">
+                                            {{ exclusion.status }}
+                                        </span>
+                                    {% else %}
+                                        {{ exclusion.status }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="clearfix">
+                {% include "dojo/paging_snippet.html" with page=exclusions page_size=True %}
+            </div>
+        {% else %}
+            No questionnaires found.
+        {% endif %}
+    
+    
+    </div>
+
+    </div>   
+{% endblock %}

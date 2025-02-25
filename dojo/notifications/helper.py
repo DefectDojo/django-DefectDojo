@@ -385,6 +385,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
         logger.debug("notification email for user %s to %s", user, address)
 
         try:
+            kwargs["system_settings"] = self.system_settings
             if settings.AWS_SES_EMAIL:
                 ses_email.aws_ses(email=address,
                                 email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",

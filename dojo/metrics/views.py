@@ -23,6 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_has_role_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
@@ -263,6 +264,7 @@ def metrics_panel(request):
        'user': user,
     })
 
+@user_has_role_permission(Permissions.Metrics_DevSecOps)
 def metrics_devsecops(request):
     page_name = _('Metrics DevSecOps')
     role = Role.objects.get(id=Roles.Maintainer)
@@ -277,6 +279,7 @@ def metrics_devsecops(request):
        'user': user,
     })
 
+@user_has_role_permission(Permissions.Metrics_Panel_Admin)
 def metrics_panel_admin(request):
     page_name = _('Metrics Panel Admin')
     role = Role.objects.get(id=Roles.Maintainer)
@@ -290,6 +293,24 @@ def metrics_panel_admin(request):
        'grafana_url': settings.GRAFANA_URL,
        'grafana_path': settings.GRAFANA_PATH.get("metrics_panel_admin"),
        'grafana_params': grafana_params,
+       'role': role,
+       'user': user,
+    })
+    
+@user_has_role_permission(Permissions.Metrics_Regulatory)    
+def metrics_regulatory(request):
+    page_name = _('Metrics Regulatory')
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_regulatory.html', {
+       'name': page_name,
+       'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
+       'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_regulatory"),
+       'mf_frontend_defect_dojo_params': mf_frontend_defect_dojo_params,
        'role': role,
        'user': user,
     })

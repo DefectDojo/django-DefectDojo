@@ -175,7 +175,7 @@
 				outline: none;
 			}
 
-			.proton-button-actions-reject{
+			.button-reject{
 				font-size: 12px;
 				padding: 2px 0px;
 				margin: 20px 2px;
@@ -186,20 +186,32 @@
 				outline: none;
 				width: 60px;
 				float: left;
-		}
+			}
 
-		.proton-button-actions-accept{
-				font-size: 12px;
-				padding: 2px 0px;
-				margin: 20px 2px;
-				color: #040404 !important;
-				background: #00ab46 !important;
-				border-radius: 10px;
-				text-decoration: none;
+			.button-accept{
+					font-size: 12px;
+					padding: 2px 0px;
+					margin: 20px 2px;
+					color: #040404 !important;
+					background: #00ab46 !important;
+					border-radius: 10px;
+					text-decoration: none;
+					outline: none;
+					width: 60px;
+					float: left;
+			}
+
+			.button-status {
+				font-size: 14px;
+				padding: 3px 6px;
+				margin: 2px 2px;
+				color: #040404;
+				background: #00ab46;
+				border-radius: 20px;
 				outline: none;
 				width: 60px;
-				float: left;
-		}
+				float: center;
+			}
 
 			.proton-flex {
 				float: left;
@@ -286,7 +298,7 @@
 						<td class="proton-td" colspan="10" style="">
 							<div class="proton-divider"></div>
 							<center>
-								<span style="color: #000000"> © 2024 DevSecOps Team</span>
+								<span style="color: #000000"> © 2025 DevSecOps Team</span>
 							</center>
 							<div class="proton-margin-bottom"></div>
 						</td>

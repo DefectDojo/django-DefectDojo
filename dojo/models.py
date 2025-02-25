@@ -42,6 +42,7 @@ from polymorphic.models import PolymorphicModel
 from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+from dojo.engine_tools.models import *
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -846,6 +847,14 @@ class Product_Type(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
+    
+    def get_contacts(self):
+        return {
+            "product_type_manager": self.product_type_manager,
+            "product_type_technical_contact": self.product_type_technical_contact,
+            "environment_manager": self.environment_manager,
+            "environment_technical_contact": self.environment_technical_contact
+        }
 
     @cached_property
     def critical_present(self):
@@ -1226,6 +1235,13 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
+    
+    def get_contacts(self):
+        return {
+            "product_manager": self.product_manager,
+            "technical_contact": self.technical_contact,
+            "team_manager": self.team_manager
+            }
 
     @cached_property
     def findings_count(self):
@@ -2349,6 +2365,8 @@ class Finding(models.Model):
                       ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
+                      ('On Whitelist', 'On Whitelist'),
+                      ('On Blacklist', 'On Blacklist'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
                       ('Transfer Expired', 'Transfer Expired'),
@@ -2435,7 +2453,7 @@ class Finding(models.Model):
                                   verbose_name=_("References"),
                                   help_text=_("The external documentation available for this flaw."))
     test = models.ForeignKey(Test,
-                             editable=False,
+                             editable=True,
                              on_delete=models.CASCADE,
                              verbose_name=_("Test"),
                              help_text=_("The test that is associated with this flaw."))
@@ -2698,6 +2716,11 @@ class Finding(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
+    priority = models.FloatField(null=True,
+                                blank=True,
+                                default=0.0,
+                                )
+    
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
@@ -3086,9 +3109,13 @@ class Finding(models.Model):
         if self.risk_status == "Transfer Rejected":
             status += ["Transfer Rejected"]
         if self.risk_status == "Risk Pending":
-            status += ["Risk pending"]
+            status += ["Risk Pending"]
         if self.risk_status == "Risk Rejected":
             status += ["Risk Rejected"]
+        if self.risk_status == "On Whitelist":
+            status += ["On Whitelist"]
+        if self.risk_status == "On Blacklist":
+            status += ["On Blacklist"]
         if self.risk_status == "Risk Expired":
             status += ["Risk Expired"]
         elif self.risk_accepted:
@@ -4317,6 +4344,18 @@ class Notifications(models.Model):
     sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_("SLA breach (combined)"),
         help_text=_("Get notified of (upcoming) SLA breaches (a message per project)"))
+    finding_exclusion_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion request"),
+        help_text=_("Get notified of finding exclusion requests"))
+    finding_exclusion_rejected = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion rejected"),
+        help_text=_("Get notified of finding exclusion requests rejected"))
+    finding_exclusion_approved = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion approved"),
+        help_text=_("Get notified of finding exclusion requests approved"))
+    finding_exclusion_expired = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion expired"),
+        help_text=_("Get notified of finding exclusion requests expired"))
 
     class Meta:
         constraints = [
@@ -4360,6 +4399,10 @@ class Notifications(models.Model):
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
                 result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
                 result.risk_acceptance_confirmed = {*result.risk_acceptance_confirmed, *notifications.risk_acceptance_confirmed}
+                result.finding_exclusion_request = {*result.finding_exclusion_request, *notifications.finding_exclusion_request}
+                result.finding_exclusion_rejected = {*result.finding_exclusion_rejected, *notifications.finding_exclusion_rejected}
+                result.finding_exclusion_approved = {*result.finding_exclusion_approved, *notifications.finding_exclusion_approved}
+                result.finding_exclusion_expired = {*result.finding_exclusion_expired, *notifications.finding_exclusion_expired}
         return result
 
 
@@ -4912,10 +4955,21 @@ class ExclusivePermission(models.Model):
                            unique=True,
                            blank=True,
                            help_text=_("name permission")) 
+    short_name = models.CharField(max_length=50,
+                           blank=True,
+                           null=True,
+                           help_text=_("name permission")) 
     description = models.CharField(max_length=128,
                                   help_text=_("Short permit description"),
                                   null=True,
                                   blank=True) 
+    validation_field = models.CharField(max_length=250,
+                                  help_text=_("Validation Field"),
+                                  null=True,
+                                  blank=True) 
+    status = models.BooleanField(
+        default=True,
+        help_text=_("Status of the permission"))
     members = models.ManyToManyField(Product_Member,
                                     related_name="exclusive_permission_product",
                                     blank=True)
@@ -4926,8 +4980,18 @@ class ExclusivePermission(models.Model):
 
     def __str__(self):
         return self.description
-   
-
+    
+    @classmethod
+    def get_validation_field(cls, name: str) -> str:
+        try:
+            permission = cls.objects.get(name=name)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Exclusive permission {name} not found")
+            raise e
+        return permission.validation_field
+    
+    def is_active(self):
+        return self.status
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database

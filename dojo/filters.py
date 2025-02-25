@@ -3,6 +3,7 @@ import decimal
 import logging
 import warnings
 from datetime import datetime, timedelta
+from django.contrib.auth.models import User
 
 import pytz
 import six
@@ -907,14 +908,14 @@ class ProductComponentFilter(DojoFilter):
             ("name", "name"),
             ("version", "version"),
             ("active_findings", "active_findings"),
-            ("duplicate_findings", "duplicate_findings"),
+            ("closed_findings", "closed_findings"),
             ("total_findings", "total_findings"),
         ),
         field_labels={
             "name": "Component Name",
             "version": "Component Version",
             "active_findings": "Active",
-            "duplicate_findings": "Duplicate",
+            "closed_findings": "Closed",
             "total_findings": "Total",
         },
     )
@@ -968,20 +969,12 @@ class ComponentFilter(ProductComponentFilter):
         label="Product")
 
     def __init__(self, *args, **kwargs):
-        parent_product = kwargs.pop("parent_product", None)
         super().__init__(*args, **kwargs)
+        del self.form.fields["engagement"]
         self.form.fields[
             "engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
             "engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
-        if parent_product:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
-        else:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class EngagementDirectFilterHelper(FilterSet):
@@ -3343,6 +3336,25 @@ class UserFilter(DojoFilter):
 
     class Meta:
         model = Dojo_User
+        fields = ["is_superuser", "is_active", "first_name", "last_name", "username", "email"]
+
+class UserApiFilter(DojoFilter):
+    email = CharFilter(lookup_expr="icontains")
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("last_name", "last_name"),
+            ("first_name", "first_name"),
+            ("is_active", "is_active"),
+            ("is_superuser", "is_superuser"),
+            ("date_joined", "date_joined"),
+            ("last_login", "last_login"),
+        ),
+    )
+
+    class Meta:
+        model = User
         fields = ["is_superuser", "is_active", "first_name", "last_name", "username", "email"]
 
 

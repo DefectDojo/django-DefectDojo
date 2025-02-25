@@ -121,6 +121,7 @@ class TwistlockCSVParser:
             out_of_scope=False,
             mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
+            cvssv3_score=float(data_cvss) if data_cvss else None,
             impact=data_severity,
             vuln_id_from_tool=data_vulnerability_id,
             unique_id_from_tool=data_unique_id,
@@ -130,18 +131,21 @@ class TwistlockCSVParser:
                 else None
             ),
         )
-        finding.unsaved_tags = [
-            (
-                row.get("Custom Tag")
-                if row.get("Custom Tag", None)
-                else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
-            )
-        ]
+        finding.unsaved_tags = self.get_tags(row)
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
+
+    def get_tags(self, row):
+        tags = row.get("Custom Tag", None)
+        if (tags is not None) and ',' in str(tags):
+            return str(tags).split(',')
+        elif (tags is not None):
+            return [tags]
+        else:
+            return [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
 
     def get_description(
         self,
@@ -259,6 +263,17 @@ class TwistlockCSVParser:
             ).hexdigest()
         return key, finding
 
+    def validate_content(self, content):
+        try:
+            if not content or not isinstance(content, str):
+                return None
+            lines = content.splitlines()
+            if not lines:
+                return None
+            return lines[0]
+        except IndexError:
+            return None
+
     def parse(self, filename, test):
         if filename is None:
             return None
@@ -266,9 +281,14 @@ class TwistlockCSVParser:
         dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
+
+        first_line = self.validate_content(content)
+        if first_line is None:
+            first_line = ''
+        delimiter = ';' if ';' in first_line else ','
         reader = csv.DictReader(
             io.StringIO(content),
-            delimiter=",",
+            delimiter=delimiter,
             quotechar='"',
         )
         with ThreadPoolExecutor(max_workers=25) as executor:
@@ -378,6 +398,7 @@ def get_item(vulnerability, test, packageTree):
         out_of_scope=False,
         mitigated=None,
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
+        cvssv3_score=float(cvss) if cvss != "No CVSS score yet." else None,
         impact=severity,
         vuln_id_from_tool=vulnerability["id"],
         publish_date=(

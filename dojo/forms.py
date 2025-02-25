@@ -117,7 +117,8 @@ from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
-    sla_expiration_risk_acceptance
+    sla_expiration_risk_acceptance,
+    user_is_contacts
 )
 from dojo.widgets import TableCheckboxWidget
 
@@ -474,11 +475,12 @@ class Edit_Product_MemberForm(forms.ModelForm):
         label="Exclusive Permission")
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
+        self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
+        self.product = self.initial["product"]
         self.fields["product"].disabled = True
         self.fields["role"].disabled = not user_has_global_permission(
-            user, Permissions.Product_Member_Add_Role
+            self.user, Permissions.Product_Member_Add_Role
         )
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
@@ -493,6 +495,24 @@ class Edit_Product_MemberForm(forms.ModelForm):
             self.save_m2m()
             instance.exclusive_permission_product.set(self.cleaned_data['exclusive_permission'])
         return instance
+    
+    def is_valid(self):
+        valid = super(Edit_Product_MemberForm, self).is_valid()
+
+        if not valid:
+            return valid
+       
+        if user_has_global_permission(self.user,
+                                      Permissions.Product_Member_Add_Owner):
+            return True
+        
+        if not user_is_contacts(
+                self.user,
+                self.product):
+            self.add_error("user", "You do not have permission to add users to this product.")
+            return False
+
+        return True
 
     class Meta:
         model = Product_Member
@@ -507,17 +527,20 @@ class Add_Product_MemberForm(forms.ModelForm):
         label="Exclusive Permission")
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
+        self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
+        self.product = self.initial["product"]
         self.fields["product"].disabled = True
-        self.fields["role"].disabled = not user_has_global_permission(user, Permissions.Product_Member_Add_Role)
-        current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list("user", flat=True)
+        self.fields["role"].disabled = not user_has_global_permission(
+            self.user, Permissions.Product_Member_Add_Role)
+        self.fields["role"].initial = Role.objects.get(name="Developer") 
+        current_members = Product_Member.objects.filter(product=self.product).values_list("user", flat=True)
         self.fields["exclusive_permission"].queryset = ExclusivePermission.objects.all()
         self.fields["users"].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
             | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
     
-    
+
         if self.instance.pk:
             self.fields["exclusive_permission"].initial = self.instance.exclusive_permission_product.all()
     
@@ -528,6 +551,25 @@ class Add_Product_MemberForm(forms.ModelForm):
             for permission in self.cleaned_data['exclusive_permission']:
                 permission.members.add(instance)
         return instance
+    
+    def is_valid(self):
+        valid = super(Add_Product_MemberForm, self).is_valid()
+
+        if not valid:
+            return valid
+       
+        if user_has_global_permission(self.user,
+                                      Permissions.Product_Member_Add_Owner):
+            return True
+        
+        if not user_is_contacts(
+                self.user,
+                self.product):
+            self.add_error("users", "You do not have permission to add users to this product.")
+            return False
+
+        return True
+
 
     class Meta:
         model = Product_Member
@@ -1485,8 +1527,11 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
+        exclude = ("reporter", "url", "numerical_severity",
+                   "under_review", "reviewers", "cve", "inherited_tags",
+                   "review_requested_by", "is_mitigated", "jira_creation",
+                   "jira_change", "endpoints", "sla_start_date",
+                   "component")
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -1562,9 +1607,11 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
-                   "sla_expiration_date")
+        exclude = ("reporter", "url", "numerical_severity", "under_review",
+                   "reviewers", "cve", "inherited_tags",
+                   "review_requested_by", "is_mitigated",
+                   "jira_creation", "jira_change", "endpoints",
+                   "sla_start_date", "sla_expiration_date", "component")
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1619,8 +1666,12 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
-                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
+        exclude = ("reporter", "url", "numerical_severity", "active",
+                   "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
+                   "duplicate", "out_of_scope", "under_review", "reviewers",
+                   "review_requested_by", "is_mitigated", "jira_creation",
+                   "jira_change", "planned_remediation_date", "planned_remediation_version",
+                   "effort_for_fixing", "component")
 
 
 class FindingForm(forms.ModelForm):

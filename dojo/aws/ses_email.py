@@ -68,9 +68,16 @@ class SesMailSender:
 
 def send_email(ses_mail_sender, email_from_address, email, subject, message_text, message_html):
     logger.debug("send email")
+    
+    if isinstance(email, list):
+        email_list = email
+    else:
+        email_list = [email]
+        
+    
     ses_mail_sender.send_email(
         email_from_address,
-        SesDestination([email]),
+        SesDestination(email_list),
         subject,
         message_text,
         message_html,

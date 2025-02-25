@@ -3143,5 +3143,19 @@
       "note": null,
       "owner": 2
     }
+  },
+  {
+    "model": "dojo.exclusivepermission",
+    "pk": 1,
+    "fields": {
+      "name": "Product_Tag_Red_Team",
+      "short_name": "Short Name Test",
+      "description": "Permission to veiw findings ",
+      "validation_field": "tag_name_test",
+      "status": true,
+      "members": [
+        1
+      ]
+    }
   }
 ]

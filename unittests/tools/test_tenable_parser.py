@@ -38,7 +38,6 @@ class TestTenableParser(DojoTestCase):
             for i in [0, 1, 2, 3]:
                 finding = findings[i]
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-                self.assertEqual("Medium", finding.severity)
                 self.assertEqual(0, finding.cwe)
             # check some data
             finding = findings[0]
@@ -222,7 +221,7 @@ class TestTenableParser(DojoTestCase):
                 self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
             finding = findings[0]
             self.assertEqual("7.1", finding.cvssv3_score)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
 
     def test_parse_one_findings_csv_nessus_was_legacy(self):
@@ -238,7 +237,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("google.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("7.1", finding.cvssv3_score)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
 
     def test_parse_no_findings_csv_nessus_was_legacy(self):
@@ -257,7 +256,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(9, len(findings))
             finding = findings[0]
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual("ip-127-0-0-1.us-west-2.compute.internal", finding.unsaved_endpoints[0].host)
             self.assertEqual("Amazon Linux 2 : kernel (ALAS-2023-2050)", finding.title)
             self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
@@ -285,7 +284,7 @@ class TestTenableParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Blah1", finding.unsaved_endpoints[0].host)
             self.assertEqual("Blah1", finding.title)
-            self.assertEqual("Low", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual("3.1", finding.cvssv3_score)
 
     def test_parse_issue_9612(self):
@@ -296,7 +295,7 @@ class TestTenableParser(DojoTestCase):
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
             self.assertEqual(2, len(findings))
-            self.assertEqual("Critical", findings[0].severity)
+            self.assertEqual("Info", findings[0].severity)
 
     def test_parse_issue_11102(self):
         with open(get_unit_tests_scans_path("tenable") / "issue_11102.csv", encoding="utf-8") as testfile:

@@ -14,6 +14,7 @@ from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
 
+from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -179,6 +180,11 @@ def report_findings(request):
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     findings = filter_class(request.GET, queryset=findings)
+    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+        findings = exclude_test_or_finding_with_tag(
+            objs=findings,
+            product=None,
+            user=request.user)
 
     title_words = get_words_for_field(Finding, "title")
     component_words = get_words_for_field(Finding, "component_name")
@@ -752,6 +758,10 @@ class QuickReportView(View):
 
     def get(self, request):
         findings, obj = get_findings(request)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            findings = exclude_test_or_finding_with_tag(objs=findings,
+                                                        product=None,
+                                                        user=request.user)
         self.findings = findings
         findings = self.add_findings_data()
         return self.generate_quick_report(request, findings, obj)
@@ -809,6 +819,10 @@ class CSVExportView(View):
 
     def get(self, request):
         findings, _obj = get_findings(request)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            findings = exclude_test_or_finding_with_tag(objs=findings,
+                                                        product=None,
+                                                        user=request.user)
         self.findings = findings
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
@@ -935,6 +949,12 @@ class ExcelExportView(View):
 
     def get(self, request):
         findings, _obj = get_findings(request)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            findings = exclude_test_or_finding_with_tag(
+                objs=findings,
+                product=None,
+                user=request.user
+            )
         self.findings = findings
         findings = self.add_findings_data()
         workbook = Workbook()

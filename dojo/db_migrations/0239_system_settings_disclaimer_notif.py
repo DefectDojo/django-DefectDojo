@@ -13,7 +13,7 @@ def copy_notif_field(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0220_system_settings_disclaimer_notif'),
+        ('dojo', '0238_system_settings_disclaimer_notif'),
     ]
 
     operations = [

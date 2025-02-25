@@ -31,6 +31,7 @@ from dojo.models import (
     TransferFindingFinding,
     Risk_Acceptance
 )
+from dojo.engine_tools.models import FindingExclusion
 from dojo.request_cache import cache_for_request
 logger = logging.getLogger(__name__)
 
@@ -111,6 +112,7 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
+        
     if (
         isinstance(obj, Component)
         and permission in Permissions.get_component_permissions()
@@ -252,6 +254,38 @@ def user_has_global_permission(user, permission):
 
     return False
 
+def user_has_role_permission(user, permission):
+    if not user:
+        return False
+
+    if user.is_anonymous:
+        return False
+
+    if user.is_superuser:
+        return True
+    
+    if (
+        hasattr(user, "global_role")
+        and user.global_role.role is not None
+        and role_has_global_permission(user.global_role.role.id, permission)
+    ):
+        return True
+
+    product_type_members = Product_Type_Member.objects.filter(user=user)
+    for ptm in product_type_members:
+        if role_has_permission(ptm.role.id, permission):
+            return True
+    
+    product_members = Product_Member.objects.filter(user=user)
+    for pm in product_members:
+        if role_has_permission(pm.role.id, permission):
+            return True
+
+    return False
+
+def user_has_role_permission_or_403(user, permission):
+    if not user_has_role_permission(user, permission):
+        raise PermissionDenied
 
 def user_has_configuration_permission_or_403(user, permission):
     if not user_has_configuration_permission(user, permission):
