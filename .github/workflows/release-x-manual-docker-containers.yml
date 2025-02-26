@@ -52,7 +52,8 @@ jobs:
       - name: Checkout tag
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.release_number }}
+        #   ref: ${{ github.event.inputs.release_number }}
+          ref: arm64-unit-tests
 
       - id: set-repo-org
         run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
