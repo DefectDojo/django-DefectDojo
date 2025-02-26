@@ -44,7 +44,7 @@ jobs:
         docker-image: ${{ matrix.docker-image }}
       with:
         images: |
-            ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+            ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
