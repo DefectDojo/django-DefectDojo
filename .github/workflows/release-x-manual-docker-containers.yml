@@ -73,7 +73,7 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
+        #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
           outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }},${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }},${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest",push-by-digest=true,name-canonical=true
@@ -105,7 +105,7 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
           outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
