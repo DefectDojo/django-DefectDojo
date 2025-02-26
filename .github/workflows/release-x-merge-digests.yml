@@ -12,6 +12,7 @@ jobs:
   merge-digests:
     runs-on: ubuntu-latest
     strategy:
+        fail-fast: false
         matrix:
             docker-image: [django, nginx]
             os: [alpine, debian]
