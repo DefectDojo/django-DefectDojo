@@ -11,7 +11,7 @@ on:
       # because someone will forget one day to change it.
       release_number:
         description: 'Release version (x.y.z format)'
-        default: "0.0.5"
+        default: "0.0.6"
         required: true
 
 jobs:
