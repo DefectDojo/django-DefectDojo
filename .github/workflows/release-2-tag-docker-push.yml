@@ -47,6 +47,11 @@ jobs:
       release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
+  merge-digests:
+    needs: release-docker-containers
+    uses: ./.github/workflows/release-x-merge-digests.yml
+    secrets: inherit
+
   release-drafter:
     needs: release-docker-containers
     uses: ./.github/workflows/release-drafter.yml
