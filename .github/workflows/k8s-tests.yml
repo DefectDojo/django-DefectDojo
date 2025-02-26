@@ -58,8 +58,8 @@ jobs:
         timeout-minutes: 15
         run: |-
              eval $(minikube docker-env)
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-ubuntu-latest_img
-             docker load -i built-docker-image/django-${{ matrix.os }}-ubuntu-latest_img
+             docker load -i built-docker-image/nginx-${{ matrix.os }}-x64_img
+             docker load -i built-docker-image/django-${{ matrix.os }}-x64_img
              docker images
 
       - name: Configure HELM repos
@@ -75,7 +75,7 @@ jobs:
               echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
 
       - name: Deploying Django application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        timeout-minutes: 15 
+        timeout-minutes: 15
         run: |-
              helm install \
                --timeout 800s \
