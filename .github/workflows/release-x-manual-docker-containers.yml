@@ -32,6 +32,7 @@ jobs:
   job-build-and-push:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
           docker-image: [django, nginx]
           os: [alpine, debian]
@@ -60,6 +61,8 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
 
+#TODO : build once, retag for debian via https://github.com/koraykoska/retag-docker-image
+
       - name: Build and push images with debian
         id: 'build-debian'
         if: ${{ matrix.os  == 'debian' }}
@@ -76,12 +79,14 @@ jobs:
           outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest, ",push-by-digest=true,name-canonical=true
 
       - name: Export digest
+        if: ${{ matrix.os  == 'debian' }}
         run: |
           mkdir -p ${{ runner.temp }}/digests
           digest="${{ steps.build-debian.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
       - name: Upload digest
+        if: ${{ matrix.os  == 'debian' }}
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ env.PLATFORM_PAIR }}
@@ -105,12 +110,14 @@ jobs:
           context: .
 
       - name: Export digest
+        if: ${{ matrix.os  == 'alpine' }}
         run: |
           mkdir -p ${{ runner.temp }}/digests
           digest="${{ steps.build-alpine.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
       - name: Upload digest
+        if: ${{ matrix.os  == 'alpine' }}
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ env.PLATFORM_PAIR }}
