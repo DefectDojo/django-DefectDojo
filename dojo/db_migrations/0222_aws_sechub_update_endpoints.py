@@ -5,7 +5,7 @@ from django.db import migrations
 
 def aws_sechub_update_endpoints(apps, schema_editor):
     endpoint_model = apps.get_model('dojo', 'Endpoint')
-    endpoints = endpoint_model.objects.filter(host__contains="arn:aws")
+    endpoints = endpoint_model.objects.filter(finding__test__test_type__name__in=["AWS Security Hub Scan", "AWS Inspector2 Scan"])
     for endpoint in endpoints:
         endpoint.host = endpoint.host.replace(':', '_').replace("/", "_").replace(" ", "_")
         endpoint.save()
