@@ -4,35 +4,32 @@ on:
   # inspired by https://github.com/orgs/community/discussions/26801 we take the runs-on as parameter so we can run arm64 on native hardwarde
   workflow_dispatch:
     inputs:
-        runner:
+        platform:
           type: string
-          default: "ubuntu-latest"
+          default: "x64"
   workflow_call:
     inputs:
-        runner:
+        platform:
           type: string
-          default: "ubuntu-latest"
+          default: "x64"
 
 jobs:
   build:
     name: Build Docker Images
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.platform ==  'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       matrix:
         # integration tests are only build (and run) on debian x64
         docker-image: [django, nginx, integration-tests]
         os: [alpine, debian]
-        runner: ["${{ inputs.runner }}"]
+        platform: ["${{ inputs.platform }}"]
         exclude:
             - docker-image: integration-tests
               os: alpine
             - docker-image: integration-tests
-              runner: ubuntu-24.04-arm
+              platform: arm64
 
     steps:
-      - name: Show Platform
-        run: echo Runner value for this run = ${{ inputs.runner }}
-
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
