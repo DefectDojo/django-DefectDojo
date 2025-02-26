@@ -2,7 +2,11 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://documentation.defectdojo.com/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. 
+
+[Running in Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+
+[Configuration](https://docs.defectdojo.com/en/open_source/installation/configuration/) explains the different ways to adjust settings and environment variables.
 
 
 # Prerequisites
@@ -147,7 +151,7 @@ docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
 ```
 
 # Logging
-For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](../dojo/settings/template-local_settings)). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
 
 ```
