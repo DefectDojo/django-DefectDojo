@@ -77,7 +77,7 @@ jobs:
         #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
-          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }},${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }},${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest",push-by-digest=true,name-canonical=true
+          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
 
       - name: Export digest
         if: ${{ matrix.os  == 'debian' }}
@@ -112,7 +112,7 @@ jobs:
         #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
-          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
+          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
 
       - name: Export digest
         if: ${{ matrix.os  == 'alpine' }}
