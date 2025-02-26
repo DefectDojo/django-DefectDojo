@@ -16,7 +16,7 @@ class CheckmarxParser:
     def get_fields(self) -> list[str]:
         """
         Return the list of fields used in the Checkmarx Parser.
-    
+
         Fields:
         - title: Constructed from output of Checkmarx Scanner.
         - cwe: Set to cwe outputted by Checkmarx Parser.
@@ -59,11 +59,11 @@ class CheckmarxParser:
             "component_name",
             "component_version",
         ]
-    
+
     def get_dedupe_fields(self) -> list[str]:
         """
         Return the list of fields used for deduplication in the Checkmarx Parser.
-    
+
         Fields:
         - cwe: Set to cwe outputted by Checkmarx Parser.
         - severity: Set to severity outputted by Checkmarx Scanner.
