@@ -105,6 +105,9 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
+        #https://github.com/docker/build-push-action/discussions/1213
+#https://github.com/erhhung/al2023-devops/blob/main/.github/workflows/ci.yml
+#https://github.com/docker/buildx/issues/805
         #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
