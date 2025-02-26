@@ -44,7 +44,7 @@ class CargoAuditParser:
         Return the list of fields used for deduplication in the Cargo Audit Parser.
 
         Fields:
-        - vulnerability_ids: 
+        - vulnerability_ids:
         - severity: Set to "High" regardless of context.
         - component_name: Set to name of package provided by the Cargo Audit Scanner.
         - component_version: Set to version of package provided by the Cargo Audit Scanner.
