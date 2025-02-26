@@ -56,7 +56,7 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-        $(printf '${{ env.DOCKERHUB_REPO }}@sha256:%s ' *)
+        $(printf '${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
 
     - name: Inspect image
       run: |
