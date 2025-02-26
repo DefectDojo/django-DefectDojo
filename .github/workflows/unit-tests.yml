@@ -14,31 +14,31 @@ jobs:
   build-docker-containers:
     strategy:
         matrix:
-          runner: ["ubuntu-latest", "ubuntu-24.04-arm"] # we need to pass runner names instead of amd64/amd64
+          platform: ['x64', 'arm64']
         fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
     with:
-      runner: ${{ matrix.runner }}
+      platform: ${{ matrix.platform }}
 
   test-rest-framework:
     strategy:
         matrix:
-          runner: ["ubuntu-latest", "ubuntu-24.04-arm"]
+            platform: ['x64', 'arm64']
         fail-fast: false
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
     with:
-      runner: ${{ matrix.runner}}
+      platform: ${{ matrix.platform}}
 
-  # only run integration tests on ubuntu-latest (x64)
+  # only run integration tests for x64 (default)
   test-user-interface:
     needs: build-docker-containers
     uses: ./.github/workflows/integration-tests.yml
     secrets: inherit
 
-  # only run k8s tests on ubuntu-latest (x64)
+  # only run k8s tests for x64 (default)
   test-k8s:
     needs: build-docker-containers
     uses: ./.github/workflows/k8s-tests.yml
