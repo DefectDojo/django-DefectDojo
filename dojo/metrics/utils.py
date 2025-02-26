@@ -128,7 +128,6 @@ def finding_queries(
         "closed": closed_filtered_findings,
         "accepted": accepted_filtered_findings,
         "accepted_count": accepted_findings_counts,
-        "top_ten": top_ten,
         "monthly_counts": monthly_counts,
         "weekly_counts": weekly_counts,
         "weeks_between": weeks_between,

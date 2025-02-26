@@ -136,7 +136,7 @@ def metrics(request, mtype):
         "opened_per_week": filters["weekly_counts"]["opened_per_period"],
         "accepted_per_month": filters["monthly_counts"]["accepted_per_period"],
         "accepted_per_week": filters["weekly_counts"]["accepted_per_period"],
-        "top_ten_products": filters["top_ten"],
+        #"top_ten_products": filters["top_ten"],
         "age_detail": age_detail,
         "in_period_counts": in_period_counts,
         "in_period_details": in_period_details,
