@@ -31,8 +31,8 @@ jobs:
       - name: Create new tag ${{ github.event.inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
-        #   git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
-        #   git push origin ${{ github.event.inputs.release_number }}
+          git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
+          git push origin ${{ github.event.inputs.release_number }}
 
   release-helm-chart:
     needs: tag
