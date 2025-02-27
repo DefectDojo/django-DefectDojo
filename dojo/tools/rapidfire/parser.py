@@ -3,16 +3,19 @@ import io
 import logging
 import re
 import sys
+from urllib.parse import urlparse
+
 from dateutil import parser as date_parser
 from django.utils import timezone
-from dojo.models import Finding, Endpoint
-from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 
 logger = logging.getLogger(__name__)
 
 
 class RapidFireParser:
+
     """RapidFire vulnerability scanner CSV report parser"""
 
     def get_scan_types(self):
@@ -173,18 +176,16 @@ class RapidFireParser:
                 # Split on '-' but preserve any other dashes in the text
                 flaw_list = [f.strip().lstrip("- ") for f in flaws.split("   - ") if f.strip()]
                 if flaw_list:
-                    parts.append("### Identified Flaws")
-                    parts.append("\n".join(f"* {flaw}" for flaw in flaw_list))
+                    parts.extend(["### Identified Flaws", "\n".join(f"* {flaw}" for flaw in flaw_list)])
             else:
-                parts.append("### Description")
-                parts.append(vuln_insight)
+                parts.extend(["### Description", vuln_insight])
 
         # Add CVE information if present
         if cves:
-            if parts:  # If we already have content, add an extra newline
-                parts.append("")
-            parts.append("### Associated CVEs")
-            parts.append("\n".join(f"* **{cve}** - [NVD Link](https://nvd.nist.gov/vuln/detail/{cve})" for cve in cves))
+            spacer = [""] if parts else []
+            cve_content = ["### Associated CVEs", 
+                          "\n".join(f"* **{cve}** - [NVD Link](https://nvd.nist.gov/vuln/detail/{cve})" for cve in cves)]
+            parts.extend(spacer + cve_content)
 
         # Join all parts with double newlines
         return "\n\n".join(filter(None, parts))
@@ -197,7 +198,7 @@ class RapidFireParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
 
-        csv.field_size_limit(int(sys.maxsize / 10))
+        csv.field_size_limit(int(sys.maxsize // 10))
 
         try:
             reader = csv.DictReader(io.StringIO(content))
@@ -229,8 +230,10 @@ class RapidFireParser:
                     description.append(f"**Known Exploited Vulnerability**: {row['Known Exploited Vulnerability']}")
                 if row.get("MAC Address"):
                     description.append(f"**MAC Address**: {row['MAC Address']}")
+                
+                ransomware_warning = "⚠️ **Warning**: This vulnerability is known to be used in ransomware campaigns"
                 if row.get("Known To Be Used In Ransomware Campaigns", "").lower() == "true":
-                    description.append("⚠️ **Warning**: This vulnerability is known to be used in ransomware campaigns")
+                    description.append(ransomware_warning)
 
                 # Format impact combining vulnerability insight and CVEs
                 impact = self._format_impact(row.get("Vulnerability Insight", ""), cves)
@@ -281,8 +284,8 @@ class RapidFireParser:
             return list(dupes.values())
 
         except csv.Error as e:
-            logger.error(f"CSV parsing error: {str(e)}")
+            logger.error(f"CSV parsing error: {e!s}")
             raise
         except Exception as e:
-            logger.error(f"Error parsing findings: {str(e)}")
+            logger.error(f"Error parsing findings: {e!s}")
             raise
