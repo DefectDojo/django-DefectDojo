@@ -1,6 +1,8 @@
+# test_rapidfire_parser.py
 import datetime
+
 from django.test import TestCase
-from django.utils import timezone
+
 from dojo.models import Test
 from dojo.tools.rapidfire.parser import RapidFireParser
 

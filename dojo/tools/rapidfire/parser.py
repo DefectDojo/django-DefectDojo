@@ -1,3 +1,4 @@
+# parser.py
 import csv
 import io
 import logging
@@ -15,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class RapidFireParser:
-
     """RapidFire vulnerability scanner CSV report parser"""
 
     def get_scan_types(self):
@@ -260,7 +260,7 @@ class RapidFireParser:
 
                 if hostname or ip_address:
                     endpoint = Endpoint(
-                        host=hostname if hostname else ip_address,
+                        host=hostname or ip_address,
                         port=port,
                     )
                     find.unsaved_endpoints = [endpoint]
@@ -284,8 +284,8 @@ class RapidFireParser:
             return list(dupes.values())
 
         except csv.Error as e:
-            logger.error(f"CSV parsing error: {e!s}")
+            logger.error(f"CSV parsing error: {str(e)}")
             raise
         except Exception as e:
-            logger.error(f"Error parsing findings: {e!s}")
+            logger.error(f"Error parsing findings: {str(e)}")
             raise
