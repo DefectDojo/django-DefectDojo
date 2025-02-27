@@ -1,4 +1,4 @@
-# test_rapidfire_parser.py
+# unittests/tools/test_rapidfire_parser.py
 import datetime
 
 from django.test import TestCase
@@ -8,6 +8,7 @@ from dojo.tools.rapidfire.parser import RapidFireParser
 
 
 class TestRapidFireParser(TestCase):
+
     """Test RapidFire CSV Parser"""
 
     def test_parse_no_findings(self):

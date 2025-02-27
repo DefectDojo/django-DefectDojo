@@ -1,4 +1,4 @@
-# parser.py
+# dojo/tools/rapidfire/parser.py
 import csv
 import io
 import logging
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class RapidFireParser:
+
     """RapidFire vulnerability scanner CSV report parser"""
 
     def get_scan_types(self):
@@ -153,7 +154,7 @@ class RapidFireParser:
                 formatted_refs.append(f"* [{name}]({clean_url})")
 
             except Exception as e:
-                logger.warning(f"Error formatting reference URL {clean_url}: {str(e)}")
+                logger.warning(f"Error formatting reference URL {clean_url}: {e!s}")
                 continue
 
         # Return unique references, sorted alphabetically
@@ -183,7 +184,7 @@ class RapidFireParser:
         # Add CVE information if present
         if cves:
             spacer = [""] if parts else []
-            cve_content = ["### Associated CVEs", 
+            cve_content = ["### Associated CVEs",
                           "\n".join(f"* **{cve}** - [NVD Link](https://nvd.nist.gov/vuln/detail/{cve})" for cve in cves)]
             parts.extend(spacer + cve_content)
 
@@ -284,8 +285,8 @@ class RapidFireParser:
             return list(dupes.values())
 
         except csv.Error as e:
-            logger.error(f"CSV parsing error: {str(e)}")
+            logger.error(f"CSV parsing error: {e!s}")
             raise
         except Exception as e:
-            logger.error(f"Error parsing findings: {str(e)}")
+            logger.error(f"Error parsing findings: {e!s}")
             raise
