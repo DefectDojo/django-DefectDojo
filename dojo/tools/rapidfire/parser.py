@@ -15,6 +15,7 @@ from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
+
 class RapidFireParser:
 
     """RapidFire vulnerability scanner CSV report parser"""
