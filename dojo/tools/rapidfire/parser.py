@@ -1,4 +1,4 @@
-# dojo/tools/rapidfire/parser.py
+# Standard library imports
 import csv
 import io
 import logging
@@ -6,14 +6,14 @@ import re
 import sys
 from urllib.parse import urlparse
 
+# Third party imports
 from dateutil import parser as date_parser
 from django.utils import timezone
 
+# Local imports
 from dojo.models import Endpoint, Finding
 
-
 logger = logging.getLogger(__name__)
-
 
 class RapidFireParser:
 
@@ -231,7 +231,7 @@ class RapidFireParser:
                     description.append(f"**Known Exploited Vulnerability**: {row['Known Exploited Vulnerability']}")
                 if row.get("MAC Address"):
                     description.append(f"**MAC Address**: {row['MAC Address']}")
-                
+
                 ransomware_warning = "⚠️ **Warning**: This vulnerability is known to be used in ransomware campaigns"
                 if row.get("Known To Be Used In Ransomware Campaigns", "").lower() == "true":
                     description.append(ransomware_warning)
