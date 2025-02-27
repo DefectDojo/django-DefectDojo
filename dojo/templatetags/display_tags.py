@@ -800,9 +800,11 @@ def finding_display_status(finding, event="view"):
         "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
         "Active, Verified, Risk Expired": ["Open", "view_risk", "Red"],
         "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
+        "Inactive, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
         "Under Review, Inactive, Mitigated, Risk Accepted": ["Closed", "view_review", "Green"],
         "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
         "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
+        "Under Review, Inactive, Verified, Mitigated": ["Closed", "view_review", "Green"],
         "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
         "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
         "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
@@ -825,6 +827,7 @@ def finding_display_status(finding, event="view"):
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
+        "Inactive, Mitigated": ["Closed", "view_finding", "Green"],
         "Active, Verified": ["Open", "view_finding", "Red"],
     }
 

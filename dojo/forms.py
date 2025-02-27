@@ -1531,7 +1531,7 @@ class AddFindingForm(forms.ModelForm):
                    "under_review", "reviewers", "cve", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation",
                    "jira_change", "endpoints", "sla_start_date",
-                   "component")
+                   "component", "test")
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -1611,7 +1611,7 @@ class AdHocFindingForm(forms.ModelForm):
                    "reviewers", "cve", "inherited_tags",
                    "review_requested_by", "is_mitigated",
                    "jira_creation", "jira_change", "endpoints",
-                   "sla_start_date", "sla_expiration_date", "component")
+                   "sla_start_date", "sla_expiration_date", "component", "test")
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1671,7 +1671,7 @@ class PromoteFindingForm(forms.ModelForm):
                    "duplicate", "out_of_scope", "under_review", "reviewers",
                    "review_requested_by", "is_mitigated", "jira_creation",
                    "jira_change", "planned_remediation_date", "planned_remediation_version",
-                   "effort_for_fixing", "component")
+                   "effort_for_fixing", "component", "test")
 
 
 class FindingForm(forms.ModelForm):
@@ -1806,7 +1806,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status", "component")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status", "component", "test")
 
 
 class StubFindingForm(forms.ModelForm):
