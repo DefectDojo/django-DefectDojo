@@ -25,6 +25,7 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     extend_schema,
     extend_schema_view,
+    OpenApiTypes,
 )
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework import mixins, status, viewsets
@@ -1042,38 +1043,35 @@ class FindingViewSet(
         request=serializers.FindingCloseBulkSerializer,
         responses={status.HTTP_200_OK: serializers.FindingCloseBulkSerializer},
     )
-    @action(detail=True, methods=["post"])
-    def bulk_close(self, request, pk=None):
-        # finding = self.get_object()
+    @action(detail=False, methods=["POST"])
+    def bulk_close(self, request):
 
         if request.method == "POST":
             findings_close = serializers.FindingCloseBulkSerializer(
-                data=request.data,
+                data=request.data
             )
             if findings_close.is_valid():
                 try:
                     findings = []
-                    for finding_close in findings_close:
+                    for finding_close in findings_close.data["findings"]:
                         finding = Finding.objects.get(id=finding_close["id"])
-                        finding.is_mitigated = finding_close.validated_data[
-                            "is_mitigated"
-                        ]
+                        finding.is_mitigated = finding_close["is_mitigated"]
                         if settings.EDITABLE_MITIGATED_DATA:
                             finding.mitigated = (
-                                finding_close.validated_data["mitigated"]
+                                finding_close["mitigated"]
                                 or timezone.now()
                             )
                         else:
                             finding.mitigated = timezone.now()
                         finding.mitigated_by = request.user
                         finding.active = False
-                        finding.false_p = finding_close.validated_data.get(
+                        finding.false_p = finding_close.get(
                             "false_p", False,
                         )
-                        finding.duplicate = finding_close.validated_data.get(
+                        finding.duplicate = finding_close.get(
                             "duplicate", False,
                         )
-                        finding.out_of_scope = finding_close.validated_data.get(
+                        finding.out_of_scope = finding_close.get(
                             "out_of_scope", False,
                         )
 
@@ -1090,7 +1088,7 @@ class FindingViewSet(
                             e_status.mitigated = True
                             e_status.last_modified = timezone.now()
                             e_status.save()
-                        findings.append(finding) 
+                        findings.append(finding)
                         system_settings = System_Settings.objects.get()
                         if system_settings.enable_transfer_finding:
                             helper_tf.close_or_reactive_related_finding(
@@ -1114,7 +1112,7 @@ class FindingViewSet(
                             message="Findings closed successfully")
 
                 except Exception as e:
-                    ApiError.internal_server_error(
+                    raise ApiError.internal_server_error(
                         detail=str(f"Error Closed finding bulk: {e}"))
             else:
                 return Response(
@@ -1122,6 +1120,7 @@ class FindingViewSet(
                 )
             serialized_finding = serializers.FindingCloseBulkSerializer(findings_close)
             return Response(serialized_finding.data)
+
     @extend_schema(
         methods=["POST"],
         request=serializers.TagSerializer,
