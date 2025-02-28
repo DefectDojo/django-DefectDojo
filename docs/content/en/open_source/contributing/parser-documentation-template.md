@@ -36,8 +36,8 @@ _For each finding created, include details of how the parser parses specific dat
 - How deduplication is handled (e.g., using a hash of severity + title + description).
 - Describes the default severity if no mapping is matched.
 
-### Sample Scan Data
-_Add a link to the relevant unit tests or sample scan data folder in the GitHub repository. For example:_
+### Sample Scan Data or Unit Tests
+_Add a link to the unit tests or sample scan data folder in the GitHub repository. For example:_
 - [Sample Scan Data Folder](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/[parser-name])
 
 ### Link To Tool
