@@ -445,6 +445,7 @@ def get_roles_with_permissions():
             Permissions.Product_Member_Edit,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
+            Permissions.Product_Delete,
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
