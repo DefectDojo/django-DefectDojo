@@ -4,6 +4,7 @@ import contextlib
 import datetime
 import logging
 import mimetypes
+from ast import literal_eval
 from itertools import chain
 
 import bleach
@@ -351,8 +352,7 @@ def display_index(data, index):
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
-    import json
-    history = json.loads(value)
+    history = literal_eval(value)
     text = ""
     for k in history:
         if isinstance(history[k], dict):
@@ -459,13 +459,12 @@ def pic_token(context, image, size):
 
 @register.filter
 def inline_image(image_file):
-    try:
-        if img_type := mimetypes.guess_type(image_file.file.name)[0]:
-            if img_type.startswith("image/"):
-                img_data = base64.b64encode(image_file.file.read())
-                return f"data:{img_type};base64, {img_data.decode('utf-8')}"
-    except:
-        pass
+    # TODO: This code might need better exception handling or data processing
+    if img_types := mimetypes.guess_type(image_file.file.name):
+        img_type = img_types[0]
+        if img_type.startswith("image/"):
+            img_data = base64.b64encode(image_file.file.read())
+            return f"data:{img_type};base64, {img_data.decode('utf-8')}"
     return ""
 
 
@@ -801,9 +800,11 @@ def finding_display_status(finding, event="view"):
         "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
         "Active, Verified, Risk Expired": ["Open", "view_risk", "Red"],
         "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
+        "Inactive, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
         "Under Review, Inactive, Mitigated, Risk Accepted": ["Closed", "view_review", "Green"],
         "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
         "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
+        "Under Review, Inactive, Verified, Mitigated": ["Closed", "view_review", "Green"],
         "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
         "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
         "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
@@ -826,6 +827,7 @@ def finding_display_status(finding, event="view"):
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
+        "Inactive, Mitigated": ["Closed", "view_finding", "Green"],
         "Active, Verified": ["Open", "view_finding", "Red"],
     }
 
@@ -874,6 +876,8 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "GLSA":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key in ["AVD", "KHV", "C-"]:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if "&&" in settings.VULNERABILITY_URLS[key]:

@@ -156,7 +156,7 @@ def get_message_from_multiformatMessageString(data, rule):
 
 def cve_try(val):
     # Match only the first CVE!
-    cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
+    cveSearch = re.search(r"(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
     if cveSearch:
         return cveSearch.group(1).upper()
     return None
@@ -241,10 +241,10 @@ def get_codeFlowsDescription(codeFlows):
                 snippet = ""
 
                 if "startLine" in region:
-                    start_line = f":L{str(region.get('startLine'))}"
+                    start_line = f":L{region.get('startLine')}"
 
                 if "startColumn" in region:
-                    start_column = f":C{str(region.get('startColumn'))}"
+                    start_column = f":C{region.get('startColumn')}"
 
                 if "snippet" in region:
                     snippet = f"\t-\t{region.get('snippet').get('text')}"

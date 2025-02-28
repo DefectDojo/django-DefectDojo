@@ -126,7 +126,7 @@
                                 <div class="custom-search-form">
                                     <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
                                         <div class="input-group">
-                                            <input id="simple_search" label="simple_search" aria_label="simple_search" type="text" name="query" class="form-control"
+                                            <input id="simple_search" label="simple_search" aria-label="simple_search" type="text" name="query" class="form-control"
                                                 placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                                             <span class="input-group-btn">
                                                 <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
@@ -724,7 +724,7 @@
                                             <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
-                                                    {% if product_tab.engagements > 0 %} 
+                                                    {% if product_tab.engagements > 0 %}
                                                         <span class="badge">{{ product_tab.engagements }}</span>
                                                     {% endif %}
                                                 </span>
@@ -1216,6 +1216,9 @@
                 {% endif %}
 
                 function htmlEscape(str) {
+                    if (!str) {
+                        return '';
+                    }
                     return str
                         .replace(/\n/g, " ")
                         .replace(/&/g, '&amp;')

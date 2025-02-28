@@ -64,6 +64,7 @@ class Inspector:
                         f"Registry: {details.get('RegistryId')}",
                         f"Repository: {details.get('RepositoryName')}",
                         f"Image digest: {details.get('ImageDigest')}",
+                        f"Image tags: {','.join(details.get('ImageTags', []))}",
                     ))
                 title_suffix = f" - Image: {arn.split('/', 1)[1]}"  # repo-name/sha256:digest
             else:  # generic implementation

@@ -199,7 +199,7 @@ def simple_metrics(request):
                                        date__year=now.year,
                                        )
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             total = total.filter(verified=True)
 
         total = total.distinct()
@@ -380,7 +380,7 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            if get_system_setting("enforce_verified_status", True):
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     verified=True,
                                                     false_p=False,
@@ -581,7 +581,7 @@ def product_tag_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            if get_system_setting("enforce_verified_status", True):
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     verified=True,
                                                     false_p=False,
@@ -757,7 +757,7 @@ def view_engineer(request, eid):
         raise PermissionDenied
     now = timezone.now()
 
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         findings = Finding.objects.filter(reporter=user, verified=True)
     else:
         findings = Finding.objects.filter(reporter=user)
