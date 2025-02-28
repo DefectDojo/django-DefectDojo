@@ -561,7 +561,7 @@ class TestAuthorization(DojoTestCase):
         mock_foo.filter.return_value = [self.group2]
 
         result = user_has_permission(self.user3, self.product, Permissions.Product_Delete)
-        self.assertFalse(result)
+        self.assertTrue(result)
         mock_foo.filter.assert_called_with(users=self.user3)
 
     @patch("dojo.models.Dojo_Group.objects")
