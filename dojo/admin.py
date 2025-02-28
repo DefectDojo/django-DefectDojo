@@ -5,7 +5,7 @@ from django.db.migrations.recorder import MigrationRecorder
 from dojo.models import Question, TextQuestion, ChoiceQuestion, Choice, \
     Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey, Component
 
-admin.site.unregister(LogEntry)
+# admin.site.unregister(LogEntry)
 
 # ==============================
 # Defect Dojo Engaegment Surveys
