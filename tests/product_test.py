@@ -549,12 +549,12 @@ class ProductTest(BaseTestCase):
         # Navigate to the product page
         driver.get(self.base_url + "metrics/panel_admin")
         
-    def test_metrics_regulatory(self):
+    def test_metrics_scan_cycle(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
         driver = self.driver
         # Navigate to the product page
-        driver.get(self.base_url + "metrics/regulatory")
+        driver.get(self.base_url + "metrics/scan_cycle")
 
 
 def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False):
