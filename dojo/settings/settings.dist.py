@@ -356,6 +356,8 @@ env = environ.FileAwareEnv(
     DD_TENAN_ID=(str, ""),
     DD_CLIENT_ID=(str, ""),
     DD_CALLBACK_URL=(str, ""),
+    # Reimport Scan
+    DD_ENABLE_REIMPORT_SCAN=(bool, False),
     # The varible that allows settings acceptance for email
     DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
     DD_LIFETIME_HOURS_PERMISSION_KEY=(int, 48),
@@ -2228,6 +2230,8 @@ HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 TENAN_ID = env("DD_TENAN_ID")
 CLIENT_ID = env("DD_CLIENT_ID")
 CALLBACK_URL = env("DD_CALLBACK_URL")
+# Reimport Scan
+ENABLE_REIMPORT_SCAN = env("DD_ENABLE_REIMPORT_SCAN")
 
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
