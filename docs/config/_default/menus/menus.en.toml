@@ -4,14 +4,19 @@
   weight = 10
 
 [[main]]
-  name = "Changelog"
-  url = "/en/changelog/changelog/"
+  name = "Supported Tools"
+  url = "/en/connecting_your_tools/parsers/"
   weight = 11
 
 [[main]]
   name = "Pro Features"
   url = "/en/about_defectdojo/pro_features"
-  weight = 11
+  weight = 12
+
+[[main]]
+  name = "Changelog"
+  url = "/en/changelog/changelog/"
+  weight = 13
 
 [[social]]
   name = "X"
