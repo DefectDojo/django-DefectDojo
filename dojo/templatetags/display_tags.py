@@ -261,32 +261,32 @@ def finding_sla(finding):
     if not get_system_setting("enable_finding_sla"):
         return ""
 
-    sla_age, enforce_sla = finding.get_sla_period()
+    sla_period, enforce_sla = finding.get_sla_period()
     if not enforce_sla:
         return ""
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla_days_remaining()
+    days_remaining = finding.sla_days_remaining()
     if finding.mitigated:
         status = "blue"
-        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
-        if find_sla and find_sla < 0:
+        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+        if days_remaining and days_remaining < 0:
             status = "orange"
-            find_sla = abs(find_sla)
+            days_remaining = abs(days_remaining)
             status_text = "Out of SLA: Remediated " + str(
-                find_sla) + " days past SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+                days_remaining) + " days past SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
     else:
         status = "green"
-        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
-        if find_sla and find_sla < 0:
+        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+        if days_remaining and days_remaining < 0:
             status = "red"
             status_text = "Overdue: Remediation for " + severity.lower() + " findings in " + str(
-                sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+                sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
 
-    if find_sla is not None:
+    if days_remaining is not None:
         title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
-                                                                                                                           '<span class="label severity age-' + status + '">' + str(find_sla) + "</span></a>"
+                                                                                                                           '<span class="label severity age-' + status + '">' + str(days_remaining) + "</span></a>"
 
     return mark_safe(title)
 
