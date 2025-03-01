@@ -39,7 +39,8 @@ class TestSLACalculations(DojoTestCase):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
 
-        logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(finding_sla(finding))
 
         self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
         self.assertEqual(self.sla_config.high, finding.sla_days_remaining())
@@ -49,7 +50,8 @@ class TestSLACalculations(DojoTestCase):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
 
-        logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(finding_sla(finding))
 
         with patch("django.db.models.fields.timezone.now") as mock_now:
             mock_now.return_value = self.now + relativedelta(days=10)
@@ -61,7 +63,8 @@ class TestSLACalculations(DojoTestCase):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
 
-        logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated} {finding.sla_expiration_date}")
+        logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(finding_sla(finding))
 
         with patch("django.db.models.fields.timezone.now") as mock_now:
             mock_now.return_value = self.now + relativedelta(days=50)
@@ -73,7 +76,8 @@ class TestSLACalculations(DojoTestCase):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
 
-        logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(finding_sla(finding))
 
         initial_sla_expiration_date = finding.sla_expiration_date
 
@@ -83,8 +87,8 @@ class TestSLACalculations(DojoTestCase):
             finding.is_mitigated = True
             finding.active = False
             finding.save()
-            logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
-            logger.error(finding_sla(finding))
+            logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+            logger.debug(finding_sla(finding))
 
             # sla_expiration_date should not change just because a finding is mitigated
             self.assertEqual(initial_sla_expiration_date, finding.sla_expiration_date)
@@ -96,8 +100,9 @@ class TestSLACalculations(DojoTestCase):
         with patch("django.db.models.fields.timezone.now") as mock_now:
             mock_now.return_value = self.now + relativedelta(days=20)
             finding.save()
-            logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
-            logger.error(finding_sla(finding))
+
+            logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+            logger.debug(finding_sla(finding))
 
             # sla_expiration_date should not change just because a finding is saved
             self.assertEqual(initial_sla_expiration_date, finding.sla_expiration_date)
@@ -111,7 +116,8 @@ class TestSLACalculations(DojoTestCase):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
 
-        logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.sla_expiration_date}")
+        logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+        logger.debug(finding_sla(finding))
 
         initial_sla_expiration_date = finding.sla_expiration_date
 
@@ -121,8 +127,9 @@ class TestSLACalculations(DojoTestCase):
             finding.is_mitigated = True
             finding.active = False
             finding.save()
-            logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated} {finding.sla_expiration_date}")
-            logger.error(finding_sla(finding))
+
+            logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+            logger.debug(finding_sla(finding))
 
             # sla_expiration_date should not change just because a finding is mitigated
             self.assertEqual(initial_sla_expiration_date, finding.sla_expiration_date)
@@ -135,10 +142,11 @@ class TestSLACalculations(DojoTestCase):
         with patch("django.db.models.fields.timezone.now") as mock_now:
             mock_now.return_value = self.now + relativedelta(days=55)
             finding.save()
-            logger.error(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated} {finding.sla_expiration_date}")
-            logger.error(finding_sla(finding))
 
-            # sla_expiration_date should not change just because a finding is mitigated
+            logger.debug(f"Finding: {finding.test.id} {finding.id} {finding.date} {finding.mitigated}  {finding.sla_expiration_date}")
+            logger.debug(finding_sla(finding))
+
+            # sla_expiration_date should not change just because a finding is saved
             self.assertEqual(initial_sla_expiration_date, finding.sla_expiration_date)
             self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
             self.assertEqual(-15, finding.sla_days_remaining())
