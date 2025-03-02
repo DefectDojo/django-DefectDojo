@@ -30,14 +30,13 @@ on:
 
 jobs:
   job-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
           docker-image: [django, nginx]
           os: [alpine, debian]
     steps:
-
       - name: Prepare
         run: |
           platform_input=${{ inputs.platform }}
