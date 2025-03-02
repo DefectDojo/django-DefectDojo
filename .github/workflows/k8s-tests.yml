@@ -58,8 +58,8 @@ jobs:
         timeout-minutes: 15
         run: |-
              eval $(minikube docker-env)
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-x64_img
-             docker load -i built-docker-image/django-${{ matrix.os }}-x64_img
+             docker load -i built-docker-image/nginx-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/django-${{ matrix.os }}-linux-amd64_img
              docker images
 
       - name: Configure HELM repos
