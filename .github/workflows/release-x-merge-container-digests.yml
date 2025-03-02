@@ -82,6 +82,8 @@ jobs:
       env:
         REPO_ORG: ${{ env.repoorg }}
       run: |
+        @echo on
+        set -x
         echo "$DOCKER_METADATA_OUTPUT_JSON"
         ls -l
         printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *
