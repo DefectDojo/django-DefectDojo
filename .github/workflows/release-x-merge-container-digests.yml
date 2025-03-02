@@ -58,7 +58,7 @@ jobs:
       run: |
         set -x
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
-        $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
+        $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}@sha256:%s ' *)
 
     # Debian images the default / official ones, so these get the os-less tag and the latest tag
     - name: Create default manifest list and push
