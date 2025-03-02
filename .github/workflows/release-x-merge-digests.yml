@@ -57,6 +57,9 @@ jobs:
       env:
         REPO_ORG: ${{ env.repoorg }}
       run: |
+        ls -l
+        printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *
+        jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON"
         docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") --progress=plain \
         $(printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
 
