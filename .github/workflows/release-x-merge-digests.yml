@@ -25,7 +25,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: ${{ runner.temp }}/digests
-        pattern: digests-*
+        pattern: digests-${{ matrix.docker-image}}-${{ matrix.os }}-*
         merge-multiple: true
 
     - name: Login to DockerHub
