@@ -51,6 +51,8 @@ jobs:
   merge-digests:
     needs: release-docker-containers
     uses: ./.github/workflows/release-x-merge-digests.yml
+    with:
+        release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
   release-drafter:
