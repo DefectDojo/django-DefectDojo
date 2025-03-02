@@ -77,7 +77,7 @@ jobs:
 
 #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
 
-    - name: Create manifest list and push
+    - name: Create OS specific manifest list and push
       working-directory: ${{ runner.temp }}/digests
       env:
         REPO_ORG: ${{ env.repoorg }}
@@ -85,6 +85,17 @@ jobs:
         set -x
         docker buildx imagetools create -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
+
+    # Debian images the default / official ones, so these get some extra tags
+    - name: Create default manifest list and push
+      if: ${{ matrix.os  == 'debian' }}
+      working-directory: ${{ runner.temp }}/digests
+      env:
+        REPO_ORG: ${{ env.repoorg }}
+      run: |
+        set -x
+        docker buildx imagetools create -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools create -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
     - name: Inspect image
       env:
