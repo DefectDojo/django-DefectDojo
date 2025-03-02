@@ -34,12 +34,12 @@ jobs:
         #   git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
         #   git push origin ${{ github.event.inputs.release_number }}
 
-#   release-helm-chart:
-#     needs: tag
-#     uses: ./.github/workflows/release-x-manual-helm-chart.yml
-#     with:
-#       release_number: ${{ github.event.inputs.release_number }}
-#     secrets: inherit
+  release-helm-chart:
+    needs: tag
+    uses: ./.github/workflows/release-x-manual-helm-chart.yml
+    with:
+      release_number: ${{ github.event.inputs.release_number }}
+    secrets: inherit
 
   publish-docker-containers:
     strategy:
