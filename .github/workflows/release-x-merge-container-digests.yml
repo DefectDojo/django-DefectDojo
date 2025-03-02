@@ -1,0 +1,90 @@
+name: "release-X: Merge platform digests"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+    workflow_dispatch:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
+
+    workflow_call:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
+
+jobs:
+  merge-digests:
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix:
+            docker-image: [django, nginx]
+            os: [alpine, debian]
+
+    steps:
+    - name: Prepare
+      run: |
+        platform_input=${{ inputs.platform }}
+        echo "PLATFORM=${platform_input//\//-}" >> $GITHUB_ENV
+
+    - id: set-repo-org
+      run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+    - name: Download digests
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ runner.temp }}/digests
+        pattern: digests-${{ matrix.docker-image}}-${{ matrix.os }}-*
+        merge-multiple: true
+
+    - name: Login to DockerHub
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      env:
+        REPO_ORG: ${{ env.repoorg }}
+        docker-image: ${{ matrix.docker-image }}
+      with:
+        images: |
+            ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+
+    - name: Create manifest list and push
+      working-directory: ${{ runner.temp }}/digests
+      env:
+        REPO_ORG: ${{ env.repoorg }}
+      run: |
+        ls -l
+        printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *
+        jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON"
+        docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") --progress=plain \
+        $(printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
+
+    - name: Inspect image
+      env:
+        REPO_ORG: ${{ env.repoorg }}
+      run: |
+        docker buildx imagetools inspect ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ steps.meta.outputs.version }}
