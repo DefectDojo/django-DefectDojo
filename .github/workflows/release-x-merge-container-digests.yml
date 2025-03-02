@@ -37,6 +37,7 @@ jobs:
     - id: Set-docker-org
       run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+    # only download digests for this image and this os
     - name: Download digests
       uses: actions/download-artifact@v4
       with:
@@ -65,7 +66,7 @@ jobs:
       run: |
         docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
-        # Debian images the default / official ones, so these get the os-less tag and the latest tag
+    # Debian images are the default / official ones, so these get the os-less tag and the latest tag
     - name: Create default manifest list and push
       if: ${{ matrix.os  == 'debian' }}
       working-directory: ${{ runner.temp }}/digests
