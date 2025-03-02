@@ -33,12 +33,6 @@ jobs:
             os: [alpine, debian]
 
     steps:
-    # Replace slashes so we can use this in filenames
-    - name: Set-platform
-      run: |
-        platform=${{ matrix.platform }}
-        echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
-
     # deduce docker org name from git repo to make the build also work in forks
     - id: Set-docker-org
       run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
