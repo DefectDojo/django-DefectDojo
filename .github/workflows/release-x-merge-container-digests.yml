@@ -72,11 +72,14 @@ jobs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
 
+#   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
+
     - name: Create manifest list and push
       working-directory: ${{ runner.temp }}/digests
       env:
         REPO_ORG: ${{ env.repoorg }}
       run: |
+        echo "$DOCKER_METADATA_OUTPUT_JSON"
         ls -l
         printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *
         jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON"
