@@ -37,7 +37,7 @@ jobs:
     - name: Set-platform
       run: |
         platform=${{ matrix.platform }}
-        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+        echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
 
     # deduce docker org name from git repo to make the build also work in forks
     - id: Set-docker-org
