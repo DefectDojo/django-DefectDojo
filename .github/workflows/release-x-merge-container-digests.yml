@@ -60,7 +60,12 @@ jobs:
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}@sha256:%s ' *)
 
-    # Debian images the default / official ones, so these get the os-less tag and the latest tag
+    # Just for logging
+    - name: Inspect OS specific image
+      run: |
+        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+
+        # Debian images the default / official ones, so these get the os-less tag and the latest tag
     - name: Create default manifest list and push
       if: ${{ matrix.os  == 'debian' }}
       working-directory: ${{ runner.temp }}/digests
@@ -69,11 +74,9 @@ jobs:
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
-    - name: Inspect OS specific image
-      run: |
-        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
-
+    # Just for logging
     - name: Inspect default images
+      if: ${{ matrix.os  == 'debian' }}
       run: |
           docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}
           docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest
