@@ -5,8 +5,23 @@ env:
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
 
 on:
-  workflow_dispatch:
-  workflow_call:
+    workflow_dispatch:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
+
+    workflow_call:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
 
 jobs:
   merge-digests:
@@ -18,6 +33,11 @@ jobs:
             os: [alpine, debian]
 
     steps:
+    - name: Prepare
+      run: |
+        platform_input=${{ inputs.platform }}
+        echo "PLATFORM=${platform_input//\//-}" >> $GITHUB_ENV
+
     - id: set-repo-org
       run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 

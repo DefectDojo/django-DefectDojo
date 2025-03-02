@@ -5,7 +5,7 @@ on:
     inputs:
         platform:
           type: string
-          default: "x64"
+          default: "amd64"
 
 jobs:
   unit_tests:

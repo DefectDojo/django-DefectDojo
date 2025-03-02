@@ -6,20 +6,20 @@ on:
     inputs:
         platform:
           type: string
-          default: "x64"
+          default: "linux/amd64"
   workflow_call:
     inputs:
         platform:
           type: string
-          default: "x64"
+          default: "linux/amd64"
 
 jobs:
   build:
     name: Build Docker Images
-    runs-on: ${{ inputs.platform ==  'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       matrix:
-        # integration tests are only build (and run) on debian x64
+        # integration tests are only build (and run) on debian linux/amd64
         docker-image: [django, nginx, integration-tests]
         os: [alpine, debian]
         platform: ["${{ inputs.platform }}"]
