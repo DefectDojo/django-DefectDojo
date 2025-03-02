@@ -50,6 +50,7 @@ jobs:
     uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
+      platform: ${{ matrix.platform }}
     secrets: inherit
 
   merge-digests:
