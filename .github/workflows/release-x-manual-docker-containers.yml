@@ -41,6 +41,7 @@ jobs:
       - name: Set-platform
         run: |
           echo "PLATFORM=${${{ inputs.platform }}//\//-}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
 
       # deduce docker org name from git repo to make the build also work in forks
       - id: Set-docker-org
@@ -75,6 +76,7 @@ jobs:
 
       - name: Export digest
         run: |
+          echo platform: $PLATFORM
           mkdir -p ${{ runner.temp }}/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
