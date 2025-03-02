@@ -41,7 +41,7 @@ jobs:
 #       release_number: ${{ github.event.inputs.release_number }}
 #     secrets: inherit
 
-  release-docker-containers:
+  publish-docker-containers:
     strategy:
         matrix:
           platform: ['linux/amd64', 'linux/arm64']
@@ -53,9 +53,9 @@ jobs:
       platform: ${{ matrix.platform }}
     secrets: inherit
 
-  merge-digests:
-    needs: release-docker-containers
-    uses: ./.github/workflows/release-x-merge-container-digests.yml
+  publish-container-digests:
+    needs: publish-docker-containers
+    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
         release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
