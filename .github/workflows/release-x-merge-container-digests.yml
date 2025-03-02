@@ -83,11 +83,11 @@ jobs:
         REPO_ORG: ${{ env.repoorg }}
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
+        docker buildx imagetools create -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
 
     - name: Inspect image
       env:
         REPO_ORG: ${{ env.repoorg }}
       run: |
-        docker buildx imagetools inspect ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ steps.meta.outputs.version }}
+        docker buildx imagetools inspect ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
