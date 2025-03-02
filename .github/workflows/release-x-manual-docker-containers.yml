@@ -37,10 +37,14 @@ jobs:
           docker-image: [django, nginx]
           os: [alpine, debian]
     steps:
-      - name: Prepare
+      # Replace slashes so we can use this in filenames
+      - name: Set-platform
         run: |
-          platform_input=${{ inputs.platform }}
-          echo "PLATFORM=${platform_input//\//-}" >> $GITHUB_ENV
+          echo "PLATFORM=${${{ inputs.platform }}//\//-}" >> $GITHUB_ENV
+
+      # deduce docker org name from git repo to make the build also work in forks
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
@@ -54,74 +58,28 @@ jobs:
         #   ref: ${{ github.event.inputs.release_number }}
           ref: arm64-unit-tests
 
-      - id: set-repo-org
-        run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
-#TODO : build once, retag for debian via https://github.com/koraykoska/retag-docker-image
-
-      - name: Build and push images with debian
-        id: 'build-debian'
-        if: ${{ matrix.os  == 'debian' }}
+      - name: Build and push images
+        id: build
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         env:
           DOCKER_BUILD_CHECKS_ANNOTATIONS: false
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-        #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
-          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
+          outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
 
       - name: Export digest
-        if: ${{ matrix.os  == 'debian' }}
         run: |
           mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build-debian.outputs.digest }}"
+          digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
       - name: Upload digest
-        if: ${{ matrix.os  == 'debian' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: digests-${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}
-          path: ${{ runner.temp }}/digests/*
-          if-no-files-found: error
-          retention-days: 1
-
-
-      - name: Build and push images with alpine
-        id: 'build-alpine'
-        if: ${{ matrix.os  == 'alpine' }}
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        env:
-          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          push: true
-        #https://github.com/docker/build-push-action/discussions/1213
-#https://github.com/erhhung/al2023-devops/blob/main/.github/workflows/ci.yml
-#https://github.com/docker/buildx/issues/805
-        #   tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
-          context: .
-          outputs: type=image,"name=${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}-${{ matrix.os }}",push-by-digest=true,name-canonical=true
-
-      - name: Export digest
-        if: ${{ matrix.os  == 'alpine' }}
-        run: |
-          mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build-alpine.outputs.digest }}"
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
-
-      - name: Upload digest
-        if: ${{ matrix.os  == 'alpine' }}
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}
