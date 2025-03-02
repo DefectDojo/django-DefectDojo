@@ -83,11 +83,7 @@ jobs:
         REPO_ORG: ${{ env.repoorg }}
       run: |
         set -x
-        echo "$DOCKER_METADATA_OUTPUT_JSON"
-        ls -l
-        printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *
-        jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON"
-        docker buildx imagetools -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }} --progress=plain \
+        docker buildx imagetools -t "${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}-${{ matrix.os }}@sha256:%s ' *)
 
     - name: Inspect image
