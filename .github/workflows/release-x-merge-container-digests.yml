@@ -82,7 +82,6 @@ jobs:
       env:
         REPO_ORG: ${{ env.repoorg }}
       run: |
-        @echo on
         set -x
         echo "$DOCKER_METADATA_OUTPUT_JSON"
         ls -l
