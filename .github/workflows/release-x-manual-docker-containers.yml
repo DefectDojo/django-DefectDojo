@@ -44,7 +44,7 @@ jobs:
           echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
           echo $GITHUB_ENV
 
-      # deduce docker org name from git repo to make the build also work in forks
+        # deduce docker org name from git repo to make the build also work in forks
       - id: Set-docker-org
         run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
@@ -64,6 +64,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
 
+        # we cannot set any tags here, those are set on the merged digest in release-x-manual-merge-container-digests.yml
       - name: Build and push images
         id: build
         uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
@@ -75,12 +76,14 @@ jobs:
           context: .
           outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
 
+        # export the digest to a file
       - name: Export digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
 
+        # upload the digest file as artifact
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
