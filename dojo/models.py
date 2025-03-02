@@ -3052,7 +3052,6 @@ class Finding(models.Model):
             self.sla_expiration_date = None
 
     def sla_days_remaining(self):
-        logger.error(f"sla_days_remaining: {get_current_date()} {self.mitigated} {self.sla_expiration_date}")
         if self.sla_expiration_date:
             if self.mitigated:
                 mitigated_date = self.mitigated
