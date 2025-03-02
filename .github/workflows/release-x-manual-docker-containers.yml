@@ -77,8 +77,6 @@ jobs:
 
       - name: Export digest
         run: |
-          echo platform: $PLATFORM
-          echo platform2: ${{ env.PLATFORM }}
           mkdir -p ${{ runner.temp }}/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
