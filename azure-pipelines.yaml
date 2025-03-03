@@ -74,7 +74,6 @@ steps:
       coverage report
       coverage xml
     displayName: "Unit test"
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: SonarQubePrepare@7
     displayName: "Prepare analysis on SonarQube"
