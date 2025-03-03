@@ -4,6 +4,57 @@ from dojo.models import Finding
 
 
 class SemgrepParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the check_id value outputted by the Semgrep Scanner.
+        - severity: Set to severity from Semgrep Scanner that has been converted to DefectDojo format.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - line: Set to line from Semgrep Scanner.
+        - vuln_id_from_tool: Set to Vuln Id from Semgrep Scanner.
+        - nb_occurences: Initially set to 1 then updated.
+        - unique_id_from_tool: Set to corresponding field from scanner if it is present in the output.
+        - cwe: Set to cwe from scanner output if present.
+        - mitigation: Set to "fix" from scanner output or "fix_regex" if "fix" isn't present.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "file_path",
+            "line",
+            "vuln_id_from_tool",
+            "nb_occurences",
+            "unique_id_from_tool",
+            "cwe",
+            "mitigation",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the title outputted by the Semgrep Scanner.
+        - cwe: Set to cwe from scanner output if present.
+        - line: Set to line from Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "line",
+            "file_path",
+            "description",
+        ]
+
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
 
@@ -141,11 +192,11 @@ class SemgrepParser:
         upper_value = val.upper()
         if upper_value == "CRITICAL":
             return "Critical"
-        if upper_value in ["WARNING", "MEDIUM"]:
+        if upper_value in {"WARNING", "MEDIUM"}:
             return "Medium"
-        if upper_value in ["ERROR", "HIGH"]:
+        if upper_value in {"ERROR", "HIGH"}:
             return "High"
-        if upper_value in ["LOW", "INFO"]:
+        if upper_value in {"LOW", "INFO"}:
             return "Low"
         msg = f"Unknown value for severity: {val}"
         raise ValueError(msg)

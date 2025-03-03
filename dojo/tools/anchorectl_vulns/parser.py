@@ -69,27 +69,26 @@ class AnchoreCTLVulnsParser:
                     cvssv3_base_score = item["nvdData"][0]["cvssV3"][
                         "baseScore"
                     ]
-            else:
-                # there may be other keys, but taking a best guess here
-                if "vendorData" in item and len(item["vendorData"]) > 0:
-                    # sometimes cvssv3 in 1st element will have -1 for "not
-                    # set", but have data in the 2nd array item
+            # there may be other keys, but taking a best guess here
+            elif "vendorData" in item and len(item["vendorData"]) > 0:
+                # sometimes cvssv3 in 1st element will have -1 for "not
+                # set", but have data in the 2nd array item
+                if (
+                    "cvssV3" in item["vendorData"][0]
+                    and item["vendorData"][0]["cvssV3"]["baseScore"] != -1
+                ):
+                    cvssv3_base_score = item["vendorData"][0]["cvssV3"][
+                        "baseScore"
+                    ]
+                elif len(item["vendorData"]) > 1:
                     if (
-                        "cvssV3" in item["vendorData"][0]
-                        and item["vendorData"][0]["cvssV3"]["baseScore"] != -1
+                        "cvssV3" in item["vendorData"][1]
+                        and item["vendorData"][1]["cvssV3"]["baseScore"]
+                        != -1
                     ):
-                        cvssv3_base_score = item["vendorData"][0]["cvssV3"][
-                            "baseScore"
-                        ]
-                    elif len(item["vendorData"]) > 1:
-                        if (
-                            "cvssV3" in item["vendorData"][1]
-                            and item["vendorData"][1]["cvssV3"]["baseScore"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendorData"][1][
-                                "cvssV3"
-                            ]["baseScore"]
+                        cvssv3_base_score = item["vendorData"][1][
+                            "cvssV3"
+                        ]["baseScore"]
 
             references = item["url"]
 

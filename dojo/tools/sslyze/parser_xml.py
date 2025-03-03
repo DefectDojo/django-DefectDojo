@@ -77,8 +77,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**heartbleed** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if element.tag == "openssl_ccs":
@@ -91,8 +91,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**openssl_ccs** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if element.tag == "reneg":
@@ -102,8 +102,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**Session Renegotiation** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if (

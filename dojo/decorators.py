@@ -66,9 +66,8 @@ def dojo_model_to_id(_func=None, *, parameter=0):
             if model_or_id:
                 if isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
                     logger.debug("converting model_or_id to id: %s", model_or_id)
-                    id = model_or_id.id
                     args = list(args)
-                    args[parameter] = id
+                    args[parameter] = model_or_id.id
 
             return func(*args, **kwargs)
 
@@ -144,7 +143,7 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
     return model_or_id
 
 
-def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, block=False):
+def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
