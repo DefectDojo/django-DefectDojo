@@ -51,7 +51,7 @@ class NetsparkerParser:
             else:
                 cwe = None
             sev = item["Severity"]
-            if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+            if sev not in {"Info", "Low", "Medium", "High", "Critical"}:
                 sev = "Info"
             mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
             references = html2text.html2text(item.get("RemedyReferences", ""))

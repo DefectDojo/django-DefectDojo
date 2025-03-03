@@ -127,10 +127,7 @@ class CycloneDXJSONParser:
                         if not finding.active:
                             detail = analysis.get("detail")
                             if detail:
-                                finding.mitigation = (
-                                    finding.mitigation
-                                    + f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
-                                )
+                                finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
                 findings.append(finding)
         return findings
 
