@@ -88,7 +88,7 @@ class BurpGraphQLParser:
                     finding["Description"] += description + "\n\n"
 
         if issue.get("evidence"):
-            finding["Evidence"] = finding["Evidence"] + self.parse_evidence(
+            finding["Evidence"] += self.parse_evidence(
                 issue.get("evidence"),
             )
 

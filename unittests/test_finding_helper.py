@@ -53,7 +53,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             status_fields = self.get_status_fields(finding)
 
-            finding.title = finding.title + "!!!"
+            finding.title += "!!!"
             finding.save()
 
             self.assertEqual(

@@ -29,7 +29,7 @@ class TestsslParser:
             # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO
             if row["severity"] == "OK":
                 continue
-            if row["id"] in [
+            if row["id"] in {
                 "rating_spec",
                 "rating_doc",
                 "protocol_support_score",
@@ -40,7 +40,7 @@ class TestsslParser:
                 "cipher_strength_score_weighted",
                 "final_score",
                 "overall_grade",
-            ]:
+            }:
                 continue
             if "grade_cap_reason_" in row["id"]:
                 continue
