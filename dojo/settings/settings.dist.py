@@ -325,6 +325,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    DD_AUDITLOG_TWO_STEP_MIGRATION=(bool, False),
+    DD_AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT=(bool, False),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -2197,8 +2199,8 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
-AUDITLOG_TWO_STEP_MIGRATION = False
-AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_TWO_STEP_MIGRATION = env('DD_AUDITLOG_TWO_STEP_MIGRATION')
+AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = env('DD_AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
