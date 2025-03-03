@@ -325,6 +325,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    DD_AUDITLOG_TWO_STEP_MIGRATION=(bool, False),
+    DD_AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT=(bool, False),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
