@@ -76,21 +76,19 @@ def get_item(vuln):
     risk_accepted = (
         review_status == "intentional"
     )  # not confirmed, not a bug, there are some reasons to make this code in this manner
-    false_positive = review_status in [
+    false_positive = review_status in {
         "false_positive",
         "suppressed",
-    ]  # this finding is false positive
+    }  # this finding is false positive
     active = not false_positive and not risk_accepted
 
-    hash = hashlib.sha256()
     unique_id = (
         vuln["report_hash"]
         + "."
         + vuln["analyzer_result_file_path"]
         + description
     )
-    hash.update(unique_id.encode())
-    unique_id_from_tool = hash.hexdigest()
+    unique_id_from_tool = hashlib.sha256(unique_id.encode()).hexdigest()
 
     title = ""
     if "checker_name" in vuln:
