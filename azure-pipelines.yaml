@@ -119,7 +119,7 @@ steps:
     inputs:
       PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
       ArtifactName: "$(DefinitionName)_artifact"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArtifactoryGenericUpload@2
     displayName: "Artifactory Generic Upload"
