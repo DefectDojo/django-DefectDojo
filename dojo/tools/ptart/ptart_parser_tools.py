@@ -43,9 +43,9 @@ def parse_date_added_from_hit(hit):
     return parse_date(date_added, PTART_DATETIME_FORMAT)
 
 
-def parse_date(date, format):
+def parse_date(date, date_format):
     try:
-        return datetime.strptime(date, format) if date else datetime.now()
+        return datetime.strptime(date, date_format) if date else datetime.now()
     except ValueError:
         return datetime.now()
 
@@ -87,12 +87,12 @@ def parse_screenshot_data(screenshot):
     try:
         title = get_screenshot_title(screenshot)
         data = get_screenshot_data(screenshot)
-        return {
-            "title": title,
-            "data": data,
-        }
     except ValueError:
         return None
+    return {
+        "title": title,
+        "data": data,
+    }
 
 
 def get_screenshot_title(screenshot):
@@ -129,13 +129,13 @@ def parse_attachment_data(attachment):
     try:
         title = get_attachement_title(attachment)
         data = get_attachment_data(attachment)
-        return {
-            "title": title,
-            "data": data,
-        }
     except ValueError:
         # No data in attachment, let's not import this file.
         return None
+    return {
+        "title": title,
+        "data": data,
+    }
 
 
 def get_attachment_data(attachment):

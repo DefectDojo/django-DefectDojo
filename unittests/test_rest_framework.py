@@ -1,3 +1,4 @@
+import functools
 import json
 import logging
 import pathlib
@@ -151,6 +152,7 @@ IMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 REIMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 
 
+@functools.cache
 def get_open_api3_json_schema():
     generator_class = spectacular_settings.DEFAULT_GENERATOR_CLASS
     generator = generator_class()
@@ -161,11 +163,6 @@ def get_open_api3_json_schema():
     validate_schema(schema)
 
     return schema
-
-
-# use ugly global to avoid generating the schema for every test/method (as it's slow)
-global open_api3_json_schema
-open_api3_json_schema = get_open_api3_json_schema()
 
 
 def skipIfNotSubclass(baseclass):
@@ -290,9 +287,9 @@ class SchemaChecker:
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
-    def _with_prefix(self, prefix, callable, *args):
+    def _with_prefix(self, prefix, callable_function, *args):
         self._push_prefix(prefix)
-        callable(*args)
+        callable_function(*args)
         self._pop_prefix()
 
     def check(self, schema, obj):
@@ -363,7 +360,7 @@ class BaseClass:
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
             self.url = reverse(self.viewname + "-list")
-            self.schema = open_api3_json_schema
+            self.schema = get_open_api3_json_schema()
 
         def setUp_not_authorized(self):
             testuser = User.objects.get(id=3)
@@ -388,7 +385,7 @@ class BaseClass:
             # print(vars(schema_checker))
             schema_checker.check(self.schema, obj)
 
-        def check_schema_response(self, method, status_code, response, detail=False):
+        def check_schema_response(self, method, status_code, response, *, detail=False):
             detail_path = "{id}/" if detail else ""
             endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
             schema = endpoints_schema[method]["responses"][status_code]["content"]["application/json"]["schema"]
@@ -465,7 +462,7 @@ class BaseClass:
     class ListRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
-            # print(open_api3_json_schema)
+            # print(get_open_api3_json_schema())
             # validator = ResponseValidator(spec)
 
             check_for_tags = False
@@ -607,7 +604,7 @@ class BaseClass:
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
-                if key not in ["push_to_jira", "ssh", "password", "api_key"]:
+                if key not in {"push_to_jira", "ssh", "password", "api_key"}:
                     # Convert data to sets to avoid problems with lists
                     clean_value = set(value) if isinstance(value, list) else value
                     if isinstance(response.data[key], list):

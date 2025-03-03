@@ -43,11 +43,11 @@ class TestAWSInspector2Parser(TestCase):
             self.assertEqual(datetime(2024, 6, 14, 4, 3, 53, 51000, tzinfo=tzoffset(None, 7200)), findings[0].mitigated)
 
     def test_aws_inspector2_parser_empty_with_error(self):
-        with self.assertRaises(TypeError) as context:
-            with open(get_unit_tests_scans_path("aws_inspector2") / "empty_with_error.json", encoding="utf-8") as testfile:
-                parser = AWSInspector2Parser()
-                parser.get_findings(testfile, Test())
-                testfile.close()
-                self.assertTrue(
-                    "Incorrect Inspector2 report format" in str(context.exception),
-                )
+        with self.assertRaises(TypeError) as context, \
+          open(get_unit_tests_scans_path("aws_inspector2") / "empty_with_error.json", encoding="utf-8") as testfile:
+            parser = AWSInspector2Parser()
+            parser.get_findings(testfile, Test())
+            testfile.close()
+            self.assertTrue(
+                "Incorrect Inspector2 report format" in str(context.exception),
+            )

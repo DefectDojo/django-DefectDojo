@@ -50,7 +50,7 @@ class HuskyCIParser:
                     vulns = severity_results[severity]
                     for vuln in vulns:
                         vuln["severity"] = severity[0:-5].lower().capitalize()
-                        if vuln["severity"] not in ("High", "Medium", "Low"):
+                        if vuln["severity"] not in {"High", "Medium", "Low"}:
                             continue
                         unique_key = hashlib.md5(
                             str(vuln).encode("utf-8"),
