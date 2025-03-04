@@ -11,20 +11,16 @@ from dojo.models import (
     Engagement,
     Risk_Acceptance,
     Finding,
-    Product_Type_Member,
-    Product_Member,
     Product,
     Product_Type,
     System_Settings,
     PermissionKey,
-    Dojo_User
+    Dojo_User,
+    FindingExclusion
     )
 from dojo.api_v2.api_error import ApiError
-from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
+from dojo.risk_acceptance.helper import post_jira_comments
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
-from dojo.product_type.queries import get_authorized_product_type_members_for_user
-from dojo.product.queries import get_authorized_members_for_product
-from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members
 from dojo.risk_acceptance.queries import (
@@ -457,27 +453,15 @@ def accept_or_reject_risk_bulk(eng: Engagement,
             raise ApiError.forbidden(detail="The parameter *action* must be accept or reject")
 
 
-def validate_list_findings(conf_risk, type, finding, eng):
+def validate_list_findings(type, finding):
     if type == "black_list":
         return next(
             (
                 item
-                for item in conf_risk.get("BLACK_LIST_FINDING", [])
+                for item in FindingExclusion.objects.filter(
+                    type="black_list", status="Accepted").values_list('unique_id_from_tool', flat=True)
                 if item in finding.vulnerability_ids
                 or item == finding.vuln_id_from_tool
-            ),
-            None,
-        )
-    elif type == "white_list":
-        return next(
-            (
-                item
-                for item in conf_risk.get("WHITE_LIST_FINDING", [])
-                if (
-                    set(item.get("id")) & set(finding.vulnerability_ids)
-                    or finding.vuln_id_from_tool in item.get("id")
-                )
-                and item.get("where", eng.name) == eng.name
             ),
             None,
         )

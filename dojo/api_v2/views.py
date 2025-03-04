@@ -75,6 +75,7 @@ from dojo.filters import (
     ApiTestFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
+    TestImportAPIFilter,
     UserApiFilter
 )
 from dojo.finding.queries import (
@@ -2446,17 +2447,9 @@ class TestImportViewSet(
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "test",
-        "findings_affected",
-        "version",
-        "branch_tag",
-        "build_id",
-        "commit_hash",
-        "test_import_finding_action__action",
-        "test_import_finding_action__finding",
-        "test_import_finding_action__created",
-    ]
+
+    filterset_class = TestImportAPIFilter
+
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasTestImportPermission,
@@ -2879,6 +2872,24 @@ class NoteTypeViewSet(
 
     def get_queryset(self):
         return Note_Type.objects.all().order_by("id")
+
+
+class BurpRawRequestResponseViewSet(
+    DojoModelViewSet,
+):
+    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
+
+    def get_queryset(self):
+        results = BurpRawRequestResponse.objects.all()
+        empty_value = b""
+        results = results.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+        return results.order_by("id")
 
 
 # Authorization: superuser

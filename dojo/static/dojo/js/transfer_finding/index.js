@@ -40,26 +40,6 @@ $(document).ready(function(){
 });
 
 
-function getEngagementOptions(idProduct, engagementElement){
-    $.ajax({
-        url: "/api/v2/engagements/?product=" + idProduct,
-        type: "GET",
-        retry: MAX_RETRY,
-        retryInterval: RETRY_INTERVAL,
-        success: function(response) {
-            clearSelect(engagementElement);
-            addOption(engagementElement, '', 'Select Engagement Name...');
-            response.results.forEach(function(engagement) {
-                addOption(engagementElement, engagement.id, engagement.name);
-            });
-            refreshSelectPicker();
-        },
-        error: function(error) {
-            console.error(error);
-        }
-    });
-}
-
 $(document).ready(function() {
 
     $('#modalTransferFinding').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
@@ -106,7 +86,6 @@ export async function getTransferFindingsAsync(transferFindingId) {
         });
         return response;
     } catch (error) {
-        console.error(`getTransferFinding ${error.statusText}, transferFindingId=${transferFindingId}`);
         throw error;
     }
 }
@@ -253,7 +232,6 @@ async function getTransferFindings(transferFindingId){
             }
     }
     catch(error){
-        console.error(error); 
         throw error;
     }
     
@@ -281,7 +259,6 @@ export async function generateRequestTransferFindingUpdate(transferFindingId, ri
         });
         return requestFindingStatus;
     } catch (error) {
-        console.error(error);
         throw error;
     }
 }

@@ -3,8 +3,6 @@ import crum
 import requests
 import json
 from datetime import timedelta
-from azure.devops.connection import Connection
-from msrest.authentication import BasicAuthentication
 from django.conf import settings
 from contextlib import suppress
 
@@ -18,10 +16,9 @@ from dojo.celery import app
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings, PermissionKey, Dojo_User
-from dojo.user import queries as user_queries
 from dojo.transfer_findings import helper as hp_transfer_finding
 from dojo.risk_acceptance.notification import Notification
-from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
+from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +45,11 @@ def expire_now(risk_acceptance):
                 
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
+                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
+                    finding.save(dedupe_option=False)  # resave if changed after risk_unaccept
 
                 finding.save(dedupe_option=False)
                 # reactivate finding realted (transfer finding)
@@ -62,9 +61,7 @@ def expire_now(risk_acceptance):
                         notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
                         send_notification=False)
                 reactivated_findings.append(finding)
-                # findings remain in this risk acceptance for reporting / metrics purposes
 
-        # best effort JIRA integration, no status changes
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
 
     risk_acceptance.expiration_date = timezone.now()
@@ -254,7 +251,7 @@ def expiration_handler(*args, **kwargs):
                 str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
 
             Notification.risk_acceptance_expiration(risk_acceptance, notification_title)
-            post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
+            post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
             risk_acceptance.expiration_date_warned = timezone.now()
             risk_acceptance.save()
@@ -308,20 +305,22 @@ def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
 
 
 def post_jira_comment(finding, message_factory, heads_up_days=0):
-    if not finding or not finding.has_jira_issue:
+    if not finding or (not finding.has_jira_issue and not finding.has_jira_group_issue):
         return
-
     jira_project = jira_helper.get_jira_project(finding)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
         jira_instance = jira_helper.get_jira_instance(finding)
-
         if jira_instance:
 
             jira_comment = message_factory(None, heads_up_days)
 
-            logger.debug("Creating JIRA comment for something risk acceptance related")
-            jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
+            jira_issue = None
+            if finding.has_jira_issue:
+                jira_issue = finding.jira_issue
+            elif finding.has_jira_group_issue:
+                jira_issue = finding.finding_group.jira_issue
+            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
 
 
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
@@ -335,11 +334,15 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
 
         if jira_instance:
             jira_comment = message_factory(risk_acceptance, heads_up_days)
-
             for finding in findings:
+                jira_issue = None
                 if finding.has_jira_issue:
-                    logger.debug("Creating JIRA comment for something risk acceptance related")
-                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
+                    jira_issue = finding.jira_issue
+                elif finding.has_jira_group_issue:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
+                    jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
 
 
 def get_expired_risk_acceptances_to_handle():
@@ -384,7 +387,7 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> 
         ))
 
 
-def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
+def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True, post_comments=True) -> None:
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
@@ -401,7 +404,12 @@ def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
 
         # post_jira_comment might reload from database so see unaccepted finding. but the comment
         # only contains some text so that's ok
-        post_jira_comment(finding, unaccepted_message_creator)
+        if post_comments:
+            post_jira_comment(finding, unaccepted_message_creator)
+
+        # Update the JIRA obect for this finding
+        jira_helper.save_and_push_to_jira(finding)
+
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
@@ -481,16 +489,9 @@ def get_matching_value(list_a, list_b):
     matches = [item.name for item in list_a if item in list_b]
     return matches[0] if matches else None
 
-
-def get_config_risk():
-    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
-    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
-
-
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
-    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"] and  kwargs["finding"].severity != "Info"
     and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False

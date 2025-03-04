@@ -1,7 +1,6 @@
 import io
 import json
 import logging
-import os
 from pathlib import Path
 from typing import Any
 
@@ -146,7 +145,7 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        isenforced = get_system_setting("enforce_verified_status", True)
+        isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
 
         if not active or (not verified and isenforced):
             logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
@@ -333,8 +332,8 @@ def get_jira_issue_template(obj):
         template_dir = "issue-trackers/jira_full/"
 
     if isinstance(obj, Finding_Group):
-        return os.path.join(template_dir, "jira-finding-group-description.tpl")
-    return os.path.join(template_dir, "jira-description.tpl")
+        return Path(template_dir) / "jira-finding-group-description.tpl"
+    return Path(template_dir) / "jira-description.tpl"
 
 
 def get_jira_creation(obj):
@@ -514,8 +513,8 @@ def get_jira_comments(finding):
     return None
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
+    """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title=title,
@@ -524,8 +523,8 @@ def log_jira_generic_alert(title, description):
         source="JIRA")
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, obj):
+    """Creates a notification for JIRA errors when handling a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
@@ -534,6 +533,19 @@ def log_jira_alert(error, obj):
         icon="bullseye",
         source="Push to JIRA",
         obj=obj)
+
+
+def log_jira_cannot_be_pushed_reason(error, obj):
+    """Creates an Alert for GUI display  when handling a specific (finding/group/epic) object"""
+    create_notification(
+        event="jira_update",
+        title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
+        description=obj.__class__.__name__ + ": " + error,
+        url=obj.get_absolute_url(),
+        icon="bullseye",
+        source="Push to JIRA",
+        obj=obj,
+        alert_only=True)
 
 
 # Displays an alert for Jira notifications
@@ -677,10 +689,26 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
     try:
         return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
     except JIRAError as e:
-        logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
-        logger.exception(e)
-        log_jira_alert(e.text, obj)
-        return False
+        """
+        We must try to accommodate the following:
+
+        The request contains a next-gen issue. This operation can't add next-gen issues to epics.
+        To add a next-gen issue to an epic, use the Edit issue operation and set the parent property
+        (i.e., '"parent":{"key":"PROJ-123"}' where "PROJ-123" has an issue type at level one of the issue type hierarchy).
+        See <a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/"> developer.atlassian.com </a> for more details.
+        """
+        try:
+            if "The request contains a next-gen issue." in str(e):
+                # Attempt to update the issue manually
+                for issue_key in issue_keys:
+                    issue = jira.issue(issue_key)
+                    epic = jira.issue(epic_id)
+                    issue.update(parent={"key": epic.key})
+        except JIRAError as e:
+            logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
+            logger.exception(e)
+            log_jira_alert(e.text, obj)
+            return False
 
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
@@ -772,10 +800,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
         else:
-            log_jira_alert(error_message, obj)
+            log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
         return False
@@ -785,7 +815,7 @@ def add_jira_issue(obj, *args, **kwargs):
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
     except Exception as e:
-        message = f"The following jira instance could not be connected: {jira_instance} - {e.text}"
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
         return failure_to_add_message(message, e, obj)
     # Set the list of labels to set on the jira issue
     labels = get_labels(obj) + get_tags(obj)
@@ -793,6 +823,7 @@ def add_jira_issue(obj, *args, **kwargs):
         labels = list(dict.fromkeys(labels))  # de-dup
     # Determine what due date to set on the jira issue
     duedate = None
+
     if System_Settings.objects.get().enable_finding_sla:
         duedate = obj.sla_deadline()
     # Set the fields that will compose the jira issue
@@ -1104,6 +1135,7 @@ def get_issuetype_fields(
 
     issuetype_fields = None
     use_cloud_api = jira.deploymentType.lower() == "cloud" or jira._version < (9, 0, 0)
+
     try:
         if use_cloud_api:
             try:
@@ -1114,7 +1146,6 @@ def get_issuetype_fields(
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
                 raise
-
             project = None
             try:
                 project = meta["projects"][0]
@@ -1283,13 +1314,12 @@ def update_epic(engagement, **kwargs):
             if not epic_name:
                 epic_name = engagement.name
 
-            epic_priority = kwargs.get("epic_priority")
-
             jira_issue_update_kwargs = {
                 "summary": epic_name,
                 "description": epic_name,
-                "priority": {"name": epic_priority},
             }
+            if (epic_priority := kwargs.get("epic_priority")) is not None:
+                jira_issue_update_kwargs["priority"] = {"name": epic_priority}
             issue.update(**jira_issue_update_kwargs)
             return True
         except JIRAError as e:
@@ -1318,6 +1348,7 @@ def add_epic(engagement, **kwargs):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
+        epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
         issue_dict = {
@@ -1327,14 +1358,16 @@ def add_epic(engagement, **kwargs):
             "summary": epic_name,
             "description": epic_name,
             "issuetype": {
-                "name": getattr(jira_project, "epic_issue_type_name", "Epic"),
+                "name": epic_issue_type_name,
             },
-            get_epic_name_field_name(jira_instance): epic_name,
         }
         if kwargs.get("epic_priority"):
             issue_dict["priority"] = {"name": kwargs.get("epic_priority")}
         try:
             jira = get_jira_connection(jira_instance)
+            # Determine if we should add the epic name or not
+            if (epic_name_field := get_epic_name_field_name(jira_instance)) in get_issuetype_fields(jira, jira_project.project_key, epic_issue_type_name):
+                issue_dict[epic_name_field] = epic_name
             logger.debug("add_epic: %s", issue_dict)
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
@@ -1706,3 +1739,24 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if status_changed:
         finding.save()
     return status_changed
+
+
+def save_and_push_to_jira(finding):
+    # Manage the jira status changes
+    push_to_jira = False
+    # Determine if the finding is in a group. if so, not push to jira yet
+    finding_in_group = finding.has_finding_group
+    # Check if there is a jira issue that needs to be updated
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+    # Only push if the finding is not in a group
+    if jira_issue_exists:
+        # Determine if any automatic sync should occur
+        push_to_jira = is_push_all_issues(finding) \
+            or get_jira_instance(finding).finding_jira_sync
+    # Save the finding
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+    # we only push the group after saving the finding to make sure
+    # the updated data of the finding is pushed as part of the group
+    if push_to_jira and finding_in_group:
+        push_to_jira(finding.finding_group)

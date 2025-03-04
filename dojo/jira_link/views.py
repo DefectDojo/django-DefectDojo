@@ -50,7 +50,7 @@ def webhook_responser_handler(
 @require_POST
 def webhook(request, secret=None):
     """
-    for examples of incoming json, see the unit tests for the webhook:
+    For examples of incoming json, see the unit tests for the webhook:
         https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/test_jira_webhook.py
     or the officials docs (which are not always clear):
         https://developer.atlassian.com/server/jira/platform/webhooks/
@@ -168,7 +168,7 @@ def webhook(request, secret=None):
 
 def check_for_and_create_comment(parsed_json):
     """
-    example incoming requests from JIRA Server 8.14.0
+    Example incoming requests from JIRA Server 8.14.0
     {
     "timestamp":1610269967824,
     "webhookEvent":"comment_created",
@@ -552,7 +552,7 @@ class DeleteJiraView(View):
                         url=request.build_absolute_uri(reverse("jira")))
                     return HttpResponseRedirect(reverse("jira"))
                 except Exception as e:
-                    add_error_message_to_response(f"Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}")
+                    add_error_message_to_response(f"Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {e}")
 
         rels = ["Previewing the relationships has been disabled.", ""]
         display_preview = get_setting("DELETE_PREVIEW")

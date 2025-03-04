@@ -129,7 +129,7 @@ def process_component(component):
                 if "full_path" in item:
                     refs.append(item["full_path"])
         if refs:
-            impact += "\n- ".join(sorted(set(refs)))  # deduplication
+            impact += "\n- ".join(dict.fromkeys(refs))  # deduplication
     return mitigation, impact
 
 

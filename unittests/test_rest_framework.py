@@ -4,7 +4,6 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
-from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -31,6 +30,7 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -133,7 +133,7 @@ from dojo.models import (
     UserContactInfo,
 )
 
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -1119,7 +1119,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels:
             length = FileUpload.objects.count()
-            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
+            with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1131,7 +1131,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
+        file_data = (get_unit_tests_scans_path("acunetix") / "one_finding.xml").read_text(encoding="utf-8")
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
@@ -3039,6 +3039,30 @@ class NotificationWebhooksTest(BaseClass.BaseClassTest):
         self.update_fields = {
             "header_name": "Auth",
             "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = BurpRawRequestResponse
+        self.endpoint_path = "request_response_pairs"
+        self.viewname = "request_response_pairs"
+        self.viewset = BurpRawRequestResponseViewSet
+        self.payload = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdAo=",
+            "burpResponseBase64": "cmVzcG9uc2UK",
+        }
+
+        self.update_fields = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdCAtIGVkaXRlZAo=",
+            "burpResponseBase64": "cmVzcG9uc2UgLSBlZGl0ZWQK",
         }
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1

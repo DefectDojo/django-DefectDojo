@@ -3,7 +3,6 @@ import re
 
 import gitlab
 import requests
-import json
 import social_core.pipeline.user
 from django.conf import settings
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
@@ -14,7 +13,6 @@ from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, 
 from dojo.product.queries import get_authorized_products
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
-from dojo.utils import get_remote_json_config
 from django.contrib import messages
 
 logger = logging.getLogger(__name__)
@@ -137,7 +135,7 @@ def search_azure_groups(kwargs, token, soc):
 
 
 def is_group_id(group):
-    return bool(re.search("^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group))
+    return bool(re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group))
 
 
 def assign_user_to_groups(user, group_names, social_provider):
@@ -216,7 +214,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             is_leader = any(any(sub_part in job_title for sub_part in part.split("-")) for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2])
             if is_leader:
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
-                assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names)
+                assign_product_type_product_to_leaders(user, job_title, office_location)
 
             if result_query_subjects is not None and len(result_query_subjects) > 0:
                 # Get user's product type for become member
@@ -245,9 +243,13 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                 # If not, create a product type with that name
                                 product_type = Product_Type(name=group_team_leve2.display_name)
                                 product_type.save()
-                            Product_Type_Member.objects.get_or_create(
+                            product_type_member, created = Product_Type_Member.objects.get_or_create(
                                 product_type=product_type, user=user, defaults=role_assigned
                             )
+                            if not created and product_type_member.role != role_assigned["role"]:
+                                product_type_member.role = role_assigned["role"]
+                                product_type_member.save()
+                                
                             logger.debug(
                                 "User %s become member of product type %s with the role %s",
                                 user,
@@ -277,31 +279,12 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             raise Exception(message)
            
 
-def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names):
+def assign_product_type_product_to_leaders(user, job_title, office_location):
     conf_jobs = settings.AZURE_DEVOPS_JOBS_TITLE.split(",")
     if any(sub_part in job_title for sub_part in conf_jobs[0].split("-")):
         Product.objects.filter(
             description__contains=re.sub(conf_jobs[2], "", office_location).replace(" ", "-")
         ).update(team_manager=user)
-    if any(sub_part in job_title for sub_part in conf_jobs[1].split("-")):
-        keys = [
-            (key_pt, key_user)
-            for key_pt, value in get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[0]).items()
-            for key_user, val in value.items()
-            if val.lower() == user_login.lower()
-        ]
-        for pt_key, user_key in keys:
-            pt = Product_Type.objects.filter(name=pt_key)
-            if pt.exists():
-                pt.update(**{json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[2])[user_key]: user})
-                if pt_key not in user_product_types_names:
-                    Product_Type_Member.objects.get_or_create(product_type=pt[0], user=user, defaults=role_assigned)
-                    logger.debug(
-                        "User %s become member of product type %s with the role %s",
-                        user,
-                        pt,
-                        role_assigned["role"],
-                    )
 
 
 def clean_project_type_user(user_product_types_names, user, user_login, is_leader):

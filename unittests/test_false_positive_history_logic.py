@@ -3,7 +3,17 @@ from datetime import datetime
 
 from crum import impersonate
 
-from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User
+from dojo.models import (
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Product,
+    System_Settings,
+    Test,
+    User,
+    _copy_model_util,
+)
 
 from .dojo_test_case import DojoTestCase
 
@@ -1678,12 +1688,12 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         else:
             logger.debug("\t\t" + "findings:")
             for finding in findings:
-                logger.debug(f"\t\t\t{str(finding.id):4.4}" + ': "' + f"{finding.title:20.20}" + '": ' + f"{finding.severity:5.5}" + ": act: " + f"{str(finding.active):5.5}"
-                        + ": ver: " + f"{str(finding.verified):5.5}" + ": mit: " + f"{str(finding.is_mitigated):5.5}"
-                        + ": dup: " + f"{str(finding.duplicate):5.5}" + ": dup_id: "
-                        + (f"{str(finding.duplicate_finding.id):4.4}" if finding.duplicate_finding else "None") + ": hash_code: " + str(finding.hash_code)
+                logger.debug(f"\t\t\t{finding.id!s:4.4}" + ': "' + f"{finding.title:20.20}" + '": ' + f"{finding.severity:5.5}" + ": act: " + f"{finding.active!s:5.5}"
+                        + ": ver: " + f"{finding.verified!s:5.5}" + ": mit: " + f"{finding.is_mitigated!s:5.5}"
+                        + ": dup: " + f"{finding.duplicate!s:5.5}" + ": dup_id: "
+                        + (f"{finding.duplicate_finding.id!s:4.4}" if finding.duplicate_finding else "None") + ": hash_code: " + str(finding.hash_code)
                         + ": eps: " + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
-                        + ": uid: " + f"{str(finding.unique_id_from_tool):5.5}" + (" fp" if finding.false_p else ""),
+                        + ": uid: " + f"{finding.unique_id_from_tool!s:5.5}" + (" fp" if finding.false_p else ""),
                         )
 
         logger.debug("\t\tendpoints")
@@ -1709,8 +1719,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, id):
         org = Finding.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.false_p = False
@@ -1721,22 +1730,19 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_test(self, id):
         org = Test.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         # return unsaved new test and reloaded existing test
         return new, Test.objects.get(id=id)
 
     def copy_and_reset_engagement(self, id):
         org = Engagement.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         # return unsaved new engagement and reloaded existing engagement
         return new, Engagement.objects.get(id=id)
 
     def copy_and_reset_product(self, id):
         org = Product.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         new.name = f"{org.name} (Copy {datetime.now()})"
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=id)

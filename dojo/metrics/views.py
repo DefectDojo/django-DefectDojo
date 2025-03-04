@@ -199,7 +199,7 @@ def simple_metrics(request):
                                        date__year=now.year,
                                        )
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             total = total.filter(verified=True)
 
         total = total.distinct()
@@ -297,19 +297,19 @@ def metrics_panel_admin(request):
        'user': user,
     })
     
-@user_has_role_permission(Permissions.Metrics_Regulatory)    
-def metrics_regulatory(request):
-    page_name = _('Metrics Regulatory')
+@user_has_role_permission(Permissions.Metrics_Scan_Cycle)    
+def metrics_scan_cycle(request):
+    page_name = _('Metrics Scan Cycle')
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
     cookie_csrftoken = request.COOKIES.get('csrftoken', '')
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_regulatory.html', {
+    return render(request, 'dojo/metrics_scan_cycle.html', {
        'name': page_name,
        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
-       'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_regulatory"),
+       'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_scan_cycle"),
        'mf_frontend_defect_dojo_params': mf_frontend_defect_dojo_params,
        'role': role,
        'user': user,
@@ -380,7 +380,7 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            if get_system_setting("enforce_verified_status", True):
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     verified=True,
                                                     false_p=False,
@@ -581,7 +581,7 @@ def product_tag_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            if get_system_setting("enforce_verified_status", True):
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     verified=True,
                                                     false_p=False,
@@ -757,7 +757,7 @@ def view_engineer(request, eid):
         raise PermissionDenied
     now = timezone.now()
 
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         findings = Finding.objects.filter(reporter=user, verified=True)
     else:
         findings = Finding.objects.filter(reporter=user)

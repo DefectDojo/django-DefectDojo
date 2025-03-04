@@ -219,7 +219,7 @@ class BurpGraphQLParser:
 
     def get_cwe(self, cwe_html):
         # Match only the first CWE!
-        cweSearch = re.search("CWE-([0-9]*)", cwe_html, re.IGNORECASE)
+        cweSearch = re.search(r"CWE-([0-9]*)", cwe_html, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
         return 0

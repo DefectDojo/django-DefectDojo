@@ -103,7 +103,7 @@
 
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
+                                data-toggle="dropdown" aria-expanded="true" aria-label="Risk acceptance options">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -321,7 +321,7 @@
                 </tbody>
             </table>
             <div class="panel-body">
-                {% include "dojo/paging_snippet.html" with page=accepted_findings %}
+                {% include "dojo/paging_snippet.html" with page=accepted_findings page_size=True %}
             </div>
         {% else %}
             <div class="panel-body">
@@ -342,7 +342,7 @@
                     {{ add_findings_form.as_p }}
                 </div>
                 <div class="panel-body">
-                    {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
+                    {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" page_size=True %}
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">

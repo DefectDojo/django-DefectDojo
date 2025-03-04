@@ -1171,9 +1171,12 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
                 days=expiration_delta_days
             )
             self.fields["expiration_date"].initial = expiration_date
+        # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields["accepted_findings"].queryset = get_authorized_findings(
             Permissions.Risk_Acceptance
         )
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class TransferFindingForm(forms.ModelForm):
@@ -1528,7 +1531,7 @@ class AddFindingForm(forms.ModelForm):
                    "under_review", "reviewers", "cve", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation",
                    "jira_change", "endpoints", "sla_start_date",
-                   "component")
+                   "component", "test")
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -1608,7 +1611,7 @@ class AdHocFindingForm(forms.ModelForm):
                    "reviewers", "cve", "inherited_tags",
                    "review_requested_by", "is_mitigated",
                    "jira_creation", "jira_change", "endpoints",
-                   "sla_start_date", "sla_expiration_date", "component")
+                   "sla_start_date", "sla_expiration_date", "component", "test")
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1668,7 +1671,7 @@ class PromoteFindingForm(forms.ModelForm):
                    "duplicate", "out_of_scope", "under_review", "reviewers",
                    "review_requested_by", "is_mitigated", "jira_creation",
                    "jira_change", "planned_remediation_date", "planned_remediation_version",
-                   "effort_for_fixing", "component")
+                   "effort_for_fixing", "component", "test")
 
 
 class FindingForm(forms.ModelForm):
@@ -1803,7 +1806,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status", "component")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status", "component", "test")
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1936,6 +1939,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
         self.fields["severity"].required = False
         # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields["tags"].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -2078,6 +2083,11 @@ class NoteForm(forms.ModelForm):
         model = Notes
         fields = ["entry", "private"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
+
 
 class TypedNoteForm(NoteForm):
 
@@ -2129,6 +2139,8 @@ class CloseFindingForm(forms.ModelForm):
             self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def _post_clean(self):
         super()._post_clean()
@@ -2181,6 +2193,11 @@ class DefectFindingForm(forms.ModelForm):
         model = Notes
         fields = ["entry"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
+
 
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(
@@ -2194,6 +2211,11 @@ class ClearFindingReviewForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ["active", "verified", "false_p", "out_of_scope", "duplicate", "is_mitigated"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class ReviewFindingForm(forms.Form):
@@ -2252,6 +2274,8 @@ class ReviewFindingForm(forms.Form):
         self.reviewer_queryset = users
         # Set the users in the form
         self.fields["reviewers"].choices = self._get_choices(self.reviewer_queryset)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     @staticmethod
     def _get_choices(queryset):
@@ -2336,9 +2360,7 @@ class MetricsFilterForm(forms.Form):
 
     # add the ability to exclude the exclude_product_types field
     def __init__(self, *args, **kwargs):
-        exclude_product_types = kwargs.get("exclude_product_types", False)
-        if "exclude_product_types" in kwargs:
-            del kwargs["exclude_product_types"]
+        exclude_product_types = kwargs.pop("exclude_product_types", False)
         super().__init__(*args, **kwargs)
         if exclude_product_types:
             del self.fields["exclude_product_types"]
@@ -2695,6 +2717,13 @@ class ReportOptionsForm(forms.Form):
     include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
     report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if get_system_setting("disclaimer_reports_forced"):
+            self.fields["include_disclaimer"].disabled = True
+            self.fields["include_disclaimer"].initial = "1"  # represents yes
+            self.fields["include_disclaimer"].help_text = "Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
+
 
 class CustomReportOptionsForm(forms.Form):
     yes_no = (("0", "No"), ("1", "Yes"))
@@ -2786,7 +2815,7 @@ def get_jira_issue_template_dir_choices():
 
         for dirname in dirnames:
             clean_base_dir = base_dir.removeprefix(settings.TEMPLATE_DIR_PREFIX)
-            template_dir_list.append((os.path.join(clean_base_dir, dirname), dirname))
+            template_dir_list.append((str(Path(clean_base_dir) / dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
     return template_dir_list
@@ -3135,6 +3164,11 @@ class EngagementPresetsForm(forms.ModelForm):
         model = Engagement_Presets
         exclude = ["product"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
+
 
 class DeleteEngagementPresetsForm(forms.ModelForm):
     id = forms.IntegerField(required=True, widget=forms.widgets.HiddenInput())
@@ -3471,7 +3505,7 @@ class JIRAFindingForm(forms.Form):
         elif self.cleaned_data.get("push_to_jira", None):
             active = self.finding_form["active"].value()
             verified = self.finding_form["verified"].value()
-            if not active or (not verified and get_system_setting("enforce_verified_status", True)):
+            if not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))):
                 logger.debug("Findings must be active and verified to be pushed to JIRA")
                 error_message = "Findings must be active and verified to be pushed to JIRA"
                 self.add_error("push_to_jira", ValidationError(error_message, code="not_active_or_verified"))
@@ -3625,10 +3659,7 @@ class QuestionForm(forms.Form):
         self.helper.form_method = "post"
 
         # If true crispy-forms will render a <form>..</form> tags
-        self.helper.form_tag = kwargs.get("form_tag", True)
-
-        if "form_tag" in kwargs:
-            del kwargs["form_tag"]
+        self.helper.form_tag = kwargs.pop("form_tag", True)
 
         self.engagement_survey = kwargs.get("engagement_survey")
 
@@ -3640,13 +3671,12 @@ class QuestionForm(forms.Form):
 
         self.helper.form_class = kwargs.get("form_class", "")
 
-        self.question = kwargs.get("question")
+        self.question = kwargs.pop("question", None)
 
         if not self.question:
             msg = "Need a question to render"
             raise ValueError(msg)
 
-        del kwargs["question"]
         super().__init__(*args, **kwargs)
 
 

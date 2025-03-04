@@ -114,7 +114,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "editUser").click()
@@ -141,7 +141,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed user is now available, proceed with clicking 'View' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "viewUser").click()
@@ -169,7 +169,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("userWriter")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed user is now available, proceed with clicking 'View' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "viewUser").click()
@@ -235,7 +235,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "viewUser").click()
@@ -256,7 +256,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "viewUser").click()
