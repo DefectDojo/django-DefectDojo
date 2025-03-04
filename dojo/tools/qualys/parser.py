@@ -12,6 +12,69 @@ from dojo.tools.qualys import csv_parser
 logger = logging.getLogger(__name__)
 
 
+class QualysParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Parser.
+
+        Fields:
+        - title: Set to gid and vulnerability name from Qualys Scanner
+        - mitigation: Set to solution from Qualys Scanner
+        - description: Custom description made from: description, category, QID, port, result evidence, first found, last found, and times found.
+        - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+        - impact: Set to impact from Qualys Scanner.
+        - date: Set to datetime from Qualys Scanner.
+        - vuln_id_from_tool: Set to gid from Qualys Scanner.
+        - mitigated: Set to the mitigation_date from Qualys Scanner
+        - is_mitigated: Set to true or false based on pressence of "mitigated" in Qualys Scanner output.
+        - active: Set to true if status equals active, re-opened, or new; else set to false.
+        - cvssv3: Set to CVSS_vector if not null.
+        """
+        return [
+            "title",
+            "mitigation",
+            "description",
+            "severity",
+            "impact",
+            "date",
+            "vuln_id_from_tool",
+            "mitigated",
+            "is_mitigated",
+            "active",
+            "cvssv3",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Parser.
+
+        Fields:
+        - title: Set to gid and vulnerability name from Qualys Scanner
+        - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+
+        #NOTE: endpoints is not provided by parser
+        """
+        return [
+            "title",
+            "severity",
+        ]
+
+    def get_scan_types(self):
+        return ["Qualys Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Qualys Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Qualys WebGUI output files can be imported in XML format."
+
+    def get_findings(self, file, test):
+        if file.name.lower().endswith(".csv"):
+            return csv_parser.parse_csv(file)
+        return qualys_parser(file)
+
+
 CUSTOM_HEADERS = {
     "CVSS_score": "CVSS Score",
     "ip_address": "IP Address",
@@ -113,9 +176,8 @@ def split_cvss(value, _temp):
             _temp["CVSS_vector"] = CVSS3(
                 "CVSS:3.0/" + split[1][:-1],
             ).clean_vector()
-    else:
-        if _temp.get("CVSS_value") is None:
-            _temp["CVSS_value"] = float(value)
+    elif _temp.get("CVSS_value") is None:
+        _temp["CVSS_value"] = float(value)
 
 
 def parse_finding(host, tree):
@@ -153,9 +215,8 @@ def parse_finding(host, tree):
             if settings.USE_FIRST_SEEN:
                 if date := vuln_details.findtext("FIRST_FOUND"):
                     temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
-            else:
-                if date := vuln_details.findtext("LAST_FOUND"):
-                    temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+            elif date := vuln_details.findtext("LAST_FOUND"):
+                temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
         except Exception:
             temp["date"] = None
 
@@ -292,19 +353,3 @@ def qualys_parser(qualys_xml_file):
         for host in host_list:
             finding_list += parse_finding(host, tree)
     return finding_list
-
-
-class QualysParser:
-    def get_scan_types(self):
-        return ["Qualys Scan"]
-
-    def get_label_for_scan_types(self, scan_type):
-        return "Qualys Scan"
-
-    def get_description_for_scan_types(self, scan_type):
-        return "Qualys WebGUI output files can be imported in XML format."
-
-    def get_findings(self, file, test):
-        if file.name.lower().endswith(".csv"):
-            return csv_parser.parse_csv(file)
-        return qualys_parser(file)

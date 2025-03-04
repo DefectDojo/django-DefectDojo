@@ -23,10 +23,10 @@ class TestParsers(DojoTestCase):
                 doc_name = parser_dir.name
                 category = "file"
 
-            if doc_name not in [
+            if doc_name not in {
                 "checkmarx_osa",  # it is documented in 'checkmarx'
                 "wizcli_common_parsers",  # common class for other wizcli parsers
-            ]:
+            }:
                 with self.subTest(parser=parser_dir.name, category="docs"):
                     doc_file = Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / category / f"{doc_name}.md"
                     self.assertTrue(
@@ -49,9 +49,9 @@ class TestParsers(DojoTestCase):
                                         f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
 
-            if parser_dir.name not in [  # noqa: FURB171
+            if parser_dir.name not in {  # noqa: FURB171
                 "wizcli_common_parsers",  # common class for other wizcli parsers
-            ]:
+            }:
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = Path(basedir) / "unittests" / "tools" / f"test_{parser_dir.name}_parser.py"
                     self.assertTrue(
@@ -59,10 +59,10 @@ class TestParsers(DojoTestCase):
                         f"Unittest of parser '{parser_test_file}' is missing or using different name",
                     )
 
-            if parser_dir.name not in [
+            if parser_dir.name not in {
                 "vcg",  # content of the sample report is string the directly in unittest
                 "wizcli_common_parsers",  # common class for other wizcli parsers
-            ]:
+            }:
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = Path(basedir) / "unittests" / "scans" / parser_dir.name
                     self.assertTrue(
@@ -71,10 +71,10 @@ class TestParsers(DojoTestCase):
                     )
 
             if category == "api":
-                if parser_dir.name not in [
+                if parser_dir.name not in {
                     "api_blackduck",  # TODO: tests should be implemented also for this parser
                     "api_vulners",  # TODO: tests should be implemented also for this parser
-                ]:
+                }:
                     with self.subTest(parser=parser_dir.name, category="importer"):
                         importer_test_file = Path(basedir) / "unittests" / "tools" / f"test_{parser_dir.name}_importer.py"
                         self.assertTrue(
@@ -104,9 +104,9 @@ class TestParsers(DojoTestCase):
 
     def test_parser_existence(self):
         for docs in os.scandir(Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / "file"):
-            if docs.name not in [
+            if docs.name not in {
                 "_index.md", "codeql.md", "edgescan.md",
-            ]:
+            }:
                 with self.subTest(parser=docs.name.split(".md")[0], category="parser"):
                     parser = Path(basedir) / "dojo" / "tools" / f"{docs.name.split('.md')[0]}" / "parser.py"
                     self.assertTrue(

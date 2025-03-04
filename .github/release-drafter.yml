@@ -41,6 +41,8 @@ categories:
     label: 'ui'
   - title: '🗣 Updates in localization'
     label: 'localization'
+  - title: '🔧 Improved code quality with linters'
+    label: 'lint'
   - title: '🧰 Maintenance'
     collapse-after: 3
     labels:

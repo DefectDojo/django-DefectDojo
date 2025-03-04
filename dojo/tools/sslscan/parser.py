@@ -41,14 +41,14 @@ class SslscanParser:
                     title = "heartbleed" + " | " + target.attrib["sslversion"]
                     description = (
                         "**heartbleed** :"
-                        + "\n\n"
-                        + "**sslversion** : "
+                        "\n\n"
+                        "**sslversion** : "
                         + target.attrib["sslversion"]
                         + "\n"
                     )
                 if target.tag == "cipher" and target.attrib[
                     "strength"
-                ] not in ["acceptable", "strong"]:
+                ] not in {"acceptable", "strong"}:
                     title = "cipher" + " | " + target.attrib["sslversion"]
                     description = (
                         "**Cipher** : "

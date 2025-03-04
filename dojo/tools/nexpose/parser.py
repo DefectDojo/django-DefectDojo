@@ -59,9 +59,8 @@ class NexposeParser:
             if len(list(node)) > 0:
                 for child in list(node):
                     ret += self.parse_html_type(child)
-            else:
-                if node.text:
-                    ret += "<li>" + str(node.text).strip() + "</li>"
+            elif node.text:
+                ret += "<li>" + str(node.text).strip() + "</li>"
         if tag == "orderedlist":
             i = 1
             for item in list(node):
@@ -114,11 +113,11 @@ class NexposeParser:
             for test in tests.findall("test"):
                 if test.get("id") in vulnsDefinitions and (
                     test.get("status")
-                    in [
+                    in {
                         "vulnerable-exploited",
                         "vulnerable-version",
                         "vulnerable-potential",
-                    ]
+                    }
                 ):
                     vuln = vulnsDefinitions[test.get("id").lower()]
                     for desc in list(test):
