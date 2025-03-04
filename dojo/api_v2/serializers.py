@@ -2753,7 +2753,8 @@ class FindingCloseSerializer(serializers.ModelSerializer):
 
 
 class FindingCloseBulkSerializer(serializers.Serializer):
-    findings = FindingCloseSerializer(many=True)
+    verify = serializers.BooleanField(required=False, default=False)
+    findings = FindingCloseSerializer(many=True, required=True)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

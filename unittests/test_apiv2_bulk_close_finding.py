@@ -23,7 +23,7 @@ class BulkCloseFindingsTestCase(APITestCase):
         }
         for finding_id in findings:
             finding_request = {
-                "id": finding_id,
+                "id": int(finding_id),
                 "is_mitigated": True,
                 "mitigated": "2025-02-27",
             }
@@ -31,18 +31,34 @@ class BulkCloseFindingsTestCase(APITestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
+        
         for finding_data in data["findings"]:
-            finding_id = Finding.objects.get(id=finding_data["id"])
-            self.assertTrue(finding_id.is_mitigated)
-            self.assertEqual(finding_id.mitigated.strftime('%Y-%m-%d'), finding_data["mitigated"])
-            self.assertFalse(finding_id.active)
+            finding = Finding.objects.get(id=finding_data["id"])
+            self.assertTrue(finding.is_mitigated)
+            self.assertEqual(finding.mitigated.strftime('%Y-%m-%d'), finding_data["mitigated"])
+            self.assertFalse(finding.active)
 
-    def test_bulk_close_invalid_data(self):
-        # id not found
+    def test_bulk_close_verify(self):
         data = {
+            "verify": True,
             "findings": [
                 {
                     "id": 999,
+                    "is_mitigated": True,
+                    "mitigated": "2025-02-27",
+                },
+                {
+                    "id": 2,
+                    "is_mitigated": True,
+                    "mitigated": "2025-02-27",
+                },
+                {
+                    "id": 22,
+                    "is_mitigated": True,
+                    "mitigated": "2025-02-27",
+                },
+                {
+                    "id": 124,
                     "is_mitigated": True,
                     "mitigated": "2025-02-27",
                 }
@@ -50,21 +66,10 @@ class BulkCloseFindingsTestCase(APITestCase):
         }
         
         response = self.client.post(self.url, data, format='json')
-        
-        self.assertEqual(response.code, status.HTTP_400_BAD_REQUEST)
-
-    # def test_bulk_close_missing_fields(self):
-    #     data = {
-    #         "findings": [
-    #             {
-    #                 "id": 10,
-    #                 "is_mitigated": True,
-    #                 # Falta el campo "mitigated"
-    #                 "message": "close for test"
-    #             }
-    #         ]
-    #     }
-        
-    #     response = self.client.post(self.url, data, format='json')
-        
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["data"]["success"], [
+            {2: 'closed succesfully'},
+            {22: 'closed succesfully'},
+            {124: 'closed succesfully'}
+            ])
+        self.assertEqual(response.data["data"]["errors"], [{999: 'not found'}])

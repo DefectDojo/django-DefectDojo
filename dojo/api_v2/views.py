@@ -1045,7 +1045,8 @@ class FindingViewSet(
     )
     @action(detail=False, methods=["POST"])
     def bulk_close(self, request):
-
+        errors = []
+        success = []
         if request.method == "POST":
             findings_close = serializers.FindingCloseBulkSerializer(
                 data=request.data
@@ -1054,15 +1055,12 @@ class FindingViewSet(
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
-                        finding = Finding.objects.get(id=finding_close["id"])
+                        try:
+                            finding = Finding.objects.get(id=finding_close["id"])
+                        except Finding.DoesNotExist:
+                            continue
                         finding.is_mitigated = finding_close["is_mitigated"]
-                        if settings.EDITABLE_MITIGATED_DATA:
-                            finding.mitigated = (
-                                finding_close["mitigated"]
-                                or timezone.now()
-                            )
-                        else:
-                            finding.mitigated = timezone.now()
+                        finding.mitigated = finding_close.get("mitigated", timezone.now())
                         finding.mitigated_by = request.user
                         finding.active = False
                         finding.false_p = finding_close.get(
@@ -1078,13 +1076,8 @@ class FindingViewSet(
                         endpoints_status = finding.status_finding.all()
                         for e_status in endpoints_status:
                             e_status.mitigated_by = request.user
-                            if settings.EDITABLE_MITIGATED_DATA:
-                                e_status.mitigated_time = (
-                                    finding_close.validated_data["mitigated"]
-                                    or timezone.now()
-                                )
-                            else:
-                                e_status.mitigated_time = timezone.now()
+                            e_status.mitigated = finding_close.get("mitigated", timezone.now())
+                            e_status.mitigated_time = finding_close.get("mitigated", timezone.now()) 
                             e_status.mitigated = True
                             e_status.last_modified = timezone.now()
                             e_status.save()
@@ -1096,8 +1089,9 @@ class FindingViewSet(
                                 parent_finding=finding,
                                 notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
                                 send_notification=False)
+
                 except Exception as e:
-                    return ApiError.internal_server_error(detail=str(e))
+                    raise ApiError.internal_server_error(detail=str(e))
                 
                 try:
                     with transaction.atomic():
@@ -1108,18 +1102,22 @@ class FindingViewSet(
                                                                "false_p",
                                                                "duplicate",
                                                                "out_of_scope"])
-                        return http_response.ok(
-                            message="Findings closed successfully")
-
                 except Exception as e:
                     raise ApiError.internal_server_error(
                         detail=str(f"Error Closed finding bulk: {e}"))
             else:
-                return Response(
-                    findings_close.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-            serialized_finding = serializers.FindingCloseBulkSerializer(findings_close)
-            return Response(serialized_finding.data)
+                return http_response.bad_request(data=findings_close.errors)
+            if findings_close.data["verify"] is True:
+                for finding_close in findings_close.data["findings"]:
+                    try:
+                        finding = Finding.objects.get(id=finding_close["id"])
+                        if finding.is_mitigated is True:
+                            success.append({finding.id: "closed succesfully"})
+                        else:
+                            errors.append({finding.id: "Not closed"})
+                    except Finding.DoesNotExist:
+                        errors.append({finding_close['id']: "not found"})
+            return http_response.ok(data={"success": success, "errors": errors})
 
     @extend_schema(
         methods=["POST"],

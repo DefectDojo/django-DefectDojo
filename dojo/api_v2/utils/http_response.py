@@ -12,6 +12,12 @@ def custom_response(code, status, message="", data={}):
         }
     )
 
+def error(message="", data={}):
+    return custom_response(code=status.HTTP_200_OK, status="success", message=message, data=data)
+
+def bad_request(message="", data={}):
+    return custom_response(code=status.HTTP_400_BAD_REQUEST, status="bad_request", message=message, data=data)
+
 def ok(message="", data={}):
     return custom_response(code=status.HTTP_200_OK, status="success", message=message, data=data)
 
