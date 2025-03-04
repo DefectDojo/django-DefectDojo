@@ -3,6 +3,7 @@ title: "Features"
 description: "Various features help manage vulnerabilities."
 draft: false
 weight: 2
+exclude_search: true
 ---
 
 ## Tags
@@ -24,8 +25,6 @@ Tags can be formatted in any of the following ways:
 - string_with_underscores
 - colons:acceptable
 - "quoted string with spaces"
-- "quoted,comma,tag"
-- "quoted with spaces, and also commas!"
 
 ### Adding and Removing
 
