@@ -22,8 +22,8 @@ class SonarQubeApiImporter:
      findings.
     """
 
-    def get_findings(self, filename, test, branch_tag):
-        items = self.import_issues(test, branch_tag)
+    def get_findings(self, filename, test):
+        items = self.import_issues(test)
         if settings.SONARQUBE_API_PARSER_HOTSPOTS:
             if items:
                 items.extend(self.import_hotspots(test))
@@ -103,9 +103,6 @@ class SonarQubeApiImporter:
 
         try:
             client, config = self.prepare_client(test)
-            branch_name = test.branch_tag
-            if settings.ENABLE_REIMPORT_SCAN and branch_tag:
-                branch_name = branch_tag
             # Get the value in the service key 2 box
             organization = (
                 config.service_key_2
@@ -117,19 +114,16 @@ class SonarQubeApiImporter:
                 component = client.get_project(
                     config.service_key_1,
                     organization=organization,
-                    branch=branch_name,
                 )
             else:
                 component = client.find_project(
                     test.engagement.product.name,
                     organization=organization,
-                    branch=branch_name,
                 )
             # Get the resource from SonarQube
             issues = client.find_issues(
                 component["key"],
                 organization=organization,
-                branch=branch_name,
             )
             logger.info(
                 f'Found {len(issues)} issues for component {component["key"]}',
