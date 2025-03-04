@@ -10,11 +10,11 @@ Deduplication can be implemented at either a Product level or at a more narrow E
 
 1. Start by navigating to the System Settings page. This is nested under **Settings \> Pro Settings \> ⚙️ System Settings** on the sidebar.
 
-![image](images/Enabling_Product-Level_Deduplication.png)
+![image](images/enabling_product-level_deduplication.png)
 
 2. **Deduplication and Finding Settings** are at the top of the **System Settings** menu.  
 ​
-![image](images/Enabling_Product-Level_Deduplication_2.png)
+![image](images/enabling_product-level_deduplication_2.png)
 
 ### Enable Finding Deduplication
 
@@ -36,15 +36,15 @@ Rather than Deduplicating across an entire Product, you can set a deduplication 
 
 * To enable Deduplication within a New Engagement, start with the **\+ New Engagement** option from the sidebar, which you can find by opening the **📥Engagements** sub\-menu.  
 ​
-![image](images/Enabling_Deduplication_within_an_Engagement.png)
+![image](images/enabling_deduplication_within_an_engagement.png)
 
 * To enable Deduplication within an existing Engagement: from the **All Engagements** page, select the **Edit Engagement** option from the **⋮** menu.   
 ​
-![image](images/Enabling_Deduplication_within_an_Engagement_2.png)
+![image](images/enabling_deduplication_within_an_engagement_2.png)
 
 * You can also open this menu from a specific **Engagement Page** by clicking the ⚙️Gear icon in the top\-right hand corner.  
 ​
-![image](images/Enabling_Deduplication_within_an_Engagement_3.png)
+![image](images/enabling_deduplication_within_an_engagement_3.png)
 
 ### Completing the Edit Engagement form
 
@@ -52,4 +52,4 @@ Rather than Deduplicating across an entire Product, you can set a deduplication 
 2. Click the ☐ **Deduplication Within This Engagement** box.
 3. Submit the form.
 
-![image](images/Enabling_Deduplication_within_an_Engagement_4.png)
+![image](images/enabling_deduplication_within_an_engagement_4.png)

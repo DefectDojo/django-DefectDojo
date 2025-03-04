@@ -247,11 +247,11 @@ function togglePassVisibility() {
     if (passwdInput.type === "password") {
         passwdInput.type = "text";
         toggleBox.innerHTML = "<i class='fa-solid fa-eye-slash'></i>\
-        <span><b>Hide Password</b></span>";
+        <span>Hide Password</span>";
     } else {
         passwdInput.type = "password";
         toggleBox.innerHTML = "<i class='fa-solid fa-eye'></i>\
-        <span><b>Show Password</b></span>";
+        <span>Show Password</span>";
     }
 }
 
@@ -342,8 +342,13 @@ function clear_form(form){
             case 'radio':
                 this.checked = false;
                 break;
-            case 'select-multiple':
-                $(this).val(null).trigger('change');
+                case 'select-multiple':
+                // Clear all types of multiple select versions
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).data('select2').$container.find(".select2-selection__choice").remove(); 
+                }
+                $(this).val(null).trigger('change'); 
+                break;
         }
     });
 }
