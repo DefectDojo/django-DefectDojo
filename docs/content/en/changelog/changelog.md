@@ -13,7 +13,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 ### Mar 3, 2025: v2.44.0
 
 - **(Beta UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
-- **(Universal Parser)** Added support for XML files, in addition to .CSV and .JSON.
 
 ## Feb 2025: v2.43
 

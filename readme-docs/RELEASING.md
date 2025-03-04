@@ -32,7 +32,7 @@ The steps are identical for both release types, unless specified otherwise below
 - Merge the PRs
 
 ### Always
-- Make sure there's a section in [upgrading.md](https://documentation.defectdojo.com/dev/getting_started/upgrading/) about any specific instructions when upgrading to this new release.
+- Make sure there's a section in [upgrading.md](../docs/content/en/open_source/upgrading) about any specific instructions when upgrading to this new release.
 
 - Remove existing draft releases with the same version number
 Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number. This is probably not needed if you're doing a bugfix release.

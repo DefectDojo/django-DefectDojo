@@ -108,11 +108,11 @@ class SslLabsParser:
                 try:
                     if "list" in endpoints["details"]["suites"]:
                         for suites in endpoints["details"]["suites"]["list"]:
-                            suite_info = suite_info + self.suite_data(suites)
+                            suite_info += self.suite_data(suites)
                     elif "suites" in endpoints["details"]:
                         for item in endpoints["details"]["suites"]:
                             for suites in item["list"]:
-                                suite_info = suite_info + self.suite_data(
+                                suite_info += self.suite_data(
                                     suites,
                                 )
                 except Exception:

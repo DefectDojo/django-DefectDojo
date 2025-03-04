@@ -433,7 +433,7 @@ def get_charting_data(
     if period == MetricsPeriod.WEEK:
         # For weeks, start at the first day of the specified week
         start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
-        start_date = start_date + timedelta(days=-start_date.weekday())
+        start_date += timedelta(days=-start_date.weekday())
     else:
         # For months, start on the first day of the month
         start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
