@@ -21,7 +21,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
     logger.debug("mode: %s product:%s engagement: %s dryrun: %s", mode, product, engagement, dryrun)
 
-    if mode and mode not in ("push_status_to_jira", "import_status_from_jira", "reconcile"):
+    if mode and mode not in {"push_status_to_jira", "import_status_from_jira", "reconcile"}:
         logger.info("mode must be one of reconcile, push_status_to_jira or import_status_from_jira")
         return False
 
@@ -107,7 +107,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
         else:
             # statuses are different
-            if mode in ("push_status_to_jira", "import_status_from_jira"):
+            if mode in {"push_status_to_jira", "import_status_from_jira"}:
                 action = mode
             else:
                 # reconcile
@@ -204,10 +204,11 @@ class Command(BaseCommand):
     help = "Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
         Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped."
 
-    mode_help = \
-        "- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status" \
-        "- push_status_to_jira: update JIRA status for all JIRA issues connected to a Defect Dojo finding (will not push summary/description, only status)" \
+    mode_help = (
+        "- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status"
+        "- push_status_to_jira: update JIRA status for all JIRA issues connected to a Defect Dojo finding (will not push summary/description, only status)"
         "- import_status_from_jira: update Defect Dojo finding status from JIRA"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--mode", help=self.mode_help)

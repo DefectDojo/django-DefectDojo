@@ -155,7 +155,7 @@ class MonthYearWidget(Widget):
     month_field = "%s_month"
     year_field = "%s_year"
 
-    def __init__(self, attrs=None, years=None, required=True):
+    def __init__(self, attrs=None, years=None, *, required=True):
         # years is an optional list/tuple of years to use in the
         # "year" select box.
         self.attrs = attrs or {}
@@ -200,10 +200,9 @@ class MonthYearWidget(Widget):
 
         return mark_safe("\n".join(output))
 
-    def id_for_label(self, id_):
+    @classmethod
+    def id_for_label(cls, id_):
         return f"{id_}_month"
-
-    id_for_label = classmethod(id_for_label)
 
     def value_from_datadict(self, data, files, name):
         y = data.get(self.year_field % name)
@@ -328,8 +327,10 @@ class ProductForm(forms.ModelForm):
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
             self.fields["sla_configuration"].disabled = True
-            self.fields["sla_configuration"].widget.attrs["message"] = "Finding SLA expiration dates are currently being recalculated. " + \
-                                                                       "This field cannot be changed until the calculation is complete."
+            self.fields["sla_configuration"].widget.attrs["message"] = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
 
     class Meta:
         model = Product
@@ -954,8 +955,10 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. "
-                  + "Without a name the target start date will be set.")
+        help_text=(
+            "Add a descriptive name to identify this engagement. "
+            "Without a name the target start date will be set."
+        ))
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label="Product",
@@ -1371,11 +1374,10 @@ class FindingForm(forms.ModelForm):
         # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk acceptance
         if not hasattr(self.instance, "test") or (not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance):
             del self.fields["risk_accepted"]
-        else:
-            if self.instance.risk_accepted:
-                self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
-            elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
-                self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.risk_accepted:
+            self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
 
         # self.fields['tags'].widget.choices = t
         if req_resp:
@@ -2640,8 +2642,10 @@ class SLAConfigForm(forms.ModelForm):
 
         # if this sla config has findings being asynchronously updated, disable the days by severity fields
         if self.instance.async_updating:
-            msg = "Finding SLA expiration dates are currently being recalculated. " + \
-                  "This field cannot be changed until the calculation is complete."
+            msg = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
             self.fields["critical"].disabled = True
             self.fields["enforce_critical"].disabled = True
             self.fields["critical"].widget.attrs["message"] = msg
@@ -3063,9 +3067,10 @@ class JIRAFindingForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 
@@ -3166,9 +3171,10 @@ class JIRAImportScanForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 
@@ -3669,12 +3675,11 @@ class ConfigurationPermissionsForm(forms.Form):
             else:
                 msg = "Neither user or group are set"
                 raise Exception(msg)
+        # Checkbox is unset
+        elif self.user:
+            self.user.user_permissions.remove(self.permissions[codename])
+        elif self.group:
+            self.group.auth_group.permissions.remove(self.permissions[codename])
         else:
-            # Checkbox is unset
-            if self.user:
-                self.user.user_permissions.remove(self.permissions[codename])
-            elif self.group:
-                self.group.auth_group.permissions.remove(self.permissions[codename])
-            else:
-                msg = "Neither user or group are set"
-                raise Exception(msg)
+            msg = "Neither user or group are set"
+            raise Exception(msg)
