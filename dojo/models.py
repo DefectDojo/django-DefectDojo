@@ -126,7 +126,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
     new_model_instance = model_in_database.__class__()
     for field in model_in_database._meta.fields:
-        if field.name not in ["id", *exclude_fields]:
+        if field.name not in {"id", *exclude_fields}:
             setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
     return new_model_instance
 
@@ -143,7 +143,7 @@ class UniqueUploadNameProvider:
     the filename extension will be dropped.
     """
 
-    def __init__(self, directory=None, keep_basename=False, keep_ext=True):
+    def __init__(self, directory=None, *, keep_basename=False, keep_ext=True):
         self.directory = directory
         self.keep_basename = keep_basename
         self.keep_ext = keep_ext
@@ -857,11 +857,11 @@ class Product_Type(models.Model):
         health = 100
         if c_findings.count() > 0:
             health = 40
-            health = health - ((c_findings.count() - 1) * 5)
+            health -= ((c_findings.count() - 1) * 5)
         if h_findings.count() > 0:
             if health == 100:
                 health = 60
-            health = health - ((h_findings.count() - 1) * 2)
+            health -= ((h_findings.count() - 1) * 2)
         if health < 5:
             return 5
         return health
@@ -941,8 +941,8 @@ class DojoMeta(models.Model):
                self.finding_id]
         ids_count = 0
 
-        for id in ids:
-            if id is not None:
+        for obj_id in ids:
+            if obj_id is not None:
                 ids_count += 1
 
         if ids_count == 0:
@@ -1033,7 +1033,7 @@ class SLA_Configuration(models.Model):
             if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
                 severities.append("Low")
             # if severities have changed, update finding sla expiration dates with those severities
-            if len(severities):
+            if severities:
                 # set the async updating flag to true for this sla config
                 self.async_updating = True
                 super().save(*args, **kwargs)
@@ -1602,7 +1602,7 @@ class Engagement(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Product.DoesNotExist):
@@ -2009,10 +2009,10 @@ class Endpoint(models.Model):
         query_string = "&".join(query_parts)
 
         protocol = url.scheme if url.scheme != "" else None
-        userinfo = ":".join(url.userinfo) if url.userinfo not in [(), ("",)] else None
+        userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
         host = url.host if url.host != "" else None
         port = url.port
-        path = "/".join(url.path)[:500] if url.path not in [None, (), ("",)] else None
+        path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
         query = query_string[:1000] if query_string is not None and query_string != "" else None
         fragment = url.fragment[:500] if url.fragment is not None and url.fragment != "" else None
 
@@ -2668,8 +2668,8 @@ class Finding(models.Model):
     def __str__(self):
         return self.title
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
         from dojo.finding import helper as finding_helper
 
@@ -2711,14 +2711,13 @@ class Finding(models.Model):
             # so we call it manually
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
 
-        else:
-            # logger.debug('setting static / dynamic in save')
-            # need to have an id/pk before we can access endpoints
-            if (self.file_path is not None) and (self.endpoints.count() == 0):
-                self.static_finding = True
-                self.dynamic_finding = False
-            elif (self.file_path is not None):
-                self.static_finding = True
+        # logger.debug('setting static / dynamic in save')
+        # need to have an id/pk before we can access endpoints
+        elif (self.file_path is not None) and (self.endpoints.count() == 0):
+            self.static_finding = True
+            self.dynamic_finding = False
+        elif (self.file_path is not None):
+            self.static_finding = True
 
         # update the SLA expiration date last, after all other finding fields have been updated
         self.set_sla_expiration_date()
@@ -2773,7 +2772,7 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d finding delete", self.id)
-        import dojo.finding.helper as helper
+        from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
@@ -2835,16 +2834,16 @@ class Finding(models.Model):
             if hashcodeField == "endpoints":
                 # For endpoints, need to compute the field
                 myEndpoints = self.get_endpoints()
-                fields_to_hash = fields_to_hash + myEndpoints
+                fields_to_hash += myEndpoints
                 deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
             elif hashcodeField == "vulnerability_ids":
                 # For vulnerability_ids, need to compute the field
                 my_vulnerability_ids = self.get_vulnerability_ids()
-                fields_to_hash = fields_to_hash + my_vulnerability_ids
+                fields_to_hash += my_vulnerability_ids
                 deduplicationLogger.debug(hashcodeField + " : " + my_vulnerability_ids)
             else:
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
-                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                fields_to_hash += str(getattr(self, hashcodeField))
                 deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
@@ -3085,9 +3084,9 @@ class Finding(models.Model):
         try:
             # Attempt to access the github issue if it exists. If not, an exception will be caught
             _ = self.github_issue
-            return True
         except GITHUB_Issue.DoesNotExist:
             return False
+        return True
 
     def github_conf(self):
         try:
@@ -3246,7 +3245,7 @@ class Finding(models.Model):
     def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
-        intermediate_path = "/blob/" if scm_type in ["github", "gitlab"] else "/src/"
+        intermediate_path = "/blob/" if scm_type in {"github", "gitlab"} else "/src/"
 
         link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
@@ -3308,7 +3307,7 @@ class Finding(models.Model):
         if (self.test.engagement.source_code_management_uri is not None):
             if scm_type == "bitbucket-standalone":
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type in ["github", "gitlab", "gitea", "codeberg", "bitbucket"]:
+            elif scm_type in {"github", "gitlab", "gitea", "codeberg", "bitbucket"}:
                 link = self.git_public_prepare_scm_link(link, scm_type)
             elif "https://github.com/" in self.test.engagement.source_code_management_uri:
                 link = self.git_public_prepare_scm_link(link, "github")
@@ -3319,7 +3318,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type in ["github", "gitlab", "gitea", "codeberg"] or "https://github.com/" in self.test.engagement.source_code_management_uri:
+            if scm_type in {"github", "gitlab", "gitea", "codeberg"} or "https://github.com/" in self.test.engagement.source_code_management_uri:
                 link = link + "#L" + str(self.line)
             elif scm_type == "bitbucket-standalone":
                 link = link + "#" + str(self.line)
@@ -3379,15 +3378,14 @@ class Finding(models.Model):
         from dojo.utils import get_custom_method
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
             hash_method(self, dedupe_option)
-        else:
-            # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-            # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-            if dedupe_option:
-                if self.hash_code is not None:
-                    deduplicationLogger.debug("Hash_code already computed for finding")
-                else:
-                    self.hash_code = self.compute_hash_code()
-                    deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+        elif dedupe_option:
+            if self.hash_code is not None:
+                deduplicationLogger.debug("Hash_code already computed for finding")
+            else:
+                self.hash_code = self.compute_hash_code()
+                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):

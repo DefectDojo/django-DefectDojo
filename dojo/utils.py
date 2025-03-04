@@ -101,8 +101,10 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-        + "that were previously marked as false positive",
+        (
+            "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
+            "that were previously marked as false positive"
+        ),
         len(existing_fp_findings),
     )
 
@@ -712,6 +714,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
 
 def add_breadcrumb(parent=None,
                    title=None,
+                   *,
                    top_level=True,
                    url=None,
                    request=None,
@@ -766,9 +769,8 @@ def add_breadcrumb(parent=None,
                             crumbs = crumbs[:crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
-                    else:
-                        if crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                    elif crumb in crumbs:
+                        crumbs = crumbs[:crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 
@@ -882,11 +884,11 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
             punch.append(punch[2])
             punch[2] = (sqrt(punch[2] / pi)) / ratio
 
-        return punchcard, ticks
-
     except Exception:
         logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
+
+    return punchcard, ticks
 
 
 def get_week_data(week_start_date, tick, day_counts):
@@ -1351,7 +1353,7 @@ def get_page_items(request, items, page_size, prefix=""):
     return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
 
 
-def get_page_items_and_count(request, items, page_size, prefix="", do_count=True):
+def get_page_items_and_count(request, items, page_size, prefix="", *, do_count=True):
     page_param = prefix + "page"
     page_size_param = prefix + "page_size"
 
@@ -1628,11 +1630,11 @@ def get_work_days(start: date, end: date):
     """
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
-        start = start + timedelta(days=7 - start.weekday())
+        start += timedelta(days=7 - start.weekday())
 
     # if the end date is on a weekend, rewind the date to the previous Friday
     if end.weekday() > WEEKDAY_FRIDAY:
-        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
+        end -= timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
 
     if start > end:
         return 0
@@ -1643,7 +1645,7 @@ def get_work_days(start: date, end: date):
     remainder = end.weekday() - start.weekday() + 1
 
     if remainder != 0 and end.weekday() < start.weekday():
-        remainder = 5 + remainder
+        remainder += 5
 
     return weeks * 5 + remainder
 
@@ -1748,7 +1750,7 @@ def add_language(product, language, files=1, code=1):
 
 
 # Apply finding template data by matching CWE + Title or CWE
-def apply_cwe_to_template(finding, override=False):
+def apply_cwe_to_template(finding, *, override=False):
     if System_Settings.objects.get().enable_template_match or override:
         # Attempt to match on CWE and Title First
         template = Finding_Template.objects.filter(
@@ -1774,8 +1776,8 @@ def truncate_with_dots(the_string, max_length_including_dots):
     return (the_string[:max_length_including_dots - 3] + "..." if len(the_string) > max_length_including_dots else the_string)
 
 
-def max_safe(list):
-    return max(i for i in list if i is not None)
+def max_safe(full_list):
+    return max(i for i in full_list if i is not None)
 
 
 def get_full_url(relative_url):
@@ -1899,7 +1901,7 @@ def sla_compute_and_notify(*args, **kwargs):
     import dojo.jira_link.helper as jira_helper
 
     class NotificationEntry:
-        def __init__(self, finding=None, jira_issue=None, do_jira_sla_comment=False):
+        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
             self.finding = finding
             self.jira_issue = jira_issue
             self.do_jira_sla_comment = do_jira_sla_comment
@@ -2315,7 +2317,7 @@ def prod_name(obj):
 
 # Returns image locations by default (i.e. uploaded_files/09577eb1-6ccb-430b-bc82-0742d4c97a09.png)
 # if return_objects=True, return the FileUPload object instead of just the file location
-def get_file_images(obj, return_objects=False):
+def get_file_images(obj, *, return_objects=False):
     logger.debug("getting images for %s:%s", type(obj), obj)
     files = None
     if not obj:
@@ -2371,9 +2373,9 @@ class async_delete:
     @dojo_async_task
     @app.task
     def delete_chunk(self, objects, **kwargs):
-        for object in objects:
+        for obj in objects:
             try:
-                object.delete()
+                obj.delete()
             except AssertionError:
                 logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
                 # The id must be None
@@ -2381,45 +2383,45 @@ class async_delete:
 
     @dojo_async_task
     @app.task
-    def delete(self, object, **kwargs):
-        logger.debug("ASYNC_DELETE: Deleting " + self.get_object_name(object) + ": " + str(object))
-        model_list = self.mapping.get(self.get_object_name(object), None)
+    def delete(self, obj, **kwargs):
+        logger.debug("ASYNC_DELETE: Deleting " + self.get_object_name(obj) + ": " + str(obj))
+        model_list = self.mapping.get(self.get_object_name(obj), None)
         if model_list:
             # The object to be deleted was found in the object list
-            self.crawl(object, model_list)
+            self.crawl(obj, model_list)
         else:
             # The object is not supported in async delete, delete normally
-            logger.debug("ASYNC_DELETE: " + self.get_object_name(object) + " async delete not supported. Deleteing normally: " + str(object))
-            object.delete()
+            logger.debug("ASYNC_DELETE: " + self.get_object_name(obj) + " async delete not supported. Deleteing normally: " + str(obj))
+            obj.delete()
 
     @dojo_async_task
     @app.task
-    def crawl(self, object, model_list, **kwargs):
-        logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(object) + ": " + str(object))
+    def crawl(self, obj, model_list, **kwargs):
+        logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
         for model_info in model_list:
             model = model_info[0]
             model_query = model_info[1]
-            filter_dict = {model_query: object}
+            filter_dict = {model_query: obj}
             objects_to_delete = model.objects.filter(**filter_dict)
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
                 logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
                 self.delete_chunk(chunk)
-        self.delete_chunk([object])
-        logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(object) + ": " + str(object))
+        self.delete_chunk([obj])
+        logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
-    def chunk_list(self, model, list):
+    def chunk_list(self, model, full_list):
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
         # Break the list of objects into "chunk_size" lists
-        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        chunk_list = [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
         logger.debug("ASYNC_DELETE: Split " + self.get_object_name(model) + " into " + str(len(chunk_list)) + " chunks of " + str(chunk_size))
         return chunk_list
 
-    def get_object_name(self, object):
-        if object.__class__.__name__ == "ModelBase":
-            return object.__name__
-        return object.__class__.__name__
+    def get_object_name(self, obj):
+        if obj.__class__.__name__ == "ModelBase":
+            return obj.__name__
+        return obj.__class__.__name__
 
 
 @receiver(user_logged_in)

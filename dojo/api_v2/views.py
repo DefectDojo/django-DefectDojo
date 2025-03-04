@@ -667,12 +667,12 @@ class EngagementViewSet(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
                 )
-            return response
         except ValidationError:
             return Response(
                 {"error": "Bad Request!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        return response
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -1491,7 +1491,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method in ["PUT", "PATCH"]:
+        if request.method in {"PUT", "PATCH"}:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)
@@ -2433,7 +2433,7 @@ class UserProfileView(GenericAPIView):
     @action(
         detail=True, methods=["get"], filter_backends=[], pagination_class=None,
     )
-    def get(self, request, format=None):
+    def get(self, request, _=None):
         user = get_current_user()
         user_contact_info = (
             user.usercontactinfo if hasattr(user, "usercontactinfo") else None

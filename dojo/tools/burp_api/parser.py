@@ -84,10 +84,10 @@ class BurpApiParser:
                     ]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get("evidence", []):
-                    if evidence.get("type") not in [
+                    if evidence.get("type") not in {
                         "InformationListEvidence",
                         "FirstOrderEvidence",
-                    ]:
+                    }:
                         continue
                     request = self.get_clean_base64(
                         evidence.get("request_response").get("request"),
@@ -140,7 +140,7 @@ def convert_severity(issue):
           },
     """
     value = issue.get("severity", "info").lower()
-    if value in ["high", "medium", "low", "info"]:
+    if value in {"high", "medium", "low", "info"}:
         return value.title()
     return "Info"
 
