@@ -162,7 +162,7 @@ class BaseImporter(ImporterOptions):
             msg = "A test must be supplied to parse the file"
             raise ValidationError(msg)
         try:
-            return parser.get_findings(scan, self.test, self.branch_tag)
+            return parser.get_findings(scan, self.test)
         except ValueError as e:
             logger.warning(e)
             raise ValidationError(e)

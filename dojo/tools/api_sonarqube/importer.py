@@ -98,7 +98,7 @@ class SonarQubeApiImporter:
 
         return SonarQubeAPI(tool_config=config.tool_configuration), config
 
-    def import_issues(self, test, branch_tag=None):
+    def import_issues(self, test):
         items = []
 
         try:
@@ -114,16 +114,19 @@ class SonarQubeApiImporter:
                 component = client.get_project(
                     config.service_key_1,
                     organization=organization,
+                    branch=test.branch_tag,
                 )
             else:
                 component = client.find_project(
                     test.engagement.product.name,
                     organization=organization,
+                    branch=test.branch_tag,
                 )
             # Get the resource from SonarQube
             issues = client.find_issues(
                 component["key"],
                 organization=organization,
+                branch=test.branch_tag,
             )
             logger.info(
                 f'Found {len(issues)} issues for component {component["key"]}',
