@@ -2,9 +2,6 @@ from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas.parser import OpenVASParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 class TestOpenVASParser(DojoTestCase):
     def test_openvas_csv_one_vuln(self):
