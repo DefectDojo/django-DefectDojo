@@ -108,7 +108,7 @@ class TestOpenVASParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Mozilla Firefox Security Update (mfsa_2023-32_2023-36) - Windows_10.0.101.2_general/tcp", finding.title)
-                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("High", finding.severity)
 
     def test_openvas_xml_many_vuln(self):
         with open(get_unit_tests_scans_path("openvas") / "many_vuln.xml", encoding="utf-8") as f:

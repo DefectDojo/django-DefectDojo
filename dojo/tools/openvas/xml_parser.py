@@ -44,8 +44,10 @@ class OpenVASXMLParser:
                     description.append(f"**NVT**: {field.text}")
                     script_id = field.get("oid") or field.text
                 if field.tag == "severity":
-                    severity = self.convert_cvss_score(field.text)
                     description.append(f"**Severity**: {field.text}")
+                if field.tag == "threat":
+                    description.append(f"**Threat**: {field.text}")
+                    severity = field.text if field.text in {"Info", "Low", "Medium", "High", "Critical"} else "Info"
                 if field.tag == "qod":
                     description.append(f"**QOD**: {field.text}")
                 if field.tag == "description":
