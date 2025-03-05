@@ -118,8 +118,8 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         if not finding.unsaved_endpoints[
             0
-        ].host:  # process only if host is not already defined (by field hostname)
-            finding.unsaved_endpoints[0].host = column_value
+        ].host and column_value is not None:  # process only if host is not already defined (by field hostname)
+            finding.unsaved_endpoints[0].host = column_value.strip()
 
 
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
@@ -129,7 +129,7 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
-            finding.unsaved_endpoints[0].host = column_value
+            finding.unsaved_endpoints[0].host = column_value.strip()
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
