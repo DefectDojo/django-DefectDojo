@@ -2,6 +2,9 @@ from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas.parser import OpenVASParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class TestOpenVASParser(DojoTestCase):
     def test_openvas_csv_one_vuln(self):
@@ -114,7 +117,9 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
+            self.assertEqual(44, len(findings))
+            self.assertEqual(44, len([endpoint for finding in findings for endpoint in finding.unsaved_endpoints]))
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertEqual(44, len(findings))
+            self.assertEqual("tcp://192.168.1.1001:512", str(findings[0].unsaved_endpoints[0]))

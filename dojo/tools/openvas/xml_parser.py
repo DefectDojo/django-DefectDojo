@@ -2,8 +2,8 @@ from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
 
-from dojo.models import Finding
-
+from dojo.models import Endpoint, Finding
+import contextlib
 
 class OpenVASXMLParser:
     def get_findings(self, filename, test):
@@ -17,26 +17,39 @@ class OpenVASXMLParser:
         results = report.find("results")
         for result in results:
             script_id = None
-            for finding in result:
-                if finding.tag == "name":
-                    title = finding.text
-                    description = [f"**Name**: {finding.text}"]
-                if finding.tag == "host":
-                    title = title + "_" + finding.text
-                    description.append(f"**Host**: {finding.text}")
-                if finding.tag == "port":
-                    title = title + "_" + finding.text
-                    description.append(f"**Port**: {finding.text}")
-                if finding.tag == "nvt":
-                    description.append(f"**NVT**: {finding.text}")
-                    script_id = finding.get("oid") or finding.text
-                if finding.tag == "severity":
-                    severity = self.convert_cvss_score(finding.text)
-                    description.append(f"**Severity**: {finding.text}")
-                if finding.tag == "qod":
-                    description.append(f"**QOD**: {finding.text}")
-                if finding.tag == "description":
-                    description.append(f"**Description**: {finding.text}")
+            unsaved_endpoint = Endpoint()
+            for field in result:
+                if field.tag == "name":
+                    title = field.text
+                    description = [f"**Name**: {field.text}"]
+                if field.tag == "hostname":
+                    title = title + "_" + field.text
+                    description.append(f"**Hostname**: {field.text}")
+                    if field.text:
+                        unsaved_endpoint.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
+                if field.tag == "host":
+                    title = title + "_" + field.text
+                    description.append(f"**Host**: {field.text}")
+                    if not unsaved_endpoint.host and field.text:
+                        unsaved_endpoint.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
+                if field.tag == "port":
+                    title = title + "_" + field.text
+                    description.append(f"**Port**: {field.text}")
+                    if field.text:
+                        port_str, protocol = field.text.split("/")
+                        with contextlib.suppress(ValueError):
+                            unsaved_endpoint.port = int(port_str)
+                        unsaved_endpoint.protocol = protocol
+                if field.tag == "nvt":
+                    description.append(f"**NVT**: {field.text}")
+                    script_id = field.get("oid") or field.text
+                if field.tag == "severity":
+                    severity = self.convert_cvss_score(field.text)
+                    description.append(f"**Severity**: {field.text}")
+                if field.tag == "qod":
+                    description.append(f"**QOD**: {field.text}")
+                if field.tag == "description":
+                    description.append(f"**Description**: {field.text}")
 
             finding = Finding(
                 title=str(title),
@@ -47,6 +60,7 @@ class OpenVASXMLParser:
                 static_finding=False,
                 vuln_id_from_tool=script_id,
             )
+            finding.unsaved_endpoints = [unsaved_endpoint]
             findings.append(finding)
         return findings
 
