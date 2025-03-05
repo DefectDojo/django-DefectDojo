@@ -1,9 +1,10 @@
+import contextlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
 
 from dojo.models import Endpoint, Finding
-import contextlib
+
 
 class OpenVASXMLParser:
     def get_findings(self, filename, test):
