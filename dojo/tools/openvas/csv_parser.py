@@ -280,6 +280,7 @@ class OpenVASCSVParser:
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_endpoints = [Endpoint()]
+            ip = None
             if row_number == 0:
                 column_names = self.read_column_names(row)
                 continue
@@ -287,6 +288,13 @@ class OpenVASCSVParser:
                 chain.process_column(
                     column_names[column_number], column, finding,
                 )
+                # due to the way this parser is implemented we have to do this stuff to retrieve a value for later use
+                if column_names[column_number].lower() == "ip":
+                    ip = column
+
+            if ip:
+                finding.description += f"\n**IP**: {ip}"
+
             if finding is not None and row_number > 0:
                 if finding.title is None:
                     finding.title = ""
