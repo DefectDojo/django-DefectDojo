@@ -2230,7 +2230,6 @@ HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 TENAN_ID = env("DD_TENAN_ID")
 CLIENT_ID = env("DD_CLIENT_ID")
 CALLBACK_URL = env("DD_CALLBACK_URL")
-
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
