@@ -182,7 +182,7 @@ class ImporterOptions:
     def validate(
         self,
         field_name: str,
-        expected_types: list[Callable] = [],
+        expected_types: list[Callable] | None = None,
         *,
         required: bool = False,
         default: Any = None,
@@ -193,6 +193,8 @@ class ImporterOptions:
         and ensures it is the correct type before returning it
         """
         # Get the value from the kwargs
+        if expected_types is None:
+            expected_types = []
         value = kwargs.get(field_name)
         # Make sure we have something if we need it
         if required is True:

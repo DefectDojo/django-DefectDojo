@@ -97,7 +97,9 @@ class DojoTestUtilsMixin:
         sla_configuration.save()
         return sla_configuration
 
-    def create_product(self, name, *args, description="dummy description", prod_type=None, tags=[], **kwargs):
+    def create_product(self, name, *args, description="dummy description", prod_type=None, tags=None, **kwargs):
+        if tags is None:
+            tags = []
         if not prod_type:
             prod_type = Product_Type.objects.first()
         product = Product(name=name, description=description, prod_type=prod_type, tags=tags)
