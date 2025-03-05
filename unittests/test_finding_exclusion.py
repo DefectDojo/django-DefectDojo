@@ -235,3 +235,19 @@ class FindingExclusionViewsTestCase(DojoTestCase):
             response = self.client.get(reverse(view_name, args=args))
             
             self.assertRedirects(response, reverse('finding_exclusion', args=args))
+            
+    def test_delete_finding_exclusion_discussion(self):
+        self.client.force_login(self.user)
+        discussion = FindingExclusionDiscussion.objects.create(
+            finding_exclusion=self.exclusion1,
+            author=self.user,
+            content='This is a test discussion'
+        )
+        
+        response = self.client.post(
+            reverse('delete_finding_exclusion_discussion', 
+                    args=[str(self.exclusion1.uuid), str(discussion.id)])
+        )
+        
+        self.assertRedirects(response, reverse('finding_exclusion', args=[str(self.exclusion1.uuid,)]))
+        self.assertFalse(FindingExclusionDiscussion.objects.filter(id=discussion.id).exists())

@@ -100,7 +100,8 @@ def remove_finding_from_list(finding: Finding, note: Notes, list_type: str) -> F
     finding.notes.add(note)
     
     if list_type == "white_list":
-        finding.active = True
+        if not finding.is_mitigated:
+            finding.active = True
         finding.tags.remove("white_list")
     elif list_type == "black_list":
         finding.tags.remove("black_list")
@@ -232,24 +233,26 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
         finding.priority = priority
         
     Finding.objects.bulk_update(findings_to_update, ["risk_status", "priority"], 1000)
-    logger.info(f"{findings_to_update.count()} findings added to blacklist.")
+    findings_to_update_count = findings_to_update.count()
+    logger.info(f"{findings_to_update_count} findings added to blacklist.")
     
-    blacklist_message = f"{findings_to_update.count()} findings added to the blacklist. CVE: {unique_id_from_tool}."
-    create_notification(
-        event="finding_exclusion_request",
-        subject="✅Findings added to blacklist",
-        title=blacklist_message,
-        description=blacklist_message,
-        url=relative_url,
-        recipients=get_reviewers_members() + get_approvers_members(),
-        color_icon="#52A3FA"
-    )
-    finding_exclusion = FindingExclusion.objects.filter(
-        unique_id_from_tool=unique_id_from_tool, 
-        type="black_list", 
-        status="Accepted"
-    ).first()
-    send_mail_to_cybersecurity(finding_exclusion, blacklist_message)
+    if findings_to_update_count > 0:
+        blacklist_message = f"{findings_to_update_count} findings added to the blacklist. CVE: {unique_id_from_tool}."
+        create_notification(
+            event="finding_exclusion_request",
+            subject="✅Findings added to blacklist",
+            title=blacklist_message,
+            description=blacklist_message,
+            url=relative_url,
+            recipients=get_reviewers_members() + get_approvers_members(),
+            color_icon="#52A3FA"
+        )
+        finding_exclusion = FindingExclusion.objects.filter(
+            unique_id_from_tool=unique_id_from_tool, 
+            type="black_list", 
+            status="Accepted"
+        ).first()
+        send_mail_to_cybersecurity(finding_exclusion, blacklist_message)
 
 
 def get_resource_type(finding) -> str:
