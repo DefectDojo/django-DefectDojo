@@ -119,6 +119,7 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
         if not finding.unsaved_endpoints[
             0
         ].host and column_value is not None:  # process only if host is not already defined (by field hostname)
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
             finding.unsaved_endpoints[0].host = column_value.strip()
 
 
@@ -129,6 +130,7 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
             finding.unsaved_endpoints[0].host = column_value.strip()
 
 
