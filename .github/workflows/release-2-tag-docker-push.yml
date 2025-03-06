@@ -60,7 +60,7 @@ jobs:
     secrets: inherit
 
   release-drafter:
-    needs: release-docker-containers
+    needs: publish-container-digests
     uses: ./.github/workflows/release-drafter.yml
     with:
       version: ${{ github.event.inputs.release_number }}
