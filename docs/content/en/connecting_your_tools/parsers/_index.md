@@ -11,7 +11,7 @@ DefectDojo can parse data from 180+ security reports and counting.
 ## DefectDojo Pro Methods
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users have enhanced methods of import available for certain tools.
 
-**Connactors** allow you to automatically import and sync vulnerabilities from certain tools.
+**Connectors** allow you to automatically import and sync vulnerabilities from certain tools.
 
 **Smart Upload** allows you to split infrastructure-wide scan files up by component or endpoint, and easily combine those results with other Findings from the same location.
 
