@@ -48,7 +48,11 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
-from dojo.transfer_findings.serializers import TransferFindingFindingSerializer, TransferFindingFindingsSerializer
+from dojo.transfer_findings.serializers import (
+    TransferFindingFindingSerializer,
+    TransferFindingFindingsSerializer,
+    TransferFindingCreateSerializer,
+    TransferFindingFindingCreateSerializer,)
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -3394,6 +3398,18 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
+    @extend_schema(
+        request=TransferFindingCreateSerializer,
+        responses={status.HTTP_200_OK: TransferFindingCreateSerializer},
+    )
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = TransferFindingCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return http_response.bad_request(data=serializer.errors)
+        return http_response.created(message="Transfer Finding Created", data=serializer.data)
     
     def destroy(self, request, pk=None):
         transfer_finding = get_object_or_404(TransferFinding, id=pk)
@@ -3413,6 +3429,19 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     serializer_class = TransferFindingFindingsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id"]
+
+    @extend_schema(
+        request=TransferFindingFindingCreateSerializer,
+        responses={status.HTTP_201_CREATED: TransferFindingFindingCreateSerializer},
+    )
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = TransferFindingFindingCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return http_response.bad_request(data=serializer.errors)
+        return http_response.created(message="Transfer Finding Finding Created", data=serializer.data)
 
     @extend_schema(
         request=TransferFindingFindingSerializer,

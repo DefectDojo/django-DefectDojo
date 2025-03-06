@@ -1100,18 +1100,17 @@
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                                    <li role="presentation">
                                                                     {% if finding|enable_button:"Add Risk Acceptance"%}
-                                                                        <li role="presentation">
-                                                                            <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                            <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptances..." %}<span>
                                                                             </a>
                                                                         </li>
                                                                     {% else %}
-                                                                        <li role="presentation">
-                                                                            <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                                <i class="fa-solid fa-circle-exclamation"></i><span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>
-                                                                            </a>
-                                                                        </li>  
+                                                                        <a rel="noopener noreferrer" href ="#" disabled>
+                                                                            <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"></i> Add Risk Acceptance...
+                                                                        </a>
+                                                                    </li>
                                                                     {% endif %}
                                                                 {% endif %}
                                                             {% endif %}
