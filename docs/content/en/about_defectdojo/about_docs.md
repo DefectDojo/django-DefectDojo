@@ -46,7 +46,7 @@ Whether you're a Pro or an Open-Source user, we have many resources that can hel
 
 - Our [New User Checklist](../new_user_checklist) covers the fundamentals of setting up your DefectDojo environment and setting up your import, triage and reporting workflows.
 
-- We support a large amount of [security tool integrations](../../connecting_your_tools/parsers/) to help fit DefectDojo in your DevSecOps program.
+- We support a large amount of [security tool integrations](/en/connecting_your_tools/parsers/) to help fit DefectDojo in your DevSecOps program.
 
 - Our team maintains a [YouTube Channel](https://www.youtube.com/@defectdojo) which hosts tutorials, archived Office Hours events and other content. New subscribers are always welcome!
 
