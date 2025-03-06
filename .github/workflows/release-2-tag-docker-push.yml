@@ -11,7 +11,6 @@ on:
       # because someone will forget one day to change it.
       release_number:
         description: 'Release version (x.y.z format)'
-        default: "0.0.7"
         required: true
 
 jobs:
@@ -31,8 +30,8 @@ jobs:
       - name: Create new tag ${{ github.event.inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
-        #   git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
-        #   git push origin ${{ github.event.inputs.release_number }}
+          git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
+          git push origin ${{ github.event.inputs.release_number }}
 
   release-helm-chart:
     needs: tag
@@ -60,9 +59,9 @@ jobs:
         release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
-#   release-drafter:
-#     needs: release-docker-containers
-#     uses: ./.github/workflows/release-drafter.yml
-#     with:
-#       version: ${{ github.event.inputs.release_number }}
-#     secrets: inherit
+  release-drafter:
+    needs: release-docker-containers
+    uses: ./.github/workflows/release-drafter.yml
+    with:
+      version: ${{ github.event.inputs.release_number }}
+    secrets: inherit

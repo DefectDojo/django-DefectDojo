@@ -11,7 +11,7 @@ services:
     build:
       context: ./
       dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
-    image: "valentijnscholten/defectdojo-nginx:2.44.0-dev-valentijn"
+    image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     depends_on:
       - uwsgi
     environment:
@@ -34,7 +34,7 @@ services:
       context: ./
       dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
       target: django
-    image: "valentijnscholten/defectdojo-django:2.44.0-dev-valentijn"
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - postgres
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
@@ -53,7 +53,7 @@ services:
           target: /app/docker/extra_settings
         - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
   celerybeat:
-    image: "valentijnscholten/defectdojo-django:2.44.0-dev-valentijn"
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - postgres
       - redis
@@ -69,7 +69,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   celeryworker:
-    image: "valentijnscholten/defectdojo-django:2.44.0-dev-valentijn"
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - postgres
       - redis
@@ -86,7 +86,7 @@ services:
           target: /app/docker/extra_settings
         - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
   initializer:
-    image: "valentijnscholten/defectdojo-django:2.44.0-dev-valentijn"
+    image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - postgres
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '--', '/entrypoint-initializer.sh']

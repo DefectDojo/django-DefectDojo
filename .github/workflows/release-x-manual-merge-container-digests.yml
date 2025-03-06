@@ -1,4 +1,4 @@
-name: "release-X: Merge platform digests"
+name: "release-X: Merge container digests"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
