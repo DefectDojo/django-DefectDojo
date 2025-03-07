@@ -141,7 +141,7 @@ When a user is removed from a given group in Azure AD, they will also be removed
 
 ### Open-Source
 
-Open-Source users will need to map these variables as an environment variable, or in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
 1.  Add the following information to the settings file:
 
