@@ -1,4 +1,5 @@
 import logging
+from warnings import warn
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
@@ -330,6 +331,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
+        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.")
         # Indicate that the test is not complete yet as endpoints will still be rolling in.
         self.update_test_progress(percentage_value=50)
         chunk_list = self.chunk_findings(parsed_findings)
