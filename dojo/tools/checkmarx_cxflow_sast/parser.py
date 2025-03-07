@@ -1,5 +1,6 @@
 import json
 import logging
+from dataclasses import dataclass
 
 import dateutil.parser
 
@@ -29,12 +30,12 @@ class _PathNode:
         )
 
 
+@dataclass
 class _Path:
-    def __init__(self, sink: _PathNode, source: _PathNode, state: str, paths: [_PathNode]):
-        self.sink = sink
-        self.source = source
-        self.state = state
-        self.paths = paths
+    sink: _PathNode
+    source: _PathNode
+    state: str
+    paths: [_PathNode]
 
 
 class CheckmarxCXFlowSastParser:
