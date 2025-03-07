@@ -1,8 +1,7 @@
 """
 ===========================================================================================
       RapidFire vulnerability scanner CSV report parser.
-==============================================================================================
- 
+===========================================================================================
 Expected CSV columns:
  - IP Address: Target system IP
  - Hostname: Target system hostname
@@ -10,7 +9,7 @@ Expected CSV columns:
  - Severity: Vulnerability severity (Critical, High, Medium, Low, Info)
  - Issue: Vulnerability title/name
  - Ports: Affected ports and protocols (e.g., "443/tcp")
- - OID: Unique vulnerability identifier 
+ - OID: Unique vulnerability identifier
  - CVE: Associated CVEs (comma-separated)
  - Last Detected: Date the vulnerability was last detected
  - Known Exploited Vulnerability: Whether the vulnerability is known to be exploited

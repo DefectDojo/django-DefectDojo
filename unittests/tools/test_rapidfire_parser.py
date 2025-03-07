@@ -3,14 +3,11 @@ import datetime
 
 from django.test import TestCase
 
-from dojo.models import Test, Finding
+from dojo.models import Finding, Test
 from dojo.tools.rapidfire.parser import RapidFireParser
 
 
 class TestRapidFireParser(TestCase):
-
-    """Test RapidFire CSV Parser"""
-
     def test_parse_no_findings(self):
         """Test parsing a RapidFire report with no findings"""
         with open("unittests/scans/rapidfire/no_vuln.csv", encoding="utf-8") as testfile:
@@ -54,7 +51,7 @@ class TestRapidFireParser(TestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertTrue(finding.dynamic_finding)
                 self.assertFalse(finding.static_finding)
-            
+
                 # Check endpoint details if they match the actual data
                 if finding.unsaved_endpoints:
                     self.assertIsNotNone(finding.unsaved_endpoints[0].host)
@@ -68,7 +65,7 @@ class TestRapidFireParser(TestCase):
                 self.assertEqual("Apache Tomcat Request Mix-up Vulnerability (May 2022) - Windows (CVSS: 8.6)", finding.title)
                 # Assert correct severity level based on actual data
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-            
+
                 # Check for any vulnerability IDs if present
                 if finding.unsaved_vulnerability_ids:
                     self.assertTrue(all(vid.startswith("CVE-") for vid in finding.unsaved_vulnerability_ids))
@@ -78,7 +75,7 @@ class TestRapidFireParser(TestCase):
                 finding = findings[2]
                 self.assertEqual("Apache Tomcat Request Smuggling Vulnerability (Nov 2023) - Windows (CVSS: 7.5)", finding.title)
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-            
+
                 # Verify vuln_id_from_tool is in the expected format
                 if finding.vuln_id_from_tool:
                     self.assertTrue(finding.vuln_id_from_tool.startswith("1.3.6.1.4.1.25623"))
@@ -88,7 +85,7 @@ class TestRapidFireParser(TestCase):
                 finding = findings[3]
                 self.assertEqual("Apache Tomcat Open Redirect Vulnerability (Aug 2023) - Windows (CVSS: 6.1)", finding.title)
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-            
+
                 # Verify that date is a valid datetime object
                 self.assertIsInstance(finding.date, datetime.datetime)
 
@@ -97,7 +94,7 @@ class TestRapidFireParser(TestCase):
                 finding = findings[4]
                 self.assertEqual("Apache Tomcat Information Disclosure Vulnerability (Sep 2022) - Windows (CVSS: 3.7)", finding.title)
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-            
+
                 # Check that description is not empty
                 self.assertTrue(finding.description)
 
@@ -106,7 +103,7 @@ class TestRapidFireParser(TestCase):
                 finding = findings[5]
                 self.assertEqual("ICMP Timestamp Reply Information Disclosure (CVSS: 2.1)", finding.title)
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-            
+
                 # Check for mitigation presence
                 if finding.mitigation:
                     self.assertIsInstance(finding.mitigation, str)
