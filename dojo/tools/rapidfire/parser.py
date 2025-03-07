@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 class RapidFireParser:
 
-"""RapidFire vulnerability scanner CSV report parser"""
+    """RapidFire vulnerability scanner CSV report parser"""
 
     def get_scan_types(self):
         return ["Rapidfire Scan"]
