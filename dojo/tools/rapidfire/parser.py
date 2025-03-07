@@ -1,40 +1,42 @@
-#==============================================================================================
-#      RapidFire vulnerability scanner CSV report parser.
-#==============================================================================================
-# 
-# Expected CSV columns:
-# - IP Address: Target system IP
-# - Hostname: Target system hostname
-# - MAC Address: Target system MAC address
-# - Severity: Vulnerability severity (Critical, High, Medium, Low, Info)
-# - Issue: Vulnerability title/name
-# - Ports: Affected ports and protocols (e.g., "443/tcp")
-# - OID: Unique vulnerability identifier 
-# - CVE: Associated CVEs (comma-separated)
-# - Last Detected: Date the vulnerability was last detected
-# - Known Exploited Vulnerability: Whether the vulnerability is known to be exploited
-# - Summary: Brief description of the vulnerability
-# - Vulnerability Detection Result: Specific findings about this instance
-# - Solution: Recommended remediation steps
-# - Vulnerability Insight: Technical details about the vulnerability
-# - Vulnerability Detection Method: How the vulnerability was detected
-# - References: URLs to relevant documentation (comma-separated)
-# - Known To Be Used In Ransomware Campaigns: Whether the vulnerability is used in ransomware
-#==============================================================================================
-# Mapping of CSV columns expected to be parsed into Finding fields:
-# - Issue → title
-# - Severity → severity (after conversion)
-# - Summary, Vulnerability Detection Result, etc. → description (combined)
-# - Solution → mitigation
-# - Vulnerability Insight + CVEs → impact (formatted)
-# - References → references (formatted as markdown list)
-# - Last Detected → date
-# - OID → vuln_id_from_tool
-# - IP Address/Hostname → endpoints.host
-# - Ports → endpoints.port
-# - CVE → unsaved_vulnerability_ids
-# - Known To Be Used In Ransomware Campaigns → tags
-#==============================================================================================
+"""
+===========================================================================================
+      RapidFire vulnerability scanner CSV report parser.
+==============================================================================================
+ 
+Expected CSV columns:
+ - IP Address: Target system IP
+ - Hostname: Target system hostname
+ - MAC Address: Target system MAC address
+ - Severity: Vulnerability severity (Critical, High, Medium, Low, Info)
+ - Issue: Vulnerability title/name
+ - Ports: Affected ports and protocols (e.g., "443/tcp")
+ - OID: Unique vulnerability identifier 
+ - CVE: Associated CVEs (comma-separated)
+ - Last Detected: Date the vulnerability was last detected
+ - Known Exploited Vulnerability: Whether the vulnerability is known to be exploited
+ - Summary: Brief description of the vulnerability
+ - Vulnerability Detection Result: Specific findings about this instance
+ - Solution: Recommended remediation steps
+ - Vulnerability Insight: Technical details about the vulnerability
+ - Vulnerability Detection Method: How the vulnerability was detected
+ - References: URLs to relevant documentation (comma-separated)
+ - Known To Be Used In Ransomware Campaigns: Whether the vulnerability is used in ransomware
+==============================================================================================
+ Mapping of CSV columns expected to be parsed into Finding fields:
+ - Issue → title
+ - Severity → severity (after conversion)
+ - Summary, Vulnerability Detection Result, etc. → description (combined)
+ - Solution → mitigation
+ - Vulnerability Insight + CVEs → impact (formatted)
+ - References → references (formatted as markdown list)
+ - Last Detected → date
+ - OID → vuln_id_from_tool
+ - IP Address/Hostname → endpoints.host
+ - Ports → endpoints.port
+ - CVE → unsaved_vulnerability_ids
+ - Known To Be Used In Ransomware Campaigns → tags
+==============================================================================================
+"""
 
 # Standard library imports
 import csv
@@ -56,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 class RapidFireParser:
 
-    """RapidFire vulnerability scanner CSV report parser"""
+"""RapidFire vulnerability scanner CSV report parser"""
 
     def get_scan_types(self):
         return ["Rapidfire Scan"]
