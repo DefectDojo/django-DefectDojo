@@ -329,13 +329,21 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: list[Finding] = [],
-        closed_findings: list[Finding] = [],
-        reactivated_findings: list[Finding] = [],
-        untouched_findings: list[Finding] = [],
+        new_findings: list[Finding] | None = None,
+        closed_findings: list[Finding] | None = None,
+        reactivated_findings: list[Finding] | None = None,
+        untouched_findings: list[Finding] | None = None,
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
+        if untouched_findings is None:
+            untouched_findings = []
+        if reactivated_findings is None:
+            reactivated_findings = []
+        if closed_findings is None:
+            closed_findings = []
+        if new_findings is None:
+            new_findings = []
         if settings.TRACK_IMPORT_HISTORY is False:
             return None
         # Log the current state of what has occurred in case there could be
@@ -763,11 +771,19 @@ class BaseImporter(ImporterOptions):
         self,
         test,
         updated_count,
-        new_findings=[],
-        findings_mitigated=[],
-        findings_reactivated=[],
-        findings_untouched=[],
+        new_findings=None,
+        findings_mitigated=None,
+        findings_reactivated=None,
+        findings_untouched=None,
     ):
+        if findings_untouched is None:
+            findings_untouched = []
+        if findings_reactivated is None:
+            findings_reactivated = []
+        if findings_mitigated is None:
+            findings_mitigated = []
+        if new_findings is None:
+            new_findings = []
         logger.debug("Scan added notifications")
 
         new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
