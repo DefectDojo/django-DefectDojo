@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh

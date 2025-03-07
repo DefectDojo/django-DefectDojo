@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Run available unittests with a setup for CI/CD:
 # - Fail if migrations are not created
 # - Exit container after running tests to allow exit code to propagate as test result
