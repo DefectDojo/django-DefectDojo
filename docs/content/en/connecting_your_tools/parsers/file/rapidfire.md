@@ -1,5 +1,6 @@
 ---
 title: Rapidfire CSV Parser
+toc_hide: true
 ---
 
 # Rapidfire CSV Parser
