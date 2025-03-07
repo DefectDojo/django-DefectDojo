@@ -3611,7 +3611,6 @@ class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
     finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
-    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 
 class FindingAdmin(admin.ModelAdmin):

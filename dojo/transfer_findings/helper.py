@@ -373,6 +373,8 @@ def delete_transfer_finding_finding(transfer_finding):
 
 def enable_flow_transfer_finding(**kwargs):
     # add rule custom if necessary
+    if kwargs["finding"].tags.filter(name="transferred").exists():
+        return False
     if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
     and kwargs["finding"].active is True):
         return True

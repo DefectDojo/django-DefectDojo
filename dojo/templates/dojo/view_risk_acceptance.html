@@ -377,7 +377,7 @@
                         {% if engagement|has_object_permission:"Risk_Acceptance" %}
                             <form id="replace_risk_file" enctype="multipart/form-data" method="post">
                                 {% csrf_token %}
-                                <label class="btn btn-sm btn-primary">
+                                <label style="background-color:#546474 !important" class="btn btn-sm btn-primary">
                                     Replace File
                                     <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
                                 </label>
@@ -390,7 +390,20 @@
                 {% else %}
                     <td>None</td>
                     <td>None</td>
-                    <td>None</td>
+                    <td>
+                        {% if engagement|has_object_permission:"Risk_Acceptance" %}
+                            <form id="replace_risk_file" enctype="multipart/form-data" method="post">
+                                {% csrf_token %}
+                                <label style="background-color:#546474 !important" class="btn btn-sm btn-primary">
+                                    Add File
+                                    <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
+                                </label>
+                                <input type="hidden" name="replace_file" value="Add File"/>
+                            </form>
+                        {% else %}
+                            Not Authorized
+                        {% endif %}
+                    </td>
                 {% endif %}
             </tr>
             </tbody>
