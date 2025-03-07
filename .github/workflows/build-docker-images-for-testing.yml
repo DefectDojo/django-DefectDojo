@@ -27,9 +27,16 @@ jobs:
             - docker-image: integration-tests
               os: alpine
             - docker-image: integration-tests
-              platform: arm64
+              platform: linux/arm64
 
     steps:
+      # Replace slashes so we can use this in filenames
+      - name: Set-platform
+        run: |
+          platform=${{ inputs.platform }}
+          echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -53,13 +60,13 @@ jobs:
           push: false
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }},${{ env.IMAGE_REPOSITORY }}/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
-          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}-${{ inputs.platform }}_img
+          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}-${{ env.PLATFORM }}_img
 
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 15
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
-          name: built-docker-image-${{ matrix.docker-image }}-${{ matrix.os }}-${{ inputs.platform }}
-          path: ${{ matrix.docker-image }}-${{ matrix.os }}-${{ inputs.platform }}_img
+          name: built-docker-image-${{ matrix.docker-image }}-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ matrix.docker-image }}-${{ matrix.os }}-${{ env.PLATFORM }}_img
           retention-days: 1
