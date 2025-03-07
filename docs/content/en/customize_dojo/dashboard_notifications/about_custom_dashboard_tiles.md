@@ -315,7 +315,7 @@ This Tile compares the Product Grade of all Products on your instance, so that y
 This tile uses a comparison operator (\<, \=, \<\=, \>\=) to track Products which equal, exceed or fail to meet the Product Grade which you want to monitor.
 
 ![image](images/About_Custom_Dashboard_Tiles_11.png)
-For more information on how Product Grades are calculated, see our article on [Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product-health-grade/).
+For more information on how Product Grades are calculated, see our article on [Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product_health_grade/).
 
 #### Example: Track Failing Products
 

@@ -9,7 +9,7 @@ Logging into DefectDojo's Cloud Manager allows you to configure your account set
 ## **New Subscription**
 <https://cloud.defectdojo.com/accounts/onboarding/step_1>
 
-This page allows you to request a [new, or additional Cloud instance](../set-up-an-additional-cloud-instance) from DefectDojo. 
+This page allows you to request a new, [or additional](../additional-cloud-instance/) Cloud instance from DefectDojo. 
 
 ## **Manage Subscriptions**
 <https://cloud.defectdojo.com/accounts/manage_subscriptions>

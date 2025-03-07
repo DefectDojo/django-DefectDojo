@@ -2,6 +2,7 @@
 title: "Event: scan_added and scan_added_empty"
 weight: 6
 chapter: true
+exclude_search: true
 ---
 
 Event `scan_added_empty` describes a situation when reimport did not affect the existing test (no finding has been created or closed). 

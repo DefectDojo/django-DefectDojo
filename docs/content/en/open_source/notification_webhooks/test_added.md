@@ -2,6 +2,7 @@
 title: "Event: test_added"
 weight: 5
 chapter: true
+exclude_search: true
 ---
 
 ## Event HTTP header
