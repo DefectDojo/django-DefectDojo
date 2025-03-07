@@ -189,16 +189,16 @@ def score_asvs(product, benchmark_type):
 
 
 @user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
-def benchmark_view(request, pid, type, cat=None):
+def benchmark_view(request, pid, benchmark_type, cat=None):
     product = get_object_or_404(Product, id=pid)
-    benchmark_type = get_object_or_404(Benchmark_Type, id=type)
+    benchmark_type = get_object_or_404(Benchmark_Type, id=benchmark_type)
     benchmark_category = Benchmark_Category.objects.filter(
-        type=type, enabled=True,
+        type=benchmark_type, enabled=True,
     ).order_by("name")
 
     # Add requirements to the product
     new_benchmarks = Benchmark_Requirement.objects.filter(
-        category__type=type, category__type__enabled=True, enabled=True,
+        category__type=benchmark_type, category__type__enabled=True, enabled=True,
     ).exclude(
         id__in=Benchmark_Product.objects.filter(product=product).values_list(
             "control_id", flat=True,
@@ -226,7 +226,7 @@ def benchmark_view(request, pid, type, cat=None):
                 product=product.id,
                 control__category=cat,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()
@@ -240,7 +240,7 @@ def benchmark_view(request, pid, type, cat=None):
             .filter(
                 product=product.id,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()
@@ -288,10 +288,10 @@ def benchmark_view(request, pid, type, cat=None):
 
 
 @user_is_authorized(Product, Permissions.Benchmark_Delete, "pid")
-def delete(request, pid, type):
+def delete(request, pid, benchmark_type):
     product = get_object_or_404(Product, id=pid)
     benchmark_product_summary = Benchmark_Product_Summary.objects.filter(
-        product=product, benchmark_type=type,
+        product=product, benchmark_type=benchmark_type,
     ).first()
     form = DeleteBenchmarkForm(instance=benchmark_product_summary)
 
@@ -305,7 +305,7 @@ def delete(request, pid, type):
             )
             if form.is_valid():
                 benchmark_product = Benchmark_Product.objects.filter(
-                    product=product, control__category__type=type,
+                    product=product, control__category__type=benchmark_type,
                 )
                 benchmark_product.delete()
                 benchmark_product_summary.delete()
