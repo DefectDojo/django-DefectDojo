@@ -61,6 +61,9 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
+        # process in reverse order to ensure the newer findings are marked as duplicate of older findings
+        findings.order_by("-id")
+
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
