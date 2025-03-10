@@ -10,6 +10,20 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Mar 2025: v2.44
 
+### Mar 10, 2025: v2.44.1
+
+- **(Beta UI)** Added a field in the View Engagement page which allows a user to navigate to the linked Jira Epic, if one exists.
+- **(Universal Parser)** XML is now a supported file type for Universal Parser.
+- **(SSO)** SSO can now be set up with any kind of [OIDC Configuration](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol).  See ODIC Settings in the Beta UI:
+
+![image](images/odic.png)
+
+### Mar 3, 2025: v2.44.0
+
+- **(Beta UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
+
+## Mar 2025: v2.44
+
 ### Mar 3, 2025: v2.44.0
 
 - **(Beta UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
