@@ -46,7 +46,7 @@ class TenableXMLParser:
         if element is None:
             return None
         if hasattr(element, "text"):
-            element_text = getattr(element, "text")
+            element_text = element.text
             if element_text is None:
                 return None
             if isinstance(element_text, str):
