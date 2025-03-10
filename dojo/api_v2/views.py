@@ -263,7 +263,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name"]
     permission_classes = (IsAuthenticated,
-                          permissions.IsAPIMaintainer,)
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Role.objects.all().order_by("id")
@@ -718,7 +718,7 @@ class RiskAcceptanceViewSet(
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasRiskAcceptancePermission,
-        permissions.IsAPIMaintainer
+        permissions.IsAPIImporter,
     )
 
     def destroy(self, request, pk=None):
@@ -2566,7 +2566,7 @@ class RegulationsViewSet(
     filterset_fields = ["id", "name", "description"]
     permission_classes = (IsAuthenticated,
                           DjangoModelPermissions,
-                          permissions.IsAPIMaintainer)
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Regulation.objects.all().order_by("id")
@@ -3268,7 +3268,7 @@ class SLAConfigurationViewset(
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated,
                           DjangoModelPermissions,
-                          permissions.IsAPIMaintainer,)
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return SLA_Configuration.objects.all().order_by("id")

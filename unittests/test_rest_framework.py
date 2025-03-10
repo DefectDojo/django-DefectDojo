@@ -448,7 +448,7 @@ class BaseClass:
             current_objects = self.endpoint_model.objects.all()
             relative_url = self.url + f"{current_objects[0].id}/"
             response = self.client.get(relative_url)
-            self.assertEqual(404, response.status_code, response.content[:1000])
+            self.assertEqual(403, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
@@ -539,8 +539,8 @@ class BaseClass:
             self.setUp_not_authorized()
 
             response = self.client.get(self.url, format="json")
-            self.assertFalse(response.data["results"])
-            self.assertEqual(200, response.status_code, response.content[:1000])
+            # self.assertFalse(response.data["results"])
+            self.assertEqual(403, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
