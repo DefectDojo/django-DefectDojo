@@ -40,3 +40,20 @@ If you need to access an API token for a script or another integration, you can 
 The **/reimport** endpoint can be used for both an initial Import, or a “Reimport” which extends a Test with additional Findings. You do not need to first create a Test with **/import** before you can use the **/reimport** endpoint. As long as ‘Auto Create Context’ is enabled, the /reimport endpoint can create a new Test, Engagement, Product or Product Type. In almost all cases, you can use the **/reimport** endpoint exclusively when adding data via API.
 
 However, the **/import** endpoint can instead be used for a pipeline where you always want to store each scan result in a discrete Test object, rather than using **/reimport** to handle the diff within a single Test object. Either option is acceptable, and the endpoint you choose depends on your reporting structure, or whether you need to inspect an isolated run of a Pipeline.
+
+### Using the Scan Completion Date (API: `scan_date`) field
+
+DefectDojo offers a plethora of supported scanner reports, but not reports them contain the information most important to a user. The `scan_date` field is a flexible smart feature that allows users to set the completion date of the a given scan report, and have it propagate down to all the findings imported.
+
+This field is **not** mandatory, but the default value for this field is the date of import (whenever the request is processed and a successful response is returned).
+
+Here are the following use cases for this field, and the results applied to the Test:
+
+1. If the report **does not** set the date, and `scan_date` is **not** set at import
+    - Finding date will be the default value of `scan_date`
+2. If the report **sets** the date, and the `scan_date` is **not** set at import
+    - Finding date will be whatever the report sets
+3. If the report **does not** set the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`
+4. If the report **sets** the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`

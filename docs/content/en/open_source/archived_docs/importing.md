@@ -45,13 +45,13 @@ That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading
 For context, see [#6892](https://github.com/DefectDojo/django-DefectDojo/issues/6892)
 
 # API
-This section focuses on Import and Reimport via the API. Please see the [full documentation details of all API Endpoints](../api-v2-docs/) for more details.
+This section focuses on Import and Reimport via the API. Please see the [full documentation details of all API Endpoints](/en/api/api-v2-docs/) for more details.
 Reimport is actually the easiest way to get started as it will create any entities on the fly if needed and it will automatically detect if it is a first time upload or a re-upload.
 
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Core Data Classes](../../usage/models/), a test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy), a test gets created inside an Engagement, inside a Product, inside a Product Type.
 
 An import can be performed by specifying the names of these entities in the API request:
 
