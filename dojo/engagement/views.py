@@ -802,7 +802,7 @@ class ImportScanResultsView(View):
             product_tab = Product_Tab(engagement.product, title="Import Scan Results", tab="engagements")
             product_tab.setEngagement(engagement)
         else:
-            custom_breadcrumb = {"", ""}
+            custom_breadcrumb = {""}
             product_tab = Product_Tab(product, title="Import Scan Results", tab="findings")
         return product_tab, custom_breadcrumb
 
