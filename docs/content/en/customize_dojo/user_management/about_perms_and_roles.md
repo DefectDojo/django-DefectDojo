@@ -40,7 +40,7 @@ Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importe
 ​
 * **API Importer** **Users** have limited abilities. This Role allows limited API access without exposing the majority of the API endpoints, so is useful for automation or users who are meant to be ‘external’ to DefectDojo. They can view underlying data, Add / Edit Engagements, and Import Scan Data.
 
-For detailed information on Roles, please see our **[Role Permission Chart](../user-permission-charts/)**.
+For detailed information on Roles, please see our **[Role Permission Chart](../user_permission_chart/)**.
 
 ### Global Roles
 

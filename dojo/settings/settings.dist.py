@@ -104,6 +104,19 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
+    DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_KEY=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_SECRET=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, []),
+    DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256", "HS256"]),
+    DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ""),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
     DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ""),
@@ -484,6 +497,7 @@ LOGIN_URL = env("DD_LOGIN_URL")
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
+    "social_core.backends.open_id_connect.OpenIdConnectAuth",
     "social_core.backends.auth0.Auth0OAuth2",
     "social_core.backends.google.GoogleOAuth2",
     "social_core.backends.okta.OktaOAuth2",
@@ -576,6 +590,31 @@ SOCIAL_AUTH_GITLAB_SCOPE = env("DD_SOCIAL_AUTH_GITLAB_SCOPE")
 if GITLAB_PROJECT_AUTO_IMPORT:
     SOCIAL_AUTH_GITLAB_SCOPE += ["read_repository"]
 
+# Mandatory settings
+OIDC_AUTH_ENABLED = env("DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED")
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
+SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
+SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")
+# Optional settings
+if value := env("DD_SOCIAL_AUTH_OIDC_ID_KEY"):
+    SOCIAL_AUTH_OIDC_ID_KEY = value
+if value := env("DD_SOCIAL_AUTH_OIDC_USERNAME_KEY"):
+    SOCIAL_AUTH_OIDC_USERNAME_KEY = value
+if value := env("DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS"):
+    SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS = env("DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS")
+if value := env("DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS"):
+    SOCIAL_AUTH_OIDC_JWT_ALGORITHMS = env("DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS")
+if value := env("DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER"):
+    SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER = value
+if value := env("DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL"):
+    SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL = value
+if value := env("DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL"):
+    SOCIAL_AUTH_OIDC_AUTHORIZATION_URL = value
+if value := env("DD_SOCIAL_AUTH_OIDC_USERINFO_URL"):
+    SOCIAL_AUTH_OIDC_USERINFO_URL = value
+if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
+    SOCIAL_AUTH_OIDC_JWKS_URI = value
+
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
 SOCIAL_AUTH_AUTH0_SECRET = env("DD_SOCIAL_AUTH_AUTH0_SECRET")
@@ -628,6 +667,7 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}api/v2/",
     r"complete/",
     r"empty_questionnaire/([\d]+)/answer",
+    r"oauth2/idpresponse",
     rf"^{URL_PREFIX}password_reset/",
     rf"^{URL_PREFIX}forgot_username",
     rf"^{URL_PREFIX}reset/",
@@ -1793,7 +1833,9 @@ VULNERABILITY_URLS = {
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
+    "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
+    "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103
     "TEMP-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
