@@ -1,5 +1,5 @@
 ---
-title: "How to setup and use webhooks"
+title: "Notification Webhooks Setup"
 weight: 1
 chapter: true
 ---
