@@ -77,6 +77,7 @@ class Permissions(IntEnum):
     Finding_Edit = 1406
     Finding_Delete = 1407
     Finding_Code_Review = 1408
+    Finding_Bulk_Close = 1409
 
     Endpoint_View = 1502
     Endpoint_Add = 1503
