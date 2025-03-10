@@ -141,8 +141,8 @@ def edit_note(request, note_id, page, objid):
         })
 
 
-def note_history(request, elem_id, page, objid):
-    note = get_object_or_404(Notes, id=elem_id)
+def note_history(request, note_id, page, objid):
+    note = get_object_or_404(Notes, id=note_id)
     reverse_url = None
     object_id = None
 

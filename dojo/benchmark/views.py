@@ -226,7 +226,7 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
                 product=product.id,
                 control__category=cat,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()
@@ -240,7 +240,7 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
             .filter(
                 product=product.id,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()
