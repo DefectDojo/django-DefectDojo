@@ -333,8 +333,12 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
     # into a seperate class, when the legacy authorization will be removed.
     path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
     path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+    path_risk_acceptance_bulk = re.compile(r"^/api/v2/risk_acceptance/\d+/accept_bulk/$")
 
     def has_permission(self, request, view):
+
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_bulk.match(request.path):
+            return user_has_global_permission(request.user, Permissions.Risk_Acceptance_Bulk) 
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
             request.path,
         ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(

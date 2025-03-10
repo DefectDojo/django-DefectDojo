@@ -718,7 +718,6 @@ class RiskAcceptanceViewSet(
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasRiskAcceptancePermission,
-        permissions.IsAPIImporter,
     )
 
     def destroy(self, request, pk=None):
