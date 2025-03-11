@@ -468,7 +468,7 @@ env = environ.FileAwareEnv(
         "team_manager",
         ]),
     # Show Filter
-    DD_SHOW_FILTERS=(str, ""),
+    DD_SHOW_FILTERS=(str, "Finding Tag,Status,Test Type,Severity,Vulnerability Id,Product Name,Tag contains,Product Type Name Contains,Name contains,Tag name contains,Title,Test Tag,Component Name,Component Version,Engagement Name,Service contains,Vulnerability ID from tool,File path contains"),
     DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, False),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
