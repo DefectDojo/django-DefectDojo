@@ -55,7 +55,7 @@ entries:
       url: https://github.com/DefectDojo/django-DefectDojo
     name: defectdojo
     urls:
-    - https://github.com/DefectDojo/django-DefectDojo/releases/download/2.44.1/defectdojo-1.6.176.tgz
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/2.44.0/defectdojo-1.6.176.tgz
     version: 1.6.176
   - apiVersion: v2
     appVersion: 2.43.4
