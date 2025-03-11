@@ -468,11 +468,7 @@ env = environ.FileAwareEnv(
         "team_manager",
         ]),
     # Show Filter
-    DD_SHOW_FILTERS=(list, [
-        "Finding Tag", "Status", "Test Type", "Severity",
-        "Vulnerability Id", "Product Name", "Tag contains",
-        "Product Type Name Contains", "Name contains",
-        "Tag name contains", "Title", "Test type", "Test Tag"]),
+    DD_SHOW_FILTERS=(str, ""),
     DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, False),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
@@ -2229,7 +2225,7 @@ BLACKLIST_FILTER_TAGS = env("DD_BLACKLIST_FILTER_TAGS")
 # exclusive permission
 CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
-SHOW_FILTERS = env("DD_SHOW_FILTERS")
+SHOW_FILTERS = env("DD_SHOW_FILTERS").split(",")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
