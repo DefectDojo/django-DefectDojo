@@ -10,11 +10,16 @@ pro-feature: true
 
 The Universal Parser is currently in Beta.  See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
 
+## About Universal Parser
+DefectDojo has a large, regularly updated library of parsers to help security teams ingest data.  However, sometimes users have a tool that's unsupported by the parsers, or they may want to import data into the DefectDojo model differently from the way the parser does.
+
+DefectDojo's Universal Parser is meant to give our users with unsupported report types a path forward, to import and map **any JSON, CSV or XML file**.
+
 **The Universal Parser is:**
 
 * A quick way to support file formats for which we do not have Community parsers, such as reports produced by internal tools
-* A tool to help you ingest data even if a Community parser is out-of-date or doesn't structure findings the way you would like
-* An alternative to custom scripting that transforms tool reports into the CSV/JSON format expected by the "Generic Findings Import" scan type
+* A tool to help you ingest data, even if a Community parser is out-of-date or doesn't structure findings the way you would like
+* An alternative to custom scripting to transform tool reports into the CSV/JSON format expected by the "Generic Findings Import" scan type
 * Designed to be easy to use for anyone, with no coding and minimal configuration required
 
 **The Universal Parser is not:**
