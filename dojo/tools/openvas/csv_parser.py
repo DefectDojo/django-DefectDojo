@@ -118,8 +118,9 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         if not finding.unsaved_endpoints[
             0
-        ].host:  # process only if host is not already defined (by field hostname)
-            finding.unsaved_endpoints[0].host = column_value
+        ].host and column_value is not None:  # process only if host is not already defined (by field hostname)
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
+            finding.unsaved_endpoints[0].host = column_value.strip()
 
 
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
@@ -129,7 +130,8 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
-            finding.unsaved_endpoints[0].host = column_value
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
+            finding.unsaved_endpoints[0].host = column_value.strip()
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -278,6 +280,7 @@ class OpenVASCSVParser:
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_endpoints = [Endpoint()]
+            ip = None
             if row_number == 0:
                 column_names = self.read_column_names(row)
                 continue
@@ -285,6 +288,13 @@ class OpenVASCSVParser:
                 chain.process_column(
                     column_names[column_number], column, finding,
                 )
+                # due to the way this parser is implemented we have to do this stuff to retrieve a value for later use
+                if column_names[column_number].lower() == "ip":
+                    ip = column
+
+            if ip:
+                finding.description += f"\n**IP**: {ip}"
+
             if finding is not None and row_number > 0:
                 if finding.title is None:
                     finding.title = ""
