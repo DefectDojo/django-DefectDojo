@@ -13,6 +13,9 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
+      platform:
+        type: string
+        default: "linux/amd64"
   workflow_call:
     inputs:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
@@ -21,15 +24,30 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
+      platform:
+        type: string
+        default: "linux/amd64"
 
 jobs:
   job-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
           docker-image: [django, nginx]
           os: [alpine, debian]
     steps:
+      # Replace slashes so we can use this in filenames
+      - name: Set-platform
+        run: |
+          platform=${{ inputs.platform }}
+          echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
+
+        # deduce docker org name from git repo to make the build also work in forks
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Login to DockerHub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -41,35 +59,34 @@ jobs:
         with:
           ref: ${{ github.event.inputs.release_number }}
 
-      - id: set-repo-org
-        run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
-      - name: Build and push images with debian
-        if: ${{ matrix.os  == 'debian' }}
+        # we cannot set any tags here, those are set on the merged digest in release-x-manual-merge-container-digests.yml
+      - name: Build and push images
+        id: build
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         env:
           DOCKER_BUILD_CHECKS_ANNOTATIONS: false
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
+          outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
 
-      - name: Build and push images with alpine
-        if: ${{ matrix.os  == 'alpine' }}
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        env:
-          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
+        # export the digest to a file
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+        # upload the digest file as artifact
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
         with:
-          push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
-          context: .
+          name: digests-${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
