@@ -4,22 +4,22 @@ from . import views
 
 urlpatterns = [
     re_path(
-        r"^benchmark/(?P<pid>\d+)/type/(?P<type>\d+)$",
+        r"^benchmark/(?P<pid>\d+)/type/(?P<benchmark_type>\d+)$",
         views.benchmark_view,
         name="view_product_benchmark",
     ),
     re_path(
-        r"^benchmark/(?P<pid>\d+)/type/(?P<type>\d+)/category/(?P<cat>\d+)$",
+        r"^benchmark/(?P<pid>\d+)/type/(?P<benchmark_type>\d+)/category/(?P<cat>\d+)$",
         views.benchmark_view,
         name="view_product_benchmark",
     ),
     re_path(
-        r"^benchmark/(?P<pid>\d+)/type/(?P<type>\d+)/category/(?P<cat>\d+)/edit/(?P<bid>\d+)$",
+        r"^benchmark/(?P<pid>\d+)/type/(?P<benchmark_type>\d+)/category/(?P<cat>\d+)/edit/(?P<bid>\d+)$",
         views.benchmark_view,
         name="edit_benchmark",
     ),
     re_path(
-        r"^benchmark/(?P<pid>\d+)/type/(?P<type>\d+)/delete$",
+        r"^benchmark/(?P<pid>\d+)/type/(?P<benchmark_type>\d+)/delete$",
         views.delete,
         name="delete_product_benchmark",
     ),

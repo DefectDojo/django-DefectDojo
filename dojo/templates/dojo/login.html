@@ -47,6 +47,12 @@
                 {% endif %}
             </div>
             <div class="form-group">
+                {% if OIDC_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255, 255, 255)" class="btn btn-success" type="button">{% trans "Login with OIDC" %}</a>
+                    </div>
+                {% endif %}
+
                 {% if GOOGLE_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Google" %}</a>
