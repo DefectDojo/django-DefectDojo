@@ -410,7 +410,7 @@ def colgroup(parser, token):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=True)
             return ""
 
     try:

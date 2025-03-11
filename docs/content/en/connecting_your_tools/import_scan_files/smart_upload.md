@@ -4,6 +4,8 @@ description: "Automatically route incoming Findings to the correct Product"
 weight: 3
 ---
 
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Smart Upload is only available in DefectDojo Pro.</span>
+
 Smart upload is a specialized importer that ingests reports from **infrastructure scanning tools**, including:
 
 * Nexpose

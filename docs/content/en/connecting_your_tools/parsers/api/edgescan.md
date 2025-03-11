@@ -2,7 +2,7 @@
 title: "Edgescan"
 toc_hide: true
 ---
-Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan.md)
+Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan).
 
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 
