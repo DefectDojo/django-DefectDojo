@@ -53,3 +53,16 @@ Total Fields in CSV: 17
 * Impact field is specially formatted to combine vulnerability insight and CVE details
 * Date parsing handles various formats and falls back to current time
 * Port extraction handles various formats like "8080/tcp" or "443/tcp (https)"
+
+### File Types
+The Rapidfire parser accepts CSV files exported from Rapidfire vulnerability scanner. The CSV should contain vulnerability findings with fields including IP address, hostname, severity, issue details, CVEs, and other metadata.
+
+### Sample Scan Data
+Sample scan data for the Rapidfire CSV parser can be found in the [unittests/scans/rapidfire](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/rapidfire) directory. 
+There are samples for:
+* `one_vuln.csv` - A file containing a single vulnerability finding
+* `many_vulns.csv` - A file containing multiple vulnerability findings
+* `no_vuln.csv` - An empty scan with no vulnerabilities
+
+### Link To Tool
+Rapidfire is a commercial vulnerability scanning tool used for network and application security assessments. For more information, visit the vendor's website [www.rapidfire.com](https://www.rapidfire.com/).
