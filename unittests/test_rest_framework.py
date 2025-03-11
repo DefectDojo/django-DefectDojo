@@ -539,7 +539,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             response = self.client.get(self.url, format="json")
-            # self.assertFalse(response.data["results"])
+            self.assertFalse(response.data["results"])
             self.assertEqual(200, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(ListModelMixin)
