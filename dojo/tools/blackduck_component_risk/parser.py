@@ -302,8 +302,7 @@ class BlackduckComponentRiskParser:
         """
         max_impact = 0.0
         for vuln in vulns:
-            if float(vuln["Impact"]) > max_impact:
-                max_impact = float(vuln["Impact"])
+            max_impact = max(max_impact, float(vuln["Impact"]))
         return max_impact
 
     def security_references(self, vulns):

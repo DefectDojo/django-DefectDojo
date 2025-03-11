@@ -476,8 +476,7 @@ class WebdriverOnlyNewLogFacade:
 
                 # save the last timestamp only if newer
                 # in this set of logs
-                if entry["timestamp"] > last_timestamp:
-                    last_timestamp = entry["timestamp"]
+                last_timestamp = max(last_timestamp, entry["timestamp"])
 
         # store the very last timestamp
         self.last_timestamp = last_timestamp
