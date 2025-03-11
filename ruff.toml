@@ -85,6 +85,7 @@ select = [
    "FURB",
    "DOC202", "DOC403", "DOC502",
    "RUF",
+   "B905",
 ]
 ignore = [
     "E501",
