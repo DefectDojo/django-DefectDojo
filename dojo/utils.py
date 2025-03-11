@@ -2633,8 +2633,8 @@ def get_open_findings_burndown(product):
                         info_count -= 1
 
         f_day = [critical_count, high_count, medium_count, low_count, info_count]
-        running_min = min(running_min, f_day)
-        running_max = max(running_max, f_day)
+        running_min = min(*running_min, f_day)
+        running_max = max(*running_max, f_day)
 
         past_90_days["Critical"].append([d_start * 1000, critical_count])
         past_90_days["High"].append([d_start * 1000, high_count])
