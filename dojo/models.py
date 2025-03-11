@@ -101,8 +101,10 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     return stats
 
 
-def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=[]):
+def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
     # get copies of the current tag lists
+    if potentially_existing_tags is None:
+        potentially_existing_tags = []
     current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
     tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
     # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
@@ -123,7 +125,9 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
-def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
+def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
+    if exclude_fields is None:
+        exclude_fields = []
     new_model_instance = model_in_database.__class__()
     for field in model_in_database._meta.fields:
         if field.name not in {"id", *exclude_fields}:
