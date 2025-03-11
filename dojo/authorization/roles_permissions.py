@@ -77,6 +77,7 @@ class Permissions(IntEnum):
     Finding_Edit = 1406
     Finding_Delete = 1407
     Finding_Code_Review = 1408
+    Finding_Bulk_Close = 1409
 
     Endpoint_View = 1502
     Endpoint_Add = 1503
@@ -531,6 +532,7 @@ def get_roles_with_permissions():
             Permissions.Api_v2_Key,
             Permissions.Defect_Dojo_Documentation,
             Permissions.Finding_Code_Review,
+            Permissions.Finding_Bulk_Close,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,

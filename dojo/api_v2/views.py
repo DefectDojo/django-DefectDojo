@@ -32,7 +32,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated 
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -262,7 +262,8 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Role.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name"]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Role.objects.all().order_by("id")
@@ -2562,7 +2563,9 @@ class RegulationsViewSet(
     queryset = Regulation.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated,
+                          DjangoModelPermissions,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Regulation.objects.all().order_by("id")
@@ -3262,7 +3265,9 @@ class SLAConfigurationViewset(
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated,
+                          DjangoModelPermissions,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return SLA_Configuration.objects.all().order_by("id")

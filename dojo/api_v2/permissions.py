@@ -333,8 +333,12 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
     # into a seperate class, when the legacy authorization will be removed.
     path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
     path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+    path_risk_acceptance_bulk = re.compile(r"^/api/v2/risk_acceptance/\d+/accept_bulk/$")
 
     def has_permission(self, request, view):
+
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_bulk.match(request.path):
+            return user_has_global_permission(request.user, Permissions.Risk_Acceptance_Bulk) 
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
             request.path,
         ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
@@ -376,8 +380,13 @@ class UserHasFindingPermission(permissions.BasePermission):
     path_finding = re.compile(r"^/api/v2/findings/\d+/$")
     path_stub_finding_post = re.compile(r"^/api/v2/stub_findings/$")
     path_stub_finding = re.compile(r"^/api/v2/stub_findings/\d+/$")
+    path_finding_bulk_close = re.compile(r"^/api/v2/findings/bulk_close/$")
 
     def has_permission(self, request, view):
+        if UserHasFindingPermission.path_finding_bulk_close.match(request.path):
+            return user_has_global_permission(
+                request.user,
+                permission=Permissions.Finding_Bulk_Close)
         if (
             UserHasFindingPermission.path_finding_post.match(request.path)
             or UserHasFindingPermission.path_finding.match(request.path)
@@ -1085,13 +1094,8 @@ class IsAPIImporter(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
-        if request.user.global_role:
-            if request.user.global_role.role.name == 'API_Importer':
-                return True
-            if request.user.global_role.role.name == 'Maintainer':
-                return True
-        else:
-            return False
-        
-        # If you have a global role but it is not API_Importer or Maintainer.
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                if request.user.global_role.role.name in ["API_Importer", "Maintainer"]:
+                    return True
         return False
