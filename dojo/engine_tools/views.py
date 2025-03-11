@@ -110,7 +110,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 
                 create_notification(
                     event="finding_exclusion_request",
-                    subject=f"🙋‍♂️New {list_type} Request for the vulnerability {cve} 🙏",
+                    subject=f"🙋‍♂️New {list_type} Request for the CVE: {cve} 🙏",
                     title=f"A new request has been created to add {cve} to the {list_type}.",
                     description=f"A new request has been created to add {cve} to the {list_type}.",
                     url=reverse("finding_exclusion", args=[str(exclusion.pk)]),

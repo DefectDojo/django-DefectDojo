@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
+from datetime import timedelta
 from celery.utils.log import get_task_logger
 from enum import Enum
 from io import StringIO
@@ -65,6 +66,46 @@ def has_valid_comments(finding_exclusion, user) -> bool:
     return False
 
 
+@app.task
+def add_findings_to_whitelist(unique_id_from_tool, relative_url):
+    findings_to_update = Finding.objects.filter(
+        Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
+        active=True
+    ).exclude(
+        risk_status=Constants.ON_WHITELIST.value
+    ).filter(tag_filter)
+    
+    if findings_to_update.exists():
+        finding_exclusion_url = get_full_url(relative_url)
+        system_user = get_user(settings.SYSTEM_USER)
+        message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
+        note = get_note(system_user, message)
+    
+    for finding in findings_to_update:
+        if 'white_list' not in finding.tags:
+            finding.tags.add("white_list")
+        finding.active = False
+        finding.notes.add(note)
+        finding.risk_status = Constants.ON_WHITELIST.value
+        
+    Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
+    logger.info(f"{findings_to_update.count()} findings added to whitelist.")
+
+
+def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) -> None:
+    finding_exclusion.status = "Accepted"
+    finding_exclusion.final_status = "Accepted"
+    finding_exclusion.accepted_at = timezone.now()
+    finding_exclusion.accepted_by = get_user(settings.SYSTEM_USER)
+    finding_exclusion.status_updated_at = timezone.now()
+    finding_exclusion.status_updated_by = get_user(settings.SYSTEM_USER)
+    finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
+    finding_exclusion.save()
+    
+    relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+    add_findings_to_whitelist.apply_async(args=(finding_exclusion.unique_id_from_tool, str(relative_url),))
+    
+
 def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion, message: str) -> None:
     email_notification_manager = EmailNotificationManger()
     recipient = None
@@ -76,7 +117,12 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion, message: str
         if key in practice:
             recipient = value
     
+    # The practice is not in the list of providers
     if not recipient:
+        # Set approve status inmediately
+        if finding_exclusion.type == "white_list":
+            accept_finding_exclusion_inmediately(finding_exclusion)
+        
         return
     
     devsecops_email = cyber_providers.get("devsecops", "")
@@ -119,11 +165,12 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             note = get_note(system_user, f"Finding has been removed from the {expired_fex.type} as it has expired.")
             
             is_active = True if expired_fex.type == "black_list" else False
+            risk_status = Constants.ON_BLACKLIST.value if expired_fex.type == "black_list" else Constants.ON_WHITELIST.value
             
             findings = Finding.objects.filter(
                 Q(cve=expired_fex.unique_id_from_tool) | Q(vuln_id_from_tool=expired_fex.unique_id_from_tool),
                 active=is_active,
-                tags__name__icontains=expired_fex.type
+                risk_status=risk_status
             ).prefetch_related("tags", "notes")
             
             findings_to_update = []
@@ -168,33 +215,7 @@ def check_expiring_findingexclusions():
     
     for expired_fex in expired_finding_exclusions:
         expire_finding_exclusion.apply_async(args=(str(expired_fex.uuid),))
-        
-
-@app.task
-def add_findings_to_whitelist(unique_id_from_tool, relative_url):
-    findings_to_update = Finding.objects.filter(
-        Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
-        active=True
-    ).exclude(
-        risk_status=Constants.ON_WHITELIST.value
-    ).filter(tag_filter)
-    
-    if findings_to_update.exists():
-        finding_exclusion_url = get_full_url(relative_url)
-        system_user = get_user(settings.SYSTEM_USER)
-        message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
-        note = get_note(system_user, message)
-    
-    for finding in findings_to_update:
-        if 'white_list' not in finding.tags:
-            finding.tags.add("white_list")
-        finding.active = False
-        finding.notes.add(note)
-        finding.risk_status = Constants.ON_WHITELIST.value
-        
-    Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
-    logger.info(f"{findings_to_update.count()} findings added to whitelist.")
-    
+            
 
 @app.task
 def check_new_findings_to_exclusion_list():
@@ -240,7 +261,7 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
         blacklist_message = f"{findings_to_update_count} findings added to the blacklist. CVE: {unique_id_from_tool}."
         create_notification(
             event="finding_exclusion_request",
-            subject="✅Findings added to blacklist",
+            subject=f"✅Findings added to blacklist with the CVE: {unique_id_from_tool}",
             title=blacklist_message,
             description=blacklist_message,
             url=relative_url,
@@ -467,11 +488,12 @@ def remove_findings_from_deleted_finding_exclusions(unique_id_from_tool: str, fx
             note = get_note(system_user, f"Finding has been removed from the {fx_type} as it has deleted.")
             
             is_active = True if fx_type == "black_list" else False
+            risk_status = Constants.ON_BLACKLIST.value if fx_type == "black_list" else Constants.ON_WHITELIST.value
             
             findings = Finding.objects.filter(
                 Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
                 active=is_active,
-                tags__name__icontains=fx_type
+                risk_status=risk_status
             ).prefetch_related("tags", "notes")
             
             findings_to_update = []
