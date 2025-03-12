@@ -40,12 +40,12 @@ class OrtParser:
 
         return tree
 
-    def get_items(self, evaluatedmodel, test):
+    def get_items(self, evaluated_model, test):
         items = {}
-        packages = evaluatedmodel["packages"]
-        dependency_trees = evaluatedmodel["dependency_trees"]
-        rule_violations = evaluatedmodel["rule_violations"]
-        licenses = evaluatedmodel["licenses"]
+        packages = evaluated_model["packages"]
+        dependency_trees = evaluated_model["dependency_trees"]
+        rule_violations = evaluated_model["rule_violations"]
+        licenses = evaluated_model["licenses"]
         rule_violations_unresolved = get_unresolved_rule_violations(
             rule_violations,
         )
