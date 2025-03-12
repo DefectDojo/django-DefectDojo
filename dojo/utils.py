@@ -2228,17 +2228,18 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     the first X items.
     """
     # force ordering by id to make our paging work
-    last_id = None
+    last_id = 0
     models = models.order_by()
     if order == "asc":
         logger.debug("ordering ascending")
         models = models.order_by("id")
-        last_id = 0
     elif order == "desc":
         logger.debug("ordering descending")
         models = models.order_by("-id")
         # get maximum, which is the first due to descending order
-        last_id = models.first().id + 1
+        first = models.first()
+        if first:
+            last_id = models.first().id + 1
     else:
         msg = "order must be asc or desc"
         raise ValueError(msg)
