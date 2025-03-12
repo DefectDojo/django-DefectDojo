@@ -107,9 +107,8 @@ our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). F
 
 ## Contributing
 
-:warning: We have instituted a [feature freeze](https://github.com/DefectDojo/django-DefectDojo/discussions/8002) on v2
-of DefectDojo as we begin work on v3. Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
-information. Check out our latest update on v3 [here](https://github.com/DefectDojo/django-DefectDojo/discussions/11199).
+Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
+information.
 
 ## Pro Edition
 [Upgrade to DefectDojo Pro](https://www.defectdojo.com/) today to take your DevSecOps to 11. DefectDojo Pro is
