@@ -141,11 +141,5 @@ def can_add_product(user):
 
 
 @register.filter
-def show_filter(filter, user):
-    if user.is_superuser:
-        return True
-    if hasattr(user, "global_role"):
-        if user.global_role.role:
-            if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
-                return True
+def show_filter(filter):
     return filter in settings.SHOW_FILTERS

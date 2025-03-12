@@ -17,7 +17,7 @@
         {% endfor %}
         <div class="container-fluid filter-form-group">
                 {% for field in form.visible_fields %}
-                    {% if field.label|show_filter:request.user%}
+                    {% if field.label|show_filter%}
                     <div class="col-lg-3 col-md-4 col-sm-6 col-12">
                         <div class="filter-form-input" style="min-width: 0;">
                             <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
