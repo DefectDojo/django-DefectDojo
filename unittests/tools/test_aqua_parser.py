@@ -117,13 +117,13 @@ class TestAquaParser(DojoTestCase):
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
-            
+
     def test_aqua_parser_over_api_v2(self):
         with open(get_unit_tests_scans_path("aqua") / "over_api_v2.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(99, len(findings))
-            
+
     def test_aqua_parser_over_api_v2_empty(self):
         with open(get_unit_tests_scans_path("aqua") / "over_api_v2_empty.json", encoding="utf-8") as testfile:
             parser = AquaParser()

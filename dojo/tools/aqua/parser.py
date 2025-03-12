@@ -142,10 +142,11 @@ class AquaParser:
 
     def result_tree(self, resulttree, test):
         for vuln in resulttree:
-            resource = vuln.get("resource")     
+            resource = vuln.get("resource")
             item = get_item(resource, vuln, test)
             unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
             self.items[unique_key] = item
+
 
 def get_item(resource, vuln, test):
     resource_name = resource.get("name", resource.get("path"))
