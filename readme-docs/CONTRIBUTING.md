@@ -18,7 +18,7 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
-## Submission Pre-Approval -- DefectDojo is Feature Complete
+## Submission Pre-Approval
 
 We don't want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria
 for approval, please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
