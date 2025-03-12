@@ -8,7 +8,7 @@ assignees: ''
 ---
 ## :warning: Note on feature completeness :warning:
 
-We are narrowing the scope of acceptable enhancements to DefectDojo in preparation for v3. Learn more here:
+We are narrowing the scope of acceptable enhancements to DefectDojo. Learn more here:
 https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md
 
 **Is your feature request related to a problem? Please describe**
