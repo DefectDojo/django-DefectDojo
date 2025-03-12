@@ -101,17 +101,17 @@ class NexposeParser:
 
         return ret
 
-    def parse_tests_type(self, node, vulnsDefinitions):
+    def parse_tests_type(self, node, vulnsdefinitions):
         """
         Parse XML element of type TestsType
 
-        @return vulns A list of vulnerabilities according to vulnsDefinitions
+        @return vulns A list of vulnerabilities according to vulnsdefinitions
         """
         vulns = []
 
         for tests in node.findall("tests"):
             for test in tests.findall("test"):
-                if test.get("id") in vulnsDefinitions and (
+                if test.get("id") in vulnsdefinitions and (
                     test.get("status")
                     in {
                         "vulnerable-exploited",
@@ -119,7 +119,7 @@ class NexposeParser:
                         "vulnerable-potential",
                     }
                 ):
-                    vuln = vulnsDefinitions[test.get("id").lower()]
+                    vuln = vulnsdefinitions[test.get("id").lower()]
                     for desc in list(test):
                         if "pluginOutput" in vuln:
                             vuln[

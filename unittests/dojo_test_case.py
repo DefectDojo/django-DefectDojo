@@ -508,7 +508,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None, forceActive=True, forceVerified=True):
+                                scan_date=None, service=None, forceactive=True, forceverified=True):
 
         with open(get_unit_tests_path() / filename, encoding="utf-8") as testfile:
             payload = {

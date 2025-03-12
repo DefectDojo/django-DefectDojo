@@ -133,10 +133,10 @@ class WizcliParsers:
         return findings
 
     @staticmethod
-    def parse_os_packages(osPackages, test):
+    def parse_os_packages(ospackages, test):
         findings = []
-        if osPackages:
-            for osPackage in osPackages:
+        if ospackages:
+            for osPackage in ospackages:
                 pkg_name = osPackage.get("name", "N/A")
                 pkg_version = osPackage.get("version", "N/A")
                 vulnerabilities = osPackage.get("vulnerabilities", [])

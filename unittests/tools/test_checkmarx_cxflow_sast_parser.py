@@ -7,8 +7,8 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestCheckmarxCxflowSast(DojoTestCase):
 
-    def init(self, reportFilename):
-        my_file_handle = open(reportFilename, encoding="utf-8")
+    def init(self, reportfilename):
+        my_file_handle = open(reportfilename, encoding="utf-8")
         product = Product()
         engagement = Engagement()
         test = Test()

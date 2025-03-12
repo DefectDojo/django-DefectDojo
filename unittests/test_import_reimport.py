@@ -366,7 +366,7 @@ class ImportReimportMixin:
         logger.debug("reimporting exact same original veracode mitigated xml report again")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
-                                                                     verified=True, forceActive=True, forceVerified=True)
+                                                                     verified=True, forceactive=True, forceverified=True)
 
         test_id = import_veracode_many_findings["test"]
 
@@ -1808,16 +1808,16 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def import_scan_with_params_ui(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                    push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
-                                   forceActive=False, forceVerified=False):
+                                   forceactive=False, forceverified=False):
 
         activePayload = "not_specified"
-        if forceActive:
+        if forceactive:
             activePayload = "force_to_true"
         elif not active:
             activePayload = "force_to_false"
 
         verifiedPayload = "not_specified"
-        if forceVerified:
+        if forceverified:
             verifiedPayload = "force_to_true"
         elif not verified:
             verifiedPayload = "force_to_false"
