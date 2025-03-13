@@ -1513,10 +1513,9 @@ def add_transfer_finding(request, eid, fid=None):
                     obj_finding.risk_status = "Transfer Pending"
                     obj_finding.save()
                     transfer_finding_finding.save()
-                    logger.debug("Risk Transfer created {transfer_finding_finding.name}")
+                    logger.debug(f"Transfer fiding finding created: {transfer_finding_finding.id}")
                     # Create notification
                 TransferFindingsNotification.transfer_finding_request(transfer_findings)
-                logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
                 logger.debug(vars(request.POST))

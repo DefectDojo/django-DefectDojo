@@ -3443,7 +3443,27 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
         data = request.data
         serializer = TransferFindingFindingCreateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            transfer_finding_request = serializer.validated_data["transfer_findings"]
+            destination_engagement = transfer_finding_request.destination_engagement
+            for finding in serializer.validated_data["findings"]:
+                if finding.risk_status != "Risk Active":
+                    raise ApiError.precondition_required("The finding status must be Risk Active, Finding ID: " + str(finding.id))
+                if TransferFindingFinding.objects.filter(findings=finding.id).exists():
+                    raise ApiError.precondition_required(
+                        "It is not possible to transfer to a finding that has already been transferred." +
+                        f"Finding {finding.id} is already transferred")
+                if finding.test.engagement.id == destination_engagement.id:
+                    raise ApiError.precondition_required(
+                        "It is not possible to transfer to a finding the same engagement." +
+                        f"Finding {finding.id}, engagment_id: {destination_engagement.id}",)
+                transfer_finding_finding = TransferFindingFinding.objects.create(
+                    findings=finding,
+                    transfer_findings=transfer_finding_request,
+                    finding_related=serializer.validated_data.get("finding_related", None))
+                finding.risk_status = "Transfer Pending"
+                finding.save()
+                transfer_finding_finding.save()
+                logger.debug(f"Transfer_finding_findings created: {transfer_finding_finding.id}")
         else:
             return http_response.bad_request(data=serializer.errors)
         return http_response.created(message="Transfer Finding Finding Created", data=serializer.data)
