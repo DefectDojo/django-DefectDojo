@@ -1,0 +1,21 @@
+{
+    "count": 0,
+    "page": 1,
+    "pagesize": 50,
+    "result": [],
+    "query": {
+        "page_size": 50,
+        "page": 1,
+        "show_negligible": true,
+        "use_cvss3": true,
+        "include_vpatch_info": true,
+        "image_name": "helloworld:latest",
+        "image_name_exact_match": true,
+        "registry_name": "myRegistry",
+        "columns_name": "legacy_columns",
+        "first_found_date": ""
+    },
+    "more_data_all_pages": 0,
+    "is_estimated_count": false,
+    "is_partial_data": false
+}

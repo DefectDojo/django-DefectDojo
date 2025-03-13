@@ -107,13 +107,16 @@ class AquaParser:
 
     def get_items(self, tree, test):
         self.items = {}
-        if isinstance(tree, list):  # Aqua Scan Report coming from Azure Devops jobs.
+        if isinstance(tree, list):  # Aqua Scan Report coming from Azure Devops jobs (Windows based image)
             vulnerabilitytree = tree[0]["results"]["resources"] if tree else []
             self.vulnerability_tree(vulnerabilitytree, test)
-        elif "resources" in tree:  # Aqua Scan Report not from Azure Devops jobs.
+        elif "resources" in tree:   # CICD Scan Report
             vulnerabilitytree = tree["resources"]
             self.vulnerability_tree(vulnerabilitytree, test)
-        elif "cves" in tree:       # Aqua Scan Report not from Azure Devops jobs.
+        elif "result" in tree:     # Aqua Scan Report from apiv2
+            resulttree = tree["result"]
+            self.result_tree(resulttree, test)
+        elif "cves" in tree:       # Aqua Scan Report from apiv1
             for cve in tree["cves"]:
                 unique_key = cve.get("file") + cve.get("name")
                 self.items[unique_key] = get_item_v2(cve, test)
@@ -136,6 +139,13 @@ class AquaParser:
                 item = get_item_sensitive_data(resource, sensitive_item, test)
                 unique_key = resource.get("cpe") + resource.get("path", "None") + str(sensitive_item)
                 self.items[unique_key] = item
+
+    def result_tree(self, resulttree, test):
+        for vuln in resulttree:
+            resource = vuln.get("resource")
+            item = get_item(resource, vuln, test)
+            unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+            self.items[unique_key] = item
 
 
 def get_item(resource, vuln, test):
