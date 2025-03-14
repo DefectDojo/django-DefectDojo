@@ -144,7 +144,6 @@ Make sure you write down the first password generated as you'll need it when re-
 ## Option to change the password
 * If you dont have admin password use the below command to change the password.
 * After starting the container and open another tab in the same folder.
-* django-defectdojo-uwsgi-1 -- name obtained from running containers using ```zsh docker ps ``` command
 
 ```zsh
 docker compose exec -it uwsgi ./manage.py changepassword admin
