@@ -21,7 +21,7 @@ class PipelineTest(DojoTestCase):
         settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS = (
             "[A-Za-z0-9]+.\\s-\\s.+//^(CDE|EVC)\\s.*//{\"LiderTeam2\":\"product_type_manager\"}"
         )
-        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2,office3,office4"
+        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2,office3,office4,office5"
         settings.AZURE_DEVOPS_JOBS_TITLE = "job1,jobleader-job3-job4,test"
 
     def dummy_search_azure_groups(self, *args, **kwargs):
