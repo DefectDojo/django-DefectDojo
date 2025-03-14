@@ -2,7 +2,7 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. 
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation.
 
 [Running in Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
 
@@ -147,7 +147,7 @@ Make sure you write down the first password generated as you'll need it when re-
 * django-defectdojo-uwsgi-1 -- name obtained from running containers using ```zsh docker ps ``` command
 
 ```zsh
-docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
+docker compose exec -it uwsgi ./manage.py changepassword admin
 ```
 
 # Logging
@@ -231,7 +231,7 @@ To secure the application by https, follow those steps
         ssl_certificate             /etc/nginx/ssl/nginx.crt
         ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
-*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml 
+*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
 * Protect your private key from other users:
 ```
 chmod 400 nginx/*.key
@@ -286,7 +286,7 @@ If you want to enter the container to run more tests or a single test case, leav
 docker/setEnv.sh dev
 docker compose up
 ```
-Then 
+Then
 ```
 docker ps
 #find the name of the uwsgi container from the above command
@@ -310,7 +310,7 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class. 
+For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class.
 You will need to provide a test case (`--test-case`). Example:
 
 ```
@@ -329,7 +329,7 @@ NB: the first time you run it, initializing the database may be too long for the
 
 Check the logs with:
 ```
-docker logs -f django-defectdojo_integration-tests_1
+docker compose logs -f integration-tests
 ```
 
 # Checking Docker versions
