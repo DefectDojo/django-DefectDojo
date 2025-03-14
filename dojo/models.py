@@ -847,7 +847,7 @@ class Product_Type(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
-    
+
     def get_contacts(self):
         return {
             "product_type_manager": self.product_type_manager,
@@ -1235,7 +1235,7 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
-    
+
     def get_contacts(self):
         return {
             "product_manager": self.product_manager,
@@ -1343,7 +1343,7 @@ class Product(models.Model):
         for i in findings:
             findings_list.append(i.id)
         return findings_list
-    
+
 
     @property
     def has_jira_configured(self):
@@ -2618,9 +2618,9 @@ class Finding(models.Model):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the affected component."))
-    component = models.ForeignKey(Component, 
-                                  on_delete=models.SET_NULL, 
-                                  blank=True, 
+    component = models.ForeignKey(Component,
+                                  on_delete=models.SET_NULL,
+                                  blank=True,
                                   null=True,
                                   help_text=_("Reference to the component"))
     found_by = models.ManyToManyField(Test_Type,
@@ -2720,7 +2720,7 @@ class Finding(models.Model):
                                 blank=True,
                                 default=0.0,
                                 )
-    
+
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
@@ -2904,7 +2904,7 @@ class Finding(models.Model):
             return ras[0]
 
         return None
-    
+
     @property
     def transfer_finding(self):
         if self.findings:
@@ -3540,7 +3540,7 @@ class TransferFinding(models.Model):
         blank=True,
         null=True,
         help_text=_("Destination Product name"))
-    
+
     destination_engagement = models.ForeignKey(
         Engagement,
         related_name="destination_engagement",
@@ -3582,7 +3582,7 @@ class TransferFinding(models.Model):
         null=True,
         on_delete=models.CASCADE,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
-    
+
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_('When the Transfer-Finding expires, the findings will be reactivated (unless disabled below).'))
     expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) Date at which notice about the transfer-finding expiration was sent.'))
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) When the transfer-finding expiration was handled (manually or by the daily job).'))
@@ -3878,13 +3878,8 @@ class Risk_Acceptance(models.Model):
     TREATMENT_FIX = "F"
     TREATMENT_TRANSFER = "T"
 
-    SEVERITY_CHOICES = [("Critial", "Critical"),
-                        ("Hight", "Hight"),
-                        ("Medium", "Medium"),
-                        ("Low", "Low")]
-
-    SEVERITY_CHOICES = [("Critial", "Critical"),
-                        ("Hight", "Hight"),
+    SEVERITY_CHOICES = [("Critical", "Critical"),
+                        ("High", "High"),
                         ("Medium", "Medium"),
                         ("Low", "Low")]
 
@@ -4904,11 +4899,11 @@ class PermissionKey(models.Model):
 
     def is_active(self):
         return self.status
-    
+
     def expire(self):
         self.status = False
 
-    
+
     @classmethod
     def create_token(
         cls,
@@ -4937,15 +4932,15 @@ class PermissionKey(models.Model):
                 expiration=expiration)
 
         return permissionkey
-    
-    @classmethod 
+
+    @classmethod
     def get_token(cls, risk_acceptance: Risk_Acceptance, user: Dojo_User):
         try:
             permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
                                             user=user)
         except ObjectDoesNotExist as e:
             logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
-            raise e 
+            raise e
         return permission_key
 
 
@@ -4953,33 +4948,33 @@ class ExclusivePermission(models.Model):
     name = models.CharField(max_length=50,
                            unique=True,
                            blank=True,
-                           help_text=_("name permission")) 
+                           help_text=_("name permission"))
     short_name = models.CharField(max_length=50,
                            blank=True,
                            null=True,
-                           help_text=_("name permission")) 
+                           help_text=_("name permission"))
     description = models.CharField(max_length=128,
                                   help_text=_("Short permit description"),
                                   null=True,
-                                  blank=True) 
+                                  blank=True)
     validation_field = models.CharField(max_length=250,
                                   help_text=_("Validation Field"),
                                   null=True,
-                                  blank=True) 
+                                  blank=True)
     status = models.BooleanField(
         default=True,
         help_text=_("Status of the permission"))
     members = models.ManyToManyField(Product_Member,
                                     related_name="exclusive_permission_product",
                                     blank=True)
-    
+
     class Meta:
         verbose_name = _("Exclusive Permission")
         verbose_name_plural = _("Exclusive Permissions")
 
     def __str__(self):
         return self.description
-    
+
     @classmethod
     def get_validation_field(cls, name: str) -> str:
         try:
@@ -4988,7 +4983,7 @@ class ExclusivePermission(models.Model):
             logger.error(f"Exclusive permission {name} not found")
             raise e
         return permission.validation_field
-    
+
     def is_active(self):
         return self.status
 
