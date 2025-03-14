@@ -29,6 +29,7 @@ class TransferFindingFindingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TransferFindingFindingCreateSerializer(serializers.ModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=True, required=True)
     class Meta:
         model = TransferFindingFinding
         fields = '__all__'
