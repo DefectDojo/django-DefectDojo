@@ -57,4 +57,4 @@ class SysdigData:
         self.cloud_provider_name: str = ""
         self.cloud_provider_account_id: str = ""
         self.cloud_provider_region: str = ""
-        self.epss_score: float = 0
+        self.epss_score: float = None
