@@ -304,5 +304,3 @@ class SysdigReportsParser:
             # finally, Add finding to list
             sysdig_report_findings.append(finding)
         return sysdig_report_findings
-
-
