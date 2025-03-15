@@ -2674,6 +2674,7 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
 
         from dojo.finding import helper as finding_helper
 
@@ -3135,6 +3136,7 @@ class Finding(models.Model):
         return self.finding_group is not None
 
     def save_no_options(self, *args, **kwargs):
+        logger.debug("save_no_options")
         return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
