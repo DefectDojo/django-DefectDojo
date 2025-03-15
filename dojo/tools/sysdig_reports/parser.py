@@ -18,7 +18,7 @@ class SysdigReportsParser:
         return "Sysdig Vulnerability Report Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Legacy scanner: Import of Sysdig Pipeline, Registry and Runtime Vulnerability Report Scans in CSV format or a Sysdig UI JSON Report"
+        return "Import of Sysdig Pipeline, Registry and Runtime Vulnerability Report Scans in CSV format or a Sysdig UI JSON Report"
 
     def get_findings(self, filename, test):
         if filename is None:
@@ -32,10 +32,18 @@ class SysdigReportsParser:
                 data = json.loads(str(scan_data, "utf-8"))
             except Exception:
                 data = json.loads(scan_data)
-            return self.parse_json(data=data, test=test)
+
+                if "data" in data:
+                    return self.parse_json_legacy(data=data, test=test)
+
+                if "result" in data:
+                    return self.parse_json(data=data, test=test)
+
+                msg = "JSON file is not in the expected format, expected data element or result element"
+                raise ValueError(msg)
         return ()
 
-    def parse_json(self, data, test):
+    def parse_json_legacy(self, data, test):
         vulnerability = data.get("data", None)
         if not vulnerability:
             return []
@@ -66,6 +74,7 @@ class SysdigReportsParser:
             packageVersion = item.get("packageVersion", "")
             packageSuggestedFix = item.get("packageSuggestedFix", "")
             k8sPodCount = item.get("k8sPodCount", "")
+
             description = ""
             description += "imageId: " + imageId + "\n"
             description += "imagePullString: " + imagePullString + "\n"
@@ -87,9 +96,12 @@ class SysdigReportsParser:
             description += "packageVersion: " + packageVersion + "\n"
             description += "packageSuggestedFix: " + packageSuggestedFix + "\n"
             description += "k8sPodCount: " + str(k8sPodCount) + "\n"
+
             mitigation = ""
             mitigation += "vulnFixAvailable: " + str(vulnFixAvailable) + "\n"
             mitigation += "vulnFixVersion: " + vulnFixVersion + "\n"
+            mitigation += "suggestedFix: " + packageSuggestedFix + "\n"
+
             find = Finding(
                 title=vulnName + "_" + vulnFixVersion,
                 test=test,
@@ -105,6 +117,79 @@ class SysdigReportsParser:
                 find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(vulnName)
             findings.append(find)
+        return findings
+
+    def parse_json(self, data, test):
+        findings = []
+        packages = data.get("result", {}).get("packages", [])
+
+        for package in packages:
+            # print(package)
+            packageName = package.get("name", "")
+            packageType = package.get("type", "")
+            packagePath = package.get("path", "")
+            packageVersion = package.get("version", "")
+            packageSuggestedFix = package.get("suggestedFix", "")
+            layerDigest = package.get("layerDigest", "")
+
+            vulns = package.get("vulns", [])
+            # print("vulns: %s" % vulns)
+            for item in vulns:
+                # print("item: %s" % item)
+                vulnName = item.get("name", "")
+                vulnSeverity = item.get("severity", {}).get("value", "")
+                vulnCvssScore = item.get("cvssScore", {}).get("value", {}).get("score", "")
+                vulnCvssVersion = item.get("cvssScore", {}).get("value", {}).get("version", "")
+                vulnCvssVector = item.get("cvssScore", {}).get("value", {}).get("vector", "")
+                vulnDisclosureDate = item.get("disclosureDate", "")
+                vulnSolutionDate = item.get("solutionDate", "")
+                vulnPublishedByVendorDate = item.get("publishDateByVendor", {}).get("nvd", "")
+                vulnExploitable = item.get("exploitable", "")
+                vulnFixVersion = item.get("fixedInVersion", "")
+
+                description = ""
+                description += "vulnCvssVersion: " + vulnCvssVersion + "\n"
+                description += "vulnCvssScore: " + str(vulnCvssScore) + "\n"
+                description += "vulnCvssVector: " + vulnCvssVector + "\n"
+                description += "vulnDisclosureDate: " + vulnDisclosureDate + "\n"
+                description += "vulnPublishedByVendorDate: " + vulnPublishedByVendorDate + "\n"
+                description += "vulnSolutionDate: " + vulnSolutionDate + "\n"
+                description += "vulnExploitable: " + str(vulnExploitable) + "\n"
+                description += "packageName: " + packageName + "\n"
+                description += "packageType: " + packageType + "\n"
+                description += "packagePath: " + packagePath + "\n"
+                description += "packageVersion: " + packageVersion + "\n"
+                description += "packageSuggestedFix: " + packageSuggestedFix + "\n"
+                description += "layerDigest: " + layerDigest + "\n"
+
+                mitigation = ""
+                mitigation += "vulnFixVersion: " + vulnFixVersion + "\n"
+                mitigation += "suggestedFix: " + packageSuggestedFix + "\n"
+
+                finding = Finding(
+                    title=vulnName + " - " + packageName + " - " + vulnFixVersion,
+                    test=test,
+                    description=description,
+                    severity=vulnSeverity,
+                    mitigation=mitigation,
+                    static_finding=True,
+                    component_name=packageName,
+                    component_version=packageVersion,
+                )
+
+                try:
+                    if float(vulnCvssVersion) >= 3 and float(vulnCvssVersion) < 4:
+                        finding.cvssv3_score = vulnCvssScore
+                        vectors = cvss.parser.parse_cvss_from_text(vulnCvssVector)
+                        if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
+                            finding.cvss = vectors[0].clean_vector()
+                except ValueError:
+                    continue
+
+                if vulnName != "":
+                    finding.unsaved_vulnerability_ids = []
+                    finding.unsaved_vulnerability_ids.append(vulnName)
+                findings.append(finding)
         return findings
 
     def parse_csv(self, arr_data, test):
@@ -203,8 +288,8 @@ class SysdigReportsParser:
                 finding.description += f"\n - **Registry Name:** {row.registry_name}"
                 finding.description += f"\n - **Registy Image Repository:** {row.registry_image_repository}"
             try:
-                if float(row.cvss_version) >= 3:
-                    finding.cvssv3_score = row.cvss_score
+                if float(row.cvss_version) >= 3 and float(row.cvss_version) < 4:
+                    finding.cvssv3_score = float(row.cvss_score)
                     vectors = cvss.parser.parse_cvss_from_text(row.cvss_vector)
                     if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
                         finding.cvss = vectors[0].clean_vector()
@@ -219,3 +304,5 @@ class SysdigReportsParser:
             # finally, Add finding to list
             sysdig_report_findings.append(finding)
         return sysdig_report_findings
+
+
