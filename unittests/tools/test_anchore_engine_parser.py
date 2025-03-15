@@ -40,3 +40,7 @@ class TestAnchoreEngineParser(DojoTestCase):
             parser = AnchoreEngineParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(84, len(findings))
+            finding = findings[50]
+            self.assertEqual("CVE-2023-0466", finding.vuln_id_from_tool)
+            self.assertEqual("openssl-libs-1:1.1.1k-14.el8_6", finding.component_name)
+            self.assertEqual("CVE-2023-0466-openssl-libs-1:1.1.1k-14.el8_6(RPM)", finding.title)
