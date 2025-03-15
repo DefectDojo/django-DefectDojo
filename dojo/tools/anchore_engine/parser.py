@@ -21,9 +21,8 @@ class AnchoreEngineParser:
                 data = json.load(file)
         if data.get("metadata"):
             return self.get_findings_with_metadata(data, test)
-        else:
-            return self.get_findings_without_metadata(data, test)
-    
+        return self.get_findings_without_metadata(data, test)
+
     def get_findings_with_metadata(self, data, test):
         dupes = {}
         metadata = data.get("metadata", {})
@@ -42,7 +41,7 @@ class AnchoreEngineParser:
 
             severity = item.get("severity", "Unknown")
 
-            if severity.lower() in ["negligible", "unknown"]:
+            if severity.lower() in {"negligible", "unknown"}:
                 severity = "Info"
 
             mitigation = "No fix available."
