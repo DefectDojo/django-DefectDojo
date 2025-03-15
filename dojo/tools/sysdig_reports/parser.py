@@ -18,7 +18,7 @@ class SysdigReportsParser:
         return "Sysdig Vulnerability Report Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import of Sysdig Pipeline, Registry and Runtime Vulnerability Report Scans in CSV format or a Sysdig UI JSON Report"
+        return "Legacy scanner: Import of Sysdig Pipeline, Registry and Runtime Vulnerability Report Scans in CSV format or a Sysdig UI JSON Report"
 
     def get_findings(self, filename, test):
         if filename is None:
@@ -215,6 +215,7 @@ class SysdigReportsParser:
             if row.vuln_link != "":
                 finding.references = row.vuln_link
                 finding.url = row.vuln_link
+            finding.epss_score = row.epss_score
             # finally, Add finding to list
             sysdig_report_findings.append(finding)
         return sysdig_report_findings
