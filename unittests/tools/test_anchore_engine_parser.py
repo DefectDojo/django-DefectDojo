@@ -34,3 +34,9 @@ class TestAnchoreEngineParser(DojoTestCase):
             self.assertEqual(6.7, finding.cvssv3_score)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-13776", finding.unsaved_vulnerability_ids[0])
+
+    def test_anchore_engine_parser_new_fomrat_issue_11552(self):
+        with open(get_unit_tests_scans_path("anchore_engine") / "new_format_issue_11552.json", encoding="utf-8") as testfile:
+            parser = AnchoreEngineParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(51, len(findings))
