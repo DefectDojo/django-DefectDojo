@@ -69,7 +69,7 @@ def is_text(field):
 @register.filter
 def sum_dict(d):
     total = 0
-    for key, value in list(d.items()):
+    for value in d.values():
         total += value
     return total
 
