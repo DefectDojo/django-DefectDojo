@@ -123,10 +123,10 @@ class FortifyFPRParser:
             if (source_location := self.get_source_location(analysis_info)) is not None:
                 vuln_data.source_location_path = source_location.attrib.get("path")
                 vuln_data.source_location_line = source_location.attrib.get("line")
-                vuln_data.source_location_line_end = source_location.attrib.get('lineEnd')
-                vuln_data.source_location_col_start = source_location.attrib.get('colStart')
-                vuln_data.source_location_col_end = source_location.attrib.get('colEnd')
-                vuln_data.snippet_id = source_location.attrib.get('snippet')
+                vuln_data.source_location_line_end = source_location.attrib.get("lineEnd")
+                vuln_data.source_location_col_start = source_location.attrib.get("colStart")
+                vuln_data.source_location_col_end = source_location.attrib.get("colEnd")
+                vuln_data.snippet_id = source_location.attrib.get("snippet")
 
     def get_source_location(self, analysis_info: Element) -> Element | None:
         """Return the SourceLocation element if we are able to reach it."""
