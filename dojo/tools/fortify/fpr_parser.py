@@ -5,9 +5,16 @@ from xml.etree.ElementTree import Element
 from defusedxml import ElementTree
 
 from dojo.models import Finding, Test
+from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
 
 
 class FortifyFPRParser:
+    def __init__(self):
+        self.descriptions: dict[str, DescriptionData] = {}
+        self.snippets: dict[str, SnippetData] = {}
+        self.rules: dict[str, RuleData] = {}
+        self.vulnerabilities: list[VulnerabilityData] = []
+
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
             input_zip = zipfile.ZipFile(filename.name, "r")
@@ -17,7 +24,7 @@ class FortifyFPRParser:
         # filename: file_content
         zip_data = {name: input_zip.read(name) for name in input_zip.namelist()}
         root = self.identify_root(zip_data)
-        return self.parse_vulnerabilities_and_convert_to_findings(root, test)
+        return self.convert_vulnerabilities_to_findings(root, test)
 
     def identify_root(self, zip_data: dict) -> Element:
         """Iterate through the zip data to determine which file in the zip could be the XMl to be parsed."""
@@ -45,122 +52,81 @@ class FortifyFPRParser:
         except BaseException:
             self.namespace = ""
 
-    def parse_vulnerabilities_and_convert_to_findings(self, root: Element, test: Test) -> list[Finding]:
+    def parse_related_data(self, root: Element, test: Test) -> None:
         """Parse the XML and generate a list of findings."""
-        items = []
-        descriptions = {}
-        snippets = {}
-        rules = {}
-        for child in root:
-            # store descriptions for later use
-            if "Description" in child.tag:
-                class_id = child.attrib.get("ClassID")
-                if class_id:
-                    descriptions[class_id] = child
+        for description in root.findall(f"{self.namespace}Description"):
+            class_id = description.attrib.get("ClassID")
+            if class_id:
+                self.descriptions[class_id] = self.parse_description_information(description)
 
-            # store snippets for later use
-            if "Snippets" in child.tag:
-                for snippet in child:
-                    id = snippet.attrib.get("id")
-                    if id:
-                        snippets[id] = snippet
+        for snippet in root.find(f"{self.namespace}Snippets"):
+            snippet_id = snippet.attrib.get("id")
+            if snippet_id:
+                self.snippets[snippet_id] = self.parse_snippet_information(snippet)
 
-            # store rules for later use
-            if "EngineData" in child.tag:
-                rule_info = child.find(f"{self.namespace}RuleInfo")
-                for rule in rule_info:
-                    id = rule_info.attrib.get("id")
-                    if id:
-                        rules[id] = rule
+        for rule in root.find(f"{self.namespace}EngineData").find(f"{self.namespace}RuleInfo"):
+            rule_id = rule.attrib.get("id")
+            if rule_id:
+                self.rules[rule_id] = self.parse_rule_information(rule)
 
-            if "Vulnerabilities" in child.tag:
-                for vuln in child:
-                    finding_context = {
-                        "title": "",
-                        "description": "",
-                        "static_finding": True,
-                        "test": test,
-                    }
-                    self.parse_class_information(vuln, finding_context)
-                    self.parse_instance_information(vuln, finding_context)
-                    self.parse_analysis_information(vuln, finding_context)
-                    self.parse_severity_and_convert(vuln, finding_context)
-                    items.append(Finding(**finding_context))
-        return items
+    def convert_vulnerabilities_to_findings(self, root: Element, test: Test) -> list[Finding]:
+        """Convert the list of vulnerabilities to a list of findings."""
+        """Try to mimic the logic from the xml parser"""
+        """Future Improvement: share code between xml and fpr parser (it was split up earlier)"""
+        self.parse_related_data(root, test)
 
-    def parse_severity_and_convert(self, vulnerability: Element, finding_context: dict) -> None:
-        """Convert the the float representation of severity and confidence to a string severity."""
-        # Default info severity in the case of an error
-        severity = "Info"
-        instance_severity = None
-        confidence = None
+        findings = []
+        for vuln in root.find(f"{self.namespace}Vulnerabilities"):
+            vuln_data = VulnerabilityData()
+            self.parse_instance_information(vuln, vuln_data)
+            self.parse_class_information(vuln, vuln_data)
+            self.parse_analysis_information(vuln, vuln_data)
+
+            snippet = self.snippets.get(vuln_data.snippet_id)
+            description = self.descriptions.get(vuln_data.class_id)
+            rule = self.rules.get(vuln_data.class_id)
+
+            finding = Finding(test=test, static_finding=True)
+
+            finding.title = self.format_title(vuln_data, snippet, description, rule)
+            finding.description = self.format_description(vuln_data, snippet, description, rule)
+            finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
+            finding.severity = self.compute_severity(vuln_data, snippet, description, rule)
+
+            finding.file_path = vuln_data.source_location_path
+            findings.line = int(vuln_data.source_location_line)
+            finding.unique_id_from_tool = vuln_data.instance_id
+
+            findings.append(finding)
+
+        return findings
+
+    def parse_class_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
+        if (class_info := vulnerability.find(f"{self.namespace}ClassInfo")) is not None:
+            vuln_data.vulnerability_type = getattr(class_info.find(f"{self.namespace}Type"), "text", None)
+            vuln_data.class_id = getattr(class_info.find(f"{self.namespace}class_id"), "text", None)
+            vuln_data.kingdom = getattr(class_info.find(f"{self.namespace}Kingdom"), "text", None)
+            vuln_data.analyzer_name = getattr(class_info.find(f"{self.namespace}AnalyzerName"), "text", None)
+            vuln_data.default_severity = getattr(class_info.find(f"{self.namespace}DefaultSeverity"), "text", None)
+
+    def parse_instance_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
         # Attempt to fetch the confidence and instance severity
         if (instance_info := vulnerability.find(f"{self.namespace}InstanceInfo")) is not None:
-            instance_severity = getattr(instance_info.find(f"{self.namespace}InstanceSeverity"), "text", None)
-            confidence = getattr(instance_info.find(f"{self.namespace}Confidence"), "text", None)
-        # Make sure we have something to work with
-        if confidence is not None and instance_severity is not None:
-            if float(confidence) >= 2.5 and float(instance_severity) >= 2.5:
-                severity = "Critical"
-            elif float(confidence) >= 2.5 and float(instance_severity) < 2.5:
-                severity = "High"
-            elif float(confidence) < 2.5 and float(instance_severity) >= 2.5:
-                severity = "Medium"
-            elif float(confidence) < 2.5 and float(instance_severity) < 2.5:
-                severity = "Low"
-        # Return either info, or the calculated severity
-        finding_context["severity"] = severity
+            vuln_data.instance_id = getattr(instance_info.find(f"{self.namespace}InstanceID"), "text", None)
+            vuln_data.instance_severity = getattr(instance_info.find(f"{self.namespace}InstanceSeverity"), "text", None)
+            vuln_data.confidence = getattr(instance_info.find(f"{self.namespace}Confidence"), "text", None)
 
-    def parse_class_information(self, vulnerability: Element, finding_context: dict) -> None:
-        """Appends the description with any class information that can be extracted."""
-        if (class_info := vulnerability.find(f"{self.namespace}ClassInfo")) is not None:
-            if (namespace_type := class_info.find(f"{self.namespace}Type")) is not None:
-                finding_context["description"] += f"{namespace_type.text}\n"
-                finding_context["title"] += f"{namespace_type.text}"
-            if (class_id := class_info.find(f"{self.namespace}ClassID")) is not None:
-                finding_context["description"] += f"**ClassID:** {class_id.text}\n"
-                finding_context["unique_id_from_tool"] = class_id.text
-                finding_context["title"] += f" {class_id.text}"
-            if (kingdom := class_info.find(f"{self.namespace}Kingdom")) is not None:
-                finding_context["description"] += f"**Kingdom:** {kingdom.text}\n"
-            if (analyzer_name := class_info.find(f"{self.namespace}AnalyzerName")) is not None:
-                finding_context["description"] += f"**AnalyzerName:** {analyzer_name.text}\n"
-            if (default_severity := class_info.find(f"{self.namespace}DefaultSeverity")) is not None:
-                finding_context["description"] += f"**DefaultSeverity:** {default_severity.text}\n"
-
-    def parse_instance_information(self, vulnerability: Element, finding_context: dict) -> None:
-        """Appends the description with any instance information that can be extracted."""
-        if (instance_info := vulnerability.find(f"{self.namespace}InstanceInfo")) is not None:
-            if (instance_id := instance_info.find(f"{self.namespace}InstanceID")) is not None:
-                finding_context["description"] += f"**InstanceID:** {instance_id.text}\n"
-            if (instance_severity := instance_info.find(f"{self.namespace}InstanceSeverity")) is not None:
-                finding_context["description"] += f"**InstanceSeverity:** {instance_severity.text}\n"
-            if (confidence := instance_info.find(f"{self.namespace}Confidence")) is not None:
-                finding_context["description"] += f"**Confidence:** {confidence.text}\n"
-
-    def parse_analysis_information(self, vulnerability: Element, finding_context: dict) -> None:
+    def parse_analysis_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
         """Appends the description with any analysis information that can be extracted."""
         if (analysis_info := vulnerability.find(f"{self.namespace}AnalysisInfo")) is not None:
             # See if we can get a SourceLocation from this
             if (source_location := self.get_source_location(analysis_info)) is not None:
-                path = source_location.attrib.get("path")
-                line = source_location.attrib.get("line")
-                # Managed the description
-                finding_context["description"] += f"**SourceLocationPath:** {path}\n"
-                finding_context["description"] += f"**SourceLocationLine:** {line}\n"
-                finding_context["description"] += (
-                    f"**SourceLocationLineEnd:** {source_location.attrib.get('lineEnd')}\n"
-                )
-                finding_context["description"] += (
-                    f"**SourceLocationColStart:** {source_location.attrib.get('colStart')}\n"
-                )
-                finding_context["description"] += f"**SourceLocationColEnd:** {source_location.attrib.get('colEnd')}\n"
-                finding_context["description"] += (
-                    f"**SourceLocationSnippet:** {source_location.attrib.get('snippet')}\n"
-                )
-                # manage the other metadata
-                finding_context["file_path"] = path
-                finding_context["line"] = line
+                vuln_data.source_location_path = source_location.attrib.get("path")
+                vuln_data.source_location_line = source_location.attrib.get("line")
+                vuln_data.source_location_line_end = source_location.attrib.get('lineEnd')
+                vuln_data.source_location_col_start = source_location.attrib.get('colStart')
+                vuln_data.source_location_col_end = source_location.attrib.get('colEnd')
+                vuln_data.snippet_id = source_location.attrib.get('snippet')
 
     def get_source_location(self, analysis_info: Element) -> Element | None:
         """Return the SourceLocation element if we are able to reach it."""
@@ -190,3 +156,106 @@ class FortifyFPRParser:
                     return source_location
         # Return None if no SourceLocation was found in any Entry
         return None
+
+    def parse_snippet_information(self, snippet: Element) -> SnippetData:
+        """Parse the snippet information and return a SnippetData object."""
+        snippet_data = SnippetData()
+        snippet_data.file_name = snippet.attrib.get("File")
+        snippet_data.start_line = snippet.attrib.get("StartLine")
+        snippet_data.end_line = snippet.attrib.get("EndLine")
+        snippet_data.text = snippet.text
+        return snippet_data
+
+    def parse_description_information(self, description: Element) -> DescriptionData:
+        """Parse the description information and return a DescriptionData object."""
+        description_data = DescriptionData()
+        description_data.abstract = description.attrib.get("Abstract")
+        description_data.explanation = description.attrib.get("Explanation")
+        description_data.recommendations = description.attrib.get("Recommendations")
+        description_data.tips = description.attrib.get("Tips")
+        return description_data
+
+    def parse_rule_information(self, rule: Element) -> RuleData:
+        """Parse the rule information and return a RuleData object."""
+        rule_data = RuleData()
+        rule_data.accuracy = rule.attrib.get("Accuracy")
+        rule_data.impact = rule.attrib.get("Impact")
+        rule_data.probability = rule.attrib.get("Probability")
+        rule_data.impact_bias = rule.attrib.get("ImpactBias")
+        rule_data.confidentiality_impact = rule.attrib.get("ConfidentialityImpact")
+        rule_data.integrity_impact = rule.attrib.get("IntegrityImpact")
+        rule_data.remediation_effort = rule.attrib.get("Recommendations")
+        return rule_data
+
+    def format_title(self, vulnerability, snippet, description, rule) -> str:
+        # defaults for when there is no snippet (shouldn't happen, future improvement: parser might also parse ReplacementDefinitions and/or Context elements)
+        file_name = vulnerability.source_location_path.split("/")[-1]
+        line = vulnerability.source_location_line
+        if snippet:
+            file_name = snippet.file_name
+            line = snippet.start_line
+
+        return f"{vulnerability.vulnerability_type} - {file_name}: {line} ({vulnerability.class_id})"
+
+    def format_description(self, vulnerability, snippet, description, rule) -> str:
+        desc = f"##Catagory: {vulnerability.vulnerability_type}\n"
+        desc += f"###Abstract:\n{description.abstract}"
+
+        desc += f"**SourceLocationPath:** {vulnerability.source_location_path}\n"
+        desc += f"**SourceLocationLine:** {vulnerability.source_location_line}\n"
+        desc += f"**SourceLocationLineEnd:** {vulnerability.source_location_line_end}\n"
+        desc += f"**SourceLocationColStart:** {vulnerability.source_location_col_start}\n"
+        desc += f"**SourceLocationColEnd:** {vulnerability.source_location_col_end}\n"
+
+        if snippet:
+            desc += (
+                "##Source:\nThis snippet provides more context on the execution path that "
+                "leads to this finding. \n")
+            desc += f"###Snippet:\n**File: {snippet.file_name}: {snippet.start_line}**\n```\n{snippet.text}\n```\n"
+
+        desc += f"##Explanation:\n {description.explanation}"
+
+        desc += f"##Details: {vulnerability.instance_id}\n"
+        desc += f"**InstanceID:** {vulnerability.instance_id}\n"
+        desc += f"**InstanceSeverity:** {vulnerability.instance_severity}\n"
+        desc += f"**Confidence:** {vulnerability.confidence}\n"
+        desc += f"**ClassID:** {vulnerability.class_id}\n"
+        desc += f"**Kingdom:** {vulnerability.kingdom}\n"
+        desc += f"**AnalyzerName:** {vulnerability.analyzer_name}\n"
+        desc += f"**DefaultSeverity:** {vulnerability.default_severity}\n"
+
+        return desc
+
+    def format_mitigation(self, vulnerability, snippet, description, rule) -> str:
+        mitigation = ""
+        if description.recommendations:
+            mitigation += f"###Recommendation:\n {description.recommendations}\n"
+
+        if description.tips:
+            mitigation += f"###Tips:\n {description.tips}"
+        return mitigation
+
+    def compute_severity(self, vulnerability, snippet, description, rule) -> str:
+        """Convert the the float representation of severity and confidence to a string severity."""
+        if not rule.impact:
+            return "Informational"
+
+        impact = rule.impact
+        confidence = vulnerability.confidence
+        accuracy = rule.accuracy
+        probability = rule.probability
+
+        # This comes from Fortify support documentation, requested in #11901
+        likelihood = (accuracy * confidence * probability) / 25
+        likelihood = round(likelihood, 1)
+
+        if impact >= 2.5 and likelihood >= 2.5:
+            return "Critical"
+        if impact >= 2.5 > likelihood:
+            return "High"
+        if impact < 2.5 <= likelihood:
+            return "Medium"
+        if impact < 2.5 and likelihood < 2.5:
+            return "Low"
+
+        return "Informational"
