@@ -48,7 +48,31 @@ class FortifyFPRParser:
     def parse_vulnerabilities_and_convert_to_findings(self, root: Element, test: Test) -> list[Finding]:
         """Parse the XML and generate a list of findings."""
         items = []
+        descriptions = {}
+        snippets = {}
+        rules = {}
         for child in root:
+            # store descriptions for later use
+            if "Description" in child.tag:
+                class_id = child.attrib.get("ClassID")
+                if class_id:
+                    descriptions[class_id] = child
+
+            # store snippets for later use
+            if "Snippets" in child.tag:
+                for snippet in child:
+                    id = snippet.attrib.get("id")
+                    if id:
+                        snippets[id] = snippet
+
+            # store rules for later use
+            if "EngineData" in child.tag:
+                rule_info = child.find(f"{self.namespace}RuleInfo")
+                for rule in rule_info:
+                    id = rule_info.attrib.get("id")
+                    if id:
+                        rules[id] = rule
+
             if "Vulnerabilities" in child.tag:
                 for vuln in child:
                     finding_context = {
