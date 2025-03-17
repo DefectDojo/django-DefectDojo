@@ -1,5 +1,5 @@
 ---
-title: "Create a User Group for shared permissions"
+title: "Share permissions: User Groups"
 description: "Share and maintain permissions for many users"
 weight: 3
 ---
