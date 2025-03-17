@@ -19,7 +19,7 @@ In the Classic (Open-Source) UI, this history is found under the '☰' (hamburge
 
 ## Audit Log Endpoint (Pro Only)
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users also have access to a dedicated `/audit_log` endpoint for their entire instance.  This log can only be accessed users or API tokens with superuser permissions.
+<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users also have access to a dedicated `/audit_log` endpoint for their entire instance.  This log can only be accessed by users or API tokens with superuser permissions.
 
 This API returns 31 days of audit logs.
 
