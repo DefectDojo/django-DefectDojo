@@ -1,4 +1,4 @@
-name: Docs Build Check
+name: "Docs: Dry Run Production Deployment"
 
 on:
   pull_request:
@@ -34,15 +34,8 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
-
-      - name: Install dependencies
-        run: cd docs && npm ci
-      
-      - name: Build production website
+      - name: Test the build process
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
-        run: cd docs && hugo --minify --gc --config config/production/hugo.toml
+        run: cd docs && && npm ci && hugo --minify --gc --config config/production/hugo.toml
