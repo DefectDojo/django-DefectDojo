@@ -742,8 +742,10 @@ def prepare_jira_issue_fields(
         epic_name_field=None,
         default_assignee=None,
         duedate=None,
-        issuetype_fields=[]):
+        issuetype_fields=None):
 
+    if issuetype_fields is None:
+        issuetype_fields = []
     fields = {
             "project": {"key": project_key},
             "issuetype": {"name": issuetype_name},
