@@ -188,19 +188,34 @@ Building will tag the images with "x.y.z", then you can run the application base
 *  Tagged images can be seen with:
 
 ```
+$ docker compose images
+CONTAINER               REPOSITORY                     TAG                 IMAGE ID            SIZE
+dd-nginx-1              defectdojo/defectdojo-nginx    latest              b0a5f30ab01a        193MB
+...
+
+or
+
 $ docker images
 REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
 defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
+...
 ```
 
 *  This will show on which tagged images the containers are running:
 
 ```
+$ docker compose ps
+NAME                    IMAGE                                 COMMAND                  SERVICE            CREATED              STATUS              PORTS
+dd-nginx-1              defectdojo/defectdojo-nginx:latest    "/entrypoint-nginx.sh"   nginx              About a minute ago   Up About a minute   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp,
+...
+
+or
+
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
+...
 ```
-
 
 ## Clean up Docker Compose
 
