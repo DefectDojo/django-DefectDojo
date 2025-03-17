@@ -828,6 +828,7 @@ def finding_display_status(finding, event="view"):
         "Under Review, Inactive, Mitigated, Risk Pending": ["Closed", "view_review", "Green"],
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
+        "Inactive, Mitigated, False Positive, Risk Expired": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated": ["Closed", "view_finding", "Green"],
         "Active, Verified": ["Open", "view_finding", "Red"],
