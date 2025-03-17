@@ -12,7 +12,7 @@
     "preview": "vite preview --outDir public"
   },
   "dependencies": {
-    "@thulite/doks-core": "1.8.1",
+    "@thulite/doks-core": "1.8.0",
     "@thulite/images": "3.3.0",
     "@thulite/inline-svg": "1.2.0",
     "@thulite/seo": "2.4.1",
