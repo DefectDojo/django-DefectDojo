@@ -128,6 +128,24 @@ class SemgrepParser:
                             "\n```\n",
                         ],
                     )
+                if "assistant" in item["extra"] and item["extra"]["assistant"]:
+                    mitigation = ""
+                    severity_justification = ""
+                    if item["extra"]["assistant"]["autofix"]:
+                        mitigation += f"**Assistant explanation:** {item['extra']['assistant']['autofix']['explanation']} \n\n**Assistant suggested code**:\n{item['extra']['assistant']['autofix']['fix_code']}\n\n"
+                    if item["extra"]["assistant"]["component"]:
+                        severity_justification += f"Assistant thinks this file is {item['extra']['assistant']['component']['risk']} risk because it relates to {item['extra']['assistant']['component']['tag']}\n\n"
+                    if item["extra"]["assistant"]["guidance"]:
+                        mitigation += f"**Assistant guidance:**\n{item['extra']['assistant']['guidance']['summary']}\n{item['extra']['assistant']['guidance']['instructions']}\n"
+                    if item["extra"]["assistant"]["autotriage"]:
+                        severity_justification += f"Assistant thinks this is a {item['extra']['assistant']['autotriage']['verdict']}."
+                        if item["extra"]["assistant"]["autotriage"]["reason"]:
+                            severity_justification += f" {item['extra']['assistant']['autotriage']['reason']}"
+                        severity_justification += "\n"
+                    if mitigation != "":
+                        finding.mitigation = mitigation
+                    if severity_justification != "":
+                        finding.severity_justification = severity_justification
 
                 dupe_key = unique_id_from_tool
 
