@@ -269,6 +269,7 @@ class BaseListFindings:
         self,
         filter_name: str = "All",
         product_id: int | None = None,
+        prod_type_id: int | None = None,  # 🔥 Adicionado suporte para Product Type
         engagement_id: int | None = None,
         test_id: int | None = None,
         order_by: str = "numerical_severity",
@@ -276,6 +277,7 @@ class BaseListFindings:
     ):
         self.filter_name = filter_name
         self.product_id = product_id
+        self.prod_type_id = prod_type_id  # 🔥 Armazena o Product Type ID
         self.engagement_id = engagement_id
         self.test_id = test_id
         self.order_by = order_by
@@ -383,6 +385,7 @@ class ListFindings(View, BaseListFindings):
         # Look to see if the product was used
         if product_id := self.get_product_id():
             product = get_object_or_404(Product, id=product_id)
+            prod_type = product.prod_type
             user_has_permission_or_403(request.user, product, Permissions.Product_View)
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(product, title="Findings", tab="findings")

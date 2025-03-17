@@ -705,6 +705,9 @@
                                                 title="{{ finding.test.engagement }}"
                                                 alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                             </td>
+                                            <td>
+                                                {{ finding.test.engagement.product.prod_type }}
+                                            </td>
                                         {% endif %}
                                         <td>
                                             {% if finding.service %}{{ finding.service }}{% endif %}
@@ -799,6 +802,7 @@
                 {% endif %}
                 {% if show_product_column and product_tab is None %}
                     { "data": "product" },
+                    { "data": "product_type" },
                 {% endif %}
                 { "data": "service" },
                 { "data": "planned_remediation_date" },

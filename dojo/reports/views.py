@@ -717,7 +717,7 @@ def get_findings(request):
         elif view == "false_positive":
             filter_name = "False Positive"
 
-    obj = pid = eid = tid = None
+    obj = ptid = pid = eid = tid = None
     if obj_id:
         if "product" in obj_name:
             pid = obj_id
@@ -727,6 +727,10 @@ def get_findings(request):
             eid = obj_id
             obj = get_object_or_404(Engagement, id=eid)
             user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        elif "prod_type" in obj_name:
+            ptid = obj_id
+            obj = get_object_or_404(Product_Type, id=ptid)
+            user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
         elif "test" in obj_name:
             tid = obj_id
             obj = get_object_or_404(Test, id=tid)
@@ -736,6 +740,7 @@ def get_findings(request):
     list_findings = BaseListFindings(
         filter_name=filter_name,
         product_id=pid,
+        prod_type_id=ptid,
         engagement_id=eid,
         test_id=tid)
     findings = list_findings.get_fully_filtered_findings(request).qs
@@ -841,6 +846,7 @@ class CSVExportView(View):
                     "engagement",
                     "product_id",
                     "product",
+                    "prod_type",
                     "endpoints",
                     "vulnerability_ids",
                     "tags",
@@ -878,6 +884,8 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.name)
                 fields.append(finding.test.engagement.product.id)
                 fields.append(finding.test.engagement.product.name)
+                fields.append(finding.test.engagement.product.prod_type.id)
+                fields.append(finding.test.engagement.product.prod_type.name)  # 🟢 Pegando o nome do Product Type
 
                 endpoint_value = ""
                 for endpoint in finding.endpoints.all():
@@ -1020,6 +1028,10 @@ class ExcelExportView(View):
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
                 col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.prod_type.id)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.prod_type.name)
                 col_num += 1
 
                 endpoint_value = ""
