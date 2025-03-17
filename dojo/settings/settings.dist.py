@@ -1817,6 +1817,7 @@ VULNERABILITY_URLS = {
     "ELBA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "ELSA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "FEDORA-": "https://bodhi.fedoraproject.org/updates/",  # e.g. https://bodhi.fedoraproject.org/updates/FEDORA-EPEL-2024-06aa7dc422
+    "FG-IR-": "https://www.fortiguard.com/psirt/",  # e.g. https://www.fortiguard.com/psirt/FG-IR-24-373
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
