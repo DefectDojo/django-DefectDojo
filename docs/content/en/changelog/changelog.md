@@ -16,7 +16,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(Universal Parser)** XML is now a supported file type for Universal Parser.
 - **(SSO)** SSO can now be set up with any kind of [OIDC Configuration](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol).  See OIDC Settings in the Beta UI:
 
-![image](images/odic.png)
+![image](images/oidc.png)
 
 ### Mar 3, 2025: v2.44.0
 
