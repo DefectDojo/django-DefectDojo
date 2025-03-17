@@ -302,10 +302,9 @@ docker compose up
 ```
 Then
 ```
-docker ps
-#find the name of the uwsgi container from the above command
-docker exec -ti [container-name] bash
+docker exec -it uwsgi /bin/bash
 ```
+You're now inside the container.
 Rerun all the tests:
 
 ```
