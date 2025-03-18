@@ -6,6 +6,20 @@ class AcunetixParser:
 
     """Parser for Acunetix XML files and Acunetix 360 JSON files."""
 
+    def get_fields(self, filename) -> list[str]:
+        if ".xml" in str(filename):
+            return AcunetixXMLParser().get_fields(self)
+        if ".json" in str(filename):
+            return AcunetixJSONParser().get_fields(self)
+        return None
+
+    def get_dedupe_fields(self, filename) -> list[str]:
+        if ".xml" in str(filename):
+            return AcunetixXMLParser().get__dedupe_fields(self)
+        if ".json" in str(filename):
+            return AcunetixJSONParser().get_dedupe_fields(self)
+        return None
+
     def get_scan_types(self):
         return ["Acunetix Scan"]
 

@@ -11,6 +11,50 @@ class AcunetixJSONParser:
 
     """This parser is written for Acunetix JSON Findings."""
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Acunetix 360 Parser.
+
+        Fields:
+        - title: Set to the name outputted by the Acunetix 360 Scanner.
+        - description: Set to Description variable outputted from Acunetix 360 Scanner.
+        - severity: Set to severity from Acunetix 360 Scanner converted into Defect Dojo format.
+        - mitigation: Set to RemedialProcedure variable outputted from Acunetix 360 Scanner if it is present.
+        - impact: Set to Impact variable outputted from Acunetix 360 Scanner if it is present.
+        - date: Set to FirstSeenDate variable outputted from Acunetix 360 Scanner if present. If not, it is set to Generated variable from output.
+        - cwe: Set to converted cwe in Classification variable outputted from Acunetix 360 Scanner if it is present.
+        - static_finding: Set to True.
+        - cvssv3: Set to converted cvssv3 in Classification variable outputted from Acunetix 360 Scanner if it is present.
+        - risk_accepted: Set to True if AcceptedRisk is present in State variable outputted from Acunetix 360 Scanner. No value if variable is not present.
+        - active: Set to false.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "mitigation",
+            "impact",
+            "date",
+            "cwe",
+            "static_finding",
+            "cvssv3",
+            "risk_accepted",
+            "active",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Acunetix 360 Parser.
+        - title: Set to the name outputted by the Acunetix 360 Scanner.
+        - description: Set to Description variable outputted from Acunetix 360 Scanner.
+
+        Fields:
+        """
+        return [
+            "title",
+            "description",
+        ]
+
     def get_findings(self, filename, test):
         dupes = {}
         data = json.load(filename)
