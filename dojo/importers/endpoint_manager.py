@@ -100,11 +100,6 @@ class EndpointManager:
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
-        """
-        Determines whether to asynchronously process endpoints on a finding or not. if so,
-        chunk up the findings to be dispersed into individual celery workers. Otherwise,
-        only use one worker
-        """
         self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
         return
 
