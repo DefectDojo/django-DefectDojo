@@ -201,6 +201,17 @@ input[type="file"] {
     width: 70% !important;
 }
 
+.control-label .required {
+    color: #d3080c;
+    margin-left: 3px;
+    font-weight: 700;
+}
+
+.control-label .required sup {
+    top: -.2em;
+    font-size: 100%;
+}
+
 .bs-searchbox .form-control {
     width: 100% !important;
 }
