@@ -212,9 +212,13 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
             is_leader = any(any(sub_part in job_title for sub_part in part.split("-")) for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2])
+            is_cybersecurity = office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[4]
             if is_leader:
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
                 assign_product_type_product_to_leaders(user, job_title, office_location)
+            
+            if is_cybersecurity:
+                role_assigned = {"role": Role.objects.get(id=Roles.Cibersecurity)}
 
             if result_query_subjects is not None and len(result_query_subjects) > 0:
                 # Get user's product type for become member
@@ -258,14 +262,15 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                             )
 
                         # if user is not project type member any more, remove him from list of product type members
-                        for product_type_name in user_product_types_names:
-                            if (
-                                product_type_name != group_team_leve2.display_name
-                            ):
-                                product_type = Product_Type.objects.get(name=product_type_name)
-                                Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
-                                logger.debug(
-                                    "Deleting membership of user %s from product type %s", user, product_type_name
+                        if is_cybersecurity is False:
+                            for product_type_name in user_product_types_names:
+                                if (
+                                    product_type_name != group_team_leve2.display_name
+                                ):
+                                    product_type = Product_Type.objects.get(name=product_type_name)
+                                    Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
+                                    logger.debug(
+                                        "Deleting membership of user %s from product type %s", user, product_type_name
                                 )
                     else:
                         clean_project_type_user(user_product_types_names, user, user_login, is_leader)

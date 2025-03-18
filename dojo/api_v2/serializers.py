@@ -1640,6 +1640,7 @@ class FindingProductSerializer(serializers.ModelSerializer):
 
 class FindingEngagementSerializer(serializers.ModelSerializer):
     product = FindingProductSerializer(required=False)
+    source_code_management_server = ToolConfigurationSerializer(required=False)
 
     class Meta:
         model = Engagement
@@ -1651,10 +1652,12 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
             "target_start",
             "target_end",
             "branch_tag",
+            "source_code_management_uri",
             "engagement_type",
             "build_id",
             "commit_hash",
             "version",
+            "source_code_management_server",
             "created",
             "updated",
         ]

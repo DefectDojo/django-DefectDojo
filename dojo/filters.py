@@ -944,17 +944,17 @@ class ComponentFilterWithoutObjectLookups(ProductComponentFilter):
         label="Product Type Name",
         help_text="Search for Product Type names that are an exact match")
     test__engagement__product__prod_type__name_contains = CharFilter(
-        field_name="test__engagement__product__prod_type__name",
+        field_name="product_type_name",
         lookup_expr="icontains",
         label="Product Type Name Contains",
         help_text="Search for Product Type names that contain a given pattern")
     test__engagement__product__name = CharFilter(
-        field_name="test__engagement__product__name",
+        field_name="product_name",
         lookup_expr="iexact",
         label="Product Name",
         help_text="Search for Product names that are an exact match")
     engagement__product__name_contains = CharFilter(
-        field_name="engagement__product__name",
+        field_name="product_name",
         lookup_expr="icontains",
         label="Product Name Contains",
         help_text="Search for Product names that contain a given pattern")
@@ -969,12 +969,21 @@ class ComponentFilter(ProductComponentFilter):
         label="Product")
 
     def __init__(self, *args, **kwargs):
+        parent_product = kwargs.pop("parent_product", None)
         super().__init__(*args, **kwargs)
-        del self.form.fields["engagement"]
+
         self.form.fields[
             "engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
             "engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+        if parent_product:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
+        else:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class EngagementDirectFilterHelper(FilterSet):
