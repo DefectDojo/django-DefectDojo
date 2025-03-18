@@ -123,23 +123,6 @@ class EndpointManager:
                 logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
         return
 
-    def chunk_endpoints_and_reactivate(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
-        **kwargs: dict,
-    ) -> None:
-        self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-        return
-
-    def chunk_endpoints_and_mitigate(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
-        user: Dojo_User,
-        **kwargs: dict,
-    ) -> None:
-        self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-        return
-
     def update_endpoint_status(
         self,
         existing_finding: Finding,
@@ -169,6 +152,6 @@ class EndpointManager:
                     lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint in new_finding_endpoints_list,
                     existing_finding_endpoint_status_list),
             )
-            self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
-        self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)
+            self.reactivate_endpoint_status(endpoint_status_to_reactivate, sync=True)
+        self.mitigate_endpoint_status(endpoint_status_to_mitigate, user, sync=True)
         return
