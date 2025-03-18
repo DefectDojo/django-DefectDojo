@@ -319,6 +319,7 @@
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
                         {% endif %}
+                        <th>IA Recommendation</th>
                     {% endblock header_head %}
                 </tr>
                 <tr>
@@ -505,6 +506,12 @@
                         {% if finding.vuln_id_from_tool %}
                             <td>{{ finding.vuln_id_from_tool }}</td>
                         {% endif %}
+                        <td title="IA Recommendation">
+                            <button class="btn btn-primary" data-toggle="collapse"  data-finding-id={{finding.id}} data-target="#ia_recommendation" id="id_ia_recommendation">
+                                🤖
+                            </button>
+                      
+                        </td>
                     {% endblock header_body %}
                 </tr>
             </table>
@@ -780,7 +787,20 @@
             </div>
         </div>
     {% endif %}
-
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>IA Recommendation
+                <i class="fa-solid fa-robot"></i>
+                <span class="pull-right">
+                    <a rel="noopener noreferrer" data-toggle="collapse" href="#ia_recommendation">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </a>
+                </span>
+            </h4>
+        </div>
+        <div id="ia_recommendation" class="panel-body collapse">
+        </div>
+    </div>
     {% if similar_findings_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -1226,6 +1246,7 @@
 {% block postscript %}
     {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
+    <script type="module" src="{% static "dojo/js/finding/ia_recomendation.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript" nonce="{{request.csp_nonce}}">
