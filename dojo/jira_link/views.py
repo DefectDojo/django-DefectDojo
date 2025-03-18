@@ -98,6 +98,7 @@ def webhook(request, secret=None):
             except JIRA_Instance.DoesNotExist:
                 return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
             findings = None
+            finding_is_grouped = False
             # Determine what type of object we will be working with
             if jissue.finding:
                 logger.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
@@ -105,6 +106,7 @@ def webhook(request, secret=None):
             elif jissue.finding_group:
                 logger.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
                 findings = jissue.finding_group.findings.all()
+                finding_is_grouped = True
             elif jissue.engagement:
                 return webhook_responser_handler("debug", "Update for engagement ignored")
             else:
@@ -137,7 +139,7 @@ def webhook(request, secret=None):
 
             if findings:
                 for finding in findings:
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_is_grouped=finding_is_grouped)
             # Check for any comment that could have come along with the resolution
             if (error_response := check_for_and_create_comment(parsed)) is not None:
                 return error_response
