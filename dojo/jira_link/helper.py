@@ -1677,7 +1677,7 @@ def escape_for_jira(text):
     return text.replace("|", "%7D")
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_is_grouped: bool = False) -> bool:
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper
     status_changed = False
@@ -1720,7 +1720,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.false_p = False
             ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
-    elif not finding.active and (not finding_is_grouped or settings.JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN):
+    elif not finding.active and (finding_group is None or settings.JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN):
         # Reopen / Open Jira issue
         logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
         finding.active = True
