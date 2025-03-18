@@ -22,8 +22,8 @@
             <div class="col-sm-offset-2 col-sm-10 {{ classes.single_value }}">
                 <div class="checkbox">
                     {% if field.auto_id %}
-                        <label {% if field.field.required and form.required_css_class %}class="col-sm-2 control-label"{% endif %}>
-                            {{ field }} <span>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</span>
+                        <label {% if field.field.required and form.required_css_class %}class="col-sm-3 control-label"{% endif %}>
+                            {{ field }} <span>{{ field.label }}{% if field.field.required%}<strong class="required"><sup>*</sup>(required)</strong>{% endif %}</span>
                         </label>
                     {% endif %}
                     {% if field.help_text %}
@@ -38,8 +38,8 @@
             </div>
         {% elif field|is_radio %}
             {% if field.auto_id %}
-                <label class="col-sm-2 control-label
-                        {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</label>
+                <label class="col-sm-3 control-label
+                        {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}{% if field.field.required%}<strong class="required"><sup>*</sup>(required)</strong>{% endif %}</label>
             {% endif %}
             <div class="col-sm-10 {{ classes.value }}">
                 {% for choice in field %}
@@ -62,9 +62,9 @@
             </div>
         {% else %}
             {% if field.auto_id %}
-                <label class="col-sm-2 control-label
+                <label class="col-sm-3 control-label
                         {% if field.field.required %}{{ form.required_css_class }}{% endif %}"
-                       for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                       for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required%}<strong class="required"><sup>*</sup>(required)</strong>{% endif %}
                         {% if field.help_text %}
                             <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
                             </i>
