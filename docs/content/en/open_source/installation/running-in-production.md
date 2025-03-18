@@ -75,22 +75,3 @@ You can execute the following command to see the configuration:
 
 `docker compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
-
-### Asynchronous Import
-
-<span style="background-color:rgba(242, 86, 29, 0.3)">This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release).  Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.</span>
-
-Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
-processing especially large scans. It works by batching Findings and Endpoints by a 
-configurable amount. Each batch will be be processed in separate celery tasks.
-
-The following variables impact async imports.
-
--   `DD_ASYNC_FINDING_IMPORT` defaults to False
--   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` defaults to 100
-
-When using asynchronous imports with dynamic scanners, Endpoints will continue to "trickle" in
-even after the import has returned a successful response. This is because processing continues 
-to occur after the Findings have already been imported.
-
-To determine if an import has been fully completed, please see the progress bar in the appropriate test.

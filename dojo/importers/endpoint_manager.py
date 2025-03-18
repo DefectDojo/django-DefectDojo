@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.urls import reverse
 from django.utils import timezone
@@ -95,24 +94,6 @@ class EndpointManager:
                 endpoint_status.save()
         return
 
-    def chunk_endpoints(
-        self,
-        endpoint_list: list[Endpoint],
-        chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> list[list[Endpoint]]:
-        """
-        Split a single large list into a list of lists of size `chunk_size`.
-        For Example
-        ```
-        >>> chunk_endpoints([A, B, C, D, E], 2)
-        >>> [[A, B], [B, C], [E]]
-        ```
-        """
-        # Break the list of parsed findings into "chunk_size" lists
-        chunk_list = [endpoint_list[i:i + chunk_size] for i in range(0, len(endpoint_list), chunk_size)]
-        logger.debug(f"Split endpoints into {len(chunk_list)} chunks of {chunk_size}")
-        return chunk_list
-
     def chunk_endpoints_and_disperse(
         self,
         finding: Finding,
@@ -124,19 +105,8 @@ class EndpointManager:
         chunk up the findings to be dispersed into individual celery workers. Otherwise,
         only use one worker
         """
-        if settings.ASYNC_FINDING_IMPORT:
-            chunked_list = self.chunk_endpoints(endpoints)
-            # If there is only one chunk, then do not bother with async
-            if len(chunked_list) < 2:
-                self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
-                return []
-            # First kick off all the workers
-            for endpoints_list in chunked_list:
-                self.add_endpoints_to_unsaved_finding(finding, endpoints_list, sync=False)
-        else:
-            # Do not run this asynchronously or chunk the endpoints
-            self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
-        return None
+        self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
+        return
 
     def clean_unsaved_endpoints(
         self,
@@ -158,23 +128,7 @@ class EndpointManager:
         endpoint_status_list: list[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        """
-        Reactivates all endpoint status objects. Whether this function will asynchronous or not is dependent
-        on the ASYNC_FINDING_IMPORT setting. If it is set to true, endpoint statuses will be chunked,
-        and dispersed over celery workers.
-        """
-        # Determine if this can be run async
-        if settings.ASYNC_FINDING_IMPORT:
-            chunked_list = self.chunk_endpoints(endpoint_status_list)
-            # If there is only one chunk, then do not bother with async
-            if len(chunked_list) < 2:
-                self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
-            # First kick off all the workers
-            for endpoint_status_list in chunked_list:
-                self.reactivate_endpoint_status(endpoint_status_list, sync=False)
-        else:
-            self.reactivate_endpoint_status(endpoint_status_list, sync=True)
+        self.reactivate_endpoint_status(endpoint_status_list, sync=True)
         return
 
     def chunk_endpoints_and_mitigate(
@@ -183,23 +137,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Mitigates all endpoint status objects. Whether this function will asynchronous or not is dependent
-        on the ASYNC_FINDING_IMPORT setting. If it is set to true, endpoint statuses will be chunked,
-        and dispersed over celery workers.
-        """
-        # Determine if this can be run async
-        if settings.ASYNC_FINDING_IMPORT:
-            chunked_list = self.chunk_endpoints(endpoint_status_list)
-            # If there is only one chunk, then do not bother with async
-            if len(chunked_list) < 2:
-                self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
-            # First kick off all the workers
-            for endpoint_status_list in chunked_list:
-                self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
-        else:
-            self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
+        self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
         return
 
     def update_endpoint_status(
