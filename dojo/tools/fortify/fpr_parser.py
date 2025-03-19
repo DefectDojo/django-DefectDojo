@@ -1,3 +1,4 @@
+import logging
 import re
 import zipfile
 from xml.etree.ElementTree import Element
@@ -6,6 +7,8 @@ from defusedxml import ElementTree
 
 from dojo.models import Finding, Test
 from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
+
+logger = logging.getLogger(__name__)
 
 
 class FortifyFPRParser:
@@ -44,30 +47,30 @@ class FortifyFPRParser:
         return root
 
     def identify_namespace(self, root: Element) -> None:
-        """Determine what the namespace could be, and then set the value in a class var labeled `namespace`"""
-        regex = r"{.*}"
+        """Determine what the namespace could be, and then set the value in a class var labeled `namespaces`"""
+        regex = r"{(.*)}"
         matches = re.match(regex, root.tag)
-        try:
-            self.namespace = matches.group(0)
-        except BaseException:
-            self.namespace = ""
+        self.namespaces = {"": matches.group(1)}
 
     def parse_related_data(self, root: Element, test: Test) -> None:
         """Parse the XML and generate a list of findings."""
-        for description in root.findall(f"{self.namespace}Description"):
-            class_id = description.attrib.get("ClassID")
+        for description in root.findall("Description", self.namespaces):
+            class_id = description.attrib.get("classID")
+            logger.debug(f"Description: {class_id}")
             if class_id:
                 self.descriptions[class_id] = self.parse_description_information(description)
 
-        for snippet in root.find(f"{self.namespace}Snippets"):
+        for snippet in root.find("Snippets", self.namespaces):
             snippet_id = snippet.attrib.get("id")
+            logger.debug(f"Snippet: {snippet_id}")
             if snippet_id:
                 self.snippets[snippet_id] = self.parse_snippet_information(snippet)
 
-        for rule in root.find(f"{self.namespace}EngineData").find(f"{self.namespace}RuleInfo"):
+        for rule in root.find("EngineData", self.namespaces).find("RuleInfo", self.namespaces):
             rule_id = rule.attrib.get("id")
+            logger.debug(f"Rule: {rule_id}")
             if rule_id:
-                self.rules[rule_id] = self.parse_rule_information(rule)
+                self.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
 
     def convert_vulnerabilities_to_findings(self, root: Element, test: Test) -> list[Finding]:
         """Convert the list of vulnerabilities to a list of findings."""
@@ -76,7 +79,7 @@ class FortifyFPRParser:
         self.parse_related_data(root, test)
 
         findings = []
-        for vuln in root.find(f"{self.namespace}Vulnerabilities"):
+        for vuln in root.find("Vulnerabilities", self.namespaces):
             vuln_data = VulnerabilityData()
             self.parse_instance_information(vuln, vuln_data)
             self.parse_class_information(vuln, vuln_data)
@@ -94,7 +97,7 @@ class FortifyFPRParser:
             finding.severity = self.compute_severity(vuln_data, snippet, description, rule)
 
             finding.file_path = vuln_data.source_location_path
-            findings.line = int(vuln_data.source_location_line)
+            finding.line = int(self.compute_line(vuln_data, snippet, description, rule))
             finding.unique_id_from_tool = vuln_data.instance_id
 
             findings.append(finding)
@@ -102,23 +105,23 @@ class FortifyFPRParser:
         return findings
 
     def parse_class_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
-        if (class_info := vulnerability.find(f"{self.namespace}ClassInfo")) is not None:
-            vuln_data.vulnerability_type = getattr(class_info.find(f"{self.namespace}Type"), "text", None)
-            vuln_data.class_id = getattr(class_info.find(f"{self.namespace}class_id"), "text", None)
-            vuln_data.kingdom = getattr(class_info.find(f"{self.namespace}Kingdom"), "text", None)
-            vuln_data.analyzer_name = getattr(class_info.find(f"{self.namespace}AnalyzerName"), "text", None)
-            vuln_data.default_severity = getattr(class_info.find(f"{self.namespace}DefaultSeverity"), "text", None)
+        if (class_info := vulnerability.find("ClassInfo", self.namespaces)) is not None:
+            vuln_data.vulnerability_type = class_info.findtext("Type", None, self.namespaces)
+            vuln_data.class_id = class_info.findtext("ClassID", None, self.namespaces)
+            vuln_data.kingdom = class_info.findtext("Kingdom", None, self.namespaces)
+            vuln_data.analyzer_name = class_info.findtext("AnalyzerName", None, self.namespaces)
+            vuln_data.default_severity = class_info.findtext("DefaultSeverity", None, self.namespaces)
 
     def parse_instance_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
         # Attempt to fetch the confidence and instance severity
-        if (instance_info := vulnerability.find(f"{self.namespace}InstanceInfo")) is not None:
-            vuln_data.instance_id = getattr(instance_info.find(f"{self.namespace}InstanceID"), "text", None)
-            vuln_data.instance_severity = getattr(instance_info.find(f"{self.namespace}InstanceSeverity"), "text", None)
-            vuln_data.confidence = getattr(instance_info.find(f"{self.namespace}Confidence"), "text", None)
+        if (instance_info := vulnerability.find("InstanceInfo", self.namespaces)) is not None:
+            vuln_data.instance_id = instance_info.findtext("InstanceID", None, self.namespaces)
+            vuln_data.instance_severity = instance_info.findtext("InstanceSeverity", None, self.namespaces)
+            vuln_data.confidence = instance_info.findtext("Confidence", None, self.namespaces)
 
     def parse_analysis_information(self, vulnerability: Element, vuln_data: VulnerabilityData) -> None:
         """Appends the description with any analysis information that can be extracted."""
-        if (analysis_info := vulnerability.find(f"{self.namespace}AnalysisInfo")) is not None:
+        if (analysis_info := vulnerability.find("AnalysisInfo", self.namespaces)) is not None:
             # See if we can get a SourceLocation from this
             if (source_location := self.get_source_location(analysis_info)) is not None:
                 vuln_data.source_location_path = source_location.attrib.get("path")
@@ -143,16 +146,16 @@ class FortifyFPRParser:
         current_element = analysis_info
         # Traverse the key path up to "Entry" to fetch all Entry elements
         for key in key_path[:-3]:  # stop before "Entry" level
-            if (next_current_element := current_element.find(f"{self.namespace}{key}")) is not None:
+            if (next_current_element := current_element.find(f"{key}", self.namespaces)) is not None:
                 current_element = next_current_element
             else:
                 return None
         # Iterate over all "Entry" elements
-        entries = current_element.findall(f"{self.namespace}Entry")
+        entries = current_element.findall("Entry", self.namespaces)
         for entry in entries:
             # Continue the search for "Node" and "SourceLocation" within each entry
-            if (node := entry.find(f"{self.namespace}Node")) is not None:
-                if (source_location := node.find(f"{self.namespace}SourceLocation")) is not None:
+            if (node := entry.find("Node", self.namespaces)) is not None:
+                if (source_location := node.find("SourceLocation", self.namespaces)) is not None:
                     return source_location
         # Return None if no SourceLocation was found in any Entry
         return None
@@ -160,46 +163,45 @@ class FortifyFPRParser:
     def parse_snippet_information(self, snippet: Element) -> SnippetData:
         """Parse the snippet information and return a SnippetData object."""
         snippet_data = SnippetData()
-        snippet_data.file_name = snippet.attrib.get("File")
-        snippet_data.start_line = snippet.attrib.get("StartLine")
-        snippet_data.end_line = snippet.attrib.get("EndLine")
-        snippet_data.text = snippet.text
+        snippet_data.file_name = snippet.findtext("File", None, self.namespaces)
+        snippet_data.start_line = snippet.findtext("StartLine", None, self.namespaces)
+        snippet_data.end_line = snippet.findtext("EndLine", None, self.namespaces)
+        snippet_data.text = snippet.findtext("Text", None, self.namespaces)
+        logger.debug(f"Snippet: {snippet_data.file_name}: {snippet_data.start_line}")
         return snippet_data
 
     def parse_description_information(self, description: Element) -> DescriptionData:
         """Parse the description information and return a DescriptionData object."""
         description_data = DescriptionData()
-        description_data.abstract = description.attrib.get("Abstract")
-        description_data.explanation = description.attrib.get("Explanation")
-        description_data.recommendations = description.attrib.get("Recommendations")
-        description_data.tips = description.attrib.get("Tips")
+        description_data.abstract = description.findtext("Abstract", None, self.namespaces)
+        description_data.explanation = description.findtext("Explanation", None, self.namespaces)
+        description_data.recommendations = description.findtext("Recommendations", None, self.namespaces)
+        description_data.tips = description.findtext("Tips", None, self.namespaces)
         return description_data
 
     def parse_rule_information(self, rule: Element) -> RuleData:
         """Parse the rule information and return a RuleData object."""
         rule_data = RuleData()
-        rule_data.accuracy = rule.attrib.get("Accuracy")
-        rule_data.impact = rule.attrib.get("Impact")
-        rule_data.probability = rule.attrib.get("Probability")
-        rule_data.impact_bias = rule.attrib.get("ImpactBias")
-        rule_data.confidentiality_impact = rule.attrib.get("ConfidentialityImpact")
-        rule_data.integrity_impact = rule.attrib.get("IntegrityImpact")
-        rule_data.remediation_effort = rule.attrib.get("Recommendations")
+        rule_data.accuracy = rule.findtext("Group[@name='Accuracy']", None, self.namespaces)
+        rule_data.impact = rule.findtext("Group[@name='Impact']", None, self.namespaces)
+        rule_data.probability = rule.findtext("Group[@name='Probability']", None, self.namespaces)
+        rule_data.impact_bias = rule.findtext("Group[@name='ImpactBias']", None, self.namespaces)
+        rule_data.confidentiality_impact = rule.findtext("Group[@name='ConfidentialityImpact']", None, self.namespaces)
+        rule_data.integrity_impact = rule.findtext("Group[@name='IntegrityImpact']", None, self.namespaces)
+        rule_data.remediation_effort = rule.findtext("Group[@name='Recommendations']", None, self.namespaces)
+        logger.debug(f"Rule Impact: {rule_data.impact}")
         return rule_data
 
     def format_title(self, vulnerability, snippet, description, rule) -> str:
         # defaults for when there is no snippet (shouldn't happen, future improvement: parser might also parse ReplacementDefinitions and/or Context elements)
         file_name = vulnerability.source_location_path.split("/")[-1]
-        line = vulnerability.source_location_line
-        if snippet:
-            file_name = snippet.file_name
-            line = snippet.start_line
+        line = self.compute_line(vulnerability, snippet, description, rule)
 
         return f"{vulnerability.vulnerability_type} - {file_name}: {line} ({vulnerability.class_id})"
 
     def format_description(self, vulnerability, snippet, description, rule) -> str:
         desc = f"##Catagory: {vulnerability.vulnerability_type}\n"
-        desc += f"###Abstract:\n{description.abstract}"
+        desc += f"###Abstract:\n{description.abstract}\n"
 
         desc += f"**SourceLocationPath:** {vulnerability.source_location_path}\n"
         desc += f"**SourceLocationLine:** {vulnerability.source_location_line}\n"
@@ -238,24 +240,35 @@ class FortifyFPRParser:
     def compute_severity(self, vulnerability, snippet, description, rule) -> str:
         """Convert the the float representation of severity and confidence to a string severity."""
         if not rule.impact:
+            logger.debug("No rule impact found, setting severity to Informational")
             return "Informational"
 
-        impact = rule.impact
-        confidence = vulnerability.confidence
-        accuracy = rule.accuracy
-        probability = rule.probability
+        try:
+            impact = float(rule.impact)
+            confidence = float(vulnerability.confidence)
+            accuracy = float(rule.accuracy)
+            probability = float(rule.probability)
 
-        # This comes from Fortify support documentation, requested in #11901
-        likelihood = (accuracy * confidence * probability) / 25
-        likelihood = round(likelihood, 1)
+            # This comes from Fortify support documentation, requested in #11901
+            likelihood = (accuracy * confidence * probability) / 25
+            likelihood = round(likelihood, 1)
+            logger.debug(f"Impact: {impact}, Likelihood: {likelihood}")
 
-        if impact >= 2.5 and likelihood >= 2.5:
-            return "Critical"
-        if impact >= 2.5 > likelihood:
-            return "High"
-        if impact < 2.5 <= likelihood:
-            return "Medium"
-        if impact < 2.5 and likelihood < 2.5:
-            return "Low"
+            if impact >= 2.5 and likelihood >= 2.5:
+                return "Critical"
+            if impact >= 2.5 > likelihood:
+                return "High"
+            if impact < 2.5 <= likelihood:
+                return "Medium"
+            if impact < 2.5 and likelihood < 2.5:
+                return "Low"
+
+        except ValueError:
+            logger.info("Impossible to compute severity due to number format error", exc_info=True)
 
         return "Informational"
+
+    def compute_line(self, vulnerability, snippet, description, rule) -> str:
+        if snippet and snippet.start_line:
+            return snippet.start_line
+        return vulnerability.source_location_line

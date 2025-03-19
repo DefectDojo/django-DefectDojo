@@ -26,6 +26,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("Privilege Management: Unnecessary Permission - AndroidManifest.xml: 11", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("app/build/intermediates/bundle_manifest/developDebug/processDevelopDebugManifest/bundle-manifest/AndroidManifest.xml", finding.file_path)
+            with self.subTest(i=1):
                 self.assertEqual(11, finding.line)
                 self.assertEqual("53C25D2FC6950554F16D3CEF9E41EF6F", finding.unique_id_from_tool)
 
@@ -80,10 +81,20 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(61, len(findings))
+            # for i in range(len(findings)):
+            #     print(f"{i}: {findings[i]}: {findings[i].severity}")
+
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)
-                self.assertEqual("High", finding.severity)
-                self.assertEqual("114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.unique_id_from_tool)
-                finding = findings[12]
-                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("Cross-Site Request Forgery - category.html: 219 (114E5A67-3446-4DD5-B578-D0E6FDBB304E)", finding.title)
+                self.assertEqual("Low", finding.severity)
+                self.assertEqual("1B87289954501EF8FD3861819DD98C27", finding.unique_id_from_tool)
+                self.assertEqual("public/category.html", finding.file_path)
+                self.assertEqual(219, finding.line)
+            with self.subTest(i=1):
+                finding = findings[50]
+                self.assertEqual("Insecure Transport - footer.html: 104 (C72A3E77-8324-4FF9-B958-74FCDDF39D17)", finding.title)
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("D739B2E51B127BDFA4FE07B5A7662A45", finding.unique_id_from_tool)
+                self.assertEqual("public/footer.html", finding.file_path)
+                self.assertEqual(104, finding.line)
