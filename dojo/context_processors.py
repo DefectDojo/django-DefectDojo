@@ -97,4 +97,4 @@ def session_expiry(request):
             "session_notify_time": notify_time,
         }
     except Exception:
-        return{}
+        return {}
