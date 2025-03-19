@@ -817,6 +817,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_system_settings",
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
+                "dojo.context_processors.session_expiry",
             ],
         },
     },
