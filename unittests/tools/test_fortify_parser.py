@@ -98,3 +98,26 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D739B2E51B127BDFA4FE07B5A7662A45", finding.unique_id_from_tool)
                 self.assertEqual("public/footer.html", finding.file_path)
                 self.assertEqual(104, finding.line)
+
+    def test_fortify_hello_world_fdr_findings(self):
+        with open(get_unit_tests_scans_path("fortify") / "hello_world.fpr", encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(4, len(findings))
+            # for i in range(len(findings)):
+            #     print(f"{i}: {findings[i]}: {findings[i].severity}")
+
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                self.assertEqual("Low", finding.severity)
+                self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
+                self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
+                self.assertEqual(5, finding.line)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
+                self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
+                self.assertEqual(13, finding.line)
