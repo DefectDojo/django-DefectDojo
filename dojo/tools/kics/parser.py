@@ -2,7 +2,7 @@ import hashlib
 import json
 
 from dojo.models import Finding
-
+from django.conf import settings
 
 class KICSParser:
 
@@ -29,6 +29,7 @@ class KICSParser:
         data = json.load(filename)
         dupes = {}
         for query in data["queries"]:
+            id = query.get("query_id")
             name = query.get("query_name")
             query_url = query.get("query_url")
             severity = self.SEVERITY.get(query.get("severity"), "Medium")
@@ -80,6 +81,8 @@ class KICSParser:
                         component_name=platform,
                         nb_occurences=1,
                         references=query_url,
+                        vuln_id_from_tool=id,
                     )
+                    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("kics")]
                     dupes[dupe_key] = finding
         return list(dupes.values())
