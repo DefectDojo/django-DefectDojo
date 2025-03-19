@@ -79,6 +79,7 @@ def session_expiry(request):
     except Exception:
         return {}
 
+
 def session_expiry(request):
     from datetime import datetime
 
