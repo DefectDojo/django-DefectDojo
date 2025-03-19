@@ -57,6 +57,7 @@ def bind_announcement(request):
     except Exception:
         return {}
 
+
 def session_expiry(request):
     from datetime import datetime
 
