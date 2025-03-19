@@ -1,0 +1,34 @@
+name: "Release-X: Nightly dev build"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+  workflow_dispatch:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        description: 'Release version (x.y.z format)'
+        default: "dev"
+        required: true
+
+jobs:
+  publish-docker-containers:
+    strategy:
+        matrix:
+          platform: ['linux/amd64', 'linux/arm64']
+        fail-fast: false
+    uses: ./.github/workflows/release-x-manual-docker-containers.yml
+    with:
+      release_number: ${{ github.event.inputs.release_number }}
+      platform: ${{ matrix.platform }}
+    secrets: inherit
+
+  publish-container-digests:
+    needs: publish-docker-containers
+    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
+    with:
+        release_number: ${{ github.event.inputs.release_number }}
+    secrets: inherit
