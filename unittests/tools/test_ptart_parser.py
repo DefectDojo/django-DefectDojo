@@ -459,6 +459,43 @@ class TestPTARTParser(DojoTestCase):
             hit = {}
             self.assertEqual(None, parse_cwe_from_hit(hit))
 
+    def test_ptart_parser_tools_parse_endpoints_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_endpoints_from_hit
+        with self.subTest("No Asset"):
+            hit = {}
+            self.assertEqual([], parse_endpoints_from_hit(hit))
+        with self.subTest("Empty Asset"):
+            hit = {
+                "asset": "",
+            }
+            self.assertEqual([], parse_endpoints_from_hit(hit))
+        with self.subTest("Valid Asset"):
+            hit = {
+                "asset": "https://test.example.com",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(1, len(endpoints))
+            endpoint = endpoints[0]
+            self.assertEqual("test.example.com", endpoint.host)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual(None, endpoint.path)
+        with self.subTest("Asset with Invalid Port"):
+            hit = {
+                "asset": "https://test.example.com:<random_port>",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(0, len(endpoints))
+        with self.subTest("Asset with Invalid Protocol"):
+            hit = {
+                "asset": "test.example.com",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(1, len(endpoints))
+            endpoint = endpoints[0]
+            self.assertEqual("test.example.com", endpoint.host)
+            self.assertEqual("https", endpoint.protocol)
+
     def test_ptart_parser_with_empty_json_throws_error(self):
         with open(get_unit_tests_scans_path("ptart") / "empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
@@ -751,6 +788,7 @@ class TestPTARTParser(DojoTestCase):
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Yet another Screenshot.png", screenshot["title"])
                 self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+
     def test_ptart_parser_with_single_vuln_containing_multiple_cwes(self):
         with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_multiple_cwe.json", encoding="utf-8") as testfile:
             parser = PTARTParser()

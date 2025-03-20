@@ -2,6 +2,7 @@ import pathlib
 from datetime import datetime
 
 import cvss
+from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint
 
@@ -154,8 +155,17 @@ def get_attachement_title(attachment):
 def parse_endpoints_from_hit(hit):
     if "asset" not in hit or not hit["asset"]:
         return []
-    endpoint = Endpoint.from_uri(hit["asset"])
-    return [endpoint]
+    try:
+        asset = hit.get("asset", None)
+        if not asset:
+            return []
+        # Workaround for Defect Dojo being silly when parsing uris.
+        # If there's no protocol, it will assume the hostname is the protocol.
+        asset = f"https://{asset}" if "://" not in asset else asset
+        endpoint = Endpoint.from_uri(asset)
+    except ValidationError:
+        endpoint = None
+    return [] if not endpoint else [endpoint]
 
 
 def generate_test_description_from_report(data):
