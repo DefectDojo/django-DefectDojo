@@ -185,3 +185,41 @@ def get_transformed_reference(reference):
             return url
         return None
     return f"{title}: {url}"
+
+
+def parse_cwe_from_hit(hit):
+    if "cwes" not in hit or not hit["cwes"]:
+        return None
+    cwes = hit["cwes"]
+    # Grab the last CWE in the list, as it's sorted in numerical order,
+    # and the last element is generally the most specific.
+    return parse_cwe_id_from_cwe(cwes.pop()) if cwes and isinstance(cwes, list) and len(cwes) > 0 else None
+
+
+def parse_cwe_id_from_cwe(cwe):
+    try:
+        if not cwe:
+            return None
+
+        cwe_id = cwe.get("cwe_id", None)
+        if not cwe_id:
+            title = cwe.get("title", None)
+            if not title:
+                return None
+            cwe_id = parse_cwe_id_from_cwe_title(title)
+        elif isinstance(cwe_id, str):
+            cwe_id = int(cwe_id)
+        elif not isinstance(cwe_id, int):
+            cwe_id = None
+    except (ValueError, IndexError):
+        return None
+    return cwe_id
+
+
+def parse_cwe_id_from_cwe_title(title):
+    try:
+        if not title:
+            return None
+        return int(title.split("-")[1])
+    except (ValueError, IndexError):
+        return None

@@ -40,7 +40,9 @@
             "A01:2021-Broken Access Control",
             "A04:2021-Insecure Design"
           ],
-          "cwes": ["CWE-862 - Missing Authorization"],
+          "cwes": [
+            { "cwe_id": 862, "title": "CWE-862 - Missing Authorization" }
+          ],
           "screenshots": [
             {
               "caption": "Borked",
@@ -74,7 +76,9 @@
           "labels": [
             "A09:2021-Security Logging and Monitoring Failures"
           ],
-          "cwes": ["CWE-778 - Insufficient Logging"],
+          "cwes": [
+            { "cwe_id": 778, "title": "CWE-778 - Insufficient Logging" }
+          ],
           "screenshots": [],
           "attachments": [],
           "references": []
@@ -109,7 +113,9 @@
               "A01:2021-Broken Access Control",
               "A04:2021-Insecure Design"
             ],
-            "cwes": ["CWE-862 - Missing Authorization"]
+            "cwes": [
+              { "cwe_id": 862, "title": "CWE-862 - Missing Authorization" }
+            ]
           },
           "screenshots": [
             {
