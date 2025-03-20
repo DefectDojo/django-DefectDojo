@@ -33,6 +33,7 @@ from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
@@ -1828,17 +1829,6 @@ def user_post_save(sender, instance, created, **kwargs):
         instance.save()
 
 
-def is_safe_url(url):
-    try:
-        # available in django 3+
-        from django.utils.http import url_has_allowed_host_and_scheme
-    except ImportError:
-        # django < 3
-        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
-
-    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
-
-
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
     if return_url is None or not return_url.strip():
@@ -1862,7 +1852,7 @@ def redirect_to_return_url_or_else(request, or_else):
 
 def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
-    if is_safe_url(redirect_to):
+    if url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=None):
         return HttpResponseRedirect(redirect_to)
     msg = "invalid redirect, host and scheme not in allowed_hosts"
     raise ValueError(msg)
