@@ -63,7 +63,7 @@ def session_expiry(request):
 
     try:
         if request.user.is_authenticated:
-            last_activity = request.session.get('_last_activity', time.time())
+            last_activity = request.session.get("_last_activity", time.time())
             expiry_time = last_activity + settings.SESSION_COOKIE_AGE  # When the session will expire
             warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
             notify_time = expiry_time - warning_time
