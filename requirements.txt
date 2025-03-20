@@ -62,7 +62,7 @@ cvss==3.4
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
 django-test-migrations==1.4.0
-djangosaml2==1.9.4
+djangosaml2==1.10.1
 drf-spectacular==0.28.0
 drf-spectacular-sidecar==2025.3.1
 django-ratelimit==4.1.0
