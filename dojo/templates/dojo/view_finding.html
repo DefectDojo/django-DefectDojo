@@ -507,7 +507,7 @@
                             <td>{{ finding.vuln_id_from_tool }}</td>
                         {% endif %}
                         <td title="IA Recommendation">
-                            <button class="btn btn-primary" data-toggle="collapse"  data-finding-id={{finding.id}} data-target="#ia_recommendation" id="id_ia_recommendation">
+                            <button class="btn btn-primary" data-toggle="collapse" data-finding-id={{finding.id}} data-target="#ia_recommendation" id="id_ia_recommendation">
                                 🤖
                             </button>
                       
@@ -788,8 +788,9 @@
         </div>
     {% endif %}
     <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading"> 
             <h4>IA Recommendation
+                
                 <i class="fa-solid fa-robot"></i>
                 <span class="pull-right">
                     <a rel="noopener noreferrer" data-toggle="collapse" href="#ia_recommendation">
@@ -798,7 +799,9 @@
                 </span>
             </h4>
         </div>
+        <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
         <div id="ia_recommendation" class="panel-body collapse">
+            <div id="id_recommendation_content"> </div>
         </div>
     </div>
     {% if similar_findings_enabled %}
@@ -1246,6 +1249,8 @@
 {% block postscript %}
     {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
+    <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>
     <script type="module" src="{% static "dojo/js/finding/ia_recomendation.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
@@ -1253,6 +1258,7 @@
         var firstID = {{findings_list.0}};
         var currentID = {{finding.id}};
         var lastID = {{findings_list_lastElement}};
+
         if(currentID != firstID)
         {
             $('.PrevAndNext_Buttons').append('<a rel="noopener noreferrer" href="{% url 'view_finding' prev_finding_id %}" class="btn btn-primary">Previous Finding</a> ');
@@ -1552,6 +1558,7 @@
     </script>
 
     <script type="application/javascript">
+       
         // DataTables Setup
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
