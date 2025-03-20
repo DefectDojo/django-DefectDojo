@@ -1,5 +1,5 @@
 ---
-title: "User permission charts"
+title: "Action permission charts"
 description: "All user permissions in detail"
 weight: 4
 ---

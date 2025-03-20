@@ -10,6 +10,12 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Mar 2025: v2.44
 
+### Mar 17, 2025, v2.44.2
+
+- **(Beta UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/) for more details.
+
+![image](images/pro_permissions_2.png)
+
 ### Mar 10, 2025: v2.44.1
 
 - **(Beta UI)** Added a field in the View Engagement page which allows a user to navigate to the linked Jira Epic, if one exists.
