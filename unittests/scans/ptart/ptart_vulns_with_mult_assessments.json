@@ -39,6 +39,9 @@
           "labels": [
             "A03:2021-Injection"
           ],
+          "cwes": [
+            "CWE-79 - Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+          ],
           "screenshots": [],
           "attachments": [],
           "references": []
@@ -63,6 +66,7 @@
             "A01:2021-Broken Access Control",
             "A04:2021-Insecure Design"
           ],
+          "cwes": ["CWE-862 - Missing Authorization"],
           "screenshots": [
             {
               "caption": "Borked",
@@ -96,6 +100,7 @@
           "labels": [
             "A09:2021-Security Logging and Monitoring Failures"
           ],
+          "cwes": ["CWE-778 - Insufficient Logging"],
           "screenshots": [],
           "attachments": [],
           "references": []
