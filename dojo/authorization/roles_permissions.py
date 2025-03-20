@@ -370,6 +370,7 @@ def get_roles_with_permissions():
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
             Permissions.Finding_Group_View,
+            Permissions.Finding_Bulk_Close,
             Permissions.Endpoint_View,
             Permissions.Component_View,
             Permissions.Component_Add,
