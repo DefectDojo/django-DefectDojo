@@ -68,7 +68,7 @@ class FindingTest(BaseTestCase):
 
     def check_file(self, file_name):
         file_found = False
-        for i in range(1, 30):
+        for _ in range(1, 30):
             time.sleep(1)
             if Path(file_name).is_file():
                 file_found = True
