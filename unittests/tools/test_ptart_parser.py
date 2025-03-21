@@ -209,6 +209,24 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("screenshot.png", screenshot["title"])
             self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
                             "Invalid Screenshot Data")
+        with self.subTest("Screenshot with overly long caption"):
+            hit = {
+                "screenshots": [{
+                    "caption": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(1, len(screenshots))
+            screenshot = screenshots[0]
+            self.assertEqual("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l...png",
+                             screenshot["title"])
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
 
     def test_ptart_parser_tools_parse_attachment_from_hit(self):
         from dojo.tools.ptart.ptart_parser_tools import parse_attachment_from_hit
@@ -830,6 +848,53 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual(2, len(finding.unsaved_files))
             screenshot = finding.unsaved_files[0]
             self.assertEqual("Borked.png", screenshot["title"])
+            self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+            attachment = finding.unsaved_files[1]
+            self.assertEqual("License", attachment["title"])
+            self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+            self.assertEqual("Reference: https://ref.example.com", finding.references)
+
+    def test_ptart_parser_with_single_vuln_screenshot_with_long_caption(self):
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_screenshot_long.json", encoding="utf-8") as testfile:
+            parser = PTARTParser()
+            tests = parser.get_tests("PTART Report", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual("Test Report", test.name)
+            self.assertEqual("Test Report", test.type)
+            self.assertEqual("", test.version)
+            self.assertEqual("Mistakes were made\n\nThings were done\n\nThings should be put right", test.description)
+            self.assertEqual("2024-08-11", test.target_start.strftime("%Y-%m-%d"))
+            self.assertEqual("2024-08-16", test.target_end.strftime("%Y-%m-%d"))
+            self.assertEqual(1, len(test.findings))
+            finding = test.findings[0]
+            self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(
+                "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                finding.description)
+            self.assertEqual(
+                "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                finding.mitigation)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+            self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.vuln_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.cve)
+            self.assertEqual("Low", finding.effort_for_fixing)
+            self.assertEqual("Test Assessment", finding.component_name)
+            self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+            self.assertEqual(862, finding.cwe)
+            self.assertEqual(2, len(finding.unsaved_tags))
+            self.assertEqual([
+                "A01:2021-Broken Access Control",
+                "A04:2021-Insecure Design",
+            ], finding.unsaved_tags)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(2, len(finding.unsaved_files))
+            screenshot = finding.unsaved_files[0]
+            self.assertEqual("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l...png", screenshot["title"])
             self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
             attachment = finding.unsaved_files[1]
             self.assertEqual("License", attachment["title"])

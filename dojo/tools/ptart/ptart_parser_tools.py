@@ -97,7 +97,8 @@ def parse_screenshot_data(screenshot):
 
 
 def get_screenshot_title(screenshot):
-    caption = screenshot.get("caption", "screenshot")
+    raw_caption = screenshot.get("caption", "screenshot")
+    caption = f"{raw_caption[:94]}.." if len(raw_caption) > 96 else raw_caption
     if not caption:
         caption = "screenshot"
     return f"{caption}{get_file_suffix_from_screenshot(screenshot)}"
