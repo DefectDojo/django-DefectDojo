@@ -98,6 +98,7 @@ def parse_screenshot_data(screenshot):
 
 def get_screenshot_title(screenshot):
     raw_caption = screenshot.get("caption", "screenshot")
+    # Screenshot filenames are limited to 100 characters.
     caption = f"{raw_caption[:94]}.." if len(raw_caption) > 96 else raw_caption
     if not caption:
         caption = "screenshot"
