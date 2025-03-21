@@ -1671,12 +1671,15 @@
 
     <script type="module">
         import {get_ia_recommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
-        const apiUrl = "https://09a7b3c2-0993-47f6-87ef-e7ec9e4c1f0d.mock.pstmn.io/open-assistant/marvin/tools/api/v1/devsecops"
+        const apiUrl = "{{ HOST_IA_RECOMMENDATION }}"
         $(document).ready(function() {
             $('#id_button_ia_recommendation').click(function(event)
             {
+                $('#id_recommendation_content').empty();
+                $('#id_mitigations_contect').empty();
+                $('#id_files_to_fix_content').empty();
                 $('#ia_recommendation').collapse('show');
-                get_ia_recommendation(1, apiUrl);
+                get_ia_recommendation(3, apiUrl);
             });
         });
             

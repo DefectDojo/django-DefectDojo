@@ -497,7 +497,7 @@ env = environ.FileAwareEnv(
     # Priorization
     DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
     # Host IA recommendation
-    DD_HOST_IA_RECOMMENDATION=(str, ""),
+    DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
 )
 
 
