@@ -141,3 +141,19 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertEqual(endpoint.port, 80)
             self.assertEqual(endpoint.path, "v1/tree/10")
             self.assertIn("Ensure that your web server,", finding.mitigation)
+
+    def test_parse_file_issue_12050(self):
+        with open(get_unit_tests_scans_path("gitlab_dast") / "issue_12050.json", encoding="utf-8") as testfile:
+            parser = GitlabDastParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            # check req/resp
+            finding = findings[0]
+            self.assertEqual(1, len(finding.unsaved_req_resp))
+            req_resp = finding.unsaved_req_resp[0]
+            self.assertIn("req", req_resp)
+            self.assertIsNotNone(req_resp["req"])
+            self.assertIsInstance(req_resp["req"], str)
+            self.assertIn("resp", req_resp)
+            self.assertIsNotNone(req_resp["resp"])
+            self.assertIsInstance(req_resp["resp"], str)
