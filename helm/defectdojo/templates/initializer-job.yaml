@@ -103,6 +103,8 @@ spec:
         {{- with .Values.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        resources:
+          {{- toYaml .Values.initializer.resources | nindent 10 }}
       containers:
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
