@@ -507,7 +507,7 @@
                             <td>{{ finding.vuln_id_from_tool }}</td>
                         {% endif %}
                         <td title="IA Recommendation">
-                            <button class="btn btn-primary" data-toggle="collapse" data-finding-id={{finding.id}} data-target="#ia_recommendation" id="id_ia_recommendation">
+                            <button class="btn btn-primary" data-finding-id={{finding.id}} id="id_button_ia_recommendation">
                                 🤖
                             </button>
                       
@@ -799,9 +799,11 @@
                 </span>
             </h4>
         </div>
-        <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
         <div id="ia_recommendation" class="panel-body collapse">
+            <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
             <div id="id_recommendation_content"> </div>
+            <div id="id_mitigations_contect"> </div>
+            <div id="id_files_to_fix_content"> </div>
         </div>
     </div>
     {% if similar_findings_enabled %}

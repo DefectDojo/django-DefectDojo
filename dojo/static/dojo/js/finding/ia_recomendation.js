@@ -1,57 +1,63 @@
-
-// import { get_ia_recommendation, get_ia_recommendation2} from '../driver_adapter/ia_recommendation.js'; 
-
- function writingEffect(strings, elementId) {
-    new TypeIt(elementId, {
-        strings: strings,
-        speed: 1,
-        waitUntilVisible: true,
-        cursor: false
-    }).go();
-}
-
-
-
- function FormaterHtmlRecommendation(recommendations){
+function FormaterHtmlRecommendation(data, elementId){
     let html = "";
     html += `<h5>Recommendation</h5>`
     html += `<ul>`;
-    recommendations.forEach(element => {
+    data.recommendations.forEach(element => {
     html += `<li> ${element} </li>`
     });
     html += `</ul>`
-    return html
+    new TypeIt(elementId, {
+        strings: html,
+        speed: 1,
+        waitUntilVisible: true,
+        cursor: false,
+        afterComplete: function () {
+            FormaterHtmlMitigations(data, "#id_mitigations_contect")
+        }
+    }).go();
 }
 
- function FormaterHtmlMitigations(mitigations){
+function FormaterHtmlMitigations(data, elementId){
     let html = "";
     html += `<h5>Mitigations</h5>`;
-    mitigations.forEach(element => {
-        element = element.replace(/</g, '<;').replace(/>/g, '>;').replace(/&/g, '&amp;');
-        html += `<pre><code class="language-css">${element}</code></pre>`;
+    data.mitigations.forEach(element => {
+        let preElement = document.createElement("pre")
+        let codeElement = document.createElement("code")
+        codeElement.textContent = element
+        preElement.appendChild(codeElement)
+        html += preElement.outerHTML;
     });
-    return html
+    new TypeIt(elementId, {
+        strings: html,
+        speed: 1,
+        waitUntilVisible: true,
+        cursor: false,
+        afterComplete: function () {
+            formaterHtmlFilesToFix(data, "#id_files_to_fix_content")
+        }
+    }).go();
 }
 
- function formaterHtmlFilesToFix(filesToFix){
+function formaterHtmlFilesToFix(data, elementId){
+    console.log("id_files_to_fix_content")
     let html = "";
     html += `<h5>File To Fix</h5>`;
     html += `<ul>`;
-    filesToFix.forEach(element => {
+    data.files_to_fix.forEach(element => {
         html += `<li class="file-path" > ${element} </li>`;
     });
     html += `</ul>`;
-    return html
+    new TypeIt(elementId, {
+        strings: html,
+        speed: 1,
+        waitUntilVisible: true,
+        cursor: false,
+        afterComplete: function () {
+            $('#spinnerLoading').css('display', 'none');
+            $('#id_button_ia_recommendation').prop('disabled', false); 
+        }
+    }).go();
 }
-
-function generarHtml(response){
-    console.log(response)
-    let htmlRecommendation =  FormaterHtmlRecommendation(response.data.recommendations)
-    htmlRecommendation +=  FormaterHtmlMitigations(response.data.mitigations)
-    htmlRecommendation +=  formaterHtmlFilesToFix(response.data.files_to_fix)
-    return htmlRecommendation
-}
-
 
 function get_ia_recommendation(finding_id) {
     $.ajax({
@@ -59,43 +65,21 @@ function get_ia_recommendation(finding_id) {
         type: "GET",
         beforeSend: function() {
             $('#spinnerLoading').css('display', 'flex');
+            $('#id_button_ia_recommendation').prop('disabled', true);
         },
         success: function(response) {
-            let htmlRecomendation = generarHtml(response)
-            writingEffect(htmlRecomendation, "#id_recommendation_content")
+            FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
         },
         error: function(error) {
-            console.log("erro or")
-        },
-        afeterSend: function() {
-            $('#spinnerLoading').css('display', 'none');
+            console.log(error)
         }
     });
 }
 
-
-
-
 $(document).ready(function() {
-    $('#id_ia_recommendation').click(function(event)
+    $('#id_button_ia_recommendation').click(function(event)
     {
+        $('#ia_recommendation').collapse('show');
         get_ia_recommendation(1)
-        // try {
-        //     $('#spinnerLoading').css('display', 'flex');
-        //     $('#id_ia_recommendation').prop('disabled', true);
-        //     let response =  get_ia_recommendation(1)
-        //     let htmlRecommendation =  FormaterHtmlRecommendation(response.data.recommendations)
-        //     htmlRecommendation +=  FormaterHtmlMitigations(response.data.mitigations)
-        //     htmlRecommendation +=  formaterHtmlFilesToFix(response.data.files_to_fix)
-        //     writingEffect(htmlRecommendation, "#id_recommendation_content")
-            
-        // } catch (error) {
-        //     console.error(error);
-        // }
-        // finally {
-        //     console.log("Finally");
-        //     $('#spinnerLoading').css('display', 'none');
-        //     $('#id_ia_recommendation').prop('disabled', false);
-        // }
     });
 });
