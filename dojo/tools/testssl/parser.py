@@ -60,6 +60,10 @@ class TestsslParser:
                     severity=severity,
                     nb_occurences=1,
                 )
+                # add Reference
+                if "cipher-tls" in row["id"]:
+                    ciphertls = "TLS_" + row["finding"].split("TLS_")[1]
+                    finding.references = "[https://ciphersuite.info/cs/" + ciphertls + "](https://ciphersuite.info/cs/" + ciphertls + ")"
                 # manage CVE
                 if vulnerability:
                     finding.unsaved_vulnerability_ids = [vulnerability]

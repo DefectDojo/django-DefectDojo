@@ -109,3 +109,16 @@ class TestTestsslParser(DojoTestCase):
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
             self.assertEqual(1, len(findings))
+
+    def test_parse_file_references(self):
+        with open(get_unit_tests_scans_path("testssl") / "references.csv", encoding="utf-8") as testfile:
+            parser = TestsslParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(43, len(findings))
+            finding = findings[10]
+            self.assertEqual(finding.references, "[https://ciphersuite.info/cs/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA](https://ciphersuite.info/cs/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA)")
+            finding = findings[15]
+            self.assertEqual(finding.references, "[https://ciphersuite.info/cs/TLS_RSA_WITH_AES_128_CBC_SHA](https://ciphersuite.info/cs/TLS_RSA_WITH_AES_128_CBC_SHA)")
