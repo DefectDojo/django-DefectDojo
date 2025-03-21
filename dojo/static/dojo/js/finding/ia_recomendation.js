@@ -39,7 +39,6 @@ function FormaterHtmlMitigations(data, elementId){
 }
 
 function formaterHtmlFilesToFix(data, elementId){
-    console.log("id_files_to_fix_content")
     let html = "";
     html += `<h5>File To Fix</h5>`;
     html += `<ul>`;
@@ -59,9 +58,9 @@ function formaterHtmlFilesToFix(data, elementId){
     }).go();
 }
 
-function get_ia_recommendation(finding_id) {
+export function get_ia_recommendation(finding_id, apiUrl) {
     $.ajax({
-        url: `https://09a7b3c2-0993-47f6-87ef-e7ec9e4c1f0d.mock.pstmn.io/open-assistant/marvin/tools/api/v1/devsecops/full-remediation-process/${finding_id}`,
+        url: `${apiUrl}/full-remediation-process/${finding_id}`,
         type: "GET",
         beforeSend: function() {
             $('#spinnerLoading').css('display', 'flex');
@@ -75,11 +74,3 @@ function get_ia_recommendation(finding_id) {
         }
     });
 }
-
-$(document).ready(function() {
-    $('#id_button_ia_recommendation').click(function(event)
-    {
-        $('#ia_recommendation').collapse('show');
-        get_ia_recommendation(1)
-    });
-});

@@ -1253,8 +1253,8 @@
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>
-    <script type="module" src="{% static "dojo/js/finding/ia_recomendation.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+    <script type="module" src="{% static "dojo/js/settings.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript" nonce="{{request.csp_nonce}}">
         var firstID = {{findings_list.0}};
@@ -1669,5 +1669,19 @@
         });
     </script>
 
+    <script type="module">
+        import {get_ia_recommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
+        const apiUrl = "https://09a7b3c2-0993-47f6-87ef-e7ec9e4c1f0d.mock.pstmn.io/open-assistant/marvin/tools/api/v1/devsecops"
+        $(document).ready(function() {
+            $('#id_button_ia_recommendation').click(function(event)
+            {
+                $('#ia_recommendation').collapse('show');
+                get_ia_recommendation(1, apiUrl);
+            });
+        });
+            
+    </script>
+
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
+   
