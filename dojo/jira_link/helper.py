@@ -1225,7 +1225,7 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     issue=issue, attachment=attachment, filename=jira_filename)
             else:
                 # read and upload a file
-                with open(file, "rb") as f:
+                with Path(file).open("rb") as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
             logger.exception("Unable to add attachment")

@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 
 from django.core.management.base import BaseCommand
 from pytz import timezone
@@ -21,12 +22,12 @@ class Command(BaseCommand):
         parser.add_argument("file_path")
 
     def handle(self, *args, **options):
-        file_path = options["file_path"]
+        file_path = Path(options["file_path"])
 
         findings = Finding.objects.filter(verified=True,
                                           active=True).select_related(
             "test__engagement__product")
-        writer = csv.writer(open(file_path, "w", encoding="utf-8"))
+        writer = csv.writer(file_path.open("w", encoding="utf-8"))
 
         headers = [
             "product_name",

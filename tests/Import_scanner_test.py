@@ -61,7 +61,7 @@ class ScannerTest(BaseTestCase):
 
     def test_check_for_forms(self):
         forms_path = dir_path.parent / "dojo" / "forms.py"
-        file = open(forms_path, "r+", encoding="utf-8")
+        file = forms_path.open("r+", encoding="utf-8")
         forms = file.readlines()
         file.close()
 
@@ -99,7 +99,7 @@ class ScannerTest(BaseTestCase):
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
         template_path = dir_path.parent / "dojo" / "templates" / "dojo" / "import_scan_results.html"
-        file = open(template_path, "r+", encoding="utf-8")
+        file = template_path.open("r+", encoding="utf-8")
         templates = file.readlines()
         file.close()
 

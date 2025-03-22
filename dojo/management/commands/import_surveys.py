@@ -27,9 +27,8 @@ class Command(BaseCommand):
             row = cursor.fetchone()
             ctype_id = row[0]
         # Find the current id in the surveys file
-        path = Path(__file__).parent.absolute()
-        path = path[:-19] + "fixtures/initial_surveys.json"
-        contents = open(path, encoding="utf-8").readlines()
+        path = Path(__file__).parent.parent.parent / "fixtures" / "initial_surveys.json"
+        contents = path.open(encoding="utf-8").readlines()
         for line in contents:
             if '"polymorphic_ctype": ' in line:
                 matchedLine = line
@@ -38,7 +37,7 @@ class Command(BaseCommand):
         old_id = "".join(c for c in matchedLine if c.isdigit())
         new_line = matchedLine.replace(old_id, str(ctype_id))
         # Replace the all lines in the file
-        with open(path, "w", encoding="utf-8") as fout:
+        with path.open("w", encoding="utf-8") as fout:
             fout.writelines(line.replace(matchedLine, new_line) for line in contents)
         # Delete the temp question
         created_question.delete()
