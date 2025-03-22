@@ -270,12 +270,6 @@ env = environ.FileAwareEnv(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # when enabled, finding importing will occur asynchronously, default False
-    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
-    DD_ASYNC_FINDING_IMPORT=(bool, False),
-    # The number of findings to be processed per celeryworker
-    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
-    DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
     # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
     DD_ASYNC_OBJECT_DELETE=(bool, False),
@@ -1782,10 +1776,6 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env("DD_DUPLICATE_CLUSTER_CASCADE_DELETE")
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
-# when enabled, finding importing will occur asynchronously, default False
-ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
-# The number of findings to be processed per celeryworker
-ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
 # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
 ASYNC_OBJECT_DELETE = env("DD_ASYNC_OBJECT_DELETE")
