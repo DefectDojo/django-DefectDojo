@@ -3,7 +3,7 @@ import json
 from collections import OrderedDict
 
 from django import forms
-from django.forms import Widget as form_widget
+from django.forms import Widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
 from django.template.loader import render_to_string
@@ -56,7 +56,7 @@ class TableOfContentsForm(forms.Form):
         exclude = []
 
 
-class Div(form_widget):
+class Div(Widget):
     def __init__(self, attrs=None):
         # Use slightly better defaults than HTML's 20x2 box
         default_attrs = {"style": "width:100%;min-height:400px"}
