@@ -1,7 +1,7 @@
 import re
 
 import html2text
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -26,7 +26,7 @@ class SpotbugsParser:
 
         SEVERITY = {"1": "High", "2": "Medium", "3": "Low"}
 
-        tree = ET.parse(filename)
+        tree = ElementTree.parse(filename)
         root = tree.getroot()
 
         html_parser = html2text.HTML2Text()
@@ -36,7 +36,7 @@ class SpotbugsParser:
         for pattern in root.findall("BugPattern"):
             # Parse <BugPattern>...<Details> html content
             html_text = html_parser.handle(
-                ET.tostring(pattern.find("Details"), method="text").decode(
+                ElementTree.tostring(pattern.find("Details"), method="text").decode(
                     "utf-8",
                 ),
             )

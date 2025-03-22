@@ -1,7 +1,7 @@
 import hashlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -51,7 +51,7 @@ PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 class SSLyzeXMLParser:
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:

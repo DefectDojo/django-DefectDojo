@@ -3,7 +3,7 @@ __author__ = "phylu"
 import json
 import re
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -163,7 +163,7 @@ class CrashtestSecurityXmlParser:
         @return xml_tree An xml tree instance. None if error.
         """
         try:
-            tree = ET.parse(xml_output)
+            tree = ElementTree.parse(xml_output)
         except SyntaxError as se:
             raise ValueError(se)
 
