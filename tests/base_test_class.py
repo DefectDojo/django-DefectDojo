@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 # import time
@@ -240,7 +240,7 @@ class BaseTestCase(unittest.TestCase):
         if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(
-                EC.presence_of_element_located((By.ID, wrapper_id)),
+                expected_conditions.presence_of_element_located((By.ID, wrapper_id)),
             )
 
     def is_element_by_css_selector_present(self, selector, text=None):

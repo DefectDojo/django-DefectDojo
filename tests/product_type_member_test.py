@@ -5,7 +5,7 @@ import unittest
 from base_test_class import BaseTestCase
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
@@ -29,7 +29,7 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element(By.ID, "addProductTypeMember").click()
             # Select the product type 'Research and Development'
             try:
-                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_product_types")))
+                WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_product_types")))
             except TimeoutException:
                 self.fail("Timed out waiting for product types dropdown to initialize ")
             driver.execute_script("document.getElementsByName('product_types')[0].style.display = 'inline'")
@@ -116,7 +116,7 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element(By.ID, "addProductTypeMember").click()
             # Select the user 'propersahm'
             try:
-                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_users")))
+                WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_users")))
             except TimeoutException:
                 self.fail("Timed out waiting for users dropdown to initialize ")
             driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")

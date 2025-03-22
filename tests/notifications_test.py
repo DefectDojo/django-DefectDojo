@@ -5,7 +5,7 @@ from base_test_class import BaseTestCase
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 
@@ -130,7 +130,7 @@ class NotificationTest(BaseTestCase):
         actions = ActionChains(driver)
         configuration_menu = driver.find_element(By.ID, "menu_configuration")
         actions.move_to_element(configuration_menu).perform()
-        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
+        wait.until(expected_conditions.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
         originally_selected = {
             "product_added": driver.find_element(By.XPATH,

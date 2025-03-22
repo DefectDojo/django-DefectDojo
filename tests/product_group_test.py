@@ -6,7 +6,7 @@ from group_test import GroupTest
 from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
@@ -19,7 +19,7 @@ class ProductGroupTest(BaseTestCase):
         driver.find_element(By.ID, "addProductGroup").click()
         # Select the product 'Research and Development'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_products")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_products")))
         except TimeoutException:
             self.fail("Timed out waiting for products dropdown to initialize ")
         driver.execute_script("document.getElementsByName('products')[0].style.display = 'inline'")
@@ -76,7 +76,7 @@ class ProductGroupTest(BaseTestCase):
         driver.find_element(By.ID, "addProductGroup").click()
         # Select the group 'Group Name'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_groups")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_groups")))
         except TimeoutException:
             self.fail("Timed out waiting for groups dropdown to initialize ")
         driver.execute_script("document.getElementsByName('groups')[0].style.display = 'inline'")
