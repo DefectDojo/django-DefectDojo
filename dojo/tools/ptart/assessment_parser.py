@@ -51,6 +51,8 @@ class PTARTAssessmentParser:
         if "labels" in hit:
             finding.unsaved_tags = hit["labels"]
 
+        finding.cwe = ptart_tools.parse_cwe_from_hit(hit)
+
         finding.unsaved_endpoints = ptart_tools.parse_endpoints_from_hit(hit)
 
         # Add screenshots to files, and add other attachments as well.
