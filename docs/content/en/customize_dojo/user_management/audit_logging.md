@@ -19,12 +19,13 @@ In the Classic (Open-Source) UI, this history is found under the '☰' (hamburge
 
 ## Audit Log Endpoint (Pro Only)
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users also have access to a dedicated `/audit_log` endpoint for their entire instance.  This log can only be accessed users or API tokens with superuser permissions.
+<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users also have access to a dedicated `/audit_log` endpoint for their entire instance.  This log can only be accessed by users or API tokens with superuser permissions.
 
 This API returns 31 days of audit logs.
 
 * Sending default or empty parameters will return the last 31 days of audit logs.
-* Parameter "window_month" which will take a month and year in the format MM-YYYY and provide the audit logs for that month.
+
+* Parameter `window_month` which will take a month and year in the format MM-YYYY and provide the audit logs for that month.
 * You can set the `window_start` parameter to limit these logs to a shorter window, rather than returning the entire month.
 
 For more information, see the API documentation, located in your instance: `your-instance.cloud.defectdojo.com/api/v2/oa3/swagger-ui/`
