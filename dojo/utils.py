@@ -2203,7 +2203,7 @@ def add_error_message_to_response(message):
 
 def add_field_errors_to_response(form):
     if form and get_current_request():
-        for field, error in form.errors.items():
+        for error in form.errors.values():
             add_error_message_to_response(error)
 
 
@@ -2242,7 +2242,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
-    for p in range(1, total_pages):
+    for _p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
