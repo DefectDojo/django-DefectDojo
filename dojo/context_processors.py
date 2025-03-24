@@ -71,9 +71,10 @@ def session_expiry(request):
         else:
             expiry_time = None
             notify_time = None
+    except Exception:
+        return {}
+    else:
         return {
             "session_expiry_time": expiry_time,
             "session_notify_time": notify_time,
         }
-    except Exception:
-        return {}
