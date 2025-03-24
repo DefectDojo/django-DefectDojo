@@ -452,8 +452,8 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual(261, finding.cwe)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-                self.assertIn("security", finding.tags)
-                self.assertIn("network", finding.tags)
+                self.assertIn("security", finding.unsaved_tags)
+                self.assertIn("network", finding.unsaved_tags)
                 self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
             with self.subTest(i=1):
@@ -631,8 +631,8 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("CVE-2020-36234", finding.cve)
                 self.assertEqual(261, finding.cwe)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-                self.assertIn("security", finding.tags)
-                self.assertIn("network", finding.tags)
+                self.assertIn("security", finding.unsaved_tags)
+                self.assertIn("network", finding.unsaved_tags)
                 self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
 
