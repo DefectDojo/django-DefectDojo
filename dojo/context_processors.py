@@ -98,3 +98,23 @@ def session_expiry(request):
         }
     except Exception:
         return {}
+
+
+def session_expiry(request):
+    import time
+
+    try:
+        if request.user.is_authenticated:
+            last_activity = request.session.get("_last_activity", time.time())
+            expiry_time = last_activity + settings.SESSION_COOKIE_AGE  # When the session will expire
+            warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
+            notify_time = expiry_time - warning_time
+        else:
+            expiry_time = None
+            notify_time = None
+        return {
+            "session_expiry_time": expiry_time,
+            "session_notify_time": notify_time,
+        }
+    except Exception:
+        return {}
