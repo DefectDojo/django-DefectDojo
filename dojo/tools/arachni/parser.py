@@ -57,12 +57,9 @@ class ArachniParser:
             url = item_node["response"]["url"]
 
         request = item_node["request"]
-        #
         req = ""
-        #
         for key, value in request.items():
             req += str(key) + ": " + str(value) + "\n\n"
-        #
         respz = item_node["response"]
 
         resp = ""

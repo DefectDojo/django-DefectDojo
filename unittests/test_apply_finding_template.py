@@ -99,7 +99,7 @@ class FindingTemplateTestUtil:
         post_request.user = user
         post_request.session = {}
         messages = FallbackStorage(post_request)
-        setattr(post_request, "_messages", messages)
+        post_request._messages = messages
 
         return post_request
 
