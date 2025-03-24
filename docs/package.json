@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@thulite/doks-core": "1.8.0",
-    "@thulite/images": "3.3.0",
+    "@thulite/images": "3.3.1",
     "@thulite/inline-svg": "1.2.0",
     "@thulite/seo": "2.4.1",
     "@tabler/icons": "3.30.0",
