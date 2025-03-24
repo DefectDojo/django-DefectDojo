@@ -4,6 +4,45 @@ from dojo.models import Finding
 
 
 class CheckovParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Checkov Parser.
+        Fields:
+        - title: Set to check_name outputted from Checkov Scanner.
+        - description: Custom description made from: check type, check id, and check name.
+        - severity: Set to severity from Checkov Scanner that has been translated into Defect Dojo format.
+        - mitigation: Set to severity from Checkov Scanner that has been translated into Defect Dojo format.
+        - file_path: Set to file path from Checkov Scanner.
+        - line: Set to first line of the file line range from Checkov Scanner.
+        - component_name: Set to resource from Checkov Scanner.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "mitigation",
+            "file_path",
+            "line",
+            "component_name",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Checkov Parser
+
+        Fields:
+        - title: Set to check_name outputted from Checkov Scanner.
+        - description: Custom description made from: check type, check id, and check name.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        NOTE: cwe is not provided by parser
+        """
+        return [
+            "title",
+            "description",
+        ]
+
     def get_scan_types(self):
         return ["Checkov Scan"]
 
