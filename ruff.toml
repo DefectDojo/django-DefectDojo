@@ -52,6 +52,7 @@ select = [
    "EM",
    "EXE",
    "FA",
+   "DTZ003", "DTZ004", "DTZ012", "DTZ901",
    "ISC",
    "ICN",
    "LOG",
