@@ -41,6 +41,7 @@
             "A04:2021-Insecure Design"
           ],
           "cwes": [
+            { "cwe_id": 284, "title": "CWE-284 - Improper Access Control" },
             { "cwe_id": 862, "title": "CWE-862 - Missing Authorization" }
           ],
           "screenshots": [
