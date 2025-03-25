@@ -1,3 +1,4 @@
+# noqa: N999 - see https://github.com/DefectDojo/django-DefectDojo/pull/11647
 #########################################################################################################
 # It is not recommended to edit file 'settings.dist.py', for production deployments.                        #
 # Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
