@@ -132,7 +132,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.test,
             updated_count,
             new_findings=new_findings,
+            findings_reactivated=reactivated_findings,
             findings_mitigated=closed_findings,
+            findings_untouched=untouched_findings,
         )
         # Update the test progress to reflect that the import has completed
         logger.debug("REIMPORT_SCAN: Updating Test progress")

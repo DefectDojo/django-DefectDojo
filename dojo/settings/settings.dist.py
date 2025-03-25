@@ -225,6 +225,9 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    # When interacting with jira tickets that attached finding groups, we should no be opening any findings
+    # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
+    DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
@@ -1634,6 +1637,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
 # LOGGING
@@ -1817,6 +1821,7 @@ VULNERABILITY_URLS = {
     "ELBA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "ELSA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "FEDORA-": "https://bodhi.fedoraproject.org/updates/",  # e.g. https://bodhi.fedoraproject.org/updates/FEDORA-EPEL-2024-06aa7dc422
+    "FG-IR-": "https://www.fortiguard.com/psirt/",  # e.g. https://www.fortiguard.com/psirt/FG-IR-24-373
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
@@ -1825,6 +1830,7 @@ VULNERABILITY_URLS = {
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
+    "PFPT-SA-": "https://www.proofpoint.com/us/security/security-advisories/",  # e.g. https://www.proofpoint.com/us/security/security-advisories/pfpt-sa-0002
     "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
     "PYSEC-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/PYSEC-2024-48
     "RHBA-": "https://access.redhat.com/errata/",  # e.g. https://access.redhat.com/errata/RHBA-2024:2406

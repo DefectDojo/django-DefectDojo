@@ -6,7 +6,7 @@ def _get_path_to_GET_serializer_map(generator):
     path_to_GET_serializer = {}
     for (
         path,
-        path_pattern,
+        _path_pattern,
         method,
         view,
     ) in generator._get_paths_and_endpoints():

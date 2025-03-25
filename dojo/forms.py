@@ -2422,7 +2422,7 @@ class ExpressGITHUBForm(forms.ModelForm):
 def get_jira_issue_template_dir_choices():
     template_root = settings.JIRA_TEMPLATE_ROOT
     template_dir_list = [("", "---")]
-    for base_dir, dirnames, filenames in os.walk(template_root):
+    for base_dir, dirnames, _filenames in os.walk(template_root):
         # for filename in filenames:
         #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
         #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]

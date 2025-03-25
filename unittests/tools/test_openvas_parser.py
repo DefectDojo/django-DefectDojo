@@ -105,7 +105,7 @@ class TestOpenVASParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Mozilla Firefox Security Update (mfsa_2023-32_2023-36) - Windows_10.0.101.2_general/tcp", finding.title)
-                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("High", finding.severity)
 
     def test_openvas_xml_many_vuln(self):
         with open(get_unit_tests_scans_path("openvas") / "many_vuln.xml", encoding="utf-8") as f:
@@ -114,7 +114,9 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
+            self.assertEqual(44, len(findings))
+            self.assertEqual(44, len([endpoint for finding in findings for endpoint in finding.unsaved_endpoints]))
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertEqual(44, len(findings))
+            self.assertEqual("tcp://192.168.1.1001:512", str(findings[0].unsaved_endpoints[0]))
