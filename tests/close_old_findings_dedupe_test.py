@@ -9,7 +9,7 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.ID, "select_all").click()
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
         try:
-            WebDriverWait(driver, 1).until(EC.alert_is_present(),
+            WebDriverWait(driver, 1).until(expected_conditions.alert_is_present(),
                 "Timed out waiting for finding delete confirmation popup to appear.")
             driver.switch_to.alert.accept()
         except TimeoutException:
