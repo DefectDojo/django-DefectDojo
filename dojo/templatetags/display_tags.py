@@ -1,5 +1,6 @@
 from enum import Enum
 import base64
+import json
 import contextlib
 import datetime
 import logging
@@ -1158,3 +1159,13 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
     context_object = template.Context(context)
 
     return template_object.render(context_object)
+
+
+@register.filter()
+def render_ia_recommendation(ia_recommendation: str):
+    rendered = render_to_string("dojo/ia_recommendation.html", {
+        "recommendations": ia_recommendation["data"]["recommendations"],
+        "mitigations": ia_recommendation["data"]["mitigations"],
+        "files_to_fix": ia_recommendation["data"]["files_to_fix"]
+        })
+    return rendered

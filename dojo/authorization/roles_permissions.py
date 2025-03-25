@@ -78,6 +78,7 @@ class Permissions(IntEnum):
     Finding_Delete = 1407
     Finding_Code_Review = 1408
     Finding_Bulk_Close = 1409
+    Finding_Add_Recommendation = 1410
 
     Endpoint_View = 1502
     Endpoint_Add = 1503
@@ -227,7 +228,8 @@ class Permissions(IntEnum):
             Permissions.Note_Edit,
             Permissions.Note_View_History,
             Permissions.Transfer_Finding_Add,
-            Permissions.Finding_Code_Review
+            Permissions.Finding_Code_Review,
+            Permissions.Finding_Add_Recommendation,
         }.union(cls.get_finding_group_permissions())
 
     @classmethod
@@ -354,7 +356,8 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Metrics_Panel_Admin,
-            Permissions.Metrics_Scan_Cycle
+            Permissions.Metrics_Scan_Cycle,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.API_Importer: {
             Permissions.Product_Type_Add,
@@ -384,7 +387,8 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_Add,
             Permissions.Api_v2_Key,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance_Add
+            Permissions.Risk_Acceptance_Add,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
@@ -429,6 +433,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Finding_Code_Review,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -533,6 +538,7 @@ def get_roles_with_permissions():
             Permissions.Defect_Dojo_Documentation,
             Permissions.Finding_Code_Review,
             Permissions.Finding_Bulk_Close,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -621,6 +627,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
             Permissions.Finding_Code_Review,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Developer: {
             Permissions.Product_Type_View,
@@ -647,6 +654,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
+            Permissions.Finding_Add_Recommendation,
 
         },
         Roles.Leader: {
@@ -686,6 +694,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_Add,
             Permissions.Metrics_Panel_Admin,
             Permissions.Metrics_Scan_Cycle,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,
@@ -711,6 +720,7 @@ def get_roles_with_permissions():
             Permissions.Finding_Code_Review,
             Permissions.Metrics_Panel_Admin,
             Permissions.Metrics_Scan_Cycle,
+            Permissions.Finding_Add_Recommendation,
         },
         Roles.Risk: {
             Permissions.Product_Type_View,

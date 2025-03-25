@@ -2426,6 +2426,10 @@ class Finding(models.Model):
                                 help_text=_("The severity level of this flaw (Critical, High, Medium, Low, Info)."))
     description = models.TextField(verbose_name=_("Description"),
                                 help_text=_("Longer more descriptive information about the flaw."))
+    ia_recommendation = models.JSONField(verbose_name=_("Recommendation"),
+                                      null=True,
+                                      blank=True,
+                                      help_text=_("Text describing IA recommendation."))
     mitigation = models.TextField(verbose_name=_("Mitigation"),
                                 null=True,
                                 blank=True,

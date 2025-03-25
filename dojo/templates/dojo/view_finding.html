@@ -800,10 +800,14 @@
             </h4>
         </div>
         <div id="ia_recommendation" class="panel-body collapse">
-            <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
-            <div id="id_recommendation_content"> </div>
-            <div id="id_mitigations_contect"> </div>
-            <div id="id_files_to_fix_content"> </div>
+            {% if finding.ia_recommendation %}
+                {{ finding.ia_recommendation|render_ia_recommendation}}
+            {% else %}
+                <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
+                <div id="id_recommendation_content"> </div>
+                <div id="id_mitigations_contect"> </div>
+                <div id="id_files_to_fix_content"> </div>
+            {% endif %}
         </div>
     </div>
     {% if similar_findings_enabled %}
@@ -1670,7 +1674,8 @@
     </script>
 
     <script type="module">
-        import {get_ia_recommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
+        import {get_ia_recommendation, FormaterHtmlRecommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
+        import {setSessionStorage, getSessionStorage} from '{% static "dojo/js/settings/session_storage.js" %}'
         const apiUrl = "{{ HOST_IA_RECOMMENDATION }}"
         $(document).ready(function() {
             $('#id_button_ia_recommendation').click(function(event)
@@ -1679,7 +1684,13 @@
                 $('#id_mitigations_contect').empty();
                 $('#id_files_to_fix_content').empty();
                 $('#ia_recommendation').collapse('show');
-                get_ia_recommendation(3, apiUrl);
+                let recomendation = getSessionStorage('ia_recommendation', "1")
+                if (recomendation == null){
+                    get_ia_recommendation(1, apiUrl);
+                }
+                else{
+                    FormaterHtmlRecommendation(recomendation, "#id_recommendation_content");
+                }
             });
         });
             

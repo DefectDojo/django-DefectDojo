@@ -5,91 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendaciones de Seguridad</title>
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/themes/prism.css" rel="stylesheet" type="text/css" />
-    <style>
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-        pre {
-            position: relative;
-            background-color: #f4f4f4;
-            padding: 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        
-        .file-path {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #ecf0f1;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-    </style>
+    {% load static %}
+    {% block dojo_css %}
+            <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
+    {% endblock %}
+    
 </head>
 <body>
-
-    <h1>Recomendaciones de Seguridad</h1>
-    <h2>Recomendaciones</h2>
+    <h5>Recommendations</h5>
     <ul>
-        <li class="recommendation-item">Actualizar Apache XML Graphics Batik a la última versión estable que corrija esta vulnerabilidad.</li>
-        <li class="recommendation-item">Implementar una validación estricta de entrada para cualquier archivo SVG procesado por Batik.</li>
-        <li class="recommendation-item">Configurar un firewall de aplicaciones web (WAF) para filtrar y bloquear solicitudes maliciosas.</li>
-        <li class="recommendation-item">Limitar los permisos de la aplicación que utiliza Batik para reducir el impacto potencial de un ataque SSRF.</li>
-        <li class="recommendation-item">Implementar listas blancas para las URL permitidas en las solicitudes generadas por Batik.</li>
-        <li class="recommendation-item">Deshabilitar el procesamiento de entidades externas en XML si no es necesario para la funcionalidad de la aplicación.</li>
+        {%for recommendation in recommendations%}
+            <li class="recommendation-item">{{recommendation}}</li>
+        {% endfor %}
     </ul>
     
-    <!-- Código con botón de copiar -->
-    <h2>Mitigaciones</h2>
-    <pre>
-        <code class="language-css" id="java-code">
-            public boolean validateSVG(InputStream svgInput) {
-                try {
-                    SAXParserFactory factory = SAXParserFactory.newInstance();
-                    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                    SAXParser parser = factory.newSAXParser();
-                    SVGValidator handler = new SVGValidator();
-                    parser.parse(svgInput, handler);
-                    return handler.isValid();
-                } catch (Exception e) {
-                    return false;
-                }
-            }
-        </code>
-        <button class="copy-btn" data-clipboard-target="#java-code">Copiar</button>
-    </pre>
+    <!-- Código con botón de copy -->
+    <h5>Mitigations</h5>
+    {% for mitigation in mitigations%}
+        <pre>
+            <code class="language-css">
+            {{mitigation}}
+            </code>
+        </pre>
+    {% endfor %}
 
-    <pre>
-        <code class="language-xml" id="python-code">
-            # Actualizar la dependencia de Batik en el archivo pom.xml
-            <dependency>
-                <groupId>org.apache.xmlgraphics</groupId>
-                <artifactId>batik-all</artifactId>
-                <version>1.17</version> <!-- o la última versión segura disponible -->
-            </dependency>
-        </code>
-        <!-- Botón de copiar -->
-        <button class="copy-btn" data-clipboard-target="#python-code">Copiar</button>
-    </pre>
-
-    <h2>Archivos a Corregir</h2>
+    <h5>files to fix</h5>
     <ul>
-        <li class="file-path">/path/to/pom.xml</li>
-        <li class="file-path">/path/to/config/security-config.xml</li>
-        <li class="file-path">/path/to/src/main/java/com/example/SVGProcessor.java</li>
+        {% for file in files_to_fix %}
+            <li class="file-path">{{file}}</li>
+        {% endfor %}
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>

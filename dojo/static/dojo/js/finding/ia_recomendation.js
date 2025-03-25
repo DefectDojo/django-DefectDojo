@@ -1,7 +1,10 @@
-function FormaterHtmlRecommendation(data, elementId){
+
+import {setSessionStorage, getSessionStorage} from '../settings/session_storage.js'
+
+export function FormaterHtmlRecommendation(data, elementId){
     if (Array.isArray(data.recommendations) && data.recommendations.length > 0) {
         let html = "";
-        html += `<h5>Recommendation</h5>`
+        html += `<h5>Recommendations</h5>`
         html += `<ul>`;
         data.recommendations.forEach(element => {
         html += `<li> ${element} </li>`
@@ -81,6 +84,7 @@ export function get_ia_recommendation(finding_id, apiUrl) {
             $('#id_button_ia_recommendation').prop('disabled', true);
         },
         success: function(response) {
+            setSessionStorage("ia_recommendation", finding_id.toString(), response.data)
             FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
         },
         error: function(error) {
