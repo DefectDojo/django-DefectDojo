@@ -14,9 +14,9 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 - **(Beta UI)** Added a field in the View Engagement page which allows a user to navigate to the linked Jira Epic, if one exists.
 - **(Universal Parser)** XML is now a supported file type for Universal Parser.
-- **(SSO)** SSO can now be set up with any kind of [OIDC Configuration](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol).  See ODIC Settings in the Beta UI:
+- **(SSO)** SSO can now be set up with any kind of [OIDC Configuration](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol).  See OIDC Settings in the Beta UI:
 
-![image](images/odic.png)
+![image](images/oidc.png)
 
 ### Mar 3, 2025: v2.44.0
 
