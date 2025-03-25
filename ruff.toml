@@ -68,7 +68,7 @@ select = [
    "TC",
    "INT",
    "ARG003", "ARG004", "ARG005",
-   "PTH2", "PTH10", "PTH11", "PTH120", "PTH121", "PTH122", "PTH124",
+   "PTH",
    "TD001", "TD004", "TD005", "TD007",
    "FIX",
    "PD",
@@ -113,6 +113,7 @@ preview = true
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
+    "PTH123", # Fix is needed in unittests as well but there are too many problematic files, let's do it per partes
 ]
 
 [lint.flake8-boolean-trap]
