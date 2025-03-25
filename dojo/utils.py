@@ -1377,23 +1377,24 @@ def handle_uploaded_threat(f, eng):
     path = Path(f.name)
     extension = path.suffix
     # Check if threat folder exist.
-    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
+    threat_dir = Path(settings.MEDIA_ROOT) / "threat"
+    if not threat_dir.is_dir():
         # Create the folder
-        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
-    with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
-              "wb+") as destination:
+        threat_dir.mkdir()
+    eng_path = threat_dir / f"{eng.id}{extension}"
+    with eng_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
+    eng.tmodel_path = str(eng_path)
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     path = Path(f.name)
     extension = path.suffix
-    with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
-              "wb+") as destination:
+    sel_path = Path(settings.MEDIA_ROOT) / "selenium" / f"{cred.id}{extension}"
+    with sel_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
+    cred.selenium_script = str(sel_path)
     cred.save()
 
 
@@ -2694,7 +2695,7 @@ def generate_file_response_from_file_path(
     # Generate the FileResponse
     full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
-        open(file_path, "rb"),
+        path.open("rb"),
         filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )
