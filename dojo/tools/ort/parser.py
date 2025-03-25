@@ -1,6 +1,6 @@
 import hashlib
 import json
-from collections import namedtuple
+from typing import NamedTuple
 
 from dojo.models import Finding
 
@@ -175,17 +175,11 @@ how to fix : {model.rule_violation['how_to_fix']}"""
     )
 
 
-# TODO: with python 3.7
-# @dataclass
-# class RuleViolationModel:
-#     pkg: dict
-#     license_id: str
-#     projects: []
-#     rule_violation: dict
-
-RuleViolationModel = namedtuple(
-    "RuleViolationModel", ["pkg", "license_id", "projects", "rule_violation"],
-)
+class RuleViolationModel(NamedTuple):
+    pkg: dict
+    license_id: str
+    projects: []
+    rule_violation: dict
 
 
 def get_severity(rule_violation):
