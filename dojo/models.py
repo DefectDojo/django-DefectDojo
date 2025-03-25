@@ -3,6 +3,7 @@ import copy
 import hashlib
 import logging
 import re
+import json
 import warnings
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -2429,7 +2430,7 @@ class Finding(models.Model):
     ia_recommendation = models.JSONField(verbose_name=_("Recommendation"),
                                       null=True,
                                       blank=True,
-                                      help_text=_("Text describing IA recommendation."))
+                                      help_text=_("Text description IA recommendation."))
     mitigation = models.TextField(verbose_name=_("Mitigation"),
                                 null=True,
                                 blank=True,
@@ -4990,6 +4991,72 @@ class ExclusivePermission(models.Model):
 
     def is_active(self):
         return self.status
+    
+
+class GeneralSettings(models.Model):
+
+    DATA_TYPE_CHOICES = [
+        ("INT", "INT"),
+        ("STRING", "STRING"),
+        ("DICT", "DICT"),
+        ("LIST", "LIST"),
+        ("BOOLEAN", "BOOLEAN"),
+    ]
+
+    name = models.CharField(max_length=250,
+                            null=True,
+                            blank=True,
+                            unique=True,
+                            help_text="Name global variable"),
+    value = models.CharField(
+        verbose_name=_("General Settings"),
+        null=True,
+        blank=True,
+        help_text=_("Text de IA recommendation."))
+    
+    category = models.CharField(
+        verbose_name = _("Category"),
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_("Variable Category")
+    )
+
+    data_type = models.CharField(
+        verbose_name=_("Data Types"),
+        choices=DATA_TYPE_CHOICES,
+        null=True,
+        blank=True,
+        help_text=_("Type Data."))
+
+    description = models.CharField(
+        verbose_name=_("Description"),
+        null=True,
+        blank=True,
+        help_text=_("Description Variable")
+        )
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    status = models.BooleanField(default=True, help_text=_("Status Variable"))
+
+    class Meta:
+        verbose_name = _("Global Variable")
+        verbose_name_plural = _("Global Variables")
+
+    def __str__(self):
+        return self.description
+    
+    @classmethod
+    def get_value(self, name_variable):
+        variable_object = GeneralSettings.objects.get(name_variable)
+        rule_data_type = {
+            "INT": int(variable_object.value),
+            "STRING": str(variable_object.value),
+            "DICT": json.loads(variable_object.value),
+            "LIST": variable_object.value.split(","),
+            "BOOLEAN": bool(variable_object.value),
+        }
+        return rule_data_type[variable_object.data_type]
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
