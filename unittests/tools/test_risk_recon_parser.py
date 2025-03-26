@@ -17,7 +17,7 @@ class TestRiskReconAPIParser(DojoTestCase):
 
     def test_api_with_bad_key(self):
         with open(get_unit_tests_scans_path("risk_recon") / "bad_key.json", encoding="utf-8") as testfile, \
-          self.assertRaises(Exception):  # noqa: B017 (Exception from tools/risk_recon/api.py --> def map_toes(self))
+          self.assertRaises(Exception):  # noqa: B017 #TODO: Exception from tools/risk_recon/api.py --> def map_toes(self)
             parser = RiskReconParser()
             parser.get_findings(testfile, Test())
 
