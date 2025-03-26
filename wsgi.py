@@ -32,4 +32,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 application = get_wsgi_application()
 
 # Preload the application code by preloading the URLs configuration
-get_resolver(ROOT_URLCONF).url_patterns
+get_resolver(ROOT_URLCONF).url_patterns  # noqa: B018
