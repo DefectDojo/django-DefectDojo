@@ -75,20 +75,3 @@ function formaterHtmlFilesToFix(data, elementId){
     }
 }
 
-export function get_ia_recommendation(finding_id, apiUrl) {
-    $.ajax({
-        url: `${apiUrl}/full-remediation-process/${finding_id}`,
-        type: "GET",
-        beforeSend: function() {
-            $('#spinnerLoading').css('display', 'flex');
-            $('#id_button_ia_recommendation').prop('disabled', true);
-        },
-        success: function(response) {
-            setSessionStorage("ia_recommendation", finding_id.toString(), response.data)
-            FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
-        },
-        error: function(error) {
-            console.log(error)
-        }
-    });
-}
