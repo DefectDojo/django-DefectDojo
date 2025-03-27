@@ -1,6 +1,5 @@
 import base64
 import logging
-from warnings import warn
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -233,33 +232,11 @@ class BaseImporter(ImporterOptions):
         """
         return self.process_findings(parsed_findings, sync=True, **kwargs)
 
-    def async_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        """
-        Processes findings in chunks within N number of processes. The
-        ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
-        findings will be processed in a given worker/process/thread
-        """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.")
-        return self.process_findings(parsed_findings, sync=False, **kwargs)
-
     def determine_process_method(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
-        """
-        Determines whether to process the scan iteratively, or in chunks,
-        based upon the ASYNC_FINDING_IMPORT setting
-        """
-        if settings.ASYNC_FINDING_IMPORT:
-            return self.async_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
         return self.sync_process_findings(
             parsed_findings,
             **kwargs,
@@ -490,24 +467,6 @@ class BaseImporter(ImporterOptions):
             message = "No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report."
 
         return message
-
-    def chunk_findings(
-        self,
-        finding_list: list[Finding],
-        chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> list[list[Finding]]:
-        """
-        Split a single large list into a list of lists of size `chunk_size`.
-        For Example
-        ```
-        >>> chunk_findings([A, B, C, D, E], 2)
-        >>> [[A, B], [B, C], [E]]
-        ```
-        """
-        # Break the list of parsed findings into "chunk_size" lists
-        chunk_list = [finding_list[i:i + chunk_size] for i in range(0, len(finding_list), chunk_size)]
-        logger.debug(f"Split endpoints/findings into {len(chunk_list)} chunks of {chunk_size}")
-        return chunk_list
 
     def update_test_progress(
         self,

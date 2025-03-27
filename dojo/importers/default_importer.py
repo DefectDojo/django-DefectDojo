@@ -1,8 +1,7 @@
 import logging
-from warnings import warn
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import deserialize, serialize
+from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
@@ -398,38 +397,3 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("IMPORT_SCAN parser v2: Parse findings (aggregate)")
         # Aggregate all the findings and return them with the newly created test
         return self.parse_dynamic_test_type_findings_from_tests(tests)
-
-    def async_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        """
-        Processes findings in chunks within N number of processes. The
-        ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
-        findings will be processed in a given worker/process/thread
-        """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.")
-        chunk_list = self.chunk_findings(parsed_findings)
-        results_list = []
-        new_findings = []
-        # First kick off all the workers
-        for findings_list in chunk_list:
-            result = self.process_findings(
-                findings_list,
-                sync=False,
-                **kwargs,
-            )
-            # Since I dont want to wait until the task is done right now, save the id
-            # So I can check on the task later
-            results_list += [result]
-        # After all tasks have been started, time to pull the results
-        logger.info("IMPORT_SCAN: Collecting Findings")
-        for results in results_list:
-            serial_new_findings = results
-            new_findings += [next(deserialize("json", finding)).object for finding in serial_new_findings]
-        logger.info("IMPORT_SCAN: All Findings Collected")
-        # Indicate that the test is not complete yet as endpoints will still be rolling in.
-        self.test.percent_complete = 50
-        self.test.save()
-        return new_findings
