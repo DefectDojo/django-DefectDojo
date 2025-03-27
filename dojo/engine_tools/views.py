@@ -253,16 +253,7 @@ def review_finding_exclusion_request(
                         icon="check-circle",
                         color_icon="#28a745")
     
-    approvers = get_approvers_members()
-    
     message = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}"
-    create_notification(event="finding_exclusion_request",
-                        subject=f"🙋‍♂️{message}",
-                        title=message,
-                        description=message,
-                        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                        recipients=approvers,
-                        color_icon="#52A3FA")
     
     send_mail_to_cybersecurity(finding_exclusion, message)
     
