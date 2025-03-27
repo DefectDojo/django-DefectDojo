@@ -409,7 +409,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.")
+        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
         chunk_list = self.chunk_findings(parsed_findings)
         results_list = []
         new_findings = []
