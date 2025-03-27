@@ -1,6 +1,10 @@
+import logging
 import os
-import requests
 from datetime import datetime, timedelta
+
+import requests
+
+logger = logging.getLogger(__name__)
 
 # Set up the GitHub and Slack tokens from environment variables
 GH_TOKEN = os.getenv("GH_TOKEN")
@@ -39,26 +43,30 @@ def get_slack_user_id(slack_email: str) -> int:
     headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}
     params = {"email": slack_email}
     response = requests.get(
-        "https://slack.com/api/users.lookupByEmail", headers=headers, params=params
+        "https://slack.com/api/users.lookupByEmail",
+        headers=headers,
+        params=params,
+        timeout=30,
     )
 
     if response.status_code != 200 or not response.json().get("ok"):
-        print(f"Error fetching Slack user ID for email {slack_email}: {response.text}")
+        logger.info(f"Error fetching Slack user ID for email {slack_email}: {response.text}")
         return None
 
-    slack_user_id = response.json().get("user", {}).get("id")
-    return slack_user_id
+    return response.json().get("user", {}).get("id")
 
 
 # Helper function to fetch pull requests from GitHub
 def get_pull_requests() -> dict:
     headers = {"Authorization": f"token {GH_TOKEN}"}
     response = requests.get(
-        f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls", headers=headers
+        f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls",
+        headers=headers,
+        timeout=30,
     )
 
     if response.status_code != 200:
-        print(f"Error fetching PRs: {response.text}")
+        logger.info(f"Error fetching PRs: {response.text}")
         response.raise_for_status()
 
     return response.json()
@@ -69,10 +77,14 @@ def get_pr_reviews(pull_request: dict) -> list[dict]:
     pr_number = pull_request["number"]
     reviews_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{pr_number}/reviews"
     headers = {"Authorization": f"token {GH_TOKEN}"}
-    response = requests.get(reviews_url, headers=headers)
+    response = requests.get(
+        reviews_url,
+        headers=headers,
+        timeout=30,
+    )
 
     if response.status_code != 200:
-        print(f"Error fetching reviews for PR {pr_number}: {response.text}")
+        logger.info(f"Error fetching reviews for PR {pr_number}: {response.text}")
         return []
 
     reviews = response.json()
@@ -86,10 +98,8 @@ def get_pr_reviews(pull_request: dict) -> list[dict]:
         # Convert the submitted_at timestamp to a datetime object for comparison
         review_time = datetime.strptime(submitted_at, "%Y-%m-%dT%H:%M:%SZ")
         # If the user doesn't have a review or the current one is later, update
-        if (
-            user not in latest_reviews
-            or review_time > latest_reviews[user]["submitted_at"]
-            and state != "COMMENTED"
+        if user not in latest_reviews or (
+            review_time > latest_reviews[user]["submitted_at"] and state != "COMMENTED"
         ):
             latest_reviews[user] = {
                 "user": user,
@@ -105,7 +115,7 @@ def get_pr_reviews(pull_request: dict) -> list[dict]:
                 "state": "PENDING",
             }
             for user_dict in pull_request.get("requested_reviewers", [])
-        }
+        },
     )
     # Return the latest review state and URL for each user
     return latest_reviews.values()
@@ -119,11 +129,14 @@ def send_slack_message(slack_user_id: int, message: str) -> None:
     }
     payload = {"channel": slack_user_id, "text": message}
     response = requests.post(
-        "https://slack.com/api/chat.postMessage", json=payload, headers=headers
+        "https://slack.com/api/chat.postMessage",
+        json=payload,
+        headers=headers,
+        timeout=30,
     )
 
     if response.status_code != 200 or not response.json().get("ok"):
-        print(f"Error sending Slack message: {response.text}")
+        logger.info(f"Error sending Slack message: {response.text}")
         response.raise_for_status()
 
 
@@ -162,13 +175,13 @@ def notify_reviewers():
         slack_email_to_slack_id = {}
         pull_requests = get_pull_requests()
         # Logging all fetched PR details
-        print(f"Fetched {len(pull_requests)} PRs from GitHub.")
+        logger.info(f"Fetched {len(pull_requests)} PRs from GitHub.")
         for pull_request in pull_requests:
             title = pull_request["title"]
             pr_number = pull_request["number"]
-            print(f"Processing PR: {pr_number} - {title}")
+            logger.info(f"Processing PR: {pr_number} - {title}")
             reviews = get_pr_reviews(pull_request)
-            print(f"Found {len(reviews)} reviews for PR {pr_number}.")
+            logger.info(f"Found {len(reviews)} reviews for PR {pr_number}.")
             message = format_pr_message(pull_request, reviews)
             # Map Slack users to PR messages
             for review in reviews:
@@ -191,13 +204,14 @@ def notify_reviewers():
             if pr_list:
                 if slack_email := GITHUB_USER_NAME_TO_SLACK_EMAIL.get(github_username):
                     if slack_user_id := slack_email_to_slack_id.get(
-                        slack_email, get_slack_user_id(slack_email)
+                        slack_email,
+                        get_slack_user_id(slack_email),
                     ):
                         message_content = f"Hello {github_username}! {header_message}\n{pr_list}\n{tips_message}"
-                        # print("\n\n", message_content, "\n\n")
+                        # logger.info("\n\n", message_content, "\n\n")
                         send_slack_message(slack_user_id, message_content)
     except Exception as e:
-        print(f"Error occurred: {e}")
+        logger.info(f"Error occurred: {e}")
         raise
 
 
