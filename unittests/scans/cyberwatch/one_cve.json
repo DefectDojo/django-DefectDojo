@@ -1,0 +1,45 @@
+{
+    "cves": [
+      {
+        "type": "CVE",
+        "cve_code": "CVE-2023-42366",
+        "cve_score": 5.5,
+        "cve_level": "level_medium",
+        "cve_published_at": "2023-11-27T23:15:07.420+01:00",
+        "updated_at": "2024-12-06T14:15:19.530+01:00",
+        "exploit_code_maturity": "proof_of_concept",
+        "cve_epss": 0.00044,
+        "cvss_v3": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+        "cwes": {
+          "cwe_id": ["787", "118", "664", "119"],
+          "capecs": [
+            "CAPEC-10", "CAPEC-100", "CAPEC-123", "CAPEC-14",
+            "CAPEC-196", "CAPEC-21", "CAPEC-24", "CAPEC-42",
+            "CAPEC-44", "CAPEC-45", "CAPEC-46", "CAPEC-47",
+            "CAPEC-60", "CAPEC-61", "CAPEC-62", "CAPEC-8", "CAPEC-9"
+          ],
+          "attacks": [
+            "T1134", "T1134.001", "T1134.002", "T1134.003",
+            "T1528", "T1539", "T1550.004", "T1606"
+          ]
+        },
+        "servers": [
+          {
+            "active": false,
+            "fixed_at": "2025-01-20T19:25:39.791+01:00",
+            "ignored": false,
+            "computer_environment": 5.2,
+            "computer_id": 32,
+            "computer_name": "computer_name",
+            "computer_os": "ubuntu_2404_64",
+            "computer_os_name": "Ubuntu 24.04 LTS",
+            "computer_os_arch": "x86_64",
+            "updates": []
+          }
+        ],
+        "updates_assets": {}
+      }
+    ],
+    "security_issues": []
+  }
+  
