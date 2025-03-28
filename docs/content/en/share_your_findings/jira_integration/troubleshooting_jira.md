@@ -26,7 +26,11 @@ This error message can appear when attempting to add a created Jira configuratio
 
 * Start by confirming that the [DefectDojo webhook receiver](../connect_to_jira/#configure-bidirectional-sync-jira-webhook) is configured correctly and can successfully receive updates.
 
+* Ensure the SSL certificate used by Defect Dojo is trusted by JIRA. For JIRA Cloud you must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
+
 * If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close [Transition IDs](../connect_to_jira/#configure-bidirectional-sync-jira-webhook)).
+
+* [Test](https://support.atlassian.com/jira/kb/testing-webhooks-in-jira-cloud/) your JIRA webhook using a public endpoint such as Pipedream or Beeceptor:
 
 ## Jira Epics aren't being created
 
