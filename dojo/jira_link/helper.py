@@ -109,6 +109,14 @@ def is_push_all_issues(instance):
     return None
 
 
+def _safely_get_finding_group_status(finding_group: Finding_Group) -> str:
+    # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
+    try:
+        return finding_group.status()
+    except TypeError:  # TypeError: 'str' object is not callable
+        return finding_group.status
+
+
 # checks if a finding can be pushed to JIRA
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
@@ -161,13 +169,8 @@ def can_be_pushed_to_jira(obj, form=None):
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
-        # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
-        try:
-            not_active = "Active" not in obj.status()
-        except TypeError:  # TypeError: 'str' object is not callable
-            not_active = "Active" not in obj.status
         # Determine if the finding group is not active
-        if not_active:
+        if "Active" not in _safely_get_finding_group_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
     else:
@@ -1101,7 +1104,7 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status_list = obj.status()
+    status_list = _safely_get_finding_group_status(obj)
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
@@ -1740,7 +1743,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
 
 def save_and_push_to_jira(finding):
     # Manage the jira status changes
-    push_to_jira = False
+    push_to_jira_decision = False
     # Determine if the finding is in a group. if so, not push to jira yet
     finding_in_group = finding.has_finding_group
     # Check if there is a jira issue that needs to be updated
@@ -1748,12 +1751,11 @@ def save_and_push_to_jira(finding):
     # Only push if the finding is not in a group
     if jira_issue_exists:
         # Determine if any automatic sync should occur
-        push_to_jira = is_push_all_issues(finding) \
+        push_to_jira_decision = is_push_all_issues(finding) \
             or get_jira_instance(finding).finding_jira_sync
     # Save the finding
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
+    finding.save(push_to_jira=(push_to_jira_decision and not finding_in_group))
     # we only push the group after saving the finding to make sure
     # the updated data of the finding is pushed as part of the group
-    if push_to_jira and finding_in_group:
+    if push_to_jira_decision and finding_in_group:
         push_to_jira(finding.finding_group)
