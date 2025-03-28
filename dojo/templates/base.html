@@ -1032,6 +1032,26 @@
             </div>
             <!-- /.dojo-modals-wrapper -->
 
+            <!-- Session Timeout Modal -->
+            <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" role="dialog" aria-labelledby="sessionModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header"> 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="sessionModalLabel">Session Expiring Soon</h4>
+                    </div>
+                    <div class="modal-body">
+                        Your session is about to expire due to inactivity.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
             <!-- #footer-wrapper -->
             <div id="footer-wrapper">
             {% block footer %}
@@ -1083,6 +1103,19 @@
                     function() { $(this).popover('show'); }, // hover
                     function() { $(this).popover('hide'); } // unhover
                 );
+
+                function session_notifcation() {
+                    var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
+                    var expiryTime = "{{ session_expiry_time|default:0|escapejs }}";  // When the session will expire
+                    var currentTime = Math.floor(Date.now() / 1000);  // Get current timestamp in seconds
+                    var timeout = warningTime - currentTime; // how many seconds until warning needs to show
+
+                    setTimeout(() => {
+                        $("#sessionTimeoutModal").modal("show");
+                    }, timeout * 1000);
+                }  
+                session_notifcation();
+
                 {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
                     function get_alerts() {
                         $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></div>');
