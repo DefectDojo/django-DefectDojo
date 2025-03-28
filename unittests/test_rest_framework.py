@@ -5,6 +5,7 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
+from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -1116,7 +1117,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels:
             length = FileUpload.objects.count()
-            with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", encoding="utf-8") as testfile:
+            with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1795,7 +1796,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         self.viewname = "importscan"
         self.viewset = ImportScanView
 
-        testfile = open("tests/zap_sample.xml", encoding="utf-8")
+        testfile = Path("tests/zap_sample.xml").open(encoding="utf-8")
         self.payload = {
             "minimum_severity": "Low",
             "active": False,
@@ -1822,7 +1823,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1852,7 +1853,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1883,7 +1884,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1915,7 +1916,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1947,7 +1948,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1982,7 +1983,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2014,7 +2015,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2056,7 +2057,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             length = Test.objects.all().count()
             response = self.client.post(
                 reverse("reimportscan-list"), {
@@ -2082,7 +2083,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2112,7 +2113,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2143,7 +2144,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2179,7 +2180,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2211,7 +2212,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2242,7 +2243,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": "Low",
                     "active": True,
@@ -2270,7 +2271,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2301,7 +2302,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2333,7 +2334,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2364,7 +2365,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2392,7 +2393,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2726,7 +2727,7 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             "product": 1,
-            "file": open("unittests/files/defectdojo_cloc.json", encoding="utf-8"),
+            "file": Path("unittests/files/defectdojo_cloc.json").open(encoding="utf-8"),
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages

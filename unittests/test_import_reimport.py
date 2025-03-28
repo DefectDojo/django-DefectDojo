@@ -2,6 +2,7 @@ import datetime
 
 # from unittest import skip
 import logging
+from pathlib import Path
 
 from django.test import override_settings
 from django.test.client import Client
@@ -1794,7 +1795,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
 
         test = Test.objects.get(id=response.url.split("/")[-1])
-        # f = open('response.html', 'w+')
+        # f = Path('response.html').open('w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()
         self.assertEqual(302, response.status_code, response.content[:1000])
@@ -1822,7 +1823,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         elif not verified:
             verifiedPayload = "force_to_false"
 
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
@@ -1860,7 +1861,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if not verified:
             verifiedPayload = "force_to_false"
 
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,

@@ -15,25 +15,25 @@ class TestFactory(DojoTestCase):
     def test_get_parser(self):
         with self.subTest(scan_type="Acunetix Scan"):
             scan_type = "Acunetix Scan"
-            testfile = open(get_unit_tests_path() / "scans" / "acunetix" / "one_finding.xml", encoding="utf-8")
+            testfile = (get_unit_tests_path() / "scans" / "acunetix" / "one_finding.xml").open(encoding="utf-8")
             parser = get_parser(scan_type)
             parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="Anchore Engine Scan"):
             scan_type = "Anchore Engine Scan"
-            testfile = open(get_unit_tests_path() / "scans" / "anchore_engine" / "one_vuln.json", encoding="utf-8")
+            testfile = (get_unit_tests_path() / "scans" / "anchore_engine" / "one_vuln.json").open(encoding="utf-8")
             parser = get_parser(scan_type)
             parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="Tenable Scan"):
             scan_type = "Tenable Scan"
-            testfile = open(get_unit_tests_path() / "scans" / "tenable/nessus" / "nessus_v_unknown.xml", encoding="utf-8")
+            testfile = (get_unit_tests_path() / "scans" / "tenable/nessus" / "nessus_v_unknown.xml").open(encoding="utf-8")
             parser = get_parser(scan_type)
             parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="ZAP Scan"):
             scan_type = "ZAP Scan"
-            testfile = open(get_unit_tests_path() / "scans" / "zap" / "some_2.9.0.xml", encoding="utf-8")
+            testfile = (get_unit_tests_path() / "scans" / "zap" / "some_2.9.0.xml").open(encoding="utf-8")
             parser = get_parser(scan_type)
             parser.get_findings(testfile, Test())
             testfile.close()

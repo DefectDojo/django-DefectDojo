@@ -39,7 +39,7 @@ TEST_TITLE_NEW = "lol importing via reimport"
 
 class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
-        with open(get_unit_tests_path() / "scans" / "acunetix" / "one_finding.xml", encoding="utf-8") as scan:
+        with (get_unit_tests_path() / "scans" / "acunetix" / "one_finding.xml").open(encoding="utf-8") as scan:
             scan_type = "Acunetix Scan"
             user, _created = User.objects.get_or_create(username="admin")
             product_type, _created = Product_Type.objects.get_or_create(name="test")
@@ -80,7 +80,7 @@ class TestDojoDefaultImporter(DojoTestCase):
                 self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
     def test_import_scan(self):
-        with open(get_unit_tests_path() / "scans" / "sarif" / "spotbugs.sarif", encoding="utf-8") as scan:
+        with (get_unit_tests_path() / "scans" / "sarif" / "spotbugs.sarif").open(encoding="utf-8") as scan:
             scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
             user, _ = User.objects.get_or_create(username="admin")
             product_type, _ = Product_Type.objects.get_or_create(name="test2")
@@ -114,7 +114,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             self.assertEqual(0, len_closed_findings)
 
     def test_import_scan_without_test_scan_type(self):
-        with open(get_unit_tests_scans_path("gitlab_sast") / "gl-sast-report-1-vuln_v15.json", encoding="utf-8") as scan:
+        with (get_unit_tests_scans_path("gitlab_sast") / "gl-sast-report-1-vuln_v15.json").open(encoding="utf-8") as scan:
             # GitLabSastParser implements get_tests but report has no scanner name
             scan_type = GitlabSastParser().get_scan_types()[0]
             user, _ = User.objects.get_or_create(username="admin")
