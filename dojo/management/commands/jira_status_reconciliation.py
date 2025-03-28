@@ -75,8 +75,6 @@ def jira_status_reconciliation(*args, **kwargs):
         # convert from str to datetime
         issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
 
-        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated
-
         flag1, flag2, flag3 = None, None, None
 
         if mode == "reconcile" and not find.last_status_update:

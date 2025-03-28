@@ -110,7 +110,7 @@ class RiskReconParser:
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
-                find.nb_occurences
+                find.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding
 

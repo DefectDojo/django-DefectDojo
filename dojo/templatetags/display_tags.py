@@ -1011,11 +1011,6 @@ def import_history(finding, *, autoescape=True):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
 
-    if autoescape:
-        conditional_escape
-    else:
-        lambda x: x
-
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
 
