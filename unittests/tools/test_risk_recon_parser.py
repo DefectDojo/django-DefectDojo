@@ -1,5 +1,7 @@
 import datetime
 
+import requests
+
 from dojo.models import Test
 from dojo.tools.risk_recon.parser import RiskReconParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -9,13 +11,13 @@ class TestRiskReconAPIParser(DojoTestCase):
 
     def test_api_with_bad_url(self):
         with open(get_unit_tests_scans_path("risk_recon") / "bad_url.json", encoding="utf-8") as testfile, \
-          self.assertRaises(Exception):
+          self.assertRaises(requests.exceptions.ConnectionError):
             parser = RiskReconParser()
             parser.get_findings(testfile, Test())
 
     def test_api_with_bad_key(self):
         with open(get_unit_tests_scans_path("risk_recon") / "bad_key.json", encoding="utf-8") as testfile, \
-          self.assertRaises(Exception):
+          self.assertRaises(Exception):  # noqa: B017 #TODO: Exception from tools/risk_recon/api.py --> def map_toes(self)
             parser = RiskReconParser()
             parser.get_findings(testfile, Test())
 
