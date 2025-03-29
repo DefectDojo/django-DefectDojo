@@ -10,6 +10,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import hyperlink
+from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
 import tagulous.admin
 from auditlog.registry import auditlog
 from cvss import CVSS3
@@ -1209,7 +1210,6 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.product.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
