@@ -3,7 +3,7 @@ import logging
 
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
-from dojo.models import Endpoint, Engagement, Finding, Product, SLA_Configuration, Test
+from dojo.models import Endpoint, Engagement, Finding, Product, Test
 
 logger = logging.getLogger(__name__)
 
