@@ -26,6 +26,7 @@ class TestParsers(DojoTestCase):
             if doc_name not in {
                 "checkmarx_osa",  # it is documented in 'checkmarx'
                 "wizcli_common_parsers",  # common class for other wizcli parsers
+                "sysdig_common",  # common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="docs"):
                     doc_file = Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / category / f"{doc_name}.md"
