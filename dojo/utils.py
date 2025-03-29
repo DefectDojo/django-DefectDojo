@@ -1624,35 +1624,6 @@ def get_celery_worker_status():
         return False
 
 
-def get_work_days(start: date, end: date):
-    """
-    Math function to get workdays between 2 dates.
-    Can be used only as fallback as it doesn't know
-    about specific country holidays or extra working days.
-    https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
-    """
-    # if the start date is on a weekend, forward the date to next Monday
-    if start.weekday() > WEEKDAY_FRIDAY:
-        start += timedelta(days=7 - start.weekday())
-
-    # if the end date is on a weekend, rewind the date to the previous Friday
-    if end.weekday() > WEEKDAY_FRIDAY:
-        end -= timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
-
-    if start > end:
-        return 0
-    # that makes the difference easy, no remainders etc
-    diff_days = (end - start).days + 1
-    weeks = int(diff_days / 7)
-
-    remainder = end.weekday() - start.weekday() + 1
-
-    if remainder != 0 and end.weekday() < start.weekday():
-        remainder += 5
-
-    return weeks * 5 + remainder
-
-
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab:
     def __init__(self, product, title=None, tab=None):
@@ -2479,26 +2450,17 @@ def calculate_finding_age(f):
     if start_date and isinstance(start_date, str):
         start_date = parse(start_date).date()
 
-    if settings.SLA_BUSINESS_DAYS:
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            days = get_work_days(f.get("date"), mitigated_date)
-        else:
-            days = get_work_days(f.get("date"), timezone.now().date())
-    else:
-        if isinstance(start_date, datetime):
-            start_date = start_date.date()
+    if isinstance(start_date, datetime):
+        start_date = start_date.date()
 
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            diff = mitigated_date - start_date
-        else:
-            diff = timezone.now().date() - start_date
-        days = diff.days
+    if f.get("mitigated"):
+        mitigated_date = f.get("mitigated")
+        if isinstance(mitigated_date, datetime):
+            mitigated_date = f.get("mitigated").date()
+        diff = mitigated_date - start_date
+    else:
+        diff = timezone.now().date() - start_date
+    days = diff.days
     return max(0, days)
 
 
