@@ -6,7 +6,7 @@ import cvss.parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
-from dojo.tools.sysdig.sysdig_data import SysdigData
+from dojo.tools.sysdig_common.sysdig_data import SysdigData
 
 
 class SysdigReportsParser:
