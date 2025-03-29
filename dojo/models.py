@@ -10,7 +10,6 @@ from pathlib import Path
 from uuid import uuid4
 
 import hyperlink
-from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
 import tagulous.admin
 from auditlog.registry import auditlog
 from cvss import CVSS3
@@ -42,6 +41,7 @@ from polymorphic.models import PolymorphicModel
 from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
