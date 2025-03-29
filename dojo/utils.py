@@ -2241,22 +2241,19 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     i = 0
     batch = []
     total_pages = (total_count // page_size) + 2
-    # logger.info('pages to process: %d', total_pages)
+    # logger.debug("pages to process: %d", total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
     for _p in range(1, total_pages):
-        # logger.info('page: %d', p)
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
         else:
             page = models.filter(id__lt=last_id)[:page_size]
 
-        # logger.info('page query: %s', page.query)
-        # if p == 23:
-        #     raise ValueError('bla')
+        logger.debug("page query: %s", page.query)
         for model in page:
             i += 1
             last_id = model.id
-            # logger.info('last_id: %s', last_id)
+            logger.debug("last_id: %s", last_id)
 
             function(model)
 

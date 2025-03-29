@@ -1048,7 +1048,7 @@ class SLA_Configuration(models.Model):
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
-                update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
+                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -3039,7 +3039,7 @@ class Finding(models.Model):
         return self.date
 
     def get_sla_period(self):
-        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        sla_configuration = self.test.engagement.product.sla_configuration
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
