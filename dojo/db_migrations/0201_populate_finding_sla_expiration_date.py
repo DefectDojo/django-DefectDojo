@@ -5,8 +5,6 @@ from django.conf import settings
 from dateutil.relativedelta import relativedelta
 import logging
 
-from dojo.utils import get_work_days
-
 logger = logging.getLogger(__name__)
 
 
@@ -44,19 +42,13 @@ def calculate_sla_expiration_dates(apps, schema_editor):
             sla_period = getattr(sla_config, find.severity.lower(), None)
 
             days = None
-            if settings.SLA_BUSINESS_DAYS:
-                if find.mitigated:
-                    days = get_work_days(find.date, find.mitigated.date())
-                else:
-                    days = get_work_days(find.date, timezone.now().date())
-            else:
-                if isinstance(start_date, datetime):
-                    start_date = start_date.date()
+            if isinstance(start_date, datetime):
+                start_date = start_date.date()
 
-                if find.mitigated:
-                    days = (find.mitigated.date() - start_date).days
-                else:
-                    days = (timezone.now().date() - start_date).days
+            if find.mitigated:
+                days = (find.mitigated.date() - start_date).days
+            else:
+                days = (timezone.now().date() - start_date).days
 
             days = days if days > 0 else 0
 
