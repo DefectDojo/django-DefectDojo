@@ -29,8 +29,8 @@ With a separate database, the minimum recommendations to run DefectDojo are:
     improvements.
 
 ### Security
-Verify the `nginx` configuration and other run-time aspects such as security headers.
-Change the AES256 encryption key `&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw` to something unique for your instance.
+Verify the `nginx` configuration and other run-time aspects such as security headers to comply with your compliance requirements.
+Change the AES256 encryption key `&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw` in `docker-compose.yml` to something unique for your instance.
 This encryption key is used to encrypt API keys and other credentials stored in Defect Dojo to connect to external tools such as SonarQube.
 
 ```
