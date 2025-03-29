@@ -1,5 +1,5 @@
 from dojo.models import Test
-from dojo.tools.sysdig.sysdig_cli.parser import SysdigCLIParser
+from dojo.tools.sysdig_cli.parser import SysdigCLIParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 

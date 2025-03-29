@@ -51,6 +51,7 @@ class TestParsers(DojoTestCase):
 
             if parser_dir.name not in {  # noqa: FURB171
                 "wizcli_common_parsers",  # common class for other wizcli parsers
+                "sysdig_common", #common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = Path(basedir) / "unittests" / "tools" / f"test_{parser_dir.name}_parser.py"
