@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 def update_sla_expiration_dates_sla_config_async(sla_config, products, severities, *args, **kwargs):
     update_sla_expiration_dates_sla_config_sync(sla_config, products, severities)
 
+
 @dojo_async_task
 @app.task
 def update_sla_expiration_dates_product_async(product, sla_config, *args, **kwargs):
@@ -35,7 +36,7 @@ def update_sla_expiration_dates_sla_config_sync(sla_config, products, severities
             "test__engagement__product__sla_configuration",
     )
 
-    findings = findings.order_by('id').only('id', 'sla_start_date', 'date', 'severity', 'test')
+    findings = findings.order_by("id").only("id", "sla_start_date", "date", "severity", "test")
 
     mass_model_updater(Finding, findings, lambda f: f.set_sla_expiration_date(), fields=["sla_expiration_date"])
 
@@ -52,4 +53,3 @@ def update_sla_expiration_dates_sla_config_sync(sla_config, products, severities
     sla_config.async_updating = False
     super(SLA_Configuration, sla_config).save()
     logger.info(f"DONE Updating finding SLA expiration dates within the {sla_config} SLA configuration")
-
