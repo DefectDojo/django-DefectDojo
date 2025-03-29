@@ -2253,7 +2253,6 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         for model in page:
             i += 1
             last_id = model.id
-            logger.debug("last_id: %s", last_id)
 
             function(model)
 
