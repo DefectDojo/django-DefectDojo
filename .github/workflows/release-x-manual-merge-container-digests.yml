@@ -32,6 +32,12 @@ on:
             description: 'Whether to tag releases with latest'
             required: true
             default: 'false'
+          is_latest_boolean:
+                type: boolean
+                description: 'Whether to tag releases with latest'
+                required: true
+                default: false
+
 jobs:
   merge-digests:
     runs-on: ubuntu-latest
@@ -84,11 +90,20 @@ jobs:
       run: |
         set -x
         echo is_latest: [${{ github.event.inputs.is_latest }}]
+        echo is_latest_boolean: [${{ github.event.inputs.is_latest_boolean }}]
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the latest tag
     - name: Tag Debian with latest tags
       if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest == 'true' || github.event.inputs.is_latest == true) }}
+      working-directory: ${{ runner.temp }}/digests
+      run: |
+        set -x
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+
+      # debian images are the default / official ones, so these get the latest tag
+    - name: Tag Debian with latest tags boolean
+      if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest_boolean == 'true' || github.event.inputs.is_latest_boolean == true) }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
