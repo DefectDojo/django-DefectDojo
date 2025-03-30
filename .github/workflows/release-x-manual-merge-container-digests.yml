@@ -61,8 +61,8 @@ jobs:
 
     - name: Print inputs
       run: |
-        echo "Release number: ${{ github.event.inputs.release_number }}"
-        echo "Is latest: ${{ github.event.inputs.is_latest }}"
+        echo "Release number: ${{ inputs.release_number }}"
+        echo "Is latest: ${{ inputs.is_latest }}"
 
     - name: Debug inputs
       run: |
@@ -94,13 +94,13 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}@sha256:%s ' *)
 
       # just for logging
     - name: Inspect OS specific image
       run: |
-        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the os-less tag
     - name: Tag Debian with os-less tags
@@ -108,32 +108,32 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        echo release_number: [${{ github.event.inputs.release_number }}]
-        echo is_latest: [${{ github.event.inputs.is_latest }}]
-        echo is_latest_boolean: [${{ github.event.inputs.is_latest_boolean }}]
-        echo something: [${{ github.event.inputs.something }}]
-        echo something_default: [${{ github.event.inputs.something_default }}]
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        echo release_number: [${{ inputs.release_number }}]
+        echo is_latest: [${{ inputs.is_latest }}]
+        echo is_latest_boolean: [${{ inputs.is_latest_boolean }}]
+        echo something: [${{ inputs.something }}]
+        echo something_default: [${{ inputs.something_default }}]
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the latest tag
     - name: Tag Debian with latest tags
-      if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest == 'true' || github.event.inputs.is_latest == true) }}
+      if: ${{ (matrix.os  == 'debian') && (inputs.is_latest == 'true' || inputs.is_latest == true) }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the latest tag
     - name: Tag Debian with latest tags boolean
-      if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest_boolean == 'true' || github.event.inputs.is_latest_boolean == true) }}
+      if: ${{ (matrix.os  == 'debian') && (inputs.is_latest_boolean == 'true' || inputs.is_latest_boolean == true) }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # just for logging
     - name: Inspect default images
       if: ${{ matrix.os  == 'debian' }}
       run: |
-          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}
+          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}
           docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest
