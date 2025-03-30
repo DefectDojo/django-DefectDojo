@@ -33,10 +33,15 @@ on:
             required: true
             default: 'false'
           is_latest_boolean:
-                type: boolean
-                description: 'Whether to tag releases with latest'
-                required: true
-                default: false
+            type: boolean
+            description: 'Whether to tag releases with latest'
+            required: true
+            default: false
+          something:
+            type: boolean
+            description: 'Whether to tag releases with latest'
+            required: true
+            default: false
 
 jobs:
   merge-digests:
@@ -91,6 +96,7 @@ jobs:
         set -x
         echo is_latest: [${{ github.event.inputs.is_latest }}]
         echo is_latest_boolean: [${{ github.event.inputs.is_latest_boolean }}]
+        echo something: [${{ github.event.inputs.something }}]
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the latest tag
