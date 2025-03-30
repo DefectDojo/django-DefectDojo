@@ -47,7 +47,6 @@ jobs:
 
       # debian images are the default / official ones, and these were already tagged, so these get the latest tag
     - name: Tag Debian with latest tags
-      working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}
