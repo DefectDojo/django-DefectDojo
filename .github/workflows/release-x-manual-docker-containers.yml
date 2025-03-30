@@ -74,6 +74,8 @@ jobs:
           file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
           outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
         # export the digest to a file
       - name: Export digest
