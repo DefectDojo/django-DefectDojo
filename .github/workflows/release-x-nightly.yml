@@ -13,7 +13,7 @@ on:
           description: 'Branch to checkout, build and publish'
           required: false
           default: 'dev'
-        tag:
+        tag-to-apply:
           type: string
           description: 'Tag to apply to the images'
           required: false
@@ -33,10 +33,10 @@ jobs:
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
 
-      - name: Create new tag ${{ github.event.inputs.tag }}
+      - name: Create new tag ${{ github.event.inputs.tag-to-apply }}
         run: |
-          git tag -f -a ${{ github.event.inputs.tag }} -m "[bot] release ${{ github.event.inputs.tag }}"
-          git push origin ${{ github.event.inputs.tag }} -f
+          git tag -f -a ${{ github.event.inputs.tag-to-apply }} -m "[bot] release ${{ github.event.inputs.tag-to-apply }}"
+          git push origin ${{ github.event.inputs.tag-to-apply }} -f
 
   publish-docker-containers:
     needs: tag
@@ -46,7 +46,7 @@ jobs:
         fail-fast: false
     uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
-        release_number: ${{ github.event.inputs.tag }}
+        release_number: ${{ github.event.inputs.tag-to-apply }}
         platform: ${{ matrix.platform }}
     secrets: inherit
 
@@ -54,13 +54,13 @@ jobs:
     needs: publish-docker-containers
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
-        release_number: ${{ github.event.inputs.tag }}
+        release_number: ${{ github.event.inputs.tag-to-apply }}
     secrets: inherit
 
   release-helm-chart:
     needs: publish-container-digests
     uses: ./.github/workflows/release-x-manual-helm-chart.yml
     with:
-      release_number: ${{ github.event.inputs.tag }}
+      release_number: ${{ github.event.inputs.tag-to-apply }}
     secrets: inherit
 

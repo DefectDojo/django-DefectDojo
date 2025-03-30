@@ -16,5 +16,5 @@ jobs:
     uses: ./.github/workflows/release-x-nightly.yml
     with:
         branch-to-build: 'dev'
-        tag: 'nightly-dev'
+        tag-to-apply: 'nightly-dev'
     secrets: inherit
