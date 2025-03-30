@@ -38,13 +38,14 @@ jobs:
           git push origin ${{ github.event.inputs.tag }}
 
   publish-docker-containers:
+    needs: tag
     strategy:
         matrix:
             platform: ['linux/amd64', 'linux/arm64']
         fail-fast: false
     uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
-        release_number: ${{ github.event.inputs.release_number }}
+        release_number: ${{ github.event.inputs.tag }}
         platform: ${{ matrix.platform }}
     secrets: inherit
 
@@ -52,13 +53,12 @@ jobs:
     needs: publish-docker-containers
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
-        release_number: ${{ github.event.inputs.release_number }}
-        is_latest: ${{ github.event.inputs.is_latest }}
+        release_number: ${{ github.event.inputs.tag }}
+        is_latest: false
     secrets: inherit
 
-
   release-helm-chart:
-    needs: build-push-containers
+    needs: publish-container-digests
     uses: ./.github/workflows/release-x-manual-helm-chart.yml
     with:
       release_number: ${{ github.event.inputs.tag }}

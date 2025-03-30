@@ -35,6 +35,7 @@ jobs:
           git push origin ${{ github.event.inputs.release_number }}
 
   publish-docker-containers:
+    needs: tag
     strategy:
       matrix:
           platform: ['linux/amd64', 'linux/arm64']
@@ -50,7 +51,7 @@ jobs:
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
-      is_latest: ${{ github.event.inputs.is_latest }}
+      is_latest: true
     secrets: inherit
 
   release-helm-chart:
