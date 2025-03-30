@@ -8,7 +8,7 @@ on:
   schedule:
     # every day at 5:00 UTC
     # in this case inputs are all null/empty, hence the default values are used below
-    - cron: "*/5 * * * *"
+    - cron: "35 * * * *"
 
   workflow_dispatch:
     inputs:
