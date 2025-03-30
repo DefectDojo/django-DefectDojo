@@ -35,7 +35,7 @@ jobs:
       - name: Create new tag ${{ github.event.inputs.tag }}
         run: |
           git tag -f -a ${{ github.event.inputs.tag }} -m "[bot] release ${{ github.event.inputs.tag }}"
-          git push origin ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }} -f
 
   publish-docker-containers:
     needs: tag
