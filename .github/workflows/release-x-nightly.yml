@@ -19,6 +19,21 @@ on:
           required: false
           default: 'nightly-dev'
 
+  workflow_dispatch:
+    inputs:
+      branch-to-build:
+        # do not use branch as name as it will be master in a scheduled run
+        type: string
+        description: 'Branch to checkout, build and publish'
+        required: false
+        default: 'dev'
+      tag-to-apply:
+        type: string
+        description: 'Tag to apply to the images'
+        required: false
+        default: 'nightly-dev'
+
+
 jobs:
   tag:
     runs-on: ubuntu-latest
