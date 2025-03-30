@@ -59,6 +59,15 @@ jobs:
 
     steps:
 
+    - name: Print inputs
+      run: |
+        echo "Release number: ${{ github.event.inputs.release_number }}"
+        echo "Is latest: ${{ github.event.inputs.is_latest }}"
+
+    - name: Debug inputs
+      run: |
+        echo "All inputs: ${{ toJson(github.event.inputs) }}"
+
       # deduce docker org name from git repo to make the build also work in forks
     - id: Set-docker-org
       run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
