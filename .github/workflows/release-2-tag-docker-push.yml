@@ -49,7 +49,6 @@ jobs:
       release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
-
   release-drafter:
     needs: build-push-containers
     uses: ./.github/workflows/release-drafter.yml
