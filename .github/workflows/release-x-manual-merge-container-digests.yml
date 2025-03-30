@@ -16,7 +16,7 @@ on:
           is_latest:
             type: string
             description: 'Whether to tag releases with latest'
-            required: false
+            required: true
             default: 'false'
 
     workflow_call:
@@ -30,7 +30,7 @@ on:
           is_latest:
             type: string
             description: 'Whether to tag releases with latest'
-            required: false
+            required: true
             default: 'false'
 jobs:
   merge-digests:
