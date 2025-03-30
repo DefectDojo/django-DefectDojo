@@ -54,7 +54,7 @@ jobs:
     with:
       release_number: ${{ github.event.inputs.release_number }}
       is_latest: 'true'
-      is_latest_boolean: 'true'
+      is_latest_boolean: true
       something: true
     secrets: inherit
 
