@@ -43,7 +43,7 @@ jobs:
 
   build-push-containers:
       needs: tag
-      uses: ./.github/workflows/release-x-docker-build-push.yml
+      uses: ./.github/workflows/release-x-manual-build-push.yml
       with:
         release_number: ${{ github.event.inputs.release_number }}
         is_latest: true
