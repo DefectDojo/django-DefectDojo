@@ -1,4 +1,4 @@
-name: "release-X: Merge container digests"
+name: "release-X: Tag docker images with latest tag"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
