@@ -45,7 +45,7 @@ on:
           something_default:
             type: boolean
             description: 'Whether to tag releases with latest'
-            required: true
+            required: false
             default: false
 
 jobs:
