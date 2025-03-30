@@ -99,6 +99,7 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
+        echo release_number: [${{ github.event.inputs.release_number }}]
         echo is_latest: [${{ github.event.inputs.is_latest }}]
         echo is_latest_boolean: [${{ github.event.inputs.is_latest_boolean }}]
         echo something: [${{ github.event.inputs.something }}]
