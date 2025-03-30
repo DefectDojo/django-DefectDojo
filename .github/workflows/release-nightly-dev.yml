@@ -8,65 +8,13 @@ on:
   schedule:
     # every day at 5:00 UTC
     # in this case inputs are all null/empty, hence the default values are used below
-    - cron: "30 * * * *"
-
+    - cron: "45 * * * *"
   workflow_dispatch:
-    inputs:
-        branch-to-build:
-          # do not use branch as name as it will be master in a scheduled run
-          type: string
-          description: 'Branch to checkout, build and publish'
-          required: false
-          default: 'dev'
-        tag:
-          type: string
-          description: 'Tag to apply to the images'
-          required: false
-          default: 'nightly-dev'
-
 
 jobs:
-  tag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          ref: ${{ github.event.inputs.branch-to-build  || 'dev'}}
-
-      - name: Configure git
-        run: |
-          git config --global user.name "${{ env.GIT_USERNAME }}"
-          git config --global user.email "${{ env.GIT_EMAIL }}"
-
-      - name: Create new tag ${{ github.event.inputs.tag  || 'nightly-dev'}}
-        run: |
-          git tag -f -a ${{ github.event.inputs.tag  || 'nightly-dev'}} -m "[bot] release ${{ github.event.inputs.tag  || 'nightly-dev'}}"
-          git push origin ${{ github.event.inputs.tag  || 'nightly-dev'}} -f
-
-  publish-docker-containers:
-    needs: tag
-    strategy:
-        matrix:
-            platform: ['linux/amd64', 'linux/arm64']
-        fail-fast: false
-    uses: ./.github/workflows/release-x-manual-docker-containers.yml
+  nightly-build-dev:
+    uses: ./.github/workflows/release-x-nightly.yml
     with:
-        release_number: ${{ github.event.inputs.tag || 'nightly-dev'}}
-        platform: ${{ matrix.platform }}
+        branch-to-build: 'dev'
+        tag: 'nightly-dev'
     secrets: inherit
-
-  publish-container-digests:
-    needs: publish-docker-containers
-    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
-    with:
-        release_number: ${{ github.event.inputs.tag || 'nightly-dev' }}
-    secrets: inherit
-
-  release-helm-chart:
-    needs: publish-container-digests
-    uses: ./.github/workflows/release-x-manual-helm-chart.yml
-    with:
-      release_number: ${{ github.event.inputs.tag  || 'nightly-dev'}}
-    secrets: inherit
-
