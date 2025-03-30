@@ -12,7 +12,8 @@ on:
 
   workflow_dispatch:
     inputs:
-        branch:
+        branch-to-build:
+          # do not use branch as name as it will be master in a scheduled run
           type: string
           description: 'Branch to checkout, build and publish'
           required: false
@@ -31,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.branch  || 'dev'}}
+          ref: ${{ github.event.inputs.branch-to-build  || 'dev'}}
 
       - name: Configure git
         run: |
