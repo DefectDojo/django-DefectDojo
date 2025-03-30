@@ -40,27 +40,16 @@ jobs:
       release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
-  publish-docker-containers:
-    strategy:
-        matrix:
-          platform: ['linux/amd64', 'linux/arm64']
-        fail-fast: false
-    needs: tag
-    uses: ./.github/workflows/release-x-manual-docker-containers.yml
-    with:
-      release_number: ${{ github.event.inputs.release_number }}
-      platform: ${{ matrix.platform }}
-    secrets: inherit
-
-  publish-container-digests:
-    needs: publish-docker-containers
-    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
-    with:
+  build-push-containers:
+      needs: tag
+      uses: ./.github/workflows/release-x-docker-build-push.yml
+      with:
         release_number: ${{ github.event.inputs.release_number }}
-    secrets: inherit
+        is_latest: true
+      secrets: inherit
 
   release-drafter:
-    needs: publish-container-digests
+    needs: build-push-containers
     uses: ./.github/workflows/release-drafter.yml
     with:
       version: ${{ github.event.inputs.release_number }}
