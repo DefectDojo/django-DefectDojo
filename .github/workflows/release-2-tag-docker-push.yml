@@ -13,6 +13,7 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
+        default: '0.1.5'
 
 jobs:
   tag:
@@ -31,7 +32,7 @@ jobs:
       - name: Create new tag ${{ github.event.inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
-          git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
+          git tag -f -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
 
   publish-docker-containers:
