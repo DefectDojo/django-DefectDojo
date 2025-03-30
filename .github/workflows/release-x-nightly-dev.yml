@@ -54,7 +54,6 @@ jobs:
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
         release_number: ${{ github.event.inputs.tag }}
-        is_latest: 'false'
     secrets: inherit
 
   release-helm-chart:

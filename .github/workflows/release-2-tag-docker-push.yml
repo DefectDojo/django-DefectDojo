@@ -53,9 +53,17 @@ jobs:
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
-      is_latest: 'true'
-      is_latest_boolean: true
-      something: true
+    secrets: inherit
+
+  # for releases we need to tag the images with the latest tag
+  # we tried to parametrize this in the previous workflow after merging the digests,
+  # but for some reason any parameter we add to the workflow will always be empty when referenced
+  # simple enough to just add a explicit workflow for this until we figure out why
+  tag-as-latest:
+    needs: publish-container-digests
+    uses: ./.github/workflows/release-x-manual-tag-as-latest.yml
+    with:
+      release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
   release-helm-chart:
