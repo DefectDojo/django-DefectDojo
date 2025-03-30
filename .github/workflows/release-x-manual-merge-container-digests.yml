@@ -88,7 +88,7 @@ jobs:
 
       # debian images are the default / official ones, so these get the latest tag
     - name: Tag Debian with latest tags
-      if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest == 'true') }}
+      if: ${{ (matrix.os  == 'debian') && (github.event.inputs.is_latest == 'true' || github.event.inputs.is_latest == true) }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
