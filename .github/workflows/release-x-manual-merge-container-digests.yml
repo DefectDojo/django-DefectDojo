@@ -14,10 +14,10 @@ on:
             description: 'Release version (x.y.z format)'
             required: true
           is_latest:
-            type: boolean
+            type: string
             description: 'Whether to tag releases with latest'
             required: false
-            default: false
+            default: 'false'
 
     workflow_call:
         inputs:
@@ -28,11 +28,10 @@ on:
             description: 'Release version (x.y.z format)'
             required: true
           is_latest:
-            type: boolean
+            type: string
             description: 'Whether to tag releases with latest'
             required: false
-            default: false
-
+            default: 'false'
 jobs:
   merge-digests:
     runs-on: ubuntu-latest
