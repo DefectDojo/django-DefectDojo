@@ -84,6 +84,7 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
+        echo is_latest: [${{ github.event.inputs.is_latest}}]
         docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the latest tag
