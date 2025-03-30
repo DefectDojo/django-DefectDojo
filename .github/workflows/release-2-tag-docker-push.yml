@@ -34,23 +34,34 @@ jobs:
           git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
 
-  build-push-containers:
-    needs: tag
-    uses: ./.github/workflows/release-x-manual-build-push.yml
+  publish-docker-containers:
+    strategy:
+      matrix:
+          platform: ['linux/amd64', 'linux/arm64']
+      fail-fast: false
+    uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
-      is_latest: true
+      platform: ${{ matrix.platform }}
+    secrets: inherit
+
+  publish-container-digests:
+    needs: publish-docker-containers
+    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
+    with:
+      release_number: ${{ github.event.inputs.release_number }}
+      is_latest: ${{ github.event.inputs.is_latest }}
     secrets: inherit
 
   release-helm-chart:
-    needs: build-push-containers
+    needs: publish-container-digests
     uses: ./.github/workflows/release-x-manual-helm-chart.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
   release-drafter:
-    needs: build-push-containers
+    needs: publish-container-digests
     uses: ./.github/workflows/release-drafter.yml
     with:
       version: ${{ github.event.inputs.release_number }}
