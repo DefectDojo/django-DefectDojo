@@ -59,13 +59,13 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}" --progress=plain \
         $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}@sha256:%s ' *)
 
       # just for logging
     - name: Inspect OS specific image
       run: |
-        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # debian images are the default / official ones, so these get the os-less tag
     - name: Tag Debian with os-less tags
@@ -73,10 +73,10 @@ jobs:
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
-        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}-${{ matrix.os }}
 
       # just for logging
     - name: Inspect default images
       if: ${{ matrix.os  == 'debian' }}
       run: |
-          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}
+          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}
