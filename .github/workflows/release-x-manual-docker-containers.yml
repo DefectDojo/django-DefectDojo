@@ -57,7 +57,7 @@ jobs:
       - name: Checkout tag
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.release_number }}
+          ref: ${{ inputs.release_number }}
 
       - name: Set up Docker Buildx
         id: buildx
@@ -74,8 +74,8 @@ jobs:
           file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
           outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
-          cache-from: type=gha,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ inputs.platform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ inputs.platform }}
+          cache-from: type=gha,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ inputs.platform }}-${{ github.event.workflow_run.head_branch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ inputs.platform }}-${{ github.event.workflow_run.head_branch }}
 
         # export the digest to a file
       - name: Export digest
