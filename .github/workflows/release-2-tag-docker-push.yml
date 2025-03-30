@@ -13,7 +13,6 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
-        default: '0.1.5'
 
 jobs:
   tag:
