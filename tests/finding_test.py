@@ -9,7 +9,7 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from product_test import ProductTest, WaitForPageLoad
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
@@ -68,7 +68,7 @@ class FindingTest(BaseTestCase):
 
     def check_file(self, file_name):
         file_found = False
-        for i in range(1, 30):
+        for _ in range(1, 30):
             time.sleep(1)
             if Path(file_name).is_file():
                 file_found = True
@@ -192,7 +192,7 @@ class FindingTest(BaseTestCase):
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_reviewers")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_reviewers")))
         except TimeoutException:
             self.fail("Timed out waiting for reviewer dropdown to initialize ")
 
