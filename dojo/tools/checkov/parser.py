@@ -16,6 +16,8 @@ class CheckovParser:
         - file_path: Set to file path from Checkov Scanner.
         - line: Set to first line of the file line range from Checkov Scanner.
         - component_name: Set to resource from Checkov Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         """
         return [
             "title",
@@ -25,6 +27,8 @@ class CheckovParser:
             "file_path",
             "line",
             "component_name",
+            "static_finding",
+            "dynamic_finding",
         ]
 
     def get_dedupe_fields(self) -> list[str]:

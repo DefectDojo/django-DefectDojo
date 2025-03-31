@@ -13,6 +13,8 @@ class OSVScannerParser:
         - title: Created from vulnerability id and package name.
         - description: Custom description made from: vulnerability, source_type, & package_ecosystem.
         - severity: Set to severity from OSV Scanner that has been translated into Defect Dojo format.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         - component_name: Set to package name from OSV Scanner.
         - component_version: Set to package version from OSV Scanner.
         - cwe: Set to cwe outputted from OSV Scanner.
@@ -22,6 +24,8 @@ class OSVScannerParser:
             "title",
             "description",
             "severity",
+            "static_finding",
+            "dynamic_finding",
             "component_name",
             "component_version",
             "cwe",

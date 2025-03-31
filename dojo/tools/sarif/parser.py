@@ -42,7 +42,10 @@ class SarifParser:
         - cvssv3_score: Set to properties and securitiy-severity from Sarif scanner if available.
         - mitigation: Set to altered version of finding's description.
         - date: Set to the date outputted from Sarif Scanner converted to datetime.
+        - tags: Set to tags from Sarif scanner.
         - unique_id_from_tool: Set to the hash fingerpring value outputted from Sarif Scanner.
+
+        NOTE: This parser supports tags.
         """
         return [
             "title",
@@ -60,6 +63,7 @@ class SarifParser:
             "cvssv3_score",
             "mitigation",
             "date",
+            "tags",
             "unique_id_from_tool",
         ]
 

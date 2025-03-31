@@ -20,8 +20,8 @@ class WhispersParser:
         - file_path: Set to file from Whispers scanner.
         - line: Set to line from Whispers scanner.
         - vuln_id_from_tool: Set to message from Whispers scanner.
-        - static_finding: Always set to true.
-        - dynamic_finding: Always set to false.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         """
         return [
             "title",

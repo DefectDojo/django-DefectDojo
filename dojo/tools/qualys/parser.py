@@ -30,6 +30,7 @@ class QualysParser:
         - is_mitigated: Set to true or false based on pressence of "mitigated" in Qualys Scanner output.
         - active: Set to true if status equals active, re-opened, or new; else set to false.
         - cvssv3: Set to CVSS_vector if not null.
+        - verified: Set to true.
         """
         return [
             "title",
@@ -43,6 +44,7 @@ class QualysParser:
             "is_mitigated",
             "active",
             "cvssv3",
+            "verified",
         ]
 
     def get_dedupe_fields(self) -> list[str]:
