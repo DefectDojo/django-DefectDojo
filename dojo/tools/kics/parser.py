@@ -29,7 +29,6 @@ class KICSParser:
         data = json.load(filename)
         dupes = {}
         for query in data["queries"]:
-            id = query.get("query_id")
             name = query.get("query_name")
             query_url = query.get("query_url")
             severity = self.SEVERITY.get(query.get("severity"), "Medium")
@@ -41,6 +40,7 @@ class KICSParser:
                 issue_type = item.get("issue_type")
                 expected_value = item.get("expected_value")
                 actual_value = item.get("actual_value")
+                vuln_id = item.get("similarity_id")
 
                 description = f"{query.get('description', '')}\n"
                 if platform:
@@ -81,8 +81,10 @@ class KICSParser:
                         component_name=platform,
                         nb_occurences=1,
                         references=query_url,
-                        vuln_id_from_tool=id,
+                        vuln_id_from_tool=vuln_id,
                     )
                     finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("kics")]
+                    if "custom_vuln_id" in query:
+                        finding.unsaved_vulnerability_ids = [query['custom_vuln_id']]
                     dupes[dupe_key] = finding
         return list(dupes.values())
