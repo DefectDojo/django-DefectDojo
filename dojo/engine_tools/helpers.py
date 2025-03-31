@@ -32,6 +32,7 @@ class Constants(Enum):
     ON_BLACKLIST = "On Blacklist"
     REVIEWERS_MAINTAINER_GROUP = settings.REVIEWER_GROUP_NAME
     APPROVERS_CYBERSECURITY_GROUP = settings.APPROVER_GROUP_NAME
+    ENGINE_CONTAINER_TAG = settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
     
     
 def get_reviewers_members():
@@ -120,8 +121,11 @@ def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) ->
 
 def check_prisma_and_tenable_cve(cve: str) -> tuple[bool, bool]:
     has_prisma_findings = Finding.objects.filter(
-        cve=cve, active=True, tags__name__icontains="prisma"
+        cve=cve, active=True
+    ).filter(
+        Q(tags__name__icontains="prisma") | Q(tags__name__icontains=Constants.ENGINE_CONTAINER_TAG.value)
     ).exists()
+    
     has_tenable_findings = Finding.objects.filter(
         cve=cve, active=True, tags__name__icontains="tenable"
     ).exists()
@@ -323,10 +327,13 @@ def get_resource_type(finding) -> str:
     contains_host = any('hosts' in tag.name for tag in finding.tags.all())
     contains_ecr = any('images' in tag.name for tag in finding.tags.all())
     contains_lambda = any('lambdas' in tag.name for tag in finding.tags.all())
+    contains_engine_container = any(
+        Constants.ENGINE_CONTAINER_TAG.value in tag.name for tag in finding.tags.all()
+    )
     
     if contains_host:
         return "host"
-    if contains_ecr:
+    if contains_ecr or contains_engine_container:
         return "image"
     if contains_lambda:
         return "function"
@@ -408,7 +415,7 @@ def calculate_vulnerability_priority(finding) -> float:
     severity_score = severity_map.get(finding.severity, 0)
 
     # Risk Score (0-100)
-    if "prisma" in finding.tags:
+    if "prisma" in finding.tags or Constants.ENGINE_CONTAINER_TAG.value in finding.tags:
         risk_score = get_risk_score(finding) or 1
     elif "tenable" in finding.tags:
         risk_score = get_tenable_risk_score(finding) or 1
