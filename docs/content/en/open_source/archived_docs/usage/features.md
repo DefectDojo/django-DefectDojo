@@ -3,7 +3,7 @@ title: "Features"
 description: "Various features help manage vulnerabilities."
 draft: false
 weight: 2
-exclude_search: true
+exclude_search: false
 ---
 
 ## Tags

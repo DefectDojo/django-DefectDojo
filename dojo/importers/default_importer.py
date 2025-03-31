@@ -106,9 +106,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        self.parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser)
         # process the findings in the foreground or background
-        new_findings = self.determine_process_method(self.parsed_findings, **kwargs)
+        new_findings = self.determine_process_method(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
         closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
@@ -330,13 +330,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         `get_tests` function on the parser object
         """
         # Attempt any preprocessing before generating findings
-        if len(self.parsed_findings) == 0 and self.test is None:
-            scan = self.process_scan_file(scan)
-            if hasattr(parser, "get_tests"):
-                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
-            else:
-                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
-        return self.parsed_findings
+        scan = self.process_scan_file(scan)
+        if hasattr(parser, "get_tests"):
+            return self.parse_findings_dynamic_test_type(scan, parser)
+        return self.parse_findings_static_test_type(scan, parser)
 
     def parse_findings_static_test_type(
         self,
@@ -349,7 +346,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         file import as usual from the base class
         """
         # by default test_type == scan_type
-        self.test = self.create_test(self.scan_type)
+        # Create a new test if it has not already been created
+        if not self.test:
+            self.test = self.create_test(self.scan_type)
         logger.debug("IMPORT_SCAN: Parse findings")
         # Use the parent method for the rest of this
         return super().parse_findings_static_test_type(scan, parser)
@@ -385,8 +384,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             test_type_name = f"{tests[0].type} Scan"
             if test_type_name != self.scan_type:
                 test_type_name = f"{test_type_name} ({self.scan_type})"
-        # Create a new test
-        self.test = self.create_test(test_type_name)
+        # Create a new test if it has not already been created
+        if not self.test:
+            self.test = self.create_test(test_type_name)
         # This part change the name of the Test
         # we get it from the data of the parser
         test_raw = tests[0]
