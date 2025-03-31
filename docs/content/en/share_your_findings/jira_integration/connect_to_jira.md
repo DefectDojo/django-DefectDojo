@@ -156,7 +156,7 @@ Your Jira Webhook is located on the System Settings form under **Jira Integratio
 2. Click 'Create a Webhook'.
 3. For the field labeled 'URL' enter: `https:// \<**YOUR DOJO DOMAIN**\> /jira/webhook/ \<**YOUR GENERATED WEBHOOK SECRET**\>`. The Web Hook Secret is listed under the Jira Integration Settings as listed above.
 4. Under 'Comments' enable 'Created'. Under Issue enable 'Updated'.
-5. Make sure your JIRA instance trusts the SSL certificate used by your Defect Dojo instance. For JIRA Cloud Defect Dojo must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
+5. Make sure your JIRA instance trusts the SSL certificate used by your DefectDojo instance. For JIRA Cloud DefectDojo must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
 
 Note that you do not need to create a Secret within Jira to use this webhook. The Secret is built into DefectDojo's URL, so simply adding the complete URL to the Jira Webhook form is sufficient.
 
