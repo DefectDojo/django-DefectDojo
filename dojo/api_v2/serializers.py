@@ -38,6 +38,7 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.engine_tools.models import FindingExclusion
+from dojo.api_v2 import validators
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
@@ -2200,9 +2201,15 @@ class CommonImportScanSerializer(serializers.Serializer):
         help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
-    engagement_name = serializers.CharField(required=False)
+    product_type_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator])
+    product_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator])
+    engagement_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator])
     engagement_end_date = serializers.DateField(
         required=False,
         help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day",
