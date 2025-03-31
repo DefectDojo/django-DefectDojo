@@ -24,6 +24,7 @@ In the Classic (Open-Source) UI, this history is found under the '☰' (hamburge
 This API returns 31 days of audit logs.
 
 * Sending default or empty parameters will return the last 31 days of audit logs.
+
 * Parameter `window_month` which will take a month and year in the format MM-YYYY and provide the audit logs for that month.
 * You can set the `window_start` parameter to limit these logs to a shorter window, rather than returning the entire month.
 

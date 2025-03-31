@@ -76,8 +76,8 @@ select = [
    "PGH",
    "PLC01", "PLC0205", "PLC0208", "PLC0414", "PLC18", "PLC24", "PLC28", "PLC3",
    "PLE",
-   "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1716", "PLR172", "PLR173", "PLR2044", "PLR5", "PLR6104", "PLR6201",
-   "PLW01", "PLW02", "PLW04", "PLW0604", "PLW07", "PLW1", "PLW2", "PLW3",
+   "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1716", "PLR172", "PLR1733", "PLR1736", "PLR5", "PLR6104", "PLR6201",
+   "PLW01", "PLW02", "PLW04", "PLW0602", "PLW0604", "PLW07", "PLW1", "PLW2", "PLW3",
    "TRY003", "TRY004", "TRY2", "TRY300", "TRY401",
    "FLY",
    "NPY",
@@ -111,6 +111,9 @@ preview = true
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
     "PTH123", # Fix is needed in unittests as well but there are too many problematic files, let's do it per partes
+]
+".github/pr-reminder.py" = [
+    "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
 ]
 
 [lint.flake8-boolean-trap]
