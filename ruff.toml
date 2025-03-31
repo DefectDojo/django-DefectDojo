@@ -110,7 +110,9 @@ preview = true
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
-    "PTH123", # Fix is needed in unittests as well but there are too many problematic files, let's do it per partes
+]
+"unittests/tools/**" = [
+    "PTH123", # Fix is needed in unittests/tools as well but there are too many problematic files, let's do it per partes
 ]
 ".github/pr-reminder.py" = [
     "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
