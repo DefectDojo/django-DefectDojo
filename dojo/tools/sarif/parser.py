@@ -22,6 +22,68 @@ class SarifParser:
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Sarif Parser
+
+        Fields:
+        - title: Made using rule and id from Sarif scanner.
+        - severity: Set to severity from Sarif Scanner converted to Defect Dojo format.
+        - description: Made by combining message, location, and rule from Sarif Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - false_p: Set to true or false based on suppression status from Sarif scanner.
+        - active: Set to true or false based on suppression status from Sarif scanner.
+        - file_path: Set to physical location from Sarif scanner.
+        - line: Set to start line from Sarif scanner.
+        - vuln_id_from_tool: Set to rule id from Sarif scanner.
+        - cwe: Set to the cwe values outputted from Sarif Scanner.
+        - cvssv3: Set to properties and securitiy-severity from Sarif scanner if available.
+        - cvssv3_score: Set to properties and securitiy-severity from Sarif scanner if available.
+        - mitigation: Set to altered version of finding's description.
+        - date: Set to the date outputted from Sarif Scanner converted to datetime.
+        - unique_id_from_tool: Set to the hash fingerpring value outputted from Sarif Scanner.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "static_finding",
+            "dynamic_finding",
+            "false_p",
+            "active",
+            "file_path",
+            "line",
+            "vuln_id_from_tool",
+            "cwe",
+            "cvssv3",
+            "cvssv3_score",
+            "mitigation",
+            "date",
+            "unique_id_from_tool",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Sarif Parser
+
+        Fields:
+        - title: Made using rule and id from Sarif scanner.
+        - cwe: Set to the cwe values outputted from Sarif Scanner.
+        - line: Set to start line from Sarif scanner.
+        - file_path: Set to physical location from Sarif scanner.
+        - description: Made by combining message, location, and rule from Sarif Scanner.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "line",
+            "file_path",
+            "description",
+        ]
+
     def get_scan_types(self):
         return ["SARIF"]
 

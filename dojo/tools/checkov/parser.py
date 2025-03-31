@@ -33,6 +33,8 @@ class CheckovParser:
 
         Fields:
         - title: Set to check_name outputted from Checkov Scanner.
+        - line: Set to first line of the file line range from Checkov Scanner.
+        - file_path: Set to file path from Checkov Scanner.
         - description: Custom description made from: check type, check id, and check name.
 
         NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
@@ -40,6 +42,8 @@ class CheckovParser:
         """
         return [
             "title",
+            "line",
+            "file_path",
             "description",
         ]
 
