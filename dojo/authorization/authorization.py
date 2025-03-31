@@ -423,7 +423,7 @@ class RoleDoesNotExistError(Exception):
 
 
 def get_product_member(user, product):
-    return get_product_member_dict(user).get(product.id)
+    return get_product_member_dict(user).get(product.id) if product else None
 
 
 @cache_for_request
@@ -439,7 +439,7 @@ def get_product_member_dict(user):
 
 
 def get_product_type_member(user, product_type):
-    return get_product_type_member_dict(user).get(product_type.id)
+    return get_product_type_member_dict(user).get(product_type.id) if product_type else None
 
 
 @cache_for_request
