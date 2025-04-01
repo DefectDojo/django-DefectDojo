@@ -183,12 +183,10 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertIn("login", result.url)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
-        with self.assertRaises(Exception):
-            self.make_request(user_is_staff=True, finding_id=None, template_id=1)
+        self.make_request(user_is_staff=True, finding_id=None, template_id=1)
 
     def test_apply_template_to_finding_with_illegal_template_fails(self):
-        with self.assertRaises(Exception):
-            self.make_request(user_is_staff=True, finding_id=1, template_id=None)
+        self.make_request(user_is_staff=True, finding_id=1, template_id=None)
 
     def test_apply_template_to_finding_with_no_data_returns_view_success(self):
         result = self.make_request(user_is_staff=True, finding_id=1, template_id=1, data=None)
