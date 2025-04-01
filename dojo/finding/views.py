@@ -2446,17 +2446,10 @@ def download_finding_pic(request, token):
 
     try:
         access_token = FileAccessToken.objects.get(token=token)
-        size = access_token.size
-
         if access_token.size not in list(size_map.keys()):
             raise Http404
         size = access_token.size
-        # we know there is a token - is it for this image
-        if access_token.size == size:
-            """all is good, one time token used, delete it"""
-            access_token.delete()
-        else:
-            raise PermissionDenied
+        access_token.delete()
     except Exception:
         raise PermissionDenied
 
