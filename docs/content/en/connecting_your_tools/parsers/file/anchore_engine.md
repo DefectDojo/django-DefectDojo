@@ -38,4 +38,4 @@ All properties are strings and are required by the parser.
 ~~~
 
 ### Sample Scan Data
-Sample Anchore Enterprise Vulnerability scans can be found [here](https://github.com/user-attachments/files/18395292/Vulnerability_Report_2025-01-13T10_09_59.971Z.json).
+Sample Anchore-Engine scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_engine)
