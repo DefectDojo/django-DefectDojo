@@ -7,6 +7,19 @@ class FortifyXMLParser:
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
+        if root.tag == "Scan":
+            return self.new_xml_structure(root, test)
+        if root.tag == "ReportDefinition":
+            return self.old_xml_structure(root, test)
+        raise ValueError
+
+    def new_xml_structure(self, root, test):
+        for Issues in root.findall("Issues"):
+            for Issue in Issues.iter("Issue"):
+                print(Issue)
+        return []
+
+    def old_xml_structure(self, root, test):
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
         cat_meta = {}
