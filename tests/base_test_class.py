@@ -447,7 +447,6 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def tearDownDriver(cls):
         logger.info(f"tearDownDriver: {cls.__name__}")
-        global dd_driver
         if dd_driver:
             if (
                 not dd_driver_options.experimental_options

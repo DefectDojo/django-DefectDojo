@@ -91,14 +91,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        self.parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser)
         # process the findings in the foreground or background
         (
             new_findings,
             reactivated_findings,
             findings_to_mitigate,
             untouched_findings,
-        ) = self.determine_process_method(self.parsed_findings, **kwargs)
+        ) = self.determine_process_method(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
         closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
@@ -289,13 +289,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         `get_tests` function on the parser object
         """
         # Attempt any preprocessing before generating findings
-        if len(self.parsed_findings) == 0 or self.test is None:
-            scan = self.process_scan_file(scan)
-            if hasattr(parser, "get_tests"):
-                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
-            else:
-                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
-        return self.parsed_findings
+        scan = self.process_scan_file(scan)
+        if hasattr(parser, "get_tests"):
+            return self.parse_findings_dynamic_test_type(scan, parser)
+        return self.parse_findings_static_test_type(scan, parser)
 
     def parse_findings_static_test_type(
         self,

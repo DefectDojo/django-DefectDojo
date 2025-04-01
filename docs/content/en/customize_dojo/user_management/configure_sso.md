@@ -141,9 +141,9 @@ When a user is removed from a given group in Azure AD, they will also be removed
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1.  Add the following information to the settings file:
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
@@ -213,9 +213,9 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to Docker, or to local_settings.py:
+1.  Set the following environment variables
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),
@@ -259,9 +259,9 @@ Follow along below.
 
 ### Open-Source
 
-Open-Source users will need to set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to Docker, or to the `local_settings.py` file:
+1.  Set the following environment variables
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, 'YOUR_SECRET_FROM_STEP_ABOVE'),
@@ -320,9 +320,9 @@ In order to use Google Authentication, a Google Authentication Server will need 
 
 ### Open-Source
 
-Open-Source users will need to set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to Docker, or to the `local_settings.py` file:
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=True,
@@ -404,9 +404,11 @@ This guide assumes you already have a KeyCloak Realm set up.  If not, you will n
 ### Open-Source
 
 
-Open-Source users will need to set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1.    {{< highlight python >}}
+1.  Set the following environment variables
+
+{{< highlight python >}}
    DD_SESSION_COOKIE_SECURE=True,
    DD_CSRF_COOKIE_SECURE=True,
    DD_SECURE_SSL_REDIRECT=True,
@@ -490,7 +492,9 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-1. Open-Source users will need to set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
@@ -504,7 +508,7 @@ If during the login process you get the following error: *The
 in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your local_settings.py file.
+`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your `local_settings.py` file.
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 
@@ -559,7 +563,7 @@ The left side of the ‘=’ sign represents the attribute you want to map from 
 ### Open-Source SAML
 
 1.  Navigate to your SAML IdP and find your metadata.
-2.  Set these fields as Docker environment variables, or add them to the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+2.  Set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),
