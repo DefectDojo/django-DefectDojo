@@ -92,7 +92,7 @@ class TestFortifyParser(DojoTestCase):
         with open(get_unit_tests_scans_path("fortify") / "issue_12065.xml", encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(61, len(findings))
+            self.assertEqual(15, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)

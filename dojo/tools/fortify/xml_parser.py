@@ -14,10 +14,34 @@ class FortifyXMLParser:
         raise ValueError
 
     def xml_structure_24_2(self, root, test):
+        items = []
         for Issues in root.findall("Issues"):
             for Issue in Issues.iter("Issue"):
-                print(Issue)
-        return []
+                CheckTypeID = Issue.find("CheckTypeID").text
+                EngineType = Issue.find("EngineType").text
+                URL = Issue.find("URL").text
+                Scheme = Issue.find("Scheme").text
+                Host = Issue.find("Host").text
+                Port = Issue.find("Port").text
+                VulnerableSession = Issue.find("VulnerableSession").text
+                VulnerabilityID = Issue.find("VulnerabilityID").text
+                Severity = Issue.find("Severity").text
+                Name = Issue.find("Name").text
+                RawResponse = Issue.find("RawResponse").text
+                items.append(
+                    Finding(
+                        # title=title,
+                        # severity=issue["Friority"],
+                        # file_path=issue["FilePath"],
+                        # line=int(issue["LineStart"]),
+                        static_finding=True,
+                        test=test,
+                        # description=self.format_description(issue, cat_meta),
+                        # mitigation=self.format_mitigation(issue, cat_meta),
+                        # unique_id_from_tool=issue_key,
+                    ),
+                )
+        return items
 
     def xml_structure_before_24_2(self, root, test):
         # Get Category Information:
