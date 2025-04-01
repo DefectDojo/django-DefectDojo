@@ -67,7 +67,7 @@ concurrent connections.
 
 ### Celery worker
 
-By default, a single mono-process celery worker is spawned. When storing a large amount of findings, leveraging async functions (like deduplication), or both. Eventually, it is important to adjust these parameters to prevent resource starvation.
+By default, a single mono-process celery worker is spawned. When storing a large amount of findings or running large imports it might be helpful to adjust these parameters to prevent resource starvation.
 
 The following variables can be changed to increase worker performance, while keeping a single celery container.
 
