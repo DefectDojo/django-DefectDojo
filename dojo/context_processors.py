@@ -59,7 +59,7 @@ def bind_announcement(request):
     return {}
 
 
-def session_expiry(request):
+def session_expiry_notification(request):
     import time
 
     try:
@@ -69,12 +69,10 @@ def session_expiry(request):
             warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
             notify_time = expiry_time - warning_time
         else:
-            expiry_time = None
             notify_time = None
     except Exception:
         return {}
     else:
         return {
-            "session_expiry_time": expiry_time,
             "session_notify_time": notify_time,
         }

@@ -1106,7 +1106,6 @@
 
                 function session_notifcation() {
                     var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
-                    var expiryTime = "{{ session_expiry_time|default:0|escapejs }}";  // When the session will expire
                     var currentTime = Math.floor(Date.now() / 1000);  // Get current timestamp in seconds
                     var timeout = warningTime - currentTime; // how many seconds until warning needs to show
 
