@@ -1159,7 +1159,7 @@ class Product(models.Model):
     lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
     origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
     user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_("Estimate the number of user records within the application."))
-    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_("Estimate the application's revenue."))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(0.00)], help_text=_("Estimate the application's revenue."))
     external_audience = models.BooleanField(default=False, help_text=_("Specify if the application is used by people outside the organization."))
     internet_accessible = models.BooleanField(default=False, help_text=_("Specify if the application is accessible from the public internet."))
     regulations = models.ManyToManyField(Regulation, blank=True)
