@@ -37,7 +37,8 @@ from dojo.models import (
     Finding,
     Product,
     System_Settings,
-    ExclusivePermission)
+    ExclusivePermission,
+    GeneralSettings)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -791,49 +792,10 @@ def finding_display_status(finding, event="view"):
         "view_exclusion": reverse_whitelist
     }
 
-
-    dict_rule_display_status = {
-        "Under Review, Active, Risk Pending": ["Under Review", "view_review", "Red"],
-        "Active, Verified, Risk Pending": ["Risk Pending", "view_risk", "Red"],
-        "Inactive, Verified, Mitigated, Risk Pending": ["Closed", "view_transfer", "Green"],
-        "Active, Verified, Risk Rejected": ["Open", "view_transfer", "Red"],
-        "Inactive, Mitigated, False Positive, Risk Rejected": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
-        "Active, Verified, Risk Expired": ["Open", "view_risk", "Red"],
-        "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
-        "Inactive, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
-        "Under Review, Inactive, Mitigated, Risk Accepted": ["Closed", "view_review", "Green"],
-        "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
-        "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
-        "Under Review, Inactive, Verified, Mitigated": ["Closed", "view_review", "Green"],
-        "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
-        "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
-        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
-        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_exclusion", "Green"],
-        "Active, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
-        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
-        "Inactive, Verified, Mitigated, On Blacklist": ["Closed", "view_finding", "Green"],
-        "Active, Verified, Transfer Pending": ["Transfer Pending", "view_transfer", "Red"],
-        "Active, Verified, Transfer Rejected": ["Open", "view_transfer", "Red"],
-        "Active, Verified, Transfer Expired": ["Open", "view_transfer", "Red"],
-        "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
-        "Inactive, Mitigated, Out Of Scope, Transfer Accepted": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Risk Expired": ["Closed", "view_risk", "Green"],
-        "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
-        "Under Review, Active, Verified, Risk Pending": ["Under Review", "view_review", "Red"],
-        "Under Review, Active": ["Under Review", "view_review", "Red"],
-        "Under Review, Inactive, Mitigated, Risk Pending": ["Closed", "view_review", "Green"],
-        "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
-        "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
-        "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
-        "Inactive, Mitigated": ["Closed", "view_finding", "Green"],
-        "Active, Verified": ["Open", "view_finding", "Red"],
-    }
-
     display_status = finding.status()
-    status = dict_rule_display_status.get(display_status, (display_status, "view_finding", "Red"))
+    status = GeneralSettings.get_value(
+        name_key=display_status,
+        default=[display_status, "view_fiding", "Red"])
     context = {}
     template_object = None
     if event == "email":

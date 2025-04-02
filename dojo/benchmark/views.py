@@ -19,7 +19,6 @@ from dojo.models import (
     Benchmark_Type,
     Product,
 )
-from dojo.templatetags.display_tags import asvs_level
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,

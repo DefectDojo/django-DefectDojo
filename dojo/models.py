@@ -44,6 +44,7 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 from dojo.engine_tools.models import *
+from dojo.api_v2.api_error import ApiError
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -5003,11 +5004,12 @@ class GeneralSettings(models.Model):
         ("BOOLEAN", "BOOLEAN"),
     ]
 
-    name = models.CharField(max_length=250,
-                            null=True,
-                            blank=True,
-                            unique=True,
-                            help_text="Name global variable"),
+    name_key = models.CharField(
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_("Text de IA recommendation."),
+        verbose_name=_("Name global variable"))
     value = models.CharField(
         verbose_name=_("General Settings"),
         null=True,
@@ -5018,7 +5020,7 @@ class GeneralSettings(models.Model):
         verbose_name = _("Category"),
         null=True,
         blank=True,
-        unique=True,
+        unique=False,
         help_text=_("Variable Category")
     )
 
@@ -5044,20 +5046,47 @@ class GeneralSettings(models.Model):
         verbose_name_plural = _("Global Variables")
 
     def __str__(self):
-        return self.description
+        return self.name_key
     
     @classmethod
-    def get_value(self, name_variable):
-        variable_object = GeneralSettings.objects.get(name_variable)
-        rule_data_type = {
-            "INT": int(variable_object.value),
-            "STRING": str(variable_object.value),
-            "DICT": json.loads(variable_object.value),
-            "LIST": variable_object.value.split(","),
-            "BOOLEAN": bool(variable_object.value),
-        }
-        return rule_data_type[variable_object.data_type]
+    def validate_status(cls):
+        return cls.status if cls.status else False
 
+
+    @classmethod
+    def get_value(cls, name_key: str, default=None):
+        if cls.validate_status() is False:
+            return False
+        variable_object = None
+        try:
+            variable_object = GeneralSettings.objects.get(name_key=name_key)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}")
+            return default
+        rule_data_type = {
+            "INT": int,
+            "STRING": str,
+            "DICT": lambda value: json.loads(value),
+            "LIST": lambda value: value.split(","),
+            "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
+        }
+        return rule_data_type[variable_object.data_type](variable_object.value)
+
+
+    @classmethod
+    def get_list_variable_by_category(cls, category: str, default=[]):
+        if cls.validate_status() is False:
+            return False
+        variable_objects = None
+        try:
+            variable_objects = GeneralSettings.objects.filter(category=category).values_list("name_key", flat=True)
+            if not variable_objects:
+                raise ApiError.not_found(f"Category not existed: {category}")
+            return list(variable_objects)
+        except ObjectDoesNotExist as e:
+            logger.error(str(e))
+            return default
+    
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
     logger.info("enabling audit logging")
@@ -5119,6 +5148,7 @@ admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
 admin.site.register(ExclusivePermission)
+admin.site.register(GeneralSettings)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

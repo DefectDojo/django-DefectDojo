@@ -12,25 +12,30 @@
     
 </head>
 <body>
-    <h5>Recommendations</h5>
-    <ul>
-        {%for recommendation in recommendations%}
-            <li class="recommendation-item">{{recommendation}}</li>
-        {% endfor %}
-    </ul>
+    <div id="id_recommendation_content">
+        <h5>IA Recommendations</h5>
+        <ul>
+            {%for recommendation in recommendations%}
+                <li class="recommendation-item">{{recommendation}}</li>
+            {% endfor %}
+        </ul>
+    </div>
     
-    <!-- Código con botón de copy -->
-    <h5>Mitigations</h5>
-    {% for mitigation in mitigations%}
-        <pre><code class="language-css">{{mitigation}}</code></pre>
-    {% endfor %}
-
-    <h5>files to fix</h5>
-    <ul>
-        {% for file in files_to_fix %}
-            <li class="file-path">{{file}}</li>
+    <div id="id_mitigations_contect">
+        <h5>Mitigations</h5>
+        {% for mitigation in mitigations%}
+            <pre><code class="language-css">{{mitigation}}</code></pre>
         {% endfor %}
-    </ul>
+    </div>
+
+    <div id="id_files_to_fix_content">
+        <h5>files to fix</h5>
+        <ul>
+            {% for file in files_to_fix %}
+                <li class="file-path">{{file}}</li>
+            {% endfor %}
+        </ul>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.10/dist/clipboard.min.js"></script>

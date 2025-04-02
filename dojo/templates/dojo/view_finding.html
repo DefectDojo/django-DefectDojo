@@ -319,7 +319,9 @@
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
                         {% endif %}
+                        {% if finding|enable_button:"IA_RECOMMENDATION" %}
                         <th>IA Recommendation</th>
+                        {% endif %}
                     {% endblock header_head %}
                 </tr>
                 <tr>
@@ -506,12 +508,14 @@
                         {% if finding.vuln_id_from_tool %}
                             <td>{{ finding.vuln_id_from_tool }}</td>
                         {% endif %}
+                        {% if finding|enable_button:"IA_RECOMMENDATION" %}
                         <td title="IA Recommendation">
                             <button class="btn btn-primary" data-finding-id={{finding.id}} id="id_button_ia_recommendation">
                                 🤖
                             </button>
                       
                         </td>
+                        {% endif %}
                     {% endblock header_body %}
                 </tr>
             </table>
@@ -788,8 +792,9 @@
         </div>
     {% endif %}
     <div class="panel panel-default">
+        {% if finding|enable_button:"IA_RECOMMENDATION" %}
         <div class="panel-heading"> 
-            <h4>IA Recommendation
+            <h4>IA Recommendation 
                 
                 <i class="fa-solid fa-robot"></i>
                 <span class="pull-right">
@@ -799,6 +804,7 @@
                 </span>
             </h4>
         </div>
+        {%endif%}
         <div id="ia_recommendation" class="panel-body collapse">
             {% if finding.ia_recommendation %}
                 {{ finding.ia_recommendation|render_ia_recommendation}}
@@ -1690,7 +1696,6 @@
               return response
             }
             catch(error){
-              console.error("updatefindings: ", error)
               throw error
             }
         }
@@ -1704,9 +1709,9 @@
                     $('#id_button_ia_recommendation').prop('disabled', true);
                 },
                 success: function(response) {
-                    console.log("resonse ", response)
                     add_ia_recommendation(finding_id, response)
                     FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
+                    $('#id_button_ia_recommendation').prop('disabled', false);
                 },
                 error: function(error) {
                     console.log(error)
@@ -1718,9 +1723,7 @@
         $(document).ready(function() {
             $('#id_button_ia_recommendation').click(async function(event)
             {
-                console.log($(this))
                 let finding_id = $(this).data('finding-id')
-                console.log("finding", finding_id)
                 $('#id_recommendation_content').empty();
                 $('#id_mitigations_contect').empty();
                 $('#id_files_to_fix_content').empty();

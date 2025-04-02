@@ -24,6 +24,7 @@ from dojo.models import (
     Vulnerability_Id,
     Vulnerability_Id_Template,
     ExclusivePermission,
+    GeneralSettings
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
@@ -685,3 +686,41 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
+
+
+def rule_product_name_enable_ia_recommendation(finding):
+    product = get_product(finding)
+    products_enabled = GeneralSettings.get_value(
+        "PRODUCT_NAMES_IA_RECOMMENDATION")
+    return product.name in products_enabled
+
+
+def rule_tags_enable_ia_recommendation(finding):
+    tags = list(finding.tags.all().values_list("name", flat=True))
+    tags_enabled = GeneralSettings.get_value(
+                "TAGS_IA_RECOMMENDATION")
+    if any(tag_enabled in tags for tag_enabled in tags_enabled):
+        return True
+    return False
+
+
+def rule_repository_enable_ia_recommendation(finding):
+    return True
+
+
+def rule_cve_enable_ia_recommendation(finding):
+    return True
+
+
+def enable_flow_ia_recommendation(**kwargs):
+    finding = kwargs["finding"]
+    rules_list = [
+        rule_product_name_enable_ia_recommendation,
+        rule_tags_enable_ia_recommendation,
+        rule_repository_enable_ia_recommendation,
+        rule_cve_enable_ia_recommendation
+    ]
+    for rule in rules_list:
+        if rule(finding) is False:
+            return False
+    return True
