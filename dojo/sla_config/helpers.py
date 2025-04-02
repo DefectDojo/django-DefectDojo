@@ -40,9 +40,6 @@ def update_sla_expiration_dates_sla_config_sync(sla_config, products, severities
 
     mass_model_updater(Finding, findings, lambda f: f.set_sla_expiration_date(), fields=["sla_expiration_date"])
 
-    # for f in findings:
-    #     f.save_no_options()
-
     # reset the async updating flag to false for all products using this sla config
     for product in products:
         product.async_updating = False
