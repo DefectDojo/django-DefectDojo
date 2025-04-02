@@ -4,9 +4,9 @@ import hashlib
 import logging
 import re
 import warnings
-from decimal import Decimal
 from contextlib import suppress
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
