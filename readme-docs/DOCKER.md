@@ -8,6 +8,8 @@ Although Docker Compose is one of the supported installation methods to deploy a
 
 [Configuration](https://docs.defectdojo.com/en/open_source/installation/configuration/) explains the different ways to adjust settings and environment variables.
 
+Docker images for `linux/amd64` are published to https://hub.docker.com/u/defectdojo. Expiremental builds for `linux/arm64` are available since 2.45.0.
+
 
 # Prerequisites
 
