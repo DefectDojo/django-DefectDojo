@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 
 class CyberwatchParser:
     def get_scan_types(self):
-        return ["Cyberwatch scan"]
+        return ["Cyberwatch scan (Galeax)"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Cyberwatch scan"
+        return "Cyberwatch scan (Galeax)"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Cyberwatch scan results in JSON format."
+        return "Import Cyberwatch Cve and Security Issue data in JSON format, you can get the json from this tool : https://github.com/Galeax/Cyberwatch-API-DefectDojo"
 
     def get_findings(self, filename, test):
         logger.debug(f"Starting get_findings with filename: {filename}")
