@@ -19,7 +19,6 @@ from drf_spectacular.utils import (
     OpenApiTypes,
 )
 
-@extend_schema_view(**schema_with_prefetch())
 class GeneralSettingsViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):

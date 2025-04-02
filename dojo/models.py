@@ -4996,13 +4996,13 @@ class ExclusivePermission(models.Model):
 
 class GeneralSettings(models.Model):
 
-    DATA_TYPE_CHOICES = [
+    DATA_TYPE_CHOICES = (
         ("INT", "INT"),
         ("STRING", "STRING"),
         ("DICT", "DICT"),
         ("LIST", "LIST"),
         ("BOOLEAN", "BOOLEAN"),
-    ]
+    )
 
     name_key = models.CharField(
         null=True,
