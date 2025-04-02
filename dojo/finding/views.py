@@ -104,6 +104,7 @@ from dojo.test.queries import get_authorized_tests
 from dojo.utils import (
     FileIterWrapper,
     Product_Tab,
+    mark_external_finding_as_false_positive,
     add_breadcrumb,
     add_error_message_to_response,
     add_external_issue,
@@ -1117,6 +1118,8 @@ class EditFinding(View):
                 new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
             else:
                 new_finding.save(push_to_jira=push_to_jira)
+            if old_finding.false_p == False and new_finding.false_p == True:
+                mark_external_finding_as_false_positive(old_finding)
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding.finding_group:

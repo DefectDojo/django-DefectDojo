@@ -10,12 +10,14 @@ services:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
+      DD_TIME_ZONE: 'America/Sao_Paulo'
   celeryworker:
     volumes:
       - '.:/app:z'
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during development
       DD_DEBUG: 'True'
+      DD_SEMGREP_TOKEN: "${DD_SEMGREP_TOKEN}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     volumes:

@@ -46,6 +46,9 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.semgrep import (
+    mark_as_false_positive_semgrep
+)
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -1446,6 +1449,14 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
     if external_issue_provider == "github":
         reopen_external_issue_github(find, note, prod, eng)
 
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id
+def mark_external_finding_as_false_positive(old_finding, **kwargs):
+    if old_finding.test.engagement.name == "sca" or old_finding.test.engagement.name == "sast":
+        mark_as_false_positive_semgrep(old_finding)
 
 def process_tag_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r"(?:\A|\s)@(\w+)\b")

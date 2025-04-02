@@ -320,9 +320,13 @@ env = environ.FileAwareEnv(
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+<<<<<<< HEAD
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+=======
+    DD_SEMGREP_TOKEN=(str, "")
+>>>>>>> d0b359f68 (feat: Closes semgrep finding when marked as false positive in defectdojo)
 )
 
 
@@ -364,7 +368,7 @@ TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
 SITE_URL = env("DD_SITE_URL")
 ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"]))
-
+SEMGREP_TOKEN = env("DD_SEMGREP_TOKEN")
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
 

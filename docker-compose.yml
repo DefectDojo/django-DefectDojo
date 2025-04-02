@@ -49,6 +49,7 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+      DD_TIME_ZONE: 'America/Sao_Paulo'
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -66,6 +67,7 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
+      DD_SEMGREP_TOKEN: "${DD_SEMGREP_TOKEN}"
     volumes:
         - type: bind
           source: ./docker/extra_settings
