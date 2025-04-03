@@ -22,7 +22,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 import dojo.jira_link.helper as jira_helper
-from dojo.transfer_findings.serializers import TransferFindingSerializer 
+from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -1724,7 +1724,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     accepted_risks = RiskAcceptanceSerializer(
         many=True, read_only=True, source="risk_acceptance_set",
     )
-    transfer_finding = TransferFindingSerializer(
+    transfer_finding = TransferFindingBasicSerializer(
         read_only=True,
     )
     push_to_jira = serializers.BooleanField(default=False)

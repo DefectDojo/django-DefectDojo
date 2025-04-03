@@ -52,6 +52,7 @@ from dojo.transfer_findings.serializers import (
     TransferFindingFindingSerializer,
     TransferFindingFindingsSerializer,
     TransferFindingCreateSerializer,
+    TransferFindingSerializer,
     TransferFindingFindingCreateSerializer,)
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
@@ -3395,7 +3396,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              DojoModelViewSet):
     queryset = TransferFinding.objects.all().order_by('id')
     permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.TransferFindingSerializer
+    serializer_class = TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
                         "destination_engagement",
