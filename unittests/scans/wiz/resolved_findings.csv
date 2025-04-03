@@ -1,5 +1,5 @@
 Created At,Title,Severity,Status,Description,Resource Type,Resource external ID,Subscription ID,Project IDs,Project Names,Resolved Time,Resolution,Control ID,Resource Name,Resource Region,Resource Status,Resource Platform,Resource OS,Resource original JSON,Issue ID,Resource vertex ID,Ticket URLs,Note,Due At,Remediation Recommendation,Subscription Name,Wiz URL,Cloud Provider URL,Resource Tags,Kubernetes Cluster,Kubernetes Namespace,Container Service
-2023-01-25T00:19:27Z,AKS role/cluster role assigned permissions that contain wildcards ,INFORMATIONAL,RESOLVED,"#### Description
+2023-01-25T00:19:27Z,AKS role/cluster role assigned permissions that contain wildcards ISO_DATE,INFORMATIONAL,RESOLVED,"#### Description
 This role is assigned an over-permissive policy that contains wildcards (""*"").
 
 #### Potential impact
@@ -9,7 +9,7 @@ This role is essentially assigned administrative permissions, probably unnecessa
 * Minimize the attack surface of principals with sensitive permissions by remediating all Issues associated to them.
 * Avoid using access keys. They function as long-term credentials to the principal, and are more easily compromised.
 * Enable MFA for users with sensitive permissions if possible.",Wiz - Demo-Scenarios,https://demo.wiz.io/issues#~(issue~'0029ee49-c676-432f-8690-12f2862ec708),,{},,,
-2024-01-24T11:02:11Z,AKS cluster contains a pod running containers with added capabilities,INFORMATIONAL,RESOLVED,"#### Description
+2024-01-24T11:02:11Z,AKS cluster contains a pod running containers with added capabilities SPECIAL_DATE,INFORMATIONAL,RESOLVED,"#### Description
 This cluster contains a pod running containers with added capabilities.
 
 #### Potential impact
