@@ -68,13 +68,15 @@ class WizParserByTitle:
                         # other timestamps in the wiz scans are ISO8601
                         # but the Resolved Time is in a different format based on data we've seen
                         # example value: 2025-04-03 20:20:00.43042 +0000 UTC
-                        resolved_time_string = row.get("Resolved Time")
-                        resolved_time_string = resolved_time_string.replace(" UTC", "")
-                        mitigated_timestamp = datetime.strptime(
-                            resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z",
-                        )
-
-                status_dict["mitigated"] = mitigated_timestamp
+                        try:
+                            resolved_time_string = row.get("Resolved Time")
+                            resolved_time_string = resolved_time_string.replace(" UTC", "")
+                            mitigated_timestamp = datetime.strptime(
+                                resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z",
+                            )
+                        except ValueError:
+                            logger.warning(f"Unable to parse Resolved Time: {row.get('Resolved Time')}", exc_info=True)
+                    status_dict["mitigated"] = mitigated_timestamp
 
             # Iterate over the description fields to create the description
             for field in description_fields:
