@@ -28,6 +28,12 @@ class FortifyXMLParser:
                 Severity = Issue.find("Severity").text
                 Name = Issue.find("Name").text
                 RawResponse = Issue.find("RawResponse").text
+                description = ""
+                description += "CheckTypeID: " + CheckTypeID + "\n"
+                description += "EngineType: " + EngineType + "\n"
+                description += "VulnerableSession: " + VulnerableSession + "\n"
+                description += "VulnerabilityID: " + VulnerabilityID + "\n"
+                description += "Scheme: " + Scheme + "\n"
                 items.append(
                     Finding(
                         title=Name,
@@ -36,8 +42,7 @@ class FortifyXMLParser:
                         # line=int(issue["LineStart"]),
                         static_finding=True,
                         test=test,
-                        # description=self.format_description(issue, cat_meta),
-                        # mitigation=self.format_mitigation(issue, cat_meta),
+                        description=description,
                         # unique_id_from_tool=issue_key,
                     ),
                 )
