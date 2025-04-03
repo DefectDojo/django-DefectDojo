@@ -18,8 +18,12 @@ Attributes supported for CSV:
 - Verified: Indicator if the finding has been verified. Must be empty, TRUE, or FALSE
 - FalsePositive: Indicator if the finding is a false positive. Must be TRUE, or FALSE.
 - Duplicate:Indicator if the finding is a duplicate. Must be TRUE, or FALSE
+- IsMitigated: Indicator if the finding is mitigated.  Must be TRUE, or FALSE
+- MitigatedDate: Date the finding was mitigated in mm/dd/yyyy format or ISO format
 
 The CSV expects a header row with the names of the attributes.
+
+Date fields are parsed using [dateutil.parse](https://dateutil.readthedocs.io/en/stable/parser.html) supporting a variety of formats such a YYYY-MM-DD or ISO-8601.
 
 Example of JSON format:
 
@@ -70,6 +74,34 @@ Example of JSON format:
             "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
             "file_path": "src/threeeeeeeeee.cpp",
             "line": 1353
+        },
+        {
+            "title": "test title mitigated",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36236",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/threeeeeeeeee.cpp",
+            "line": 1353,
+            "is_mitigated": true,
+            "mitigated": "2021-01-16"
+        },
+        {
+            "title": "test title mitigated ISO",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2024-01-04T11:02:11Z",
+            "cve": "CVE-2020-36236",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/threeeeeeeeee.cpp",
+            "line": 1353,
+            "is_mitigated": true,
+            "mitigated": "2024-01-24T11:02:11Z"
         }
     ]
 }
