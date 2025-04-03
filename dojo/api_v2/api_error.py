@@ -237,7 +237,6 @@ class ApiError(APIException):
             message="Unavailable For Legal Reasons"
         )
     
-    # Server Error - 5xx
     @classmethod
     def internal_server_error(cls, detail):
         return cls(
@@ -333,3 +332,12 @@ class ApiError(APIException):
             code=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED,
             message="Network Authentication Required"
         )
+
+    @classmethod
+    def unique_constraint_error(cls, detail="", field_name=""):
+        return cls(
+            detail=detail,
+            code=status.HTTP_400_BAD_REQUEST,
+            message="Unique constraint violation"
+        )
+

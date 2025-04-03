@@ -373,6 +373,7 @@ def get_roles_with_permissions():
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
             Permissions.Finding_Group_View,
+            Permissions.Finding_Bulk_Close,
             Permissions.Endpoint_View,
             Permissions.Component_View,
             Permissions.Component_Add,
@@ -389,6 +390,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Add,
             Permissions.Finding_Add_Recommendation,
+            Permissions.Risk_Acceptance_Bulk,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
