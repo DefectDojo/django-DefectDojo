@@ -3,12 +3,12 @@ import io
 import json
 import logging
 import sys
+from datetime import datetime
 
 from dateutil import parser as date_parser
 
 from dojo.models import SEVERITIES, Finding, Test
 from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -220,5 +220,3 @@ class WizParser(
             return WizParserByDetailedName().parse_findings(test, reader)
         msg = "This CSV format of Wiz is not supported"
         raise ValueError(msg)
-
-
