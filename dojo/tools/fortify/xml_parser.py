@@ -30,8 +30,8 @@ class FortifyXMLParser:
                 RawResponse = Issue.find("RawResponse").text
                 items.append(
                     Finding(
-                        # title=title,
-                        # severity=issue["Friority"],
+                        title=Name,
+                        severity=self.severity_translator(severity=Severity),
                         # file_path=issue["FilePath"],
                         # line=int(issue["LineStart"]),
                         static_finding=True,
@@ -43,6 +43,18 @@ class FortifyXMLParser:
                 )
         return items
 
+    def severity_translator(self, severity):
+        if severity == 0:
+            return "Info"
+        elif severity == 1:
+            return "Low"
+        elif severity == 2:
+            return "Medium"
+        elif severity == 3:
+            return "High"
+        elif severity == 4:
+            return "Critical"
+    
     def xml_structure_before_24_2(self, root, test):
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
