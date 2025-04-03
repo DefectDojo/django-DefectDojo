@@ -34,6 +34,11 @@ class TransferFindingFindingCreateSerializer(serializers.ModelSerializer):
         model = TransferFindingFinding
         fields = '__all__'
 
+class TransferFindingBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferFinding
+        fields = '__all__'
+
 class TransferFindingFindingSerializer(serializers.ModelSerializer):
     findings = FindingTfSerlilizer(read_only=True)
 
