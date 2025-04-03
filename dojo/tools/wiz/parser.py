@@ -1,3 +1,4 @@
+import contextlib
 import csv
 import io
 import json
@@ -9,7 +10,6 @@ from dateutil import parser as date_parser
 
 from dojo.models import SEVERITIES, Finding, Test
 from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
-import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ class WizParserByTitle:
                             )
 
                         if not mitigated_timestamp:
-                            logger.warning(f"Unable to parse Resolved Time: {resolved_time_string}", exc_info=True)
+                            logger.warning(f"Unable to parse Resolved Time: {resolved_time_string}")
 
                     status_dict["mitigated"] = mitigated_timestamp
 
