@@ -34,18 +34,17 @@ class FortifyXMLParser:
                 description += "VulnerableSession: " + VulnerableSession + "\n"
                 description += "VulnerabilityID: " + VulnerabilityID + "\n"
                 description += "Scheme: " + Scheme + "\n"
-                items.append(
-                    Finding(
+                finding = Finding(
                         title=Name,
                         severity=self.severity_translator(severity=Severity),
-                        # file_path=issue["FilePath"],
-                        # line=int(issue["LineStart"]),
                         static_finding=True,
                         test=test,
                         description=description,
-                        # unique_id_from_tool=issue_key,
-                    ),
-                )
+                    )
+                if RawResponse is not None:
+                    finding.unsaved_req_resp = []
+                    finding.unsaved_req_resp.append({"req": str(""), "resp": str(RawResponse)})
+                items.append(finding)
         return items
 
     def severity_translator(self, severity):
