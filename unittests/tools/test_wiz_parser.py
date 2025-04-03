@@ -1,3 +1,4 @@
+import datetime
 from dojo.models import Test
 from dojo.tools.wiz.parser import WizParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -119,3 +120,21 @@ class TestWizParser(DojoTestCase):
             self.assertIn("CVE-2024-36891", finding.unsaved_vulnerability_ids)
             self.assertNotIn("**Location Path**:", finding.description)
             self.assertNotIn("**Location Path**:", finding.mitigation)
+
+    def test_resolved_findings(self):
+        with open(get_unit_tests_scans_path("wiz") / "resolved_findings.csv", encoding="utf-8") as testfile:
+            parser = WizParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            finding = findings[0]
+            self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(datetime.date(1999, 1, 25), finding.mitigated.date())
+
+            finding = findings[1]
+            self.assertEqual("AKS cluster contains a pod running containers with added capabilities", finding.title)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(datetime.date(2025, 4, 3), finding.mitigated.date())

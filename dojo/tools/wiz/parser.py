@@ -8,6 +8,7 @@ from dateutil import parser as date_parser
 
 from dojo.models import SEVERITIES, Finding, Test
 from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,24 @@ class WizParserByTitle:
             mitigation = row.get("Remediation Recommendation")
             description = ""
             status_dict = WizcliParsers.convert_status(row.get("Status", None))
+            if status_dict.get("is_mitigated", False):
+                # If the finding is mitigated, set the date to the mitigation date
+                mitigated_timestamp = None
+                if row.get("Resolved Time", None):
+                    try:
+                        mitigated_timestamp = date_parser.parse(row.get("Resolved Time"))
+                    except ValueError:
+                        # other timestamps in the wiz scans are ISO8601
+                        # but the Resolved Time is in a different format based on data we've seen
+                        # example value: 2025-04-03 20:20:00.43042 +0000 UTC
+                        resolved_time_string = row.get("Resolved Time")
+                        resolved_time_string = resolved_time_string.replace(" UTC", "")
+                        mitigated_timestamp = datetime.strptime(
+                            resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z",
+                        )
+
+                status_dict["mitigated"] = mitigated_timestamp
+
             # Iterate over the description fields to create the description
             for field in description_fields:
                 if (field_value := row.get(field)) is not None and len(field_value) > 0:
@@ -201,3 +220,5 @@ class WizParser(
             return WizParserByDetailedName().parse_findings(test, reader)
         msg = "This CSV format of Wiz is not supported"
         raise ValueError(msg)
+
+
