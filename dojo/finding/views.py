@@ -1255,6 +1255,8 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.false_p = form.cleaned_data.get("false_p", False)
+                if finding.false_p == True:
+                    mark_external_finding_as_false_positive(finding)
                 finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
                 finding.duplicate = form.cleaned_data.get("duplicate", False)
                 endpoint_status = finding.status_finding.all()
