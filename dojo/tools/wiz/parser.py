@@ -9,6 +9,7 @@ from dateutil import parser as date_parser
 
 from dojo.models import SEVERITIES, Finding, Test
 from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
+import contextlib
 
 logger = logging.getLogger(__name__)
 
@@ -61,21 +62,31 @@ class WizParserByTitle:
             if status_dict.get("is_mitigated", False):
                 # If the finding is mitigated, set the date to the mitigation date
                 mitigated_timestamp = None
+
                 if row.get("Resolved Time", None):
-                    try:
+                    with contextlib.suppress(ValueError):
                         mitigated_timestamp = date_parser.parse(row.get("Resolved Time"))
-                    except ValueError:
+
+                    if not mitigated_timestamp:
                         # other timestamps in the wiz scans are ISO8601
                         # but the Resolved Time is in a different format based on data we've seen
                         # example value: 2025-04-03 20:20:00.43042 +0000 UTC
-                        try:
-                            resolved_time_string = row.get("Resolved Time")
-                            resolved_time_string = resolved_time_string.replace(" UTC", "")
+
+                        resolved_time_string = row.get("Resolved Time")
+                        resolved_time_string = resolved_time_string.replace(" UTC", "")
+                        # need to use suppress as try-except ValueError doesn't work here for some reason
+
+                        #   File "/usr/local/lib/python3.11/_strptime.py", line 352, in _strptime
+                        #     raise ValueError("unconverted data remains: %s" %
+                        # ValueError: unconverted data remains:  CET
+                        with contextlib.suppress(ValueError):
                             mitigated_timestamp = datetime.strptime(
                                 resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z",
                             )
-                        except ValueError:
-                            logger.warning(f"Unable to parse Resolved Time: {row.get('Resolved Time')}", exc_info=True)
+
+                        if not mitigated_timestamp:
+                            logger.warning(f"Unable to parse Resolved Time: {resolved_time_string}", exc_info=True)
+
                     status_dict["mitigated"] = mitigated_timestamp
 
             # Iterate over the description fields to create the description

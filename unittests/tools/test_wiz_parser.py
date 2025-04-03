@@ -129,7 +129,7 @@ class TestWizParser(DojoTestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertEqual(2, len(findings))
+            self.assertEqual(3, len(findings))
             finding = findings[0]
             self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ISO_DATE", finding.title)
             self.assertEqual(True, finding.is_mitigated)
@@ -139,3 +139,8 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("AKS cluster contains a pod running containers with added capabilities SPECIAL_DATE", finding.title)
             self.assertEqual(True, finding.is_mitigated)
             self.assertEqual(datetime.date(2025, 4, 3), finding.mitigated.date())
+
+            finding = findings[2]
+            self.assertEqual("AKS cluster contains a pod running containers with added capabilities UNKNOWN_DATE_FORMAT", finding.title)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(None, finding.mitigated)
