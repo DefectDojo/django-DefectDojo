@@ -95,4 +95,5 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual(15, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)
+                self.assertEqual("Cookie Security: Cookie not Sent Over SSL", finding.title)
+                self.assertEqual("Medium", finding.severity)
