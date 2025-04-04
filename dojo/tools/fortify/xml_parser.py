@@ -1,6 +1,6 @@
 from defusedxml import ElementTree
 
-from dojo.models import Finding
+from dojo.models import Endpoint, Finding
 
 
 class FortifyXMLParser:
@@ -29,36 +29,40 @@ class FortifyXMLParser:
                 Name = Issue.find("Name").text
                 RawResponse = Issue.find("RawResponse").text
                 description = ""
-                description += "CheckTypeID: " + CheckTypeID + "\n"
-                description += "EngineType: " + EngineType + "\n"
-                description += "VulnerableSession: " + VulnerableSession + "\n"
-                description += "VulnerabilityID: " + VulnerabilityID + "\n"
-                description += "Scheme: " + Scheme + "\n"
+                description += "**CheckTypeID:** " + CheckTypeID + "\n"
+                description += "**URL:** " + URL + "\n"
+                description += "**EngineType:** " + EngineType + "\n"
+                description += "**Scheme:** " + Scheme + "\n"
+                description += "**VulnerabilityID:** " + VulnerabilityID + "\n"
+                description += "**VulnerableSession:** " + VulnerableSession + "\n"
                 finding = Finding(
                         title=Name,
-                        severity=self.severity_translator(severity=Severity),
+                        severity=self.severity_translator(severity=int(Severity)),
                         static_finding=True,
                         test=test,
                         description=description,
                     )
                 if RawResponse is not None:
                     finding.unsaved_req_resp = []
-                    finding.unsaved_req_resp.append({"req": str(""), "resp": str(RawResponse)})
+                    finding.unsaved_req_resp.append({"req": "", "resp": str(RawResponse)})
+                if Host is not None:
+                    finding.unsaved_endpoints = [Endpoint(host=Host, port=Port)]
                 items.append(finding)
         return items
 
     def severity_translator(self, severity):
         if severity == 0:
             return "Info"
-        elif severity == 1:
+        if severity == 1:
             return "Low"
-        elif severity == 2:
+        if severity == 2:
             return "Medium"
-        elif severity == 3:
+        if severity == 3:
             return "High"
-        elif severity == 4:
+        if severity == 4:
             return "Critical"
-    
+        return "Info"
+
     def xml_structure_before_24_2(self, root, test):
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
