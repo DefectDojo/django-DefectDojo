@@ -233,7 +233,7 @@ class WhiteHatSentinelParser:
             active = whitehat_vuln.get("status") in ("open")
             is_mitigated = not active
 
-            dupe_key = hashlib.md5(
+            dupe_key = hashlib.md5(  # noqa: S324
                 whitehat_vuln["id"].encode("utf-8"),
             ).hexdigest()
 

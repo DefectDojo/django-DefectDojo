@@ -78,7 +78,7 @@ class TwistlockCSVParser:
         for row in reader:
             finding = self.parse_issue(row, test)
             if finding is not None:
-                key = hashlib.md5(
+                key = hashlib.md5(  # noqa: S324
                     (
                         finding.severity
                         + "|"

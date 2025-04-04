@@ -185,7 +185,7 @@ class GitleaksParser:
 
         severity = "High"
 
-        dupe_key = hashlib.md5(
+        dupe_key = hashlib.md5(  # noqa: S324
             (title + secret + str(line)).encode("utf-8"),
         ).hexdigest()
 

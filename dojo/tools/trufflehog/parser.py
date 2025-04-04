@@ -65,7 +65,7 @@ class TruffleHogParser:
             strings_found = "".join(
                 string + "\n" for string in json_data.get("stringsFound")
             )
-            dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()  # noqa: S324
             description += (
                 "\n**Strings Found:**\n```" + strings_found + "```\n"
             )
@@ -166,7 +166,7 @@ class TruffleHogParser:
                 elif detector_name == "Generic Secret":
                     severity = "Medium"
 
-            dupe_key = hashlib.md5(
+            dupe_key = hashlib.md5(  # noqa: S324
                 (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"),
             ).hexdigest()
 

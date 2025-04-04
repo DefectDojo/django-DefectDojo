@@ -44,7 +44,7 @@ class RetireJsParser:
                         item.file_path = node["file"]
 
                         encrypted_file = node["file"]
-                        unique_key = hashlib.md5(
+                        unique_key = hashlib.md5(  # noqa: S324
                             (
                                 item.title + item.references + encrypted_file
                             ).encode(),

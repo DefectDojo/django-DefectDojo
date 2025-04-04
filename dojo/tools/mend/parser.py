@@ -253,7 +253,7 @@ class MendParser:
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
-            return hashlib.md5(
+            return hashlib.md5(  # noqa: S324
                 f.description.encode("utf-8")
                 + f.title.encode("utf-8"),
             ).hexdigest()

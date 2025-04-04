@@ -55,7 +55,7 @@ class OrtParser:
 
         for model in rule_violations_models:
             item = get_item(model, test)
-            unique_key = hashlib.md5(
+            unique_key = hashlib.md5(  # noqa: S324
                 (item.title + item.references).encode(),
             ).hexdigest()
             items[unique_key] = item

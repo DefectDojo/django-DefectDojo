@@ -134,7 +134,7 @@ class SSLyzeXMLParser:
                             + ",\n\n".join(weak_cipher[element.tag])
                         )
                 if title and description is not None:
-                    dupe_key = hashlib.md5(
+                    dupe_key = hashlib.md5(  # noqa: S324
                         str(description + title).encode("utf-8"),
                     ).hexdigest()
                     if dupe_key in dupes:
