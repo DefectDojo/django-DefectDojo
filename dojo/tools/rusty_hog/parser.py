@@ -84,7 +84,7 @@ class RustyhogParser:
             if scanner == "Choctaw Hog":
                 """Choctaw Hog"""
                 if vulnerability.get("commitHash") is None:
-                    raise ValueError("You chose the wrong scan type: " + scanner)
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A commitHash is expected.")
                 found_secret_string = str(vulnerability.get("stringsFound") or "")
                 description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("commit") is not None:
@@ -122,7 +122,7 @@ class RustyhogParser:
             elif scanner == "Duroc Hog":
                 """Duroc Hog"""
                 if vulnerability.get("linenum") is None:
-                    raise ValueError("You chose the wrong scan type: " + scanner)
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A linenum is expected.")
                 found_secret_string = str(vulnerability.get("stringsFound") or "")
                 description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("path") is not None:
@@ -140,7 +140,7 @@ class RustyhogParser:
             elif scanner == "Gottingen Hog":
                 """Gottingen Hog"""
                 if vulnerability.get("issue_id") is None:
-                    raise ValueError("You chose the wrong scan type: " + scanner)
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". An issue_id is expected.")
                 found_secret_string = str(vulnerability.get("stringsFound") or "")
                 description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("issue_id"):
@@ -157,7 +157,7 @@ class RustyhogParser:
                     )
             elif scanner == "Essex Hog":
                 if vulnerability.get("page_id") is None:
-                    raise ValueError("You chose the wrong scan type: " + scanner)
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A page_id is expected.")
                 found_secret_string = str(vulnerability.get("stringsFound") or "")
                 description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("page_id"):
