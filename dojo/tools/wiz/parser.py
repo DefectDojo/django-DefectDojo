@@ -73,15 +73,14 @@ class WizParserByTitle:
                         # example value: 2025-04-03 20:20:00.43042 +0000 UTC
 
                         resolved_time_string = row.get("Resolved Time")
-                        resolved_time_string = resolved_time_string.replace(" UTC", "")
                         # need to use suppress as try-except ValueError doesn't work here for some reason
 
                         #   File "/usr/local/lib/python3.11/_strptime.py", line 352, in _strptime
                         #     raise ValueError("unconverted data remains: %s" %
-                        # ValueError: unconverted data remains:  CET
+                        # ValueError: unconverted data remains: CET
                         with contextlib.suppress(ValueError):
                             mitigated_timestamp = datetime.strptime(
-                                resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z",
+                                resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z %Z",
                             )
 
                         if not mitigated_timestamp:
