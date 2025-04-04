@@ -1347,6 +1347,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
+    "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1417,6 +1418,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Threagile risks report": True,
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
+    "Cyberwatch scan (Galeax)": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1598,6 +1600,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
