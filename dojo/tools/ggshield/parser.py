@@ -101,7 +101,7 @@ class GgshieldParser:
             date=findings["commit_date"],
         )
 
-        key = hashlib.md5(
+        key = hashlib.md5(  # noqa: S324
             (
                 title
                 + findings["match"]

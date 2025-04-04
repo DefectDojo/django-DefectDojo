@@ -45,7 +45,7 @@ class BlackduckParser:
             impact = i.impact
             references = self.format_reference(i)
 
-            dupe_key = hashlib.md5(
+            dupe_key = hashlib.md5(  # noqa: S324
                 f"{title} | {i.vuln_source}".encode(),
             ).hexdigest()
 

@@ -66,7 +66,7 @@ class HackerOneVulnerabilityDisclosureProgram:
             except Exception:
                 cwe = 0
 
-            dupe_key = hashlib.md5(
+            dupe_key = hashlib.md5(  # noqa: S324
                 str(references + title).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:

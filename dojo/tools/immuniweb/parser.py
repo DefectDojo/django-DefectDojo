@@ -54,7 +54,7 @@ class ImmuniwebParser:
             description = vulnerability.find("Description").text
             url = vulnerability.find("URL").text
 
-            dupe_key = hashlib.md5(
+            dupe_key = hashlib.md5(  # noqa: S324
                 str(description + title + severity).encode("utf-8"),
             ).hexdigest()
 

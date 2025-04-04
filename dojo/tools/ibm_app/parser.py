@@ -80,7 +80,7 @@ class IbmAppParser:
 
                     # Now time to start assigning issues to findings and
                     # endpoints
-                    dupe_key = hashlib.md5(
+                    dupe_key = hashlib.md5(  # noqa: S324
                         str(issue_description + name + severity).encode(
                             "utf-8",
                         ),

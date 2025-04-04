@@ -60,7 +60,7 @@ class TalismanParser:
                         severity=severity,
                     )
 
-                    key = hashlib.md5(
+                    key = hashlib.md5(  # noqa: S324
                         (
                             title
                             + message

@@ -138,7 +138,7 @@ class BugCrowdParser:
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5(
+                key = hashlib.md5(  # noqa: S324
                     (finding.title + "|" + finding.description).encode("utf-8"),
                 ).hexdigest()
 
