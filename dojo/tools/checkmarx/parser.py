@@ -171,7 +171,6 @@ class CheckmarxParser:
             # consolidate vuln_ids_from_tool values
             if self.mode != "detailed":
                 for key in list(dupes):
-                    vuln_ids_from_tool[key].sort
                     dupes[key].vuln_id_from_tool = ",".join(
                         vuln_ids_from_tool[key],
                     )[:500]
