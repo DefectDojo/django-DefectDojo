@@ -14,16 +14,16 @@ Users can connect to DefectDojo with a Username and Password, but if you prefer,
 * **[KeyCloak](./#keycloak)**
 * **[Okta](./#okta)**
 
-All of these methods can only be configured by a Superuser in DefectDojo.  DefectDojo Pro users can quickly set up SSO through their system settings, while Open Source users will need to configure these settings on the back-end via the local_settings.py file.  This article covers both methods of configuration.
+All of these methods can only be configured by a Superuser in DefectDojo.  DefectDojo Pro users can quickly set up SSO through their system settings, while Open Source users will need to configure these settings on the back-end by setting an environment variable within Docker.  This article covers both methods of configuration.
 
 ## Disable username / password use
 You may wish to disable traditional username/password login on your instance.
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users can uncheck the "Allow Login via Username and Password" box on the Login Settings form: **Enterprise Settings > Login Settings**.
 
-[image](images/pro_login_settings.png)
+![image](images/pro_login_settings.png)
 
-Open-Source users can set environment variables in local_settings.py to disable the Login form:
+Open-Source users can set environment variables in Docker to disable the Login form:
 
 ```yaml
 DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
@@ -68,7 +68,7 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](../../open_source/installation/configuration/)).
+Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](/en/open_source/installation/configuration/)).
 
 1. Fill out the variables as follows:
     {{< highlight python >}}
@@ -141,9 +141,9 @@ When a user is removed from a given group in Azure AD, they will also be removed
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](../../open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1.  Add the following information to the settings file:
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
@@ -213,9 +213,9 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](../../open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to your `local_settings.py` file:
+1.  Set the following environment variables
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),
@@ -259,9 +259,9 @@ Follow along below.
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](../../open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to your `local_settings.py` file:
+1.  Set the following environment variables
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, 'YOUR_SECRET_FROM_STEP_ABOVE'),
@@ -320,9 +320,9 @@ In order to use Google Authentication, a Google Authentication Server will need 
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](../../open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
-1. Add the following variables to your `local_settings.py` file:
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=True,
@@ -403,9 +403,12 @@ This guide assumes you already have a KeyCloak Realm set up.  If not, you will n
 
 ### Open-Source
 
-Edit the local_settings.py file (see [Configuration](../../open_source/installation/configuration)) with the following information:
 
-1.    {{< highlight python >}}
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+
+1.  Set the following environment variables
+
+{{< highlight python >}}
    DD_SESSION_COOKIE_SECURE=True,
    DD_CSRF_COOKIE_SECURE=True,
    DD_SECURE_SSL_REDIRECT=True,
@@ -489,7 +492,9 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-1. Edit the local_settings.py file (see [Configuration](../../open_source/installation/configuration)) with the following:
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+
+1.  Set the following environment variables
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
@@ -503,7 +508,7 @@ If during the login process you get the following error: *The
 in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in your local_settings.py file.
+`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your `local_settings.py` file.
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 
@@ -558,7 +563,7 @@ The left side of the ‘=’ sign represents the attribute you want to map from 
 ### Open-Source SAML
 
 1.  Navigate to your SAML IdP and find your metadata.
-2.  Edit the local_settings.py file (see [Configuration](../../open_source/installation/configuration)) with the following information:
+2.  Set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),
@@ -584,8 +589,7 @@ NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `D
 
 NOTE: *DD_SITE_URL* might also need to be set depending on the choices you make with the metadata.xml provider. (File versus URL).
 
-4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
-documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
+4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
 5.  Restart DefectDojo, and you should now see a **Login with SAML** button (default setting of DD_SAML2_LOGIN_BUTTON_TEXT) on the login page.
 
@@ -594,7 +598,7 @@ than CA needs to be specified by define environments variable
 REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
 
 #### Advanced Configuration
-The [https://github.com/IdentityPython/djangosaml2](djangosaml2) plugin has a lot of options. For details take a look at the [plugin documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
+The [djangosaml2](https://github.com/IdentityPython/djangosaml2) plugin has a lot of options. For details take a look at the [plugin documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
 All default options in DefectDojo can overwritten in the local_settings.py file. If you want to change the organization name, you can add the following lines:
 
@@ -616,7 +620,7 @@ if SAML2_ENABLED:
 ![image](images/sso_oauth_beta_ui.png)
 
 #### Migration from django-saml2-auth
-Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth). Which the switch to djangosaml2 some parameters has changed:
+Up to relase 1.15.0 the SAML integration was based on [django-saml2-auth](https://github.com/fangli/django-saml2-auth). Which the switch to djangosaml2 some parameters has changed:
 
 * DD_SAML2_ASSERTION_URL: not necessary any more - automatically generated
 * DD_SAML2_DEFAULT_NEXT_URL: not necessary any more - default forwarding from defectdojo is used
@@ -658,7 +662,7 @@ When both the parameters `Default group` and `Default group role` are set, the n
 
 Some Identity Providers are able to send list of groups to which should user belongs. This functionality is implemented only for Identity Providers mentioned below. For all others, we will be more than happy for contribution (hint: functions `assign_user_to_groups` and `cleanup_old_groups_for_user` from [`dojo/pipeline.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/pipeline.py) might be useful).
 
-- [Azure](#automatic-import-of-user-groups): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
+- [Azure](#open-source-azure-group-mapping): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
 - [RemoteUser](#remoteuser): Check `DD_AUTH_REMOTEUSER_GROUPS_HEADER` and `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`
 
 ### Other Providers

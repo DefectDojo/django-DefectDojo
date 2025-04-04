@@ -95,10 +95,10 @@ Navigate to `http://localhost:8080` to see your new instance!
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp.org/slack/invite)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp.org/slack/invite)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
 [Join the OWASP Slack community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
 our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
@@ -107,9 +107,8 @@ our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). F
 
 ## Contributing
 
-:warning: We have instituted a [feature freeze](https://github.com/DefectDojo/django-DefectDojo/discussions/8002) on v2
-of DefectDojo as we begin work on v3. Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
-information. Check out our latest update on v3 [here](https://github.com/DefectDojo/django-DefectDojo/discussions/11199).
+Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
+information.
 
 ## Pro Edition
 [Upgrade to DefectDojo Pro](https://www.defectdojo.com/) today to take your DevSecOps to 11. DefectDojo Pro is
