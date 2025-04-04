@@ -111,7 +111,7 @@ class TestSLACalculations(DojoTestCase):
             self.assertTrue("within SLA" in finding_sla(finding))
             self.assertTrue(">20<" in finding_sla(finding))
 
-    # Finding mitigated outside SLA should have correct sla_exration_date and days_remaining
+    # Finding mitigated outside SLA should have correct sla_expiration_date and days_remaining
     def test_mitigated_outside_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
