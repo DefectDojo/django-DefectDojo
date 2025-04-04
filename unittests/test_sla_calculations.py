@@ -45,7 +45,7 @@ class TestSLACalculations(DojoTestCase):
         self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
         self.assertEqual(self.sla_config.high, finding.sla_days_remaining())
 
-    # Finding within SLA should have correct sla_exration_date and days_remaining
+    # Finding within SLA should have correct sla_expiration_date and days_remaining
     def test_active_within_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
