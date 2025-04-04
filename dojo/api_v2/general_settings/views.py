@@ -57,7 +57,7 @@ class GeneralSettingsViewSet(prefetch.PrefetchListMixin,
                         variables.append(GeneralSettings(**variable))
                     with transaction.atomic():
                         GeneralSettings.objects.bulk_create(variables)
-                        http_response.created(
+                        return http_response.created(
                             message="GeneralSettings created",
                             data=serializer.validated_data)
                 else:

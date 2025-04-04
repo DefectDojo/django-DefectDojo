@@ -1,6 +1,6 @@
 import logging
+import re
 from time import strftime
-
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
@@ -688,39 +688,71 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = None
 
 
-def rule_product_name_enable_ia_recommendation(finding):
-    product = get_product(finding)
-    products_enabled = GeneralSettings.get_value(
-        "PRODUCT_NAMES_IA_RECOMMENDATION")
-    return product.name in products_enabled
-
-
-def rule_tags_enable_ia_recommendation(finding):
+def rule_tags_enable_ia_recommendation(*args, **kwargs):
+    finding = kwargs["finding"]
     tags = list(finding.tags.all().values_list("name", flat=True))
     tags_enabled = GeneralSettings.get_value(
-                "TAGS_IA_RECOMMENDATION")
+                "TAGS_IA_RECOMMENDATION", [])
     if any(tag_enabled in tags for tag_enabled in tags_enabled):
         return True
     return False
 
 
-def rule_repository_enable_ia_recommendation(finding):
-    return True
+def rule_repository_enable_ia_recommendation(*args, **kwargs):
+    finding = kwargs["finding"]
+    engagement = finding.test.engagement
+    repositories = GeneralSettings.get_value(
+            "REPOSITORY_IA_RECOMMENDATION", [])
+    if engagement.source_code_management_server is not None:
+        if engagement.source_code_management_server.name in repositories:
+            return True
+    return False
 
 
-def rule_cve_enable_ia_recommendation(finding):
-    return True
+def rule_cve_enable_ia_recommendation(*args, **kwargs):
+    finding = kwargs["finding"]
+    expression = GeneralSettings.get_value("CVE_IA_RECOMMENDATION", [])
+    expression = r"" + expression
+    if any(
+        re.match(expression, Vulnerability_Id)
+        for Vulnerability_Id in [finding.cve, finding.vuln_id_from_tool]
+        if Vulnerability_Id is not None
+    ):
+        return True
+    return False
+
+
+def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
+    finding = kwargs["finding"]
+    product = get_product(finding)
+    # Product Enabled
+    products_enabled = GeneralSettings.get_value(
+        "PRODUCT_NAMES_IA_RECOMMENDATION", [])
+    if product.name in products_enabled:
+        return True
+
+    # Product Type Enabled
+    product_types_enabled = GeneralSettings.get_value(
+        "PRODUCT_TYPES_IA_RECOMMENDATION", [])
+    product_exclude = GeneralSettings.get_value(
+        "PRODUCT_EXCLUDE_IA_RECOMMENDATION", [])
+
+    if (product.prod_type.name in product_types_enabled and
+       product.name not in product_exclude):
+        return True
+    return False
 
 
 def enable_flow_ia_recommendation(**kwargs):
     finding = kwargs["finding"]
     rules_list = [
-        rule_product_name_enable_ia_recommendation,
+        rule_product_type_or_product_enable_ia_recommendation,
         rule_tags_enable_ia_recommendation,
         rule_repository_enable_ia_recommendation,
         rule_cve_enable_ia_recommendation
     ]
+
     for rule in rules_list:
-        if rule(finding) is False:
+        if rule(finding=finding) is False:
             return False
     return True

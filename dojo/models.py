@@ -1645,7 +1645,7 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
-
+    
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
         import dojo.finding.helper as helper
@@ -1660,6 +1660,7 @@ class Engagement(models.Model):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+    
 
 
 class CWE(models.Model):
