@@ -1,9 +1,9 @@
-from datetime import datetime
 import hashlib
 import json
 import logging
-import dateutil
+from datetime import datetime
 
+import dateutil
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
@@ -124,7 +124,6 @@ class ImmuniwebParser:
             endpoints = []
             if item.get("link", None):
                 endpoints.append(Endpoint.from_uri(item["link"]) if "://" in item["link"] else Endpoint.from_uri("https://" + item["link"]))
-                print("endpoints: " + str(endpoints))
             if item.get("ip", None):
                 endpoints.append(Endpoint.from_uri(item["ip"]))
 
@@ -161,4 +160,3 @@ class ImmuniwebParser:
 
                 findings.append(finding)
         return findings
-
