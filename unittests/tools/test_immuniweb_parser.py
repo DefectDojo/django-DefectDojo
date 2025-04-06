@@ -45,7 +45,7 @@ class TestImmuniwebParser(DojoTestCase):
 
             self.assertEqual("Informational", findings[1].severity)
             self.assertEqual("Web: aai.some-company.com", findings[1].title)
-            self.assertIn("SSL/TLS encryption has not been detected when accessing your web application. SSL/TLS encryption is needed to protect the data transmitted between a user's browser and a web server. It encrypts the data, preventing unauthorized access, helps to verify the identity of websites to protect against impersonation, and ensures data integrity so that it isn't tampered with during transmission. Enable SSL/TLS encryption on your web application to ensure secure and private communication between your users and your application. This will protect sensitive data, build trust with your visitors, and help comply with security regulations.", findings[1].description)
+            self.assertIn("SSL/TLS encryption has not been detected when accessing your web application. SSL/TLS encryption is needed to protect the data transmitted between a user’s browser and a web server. It encrypts the data, preventing unauthorized access, helps to verify the identity of websites to protect against impersonation, and ensures data integrity so that it isn’t tampered with during transmission. Enable SSL/TLS encryption on your web application to ensure secure and private communication between your users and your application. This will protect sensitive data, build trust with your visitors, and help comply with security regulations.", findings[1].description)  # noqa: RUF001
             self.assertEqual(None, findings[1].unsaved_tags)
             self.assertEqual("aai.some-company.com", findings[1].unsaved_endpoints[0].host)
 
