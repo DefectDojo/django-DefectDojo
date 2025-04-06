@@ -1,3 +1,4 @@
+from datetime import datetime
 import hashlib
 import json
 import logging
@@ -100,46 +101,64 @@ class ImmuniwebParser:
 
         root = json.load(file)
 
-        for item in root:
-            if item == "domains":
-                findings.extend(
-                    self.get_findings_from_domains_json(root.get("domains", []), test),
-                )
+        for section in root:
+            data = root.get(section)
+            findings.extend(
+                self.get_findings_from_domains_json(section, data, test),
+            )
+
+        return findings
+
+    def get_findings_from_domains_json(self, section, data, test):
+        findings = []
+        for item in data:
+            if not item.get("remediations", []):
                 continue
 
-            logger.warning("Skipping unkown element in Immuniweb JSON file: %s", item)
-
-        return findings
-
-    def get_findings_from_domains_json(self, domains, test):
-        findings = []
-        for domain in domains:
-            title = "domain: " + domain["name"]
-            date = dateutil.parser.parse(domain["discovered"])
-
-            tag = domain["tag"] if domain["tag"].strip() else None
-            endpoint = Endpoint.from_uri(domain["link"]) if domain["link"] else None
-            description = mitigation = "\n".join(domain["remediations"])
-            description = "\n".join(domain["remediations"])
             # the json contains different types of extra/context information
-            # we just include everything in the description for now as it's unclear which fields are relevant
-            description += "\n\n"
-            description += " ## Details\n"
-            description += "```\n"
-            description += json.dumps(domain, indent=4)
-            description += "```\n"
+            title = item.get("type", "unknown") + ": " + item.get("name", "unknown")
+            title += " - " + item["leak_name"] if item.get("leak_name") else ""
+            date = dateutil.parser.parse(item["discovered"]) if item.get("discovered") else datetime.now()
 
-            finding = Finding(
-                title=title,
-                test=test,
-                date=date,
-                description=description,
-                mitigation=mitigation,
-                severity="Informational",
-                dynamic_finding=True,
-            )
-            finding.unsaved_tags = [tag] if tag else None
-            finding.unsaved_endpoints = [endpoint]
+            tag = item["tag"] if item.get("tag") else None
+            endpoints = []
+            if item.get("link", None):
+                endpoints.append(Endpoint.from_uri(item["link"]) if "://" in item["link"] else Endpoint.from_uri("https://" + item["link"]))
+                print("endpoints: " + str(endpoints))
+            if item.get("ip", None):
+                endpoints.append(Endpoint.from_uri(item["ip"]))
 
-            findings.append(finding)
+            # censor passwords in examples
+            # this is a bit of a hack, but it's unclear what fields the json can contain
+            if "examples" in item:
+                for example in item["examples"]:
+                    if "password" in example:
+                        example["password"] = "REDACTED"  # noqa: S105
+
+            remediations = item.get("remediations", [])
+
+            for remediation in remediations:
+                description = mitigation = remediation
+                # the json contains different types of extra/context information
+                # we just include everything in the description for now as it's unclear which fields are relevant
+                description += "\n\n"
+                description += " ## Details\n"
+                description += "```\n"
+                description += json.dumps(item, indent=4)
+                description += "```\n"
+
+                finding = Finding(
+                    title=title,
+                    test=test,
+                    date=date,
+                    description=description,
+                    mitigation=mitigation,
+                    severity="Informational",
+                    dynamic_finding=True,
+                )
+                finding.unsaved_tags = [tag] if tag else None
+                finding.unsaved_endpoints = endpoints
+
+                findings.append(finding)
         return findings
+
