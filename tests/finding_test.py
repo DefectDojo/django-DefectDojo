@@ -312,8 +312,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -336,8 +334,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
