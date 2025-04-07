@@ -782,7 +782,7 @@ def vulnerability_url(vulnerability_id):
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key == "SSA:":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
-            if key in {"AVD", "KHV", "C-", "CISCO-SA-"}:
+            if key in {"AVD", "KHV", "C-"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
