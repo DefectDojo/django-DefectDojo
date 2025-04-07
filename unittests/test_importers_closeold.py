@@ -37,19 +37,19 @@ class TestDojoCloseOld(DojoTestCase):
             "scan_type": scan_type,
         }
         # Import first test
-        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("acunetix") / "many_findings.xml").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(close_old_findings=False, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("acunetix") / "many_findings.xml").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
+        with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open("r+", encoding="utf-8") as single_finding_scan:
             importer = DefaultImporter(close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(single_finding_scan)
             self.assertEqual(1, len_new_findings)
@@ -95,19 +95,19 @@ class TestDojoCloseOld(DojoTestCase):
             "scan_type": scan_type,
         }
         # Import first test
-        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("acunetix") / "many_findings.xml").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement1, close_old_findings=False, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("acunetix") / "many_findings.xml").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement2, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
+        with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open("r+", encoding="utf-8") as single_finding_scan:
             importer = DefaultImporter(engagement=engagement3, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(single_finding_scan)
             self.assertEqual(1, len_new_findings)
@@ -153,20 +153,20 @@ class TestDojoCloseOld(DojoTestCase):
             "scan_type": scan_type,
         }
         # Import first test
-        with open(get_unit_tests_scans_path("semgrep") / "close_old_findings_report_line31.json", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("semgrep") / "close_old_findings_report_line31.json").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement1, close_old_findings=False, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(1, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import separate report with different line number. Before this change, the legacy dedupe algorithm would calculate a different
         # hash code and close of the findings. Now that we are matching on unique ID from tool, we should no close anything, and create one
-        with open(get_unit_tests_scans_path("semgrep") / "close_old_findings_report_second_run_line24.json", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("semgrep") / "close_old_findings_report_second_run_line24.json").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement2, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(1, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # This scan has a different unique ID from tool, so we should have one new finding, and one closed finding
-        with open(get_unit_tests_scans_path("semgrep") / "close_old_findings_report_third_run_different_unique_id.json", "r+", encoding="utf-8") as many_findings_scan:
+        with (get_unit_tests_scans_path("semgrep") / "close_old_findings_report_third_run_different_unique_id.json").open("r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement3, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(1, len_new_findings)

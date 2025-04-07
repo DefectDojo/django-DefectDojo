@@ -16,11 +16,11 @@
     "@thulite/images": "3.3.0",
     "@thulite/inline-svg": "1.2.0",
     "@thulite/seo": "2.4.1",
-    "@tabler/icons": "3.30.0",
+    "@tabler/icons": "3.31.0",
     "thulite": "2.5.0"
   },
   "devDependencies": {
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "vite": "6.2.5"
   },
   "engines": {

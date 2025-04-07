@@ -83,7 +83,7 @@ class NpmAudit7PlusParser:
         """Return the individual items found in report."""
         items = {}
 
-        for key, node in tree.items():
+        for node in tree.values():
             item = get_item(node, tree, test)
             unique_key = item.title + item.severity
             items[unique_key] = item

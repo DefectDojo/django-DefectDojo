@@ -6,6 +6,7 @@ import re
 import warnings
 from contextlib import suppress
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
@@ -101,8 +102,10 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     return stats
 
 
-def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=[]):
+def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
     # get copies of the current tag lists
+    if potentially_existing_tags is None:
+        potentially_existing_tags = []
     current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
     tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
     # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
@@ -123,7 +126,9 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
-def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
+def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
+    if exclude_fields is None:
+        exclude_fields = []
     new_model_instance = model_in_database.__class__()
     for field in model_in_database._meta.fields:
         if field.name not in {"id", *exclude_fields}:
@@ -1155,7 +1160,7 @@ class Product(models.Model):
     lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
     origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
     user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_("Estimate the number of user records within the application."))
-    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_("Estimate the application's revenue."))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal("0.00"))], help_text=_("Estimate the application's revenue."))
     external_audience = models.BooleanField(default=False, help_text=_("Specify if the application is used by people outside the organization."))
     internet_accessible = models.BooleanField(default=False, help_text=_("Specify if the application is accessible from the public internet."))
     regulations = models.ManyToManyField(Regulation, blank=True)
