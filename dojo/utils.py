@@ -1377,23 +1377,24 @@ def handle_uploaded_threat(f, eng):
     path = Path(f.name)
     extension = path.suffix
     # Check if threat folder exist.
-    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
+    threat_dir = Path(settings.MEDIA_ROOT) / "threat"
+    if not threat_dir.is_dir():
         # Create the folder
-        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
-    with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
-              "wb+") as destination:
+        threat_dir.mkdir()
+    eng_path = threat_dir / f"{eng.id}{extension}"
+    with eng_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
+    eng.tmodel_path = str(eng_path)
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     path = Path(f.name)
     extension = path.suffix
-    with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
-              "wb+") as destination:
+    sel_path = Path(settings.MEDIA_ROOT) / "selenium" / f"{cred.id}{extension}"
+    with sel_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
+    cred.selenium_script = str(sel_path)
     cred.save()
 
 
@@ -2203,7 +2204,7 @@ def add_error_message_to_response(message):
 
 def add_field_errors_to_response(form):
     if form and get_current_request():
-        for field, error in form.errors.items():
+        for error in form.errors.values():
             add_error_message_to_response(error)
 
 
@@ -2242,7 +2243,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
-    for p in range(1, total_pages):
+    for _p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
@@ -2624,10 +2625,8 @@ def get_open_findings_burndown(product):
                         info_count -= 1
 
         f_day = [critical_count, high_count, medium_count, low_count, info_count]
-        if min(f_day) < running_min:
-            running_min = min(f_day)
-        if max(f_day) > running_max:
-            running_max = max(f_day)
+        running_min = min(running_min, *f_day)
+        running_max = max(running_max, *f_day)
 
         past_90_days["Critical"].append([d_start * 1000, critical_count])
         past_90_days["High"].append([d_start * 1000, high_count])
@@ -2694,7 +2693,7 @@ def generate_file_response_from_file_path(
     # Generate the FileResponse
     full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
-        open(file_path, "rb"),
+        path.open("rb"),
         filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )
