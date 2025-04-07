@@ -27,7 +27,7 @@ def convert_underscore_to_space(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0221_system_settings_disclaimer_notif"),
+        ("dojo", "0225_alter_product_revenue"),
     ]
 
     operations = [
