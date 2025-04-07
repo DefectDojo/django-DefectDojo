@@ -28,6 +28,7 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("1.1.20-r4", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2019-14697", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVSS V2", finding.severity_justification)
 
     def test_aqua_parser_has_many_findings(self):
         with open(get_unit_tests_scans_path("aqua") / "many_vulns.json", encoding="utf-8") as testfile:
