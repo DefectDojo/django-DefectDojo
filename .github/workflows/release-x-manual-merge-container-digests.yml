@@ -1,0 +1,85 @@
+name: "release-X: Merge container digests"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+    workflow_dispatch:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
+
+    workflow_call:
+        inputs:
+          # the actual branch that can be chosen on the UI is made irrelevant by further steps
+          # because someone will forget one day to change it.
+          release_number:
+            type: string
+            description: 'Release version (x.y.z format)'
+            required: true
+
+jobs:
+  merge-digests:
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix:
+            docker-image: [django, nginx]
+            os: [alpine, debian]
+
+    steps:
+
+      # deduce docker org name from git repo to make the build also work in forks
+    - id: Set-docker-org
+      run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # only download digests for this image and this os
+    - name: Download digests
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ runner.temp }}/digests
+        pattern: digests-${{ matrix.docker-image}}-${{ matrix.os }}-*
+        merge-multiple: true
+
+    - name: Login to DockerHub
+      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+      # the alpine and debian images are tagged with the os name
+    - name: Create OS specific manifest list and push
+      working-directory: ${{ runner.temp }}/digests
+      run: |
+        set -x
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}" --progress=plain \
+        $(printf '${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}@sha256:%s ' *)
+
+      # just for logging
+    - name: Inspect OS specific image
+      run: |
+        docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+
+      # debian images are the default / official ones, so these get the os-less tag and the latest tag
+    - name: Create default manifest list and push
+      if: ${{ matrix.os  == 'debian' }}
+      working-directory: ${{ runner.temp }}/digests
+      run: |
+        set -x
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+        docker buildx imagetools create -t "${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest" ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+
+      # just for logging
+    - name: Inspect default images
+      if: ${{ matrix.os  == 'debian' }}
+      run: |
+          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}
+          docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:latest

@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # Only checkout the master branch to avoid changes to this script
           # This is to reduce the possibilities of a secret leak from modifying
@@ -19,9 +19,9 @@ jobs:
           ref: master 
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |

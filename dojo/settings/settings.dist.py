@@ -1,3 +1,4 @@
+# noqa: N999 - see https://github.com/DefectDojo/django-DefectDojo/pull/11647
 #########################################################################################################
 # It is not recommended to edit file 'settings.dist.py', for production deployments.                        #
 # Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
@@ -274,8 +275,10 @@ env = environ.FileAwareEnv(
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled, finding importing will occur asynchronously, default False
+    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
     DD_ASYNC_FINDING_IMPORT=(bool, False),
     # The number of findings to be processed per celeryworker
+    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
     # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
