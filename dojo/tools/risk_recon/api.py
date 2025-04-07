@@ -55,7 +55,7 @@ class RiskReconAPI:
                     self.toe_map[toe_id] = filters or self.data
         else:
             msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
-            raise Exception(msg)
+            raise Exception(msg)   # TODO: when implementing ruff BLE001, please fix also TODO in unittests/test_risk_recon.py
 
     def filter_finding(self, finding):
         filters = self.toe_map[finding["toe_id"]]

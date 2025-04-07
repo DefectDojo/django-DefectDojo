@@ -83,7 +83,8 @@ class GovulncheckParser:
                     for cve, elems in groupby(
                         list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0],
                     ):
-                        first_elem = list(islice(elems, 1))
+                        elem_values = list(elems)
+                        first_elem = list(islice(elem_values, 1))
                         d = {
                             "cve": cve,
                             "severity": SEVERITY,
@@ -110,7 +111,7 @@ class GovulncheckParser:
                         impact = set(
                             self.get_location(data, first_elem[0]["CallSink"]),
                         )
-                        for elem in elems:
+                        for elem in elem_values:
                             impact.update(
                                 self.get_location(data, elem["CallSink"]),
                             )

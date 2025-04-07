@@ -1,7 +1,7 @@
 import hashlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -19,7 +19,7 @@ class SslscanParser:
         return "Import XML output of sslscan report."
 
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:

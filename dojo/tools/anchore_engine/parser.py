@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from dojo.models import Finding
 
@@ -17,7 +18,7 @@ class AnchoreEngineParser:
         try:
             data = json.load(filename)
         except AttributeError:
-            with open(filename, encoding="utf-8") as file:
+            with Path(filename).open(encoding="utf-8") as file:
                 data = json.load(file)
         if data.get("metadata"):
             return self.get_findings_with_metadata(data, test)

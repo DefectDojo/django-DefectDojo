@@ -8,6 +8,8 @@ Although Docker Compose is one of the supported installation methods to deploy a
 
 [Configuration](https://docs.defectdojo.com/en/open_source/installation/configuration/) explains the different ways to adjust settings and environment variables.
 
+Docker images for `linux/amd64` are published to https://hub.docker.com/u/defectdojo. Expiremental builds for `linux/arm64` are available since 2.45.0.
+
 
 # Prerequisites
 
@@ -172,7 +174,7 @@ In the `dojo/settings/template-local_settings.py` you'll find instructions on ho
 This toolbar allows you to debug SQL queries, and shows some other interesting information.
 
 
-# Exploitation, versioning
+# Explicit Versioning
 ## Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 

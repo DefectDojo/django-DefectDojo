@@ -1,8 +1,10 @@
+import contextlib
 import csv
 import io
 import json
 import logging
 import sys
+from datetime import datetime
 
 from dateutil import parser as date_parser
 
@@ -57,6 +59,35 @@ class WizParserByTitle:
             mitigation = row.get("Remediation Recommendation")
             description = ""
             status_dict = WizcliParsers.convert_status(row.get("Status", None))
+            if status_dict.get("is_mitigated", False):
+                # If the finding is mitigated, set the date to the mitigation date
+                mitigated_timestamp = None
+
+                if row.get("Resolved Time", None):
+                    with contextlib.suppress(ValueError):
+                        mitigated_timestamp = date_parser.parse(row.get("Resolved Time"))
+
+                    if not mitigated_timestamp:
+                        # other timestamps in the wiz scans are ISO8601
+                        # but the Resolved Time is in a different format based on data we've seen
+                        # example value: 2025-04-03 20:20:00.43042 +0000 UTC
+
+                        resolved_time_string = row.get("Resolved Time")
+                        # need to use suppress as try-except ValueError doesn't work here for some reason
+
+                        #   File "/usr/local/lib/python3.11/_strptime.py", line 352, in _strptime
+                        #     raise ValueError("unconverted data remains: %s" %
+                        # ValueError: unconverted data remains: CET
+                        with contextlib.suppress(ValueError):
+                            mitigated_timestamp = datetime.strptime(
+                                resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z %Z",
+                            )
+
+                        if not mitigated_timestamp:
+                            logger.warning(f"Unable to parse Resolved Time: {resolved_time_string}")
+
+                    status_dict["mitigated"] = mitigated_timestamp
+
             # Iterate over the description fields to create the description
             for field in description_fields:
                 if (field_value := row.get(field)) is not None and len(field_value) > 0:
