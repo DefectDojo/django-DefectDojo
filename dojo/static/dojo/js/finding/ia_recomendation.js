@@ -74,4 +74,3 @@ function formaterHtmlFilesToFix(data, elementId){
         $('#id_button_ia_recommendation').prop('disabled', false);
     }
 }
-

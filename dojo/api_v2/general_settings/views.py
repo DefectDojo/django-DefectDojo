@@ -6,6 +6,7 @@ from dojo.models import GeneralSettings
 from dojo.api_v2.general_settings.serializers import GeneralSettingsSerializers
 from dojo.api_v2.views import DojoModelViewSet
 from dojo.api_v2.utils import http_response
+from dojo.authorization.roles_permissions import Permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from dojo.api_v2.api_error import ApiError
 from drf_spectacular.utils import (
@@ -27,7 +28,8 @@ class GeneralSettingsViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):
     queryset = GeneralSettings.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,
+                          permissions.UserHasPermissionGeneralSettings,)
     serializer_class = GeneralSettingsSerializers
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [

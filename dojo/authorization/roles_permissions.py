@@ -164,6 +164,11 @@ class Permissions(IntEnum):
     Swagger_Documentation = 2902
     Defect_Dojo_Documentation = 2903
 
+    General_Settings_View = 3001
+    General_Settings_Edit = 3002
+    General_Settings_Add = 3003
+    General_Settings_Delete = 3004
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -541,6 +546,10 @@ def get_roles_with_permissions():
             Permissions.Finding_Code_Review,
             Permissions.Finding_Bulk_Close,
             Permissions.Finding_Add_Recommendation,
+            Permissions.General_Settings_View,
+            Permissions.General_Settings_Edit,
+            Permissions.General_Settings_Add,
+            Permissions.General_Settings_Delete,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,

@@ -1100,3 +1100,18 @@ class IsAPIImporter(permissions.BasePermission):
                 if request.user.global_role.role.name in ["API_Importer", "Maintainer"]:
                     return True
         return False
+
+
+class UserHasPermissionGeneralSettings(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                return user_has_global_permission(
+                    request.user,
+                    Permissions.General_Settings_Add,
+)    
+        return False
+
