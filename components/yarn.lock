@@ -262,10 +262,10 @@ drmonty-datatables-responsive@^1.0.0:
   dependencies:
     jquery ">=1.7.0"
 
-easymde@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/easymde/-/easymde-2.19.0.tgz#73fb3ac2879334f4aaa6da68dec85cf1428e689f"
-  integrity sha512-4F1aNImqse+9xIjLh9ttfpOVenecjFPxUmKbl1tGp72Z+OyIqLZPE/SgNyy88c/xU0mOy0WC3+tfbZDQ5PDWhg==
+easymde@^2.20.0:
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/easymde/-/easymde-2.20.0.tgz#88b3161feab6e1900afa9c4dab3f1da352b0a26e"
+  integrity sha512-V1Z5f92TfR42Na852OWnIZMbM7zotWQYTddNaLYZFVKj7APBbyZ3FYJ27gBw2grMW3R6Qdv9J8n5Ij7XRSIgXQ==
   dependencies:
     "@types/codemirror" "^5.60.10"
     "@types/marked" "^4.0.7"

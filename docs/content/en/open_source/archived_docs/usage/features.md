@@ -3,6 +3,7 @@ title: "Features"
 description: "Various features help manage vulnerabilities."
 draft: false
 weight: 2
+exclude_search: false
 ---
 
 ## Tags
@@ -24,8 +25,6 @@ Tags can be formatted in any of the following ways:
 - string_with_underscores
 - colons:acceptable
 - "quoted string with spaces"
-- "quoted,comma,tag"
-- "quoted with spaces, and also commas!"
 
 ### Adding and Removing
 
@@ -124,8 +123,7 @@ but at different levels in the data model:
 
 ### Tag Inheritance
 
-When enabled, tags applied to a given product will automatically be applied to all objects under 
-products in the [data model](../models.md).
+When enabled, tags applied to a given product will automatically be applied to all objects under Products in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy).
 
 #### Configuration
 

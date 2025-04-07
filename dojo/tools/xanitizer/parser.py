@@ -2,7 +2,7 @@ __author__ = "jankuehl"
 
 import re
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -28,7 +28,7 @@ class XanitizerParser:
 
     def parse_xml(self, filename):
         try:
-            tree = ET.parse(filename)
+            tree = ElementTree.parse(filename)
         except SyntaxError as se:
             raise ValueError(se)
 

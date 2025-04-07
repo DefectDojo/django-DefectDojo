@@ -2,6 +2,7 @@
 title: "Event: ping"
 weight: 7
 chapter: true
+exclude_search: true
 ---
 
 An event `ping` is sent during Webhook setup to test whether the endpoint is up and responding with the expected status code.

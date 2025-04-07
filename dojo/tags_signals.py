@@ -46,8 +46,10 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
             instance.inherit_tags(tag_list)
 
 
-def propagate_inheritance(instance, tag_list=[]):
+def propagate_inheritance(instance, tag_list=None):
     # Get the expected product tags
+    if tag_list is None:
+        tag_list = []
     product_inherited_tags = [tag.name for tag in get_product(instance).tags.all()]
     existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
     # Check if product tags already matches inherited tags

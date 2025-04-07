@@ -11,6 +11,7 @@ def globalize_vars(request):
         "FORGOT_PASSWORD": settings.FORGOT_PASSWORD,
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
         "CLASSIC_AUTH_ENABLED": settings.CLASSIC_AUTH_ENABLED,
+        "OIDC_ENABLED": settings.OIDC_AUTH_ENABLED,
         "AUTH0_ENABLED": settings.AUTH0_OAUTH2_ENABLED,
         "GOOGLE_ENABLED": settings.GOOGLE_OAUTH_ENABLED,
         "OKTA_ENABLED": settings.OKTA_OAUTH_ENABLED,
@@ -56,3 +57,22 @@ def bind_announcement(request):
             ).get(user=request.user)
             return {"announcement": user_announcement.announcement}
     return {}
+
+
+def session_expiry_notification(request):
+    import time
+
+    try:
+        if request.user.is_authenticated:
+            last_activity = request.session.get("_last_activity", time.time())
+            expiry_time = last_activity + settings.SESSION_COOKIE_AGE  # When the session will expire
+            warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
+            notify_time = expiry_time - warning_time
+        else:
+            notify_time = None
+    except Exception:
+        return {}
+    else:
+        return {
+            "session_notify_time": notify_time,
+        }

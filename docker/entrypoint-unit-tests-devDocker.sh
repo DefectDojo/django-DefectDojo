@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Run available unittests with a setup for local dev:
 # - Make migrations and apply any needed changes
 # - Leave container up after running tests to allow debugging, rerunning tests, etc.

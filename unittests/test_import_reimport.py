@@ -2,6 +2,7 @@ import datetime
 
 # from unittest import skip
 import logging
+from pathlib import Path
 
 from django.test import override_settings
 from django.test.client import Client
@@ -366,7 +367,7 @@ class ImportReimportMixin:
         logger.debug("reimporting exact same original veracode mitigated xml report again")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
-                                                                     verified=True, forceActive=True, forceVerified=True)
+                                                                     verified=True, force_active=True, force_verified=True)
 
         test_id = import_veracode_many_findings["test"]
 
@@ -1794,7 +1795,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
 
         test = Test.objects.get(id=response.url.split("/")[-1])
-        # f = open('response.html', 'w+')
+        # f = Path('response.html').open('w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()
         self.assertEqual(302, response.status_code, response.content[:1000])
@@ -1808,21 +1809,21 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def import_scan_with_params_ui(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                    push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
-                                   forceActive=False, forceVerified=False):
+                                   force_active=False, force_verified=False):
 
         activePayload = "not_specified"
-        if forceActive:
+        if force_active:
             activePayload = "force_to_true"
         elif not active:
             activePayload = "force_to_false"
 
         verifiedPayload = "not_specified"
-        if forceVerified:
+        if force_verified:
             verifiedPayload = "force_to_true"
         elif not verified:
             verifiedPayload = "force_to_false"
 
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
@@ -1860,7 +1861,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if not verified:
             verifiedPayload = "force_to_false"
 
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
