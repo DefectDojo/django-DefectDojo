@@ -85,7 +85,7 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
                     f_path = Path(basedir) / "dojo" / "tools" / parser_dir.name / file.name
                     read_true = False
-                    with open(f_path, encoding="utf-8") as f:
+                    with f_path.open(encoding="utf-8") as f:
                         i = 0
                         for line in f:
                             if read_true is True:
