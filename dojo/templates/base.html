@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="">
-        <link href="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/themes/prism.css" rel="stylesheet" type="text/css" />
+        <link href="{% static "prismjs/themes/prism.css" %}", rel="stylesheet" type="text/css" />
         <title>
             {% if request.session.dojo_breadcrumbs and not product_tab.tab %}
                 {% with request.session.dojo_breadcrumbs|last as last %}

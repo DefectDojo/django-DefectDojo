@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendaciones de Seguridad</title>
-    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/themes/prism.css" rel="stylesheet" type="text/css" />
     {% load static %}
     {% block dojo_css %}
             <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
@@ -37,9 +36,6 @@
         </ul>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/prism.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.10/dist/clipboard.min.js"></script>
-    
     <script>
         new ClipboardJS('.copy-btn');
         Prism.highlightAll();
