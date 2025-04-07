@@ -1,14 +1,31 @@
 import datetime
 import logging
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from crum import impersonate
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
-from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id, Vulnerability_Id_Template
+from dojo.finding.helper import (
+    save_vulnerability_ids,
+    save_vulnerability_ids_template,
+    rule_tags_enable_ia_recommendation,
+    rule_repository_enable_ia_recommendation,
+    rule_cve_enable_ia_recommendation,
+    rule_product_type_or_product_enable_ia_recommendation,
+    enable_flow_ia_recommendation,
+
+    )
+
+from dojo.models import (
+    Finding,
+    Finding_Template,
+    Test,
+    Vulnerability_Id,
+    Vulnerability_Id_Template,
+    GeneralSettings)
+
 
 from .dojo_test_case import DojoTestCase
 
@@ -245,3 +262,90 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         delete_mock.assert_called_once()
         self.assertEqual(save_mock.call_count, 2)
         self.assertEqual("REF-1", finding_template.cve)
+
+
+    @patch("dojo.finding.helper.GeneralSettings.get_value")
+    def test_rule_tags_enable_ia_recommendation(self, mock_get_value):
+
+        # Return GeneralSettings Value
+        mock_get_value.return_value = ["tag1", "tag2"]
+
+        mock_tags = MagicMock()
+        mock_tags.all.return_value.values_list.return_value = ["tag1", "tag3"]
+
+        mock_finding = MagicMock()
+        mock_finding.tags = mock_tags
+
+        # Test case where a tag matches
+        result = rule_tags_enable_ia_recommendation(finding=mock_finding)
+        assert result is True
+
+        # Test case where no tags match
+        mock_tags.all.return_value.values_list.return_value = ["tag3"]
+        result = rule_tags_enable_ia_recommendation(finding=mock_finding)
+        assert result is False
+
+    @patch("dojo.finding.helper.GeneralSettings.get_value")
+    def test_rule_repository_enable_ia_recommendation(self, mock_get_value):
+        # Mock data
+        mock_finding = MagicMock()
+        mock_finding.test.engagement.source_code_management_server.name = "repo1"
+
+        # Return GeneralSettings Value
+        mock_get_value.return_value = ["repo1"]
+
+        # Test
+        result = rule_repository_enable_ia_recommendation(finding=mock_finding)
+        self.assertTrue(result)
+
+        # Negative case
+        mock_get_value.return_value = ["repo2"]
+        result = rule_repository_enable_ia_recommendation(finding=mock_finding)
+        self.assertFalse(result)
+
+    @patch("dojo.finding.helper.GeneralSettings.get_value")
+    def test_rule_cve_enable_ia_recommendation(self, mock_get_value):
+        # Mock data
+        mock_finding = MagicMock()
+        mock_finding.cve = "CVE-1234"
+        mock_finding.vuln_id_from_tool = None
+
+        # Return GeneralSettings Value
+        mock_get_value.return_value = "CVE-\\d+"
+
+        # Test
+        result = rule_cve_enable_ia_recommendation(finding=mock_finding)
+        self.assertTrue(result)
+
+        # Negative case
+        mock_finding.cve = "CVE-A234"
+        result = rule_cve_enable_ia_recommendation(finding=mock_finding)
+        self.assertFalse(result)
+
+    @patch("dojo.finding.helper.GeneralSettings.get_value")
+    @patch("dojo.finding.helper.get_product")
+    def test_rule_product_type_or_product_enable_ia_recommendation(
+            self,
+            mock_get_product,
+            mock_get_value):
+
+        mock_finding = MagicMock()
+        mock_product = MagicMock()
+
+        mock_product.name = "Product1"
+        mock_product.prod_type.name = "Product Type1"
+
+        mock_get_product.return_value = mock_product
+
+        # Return GeneralSettings Value
+        mock_get_value.return_value = ["Product Type1"]
+
+        # Test enabled product_type
+        result = rule_product_type_or_product_enable_ia_recommendation(finding=mock_finding)
+        self.assertTrue(result)
+
+        # Negative case: product type excluded
+        mock_product.prod_type.name = "Product Type2"
+        mock_get_value.return_value = ["Product Type1"]
+        result = rule_product_type_or_product_enable_ia_recommendation(finding=mock_finding)
+        self.assertFalse(result)

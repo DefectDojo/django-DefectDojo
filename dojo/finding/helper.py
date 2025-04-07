@@ -754,5 +754,8 @@ def enable_flow_ia_recommendation(**kwargs):
 
     for rule in rules_list:
         if rule(finding=finding) is False:
+            logger.debug(
+                "No enabled IA recommendation for finding %s rule %s",
+                finding.id, rule.__name__)
             return False
     return True
