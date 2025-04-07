@@ -5,6 +5,7 @@ import contextlib
 import datetime
 import logging
 import mimetypes
+import pytz
 from ast import literal_eval
 from itertools import chain
 
@@ -1087,7 +1088,9 @@ def import_history(finding):
 
     list_of_status_changes = ""
     for status_change in status_changes:
-        list_of_status_changes += "<b>" + status_change.created.strftime("%b %d, %Y, %H:%M:%S") + "</b>: " + status_change.get_action_display() + "<br/>"
+        date = status_change.created
+        converted = date.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime("%b %d, %Y, %H:%M:%S")
+        list_of_status_changes += "<b>" + converted + "</b>: " + status_change.get_action_display() + "<br/>"
 
     html_contect = """
        <i class="fa-solid fa-clock-rotate-left has-popover"
