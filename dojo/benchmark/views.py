@@ -47,19 +47,19 @@ def update_benchmark(request, pid, _type):
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
 
-        if field in [
+        if field in {
             "enabled",
             "pass_fail",
             "notes",
             "get_notes",
             "delete_notes",
-        ]:
+        }:
             bench = Benchmark_Product.objects.get(id=bench_id)
             if field == "enabled":
                 bench.enabled = value
             elif field == "pass_fail":
                 bench.pass_fail = value
-            elif field in ["notes", "get_notes", "delete_notes"]:
+            elif field in {"notes", "get_notes", "delete_notes"}:
                 if field == "notes":
                     bench.notes.create(entry=value, author=get_current_user())
                 if field == "delete_notes":
@@ -94,7 +94,7 @@ def update_benchmark_summary(request, pid, _type, summary):
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
 
-        if field in ["publish", "desired_level"]:
+        if field in {"publish", "desired_level"}:
             summary = Benchmark_Product_Summary.objects.get(id=summary)
             data = {}
             if field == "publish":
@@ -118,9 +118,7 @@ def return_score(queryset):
     for item in queryset:
         if item["pass_fail"]:
             asvs_level_1_score = item["pass_fail__count"]
-        asvs_level_1_benchmark = (
-            asvs_level_1_benchmark + item["pass_fail__count"]
-        )
+        asvs_level_1_benchmark += item["pass_fail__count"]
 
     return asvs_level_1_benchmark, asvs_level_1_score
 
@@ -228,7 +226,7 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
                 product=product.id,
                 control__category=cat,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()
@@ -242,7 +240,7 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
             .filter(
                 product=product.id,
                 control__category__enabled=True,
-                control__category__type=type,
+                control__category__type=benchmark_type,
                 control__enabled=True,
             )
             .all()

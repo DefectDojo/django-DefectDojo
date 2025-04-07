@@ -20,6 +20,10 @@ metadata:
 {{- end }}
 spec:
   replicas: {{ .Values.django.replicas }}
+  {{- with .Values.django.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if .Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- end }}
@@ -132,7 +136,7 @@ spec:
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
-        command: [ '/usr/bin/nginx-prometheus-exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        command: [ '/usr/bin/nginx-prometheus-exporter', '--nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
         ports:
         - name: http-metrics
           protocol: TCP

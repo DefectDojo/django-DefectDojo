@@ -74,7 +74,7 @@ If you’re in charge of security reporting for many different contexts, softwar
 * Each Product in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
 * You can create a report directly from a **Product Type, Product, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Products** can contain multiple Engagements, **Product Types** can contain multiple Products.
 
-For more information on creating a Report, see our guides to **[Custom Reporting](/en/pro_reports/using_the_report_builder/)**.
+For more information on creating a Report, see our guides to **[Custom Reporting](/en/share_your_findings/pro_reports/using_the_report_builder/)**.
 
 ### Triage Vulnerabilities using Finding Status
 
@@ -97,9 +97,9 @@ Part of a security team’s responsibility is to collaborate with developers to 
 
 Any Appsec team member understands that issue mitigation can’t be prioritized exclusively by developer teams, so Risk Acceptances help you log those sensitive decisions when they are made.
 
-### Monitor current vulnerabilities using CWEs and EPSS scores
+### Monitor current vulnerabilities using CVEs and EPSS scores (Pro Feature)
 
-Sometimes, the exploitability and threat posed by a known vulnerability can change based on new data. To keep your work up to date, DefectDojo has partnered with First.org to maintain a database of the latest EPSS scores related to Findings. Any Findings in DefectDojo will be kept up to date automatically according to their EPSS, which is directly based on the CWE of the Finding.
+Sometimes, the exploitability and threat posed by a known vulnerability can change based on new data. To keep your work up to date, DefectDojo Pro has partnered with First.org to maintain a database of the latest EPSS scores related to Findings. Any Findings in DefectDojo Pro will be kept up to date automatically according to their EPSS, which is directly based on the CVE of the Finding.
 
 If a Finding’s EPSS score changes (i.e. the related Finding becomes more exploitable or less exploitable), the Severity of the Finding will adjust accordingly.
 

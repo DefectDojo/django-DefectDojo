@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -28,7 +28,7 @@ class HCLASoCSASTParser:
 
     def get_findings(self, file, test):
         findings = []
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
         if "xml-report" not in root.tag:
             msg = "This doesn't seem to be a valid HCL ASoC SAST xml file."
@@ -122,7 +122,7 @@ class HCLASoCSASTParser:
                                             for codeitem in codeblock:
                                                 if codeitem.tag == "item" and codeitem.attrib["type"] == "string":
                                                     if codeitem.text is None:
-                                                        recommendations = recommendations + "\n"
+                                                        recommendations += "\n"
                                                     else:
                                                         recommendations = recommendations + self.xmltreehelper(codeitem) + "\n"
 

@@ -86,7 +86,7 @@ def webhook(request, secret=None):
     try:
         parsed = json.loads(request.body.decode("utf-8"))
         # Check if the events supplied are supported
-        if parsed.get("webhookEvent") not in ["comment_created", "jira:issue_updated"]:
+        if parsed.get("webhookEvent") not in {"comment_created", "jira:issue_updated"}:
             return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
 
         if parsed.get("webhookEvent") == "jira:issue_updated":
@@ -137,7 +137,7 @@ def webhook(request, secret=None):
 
             if findings:
                 for finding in findings:
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_group=jissue.finding_group)
             # Check for any comment that could have come along with the resolution
             if (error_response := check_for_and_create_comment(parsed)) is not None:
                 return error_response

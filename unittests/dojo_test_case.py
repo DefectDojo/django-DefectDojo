@@ -97,7 +97,9 @@ class DojoTestUtilsMixin:
         sla_configuration.save()
         return sla_configuration
 
-    def create_product(self, name, *args, description="dummy description", prod_type=None, tags=[], **kwargs):
+    def create_product(self, name, *args, description="dummy description", prod_type=None, tags=None, **kwargs):
+        if tags is None:
+            tags = []
         if not prod_type:
             prod_type = Product_Type.objects.first()
         product = Product(name=name, description=description, prod_type=prod_type, tags=tags)
@@ -506,9 +508,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None, forceActive=True, forceVerified=True):
+                                scan_date=None, service=None, force_active=True, force_verified=True):
 
-        with open(get_unit_tests_path() / filename, encoding="utf-8") as testfile:
+        with (get_unit_tests_path() / filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": active,
@@ -560,7 +562,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": active,
@@ -609,7 +611,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None, *,
                                               create_endpoints=True, create_tags=True, create_dojo_meta=True,
                                               expected_http_status_code=201):
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,
@@ -717,8 +719,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = self.do_finding_tags_api(self.client.get, finding_id)
         return response.data
 
-    def get_finding_api_filter_tags(self, tags):
-        response = self.client.get(reverse("finding-list") + f"?tags={tags}", format="json")
+    def get_finding_api_filter_tags(self, tags, parameter="tags"):
+        response = self.client.get(reverse("finding-list") + f"?{parameter}={tags}", format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 

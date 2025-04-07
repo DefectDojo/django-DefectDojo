@@ -83,7 +83,7 @@ class NpmAudit7PlusParser:
         """Return the individual items found in report."""
         items = {}
 
-        for key, node in tree.items():
+        for node in tree.values():
             item = get_item(node, tree, test)
             unique_key = item.title + item.severity
             items[unique_key] = item
@@ -210,10 +210,9 @@ def get_vuln_description(item_node, tree):
                 if tree[effect]["name"] != ev["name"]:
                     description += ("  Depends on vulnerable versions of "
                                     + ev["name"] + "\n")
-            else:
-                if tree[effect]["name"] != ev:
-                    description += ("  Depends on vulnerable versions of "
-                                    + ev + "\n")
+            elif tree[effect]["name"] != ev:
+                description += ("  Depends on vulnerable versions of "
+                                + ev + "\n")
         for en in tree[effect]["nodes"]:
             description += "  " + en + "\n"
 

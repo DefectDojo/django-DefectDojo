@@ -120,10 +120,10 @@ class ScoutSuiteParser:
                                     or key[i - 1] == "PolicyDocument"
                                 ):
                                     break
-                        i = i + 1
+                        i += 1
 
                     self.recursive_print(lookup)
-                    description_text = description_text + self.item_data
+                    description_text += self.item_data
                     self.item_data = ""
 
                     find = Finding(
@@ -166,7 +166,7 @@ class ScoutSuiteParser:
                 self.recursive_print(litem, depth + 2)
         else:
             if self.pdepth != depth:
-                self.item_data = self.item_data + "\n"
+                self.item_data += "\n"
             if key:
                 self.item_data = (
                     self.item_data

@@ -37,14 +37,14 @@ select = [
    "W",
    "C90",
    "I",
-   "N804", "N811", "N814", "N818",
+   "N803", "N804", "N811", "N812", "N813", "N814", "N817", "N818", "N999",
    "D2", "D3", "D402", "D403", "D405", "D406", "D407", "D408", "D409", "D410", "D411", "D412", "D413", "D414", "D416",
    "UP",
    "YTT",
    "ASYNC",
-   "S1", "S2", "S302", "S303", "S304", "S305", "S306", "S307", "S31", "S323", "S401", "S402", "S406", "S407", "S408", "S409", "S41", "S5", "S601", "S602", "S604", "S605", "S606", "S607", "S609", "S610", "S612", "S7",
+   "S1", "S2", "S302", "S303", "S304", "S305", "S306", "S307", "S31", "S321", "S323", "S401", "S402", "S406", "S407", "S408", "S409", "S41", "S5", "S601", "S602", "S604", "S605", "S606", "S607", "S609", "S61", "S7",
    "FBT",
-   "A001", "A002", "A003", "A004", "A005", "A006",
+   "A",
    "COM",
    "C4",
    "T10",
@@ -52,7 +52,8 @@ select = [
    "EM",
    "EXE",
    "FA",
-   "ISC001", "ISC002",
+   "DTZ003", "DTZ004", "DTZ012", "DTZ901",
+   "ISC",
    "ICN",
    "LOG",
    "G001", "G002", "G01", "G1", "G2",
@@ -68,23 +69,27 @@ select = [
    "TC",
    "INT",
    "ARG003", "ARG004", "ARG005",
-   "PTH2", "PTH10", "PTH11", "PTH120", "PTH121", "PTH122", "PTH124",
-   "TD001", "TD004", "TD005",
-   "FIX001", "FIX003",
+   "PTH",
+   "TD001", "TD004", "TD005", "TD007",
+   "FIX",
    "PD",
    "PGH",
-   "PLC01", "PLC0205", "PLC0208", "PLC0414", "PLC18", "PLC24", "PLC3",
+   "PLC01", "PLC0205", "PLC0208", "PLC0414", "PLC18", "PLC24", "PLC28", "PLC3",
    "PLE",
-   "PLR01", "PLR0203", "PLR0206", "PLR0915", "PLR1716", "PLR172", "PLR1733", "PLR1736",
-   "PLW0108", "PLW0120", "PLW0127", "PLW0129", "PLW013", "PLW017", "PLW02", "PLW04", "PLW07", "PLW1", "PLW2", "PLW3",
+   "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1716", "PLR172", "PLR1733", "PLR1736", "PLR5", "PLR6104", "PLR6201",
+   "PLW01", "PLW02", "PLW04", "PLW0602", "PLW0604", "PLW07", "PLW1", "PLW2", "PLW3",
    "TRY003", "TRY004", "TRY2", "TRY300", "TRY401",
+   "PT001", "PT002", "PT003", "PT006", "PT007", "PT008", "PT01", "PT020", "PT021", "PT022", "PT023", "PT024", "PT025", "PT026", "PT028", "PT029", "PT03",
    "FLY",
    "NPY",
+   "PYI00", "PYI01", "PYI020", "PYI021", "PYI025", "PYI026", "PYI029",  "PYI03",  "PYI04",  "PYI05",  "PYI06",
    "FAST",
    "AIR",
    "FURB",
    "DOC202", "DOC403", "DOC502",
    "RUF",
+   "B00", "B010", "B011", "B012", "B013", "B014", "B015", "B016", "B017", "B018", "B019", "B020", "B021", "B022", "B023", "B025", "B028", "B029", "B03", "B901", "B903", "B905", "B911",
+   "PERF1", "PERF2",
 ]
 ignore = [
     "E501",
@@ -94,6 +99,7 @@ ignore = [
     "RUF012",
     "RUF015",
     "D205",
+    "FIX002",  # TODOs need some love but we will probably not get of them
     "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
     "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
 ]
@@ -107,6 +113,12 @@ preview = true
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
+]
+"unittests/tools/**" = [
+    "PTH123", # Fix is needed in unittests/tools as well but there are too many problematic files, let's do it per partes
+]
+".github/pr-reminder.py" = [
+    "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
 ]
 
 [lint.flake8-boolean-trap]

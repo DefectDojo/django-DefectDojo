@@ -539,17 +539,18 @@ def edit_question(request, qid):
                 extra_tags="alert-info")
     content_type = str(ContentType.objects.get_for_model(question))
 
-    if content_type == "dojo | text question":
+    if content_type in {"dojo | text question", "Defect Dojo | text question"}:
         form = EditTextQuestionForm(instance=question)
-    elif content_type == "dojo | choice question":
+    elif content_type in {"dojo | choice question", "Defect Dojo | choice question"}:
+
         form = EditChoiceQuestionForm(instance=question)
     else:
         raise Http404
 
     if request.method == "POST":
-        if content_type == "dojo | text question":
+        if content_type in {"dojo | text question", "Defect Dojo | text question"}:
             form = EditTextQuestionForm(request.POST, instance=question)
-        elif content_type == "dojo | choice question":
+        elif content_type in {"dojo | choice question", "Defect Dojo | choice question"}:
             form = EditChoiceQuestionForm(request.POST, instance=question)
         else:
             raise Http404
@@ -789,7 +790,7 @@ def answer_empty_survey(request, esid):
             survey.responder = request.user if not request.user.is_anonymous else None
             survey.answered_on = date.today()
             survey.save()
-            general_survey.num_responses = general_survey.num_responses + 1
+            general_survey.num_responses += 1
             general_survey.save()
             if request.user.is_anonymous:
                 message = "Your responses have been recorded."

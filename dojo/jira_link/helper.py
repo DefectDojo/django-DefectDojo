@@ -109,6 +109,14 @@ def is_push_all_issues(instance):
     return None
 
 
+def _safely_get_finding_group_status(finding_group: Finding_Group) -> str:
+    # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
+    try:
+        return finding_group.status()
+    except TypeError:  # TypeError: 'str' object is not callable
+        return finding_group.status
+
+
 # checks if a finding can be pushed to JIRA
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
@@ -161,13 +169,8 @@ def can_be_pushed_to_jira(obj, form=None):
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
-        # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
-        try:
-            not_active = "Active" not in obj.status()
-        except TypeError:  # TypeError: 'str' object is not callable
-            not_active = "Active" not in obj.status
         # Determine if the finding group is not active
-        if not_active:
+        if "Active" not in _safely_get_finding_group_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
     else:
@@ -411,7 +414,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         error_message = e.text if hasattr(e, "text") else e.message if hasattr(e, "message") else e.args[0]
 
-        if e.status_code in [401, 403]:
+        if e.status_code in {401, 403}:
             log_jira_generic_alert("JIRA Authentication Error", error_message)
         else:
             log_jira_generic_alert("Unknown JIRA Connection Error", error_message)
@@ -514,8 +517,8 @@ def get_jira_comments(finding):
     return None
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
+    """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title=title,
@@ -524,8 +527,8 @@ def log_jira_generic_alert(title, description):
         source="JIRA")
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, obj):
+    """Creates a notification for JIRA errors when handling a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
@@ -534,6 +537,19 @@ def log_jira_alert(error, obj):
         icon="bullseye",
         source="Push to JIRA",
         obj=obj)
+
+
+def log_jira_cannot_be_pushed_reason(error, obj):
+    """Creates an Alert for GUI display  when handling a specific (finding/group/epic) object"""
+    create_notification(
+        event="jira_update",
+        title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
+        description=obj.__class__.__name__ + ": " + error,
+        url=obj.get_absolute_url(),
+        icon="bullseye",
+        source="Push to JIRA",
+        obj=obj,
+        alert_only=True)
 
 
 # Displays an alert for Jira notifications
@@ -729,8 +745,10 @@ def prepare_jira_issue_fields(
         epic_name_field=None,
         default_assignee=None,
         duedate=None,
-        issuetype_fields=[]):
+        issuetype_fields=None):
 
+    if issuetype_fields is None:
+        issuetype_fields = []
     fields = {
             "project": {"key": project_key},
             "issuetype": {"name": issuetype_name},
@@ -768,7 +786,7 @@ def prepare_jira_issue_fields(
 def add_jira_issue(obj, *args, **kwargs):
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
         if exception:
-            logger.exception(exception)
+            logger.error(exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -787,10 +805,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
         else:
-            log_jira_alert(error_message, obj)
+            log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
         return False
@@ -928,7 +948,7 @@ def update_jira_issue_for_finding_group(finding_group, *args, **kwargs):
 def update_jira_issue(obj, *args, **kwargs):
     def failure_to_update_message(message: str, exception: Exception, obj: Any) -> bool:
         if exception:
-            logger.exception(exception)
+            logger.error(exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -1086,7 +1106,7 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status_list = obj.status()
+    status_list = _safely_get_finding_group_status(obj)
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
@@ -1208,7 +1228,7 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     issue=issue, attachment=attachment, filename=jira_filename)
             else:
                 # read and upload a file
-                with open(file, "rb") as f:
+                with Path(file).open("rb") as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
             logger.exception("Unable to add attachment")
@@ -1662,7 +1682,7 @@ def escape_for_jira(text):
     return text.replace("|", "%7D")
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue) -> bool:
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper
     status_changed = False
@@ -1694,28 +1714,26 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.false_p = True
                 ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
                 status_changed = True
-        else:
-            # Mitigated by default as before
-            if not finding.is_mitigated:
-                logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
-                finding.active = False
-                finding.mitigated = jira_now
-                finding.is_mitigated = True
-                finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-                finding.endpoints.clear()
-                finding.false_p = False
-                ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
-                status_changed = True
-    else:
-        if not finding.active:
-            # Reopen / Open Jira issue
-            logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
-            finding.active = True
-            finding.mitigated = None
-            finding.is_mitigated = False
+        # Mitigated by default as before
+        elif not finding.is_mitigated:
+            logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
+            finding.active = False
+            finding.mitigated = jira_now
+            finding.is_mitigated = True
+            finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
+            finding.endpoints.clear()
             finding.false_p = False
             ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
+    elif not finding.active and (finding_group is None or settings.JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN):
+        # Reopen / Open Jira issue
+        logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
+        finding.active = True
+        finding.mitigated = None
+        finding.is_mitigated = False
+        finding.false_p = False
+        ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
+        status_changed = True
 
     # for findings in a group, there is no jira_issue attached to the finding
     jira_issue.jira_change = jira_now
@@ -1727,7 +1745,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
 
 def save_and_push_to_jira(finding):
     # Manage the jira status changes
-    push_to_jira = False
+    push_to_jira_decision = False
     # Determine if the finding is in a group. if so, not push to jira yet
     finding_in_group = finding.has_finding_group
     # Check if there is a jira issue that needs to be updated
@@ -1735,12 +1753,11 @@ def save_and_push_to_jira(finding):
     # Only push if the finding is not in a group
     if jira_issue_exists:
         # Determine if any automatic sync should occur
-        push_to_jira = is_push_all_issues(finding) \
+        push_to_jira_decision = is_push_all_issues(finding) \
             or get_jira_instance(finding).finding_jira_sync
     # Save the finding
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
+    finding.save(push_to_jira=(push_to_jira_decision and not finding_in_group))
     # we only push the group after saving the finding to make sure
     # the updated data of the finding is pushed as part of the group
-    if push_to_jira and finding_in_group:
+    if push_to_jira_decision and finding_in_group:
         push_to_jira(finding.finding_group)

@@ -6,7 +6,7 @@ def _get_path_to_GET_serializer_map(generator):
     path_to_GET_serializer = {}
     for (
         path,
-        path_pattern,
+        _path_pattern,
         method,
         view,
     ) in generator._get_paths_and_endpoints():
@@ -31,9 +31,7 @@ def get_serializer_ref_name(serializer):
     if hasattr(serializer_meta, "ref_name"):
         ref_name = serializer_meta.ref_name
     else:
-        ref_name = serializer_name
-        if ref_name.endswith("Serializer"):
-            ref_name = ref_name[:-len("Serializer")]
+        ref_name = serializer_name.removesuffix("Serializer")
     return ref_name
 
 

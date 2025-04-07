@@ -33,11 +33,10 @@ def endpoint_filter(**kwargs):
             qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
         else:
             qs = qs.filter(port__exact=kwargs["port"])
+    elif (kwargs.get("protocol")) and (kwargs["protocol"].lower() in SCHEME_PORT_MAP):
+        qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
     else:
-        if (kwargs.get("protocol")) and (kwargs["protocol"].lower() in SCHEME_PORT_MAP):
-            qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
-        else:
-            qs = qs.filter(port__isnull=True)
+        qs = qs.filter(port__isnull=True)
 
     qs = qs.filter(path__exact=kwargs["path"]) if kwargs.get("path") else qs.filter(path__isnull=True)
 
@@ -110,9 +109,8 @@ def clean_hosts_run(apps, change):
                                     f"({parts.protocol})"
                                 )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.protocol = parts.protocol
+                            elif change:
+                                endpoint.protocol = parts.protocol
 
                         if parts.userinfo:
                             if change:
@@ -133,9 +131,8 @@ def clean_hosts_run(apps, change):
                                         f"host ({parts.port})"
                                     )
                                     err_log(message, html_log, endpoint_html_log, endpoint)
-                                else:
-                                    if change:
-                                        endpoint.port = parts.port
+                                elif change:
+                                    endpoint.port = parts.port
                             except ValueError:
                                 message = f"uses non-numeric port: {endpoint.port}"
                                 err_log(message, html_log, endpoint_html_log, endpoint)
@@ -147,9 +144,8 @@ def clean_hosts_run(apps, change):
                                     f"({parts.path})"
                                 )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.path = parts.path
+                            elif change:
+                                endpoint.path = parts.path
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
@@ -158,9 +154,8 @@ def clean_hosts_run(apps, change):
                                     f"({parts.query})"
                                 )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.query = parts.query
+                            elif change:
+                                endpoint.query = parts.query
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
@@ -169,9 +164,8 @@ def clean_hosts_run(apps, change):
                                     f"({parts.fragment})"
                                 )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.fragment = parts.fragment
+                            elif change:
+                                endpoint.fragment = parts.fragment
 
                         if change and (endpoint.pk not in broken_endpoints):  # do not save broken endpoints
                             endpoint.save()

@@ -127,11 +127,10 @@ def edit_note(request, note_id, page, objid):
                             messages.SUCCESS,
                             _("Note was not succesfully edited."),
                             extra_tags="alert-danger")
+    elif note_type_activation:
+        form = TypedNoteForm(available_note_types=available_note_types, instance=note)
     else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types, instance=note)
-        else:
-            form = NoteForm(instance=note)
+        form = NoteForm(instance=note)
 
     return render(
         request, "dojo/edit_note.html", {
@@ -142,8 +141,8 @@ def edit_note(request, note_id, page, objid):
         })
 
 
-def note_history(request, elem_id, page, objid):
-    note = get_object_or_404(Notes, id=elem_id)
+def note_history(request, note_id, page, objid):
+    note = get_object_or_404(Notes, id=note_id)
     reverse_url = None
     object_id = None
 

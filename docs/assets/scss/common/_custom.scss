@@ -4,7 +4,7 @@
     font-family: 'Worksans';
     font-style: normal;
     font-weight: 400;
-    src: url('/fonts/workssans/work-sans-v19-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+    src: url('/fonts/worksans/work-sans-v19-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
   }
   /* work-sans-500 - latin */
   @font-face {
@@ -14,4 +14,6 @@
     font-weight: 500;
     src: url('/fonts/worksans/work-sans-v19-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
   }
-  
+  .container-lg {
+    max-width: 100%;
+  }

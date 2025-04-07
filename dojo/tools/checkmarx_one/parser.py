@@ -243,7 +243,7 @@ class CheckmarxOneParser:
                 finding = self.get_results_sast(test, vulnerability)
             elif result_type == "kics":
                 finding = self.get_results_kics(test, vulnerability)
-            elif result_type in ["sca", "sca-container"]:
+            elif result_type in {"sca", "sca-container"}:
                 finding = self.get_results_sca(test, vulnerability)
             # Make sure we have a finding before continuing
             if finding is not None:

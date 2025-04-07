@@ -1,15 +1,90 @@
 ---
 title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
+exclude_search: true
 ---
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
+
+## Mar 2025: v2.44
+
+### Mar 31, 2025, v2.44.4
+
+- **(Beta UI)** Group and Configuration permissions can now be assigned quickly from a User page.  For more information, see [DefectDojo Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/).
+
+### Mar 24, 2025, v2.44.3
+
+- **(Import)** Generic Findings Import will now parse tags in the JSON payload when Async Import is enabled.
+
+### Mar 17, 2025, v2.44.2
+
+- **(Beta UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/) for more details.
+
+![image](images/pro_permissions_2.png)
+
+### Mar 10, 2025: v2.44.1
+
+- **(Beta UI)** Added a field in the View Engagement page which allows a user to navigate to the linked Jira Epic, if one exists.
+- **(Universal Parser)** XML is now a supported file type for Universal Parser.
+- **(SSO)** SSO can now be set up with any kind of [OIDC Configuration](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol).  See OIDC Settings in the Beta UI:
+
+![image](images/oidc.png)
+
+### Mar 3, 2025: v2.44.0
+
+- **(Beta UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
+
+## Mar 2025: v2.44
+
+### Mar 3, 2025: v2.44.0
+
+- **(Beta UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
+
+## Feb 2025: v2.43
+
+#### Feb 24, 2025: v2.43.4
+
+- **(API)** API can now filter Findings by tag using AND, in addition to OR.  This can be done with the `tags__and` API filter.
+- **(Connectors)** Users of AWS Security Hub, Snyk can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(Pro Metrics)** Tool Insights can now be filtered with specific Date values, rather than simply 'past 30 days', etc.
+
+#### Feb 19, 2025: v2.43.3
+
+- **(API)** `/audit_log` has been added as an API endpoint for DefectDojo Pro, which can return a JSON report of all user activity, or filter by object ID. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
+- **(Beta UI)** Vulnerability ID can now be edited for a given Finding, using the Edit Finding page.  This allows users to manually identify duplicates by assigning a matching Vulnerability ID to an additional Finding.
+
+#### Feb 12, 2025: v2.43.2
+
+- **(Beta UI)** Tests and Risk Acceptances can now be added directly from the All Tests / All Risk Acceptances lists.
+- **(CLI Tools)** Added a `background-import` flag to allow for asynchronous imports or reimports.
+- **(Connectors)** Users of Burp, SonarQube and Dependency-Track Connectors can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(API)** Fixed issue where Findings created by API with methods other than `/import` / `/reimport` were not being identified as duplicates.
+- **(Findings)** 'Close Old Findings' will now apply 'Unique ID From Tool' deduplication, if this algorithm is in use for a set of Findings.
+
+#### Feb 10, 2025: v2.43.1
+
+- **(Beta UI)** Added 'Has Jira' (True/False) as a filter, to filter Findings, Products or Engagements that have associated Jira data.
+- **(Beta UI)** Notes can now be added to Engagement / Findings / Tests from All Engagements / Findings / Tests lists as well as View Engagement / Findings / Tests pages.
+- **(Beta UI)** Added ability to Close Finding from a Finding List, without needing to first open the Edit Finding form.
+- **(CLI Tools)** Improved help text for Universal Importer / DefectDojo CLI. Many guides and examples are now in our [docs](/en/connecting_your_tools/external_tools/) instead of being displayed in the CLI itself.
+- **(Tools)** Updated Burp scan to use Hashcode Deduplication.  Default hashcode forms are `title`, `file_path`, `severity`, and `vuln_id_from_tool`.
+- **(Tools)** Corrected issue with AWS Inspector2 OSS parser related to `mitigated date` being handled incorrectly.
+
+#### Feb 3, 2025: v2.43.0
+
+- **(Beta UI)** Users can now upload local SAML metadata when configuring SAML.
+- **(Beta UI)** Added new section on Risk Acceptance Form to allow users to upload 'Proof'; any relevant files that can be used to support a Risk Acceptance (emails, screenshots of communication, policies, etc).
+- **(Connectors)** Users of Semgrep and Tenable Connectors can now set a minimum Severity level for Findings to limit the amount of data imported via Connector.  Findings below the minimum Severity level will not be imported.  If Minimum Severity is changed, existing Findings below the new Minimum Severity will be Closed (not deleted).
+- **(Reimport)** Clarified 'no change' state in Import History with message 'There were no findings created, closed, or modified'.
+- **(Jira)** Next-Gen Epic creation from an Engagement no longer requires an Epic Name to be set, and will instead use an Epic ID value if Epic Name fails.
+- **(Jira)** Removed HTML encoding from strings that are sent to Jira, to prevent escape characters from being added to issue descriptions unnecessarily.
+- **(System Settings)** Split up the 'Disclaimer' function, allowing boilerplate 'Disclaimer' text to be displayed in Notifications, Reports, or Notes.
 
 ## Jan 2025: v2.42
 
-### Jan 27, 2025: v2.42.3
+#### Jan 27, 2025: v2.42.3
 
 - **(Connectors)** Added 'minimum severity' filter for Semgrep and Tenable Connectors.  If you want to only upload Findings of a certain severity and up, you can set a filter for this under 'Minimum Severity' in your Connector options.
 
@@ -18,7 +93,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 Previously synced Findings that are no longer within the filter parameters will be set to Closed upon the following Sync operation.
 - **(API)** Prefetching multiple parameters now returns all prefetched objects in an array.
 
-### Jan 21, 2025: v2.42.2
+#### Jan 21, 2025: v2.42.2
 
 - **(Classic UI)** Corrected link to Smart Upload form.
 - **(CLI Tools)** Fixed issue with .exe extensions not getting added to Windows binaries
@@ -26,7 +101,7 @@ Previously synced Findings that are no longer within the filter parameters will 
 - **(OAuth)** Clarified Azure AD labels to better align with Azure's language.  Default value for Azure Resource is now set. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(RBAC)** Request Review now applies RBAC properly with regard to User Groups.
 
-### Jan 13, 2025: v2.42.1
+#### Jan 13, 2025: v2.42.1
 
 - **(API)** Pro users can now specify the fields they want to return in a given API payload.  For example, this request will only return the title, severity and description fields for each Finding.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 ```
@@ -39,7 +114,7 @@ curl -X 'GET' \
 - **(Risk Acceptance)** Simple Risk Acceptances now have a 'paper trail' created - when they are added or removed, a note will be added to the Finding to log the action.
 - **(Tools)** ImageTags are now included with AWS SecurityHub and AWS inspector parsers.
 
-### Jan 6, 2025: v2.42.0
+#### Jan 6, 2025: v2.42.0
 
 - **(API)** `/test_reimport` results can now be ordered via id, created, modified, version, branch_tag, build_id, and commit_hash.
 - **(Jira)** When a Risk Acceptance expires, linked Jira Group issues will now be updated to reflect the status change.
@@ -194,7 +269,7 @@ configuration fields.
 - **(API)**  It is now possible to prefetch a Finding with attached files via API.
 - **(Login)**  A new "Forgot Username" link has been added to the login form.  The link will navigate to a page which requests the user's email address. The username will be sent to that address if it exists.
 - **Risk Acceptances**  Notes are now added to Findings when they are removed from Risk Acceptances.
-- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](../working_with_findings/risk-acceptances) for more details.
+- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/en/working_with_findings/findings_workflows/risk_acceptances/) for more details.
 - **Tools**  Qualys HackerGuardian parser added.
 - **Tools**  Semgrep Parser updated with new severity mappings. HackerOne parser updated and now supports bug bounty reports.
 - **Tools**  fixed an issue where certain tools would not process asyncronously: Whitehat_Sentinel, SSLyze, SSLscan, Qualys_Webapp, Mend, Intsights, H1, and Blackduck.

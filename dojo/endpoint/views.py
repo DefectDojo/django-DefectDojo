@@ -381,38 +381,37 @@ def endpoint_bulk_update_all(request, pid=None):
                     messages.SUCCESS,
                     f"Bulk delete of {deleted_endpoint_count} endpoints was successful.",
                     extra_tags="alert-success")
-        else:
-            if endpoints_to_update:
+        elif endpoints_to_update:
 
-                if pid is not None:
-                    product = get_object_or_404(Product, id=pid)
-                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+            if pid is not None:
+                product = get_object_or_404(Product, id=pid)
+                user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
 
-                skipped_endpoint_count = total_endpoint_count - endpoints.count()
-                updated_endpoint_count = endpoints.count()
+            skipped_endpoint_count = total_endpoint_count - endpoints.count()
+            updated_endpoint_count = endpoints.count()
 
-                if skipped_endpoint_count > 0:
-                    add_error_message_to_response(f"Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.")
+            if skipped_endpoint_count > 0:
+                add_error_message_to_response(f"Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.")
 
-                eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
-                    mitigated=True,
-                    mitigated_by=request.user,
-                    mitigated_time=timezone.now(),
-                    last_modified=timezone.now(),
-                )
+            eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
+                mitigated=True,
+                mitigated_by=request.user,
+                mitigated_time=timezone.now(),
+                last_modified=timezone.now(),
+            )
 
-                if updated_endpoint_count > 0:
-                    messages.add_message(request,
-                                        messages.SUCCESS,
-                                        f"Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.",
-                                        extra_tags="alert-success")
-            else:
+            if updated_endpoint_count > 0:
                 messages.add_message(request,
-                                     messages.ERROR,
-                                     "Unable to process bulk update. Required fields were not selected.",
-                                     extra_tags="alert-danger")
+                                    messages.SUCCESS,
+                                    f"Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.",
+                                    extra_tags="alert-success")
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 "Unable to process bulk update. Required fields were not selected.",
+                                 extra_tags="alert-danger")
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
@@ -432,12 +431,12 @@ def endpoint_status_bulk_update(request, fid):
                     finding__id=fid)
                 for status in status_list:
                     if status in enable:
-                        endpoint_status.__setattr__(status, True)
+                        endpoint_status.__setattr__(status, True)  # noqa: PLC2801
                         if status == "mitigated":
                             endpoint_status.mitigated_by = request.user
                             endpoint_status.mitigated_time = timezone.now()
                     else:
-                        endpoint_status.__setattr__(status, False)
+                        endpoint_status.__setattr__(status, False)  # noqa: PLC2801
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
             messages.add_message(request,

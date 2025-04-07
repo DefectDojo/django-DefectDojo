@@ -42,12 +42,19 @@ class TestMeterianParser(DojoTestCase):
             self.assertEqual("date-and-time:0.6.3", finding.title)
             self.assertEqual("2021-06-02", finding.date)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("Issue severity of: **High** from a base "
-                + "CVSS score of: **7.5**", finding.severity_justification)
-            self.assertEqual("date-and-time is an npm package for manipulating "
-                + "date and time. In date-and-time before version 0.14.2, there a regular "
-                + "expression involved in parsing which can be exploited to to cause a denial "
-                + "of service. This is fixed in version 0.14.2.", finding.description)
+            self.assertEqual(
+                "Issue severity of: **High** from a base CVSS score of: **7.5**",
+                finding.severity_justification,
+            )
+            self.assertEqual(
+                (
+                    "date-and-time is an npm package for manipulating "
+                    "date and time. In date-and-time before version 0.14.2, there a regular "
+                    "expression involved in parsing which can be exploited to to cause a denial "
+                    "of service. This is fixed in version 0.14.2."
+                ),
+                finding.description,
+            )
             self.assertEqual("7be36211-b569-30c0-8851-26b4bb8740ca", finding.unique_id_from_tool)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-26289", finding.unsaved_vulnerability_ids[0])
@@ -69,8 +76,13 @@ class TestMeterianParser(DojoTestCase):
 
             finding = findings[0]
             self.assertTrue(finding.mitigation.startswith("We were not able to provide a safe version for this library."), finding.mitigation)
-            self.assertIn("You should consider replacing this component as it could be an "
-                + "issue for the safety of your application.", finding.mitigation)
+            self.assertIn(
+                (
+                    "You should consider replacing this component as it could be an "
+                    "issue for the safety of your application."
+                ),
+                finding.mitigation,
+            )
 
     def test_meterianParser_dual_language_report_has_two_findins(self):
         with open(get_unit_tests_scans_path("meterian") / "report_multi_language.json", encoding="utf-8") as testfile:

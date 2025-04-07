@@ -298,10 +298,7 @@ class DependencyCheckParser:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
             mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
-            mitigation = (
-                mitigation
-                + f"Update {component_name}:{component_version} to at least the version recommended in the description"
-            )
+            mitigation += f"Update {component_name}:{component_version} to at least the version recommended in the description"
             mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False

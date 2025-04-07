@@ -219,9 +219,9 @@ def get_snippet(location):
     return snippet
 
 
-def get_codeFlowsDescription(codeFlows):
+def get_codeFlowsDescription(code_flows):
     description = ""
-    for codeFlow in codeFlows:
+    for codeFlow in code_flows:
         for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue
@@ -429,7 +429,7 @@ def get_items_from_result(result, rules, artifacts, run_date):
                     finding.cvssv3_score = cvss
                     finding.severity = severity
                 except ValueError:
-                    if rule["properties"]["security-severity"].lower().capitalize() in ["Info", "Low", "Medium", "High", "Critical"]:
+                    if rule["properties"]["security-severity"].lower().capitalize() in {"Info", "Low", "Medium", "High", "Critical"}:
                         finding.severity = rule["properties"]["security-severity"].lower().capitalize()
                     else:
                         finding.severity = "Info"

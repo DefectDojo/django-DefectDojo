@@ -1,5 +1,5 @@
 ---
-title: "Parsers"
+title: "Contribute to Parsers"
 description: "How to contribute to parsers"
 draft: false
 weight: 1
@@ -298,16 +298,16 @@ or like this:
 $ ./run-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
 {{< /highlight >}}
 
-Example for the blackduck hub parser:
+Example for the aqua parser:
 
 {{< highlight bash >}}
-$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_aqua_parser.TestAquaParser -v2'
 {{< /highlight >}}
 
 or like this:
 
 {{< highlight bash >}}
-$ ./run-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
+$ ./run-unittest.sh --test-case unittests.tools.test_aqua_parser.TestAquaParser
 {{< /highlight >}}
 
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
@@ -364,5 +364,5 @@ Please add a new .md file in [`docs/content/en/integrations/parsers`] with the d
 * A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
-Here is an example of a completed Parser documentation page: https://defectdojo.github.io/django-DefectDojo/integrations/parsers/file/awssecurityhub/
+Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md)
 

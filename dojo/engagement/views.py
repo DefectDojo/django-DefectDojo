@@ -5,6 +5,7 @@ import operator
 import re
 from datetime import datetime
 from functools import reduce
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
 
@@ -145,7 +146,7 @@ def engagement_calendar(request):
 
 def get_filtered_engagements(request, view):
 
-    if view not in ["all", "active"]:
+    if view not in {"all", "active"}:
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
 
@@ -802,7 +803,7 @@ class ImportScanResultsView(View):
             product_tab = Product_Tab(engagement.product, title="Import Scan Results", tab="engagements")
             product_tab.setEngagement(engagement)
         else:
-            custom_breadcrumb = {"", ""}
+            custom_breadcrumb = {""}
             product_tab = Product_Tab(product, title="Import Scan Results", tab="findings")
         return product_tab, custom_breadcrumb
 
@@ -1369,9 +1370,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
         logger.error("errors found")
 
-    else:
-        if edit_mode:
-            risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+    elif edit_mode:
+        risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
@@ -1463,7 +1463,7 @@ def download_risk_acceptance(request, eid, raid):
         raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
-            open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode="rb")))
+            (Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb")))
     response["Content-Disposition"] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response["Content-Type"] = mimetype
@@ -1562,7 +1562,7 @@ def get_engagements(request):
         raise ValidationError(msg)
 
     view = query = None
-    if get_list_index(path_items, 1) in ["active", "all"]:
+    if get_list_index(path_items, 1) in {"active", "all"}:
         view = get_list_index(path_items, 1)
         query = get_list_index(path_items, 2)
     else:
@@ -1586,6 +1586,7 @@ def get_foreign_keys():
 
 
 def csv_export(request):
+    logger.debug("starting csv export")
     engagements, test_counts = get_engagements(request)
 
     response = HttpResponse(content_type="text/csv")
@@ -1618,11 +1619,12 @@ def csv_export(request):
             fields.append(test_counts.get(engagement.id, 0))
 
             writer.writerow(fields)
-
+    logger.debug("done with csv export")
     return response
 
 
 def excel_export(request):
+    logger.debug("starting excel export")
     engagements, test_counts = get_engagements(request)
 
     workbook = Workbook()
@@ -1668,4 +1670,5 @@ def excel_export(request):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     response["Content-Disposition"] = "attachment; filename=engagements.xlsx"
+    logger.debug("done with excel export")
     return response

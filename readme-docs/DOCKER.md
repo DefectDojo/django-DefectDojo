@@ -2,7 +2,13 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://documentation.defectdojo.com/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation.
+
+[Running in Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+
+[Configuration](https://docs.defectdojo.com/en/open_source/installation/configuration/) explains the different ways to adjust settings and environment variables.
+
+Docker images for `linux/amd64` are published to https://hub.docker.com/u/defectdojo. Expiremental builds for `linux/arm64` are available since 2.45.0.
 
 
 # Prerequisites
@@ -140,14 +146,13 @@ Make sure you write down the first password generated as you'll need it when re-
 ## Option to change the password
 * If you dont have admin password use the below command to change the password.
 * After starting the container and open another tab in the same folder.
-* django-defectdojo-uwsgi-1 -- name obtained from running containers using ```zsh docker ps ``` command
 
 ```zsh
-docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
+docker compose exec -it uwsgi ./manage.py changepassword admin
 ```
 
 # Logging
-For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](../dojo/settings/template-local_settings)). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
 
 ```
@@ -185,19 +190,34 @@ Building will tag the images with "x.y.z", then you can run the application base
 *  Tagged images can be seen with:
 
 ```
+$ docker compose images
+CONTAINER               REPOSITORY                     TAG                 IMAGE ID            SIZE
+dd-nginx-1              defectdojo/defectdojo-nginx    latest              b0a5f30ab01a        193MB
+...
+
+or
+
 $ docker images
 REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
 defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
+...
 ```
 
 *  This will show on which tagged images the containers are running:
 
 ```
+$ docker compose ps
+NAME                    IMAGE                                 COMMAND                  SERVICE            CREATED              STATUS              PORTS
+dd-nginx-1              defectdojo/defectdojo-nginx:latest    "/entrypoint-nginx.sh"   nginx              About a minute ago   Up About a minute   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp,
+...
+
+or
+
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
+...
 ```
-
 
 ## Clean up Docker Compose
 
@@ -227,7 +247,7 @@ To secure the application by https, follow those steps
         ssl_certificate             /etc/nginx/ssl/nginx.crt
         ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
-*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml 
+*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
 * Protect your private key from other users:
 ```
 chmod 400 nginx/*.key
@@ -282,12 +302,11 @@ If you want to enter the container to run more tests or a single test case, leav
 docker/setEnv.sh dev
 docker compose up
 ```
-Then 
+Then
 ```
-docker ps
-#find the name of the uwsgi container from the above command
-docker exec -ti [container-name] bash
+docker exec -it uwsgi /bin/bash
 ```
+You're now inside the container.
 Rerun all the tests:
 
 ```
@@ -306,11 +325,11 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
+For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class.
 You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests
@@ -325,7 +344,7 @@ NB: the first time you run it, initializing the database may be too long for the
 
 Check the logs with:
 ```
-docker logs -f django-defectdojo_integration-tests_1
+docker compose logs -f integration-tests
 ```
 
 # Checking Docker versions

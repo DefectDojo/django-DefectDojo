@@ -2,6 +2,7 @@ import base64
 import logging
 import mimetypes
 from datetime import datetime
+from pathlib import Path
 
 import tagulous
 from crum import get_current_user
@@ -724,12 +725,12 @@ class RiskAcceptanceViewSet(
                 status=status.HTTP_404_NOT_FOUND,
             )
         # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.name}"
-        file_handle = open(file_path, "rb")
+        file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
             file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
+            content_type=f"{mimetypes.guess_type(str(file_path))}",
             status=status.HTTP_200_OK,
         )
         response["Content-Length"] = file_object.size
@@ -1491,7 +1492,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method in ["PUT", "PATCH"]:
+        if request.method in {"PUT", "PATCH"}:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)

@@ -21,7 +21,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
     logger.debug("mode: %s product:%s engagement: %s dryrun: %s", mode, product, engagement, dryrun)
 
-    if mode and mode not in ("push_status_to_jira", "import_status_from_jira", "reconcile"):
+    if mode and mode not in {"push_status_to_jira", "import_status_from_jira", "reconcile"}:
         logger.info("mode must be one of reconcile, push_status_to_jira or import_status_from_jira")
         return False
 
@@ -75,8 +75,6 @@ def jira_status_reconciliation(*args, **kwargs):
         # convert from str to datetime
         issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
 
-        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated
-
         flag1, flag2, flag3 = None, None, None
 
         if mode == "reconcile" and not find.last_status_update:
@@ -107,7 +105,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
         else:
             # statuses are different
-            if mode in ("push_status_to_jira", "import_status_from_jira"):
+            if mode in {"push_status_to_jira", "import_status_from_jira"}:
                 action = mode
             else:
                 # reconcile

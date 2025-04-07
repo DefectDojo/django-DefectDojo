@@ -1,5 +1,5 @@
 ---
-title: "New User Checklist"
+title: "☑️ New User Checklist"
 description: "Get Started With DefectDojo"
 draft: "false"
 weight: 2
@@ -14,7 +14,7 @@ Here's a quick reference you can use to ensure successful implementation - from 
 
 2. Now that you have data in DefectDojo, learn more about how to organize it with the [Product Hierarchy Overview](/en/working_with_findings/organizing_engagements_tests/product_hierarchy). The Product Hierarchy creates a working inventory of your apps, which helps you divide your data up into logical categories. These categories can be used to apply access control rules, or to segement your reports to the correct team.
 
-3. Try [creating a Report](/en/pro_reports/using_the_report_builder/) to summarize the data you've imported.  Reports can be used to quickly share Findings with stakeholders such as Product Owners.
+3. Try [creating a Report](/en/share_your_findings/pro_reports/using_the_report_builder/) to summarize the data you've imported.  Reports can be used to quickly share Findings with stakeholders such as Product Owners.
 
 This is the essence of DefectDojo - import security data, organize it, and present it to the folks who need to know. 
 
@@ -22,6 +22,6 @@ All of these features can be automated, and because DefectDojo can handle over 1
 
 ### Other guides
 
-- Does your organization use Jira? Learn how to use our [Jira integration](/en/jira_integration/connect_to_jira) to create Jira tickets from the data you ingest.
-- Are you expecting to share DefectDojo with many users in your organization? Check out our guides to [user management](/en/user_management/about_perms_and_roles/) and set up role-based access control (RBAC).
+- Does your organization use Jira? Learn how to use our [Jira integration](/en/share_your_findings/jira_integration/connect_to_jira) to create Jira tickets from the data you ingest.
+- Are you expecting to share DefectDojo with many users in your organization? Check out our guides to [user management](/en/customize_dojo/user_management/about_perms_and_roles/) and set up role-based access control (RBAC).
 - Ready to dive into automation? Learn how to use the [DefectDojo API](/en/connecting_your_tools/import_scan_files/api_pipeline_modelling) to automatically import new data, and build a robust CI / CD pipeline.

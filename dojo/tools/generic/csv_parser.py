@@ -109,6 +109,6 @@ class GenericCSVParser:
         return val.lower()[0:1] == "t"  # bool False by default
 
     def get_severity(self, severity_input):
-        if severity_input in ["Info", "Low", "Medium", "High", "Critical"]:
+        if severity_input in {"Info", "Low", "Medium", "High", "Critical"}:
             return severity_input
         return "Info"
