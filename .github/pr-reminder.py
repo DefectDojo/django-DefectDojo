@@ -19,6 +19,7 @@ GITHUB_USER_NAME_TO_SLACK_EMAIL = {
     "dogboat": "sean@defectdojo.com",
     "cneill": "charles@defectdojo.com",
     "hblankenship": "harold@defectdojo.com",
+    "valentijnscholten": "valentijn@defectdojo.com",
 }
 
 

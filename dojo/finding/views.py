@@ -7,6 +7,7 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
@@ -2453,7 +2454,7 @@ def download_finding_pic(request, token):
     except Exception:
         raise PermissionDenied
 
-    with open(access_token.file.file.file.name, "rb") as file:
+    with Path(access_token.file.file.file.name).open("rb") as file:
         file_name = file.name
         image = size_map[size](source=file).generate()
         response = StreamingHttpResponse(FileIterWrapper(image))

@@ -45,7 +45,7 @@ jobs:
 
       # load docker images from build jobs
       - name: Load images from artifacts
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           path: built-docker-image
           pattern: built-docker-image-*
@@ -54,9 +54,9 @@ jobs:
       - name: Load docker images
         timeout-minutes: 10
         run: |-
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-ubuntu-latest_img
-             docker load -i built-docker-image/django-${{ matrix.os }}-ubuntu-latest_img
-             docker load -i built-docker-image/integration-tests-debian-ubuntu-latest_img
+             docker load -i built-docker-image/nginx-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/django-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/integration-tests-debian-linux-amd64_img
              docker images
 
       - name: Set integration-test mode

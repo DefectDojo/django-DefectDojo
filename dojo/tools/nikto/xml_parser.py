@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class NiktoXMLParser:
     def process_xml(self, file, test):
         dupes = {}
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
         if scan is not None:
