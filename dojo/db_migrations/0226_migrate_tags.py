@@ -24,14 +24,12 @@ def clean_tag_value(tag: str) -> str:
     - Converting all commas to hyphens
     - Converting all spaces to underscores
     - Removing all single/double quotes
-    - Forcing the whole string to lower case
     """
     return (
         tag.replace(",", "-")
         .replace(" ", "_")
         .replace('"', "")
         .replace("'", "")
-        .lower()
     )
 
 
