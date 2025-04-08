@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.44.2",
+  "version": "2.45.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -19,7 +19,7 @@
     "datatables.net-dt": "^1.13.4",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.19.0",
+    "easymde": "^2.20.0",
     "flot": "flot/flot#~0.8.3",
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",

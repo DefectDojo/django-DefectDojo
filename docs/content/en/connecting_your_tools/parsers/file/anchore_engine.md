@@ -16,7 +16,8 @@ Using Anchorectl: Run the following command to generate a vulnerability report i
 Using the Anchore UI: Navigate to the desired image in the Anchore Enterprise UI, click on the Vulnerabilities tab, and download the report in JSON format.
 
 ### Acceptable JSON Format
-All properties are strings and are required by the parser.
+
+All properties are strings and are required by the parser. As the parser evolved, two anchore engine parser JSON formats are present till now. Both ([old](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_engine/many_vulns.json) / [new](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_engine/new_format_issue_11552.json)) are supported.
 
 ~~~
 
@@ -36,6 +37,7 @@ All properties are strings and are required by the parser.
     
 }
 ~~~
+
 
 ### Sample Scan Data
 Sample Anchore-Engine scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_engine)

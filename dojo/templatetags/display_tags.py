@@ -410,7 +410,7 @@ def colgroup(parser, token):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=True)
             return ""
 
     try:
@@ -780,6 +780,8 @@ def vulnerability_url(vulnerability_id):
         if vulnerability_id.upper().startswith(key):
             if key == "GLSA":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
+            if key == "SSA:":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
             if key in {"AVD", "KHV", "C-"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
@@ -1010,11 +1012,6 @@ def import_settings_tag(test_import, *, autoescape=True):
 def import_history(finding, *, autoescape=True):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
-
-    if autoescape:
-        conditional_escape
-    else:
-        lambda x: x
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()

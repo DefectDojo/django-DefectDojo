@@ -807,7 +807,7 @@ class NotificationManager(NotificationManagerHelpers):
         if alert_only:
             logger.debug("sending alert only")
 
-        if "alert" in getattr(notifications, event, getattr(notifications, "other")):
+        if "alert" in getattr(notifications, event, notifications.other):
             logger.debug(f"Sending Alert to {notifications.user}")
             self._get_manager_instance("alert").send_alert_notification(
                 event,
@@ -821,7 +821,7 @@ class NotificationManager(NotificationManagerHelpers):
             if self.system_settings.enable_slack_notifications and "slack" in getattr(
                 notifications,
                 event,
-                getattr(notifications, "other"),
+                notifications.other,
             ):
                 logger.debug("Sending Slack Notification")
                 self._get_manager_instance("slack").send_slack_notification(
@@ -833,7 +833,7 @@ class NotificationManager(NotificationManagerHelpers):
             if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
                 notifications,
                 event,
-                getattr(notifications, "other"),
+                notifications.other,
             ):
                 logger.debug("Sending MSTeams Notification")
                 self._get_manager_instance("msteams").send_msteams_notification(
@@ -845,7 +845,7 @@ class NotificationManager(NotificationManagerHelpers):
             if self.system_settings.enable_mail_notifications and "mail" in getattr(
                 notifications,
                 event,
-                getattr(notifications, "other"),
+                notifications.other,
             ):
                 logger.debug("Sending Mail Notification")
                 self._get_manager_instance("mail").send_mail_notification(
@@ -857,7 +857,7 @@ class NotificationManager(NotificationManagerHelpers):
             if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
                 notifications,
                 event,
-                getattr(notifications, "other"),
+                notifications.other,
             ):
                 logger.debug("Sending Webhooks Notification")
                 self._get_manager_instance("webhooks").send_webhooks_notification(
