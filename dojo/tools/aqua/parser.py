@@ -54,7 +54,7 @@ class AquaParser:
             "component_name",
             "component_version",
         ]
-    
+
     # Jino This get_fields was written for the Aque Parser v2 (based off of "get_iten_v2")
     # What do we do with the seperate versions of this parser?
     # def get_fields(self) -> list[str]:
@@ -158,49 +158,51 @@ class AquaParser:
             url += "\n{}".format(vuln.get("vendor_url"))
         # Take in order of preference (most prio at the bottom of ifs), and put
         # everything in severity justification anyways.
-        score = 0
+        score = None
         severity_justification = ""
         used_for_classification = ""
         if "aqua_severity" in vuln:
-            score = vuln.get("aqua_severity")
-            severity = self.aqua_severity_of(score)
-            used_for_classification = (
-                f"Aqua security score ({score}) used for classification.\n"
-            )
-            severity_justification = vuln.get("aqua_severity_classification", vuln.get("aqua_scoring_system"))
+            if score is None:
+                score = vuln.get("aqua_severity")
+                used_for_classification = (
+                    f"Aqua severity ({score}) used for classification.\n"
+                )
+            severity_justification += "\nAqua severity classification: {}".format(vuln.get("aqua_severity_classification"))
+            severity_justification += "\nAqua scoring system: {}".format(vuln.get("aqua_scoring_system"))
             if "nvd_score_v3" in vuln:
                 cvssv3 = vuln.get("nvd_vectors_v3")
-        else:
-            if "aqua_score" in vuln:
+        if "aqua_score" in vuln:
+            if score is None:
                 score = vuln.get("aqua_score")
                 used_for_classification = (
                     f"Aqua score ({score}) used for classification.\n"
                 )
-            elif "vendor_score" in vuln:
+            severity_justification += "\nAqua score: {}".format(vuln.get("aqua_score"))
+        if "vendor_score" in vuln:
+            if score is None:
                 score = vuln.get("vendor_score")
                 used_for_classification = (
                     f"Vendor score ({score}) used for classification.\n"
                 )
-            elif "nvd_score_v3" in vuln:
+            severity_justification += "\nVendor score: {}".format(vuln.get("vendor_score"))
+        if "nvd_score_v3" in vuln:
+            if score is None:
                 score = vuln.get("nvd_score_v3")
                 used_for_classification = (
                     f"NVD score v3 ({score}) used for classification.\n"
                 )
-                severity_justification += "\nNVD v3 vectors: {}".format(
-                    vuln.get("nvd_vectors_v3"),
-                )
-                # Add the CVSS3 to Finding
-                cvssv3 = vuln.get("nvd_vectors_v3")
-            elif "nvd_score" in vuln:
+            severity_justification += "\nNVD v3 vectors: {}".format(vuln.get("nvd_vectors_v3"))
+            # Add the CVSS3 to Finding
+            cvssv3 = vuln.get("nvd_vectors_v3")
+        if "nvd_score" in vuln:
+            if score is None:
                 score = vuln.get("nvd_score")
                 used_for_classification = (
                     f"NVD score v2 ({score}) used for classification.\n"
                 )
-                severity_justification += "\nNVD v2 vectors: {}".format(
-                    vuln.get("nvd_vectors"),
-                )
-            severity = self.severity_of(score)
-            severity_justification += f"\n{used_for_classification}"
+            severity_justification += "\nNVD v2 vectors: {}".format(vuln.get("nvd_vectors"))
+        severity_justification += f"\n{used_for_classification}"
+        severity = self.severity_of(score)
         finding = Finding(
             title=vulnerability_id
             + " - "
@@ -279,18 +281,17 @@ class AquaParser:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
         return finding
 
-    def aqua_severity_of(self, score):
-        if score == "high":
-            return "High"
-        if score == "medium":
-            return "Medium"
-        if score == "low":
-            return "Low"
-        if score == "negligible":
-            return "Info"
-        return "Critical"
-
     def severity_of(self, score):
+        if isinstance(score, str):
+            if score == "high":
+                return "High"
+            if score == "medium":
+                return "Medium"
+            if score == "low":
+                return "Low"
+            if score == "negligible":
+                return "Info"
+            return "Critical"
         if score == 0:
             return "Info"
         if score < 4:
