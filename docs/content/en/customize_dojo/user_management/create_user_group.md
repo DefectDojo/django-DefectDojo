@@ -21,6 +21,26 @@ From the sidebar, navigate to 👤**Users \> Groups** to see a list of all activ
 ![image](images/Create_a_User_Group_for_shared_permissions.png)
 From here, you can create, delete or view your individual Group pages.
 
+For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Beta UI's All Groups has a few additional options.
+* You can filter this table by Group Name, Description, E-mail Address, Global Role, as well as the total number of Users, Product Types, and Products associated with the Group.
+* You can also adjust a Group's Permissions or other settings by clicking the "⋮" button next to the Group you wish to edit.
+
+![image](images/all_groups_pro.png)
+
+## Viewing A Group
+
+Viewing a group displays all Group information, such as ID, name, description, global role, etc. The Group Members, Product Types, and Products associated with the group are also displayed. Additionally, configuration permissions tied to a Group can be updated directly from the “View Group” page.
+
+For <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users, the Beta UI's Group View allows you to assign Configuration Permission adjustments in a slightly different way.
+
+![image](images/group_view_pro_ui.png)
+
+* All configuration permissions are displayed in a dropdown which is grouped into subcategories. If the selection of configuration permissions is different from their current value, an “Update Configuration Permissions” button is displayed.
+
+![image](images/groups_pro_configuration_permissions.png)
+
+* Once a few additional permissions have been selected, the user will be asked to confirm they would like to update the permissions for the selected group before an update is made.
+
 ## Create / Edit a User Group
 
 1. Navigate to the 👤**Users \> Groups** page on the sidebar. You will see a list of all existing User Groups, including their Name, Description, Number of Users, Global Role (if applicable) and Email.  
