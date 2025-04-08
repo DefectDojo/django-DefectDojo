@@ -130,17 +130,31 @@ class TestWizParser(DojoTestCase):
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
             self.assertEqual(3, len(findings))
-            finding = findings[0]
-            self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ISO_DATE", finding.title)
-            self.assertEqual(True, finding.is_mitigated)
-            self.assertEqual(datetime.date(1999, 1, 25), finding.mitigated.date())
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ISO_DATE", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2023, 1, 25), finding.date.date())
+                self.assertEqual(datetime.date(1999, 1, 25), finding.mitigated.date())
+                self.assertEqual(datetime.date(2023, 1, 25), finding.date.date())
+                self.assertEqual("0029ee49-c676-432f-8690-12f2862ec708", finding.unique_id_from_tool)
 
-            finding = findings[1]
-            self.assertEqual("AKS cluster contains a pod running containers with added capabilities SPECIAL_DATE", finding.title)
-            self.assertEqual(True, finding.is_mitigated)
-            self.assertEqual(datetime.date(2025, 4, 3), finding.mitigated.date())
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("AKS cluster contains a pod running containers with added capabilities SPECIAL_DATE", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2024, 1, 24), finding.date.date())
+                self.assertEqual(datetime.date(2025, 4, 3), finding.mitigated.date())
+                self.assertEqual("02fd8a0d-16fa-4da0-aa49-a99694365d41", finding.unique_id_from_tool)
+                self.maxDiff = None
+                self.assertIn("Resolution: CONTROL_DISABLED", finding.mitigation)
 
-            finding = findings[2]
-            self.assertEqual("AKS cluster contains a pod running containers with added capabilities UNKNOWN_DATE_FORMAT", finding.title)
-            self.assertEqual(True, finding.is_mitigated)
-            self.assertEqual(None, finding.mitigated)
+            with self.subTest(i=2):
+                finding = findings[2]
+                self.assertEqual("AKS cluster contains a pod running containers with added capabilities UNKNOWN_DATE_FORMAT", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2024, 1, 24), finding.date.date())
+                self.assertEqual(None, finding.mitigated)
+                self.assertEqual("02fd8a0d-16fa-4da0-aa49-a99694365d41", finding.unique_id_from_tool)
+                self.maxDiff = None
+                self.assertIn("Resolution: ISSUE_FIXED", finding.mitigation)
