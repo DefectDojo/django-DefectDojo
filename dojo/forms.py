@@ -110,6 +110,7 @@ from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
+    tag_validator,
 )
 from dojo.widgets import TableCheckboxWidget
 
@@ -338,6 +339,8 @@ class ProductForm(forms.ModelForm):
                 "business_criticality", "platform", "lifecycle", "origin", "user_records", "revenue", "external_audience", "enable_product_tag_inheritance",
                 "internet_accessible", "enable_simple_risk_acceptance", "enable_full_risk_acceptance", "disable_sla_breach_notifications"]
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
 class DeleteProductForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -602,6 +605,9 @@ class ImportScanForm(forms.Form):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data.get("scan_date", None)
@@ -707,6 +713,9 @@ class ReImportScanForm(forms.Form):
                 raise forms.ValidationError(msg)
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -1021,6 +1030,9 @@ class EngForm(forms.ModelForm):
             return False
         return True
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     class Meta:
         model = Engagement
         exclude = ("first_contacted", "real_start", "engagement_type", "inherited_tags",
@@ -1076,6 +1088,8 @@ class TestForm(forms.ModelForm):
                   "environment", "percent_complete", "tags", "lead", "version", "branch_tag", "build_id", "commit_hash",
                   "api_scan_configuration"]
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
 class DeleteTestForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1171,6 +1185,9 @@ class AddFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+    
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
     class Meta:
         model = Finding
@@ -1249,6 +1266,9 @@ class AdHocFindingForm(forms.ModelForm):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
@@ -1305,6 +1325,9 @@ class PromoteFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
     class Meta:
         model = Finding
@@ -1428,6 +1451,9 @@ class FindingForm(forms.ModelForm):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     def _post_clean(self):
         super()._post_clean()
 
@@ -1504,6 +1530,9 @@ class ApplyFindingTemplateForm(forms.Form):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     class Meta:
         fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "mitigation", "impact", "references", "tags"]
         order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact", "is_mitigated")
@@ -1533,6 +1562,9 @@ class FindingTemplateForm(forms.ModelForm):
         model = Finding_Template
         order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact")
         exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve")
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1587,6 +1619,9 @@ class FindingBulkUpdateForm(forms.ModelForm):
             raise forms.ValidationError(msg)
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
+
     class Meta:
         model = Finding
         fields = ("severity", "date", "planned_remediation_date", "active", "verified", "false_p", "duplicate", "out_of_scope",
@@ -1636,6 +1671,9 @@ class EditEndpointForm(forms.ModelForm):
             raise forms.ValidationError(msg, code="invalid")
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
 
 class AddEndpointForm(forms.Form):
@@ -1700,6 +1738,8 @@ class AddEndpointForm(forms.Form):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get('tags'))
 
 class DeleteEndpointForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
