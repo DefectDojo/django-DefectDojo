@@ -174,10 +174,6 @@ class ImportStatisticsSerializer(serializers.Serializer):
     )
 
 
-def validate_tags(self, value):
-        tag_validator(value, exception_class=RestFrameworkValidationError)
-        return value
-
 @extend_schema_field(
     serializers.ListField(child=serializers.CharField()),
 )  # also takes basic python types

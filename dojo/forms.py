@@ -340,7 +340,8 @@ class ProductForm(forms.ModelForm):
                 "internet_accessible", "enable_simple_risk_acceptance", "enable_full_risk_acceptance", "disable_sla_breach_notifications"]
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
+
 
 class DeleteProductForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -606,7 +607,7 @@ class ImportScanForm(forms.Form):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -715,7 +716,7 @@ class ReImportScanForm(forms.Form):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -1031,7 +1032,7 @@ class EngForm(forms.ModelForm):
         return True
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         model = Engagement
@@ -1089,7 +1090,8 @@ class TestForm(forms.ModelForm):
                   "api_scan_configuration"]
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
+
 
 class DeleteTestForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1185,9 +1187,9 @@ class AddFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
-    
+
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         model = Finding
@@ -1267,7 +1269,7 @@ class AdHocFindingForm(forms.ModelForm):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         model = Finding
@@ -1327,7 +1329,7 @@ class PromoteFindingForm(forms.ModelForm):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         model = Finding
@@ -1452,7 +1454,7 @@ class FindingForm(forms.ModelForm):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     def _post_clean(self):
         super()._post_clean()
@@ -1531,7 +1533,7 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "mitigation", "impact", "references", "tags"]
@@ -1564,7 +1566,7 @@ class FindingTemplateForm(forms.ModelForm):
         exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve")
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1620,7 +1622,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
     class Meta:
         model = Finding
@@ -1673,7 +1675,7 @@ class EditEndpointForm(forms.ModelForm):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
 
 
 class AddEndpointForm(forms.Form):
@@ -1739,7 +1741,8 @@ class AddEndpointForm(forms.Form):
         return cleaned_data
 
     def clean_tags(self):
-        tag_validator(self.cleaned_data.get('tags'))
+        tag_validator(self.cleaned_data.get("tags"))
+
 
 class DeleteEndpointForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
