@@ -60,7 +60,6 @@ class WizParserByTitle:
             "Updated At",
         ]
 
-
         # Iterate over the objects to create findings
         for row in reader:
             title = row.get("Title")
