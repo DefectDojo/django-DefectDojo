@@ -8,7 +8,7 @@ from django.urls import re_path
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
-
+from dojo.models import GeneralSettings
 from dojo import views
 from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
@@ -77,7 +77,9 @@ from dojo.api_v2.views import (
     UsersViewSet,
     ComponentViewSet,
     FindingExclusionViewSet,
+    
 )
+from dojo.api_v2.general_settings.views import GeneralSettingsViewSet
 from dojo.exclusive_permission.view import ExclusivePermissionViewSet
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -193,6 +195,7 @@ v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basena
 v2_api.register(r"transfer_finding", TransferFindingViewSet, basename="transfer_finding")
 v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, basename="transfer_finding_findings")
 v2_api.register(r"finding_exclusions", FindingExclusionViewSet, basename="finding_exclusions")
+v2_api.register(r"general_settings", GeneralSettingsViewSet, basename="general_settings")
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
@@ -281,10 +284,9 @@ if hasattr(settings, "SAML2_ENABLED"):
         # django saml2
         urlpatterns += [re_path(r"^saml2/", include("djangosaml2.urls"))]
 
-if hasattr(settings, "DJANGO_ADMIN_ENABLED"):
-    if settings.DJANGO_ADMIN_ENABLED:
-        #  django admin
-        urlpatterns += [re_path(r"^{}admin/".format(get_system_setting("url_prefix")), admin.site.urls)]
+    if hasattr(settings, "DJANGO_ADMIN_ENABLED"):
+        if settings.DJANGO_ADMIN_ENABLED:
+            urlpatterns += [re_path(r"^{}admin/".format(get_system_setting("url_prefix")), admin.site.urls)]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, "EXTRA_URL_PATTERNS"):

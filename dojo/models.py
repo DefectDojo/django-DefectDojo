@@ -3,6 +3,7 @@ import copy
 import hashlib
 import logging
 import re
+import json
 import warnings
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -43,6 +44,7 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 from dojo.engine_tools.models import *
+from dojo.api_v2.api_error import ApiError
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1643,7 +1645,7 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
-
+    
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
         import dojo.finding.helper as helper
@@ -1658,6 +1660,7 @@ class Engagement(models.Model):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+    
 
 
 class CWE(models.Model):
@@ -2426,6 +2429,10 @@ class Finding(models.Model):
                                 help_text=_("The severity level of this flaw (Critical, High, Medium, Low, Info)."))
     description = models.TextField(verbose_name=_("Description"),
                                 help_text=_("Longer more descriptive information about the flaw."))
+    ia_recommendation = models.JSONField(verbose_name=_("Recommendation"),
+                                      null=True,
+                                      blank=True,
+                                      help_text=_("Text description IA recommendation."))
     mitigation = models.TextField(verbose_name=_("Mitigation"),
                                 null=True,
                                 blank=True,
@@ -4986,7 +4993,101 @@ class ExclusivePermission(models.Model):
 
     def is_active(self):
         return self.status
+    
 
+class GeneralSettings(models.Model):
+
+    DATA_TYPE_CHOICES = (
+        ("INT", "INT"),
+        ("STRING", "STRING"),
+        ("DICT", "DICT"),
+        ("LIST", "LIST"),
+        ("BOOLEAN", "BOOLEAN"),
+    )
+
+    name_key = models.CharField(
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_("Text de IA recommendation."),
+        verbose_name=_("Name global variable"))
+    value = models.CharField(
+        verbose_name=_("General Settings"),
+        null=True,
+        blank=True,
+        help_text=_("Text de IA recommendation."))
+    
+    category = models.CharField(
+        verbose_name = _("Category"),
+        null=True,
+        blank=True,
+        unique=False,
+        help_text=_("Variable Category")
+    )
+
+    data_type = models.CharField(
+        verbose_name=_("Data Types"),
+        choices=DATA_TYPE_CHOICES,
+        null=True,
+        blank=True,
+        help_text=_("Type Data."))
+
+    description = models.CharField(
+        verbose_name=_("Description"),
+        null=True,
+        blank=True,
+        help_text=_("Description Variable")
+        )
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    status = models.BooleanField(default=True, help_text=_("Status Variable"))
+
+    class Meta:
+        verbose_name = _("Global Variable")
+        verbose_name_plural = _("Global Variables")
+
+    def __str__(self):
+        return self.name_key
+    
+    @classmethod
+    def validate_status(cls):
+        return cls.status if cls.status else False
+
+
+    @classmethod
+    def get_value(cls, name_key: str, default=None):
+        if cls.validate_status() is False:
+            return False
+        variable_object = None
+        try:
+            variable_object = GeneralSettings.objects.get(name_key=name_key)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}")
+            return default
+        rule_data_type = {
+            "INT": int,
+            "STRING": str,
+            "DICT": lambda value: json.loads(value),
+            "LIST": lambda value: value.split(","),
+            "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
+        }
+        return rule_data_type[variable_object.data_type](variable_object.value)
+
+
+    @classmethod
+    def get_list_variable_by_category(cls, category: str, default=[]):
+        if cls.validate_status() is False:
+            return False
+        variable_objects = None
+        try:
+            variable_objects = GeneralSettings.objects.filter(category=category).values_list("name_key", flat=True)
+            if not variable_objects:
+                raise ApiError.not_found(f"Category not existed: {category}")
+            return list(variable_objects)
+        except ObjectDoesNotExist as e:
+            logger.error(str(e))
+            return default
+    
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
     logger.info("enabling audit logging")
@@ -5048,6 +5149,7 @@ admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
 admin.site.register(ExclusivePermission)
+admin.site.register(GeneralSettings)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

@@ -54,6 +54,7 @@ from dojo.transfer_findings.serializers import (
     TransferFindingCreateSerializer,
     TransferFindingSerializer,
     TransferFindingFindingCreateSerializer,)
+from dojo.finding.serializer import IARecommendationSerializer
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -1269,7 +1270,37 @@ class FindingViewSet(
         serialized_notes = serializers.FindingToNotesSerializer(
             {"finding_id": finding, "notes": notes},
         )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK)
+        return Response(serialized_notes.data, status=status.HTTP_200_OK) 
+    
+    @extend_schema(
+        methods=["GET"],
+        responses={status.HTTP_200_OK: IARecommendationSerializer},
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=IARecommendationSerializer,
+        responses={status.HTTP_201_CREATED: IARecommendationSerializer},
+    )
+    @action(detail=True, methods=["get", "post"])
+    def ia_recommendation(self, request, pk=None):
+        finding = get_authorized_findings(
+            Permissions.Finding_Add_Recommendation,
+            Finding.objects.filter(id=pk),
+            request.user).first()
+        if request.method == "POST":
+            serializer = IARecommendationSerializer(
+                data=request.data,
+            )
+            if serializer.is_valid():
+                finding.ia_recommendation = serializer.validated_data
+                finding.save()
+                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+            else:
+                return http_response.bad_request(data=serializer.errors)
+        elif request.method == "GET":
+            return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+
+        return http_response.non_authoritative_information()
 
     @extend_schema(
         methods=["GET"],

@@ -383,7 +383,8 @@ class UserHasFindingPermission(permissions.BasePermission):
     path_finding_bulk_close = re.compile(r"^/api/v2/findings/bulk_close/$")
 
     def has_permission(self, request, view):
-        if UserHasFindingPermission.path_finding_bulk_close.match(request.path):
+        if UserHasFindingPermission. \
+                path_finding_bulk_close.match(request.path):
             return user_has_global_permission(
                 request.user,
                 permission=Permissions.Finding_Bulk_Close)
@@ -1099,3 +1100,18 @@ class IsAPIImporter(permissions.BasePermission):
                 if request.user.global_role.role.name in ["API_Importer", "Maintainer"]:
                     return True
         return False
+
+
+class UserHasPermissionGeneralSettings(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                return user_has_global_permission(
+                    request.user,
+                    Permissions.General_Settings_Add,
+)    
+        return False
+

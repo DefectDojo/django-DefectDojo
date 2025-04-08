@@ -496,9 +496,12 @@ env = environ.FileAwareEnv(
     
     # Priorization
     DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
+    # Host IA recommendation
+    DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
     # Regex Validation Name
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\_\-\.\s]+$"),
 )
+
 
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
@@ -2256,6 +2259,8 @@ LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
 LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
 PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED")
 TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
+# IA Recommendation
+HOST_IA_RECOMMENDATION = env("DD_HOST_IA_RECOMMENDATION")
 
 # ------------------------------------------------------------------------------
 # CACHE REDIS

@@ -1643,7 +1643,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ["url", "thread_id", "notes", "files",
-                   "line", "cve"]
+                   "line", "cve", "ia_recommendation"]
 
     def filter_mitigated_after(self, queryset, name, value):
         if value.hour == 0 and value.minute == 0 and value.second == 0:
@@ -3092,7 +3092,7 @@ class ReportFindingFilterHelper(FilterSet):
                    "references", "sonarqube_issue", "duplicate_finding",
                    "thread_id", "notes", "inherited_tags", "endpoints",
                    "numerical_severity", "reporter", "last_reviewed",
-                   "jira_creation", "jira_change", "files"]
+                   "jira_creation", "jira_change", "files", "ia_recommendation"]
 
     def manage_kwargs(self, kwargs):
         self.prod_type = None

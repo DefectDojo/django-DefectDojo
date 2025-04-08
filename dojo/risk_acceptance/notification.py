@@ -3,7 +3,7 @@ from typing import List
 from django.urls import reverse
 from django.conf import settings
 from dojo.notifications.helper import create_notification
-from dojo.models import Finding, Risk_Acceptance, Dojo_User
+from dojo.models import Finding, Risk_Acceptance, Dojo_User, System_Settings
 from crum import get_current_user
 
 
@@ -118,8 +118,7 @@ class Notification:
     
     @staticmethod
     def proccess_confirmation(risk_pending: Risk_Acceptance, user_leader: Dojo_User,  error:str = "", product="", product_type=""):
-        """sends notification depending on the event 
-       
+        """sends notification depending on the event
 
         Args:
             risk_pending (Risk_Acceptance): Riks Acceptance Object
@@ -154,7 +153,7 @@ class Notification:
             "Token is expired": {
                 "title": "An error occurred in the acceptance process, Url has expired",
                 "description": f"""The acceptance URL has expired, more than {int(settings.LIFETIME_HOURS_PERMISSION_KEY/24)} days passed since this URL was created.
-                    <strong>{risk_pending.owner.get_short_name()}</strong> must refresh the URL in Vultracker so you can continue with the acceptance process""",
+                    <strong>{risk_pending.owner.get_short_name()}</strong> must refresh the URL in {System_Settings.objects.get().team_name} so you can continue with the acceptance process""",
                 "subject": f"❌ Error, The acceptance process was not completed Risk_Acceptance ID: {risk_pending.id}🔔",
                 "icon": "check-circle",
                 "color_icon": "#B90C0C",
