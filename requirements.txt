@@ -13,7 +13,7 @@ django-imagekit==5.0.0
 django-multiselectfield==0.1.13
 django-polymorphic==3.1.0
 django-crispy-forms==2.3
-django_extensions==3.2.3
+django_extensions==4.0
 django-slack==5.19.0
 # This library is very outdated and not directly. It is used solely for migration
 # purposes to django-tagulous, so it must stay
