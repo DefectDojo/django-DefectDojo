@@ -70,7 +70,6 @@ docs/_build/
 .DS_Store
 *.crt
 *.csr
-*.key
 dojo/migrations
 dojo/static/img/threat/*
 dojo/uploads/risk/*
