@@ -1699,61 +1699,27 @@
             }
         }
 
-        async function get_ia_recommendation(finding_id, apiUrl) {
-            try {
-                // Obtener el token de autenticación
-                const token = await get_ia_auth(finding_id);
-                console.log(token.data.access_token);
-                console.log(apiUrl);
-        
-                // Mostrar el spinner mientras se realiza la solicitud
-                $('#spinnerLoading').css('display', 'flex');
-                $('#id_button_ia_recommendation').prop('disabled', true);
-        
-                // Realizar la solicitud con fetch
-                const response = await fetch(`${apiUrl}/devsecops/recommendation-process/362488`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token.data.access_token}`,
-                    }
-                    agent: agent
-                });
-        
-                // Verificar si la respuesta fue exitosa
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+        function get_ia_recommendation(finding_id, apiUrl) {
+            $.ajax({
+                url: "/finding/" + finding_id + "/generative_ia/token",
+                type: "GET",
+                headers: { 
+                  "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"
+                },
+                beforeSend: function() {
+                    $('#spinnerLoading').css('display', 'flex');
+                    $('#id_button_ia_recommendation').prop('disabled', true);
+                },
+                success: function(response) {
+                    add_ia_recommendation(finding_id, response)
+                    FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
+                    $('#id_button_ia_recommendation').prop('disabled', false);
+                },
+                error: function(error) {
+                    console.log(error)
                 }
-        
-                // Parsear la respuesta como JSON
-                const data = await response.json();
-                console.log("response", data);
-        
-                // Llamar a las funciones con los datos obtenidos
-                await add_ia_recommendation(finding_id, data);
-                FormaterHtmlRecommendation(data.data, "#id_recommendation_content");
-        
-                // Habilitar el botón después de recibir la respuesta
-                $('#id_button_ia_recommendation').prop('disabled', false);
-            } catch (error) {
-                // Manejo de errores
-                console.error("error", error);
-            }
-        }
-
-        async function get_ia_auth(finding_id){
-            try{
-              response = await $.ajax({
-                  url: "/finding/" + finding_id + "/generative_ia/token",
-                  type: "GET",
-                  headers: { 
-                    "X-CSRFToken": csrftoken,
-                    "Content-Type": "application/json"
-                  }
-              })
-              return response
-            } catch(error){
-                throw error
-            }
+            });  
         }
        
         $(document).ready(function() {
