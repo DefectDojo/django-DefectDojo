@@ -498,8 +498,11 @@ env = environ.FileAwareEnv(
     DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
     # Host IA recommendation
     DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
+    DD_CLIENT_ID_IA=(str, ""),
+    DD_CLIENT_SECRET_IA=(str, ""),
+
     # Regex Validation Name
-    DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\_\-\.\s]+$"),
+    DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
 )
 
 
@@ -2261,6 +2264,19 @@ PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLO
 TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
 # IA Recommendation
 HOST_IA_RECOMMENDATION = env("DD_HOST_IA_RECOMMENDATION")
+
+
+CLIENT_ID_IA = (
+    get_secret(env("DD_SECRET_APP"))["client_id_ia"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_CLIENT_ID_IA")
+)
+
+CLIENT_SECRET_IA = (
+    get_secret(env("DD_SECRET_APP"))["client_secret_ia"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_CLIENT_SECRET_IA")
+)
 
 # ------------------------------------------------------------------------------
 # CACHE REDIS

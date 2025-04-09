@@ -208,5 +208,6 @@ urlpatterns = [
     re_path(r"^finding/(?P<fid>\d+)/jira/unlink$", views.unlink_jira, name="finding_unlink_jira"),
     re_path(r"^finding/(?P<fid>\d+)/jira/push$", views.push_to_jira, name="finding_push_to_jira"),
     # re_path(r'^finding/(?P<fid>\d+)/jira/push', views.finding_link_to_jira, name='finding_link_to_jira'),
+    re_path(r"^finding/(?P<fid>\d+)/generative_ia/token$", views.generate_token_generative_ia, name="generative_ia_token"),
 
 ]

@@ -706,6 +706,7 @@ def rule_repository_enable_ia_recommendation(*args, **kwargs):
     if engagement.source_code_management_server is not None:
         if engagement.source_code_management_server.name in repositories:
             return True
+    logger.debug("Repository IA_RECOMMENDATION not pass rule: %s or %s", engagement.source_code_management_server.name)
     return False
 
 
@@ -719,6 +720,8 @@ def rule_cve_enable_ia_recommendation(*args, **kwargs):
         if Vulnerability_Id is not None
     ):
         return True
+    logger.debug("CVE IA_RECOMMENDATION not pass rule: %s or %s",
+                 finding.vuln_id_from_tool, finding.cve)
     return False
 
 
@@ -740,6 +743,8 @@ def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
     if (product.prod_type.name in product_types_enabled and
        product.name not in product_exclude):
         return True
+    logger.debug("Product or product_type IA_RECOMMENDATION not pass rule: %s",
+                 product.prod_type.name, finding.cve)
     return False
 
 
@@ -754,8 +759,5 @@ def enable_flow_ia_recommendation(**kwargs):
 
     for rule in rules_list:
         if rule(finding=finding) is False:
-            logger.debug(
-                "No enabled IA recommendation for finding %s rule %s",
-                finding.id, rule.__name__)
             return False
     return True

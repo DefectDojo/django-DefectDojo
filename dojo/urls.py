@@ -196,6 +196,7 @@ v2_api.register(r"transfer_finding", TransferFindingViewSet, basename="transfer_
 v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, basename="transfer_finding_findings")
 v2_api.register(r"finding_exclusions", FindingExclusionViewSet, basename="finding_exclusions")
 v2_api.register(r"general_settings", GeneralSettingsViewSet, basename="general_settings")
+v2_api.register(r"ia_recommendation", GeneralSettingsViewSet, basename="ia_recommendation")
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
