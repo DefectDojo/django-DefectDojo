@@ -1694,32 +1694,55 @@
                   data: JSON.stringify(recommendation),
               })
               return response
-            }
-            catch(error){
-              throw error
+            } catch(error){
+                throw error
             }
         }
 
-        function get_ia_recommendation(finding_id, apiUrl) {
-            $.ajax({
-                url: `${apiUrl}/full-remediation-process/${finding_id}`,
-                type: "GET",
-                beforeSend: function() {
-                    $('#spinnerLoading').css('display', 'flex');
-                    $('#id_button_ia_recommendation').prop('disabled', true);
-                },
-                success: function(response) {
-                    add_ia_recommendation(finding_id, response)
-                    FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
-                    $('#id_button_ia_recommendation').prop('disabled', false);
-                },
-                error: function(error) {
-                    console.log(error)
-                }
-            });
+        async function get_ia_recommendation(finding_id, apiUrl) {
+            try {
+                const token = await get_ia_auth(finding_id);
+                console.log(token.access_token);
+                $.ajax({
+                    url: `${apiUrl}/devsecops/recommendation-process/${finding_id}`,
+                    type: "GET",
+                    headers: {
+                        'Authorization': `Bearer ${token.data.access_token}`,
+                      },
+                    beforeSend: function() {
+                        $('#spinnerLoading').css('display', 'flex');
+                        $('#id_button_ia_recommendation').prop('disabled', true);
+                    },
+                    success: function(response) {
+                        add_ia_recommendation(finding_id, response)
+                        FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
+                        $('#id_button_ia_recommendation').prop('disabled', false);
+                    },
+                    error: function(error) {
+                        console.log(error)
+                    }
+                });  
+            } catch (error) {
+                throw error
+            }
         }
-    
-   
+
+        async function get_ia_auth(finding_id){
+            try{
+              response = await $.ajax({
+                  url: "/finding/" + finding_id + "/generative_ia/token",
+                  type: "GET",
+                  headers: { 
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                  }
+              })
+              return response
+            } catch(error){
+                throw error
+            }
+        }
+       
         $(document).ready(function() {
             $('#id_button_ia_recommendation').click(async function(event)
             {
