@@ -1730,7 +1730,7 @@
         async function get_ia_auth(finding_id){
             try{
               response = await $.ajax({
-                  url: "/api/v2/finding/" + finding_id + "/generative_ia/token",
+                  url: "/finding/" + finding_id + "/generative_ia/token",
                   type: "GET",
                   headers: { 
                     "X-CSRFToken": csrftoken,
