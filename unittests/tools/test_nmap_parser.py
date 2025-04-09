@@ -8,7 +8,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestNmapParser(DojoTestCase):
 
     def test_parse_file_with_no_open_ports_has_no_findings(self):
-        with open(get_unit_tests_scans_path("nmap") / "nmap_0port.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("nmap") / "nmap_0port.xml").open(encoding="utf-8") as testfile:
             parser = NmapParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -17,7 +17,7 @@ class TestNmapParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_open_ports_has_single_finding(self):
-        with open(get_unit_tests_scans_path("nmap") / "nmap_1port.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("nmap") / "nmap_1port.xml").open(encoding="utf-8") as testfile:
             parser = NmapParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -37,7 +37,7 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("tcp", endpoint.protocol)
 
     def test_parse_file_with_multiple_open_ports_has_multiple_finding(self):
-        with open(get_unit_tests_scans_path("nmap") / "nmap_multiple_port.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("nmap") / "nmap_multiple_port.xml").open(encoding="utf-8") as testfile:
             parser = NmapParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -57,7 +57,7 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("tcp", endpoint.protocol)
 
     def test_parse_file_with_script_vulner(self):
-        with open(get_unit_tests_scans_path("nmap") / "nmap_script_vulners.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("nmap") / "nmap_script_vulners.xml").open(encoding="utf-8") as testfile:
             parser = NmapParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -83,7 +83,7 @@ class TestNmapParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[2].date)
 
     def test_parse_issue4406(self):
-        with open(get_unit_tests_scans_path("nmap") / "issue4406.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("nmap") / "issue4406.xml").open(encoding="utf-8") as testfile:
             parser = NmapParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
