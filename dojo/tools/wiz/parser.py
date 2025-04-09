@@ -25,6 +25,7 @@ class WizParserByTitle:
         test file: https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/scans/wiz/multiple_findings.csv
         """
         findings = []
+
         description_fields = [
             "Description",
             "Resource Type",
@@ -51,42 +52,34 @@ class WizParserByTitle:
             "Kubernetes Cluster",
             "Kubernetes Namespace",
             "Container Service",
+            "Provider ID",
+            "Risks",
+            "Threats"
+            "Created At",
+            "Status Changed At",
+            "Updated At",
         ]
+
         # Iterate over the objects to create findings
         for row in reader:
             title = row.get("Title")
+            issue_id = row.get("Issue ID")
             severity = row.get("Severity")
             mitigation = row.get("Remediation Recommendation")
+
+            if row.get("Resolution"):
+                mitigation += "\nResolution: " + row.get("Resolution")
+
             description = ""
             status_dict = WizcliParsers.convert_status(row.get("Status", None))
+            date = parse_wiz_datetime(row, "Created At")
             if status_dict.get("is_mitigated", False):
                 # If the finding is mitigated, set the date to the mitigation date
                 mitigated_timestamp = None
 
                 if row.get("Resolved Time", None):
-                    with contextlib.suppress(ValueError):
-                        mitigated_timestamp = date_parser.parse(row.get("Resolved Time"))
-
-                    if not mitigated_timestamp:
-                        # other timestamps in the wiz scans are ISO8601
-                        # but the Resolved Time is in a different format based on data we've seen
-                        # example value: 2025-04-03 20:20:00.43042 +0000 UTC
-
-                        resolved_time_string = row.get("Resolved Time")
-                        # need to use suppress as try-except ValueError doesn't work here for some reason
-
-                        #   File "/usr/local/lib/python3.11/_strptime.py", line 352, in _strptime
-                        #     raise ValueError("unconverted data remains: %s" %
-                        # ValueError: unconverted data remains: CET
-                        with contextlib.suppress(ValueError):
-                            mitigated_timestamp = datetime.strptime(
-                                resolved_time_string, "%Y-%m-%d %H:%M:%S.%f %z %Z",
-                            )
-
-                        if not mitigated_timestamp:
-                            logger.warning(f"Unable to parse Resolved Time: {resolved_time_string}")
-
-                    status_dict["mitigated"] = mitigated_timestamp
+                    mitigated_timestamp = parse_wiz_datetime(row, "Resolved Time")
+                    status_dict["mitigated"] = mitigated_timestamp or None
 
             # Iterate over the description fields to create the description
             for field in description_fields:
@@ -96,10 +89,12 @@ class WizParserByTitle:
             findings.append(
                 Finding(
                     title=title,
+                    date=date,
                     description=description,
                     severity=severity.lower().capitalize(),
                     static_finding=False,
                     dynamic_finding=True,
+                    unique_id_from_tool=issue_id,
                     mitigation=mitigation,
                     test=test,
                     **status_dict,
@@ -232,3 +227,39 @@ class WizParser(
             return WizParserByDetailedName().parse_findings(test, reader)
         msg = "This CSV format of Wiz is not supported"
         raise ValueError(msg)
+
+
+def parse_wiz_datetime(row: dict, column: str) -> datetime:
+    """
+    Parse the Wiz datetime string to a datetime object.
+
+    The format of the date is "2025-04-03 20:20:00.43042 +0000 UTC"
+    """
+    value = row.get(column)
+    if value is None:
+        return None
+
+    parsed_value = None
+
+    # Try default parser first
+    with contextlib.suppress(ValueError):
+        parsed_value = date_parser.parse(value)
+
+    # other timestamps in the wiz scans are ISO8601
+    # but the Resolved Time is in a different format based on data we've seen
+    # example value: 2025-04-03 20:20:00.43042 +0000 UTC
+
+    # need to use suppress as try-except ValueError doesn't work here for some reason
+    #   File "/usr/local/lib/python3.11/_strptime.py", line 352, in _strptime
+    #     raise ValueError("unconverted data remains: %s" %
+    # ValueError: unconverted data remains: CET
+    if not parsed_value:
+        with contextlib.suppress(ValueError):
+            parsed_value = datetime.strptime(
+                value, "%Y-%m-%d %H:%M:%S.%f %z %Z",
+            )
+
+    if not parsed_value:
+        logger.warning(f"Unable to parse Resolved Time: {value}")
+
+    return parsed_value
