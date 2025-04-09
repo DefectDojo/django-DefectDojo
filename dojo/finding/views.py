@@ -3604,12 +3604,21 @@ def generate_token_generative_ia(request, fid):
         "Content-Type": "application/x-www-form-urlencoded"
     }
     response = requests.request("POST",
-                                url,
+                                url=f"{url}/auth/login",
                                 headers=headers,
                                 data=payload,
                                 verify=False)
     if response.status_code != 200:
         logger.error("Error generating token for IA recommendation: %s", response.text)
         raise ApiError.internal_server_error(response.text)
+
+    # get Recommendation
+    headers = {
+        "Authorization": f"Bearer {response.json()["data"]['access_token']}",
+    }
+    response = requests.request("GET",
+                                url=f"{url}/devsecops/recommendation-process/{fid}",
+                                headers=headers,
+                                verify=False)
 
     return JsonResponse(response.json())
