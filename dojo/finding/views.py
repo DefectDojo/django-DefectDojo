@@ -3607,18 +3607,18 @@ def generate_token_generative_ia(request, fid):
                                 url=f"{url}/auth/login",
                                 headers=headers,
                                 data=payload,
-                                verify=False)
+                                )
     if response.status_code != 200:
         logger.error("Error generating token for IA recommendation: %s", response.text)
         raise ApiError.internal_server_error(response.text)
 
     # get Recommendation
-    headers = {
-        "Authorization": f"Bearer {response.json()["data"]['access_token']}",
-    }
+    access_token = response.json()["data"]["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
     response = requests.request("GET",
-                                url=f"{url}/devsecops/recommendation-process/{fid}",
+                                url=f"{url}/devsecops/recommendation-process/362488",
                                 headers=headers,
-                                verify=False)
+                                )
 
     return JsonResponse(response.json())
