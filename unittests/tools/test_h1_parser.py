@@ -61,6 +61,9 @@ class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
                 self.assertEqual(False, findings[3].active)
                 self.assertEqual(True, findings[3].is_mitigated)
                 self.assertEqual(mock_now.return_value.date(), findings[3].mitigated.date())
+                self.assertEqual(6.3, findings[3].cvssv3_score)
+                self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", findings[3].cvssv3)
+                self.assertIn("**Asset Identifier**: example.com", findings[3].description)
 
 
 class HackerOneBugBountyProgramTests(DojoTestCase):

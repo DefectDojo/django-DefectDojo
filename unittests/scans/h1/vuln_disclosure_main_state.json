@@ -483,7 +483,9 @@
                 "integrity": "medium",
                 "privileges_required": "low",
                 "user_interaction": "required",
-                "scope": "changed"
+                "scope": "changed",
+                "calculation_method": "cvss_3_0_hackerone",
+                "cvss_vector_string": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
               }
             }
           },

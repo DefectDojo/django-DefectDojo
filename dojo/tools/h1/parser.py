@@ -6,6 +6,9 @@ from contextlib import suppress
 from datetime import datetime
 from typing import ClassVar
 
+
+from cvss.cvss3 import CVSS3
+import cvss.parser
 from dateutil import parser as date_parser
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.utils import timezone
@@ -50,6 +53,21 @@ class HackerOneVulnerabilityDisclosureProgram:
                     severity = "Info"
             except Exception:
                 severity = "Info"
+
+            # Try to grab CVSS fields
+            if cvssv3_score := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("score"):
+                description += f"CVSS: {cvssv3_score}\n"
+
+            cvssv3_vector = None
+            if cvss_vector_string := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("cvss_vector_string"):
+                print("CVSSv3 vector string: " + cvss_vector_string)
+                vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
+                if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+                    print("CVSSv3 vector found")
+                    cvssv3_vector = vectors[0].clean_vector()
+                    if cvssv3_score is None:
+                        cvssv3_score = vectors[0].scores()[0]
+
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(
                 content.get("id"),
@@ -106,8 +124,15 @@ class HackerOneVulnerabilityDisclosureProgram:
                     references=references,
                     cwe=cwe,
                     dynamic_finding=False,
+                    cvssv3=cvssv3_vector,
+                    cvssv3_score=cvssv3_score,
                 )
                 finding.unsaved_endpoints = []
+
+                # Add vulnerability IDs if they are present
+                if (cve_ids := content["attributes"].get("cve_ids")) is not None and len(cve_ids) > 0:
+                    finding.unsaved_vulnerability_ids = cve_ids
+
                 dupes[dupe_key] = finding
         return list(dupes.values())
 
@@ -132,14 +157,29 @@ class HackerOneVulnerabilityDisclosureProgram:
             )
             description += f"Triaged: {triaged_date}\n"
 
-        # Try to grab CVSS
-        if cvss := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("score"):
-            description += f"CVSS: {cvss}\n"
-
         # Build rest of description meat
         description += "##Report: \n{}\n".format(
             content["attributes"]["vulnerability_information"],
         )
+
+        structured_scope_fields_to_label: dict[str, str] = {
+                "asset_identifier": "Asset Identifier",
+                "asset_type": "Asset Type",
+                "confidentiality_requirement": "Confidentiality Requirement",
+                "integrity_requirement": "Integrity Requirement",
+                "availability_requirement": "Availability Requirement",
+                "max_severity": "Max Severity",
+                "instruction": "Instruction",
+                "eligible_for_bounty": "Eligible for Bounty",
+                "eligible_for_submission": "Eligible for Submission",
+                "reference": "Reference",
+        }
+
+        if structured_scope_attributes := content.get("relationships", {}).get("structured_scope", {}).get("data", {}).get("attributes", {}):
+            description += "\n##Structured Scope:\n"
+            for field, label in structured_scope_fields_to_label.items():
+                if (value := structured_scope_attributes.get(field)) is not None:
+                    description += f"**{label}**: {value}\n"
 
         # Try to grab weakness if it's there
         if weakness_title := content.get("relationships", {}).get("weakness", {}).get("data", {}).get("attributes", {}).get("name"):
