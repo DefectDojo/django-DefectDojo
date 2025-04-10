@@ -2,7 +2,7 @@ from datetime import date, datetime
 from unittest.mock import patch
 
 from dateutil import parser as date_parser
-from django.utils import timezone
+
 from dojo.models import Test
 from dojo.tools.h1.parser import H1Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -14,12 +14,18 @@ class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
+            self.assertEqual(True, findings[0].active)
+            self.assertEqual(False, findings[0].is_mitigated)
+            self.assertEqual(True, findings[1].active)
+            self.assertEqual(False, findings[1].is_mitigated)
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_one.json", encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.assertEqual(True, findings[0].active)
+            self.assertEqual(False, findings[0].is_mitigated)
 
     def test_parse_file_with_no_vuln_has_no_finding(self):
         with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_zero.json", encoding="utf-8") as testfile:

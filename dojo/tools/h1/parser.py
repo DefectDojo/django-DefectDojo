@@ -4,11 +4,11 @@ import io
 import json
 from contextlib import suppress
 from datetime import datetime
-from django.utils import timezone
 from typing import ClassVar
 
 from dateutil import parser as date_parser
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.utils import timezone
 
 from dojo.models import Finding, Test
 
