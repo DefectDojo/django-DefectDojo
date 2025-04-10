@@ -59,7 +59,7 @@ class HackerOneVulnerabilityDisclosureProgram:
             # Set active state of the Dojo finding
             active = True
             if "main_state" in content["attributes"]:
-                active = content["attributes"]["main_state"] == "open"
+                active = content["attributes"]["main_state"] != "closed"
             else:
                 # If there is no main_state, we assume keep the old logic
                 active = content["attributes"]["state"] in {"triaged", "new"}
