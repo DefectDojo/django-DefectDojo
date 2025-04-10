@@ -13,7 +13,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 ### Apr 7, 2025: v2.45.0
 - **(Beta UI)** Added Calendar view to Beta UI: Calendar view now displays Tests and Engagements, and can be filtered.  Clicking on a Calendar entry now displays a more detailed description of the object.
 ![image](images/pro_calendar_view.png)
-- **(Universal Parser)** Added the ability to map an EPSS score from a file.  Note that this field **will** be updated by EPSS database sync, but this gives a user to capture that field from initial import.
+- **(Universal Parser)** Added the ability to map an EPSS score from a file.  Note that this field **will** be updated by EPSS database sync, but this gives a user the ability to capture that field from initial import.
 
 ## Mar 2025: v2.44
 
