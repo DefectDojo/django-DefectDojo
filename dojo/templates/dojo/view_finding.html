@@ -1712,6 +1712,7 @@
                     $('#id_button_ia_recommendation').prop('disabled', true);
                 },
                 success: function(response) {
+                    if (response.status === 'ERROR') return;
                     add_ia_recommendation(finding_id, response)
                     FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
                     $('#id_button_ia_recommendation').prop('disabled', false);
