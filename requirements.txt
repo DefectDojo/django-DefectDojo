@@ -4,7 +4,7 @@ bleach==6.2.0
 bleach[css]
 celery==5.5.1
 defusedxml==0.7.1
-django_celery_results==2.5.1
+django_celery_results==2.6.0
 django-auditlog==3.0.0
 django-dbbackup==4.2.1
 django-environ==0.12.0
