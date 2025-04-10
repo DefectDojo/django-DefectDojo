@@ -6,9 +6,8 @@ from contextlib import suppress
 from datetime import datetime
 from typing import ClassVar
 
-
-from cvss.cvss3 import CVSS3
 import cvss.parser
+from cvss.cvss3 import CVSS3
 from dateutil import parser as date_parser
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.utils import timezone
@@ -60,10 +59,8 @@ class HackerOneVulnerabilityDisclosureProgram:
 
             cvssv3_vector = None
             if cvss_vector_string := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("cvss_vector_string"):
-                print("CVSSv3 vector string: " + cvss_vector_string)
                 vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
                 if len(vectors) > 0 and type(vectors[0]) is CVSS3:
-                    print("CVSSv3 vector found")
                     cvssv3_vector = vectors[0].clean_vector()
                     if cvssv3_score is None:
                         cvssv3_score = vectors[0].scores()[0]
