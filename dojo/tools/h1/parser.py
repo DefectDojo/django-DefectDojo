@@ -4,6 +4,7 @@ import io
 import json
 from contextlib import suppress
 from datetime import datetime
+from django.utils import timezone
 from typing import ClassVar
 
 from dateutil import parser as date_parser
@@ -56,7 +57,19 @@ class HackerOneVulnerabilityDisclosureProgram:
             references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
-            active = content["attributes"]["state"] in {"triaged", "new"}
+            active = True
+            if "main_state" in content["attributes"]:
+                active = content["attributes"]["main_state"] == "open"
+            else:
+                # If there is no main_state, we assume keep the old logic
+                active = content["attributes"]["state"] in {"triaged", "new"}
+
+            is_mitigated = False
+            mitigated = None
+            if not active:
+                is_mitigated = not active
+                if is_mitigated:
+                    mitigated = date_parser.parse(content["attributes"]["closed_at"]) if content["attributes"].get("closed_at") else timezone.now()
 
             # Set CWE of the Dojo finding
             try:
@@ -84,6 +97,8 @@ class HackerOneVulnerabilityDisclosureProgram:
                     date=date,
                     test=test,
                     active=active,
+                    is_mitigated=is_mitigated,
+                    mitigated=mitigated,
                     description=description,
                     severity=severity,
                     mitigation="See description",

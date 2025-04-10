@@ -1,5 +1,8 @@
-from dateutil import parser as date_parser
+from datetime import date, datetime
+from unittest.mock import patch
 
+from dateutil import parser as date_parser
+from django.utils import timezone
 from dojo.models import Test
 from dojo.tools.h1.parser import H1Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -23,6 +26,35 @@ class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
+
+    def test_parse_file_with_multiple_vuln_has_multiple_finding_including_closed_findings(self):
+        with patch("django.utils.timezone.now") as mock_now:
+            mock_now.return_value = datetime(2024, 10, 1, 12, 0, 0)
+
+            with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_main_state.json", encoding="utf-8") as testfile:
+                parser = H1Parser()
+                findings = parser.get_findings(testfile, Test())
+                self.assertEqual(4, len(findings))
+
+            with self.subTest(i=1):
+                self.assertEqual(True, findings[0].active)
+                self.assertEqual(False, findings[0].is_mitigated)
+                self.assertEqual(None, findings[0].mitigated)
+
+            with self.subTest(i=2):
+                self.assertEqual(True, findings[1].active)
+                self.assertEqual(False, findings[1].is_mitigated)
+                self.assertEqual(None, findings[1].mitigated)
+
+            with self.subTest(i=3):
+                self.assertEqual(False, findings[2].active)
+                self.assertEqual(True, findings[2].is_mitigated)
+                self.assertEqual(date(2016, 10, 3), findings[2].mitigated.date())
+
+            with self.subTest(i=4):
+                self.assertEqual(False, findings[3].active)
+                self.assertEqual(True, findings[3].is_mitigated)
+                self.assertEqual(mock_now.return_value.date(), findings[3].mitigated.date())
 
 
 class HackerOneBugBountyProgramTests(DojoTestCase):
