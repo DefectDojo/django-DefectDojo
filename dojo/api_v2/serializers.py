@@ -118,7 +118,7 @@ from dojo.tools.factory import (
     requires_tool_type,
 )
 from dojo.user.utils import get_configuration_permissions_codenames
-from dojo.utils import is_scan_file_too_large
+from dojo.utils import is_scan_file_too_large, tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -225,6 +225,8 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
+            # Validate the tag to ensure it doesn't contain invalid characters
+            tag_validator(s, exception_class=RestFrameworkValidationError)
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
             data_safe.extend(substrings)
 
