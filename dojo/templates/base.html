@@ -1103,17 +1103,19 @@
                     function() { $(this).popover('show'); }, // hover
                     function() { $(this).popover('hide'); } // unhover
                 );
+                
+                {% if request.user.is_authenticated %}
+                    function session_notifcation() {
+                        var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
+                        var currentTime = Math.floor(Date.now() / 1000);  // Get current timestamp in seconds
+                        var timeout = warningTime - currentTime; // how many seconds until warning needs to show
 
-                function session_notifcation() {
-                    var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
-                    var currentTime = Math.floor(Date.now() / 1000);  // Get current timestamp in seconds
-                    var timeout = warningTime - currentTime; // how many seconds until warning needs to show
-
-                    setTimeout(() => {
-                        $("#sessionTimeoutModal").modal("show");
-                    }, timeout * 1000);
-                }  
-                session_notifcation();
+                        setTimeout(() => {
+                            $("#sessionTimeoutModal").modal("show");
+                        }, timeout * 1000);
+                    }  
+                    session_notifcation();
+                {% endif %}
 
                 {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
                     function get_alerts() {
