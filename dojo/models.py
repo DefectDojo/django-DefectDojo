@@ -67,7 +67,7 @@ IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, "created"),
     (IMPORT_CLOSED_FINDING, "closed"),
     (IMPORT_REACTIVATED_FINDING, "reactivated"),
-    (IMPORT_UNTOUCHED_FINDING, "left untouched"),
+    (IMPORT_UNTOUCHED_FINDING, "untouched"),
 ]
 
 
