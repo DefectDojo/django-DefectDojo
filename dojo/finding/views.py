@@ -1,4 +1,5 @@
 # #  findings
+import requests
 import base64
 import contextlib
 import copy
@@ -17,6 +18,7 @@ from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Length
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
+from dojo.api_v2.api_error import ApiError
 from django.shortcuts import get_object_or_404, render
 from django.template.defaultfilters import pluralize
 from django.urls import reverse
@@ -103,6 +105,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     User,
     Vulnerability_Id_Template,
+    GeneralSettings
 )
 from dojo.notifications.helper import create_notification
 from dojo.test.queries import get_authorized_tests
@@ -3591,3 +3594,31 @@ def calculate_possible_related_actions_for_similar_finding(
                 ))
 
     return actions
+
+
+@user_is_authorized(Finding, Permissions.Finding_View, "fid")
+def generate_token_generative_ia(request, fid):
+    url = GeneralSettings.get_value("HOST_LOGIN_IA_RECOMMENDATION", "")
+    payload = f"grant_type=client_credentials&client_id={settings.CLIENT_ID_IA}&client_secret={settings.CLIENT_SECRET_IA}"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    response = requests.request("POST",
+                                url=f"{url}/auth/login",
+                                headers=headers,
+                                data=payload,
+                                )
+    if response.status_code != 200:
+        logger.error("Error generating token for IA recommendation: %s", response.text)
+        raise ApiError.internal_server_error(response.text)
+
+    # get Recommendation
+    access_token = response.json()["data"]["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
+    response = requests.request("GET",
+                                url=f"{url}/devsecops/recommendation-process/362488",
+                                headers=headers,
+                                )
+
+    return JsonResponse(response.json())
