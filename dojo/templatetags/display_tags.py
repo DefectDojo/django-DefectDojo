@@ -1130,7 +1130,7 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
 def render_ia_recommendation(ia_recommendation: str):
     data = ia_recommendation.get("data")
     if not data or not all(key in data for key in ["recommendations", "mitigations", "files_to_fix"]):
-        return None
+        return "An error occurred. Please click the 'Recommendation AI' 🤖 button to try again."
         
     rendered = render_to_string("dojo/ia_recommendation.html", {
         "recommendations": data["recommendations"],
