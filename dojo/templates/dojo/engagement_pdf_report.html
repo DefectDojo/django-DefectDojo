@@ -110,15 +110,17 @@
                             <div class="panel panel-info endpoints table-responsive">
                                 {% colgroup endpoints into 2 cols as grouped_items %}
                                 <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                    {% for row in grouped_items %}
-                                        <tr>
-                                            {% for item in row %}
-                                                <td>{% if item %}<i class="fa-solid fa-circle"></i>
-                                                    {{ item }}{% endif %}
-                                                </td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
+                                    {% if grouped_items|length > 0 %}
+                                        {% for row in grouped_items %}
+                                            <tr>
+                                                {% for item in row %}
+                                                    <td>{% if item %}<i class="fa-solid fa-circle"></i>
+                                                        {{ item }}{% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
                                 </table>
                             </div>
                         </div>
