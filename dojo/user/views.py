@@ -26,6 +26,8 @@ from django.utils.http import urlencode
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
+from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import urlparse
 
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -73,6 +75,25 @@ class DojoLoginView(LoginView):
             _("Hello %s! Your last login was %s (%s)") % (name, naturaltime(last_login), last_login.strftime("%Y-%m-%d %I:%M:%S %p")),
             extra_tags="alert-success")
         return response
+
+    def get_redirect_url(self):
+        redirect_to = self.request.GET.get(self.redirect_field_name)
+
+        if not url_has_allowed_host_and_scheme(
+            url=redirect_to,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return None
+
+        if redirect_to:
+            parsed = urlparse(redirect_to)
+            path = parsed.path.lstrip('/').lower()
+            if path.startswith('logout'):
+                return None  # block redirecting to logout after login
+
+        return redirect_to
+
 
 
 # #  Django Rest Framework API v2
