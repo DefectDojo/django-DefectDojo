@@ -1128,12 +1128,13 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
 
 @register.filter()
 def render_ia_recommendation(ia_recommendation: str):
-    if not ia_recommendation or ia_recommendation["status"] == "ERROR":
+    data = ia_recommendation.get("data")
+    if not data or not all(key in data for key in ["recommendations", "mitigations", "files_to_fix"]):
         return None
         
     rendered = render_to_string("dojo/ia_recommendation.html", {
-        "recommendations": ia_recommendation["data"]["recommendations"],
-        "mitigations": ia_recommendation["data"]["mitigations"],
-        "files_to_fix": ia_recommendation["data"]["files_to_fix"]
+        "recommendations": data["recommendations"],
+        "mitigations": data["mitigations"],
+        "files_to_fix": data["files_to_fix"]
     })
     return rendered
