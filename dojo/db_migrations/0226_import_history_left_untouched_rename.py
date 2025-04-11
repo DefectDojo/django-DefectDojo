@@ -3,25 +3,25 @@
 from django.db import migrations, models
 
 
-original_left_untouched_value = "left untouched"
-updated_left_untouched_value = "left_untouched"
+original_untouched_value = "left untouched"
+updated_untouched_value = "untouched"
 
 
 def convert_space_to_underscore(apps, schema_editor):
     test_import_finding_action = apps.get_model("dojo", "Test_Import_Finding_Action")
     for test_import_action in test_import_finding_action.objects.filter(
-        action=original_left_untouched_value
+        action=original_untouched_value
     ):
-        test_import_action.action = updated_left_untouched_value
+        test_import_action.action = updated_untouched_value
         test_import_action.save()
 
 
 def convert_underscore_to_space(apps, schema_editor):
     test_import_finding_action = apps.get_model("dojo", "Test_Import_Finding_Action")
     for test_import_action in test_import_finding_action.objects.filter(
-        action=updated_left_untouched_value
+        action=updated_untouched_value
     ):
-        test_import_action.action = original_left_untouched_value
+        test_import_action.action = original_untouched_value
         test_import_action.save()
 
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='test_import_finding_action',
             name='action',
-            field=models.CharField(blank=True, choices=[('N', 'created'), ('C', 'closed'), ('R', 'reactivated'), ('U', 'left_untouched')], max_length=100, null=True),
+            field=models.CharField(blank=True, choices=[('N', 'created'), ('C', 'closed'), ('R', 'reactivated'), ('U', 'untouched')], max_length=100, null=True),
         ),
         migrations.RunPython(
             convert_space_to_underscore, reverse_code=convert_underscore_to_space

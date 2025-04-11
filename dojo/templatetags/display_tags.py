@@ -174,11 +174,6 @@ def remove_string(string, value):
 
 
 @register.filter
-def replace_underscore_with_space(string):
-    return string.replace("_", " ")
-
-
-@register.filter
 def percentage(fraction, value):
     return_value = ""
     if int(value) > 0:
