@@ -359,7 +359,7 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please add a new .md file in [`docs/content/en/integrations/parsers`] with the details of your new parser.  Include the following content headings:
+Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] with the details of your new parser.  Include the following content headings:
 
 * Acceptable File Type(s) - please include how to generate this type of file from the related tool, as some tools have multiple methods or require specific commands.
 * An example unit test block, if applicable.
