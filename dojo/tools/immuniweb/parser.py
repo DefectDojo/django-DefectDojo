@@ -55,7 +55,7 @@ class ImmuniwebParser:
             url = vulnerability.find("URL").text
 
             dupe_key = hashlib.md5(
-                str(description + title + severity).encode("utf-8"),
+                str(description + title + severity).encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
 
             # check if finding is a duplicate
