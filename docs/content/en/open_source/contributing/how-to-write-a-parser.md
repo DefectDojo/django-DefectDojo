@@ -40,7 +40,6 @@ $ docker compose build --build-arg uid=1000
 |`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
     
 
-/file
 ## Factory contract
 
 Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
