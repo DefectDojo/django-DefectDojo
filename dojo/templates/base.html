@@ -1111,10 +1111,17 @@
                         var timeout = warningTime - currentTime; // how many seconds until warning needs to show
 
                         setTimeout(() => {
-                            $("#sessionTimeoutModal").modal("show");
+                            $('#sessionTimeoutModal').modal('show');
                         }, timeout * 1000);
+
                     }  
                     session_notifcation();
+                    $('#sessionTimeoutModal').on('show.bs.modal', function (event) {
+                        $(this).attr('aria-hidden', 'false');
+                    })
+                    $('#sessionTimeoutModal').on('hidden.bs.modal', function (event) {
+                        $(this).attr('aria-hidden', 'true');
+                    })
                 {% endif %}
 
                 {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
