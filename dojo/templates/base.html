@@ -992,9 +992,9 @@
                         {% endif %}
                     {% endblock %}
                     <!-- end of tabs -->
+                    {% if messages %}
                     <div class="row">
                         <div class="col-lg-12">
-                            {% if messages %}
                                 {% for message in messages %}
                                     <div class="alert {{ message.tags }} alert-dismissible" role="alert">
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -1003,10 +1003,10 @@
                                         {{ message }}
                                     </div>
                                 {% endfor %}
-                            {% endif %}
                         </div>
                         <!-- /.col-lg-12 -->
                     </div>
+                    {% endif %}
                     <!-- /.row -->
                     <div class="row">
                         <div id="base-content" class="col-lg-12">
