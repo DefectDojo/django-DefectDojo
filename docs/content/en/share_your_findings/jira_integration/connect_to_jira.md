@@ -5,15 +5,22 @@ weight: 1
 ---
 
 Connecting a Jira Instance is the first step to take when setting up DefectDojo’s Jira integration.
+Please note Jira Service Management is currently not supported.
 
 #### Required information from Jira
 
-You will need:
-* a Jira URL
+Atlassian uses different ways of authentication between Jira Cloud and Jira Data Center. You will need:
+
+Jira Cloud:
+* a Jira URL, i.e. https://yourcompany.atlassian.net/
 * an account with permissions to create and update issues in your Jira instance.  This can be:
-    * A standard **username / password** combination
-    * A **username / API Key** combination **(Jira Cloud)**
+    * A **username / Personal Access Token** combination **(JIRA Data Center / Server)
     * A **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**
+
+Jira Data Center (or Server):
+* a Jira URL, i.e. https://jira.yourcompany.com
+* an account with permissions to create and update issues in your Jira instance.  This can be:
+    * A **emailaddress / Personal Access Token** combination
 
 Optionally, you can map:
 * Jira Transitions to trigger Re-Opening and Closing Findings

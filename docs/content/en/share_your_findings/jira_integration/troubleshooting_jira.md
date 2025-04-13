@@ -5,6 +5,53 @@ description: "Fixing issues with a Jira integration"
 
 Here are some common issues with the Jira integration, and ways to address them.
 
+## Unable to setup Jira configuration in DefectDojo due to 404, 401 or 403 errors
+Jira Cloud:
+- Consult the Jira Cloud REST API documentation on authentication: https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/
+- Verify on the command line that the provided credentials can access the necessary issues in Jira:
+
+```
+curl -D- \
+   -u <emailaddress>:<personal_access_token> \
+   -X GET \
+   -H "Content-Type: application/json" \
+   https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -D- \
+   -u defectdojo@example.com:ATATT1234567890abcdefghijklmnopqrstuvwxyz \
+   -X GET \
+   -H "Content-Type: application/json" \
+   https://defectdojo.atlassian.net/rest/api/latest/issue/VULNERABILITY-1/transitions?expand=transitions.fields
+```
+
+Jira Data Center or Server:
+- Consult the Jira Data Center REST API documentation on authentication:
+    - https://developer.atlassian.com/server/jira/platform/basic-authentication/ (username + password)
+    - https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html (personal access token)
+- Verify on the command line that the provided credentials can access the necessary issues in Jira:
+
+```
+curl -u username:password -X GET -H "Content-Type: application/json" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -u defectdojo@example.com:123456 -X GET -H "Content-Type: application/json" https://defectdojo.atlassian.net/rest/api/latest/issue/VULNERABILITY-1/transitions?expand=transitions.fields
+```
+
+When using personal access tokens:
+```
+curl -H "Authorization: Bearer <personal_access_token>" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -H "Authorization: Bearer ATATT1234567890abcdefghijklmnopqrstuvwxyz" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
 ## Findings that I 'Push To Jira' do not appear in Jira
 Using the 'Push To Jira' workflow triggers an asynchronous process, however an Issue should be created in Jira fairly quickly after 'Push To Jira' is triggered.
 
