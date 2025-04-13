@@ -923,3 +923,56 @@ class TestNotificationWebhooks(DojoTestCase):
                     "url_ui": "http://localhost:8080/finding/235",
                 }],
             })
+
+        with self.subTest("scan_added problematic titles"):
+            BaseImporter(
+                environment=Development_Environment.objects.get_or_create(name="Development")[0],
+                scan_type="ZAP Scan",
+            ).notify_scan_added(
+                test,
+                updated_count=4,
+                new_findings=[
+                    Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical"),
+                ],
+                findings_mitigated=[
+                    Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium"),
+                ],
+                findings_reactivated=[
+                    Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low"),
+                ],
+                findings_untouched=[
+                    Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info"),
+                ],
+            )
+            self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
+            self.maxDiff = None
+            self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
+                "new": [{
+                    "id": 232,
+                    "title": "Colon: New Finding",
+                    "severity": "Critical",
+                    "url_api": "http://localhost:8080/api/v2/findings/232/",
+                    "url_ui": "http://localhost:8080/finding/232",
+                }],
+                "mitigated": [{
+                    "id": 233,
+                    "title": "[Brackets] Mitigated Finding",
+                    "severity": "Medium",
+                    "url_api": "http://localhost:8080/api/v2/findings/233/",
+                    "url_ui": "http://localhost:8080/finding/233",
+                }],
+                "reactivated": [{
+                    "id": 234,
+                    "title": '"Quotation1" Reactivated Finding',
+                    "severity": "Low",
+                    "url_api": "http://localhost:8080/api/v2/findings/234/",
+                    "url_ui": "http://localhost:8080/finding/234",
+                }],
+                "untouched": [{
+                    "id": 235,
+                    "title": "'Quotation2' Untouched Finding",
+                    "severity": "Info",
+                    "url_api": "http://localhost:8080/api/v2/findings/235/",
+                    "url_ui": "http://localhost:8080/finding/235",
+                }],
+            })
