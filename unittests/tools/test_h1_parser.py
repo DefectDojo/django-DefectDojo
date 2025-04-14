@@ -37,7 +37,7 @@ class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
         with patch("django.utils.timezone.now") as mock_now:
             mock_now.return_value = datetime(2024, 10, 1, 12, 0, 0)
 
-            with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_main_state.json", encoding="utf-8") as testfile:
+            with (get_unit_tests_scans_path("h1") / "vuln_disclosure_main_state.json").open(encoding="utf-8") as testfile:
                 parser = H1Parser()
                 findings = parser.get_findings(testfile, Test())
                 self.assertEqual(4, len(findings))

@@ -30,7 +30,7 @@ class TestImmuniwebParser(DojoTestCase):
             self.assertGreater(len(findings), 2)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_json(self):
-        with open(get_unit_tests_scans_path("immuniweb") / "ImmuniWeb-multiple-vuln.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("immuniweb") / "ImmuniWeb-multiple-vuln.json").open(encoding="utf-8") as testfile:
             parser = ImmuniwebParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))

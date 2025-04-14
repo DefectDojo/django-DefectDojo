@@ -123,7 +123,7 @@ class TestWizParser(DojoTestCase):
             self.assertNotIn("**Location Path**:", finding.mitigation)
 
     def test_resolved_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "resolved_findings.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "resolved_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
