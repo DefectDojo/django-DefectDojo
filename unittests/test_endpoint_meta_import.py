@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from django.test.client import Client
 from django.urls import reverse
@@ -204,9 +205,9 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
         response = self.client_ui.post(reverse("import_endpoint_meta", args=(product, )), payload)
         self.assertEqual(302, response.status_code, response.content[:1000])
 
-    def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
+    def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, *, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        with open(filename, encoding="utf-8") as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,

@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.9-alpine3.20@sha256:df44c0c0761ddbd6388f4549cab42d24d64d257c2a960ad5b276bb7dab9639c7 AS base
+FROM python:3.11.11-alpine3.21@sha256:9af3561825050da182afc74b106388af570b99c500a69c8216263aa245a2001b AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -31,7 +31,7 @@ COPY requirements.txt ./
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM base AS django-alpine
+FROM base AS django
 WORKDIR /app
 ARG uid=1001
 ARG gid=1337
@@ -133,5 +133,5 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
-FROM django-alpine AS django-unittests
+FROM django AS django-unittests
 COPY unittests/ ./unittests/

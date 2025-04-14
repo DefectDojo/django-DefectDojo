@@ -215,7 +215,7 @@ class MobSFParser:
                             }
                             mobsf_findings.append(mobsf_item)
             elif data["binary_analysis"].get("findings"):
-                for binary_analysis_type, details in list(data["binary_analysis"]["findings"].items()):
+                for details in data["binary_analysis"]["findings"].values():
                     # "findings":{
                     #     "Binary makes use of insecure API(s)":{
                     #         "detailed_desc":"The binary may contain the following insecure API(s) _memcpy\n, _strlen\n",
@@ -234,7 +234,7 @@ class MobSFParser:
                     }
                     mobsf_findings.append(mobsf_item)
             else:
-                for binary_analysis_type, details in list(data["binary_analysis"].items()):
+                for details in data["binary_analysis"].values():
                     # "Binary makes use of insecure API(s)":{
                     #     "detailed_desc":"The binary may contain the following insecure API(s) _vsprintf.",
                     #     "severity":"high",
@@ -303,7 +303,7 @@ class MobSFParser:
                 file_path = None
 
                 if "path" in finding:
-                    description = description + "\n\n**Files:**\n"
+                    description += "\n\n**Files:**\n"
                     for path in finding["path"]:
                         if file_path is None:
                             file_path = path
@@ -335,7 +335,7 @@ class MobSFParser:
             file_path = None
             if mobsf_finding["category"]:
                 description += "**Category:** " + mobsf_finding["category"] + "\n\n"
-            description = description + html2text(mobsf_finding["description"])
+            description += html2text(mobsf_finding["description"])
             finding = Finding(
                 title=title,
                 cwe=919,  # Weaknesses in Mobile Applications

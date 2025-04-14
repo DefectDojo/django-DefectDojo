@@ -89,9 +89,8 @@ class VeracodeJSONParser:
                 if settings.USE_FIRST_SEEN:
                     if first_found_date := finding_status.get("first_found_date"):
                         finding.date = parser.parse(first_found_date)
-                else:
-                    if last_found_date := finding_status.get("last_found_date"):
-                        finding.date = parser.parse(last_found_date)
+                elif last_found_date := finding_status.get("last_found_date"):
+                    finding.date = parser.parse(last_found_date)
             # Generate the description
             finding = self.parse_description(finding, vuln.get("description"), scan_type)
             finding.nb_occurences = vuln.get("count", 1)
@@ -261,9 +260,9 @@ class VeracodeJSONParser:
         if licenses := finding_details.get("licenses", []):
             # Build the license string
             license_markdown = "#### Licenses\n"
-            for license in licenses:
-                license_name = license.get("license_id")
-                license_details = self.license_mapping.get(int(license.get("risk_rating", 5)))
+            for lic in licenses:
+                license_name = lic.get("license_id")
+                license_details = self.license_mapping.get(int(lic.get("risk_rating", 5)))
                 license_markdown += f"- {license_name}: {license_details[0]}\n    - {license_details[1]}\n"
             # Do not add any extra text if the there are no licenses here
             if license_markdown != "#### Licenses\n":
@@ -277,7 +276,7 @@ class VeracodeJSONParser:
             # Check for any wonky formats post version replacement that had extensions
             finding.component_name = finding.component_name.replace("-.", ".").replace("_.", ".")
             # Check for the event that the component name did not have an extension, but name has a dangling hyphen/underscore
-            if finding.component_name.endswith("-") or finding.component_name.endswith("_"):
+            if finding.component_name.endswith(("-", "_")):
                 finding.component_name = finding.component_name[:-1]
         # check if the CWE title was used. A cwe may not be present when a veracode SRCCLR is present
         if not finding.title:

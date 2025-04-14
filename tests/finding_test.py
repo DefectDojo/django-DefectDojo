@@ -9,7 +9,7 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from product_test import ProductTest, WaitForPageLoad
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
@@ -68,7 +68,7 @@ class FindingTest(BaseTestCase):
 
     def check_file(self, file_name):
         file_found = False
-        for i in range(1, 30):
+        for _ in range(1, 30):
             time.sleep(1)
             if Path(file_name).is_file():
                 file_found = True
@@ -192,7 +192,7 @@ class FindingTest(BaseTestCase):
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_reviewers")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_reviewers")))
         except TimeoutException:
             self.fail("Timed out waiting for reviewer dropdown to initialize ")
 
@@ -312,8 +312,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -336,8 +334,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -506,7 +502,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
 
-def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+def add_finding_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase("test_login"))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 

@@ -20,9 +20,11 @@
         <div class="form-group">
 
             {% if SHOW_LOGIN_FORM %}
-            <div class="col-sm-offset-1 col-sm-2" id="toggleBox" onclick="togglePassVisibility()">
-                <i class="fa-solid fa-eye"></i>
-                <span><b>{% trans "Show Password" %}</b></span>
+            <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button">
+                    <i class="fa-solid fa-eye"></i>
+                    {% trans "Show Password" %}
+                        </button>
             </div>
             {% endif %}
 
@@ -47,6 +49,12 @@
             {% endif %}
         </div>
         <div class="form-group">
+                {% if OIDC_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255, 255, 255)" class="btn btn-success" type="button">{% trans "Login with OIDC" %}</a>
+                    </div>
+                {% endif %}
+
             {% if GOOGLE_ENABLED is True %}
             <div class="col-sm-offset-1 col-sm-2">
                 <a rel="noopener noreferrer" href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}"

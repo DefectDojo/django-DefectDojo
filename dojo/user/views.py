@@ -130,6 +130,7 @@ def login_view(request):
         settings.AUTH0_OAUTH2_ENABLED,
         settings.KEYCLOAK_OAUTH2_ENABLED,
         settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
+        settings.OIDC_AUTH_ENABLED,
         settings.SAML2_ENABLED,
     ]) == 1 and "force_login_form" not in request.GET:
         if settings.GOOGLE_OAUTH_ENABLED:
@@ -142,6 +143,8 @@ def login_view(request):
             social_auth = "gitlab"
         elif settings.KEYCLOAK_OAUTH2_ENABLED:
             social_auth = "keycloak"
+        elif settings.OIDC_AUTH_ENABLED:
+            social_auth = "oidc"
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = "auth0"
         elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:

@@ -1,7 +1,7 @@
 import hashlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -19,7 +19,7 @@ class SslscanParser:
         return "Import XML output of sslscan report."
 
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
@@ -41,14 +41,14 @@ class SslscanParser:
                     title = "heartbleed" + " | " + target.attrib["sslversion"]
                     description = (
                         "**heartbleed** :"
-                        + "\n\n"
-                        + "**sslversion** : "
+                        "\n\n"
+                        "**sslversion** : "
                         + target.attrib["sslversion"]
                         + "\n"
                     )
                 if target.tag == "cipher" and target.attrib[
                     "strength"
-                ] not in ["acceptable", "strong"]:
+                ] not in {"acceptable", "strong"}:
                     title = "cipher" + " | " + target.attrib["sslversion"]
                     description = (
                         "**Cipher** : "

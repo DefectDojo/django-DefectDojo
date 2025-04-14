@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -15,20 +15,20 @@ class HCLASoCSASTParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import XML output of HCL AppScan on Cloud SAST"
 
-    def xmltreehelper(self, input):
-        if input.text is None:
+    def xmltreehelper(self, xml_input):
+        if xml_input.text is None:
             output = None
-        elif "\n" in input.text:
+        elif "\n" in xml_input.text:
             output = ""
-            for i in input:
+            for i in xml_input:
                 output = output + " " + i.text
         else:
-            output = " " + input.text
+            output = " " + xml_input.text
         return output
 
     def get_findings(self, file, test):
         findings = []
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
         if "xml-report" not in root.tag:
             msg = "This doesn't seem to be a valid HCL ASoC SAST xml file."
@@ -95,8 +95,8 @@ class HCLASoCSASTParser:
                             fix = item.iter()
                             for fitem in fix:
                                 if fitem.tag == "types":
-                                    type = fitem.iter()
-                                    for titem in type:
+                                    ftype = fitem.iter()
+                                    for titem in ftype:
                                         if titem.tag == "name":
                                             issuetypename = self.xmltreehelper(titem)
                                 if fitem.tag == "remediation":
@@ -122,7 +122,7 @@ class HCLASoCSASTParser:
                                             for codeitem in codeblock:
                                                 if codeitem.tag == "item" and codeitem.attrib["type"] == "string":
                                                     if codeitem.text is None:
-                                                        recommendations = recommendations + "\n"
+                                                        recommendations += "\n"
                                                     else:
                                                         recommendations = recommendations + self.xmltreehelper(codeitem) + "\n"
 

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -31,8 +33,8 @@ class ScanImportOptionsTest(APITestCase):
         test.test_type = Test_Type.objects.create(name="some other test tool")
         test.save()
 
-    def import_zap_scan(self, upload_empty_scan=False):
-        with open("tests/zap_sample.xml", encoding="utf-8") as file:
+    def import_zap_scan(self, *, upload_empty_scan=False):
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as file:
             if upload_empty_scan:
                 tested_file = SimpleUploadedFile("zap_sample.xml", self.EMPTY_ZAP_SCAN.encode("utf-8"))
             else:

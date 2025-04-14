@@ -46,7 +46,7 @@ class SarifParser:
         for run in tree.get("runs", []):
             test = ParserTest(
                 name=run["tool"]["driver"]["name"],
-                type=run["tool"]["driver"]["name"],
+                parser_type=run["tool"]["driver"]["name"],
                 version=run["tool"]["driver"].get("version"),
             )
             test.findings = self.__get_items_from_run(run)
@@ -126,10 +126,8 @@ def get_result_cwes_properties(result):
 
 def get_artifacts(run):
     artifacts = {}
-    custom_index = 0  # hack because some tool doesn't generate this attribute
-    for tree_artifact in run.get("artifacts", []):
+    for custom_index, tree_artifact in enumerate(run.get("artifacts", [])):
         artifacts[tree_artifact.get("index", custom_index)] = tree_artifact
-        custom_index += 1
     return artifacts
 
 
@@ -221,17 +219,16 @@ def get_snippet(location):
     return snippet
 
 
-def get_codeFlowsDescription(codeFlows):
+def get_codeFlowsDescription(code_flows):
     description = ""
-    for codeFlow in codeFlows:
+    for codeFlow in code_flows:
         for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue
 
             description = f"**{_('Code flow')}:**\n"
-            line = 1
 
-            for location in threadFlow.get("locations", []):
+            for line, location in enumerate(threadFlow.get("locations", [])):
                 physicalLocation = location.get("location", {}).get("physicalLocation", {})
                 region = physicalLocation.get("region", {})
                 uri = physicalLocation.get("artifactLocation").get("uri")
@@ -249,7 +246,7 @@ def get_codeFlowsDescription(codeFlows):
                 if "snippet" in region:
                     snippet = f"\t-\t{region.get('snippet').get('text')}"
 
-                description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
+                description += f"{line + 1}. {uri}{start_line}{start_column}{snippet}\n"
 
                 if "message" in location.get("location", {}):
                     message_field = location.get("location", {}).get("message", {})
@@ -259,8 +256,6 @@ def get_codeFlowsDescription(codeFlows):
                         message = message_field.get("text", "")
 
                     description += f"\t{message}\n"
-
-                line += 1
 
     return description
 
@@ -436,7 +431,7 @@ def get_items_from_result(result, rules, artifacts, run_date):
                     finding.cvssv3_score = cvss
                     finding.severity = severity
                 except ValueError:
-                    if rule["properties"]["security-severity"].lower().capitalize() in ["Info", "Low", "Medium", "High", "Critical"]:
+                    if rule["properties"]["security-severity"].lower().capitalize() in {"Info", "Low", "Medium", "High", "Critical"}:
                         finding.severity = rule["properties"]["security-severity"].lower().capitalize()
                     else:
                         finding.severity = "Info"

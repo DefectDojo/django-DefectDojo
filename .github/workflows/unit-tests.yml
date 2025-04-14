@@ -12,19 +12,33 @@ on:
 
 jobs:
   build-docker-containers:
+    strategy:
+        matrix:
+          platform: ['linux/amd64', 'linux/arm64']
+        fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
-  
+    with:
+      platform: ${{ matrix.platform }}
+
   test-rest-framework:
+    strategy:
+        matrix:
+            platform: ['linux/amd64', 'linux/arm64']
+        fail-fast: false
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
+    with:
+      platform: ${{ matrix.platform}}
 
+  # only run integration tests for linux/amd64 (default)
   test-user-interface:
     needs: build-docker-containers
     uses: ./.github/workflows/integration-tests.yml
     secrets: inherit
-  
+
+  # only run k8s tests for linux/amd64 (default)
   test-k8s:
     needs: build-docker-containers
     uses: ./.github/workflows/k8s-tests.yml

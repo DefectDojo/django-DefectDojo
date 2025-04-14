@@ -14,8 +14,13 @@ class TestAsffParser(DojoTestCase):
     def load_sample_json(self, file_name):
         with open(sample_path(file_name), encoding="utf-8") as file:
             return json.load(file)
-        
-    def common_check_finding(self, finding, data, index, parser, guarddutydate=False):
+
+    def common_check_finding(self, finding, data, index, *, guarddutydate=False):
+        parser = AsffParser()
+        resource_arns = parser.get_item_resource_arns(data[index])
+        resource_arn_strings = ", ".join(resource_arns)
+        control_description = data[index].get("Description", "")
+        full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
         self.assertEqual(finding.title, data[index]["Title"])
         self.assertEqual(finding.description, parser.get_description(data[index]))
         if guarddutydate:

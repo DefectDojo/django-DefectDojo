@@ -95,13 +95,13 @@ class Main:
 
             for details in sort_by_url[url]:
                 if details["risk"] == "Informational":
-                    info = info + 1
+                    info += 1
                 if details["risk"] == "Low":
-                    low = low + 1
+                    low += 1
                 if details["risk"] == "Medium":
-                    medium = medium + 1
+                    medium += 1
                 if details["risk"] == "High":
-                    high = high + 1
+                    high += 1
 
         summary.add_row(["Informational", info])
         summary.add_row(["Low", low])

@@ -43,7 +43,7 @@ If you're using DefectDojo's **Auto\-Map** settings, you can have your first Con
 
 1. Set up a [Connector](../add_edit_connectors/) from a supported tool.
 2. [Discover](../manage_operations/#discover-operations) your tool's data hierarchy.
-3. [Sync](../operations_sync/#sync-operations) the vulnerabilities found with your tool into DefectDojo.
+3. [Sync](../manage_operations/#sync-operations) the vulnerabilities found with your tool into DefectDojo.
 
 That's all, really! And remember, even if you create your Connector the 'easy' way, you can easily change the way things are set up later, without losing any of your work.
 

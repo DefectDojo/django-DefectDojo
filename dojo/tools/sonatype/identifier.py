@@ -11,13 +11,13 @@ class ComponentIdentifier:
             component_coordinates = component["componentIdentifier"]["coordinates"]
             componant_format = component["componentIdentifier"]["format"]
 
-            if componant_format in ["a-name", "pypi", "rpm", "gem", "golang", "conan", "conda", "bower", "composer",
+            if componant_format in {"a-name", "pypi", "rpm", "gem", "golang", "conan", "conda", "bower", "composer",
                                     "cran", "cargo", "cocoapods", "drupal", "pecoff", "swift", "generic",
-                                    "operating-system"]:
+                                    "operating-system"}:
                 self.set_name_version_component(component_coordinates)
             elif componant_format == "maven":
                 self.set_maven_component(component_coordinates)
-            elif componant_format in ["npm", "nuget"]:
+            elif componant_format in {"npm", "nuget"}:
                 self.set_package_id_version_component(component_coordinates)
             elif "displayName" in component:
                 self._component_id = component["displayName"]

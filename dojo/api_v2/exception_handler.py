@@ -47,35 +47,33 @@ def custom_exception_handler(exc, context):
             "message": str(exc.message)
         }
         response.data["message"] = str(exc.detail)
-    else:
-        if response is None:
-            if System_Settings.objects.get().api_expose_error_details:
-                exception_message = str(exc.args[0])
-            else:
-                exception_message = "Internal server error, check logs for details"
-            # There is no standard error response, so we assume an unexpected
-            # exception. It is logged but no details are given to the user,
-            # to avoid leaking internal technical information.
-            logger.exception(exc)
-            response = Response()
-            response.status_code = HTTP_500_INTERNAL_SERVER_ERROR
-            response.data = {}
-            response.data[
-                "message"
-            ] = exception_message
+    elif response is None:
+        if System_Settings.objects.get().api_expose_error_details:
+            exception_message = str(exc.args[0])
         else:
-            if response.status_code < 500:
-                # HTTP status codes lower than 500 are no technical errors.
-                # They need not to be logged and we provide the exception
-                # message, if it is different from the detail that is already
-                # in the response.
-                if isinstance(response.data, dict) and str(
-                    exc,
-                ) != response.data.get("detail", ""):
-                    response.data["message"] = str(exc)
-            else:
-                # HTTP status code 500 or higher are technical errors.
-                # They get logged and we don't change the response.
-                logger.exception(exc)
+            exception_message = "Internal server error, check logs for details"
+        # There is no standard error response, so we assume an unexpected
+        # exception. It is logged but no details are given to the user,
+        # to avoid leaking internal technical information.
+        logger.error(exc)
+        response = Response()
+        response.status_code = HTTP_500_INTERNAL_SERVER_ERROR
+        response.data = {}
+        response.data[
+            "message"
+        ] = exception_message
+    elif response.status_code < 500:
+        # HTTP status codes lower than 500 are no technical errors.
+        # They need not to be logged and we provide the exception
+        # message, if it is different from the detail that is already
+        # in the response.
+        if isinstance(response.data, dict) and str(
+            exc,
+        ) != response.data.get("detail", ""):
+            response.data["message"] = str(exc)
+    else:
+        # HTTP status code 500 or higher are technical errors.
+        # They get logged and we don't change the response.
+        logger.error(exc)
 
     return response

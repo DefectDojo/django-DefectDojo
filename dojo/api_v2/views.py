@@ -4,6 +4,7 @@ import base64
 import logging
 import mimetypes
 from datetime import datetime
+from pathlib import Path
 
 import tagulous
 from django.core.exceptions import PermissionDenied 
@@ -689,12 +690,12 @@ class EngagementViewSet(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
                 )
-            return response
         except ValidationError:
             return Response(
                 {"error": "Bad Request!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        return response
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -746,12 +747,12 @@ class RiskAcceptanceViewSet(
                 status=status.HTTP_404_NOT_FOUND,
             )
         # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.name}"
-        file_handle = open(file_path, "rb")
+        file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
             file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
+            content_type=f"{mimetypes.guess_type(str(file_path))}",
             status=status.HTTP_200_OK,
         )
         response["Content-Length"] = file_object.size
@@ -1560,7 +1561,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method in ["PUT", "PATCH"]:
+        if request.method in {"PUT", "PATCH"}:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)
@@ -2541,7 +2542,7 @@ class UserProfileView(GenericAPIView):
     @action(
         detail=True, methods=["get"], filter_backends=[], pagination_class=None,
     )
-    def get(self, request, format=None):
+    def get(self, request, _=None):
         user = get_current_user()
         user_contact_info = (
             user.usercontactinfo if hasattr(user, "usercontactinfo") else None

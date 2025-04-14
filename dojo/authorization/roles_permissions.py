@@ -16,9 +16,9 @@ class Roles(IntEnum):
     def has_value(cls, value):
         try:
             Roles(value)
-            return True
         except ValueError:
             return False
+        return True
 
 
 def django_enum(cls):
@@ -166,9 +166,9 @@ class Permissions(IntEnum):
     def has_value(cls, value):
         try:
             Permissions(value)
-            return True
         except ValueError:
             return False
+        return True
 
     @classmethod
     def get_engagement_permissions(cls):
