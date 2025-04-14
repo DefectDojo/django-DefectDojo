@@ -53,7 +53,7 @@ services:
     image: busybox:1.37.0-musl
     entrypoint: ['echo', 'skipping', 'redis']
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:v2.16.1@sha256:0b5ee23649a6cb94fd990a6d6bf414d8b4bddcf6f783ab8dcb389a6bcbc5a926
+    image: mccutchen/go-httpbin:2.18.1@sha256:ff73c96c144506048b1357ada7015b3473adc1d5bebc7088bc389bf5e64e114f
 volumes:
   defectdojo_postgres_unit_tests: {}
   defectdojo_media_unit_tests: {}

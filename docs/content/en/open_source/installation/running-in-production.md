@@ -5,7 +5,7 @@ draft: false
 weight: 4
 ---
 
-## Production use with docker compose
+## Production Use (with Docker compose)
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
@@ -13,23 +13,13 @@ Although Docker Compose is one of the supported installation methods to deploy a
 
 See [Running with Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more information how to run DefectDojo with Docker Compose.
 
-### Database performance and backup
+### System Requirements
 
-It is recommended to use a dedicated database server and not the preconfigured PostgreSQL database. This will improve the performance of DefectDojo.
+It is recommended to use a dedicated database server and not the preconfigured PostgreSQL database. This will improve the performance of DefectDojo significantly.
 
-In both cases (dedicated DB or containerized), if you are self-hosting, it is recommended that you implement and create periodic backups of your data.
+#### Instance Size
 
-### Backup of Media files
-
-Media files for uploaded files, including threat models and risk acceptance, are stored in a docker volume. This volume needs to be backed up regularly.
-
-### Instance size
-
-Please read the paragraphs below about key processes tweaks.
-
-
-With a separate database, the minimum recommendations
-are:
+With a separate database, the minimum recommendations to run DefectDojo are:
 
 -   2 vCPUs
 -   8 GB of RAM
@@ -38,7 +28,29 @@ are:
     a different disk than your OS\'s for potential performance
     improvements.
 
-#### uWSGI
+### Security
+Verify the `nginx` configuration and other run-time aspects such as security headers to comply with your compliance requirements.
+Change the AES256 encryption key `&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw` in `docker-compose.yml` to something unique for your instance.
+This encryption key is used to encrypt API keys and other credentials stored in Defect Dojo to connect to external tools such as SonarQube. A key can be generated in various ways for example using a password manager or `openssl`:
+
+```
+     openssl rand -base64 32
+```
+```
+      DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-<PUT THE GENERATED KEY HERE>o}"
+```
+
+## File Backup
+
+In both cases (dedicated DB or containerized), if you are self-hosting, it is recommended that you implement and create periodic backups of your data.
+
+### Media files
+
+Media files for uploaded files, including threat models and risk acceptance, are stored in a docker volume. This volume needs to be backed up regularly.
+
+## Performance Adjustments
+
+### uWSGI
 
 By default (except in `ptvsd` mode for debug purposes), uWSGI will
 handle 4 concurrent connections.
@@ -53,10 +65,9 @@ Based on your resource settings, you can tweak:
 For example, you may have 4 processes with 6 threads each, yielding 24
 concurrent connections.
 
-#### Celery worker
+### Celery worker
 
-By default, a single mono-process celery worker is spawned. When storing a large amount of findings, leveraging async functions (like deduplication), or both. Eventually, it is important to adjust these parameters to prevent resource starvation. 
-
+By default, a single mono-process celery worker is spawned. When storing a large amount of findings or running large imports it might be helpful to adjust these parameters to prevent resource starvation.
 
 The following variables can be changed to increase worker performance, while keeping a single celery container.
 
@@ -77,12 +88,12 @@ You can execute the following command to see the configuration:
 `docker compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
 
-#### Asynchronous Import
+### Asynchronous Import
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release).  Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.</span>
 
-Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
-processing especially large scans. It works by batching Findings and Endpoints by a 
+Import and Re-Import can also be configured to handle uploads asynchronously to aid in
+processing especially large scans. It works by batching Findings and Endpoints by a
 configurable amount. Each batch will be be processed in separate celery tasks.
 
 The following variables impact async imports.
@@ -91,8 +102,7 @@ The following variables impact async imports.
 -   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` defaults to 100
 
 When using asynchronous imports with dynamic scanners, Endpoints will continue to "trickle" in
-even after the import has returned a successful response. This is because processing continues 
+even after the import has returned a successful response. This is because processing continues
 to occur after the Findings have already been imported.
 
 To determine if an import has been fully completed, please see the progress bar in the appropriate test.
-

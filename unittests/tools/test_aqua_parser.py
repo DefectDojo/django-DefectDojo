@@ -28,6 +28,16 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("1.1.20-r4", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2019-14697", finding.unsaved_vulnerability_ids[0])
+            finding_severity_justification = """
+Aqua severity classification: None
+Aqua scoring system: CVSS V2
+Aqua score: 7.5
+Vendor score: 7.5
+NVD v3 vectors: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+NVD v2 vectors: AV:N/AC:L/Au:N/C:P/I:P/A:P
+Aqua severity (high) used for classification.
+"""
+            self.assertEqual(finding_severity_justification, finding.severity_justification)
 
     def test_aqua_parser_has_many_findings(self):
         with open(get_unit_tests_scans_path("aqua") / "many_vulns.json", encoding="utf-8") as testfile:
@@ -114,6 +124,18 @@ class TestAquaParser(DojoTestCase):
 
     def test_aqua_parser_aqua_devops_empty(self):
         with open(get_unit_tests_scans_path("aqua") / "empty_aquadevops.json", encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(0, len(findings))
+
+    def test_aqua_parser_over_api_v2(self):
+        with open(get_unit_tests_scans_path("aqua") / "over_api_v2.json", encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(99, len(findings))
+
+    def test_aqua_parser_over_api_v2_empty(self):
+        with open(get_unit_tests_scans_path("aqua") / "over_api_v2_empty.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))

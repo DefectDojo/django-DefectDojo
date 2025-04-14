@@ -452,8 +452,8 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual(261, finding.cwe)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-                self.assertIn("security", finding.tags)
-                self.assertIn("network", finding.tags)
+                self.assertIn("security", finding.unsaved_tags)
+                self.assertIn("network", finding.unsaved_tags)
                 self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
             with self.subTest(i=1):
@@ -491,7 +491,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with open(get_unit_tests_scans_path("generic") / "generic_report3.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
-            self.assertEqual(3, len(findings))
+            self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
                 finding.clean()
@@ -524,6 +524,21 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
                 self.assertEqual(2345, endpoint.port)
                 self.assertEqual("test-pest", endpoint.path)
+            with self.subTest(i=2):
+                finding = findings[2]
+                self.assertEqual("test title mitigated", finding.title)
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.duplicate)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2021, 1, 16), finding.mitigated.date())
+            with self.subTest(i=3):
+                finding = findings[3]
+                self.assertEqual("test title mitigated ISO", finding.title)
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.duplicate)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2024, 1, 4), finding.date)
+                self.assertEqual(datetime.date(2024, 1, 24), finding.mitigated.date())
 
     def test_parse_endpoints_and_vulnerability_ids_json(self):
         with open(get_unit_tests_scans_path("generic") / "generic_report4.json", encoding="utf-8") as file:
@@ -555,6 +570,26 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
+
+    def test_mitigated_csv_findings(self):
+        with open(get_unit_tests_scans_path("generic") / "generic_report3.csv", encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(2, len(findings))
+
+            finding = findings[0]
+            finding.clean()
+            self.assertEqual("Mitigated_ISO_Finding", finding.title)
+            self.assertEqual(datetime.date(2024, 1, 24), finding.date)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(datetime.date(2024, 2, 24), finding.mitigated.date())
+
+            finding = findings[1]
+            finding.clean()
+            self.assertEqual("Mitigated_Finding", finding.title)
+            self.assertEqual(datetime.date(2021, 2, 28), finding.date)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(datetime.date(2021, 3, 28), finding.mitigated.date())
 
     def test_parse_host_and_vulnerability_id_csv(self):
         with open(get_unit_tests_scans_path("generic") / "generic_report4.csv", encoding="utf-8") as file:
@@ -631,8 +666,8 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("CVE-2020-36234", finding.cve)
                 self.assertEqual(261, finding.cwe)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-                self.assertIn("security", finding.tags)
-                self.assertIn("network", finding.tags)
+                self.assertIn("security", finding.unsaved_tags)
+                self.assertIn("network", finding.unsaved_tags)
                 self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
 
