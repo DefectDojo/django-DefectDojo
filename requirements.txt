@@ -12,7 +12,7 @@ django-filter==25.1
 django-imagekit==5.0.0
 django-multiselectfield==0.1.13
 django-polymorphic==3.1.0
-django-crispy-forms==2.3
+django-crispy-forms==2.4
 django_extensions==4.1
 django-slack==5.19.0
 # This library is very outdated and not directly. It is used solely for migration
