@@ -48,8 +48,8 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_objs }}</span>
-                                    <span> rel="noopener noreferrer"
-                                        <a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer"
+                                        href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">
                                         Verified {{ view }}{{ verified_objs|pluralize}} <i class="fa-solid fa-circle-right" aria-hidden="true"></i></a>
                                     </span>

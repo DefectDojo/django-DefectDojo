@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0224_alter_regulation_category'),
+        ('dojo', '0244_alter_regulation_category'),
     ]
 
     operations = [

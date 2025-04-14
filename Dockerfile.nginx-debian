@@ -76,6 +76,7 @@ FROM nginx:1.27.4-alpine3.21@sha256:4ff102c5d78d254a6f0da062b3cf39eaf07f01eec092
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
+RUN rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/datatables && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/mocha
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \

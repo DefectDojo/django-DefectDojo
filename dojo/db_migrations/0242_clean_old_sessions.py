@@ -3,7 +3,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0221_system_settings_disclaimer_notif'),
+        ('dojo', '0241_generalsettings_finding_ia_recommendation'),
         ('sessions', '0001_initial'),
     ]
 

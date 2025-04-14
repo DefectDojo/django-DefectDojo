@@ -302,6 +302,20 @@
                         </div>
                         <div class="discussion-content">
                             {{ discussion.content|linebreaks }}
+                            {% if discussion.author == request.user %}
+                            <div class="dropup">
+                                <button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenu{{ discussion.id }}" data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa-solid fa-ellipsis-h"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right z-3" aria-labelledby="dropdownMenu{{ discussion.id }}">
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{% url 'delete_finding_exclusion_discussion' finding_exclusion.uuid|stringformat:'s' discussion.id %}">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% empty %}

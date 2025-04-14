@@ -319,6 +319,9 @@
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
                         {% endif %}
+                        {% if finding|enable_button:"IA_RECOMMENDATION" %}
+                        <th>IA Recommendation</th>
+                        {% endif %}
                     {% endblock header_head %}
                 </tr>
                 <tr>
@@ -504,6 +507,14 @@
                         {% endwith %}
                         {% if finding.vuln_id_from_tool %}
                             <td>{{ finding.vuln_id_from_tool }}</td>
+                        {% endif %}
+                        {% if finding|enable_button:"IA_RECOMMENDATION" %}
+                        <td title="IA Recommendation">
+                            <button class="btn btn-primary" data-finding-id={{finding.id}} id="id_button_ia_recommendation">
+                                🤖
+                            </button>
+                      
+                        </td>
                         {% endif %}
                     {% endblock header_body %}
                 </tr>
@@ -780,7 +791,31 @@
             </div>
         </div>
     {% endif %}
-
+    <div class="panel panel-default">
+        {% if finding|enable_button:"IA_RECOMMENDATION" %}
+        <div class="panel-heading"> 
+            <h4>IA Recommendation 
+                
+                <i class="fa-solid fa-robot"></i>
+                <span class="pull-right">
+                    <a rel="noopener noreferrer" data-toggle="collapse" href="#ia_recommendation">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </a>
+                </span>
+            </h4>
+        </div>
+        {%endif%}
+        <div id="ia_recommendation" class="panel-body collapse">
+            {% if finding.ia_recommendation %}
+                {{ finding.ia_recommendation|render_ia_recommendation}}
+            {% else %}
+                <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4> <div class="spinner"></div> </div>
+                <div id="id_recommendation_content"> </div>
+                <div id="id_mitigations_contect"> </div>
+                <div id="id_files_to_fix_content"> </div>
+            {% endif %}
+        </div>
+    </div>
     {% if similar_findings_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -1226,12 +1261,16 @@
 {% block postscript %}
     {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
+    <script src="{% static "typeit/dist/index.umd.js" %}"></script>
+    <script src="{% static 'prismjs/prism.js' %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+    <script type="module" src="{% static "dojo/js/settings.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript" nonce="{{request.csp_nonce}}">
         var firstID = {{findings_list.0}};
         var currentID = {{finding.id}};
         var lastID = {{findings_list_lastElement}};
+
         if(currentID != firstID)
         {
             $('.PrevAndNext_Buttons').append('<a rel="noopener noreferrer" href="{% url 'view_finding' prev_finding_id %}" class="btn btn-primary">Previous Finding</a> ');
@@ -1531,6 +1570,7 @@
     </script>
 
     <script type="application/javascript">
+       
         // DataTables Setup
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
@@ -1637,6 +1677,65 @@
                 });
             {% endif %}
         });
+    </script>
+
+    <script type="module">
+        import {FormaterHtmlRecommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
+        const apiUrl = "{{ HOST_IA_RECOMMENDATION }}"
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        async function add_ia_recommendation(finding_id, recommendation){
+            try{
+              response = await $.ajax({
+                  url: "/api/v2/findings/" + finding_id + "/ia_recommendation/",
+                  type: "POST",
+                  headers: { "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"},
+                  data: JSON.stringify(recommendation),
+              })
+              return response
+            } catch(error){
+                throw error
+            }
+        }
+
+        function get_ia_recommendation(finding_id, apiUrl) {
+            $.ajax({
+                url: "/finding/" + finding_id + "/generative_ia/token",
+                type: "GET",
+                headers: { 
+                  "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"
+                },
+                beforeSend: function() {
+                    $('#spinnerLoading').css('display', 'flex');
+                    $('#id_button_ia_recommendation').prop('disabled', true);
+                },
+                success: function(response) {
+                    if (response.status === 'ERROR') return;
+                    add_ia_recommendation(finding_id, response)
+                    FormaterHtmlRecommendation(response.data, "#id_recommendation_content")
+                    $('#id_button_ia_recommendation').prop('disabled', false);
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+            });  
+        }
+       
+        $(document).ready(function() {
+            $('#id_button_ia_recommendation').click(async function(event)
+            {
+                let finding_id = $(this).data('finding-id')
+                $('#id_recommendation_content').empty();
+                $('#id_mitigations_contect').empty();
+                $('#id_files_to_fix_content').empty();
+                $('#ia_recommendation').collapse('show');
+                get_ia_recommendation(finding_id, apiUrl);
+            });
+        });
+
+            
     </script>
 
     {% include "dojo/filter_js_snippet.html" %}

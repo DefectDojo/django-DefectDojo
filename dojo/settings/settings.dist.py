@@ -344,6 +344,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    DD_AUDITLOG_TWO_STEP_MIGRATION=(bool, False),
+    DD_AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT=(bool, False),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -484,6 +486,12 @@ env = environ.FileAwareEnv(
         "technical_contact",
         "team_manager",
         ]),
+    # Show Filter
+    DD_SHOW_FILTERS=(str, """Finding Tag,Status,Test Type,Severity,Vulnerability Id,Product Name,
+                     Tag contains,Product Type Name Contains,Name contains,
+                     Tag name contains,Title,Test Tag,Component Name,
+                     Component Version,Engagement Name,Service contains,
+                     Vulnerability ID from tool,File path contains"""),
     DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, False),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
@@ -507,7 +515,15 @@ env = environ.FileAwareEnv(
     
     # Priorization
     DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
+    # Host IA recommendation
+    DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
+    DD_CLIENT_ID_IA=(str, ""),
+    DD_CLIENT_SECRET_IA=(str, ""),
+
+    # Regex Validation Name
+    DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
 )
+
 
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
@@ -1505,6 +1521,7 @@ CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE
 CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
 CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
+REGEX_VALIDATION_NAME = env("DD_REGEX_VALIDATION_NAME")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -2265,8 +2282,8 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
-AUDITLOG_TWO_STEP_MIGRATION = False
-AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_TWO_STEP_MIGRATION = env('DD_AUDITLOG_TWO_STEP_MIGRATION')
+AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = env('DD_AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
@@ -2280,7 +2297,11 @@ AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
-RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+RULE_RISK = os.getenv("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+if RULE_RISK:
+    RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = json.loads(RULE_RISK)
+else:   
+    RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
@@ -2289,6 +2310,7 @@ BLACKLIST_FILTER_TAGS = env("DD_BLACKLIST_FILTER_TAGS")
 # exclusive permission
 CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
+SHOW_FILTERS = env("DD_SHOW_FILTERS").split(",")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
@@ -2296,7 +2318,6 @@ HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 TENAN_ID = env("DD_TENAN_ID")
 CLIENT_ID = env("DD_CLIENT_ID")
 CALLBACK_URL = env("DD_CALLBACK_URL")
-
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
@@ -2309,6 +2330,21 @@ LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
 LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
 PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED")
 TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
+# IA Recommendation
+HOST_IA_RECOMMENDATION = env("DD_HOST_IA_RECOMMENDATION")
+
+
+CLIENT_ID_IA = (
+    get_secret(env("DD_SECRET_APP"))["client_id_ia"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_CLIENT_ID_IA")
+)
+
+CLIENT_SECRET_IA = (
+    get_secret(env("DD_SECRET_APP"))["client_secret_ia"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_CLIENT_SECRET_IA")
+)
 
 # ------------------------------------------------------------------------------
 # CACHE REDIS

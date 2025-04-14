@@ -491,7 +491,7 @@ def get_matching_value(list_a, list_b):
 
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
-    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"] and  kwargs["finding"].severity != "Info"
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired", "Transfer Rejected"] and  kwargs["finding"].severity != "Info"
     and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False
@@ -542,3 +542,10 @@ def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
     enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
 
     return permission_keys
+
+def get_product_type_prefix_key(product_type_name):
+    risk_rule_map = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])
+    product_type_prefix_key = (
+        lambda prefix: prefix[0] if prefix and prefix[0] in risk_rule_map else "DEFAULT"
+    )(product_type_name.split(" - "))
+    return risk_rule_map[product_type_prefix_key]

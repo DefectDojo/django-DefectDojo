@@ -23,7 +23,7 @@
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=page_obj page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
         </div>
         <div class="panel panel-default table-responsive">
             <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -31,14 +31,16 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
+                        <th>Engagement Name</th>
                         <th>Product Name</th>
+                        <th>Product Type Name</th>
                         <th>Active Findings</th>
                         <th>Closed Findings</th>
                         <th>Total Findings</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in page_obj %}
+                    {% for item in result %}
                         <tr>
                             <td>
                                 <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
@@ -46,7 +48,17 @@
                                 </a>
                             </td>
                             <td>{{ item.version }}</td>
-                            <td>{{ item.product }}</td>
+                            <td>
+                                <a href="{% url 'view_engagement' item.engagement.id %}" data-toggle="tooltip" data-placement="bottom""> 
+                                 {{ item.engagement_name }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ item.product_name }}
+                            </td>
+                            <td>
+                                {{ item.product_type_name }}
+                            </td>
                             <td class="text-right">
                                 {% if item.active_findings %}
                                     <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
@@ -78,7 +90,7 @@
             </table>
         </div>
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=page_obj page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
         </div>
     </div>
 </div>
@@ -133,7 +145,9 @@
                 "columns": [
                         { "data": "Component_name" },
                         { "data": "Version" },
-                        { "data": "Product_name"},
+                        { "data": "Engagement_name"},
+                        { "data": "Product_name" },
+                        { "data": "Product_type_name" },
                         { "data": "Active" },
                         { "data": "Closed" },
                         { "data": "Total" },

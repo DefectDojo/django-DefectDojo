@@ -1,6 +1,5 @@
 import logging
 import crum
-import json
 from dateutil.relativedelta import relativedelta
 from dojo.celery import app
 from django.utils import timezone
@@ -19,7 +18,7 @@ from dojo.models import (
     FindingExclusion
     )
 from dojo.api_v2.api_error import ApiError
-from dojo.risk_acceptance.helper import post_jira_comments
+from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_prefix_key
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members
@@ -154,11 +153,7 @@ def rules_for_direct_acceptance(finding: Finding,
     number_of_acceptors_required = (
         settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity)
         .get("type_contacts")
-        .get(
-            json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[
-                product_type.name.split(" - ")[0]
-            ]
-        ).get("number_acceptors")
+        .get(get_product_type_prefix_key(product_type.name)).get("number_acceptors")
     )
 
     status_permission = {
@@ -278,7 +273,7 @@ def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product,
         or role_has_exclusive_permissions(user)
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("type_contacts")
-        .get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("number_acceptors")
+        .get(get_product_type_prefix_key(product_type.name)).get("number_acceptors")
         == 0
     ):
         result = True
@@ -290,7 +285,7 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
     user_rol = get_role_members(user, product, product_type)
     risk_rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
-    num_acceptors = risk_rule.get("type_contacts").get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("number_acceptors")
+    num_acceptors = risk_rule.get("type_contacts").get(get_product_type_prefix_key(product_type.name)).get("number_acceptors")
     if risk_rule:
         if num_acceptors == 0 and user_rol in risk_rule.get(
             "roles"

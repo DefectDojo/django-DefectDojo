@@ -11,6 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="">
+        <link href="{% static "prismjs/themes/prism.css" %}", rel="stylesheet" type="text/css" />
         <title>
             {% if request.session.dojo_breadcrumbs and not product_tab.tab %}
                 {% with request.session.dojo_breadcrumbs|last as last %}
@@ -450,10 +451,10 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "Metrics_Regulatory"|has_role_permission %}
+                                                {% if "Metrics_Scan_Cycle"|has_role_permission %}
                                                     <li>
-                                                        <a rel="noopener noreferrer" href="{% url 'metrics_regulatory' %}">
-                                                            {% trans "Metrics Regulatory" %}
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_scan_cycle' %}">
+                                                            {% trans "Metrics Scan Cycle" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}                                                 

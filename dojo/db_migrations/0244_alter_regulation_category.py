@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0223_aws_sechub_update_endpoints'),
+        ('dojo', '0243_aws_sechub_update_endpoints'),
     ]
 
     operations = [

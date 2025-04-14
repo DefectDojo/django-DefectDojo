@@ -1,9 +1,11 @@
 from enum import Enum
 import base64
+import json
 import contextlib
 import datetime
 import logging
 import mimetypes
+import pytz
 from ast import literal_eval
 from itertools import chain
 
@@ -36,7 +38,8 @@ from dojo.models import (
     Finding,
     Product,
     System_Settings,
-    ExclusivePermission)
+    ExclusivePermission,
+    GeneralSettings)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -792,49 +795,10 @@ def finding_display_status(finding, event="view"):
         "view_exclusion": reverse_whitelist
     }
 
-
-    dict_rule_display_status = {
-        "Under Review, Active, Risk Pending": ["Under Review", "view_review", "Red"],
-        "Active, Verified, Risk Pending": ["Risk Pending", "view_risk", "Red"],
-        "Inactive, Verified, Mitigated, Risk Pending": ["Closed", "view_transfer", "Green"],
-        "Active, Verified, Risk Rejected": ["Open", "view_transfer", "Red"],
-        "Inactive, Mitigated, False Positive, Risk Rejected": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
-        "Active, Verified, Risk Expired": ["Open", "view_risk", "Red"],
-        "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
-        "Inactive, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
-        "Under Review, Inactive, Mitigated, Risk Accepted": ["Closed", "view_review", "Green"],
-        "Under Review, Active, Risk Expired": ["Under Review", "view_review", "Red"],
-        "Under Review, Inactive, Mitigated": ["Closed", "view_review", "Green"],
-        "Under Review, Inactive, Verified, Mitigated": ["Closed", "view_review", "Green"],
-        "Inactive, Verified, Mitigated, Risk Accepted": ["Closed", "view_risk", "Green"],
-        "Inactive, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
-        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_exclusion", "Orange"],
-        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_exclusion", "Green"],
-        "Active, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
-        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_exclusion", "Red"],
-        "Inactive, Verified, Mitigated, On Blacklist": ["Closed", "view_finding", "Green"],
-        "Active, Verified, Transfer Pending": ["Transfer Pending", "view_transfer", "Red"],
-        "Active, Verified, Transfer Rejected": ["Open", "view_transfer", "Red"],
-        "Active, Verified, Transfer Expired": ["Open", "view_transfer", "Red"],
-        "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
-        "Inactive, Mitigated, Out Of Scope, Transfer Accepted": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_transfer", "Green"],
-        "Inactive, Verified, Mitigated, Risk Expired": ["Closed", "view_risk", "Green"],
-        "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
-        "Under Review, Active, Verified, Risk Pending": ["Under Review", "view_review", "Red"],
-        "Under Review, Active": ["Under Review", "view_review", "Red"],
-        "Under Review, Inactive, Mitigated, Risk Pending": ["Closed", "view_review", "Green"],
-        "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
-        "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
-        "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
-        "Inactive, Mitigated": ["Closed", "view_finding", "Green"],
-        "Active, Verified": ["Open", "view_finding", "Red"],
-    }
-
     display_status = finding.status()
-    status = dict_rule_display_status.get(display_status, (display_status, "view_finding", "Red"))
+    status = GeneralSettings.get_value(
+        name_key=display_status,
+        default=[display_status, "view_fiding", "Red"])
     context = {}
     template_object = None
     if event == "email":
@@ -1096,7 +1060,7 @@ def import_settings_tag(test_import, *, autoescape=True):
         def esc(x):
             return x
 
-    html = """
+    html_contect = """
 
     <i class="fa %s has-popover %s"
         title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
@@ -1136,7 +1100,9 @@ def import_history(finding, *, autoescape=True):
 
     list_of_status_changes = ""
     for status_change in status_changes:
-        list_of_status_changes += "<b>" + status_change.created.strftime("%b %d, %Y, %H:%M:%S") + "</b>: " + status_change.get_action_display() + "<br/>"
+        date = status_change.created
+        converted = date.astimezone(pytz.timezone(settings.TIME_ZONE)).strftime("%b %d, %Y, %H:%M:%S")
+        list_of_status_changes += "<b>" + converted + "</b>: " + status_change.get_action_display() + "<br/>"
 
     html_contect = """
        <i class="fa-solid fa-clock-rotate-left has-popover"
@@ -1170,3 +1136,17 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
     context_object = template.Context(context)
 
     return template_object.render(context_object)
+
+
+@register.filter()
+def render_ia_recommendation(ia_recommendation: str):
+    data = ia_recommendation.get("data")
+    if not data or not all(key in data for key in ["recommendations", "mitigations", "files_to_fix"]):
+        return "An error occurred. Please click the 'Recommendation AI' 🤖 button to try again."
+        
+    rendered = render_to_string("dojo/ia_recommendation.html", {
+        "recommendations": data["recommendations"],
+        "mitigations": data["mitigations"],
+        "files_to_fix": data["files_to_fix"]
+    })
+    return rendered

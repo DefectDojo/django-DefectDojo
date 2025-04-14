@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db import transaction
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -25,18 +26,20 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     extend_schema,
     extend_schema_view,
+    OpenApiTypes,
 )
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated 
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 from dojo import engagement
+from dojo.api_v2.api_error import ApiError
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -46,7 +49,13 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
-from dojo.transfer_findings.serializers import TransferFindingFindingSerializer, TransferFindingFindingsSerializer
+from dojo.transfer_findings.serializers import (
+    TransferFindingFindingSerializer,
+    TransferFindingFindingsSerializer,
+    TransferFindingCreateSerializer,
+    TransferFindingSerializer,
+    TransferFindingFindingCreateSerializer,)
+from dojo.finding.serializer import IARecommendationSerializer
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -256,7 +265,8 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Role.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name"]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Role.objects.all().order_by("id")
@@ -1036,11 +1046,88 @@ class FindingViewSet(
                 )
         serialized_finding = serializers.FindingCloseSerializer(finding)
         return Response(serialized_finding.data)
-
+    
     @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.TagSerializer},
+        methods=["POST"],
+        request=serializers.FindingCloseBulkSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseBulkSerializer},
     )
+    @action(detail=False, methods=["POST"])
+    def bulk_close(self, request):
+        errors = []
+        success = []
+        if request.method == "POST":
+            findings_close = serializers.FindingCloseBulkSerializer(
+                data=request.data
+            )
+            if findings_close.is_valid():
+                try:
+                    findings = []
+                    for finding_close in findings_close.data["findings"]:
+                        try:
+                            finding = Finding.objects.get(id=finding_close["id"])
+                        except Finding.DoesNotExist:
+                            continue
+                        finding.is_mitigated = finding_close["is_mitigated"]
+                        finding.mitigated = finding_close.get("mitigated", timezone.now())
+                        finding.mitigated_by = request.user
+                        finding.active = False
+                        finding.false_p = finding_close.get(
+                            "false_p", False,
+                        )
+                        finding.duplicate = finding_close.get(
+                            "duplicate", False,
+                        )
+                        finding.out_of_scope = finding_close.get(
+                            "out_of_scope", False,
+                        )
+
+                        endpoints_status = finding.status_finding.all()
+                        for e_status in endpoints_status:
+                            e_status.mitigated_by = request.user
+                            e_status.mitigated = finding_close.get("mitigated", timezone.now())
+                            e_status.mitigated_time = finding_close.get("mitigated", timezone.now()) 
+                            e_status.mitigated = True
+                            e_status.last_modified = timezone.now()
+                            e_status.save()
+                        findings.append(finding)
+                        system_settings = System_Settings.objects.get()
+                        if system_settings.enable_transfer_finding:
+                            helper_tf.close_or_reactive_related_finding(
+                                event="close",
+                                parent_finding=finding,
+                                notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                send_notification=False)
+
+                except Exception as e:
+                    raise ApiError.internal_server_error(detail=str(e))
+                
+                try:
+                    with transaction.atomic():
+                        Finding.objects.bulk_update(findings, ["is_mitigated",
+                                                               "mitigated",
+                                                               "mitigated_by",
+                                                               "active",
+                                                               "false_p",
+                                                               "duplicate",
+                                                               "out_of_scope"])
+                except Exception as e:
+                    raise ApiError.internal_server_error(
+                        detail=str(f"Error Closed finding bulk: {e}"))
+            else:
+                return http_response.bad_request(data=findings_close.errors)
+            if findings_close.data["verify"] is True:
+                for finding_close in findings_close.data["findings"]:
+                    try:
+                        finding = Finding.objects.get(id=finding_close["id"])
+                        if finding.is_mitigated is True:
+                            success.append({finding.id: "closed succesfully"})
+                        else:
+                            errors.append({finding.id: "Not closed"})
+                    except Finding.DoesNotExist:
+                        errors.append({finding_close['id']: "not found"})
+            return http_response.ok(data={"success": success, "errors": errors})
+
     @extend_schema(
         methods=["POST"],
         request=serializers.TagSerializer,
@@ -1184,7 +1271,37 @@ class FindingViewSet(
         serialized_notes = serializers.FindingToNotesSerializer(
             {"finding_id": finding, "notes": notes},
         )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK)
+        return Response(serialized_notes.data, status=status.HTTP_200_OK) 
+    
+    @extend_schema(
+        methods=["GET"],
+        responses={status.HTTP_200_OK: IARecommendationSerializer},
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=IARecommendationSerializer,
+        responses={status.HTTP_201_CREATED: IARecommendationSerializer},
+    )
+    @action(detail=True, methods=["get", "post"])
+    def ia_recommendation(self, request, pk=None):
+        finding = get_authorized_findings(
+            Permissions.Finding_Add_Recommendation,
+            Finding.objects.filter(id=pk),
+            request.user).first()
+        if request.method == "POST":
+            serializer = IARecommendationSerializer(
+                data=request.data,
+            )
+            if serializer.is_valid():
+                finding.ia_recommendation = serializer.validated_data
+                finding.save()
+                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+            else:
+                return http_response.bad_request(data=serializer.errors)
+        elif request.method == "GET":
+            return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+
+        return http_response.non_authoritative_information()
 
     @extend_schema(
         methods=["GET"],
@@ -2479,7 +2596,9 @@ class RegulationsViewSet(
     queryset = Regulation.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated,
+                          DjangoModelPermissions,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return Regulation.objects.all().order_by("id")
@@ -3179,7 +3298,9 @@ class SLAConfigurationViewset(
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated,
+                          DjangoModelPermissions,
+                          permissions.IsAPIImporter,)
 
     def get_queryset(self):
         return SLA_Configuration.objects.all().order_by("id")
@@ -3307,7 +3428,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              DojoModelViewSet):
     queryset = TransferFinding.objects.all().order_by('id')
     permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.TransferFindingSerializer
+    serializer_class = TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
                         "destination_engagement",
@@ -3315,6 +3436,18 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
+    @extend_schema(
+        request=TransferFindingCreateSerializer,
+        responses={status.HTTP_200_OK: TransferFindingCreateSerializer},
+    )
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = TransferFindingCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return http_response.bad_request(data=serializer.errors)
+        return http_response.created(message="Transfer Finding Created", data=serializer.data)
     
     def destroy(self, request, pk=None):
         transfer_finding = get_object_or_404(TransferFinding, id=pk)
@@ -3334,6 +3467,39 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     serializer_class = TransferFindingFindingsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id"]
+
+    @extend_schema(
+        request=TransferFindingFindingCreateSerializer,
+        responses={status.HTTP_201_CREATED: TransferFindingFindingCreateSerializer},
+    )
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = TransferFindingFindingCreateSerializer(data=data)
+        if serializer.is_valid():
+            transfer_finding_request = serializer.validated_data["transfer_findings"]
+            destination_engagement = transfer_finding_request.destination_engagement
+            for finding in serializer.validated_data["findings"]:
+                if finding.risk_status != "Risk Active":
+                    raise ApiError.precondition_required("The finding status must be Risk Active, Finding ID: " + str(finding.id))
+                if TransferFindingFinding.objects.filter(findings=finding.id).exists():
+                    raise ApiError.precondition_required(
+                        "It is not possible to transfer to a finding that has already been transferred." +
+                        f"Finding {finding.id} is already transferred")
+                if finding.test.engagement.id == destination_engagement.id:
+                    raise ApiError.precondition_required(
+                        "It is not possible to transfer to a finding the same engagement." +
+                        f"Finding {finding.id}, engagment_id: {destination_engagement.id}",)
+                transfer_finding_finding = TransferFindingFinding.objects.create(
+                    findings=finding,
+                    transfer_findings=transfer_finding_request,
+                    finding_related=serializer.validated_data.get("finding_related", None))
+                finding.risk_status = "Transfer Pending"
+                finding.save()
+                transfer_finding_finding.save()
+                logger.debug(f"Transfer_finding_findings created: {transfer_finding_finding.id}")
+        else:
+            return http_response.bad_request(data=serializer.errors)
+        return http_response.created(message="Transfer Finding Finding Created", data=serializer.data)
 
     @extend_schema(
         request=TransferFindingFindingSerializer,

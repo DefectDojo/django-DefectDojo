@@ -3,6 +3,7 @@ import copy
 import hashlib
 import logging
 import re
+import json
 import warnings
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -44,6 +45,7 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 from dojo.engine_tools.models import *
+from dojo.api_v2.api_error import ApiError
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -856,7 +858,7 @@ class Product_Type(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
-    
+
     def get_contacts(self):
         return {
             "product_type_manager": self.product_type_manager,
@@ -1244,7 +1246,7 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
-    
+
     def get_contacts(self):
         return {
             "product_manager": self.product_manager,
@@ -1352,7 +1354,7 @@ class Product(models.Model):
         for i in findings:
             findings_list.append(i.id)
         return findings_list
-    
+
 
     @property
     def has_jira_configured(self):
@@ -1652,7 +1654,7 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
-
+    
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
         from dojo.finding import helper
@@ -1667,6 +1669,7 @@ class Engagement(models.Model):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+    
 
 
 class CWE(models.Model):
@@ -2435,6 +2438,10 @@ class Finding(models.Model):
                                 help_text=_("The severity level of this flaw (Critical, High, Medium, Low, Info)."))
     description = models.TextField(verbose_name=_("Description"),
                                 help_text=_("Longer more descriptive information about the flaw."))
+    ia_recommendation = models.JSONField(verbose_name=_("Recommendation"),
+                                      null=True,
+                                      blank=True,
+                                      help_text=_("Text description IA recommendation."))
     mitigation = models.TextField(verbose_name=_("Mitigation"),
                                 null=True,
                                 blank=True,
@@ -2627,9 +2634,9 @@ class Finding(models.Model):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the affected component."))
-    component = models.ForeignKey(Component, 
-                                  on_delete=models.SET_NULL, 
-                                  blank=True, 
+    component = models.ForeignKey(Component,
+                                  on_delete=models.SET_NULL,
+                                  blank=True,
                                   null=True,
                                   help_text=_("Reference to the component"))
     found_by = models.ManyToManyField(Test_Type,
@@ -2729,7 +2736,7 @@ class Finding(models.Model):
                                 blank=True,
                                 default=0.0,
                                 )
-    
+
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
@@ -2912,7 +2919,7 @@ class Finding(models.Model):
             return ras[0]
 
         return None
-    
+
     @property
     def transfer_finding(self):
         if self.findings:
@@ -3547,7 +3554,7 @@ class TransferFinding(models.Model):
         blank=True,
         null=True,
         help_text=_("Destination Product name"))
-    
+
     destination_engagement = models.ForeignKey(
         Engagement,
         related_name="destination_engagement",
@@ -3589,7 +3596,7 @@ class TransferFinding(models.Model):
         null=True,
         on_delete=models.CASCADE,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
-    
+
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_('When the Transfer-Finding expires, the findings will be reactivated (unless disabled below).'))
     expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) Date at which notice about the transfer-finding expiration was sent.'))
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) When the transfer-finding expiration was handled (manually or by the daily job).'))
@@ -3618,7 +3625,6 @@ class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
     finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
-    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -3886,13 +3892,8 @@ class Risk_Acceptance(models.Model):
     TREATMENT_FIX = "F"
     TREATMENT_TRANSFER = "T"
 
-    SEVERITY_CHOICES = [("Critial", "Critical"),
-                        ("Hight", "Hight"),
-                        ("Medium", "Medium"),
-                        ("Low", "Low")]
-
-    SEVERITY_CHOICES = [("Critial", "Critical"),
-                        ("Hight", "Hight"),
+    SEVERITY_CHOICES = [("Critical", "Critical"),
+                        ("High", "High"),
                         ("Medium", "Medium"),
                         ("Low", "Low")]
 
@@ -4912,11 +4913,11 @@ class PermissionKey(models.Model):
 
     def is_active(self):
         return self.status
-    
+
     def expire(self):
         self.status = False
 
-    
+
     @classmethod
     def create_token(
         cls,
@@ -4945,15 +4946,15 @@ class PermissionKey(models.Model):
                 expiration=expiration)
 
         return permissionkey
-    
-    @classmethod 
+
+    @classmethod
     def get_token(cls, risk_acceptance: Risk_Acceptance, user: Dojo_User):
         try:
             permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
                                             user=user)
         except ObjectDoesNotExist as e:
             logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
-            raise e 
+            raise e
         return permission_key
 
 
@@ -4961,33 +4962,33 @@ class ExclusivePermission(models.Model):
     name = models.CharField(max_length=50,
                            unique=True,
                            blank=True,
-                           help_text=_("name permission")) 
+                           help_text=_("name permission"))
     short_name = models.CharField(max_length=50,
                            blank=True,
                            null=True,
-                           help_text=_("name permission")) 
+                           help_text=_("name permission"))
     description = models.CharField(max_length=128,
                                   help_text=_("Short permit description"),
                                   null=True,
-                                  blank=True) 
+                                  blank=True)
     validation_field = models.CharField(max_length=250,
                                   help_text=_("Validation Field"),
                                   null=True,
-                                  blank=True) 
+                                  blank=True)
     status = models.BooleanField(
         default=True,
         help_text=_("Status of the permission"))
     members = models.ManyToManyField(Product_Member,
                                     related_name="exclusive_permission_product",
                                     blank=True)
-    
+
     class Meta:
         verbose_name = _("Exclusive Permission")
         verbose_name_plural = _("Exclusive Permissions")
 
     def __str__(self):
         return self.description
-    
+
     @classmethod
     def get_validation_field(cls, name: str) -> str:
         try:
@@ -4996,10 +4997,104 @@ class ExclusivePermission(models.Model):
             logger.error(f"Exclusive permission {name} not found")
             raise e
         return permission.validation_field
-    
+
     def is_active(self):
         return self.status
+    
 
+class GeneralSettings(models.Model):
+
+    DATA_TYPE_CHOICES = (
+        ("INT", "INT"),
+        ("STRING", "STRING"),
+        ("DICT", "DICT"),
+        ("LIST", "LIST"),
+        ("BOOLEAN", "BOOLEAN"),
+    )
+
+    name_key = models.CharField(
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_("Text de IA recommendation."),
+        verbose_name=_("Name global variable"))
+    value = models.CharField(
+        verbose_name=_("General Settings"),
+        null=True,
+        blank=True,
+        help_text=_("Text de IA recommendation."))
+    
+    category = models.CharField(
+        verbose_name = _("Category"),
+        null=True,
+        blank=True,
+        unique=False,
+        help_text=_("Variable Category")
+    )
+
+    data_type = models.CharField(
+        verbose_name=_("Data Types"),
+        choices=DATA_TYPE_CHOICES,
+        null=True,
+        blank=True,
+        help_text=_("Type Data."))
+
+    description = models.CharField(
+        verbose_name=_("Description"),
+        null=True,
+        blank=True,
+        help_text=_("Description Variable")
+        )
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    status = models.BooleanField(default=True, help_text=_("Status Variable"))
+
+    class Meta:
+        verbose_name = _("Global Variable")
+        verbose_name_plural = _("Global Variables")
+
+    def __str__(self):
+        return self.name_key
+    
+    @classmethod
+    def validate_status(cls):
+        return cls.status if cls.status else False
+
+
+    @classmethod
+    def get_value(cls, name_key: str, default=None):
+        if cls.validate_status() is False:
+            return False
+        variable_object = None
+        try:
+            variable_object = GeneralSettings.objects.get(name_key=name_key)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}")
+            return default
+        rule_data_type = {
+            "INT": int,
+            "STRING": str,
+            "DICT": lambda value: json.loads(value),
+            "LIST": lambda value: value.split(","),
+            "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
+        }
+        return rule_data_type[variable_object.data_type](variable_object.value)
+
+
+    @classmethod
+    def get_list_variable_by_category(cls, category: str, default=[]):
+        if cls.validate_status() is False:
+            return False
+        variable_objects = None
+        try:
+            variable_objects = GeneralSettings.objects.filter(category=category).values_list("name_key", flat=True)
+            if not variable_objects:
+                raise ApiError.not_found(f"Category not existed: {category}")
+            return list(variable_objects)
+        except ObjectDoesNotExist as e:
+            logger.error(str(e))
+            return default
+    
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
     logger.info("enabling audit logging")
@@ -5061,6 +5156,7 @@ admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
 admin.site.register(ExclusivePermission)
+admin.site.register(GeneralSettings)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

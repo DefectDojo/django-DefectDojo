@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendaciones de Seguridad</title>
+    {% load static %}
+    {% block dojo_css %}
+            <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
+    {% endblock %}
+    
+</head>
+<body>
+    <div id="id_recommendation_content">
+        <h5>IA Recommendations</h5>
+        <ul>
+            {%for recommendation in recommendations%}
+                <li class="recommendation-item">{{recommendation}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div id="id_mitigations_contect">
+        <h5>Mitigations</h5>
+        {% for mitigation in mitigations%}
+            <pre><code class="language-css">{{mitigation}}</code></pre>
+        {% endfor %}
+    </div>
+
+    <div id="id_files_to_fix_content">
+        <h5>files to fix</h5>
+        <ul>
+            {% for file in files_to_fix %}
+                <li class="file-path">{{file}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        new ClipboardJS('.copy-btn');
+        Prism.highlightAll();
+    </script>
+
+</body>
+</html>

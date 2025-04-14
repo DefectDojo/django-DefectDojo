@@ -1,7 +1,7 @@
-import json
 import logging
-from dojo.models import Product_Type, Engagement, Product, Dojo_User
+from dojo.models import Engagement, Product
 from django.conf import settings
+from dojo.risk_acceptance.helper import get_product_type_prefix_key
 logger = logging.getLogger(__name__)
 
 
@@ -29,10 +29,7 @@ def get_contacts_product_type_and_product_by_serverity(
         finding_serverity)
 
     product_type = engagement.product.get_product_type
-    contacts = rule.get("type_contacts").get(
-        json.loads(
-            settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3]
-            )[product_type.name.split(" - ")[0]]).get("users")
+    contacts = rule.get("type_contacts").get(get_product_type_prefix_key(product_type.name)).get("users")
 
     get_contacts_dict = get_contacts_product_type_and_product(
         engagement.product)

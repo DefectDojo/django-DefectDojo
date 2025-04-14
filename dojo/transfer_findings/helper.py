@@ -307,12 +307,16 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
     transfer_finding_finding_reactive = None
     system_user = get_user(settings.SYSTEM_USER)
     for transfer_finding_finding in transfer_finding_findings:
+        if transfer_finding_finding.findings.is_mitigated is True:
+            logger.debug(f"Finding is Mitigated {transfer_finding_finding.findings.id}")
+            continue
         send_notification = True
         if event == "close":
-            transfer_finding_finding.findings.active = False
-            transfer_finding_finding.findings.out_of_scope = True
-            transfer_finding_finding.findings.is_mitigated = True
-            transfer_finding_finding.findings.mitigated = timezone.now()
+            transfer_finding_finding.findings.active = True
+            transfer_finding_finding.findings.risk_status = "Risk Active"
+            transfer_finding_finding.findings.out_of_scope = False
+            transfer_finding_finding.findings.is_mitigated = False
+            transfer_finding_finding.findings.mitigated = None
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
         if event == "accepted":
             transfer_finding_finding.findings.active = False
@@ -373,6 +377,8 @@ def delete_transfer_finding_finding(transfer_finding):
 
 def enable_flow_transfer_finding(**kwargs):
     # add rule custom if necessary
+    if kwargs["finding"].tags.filter(name="transferred").exists():
+        return False
     if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
     and kwargs["finding"].active is True):
         return True

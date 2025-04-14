@@ -1262,7 +1262,12 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         del form.cleaned_data['notes']
 
         findings = form.cleaned_data['accepted_findings']
-        form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(
+            duplicate=False,
+            test__engagement=eng,
+            active=True,
+            severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+
         form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
         for finding in findings:
             if (
@@ -1357,7 +1362,7 @@ def add_risk_acceptance_pending(request, eid, fid):
                 duplicate=False,
                 test__engagement=eng,
                 active=True,
-                risk_status__in=["Risk Active", "Risk Expired"],
+                risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
                 severity=finding.severity,
             )
             .filter(
@@ -1505,15 +1510,13 @@ def add_transfer_finding(request, eid, fid=None):
                     obj_finding = Finding.objects.get(id=int(finding))
                     transfer_finding_finding = TransferFindingFinding.objects.create(findings=obj_finding,
                                                                                      transfer_findings=transfer_findings,
-                                                                                     finding_related=None,
-                                                                                     engagement_related=None)
+                                                                                     finding_related=None)
                     obj_finding.risk_status = "Transfer Pending"
                     obj_finding.save()
                     transfer_finding_finding.save()
-                    logger.debug("Risk Transfer created {transfer_finding_finding.name}")
+                    logger.debug(f"Transfer fiding finding created: {transfer_finding_finding.id}")
                     # Create notification
                 TransferFindingsNotification.transfer_finding_request(transfer_findings)
-                logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
                 logger.debug(vars(request.POST))
@@ -1766,7 +1769,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),
-                                                     risk_status__in=["Risk Active", "Risk Expired"],
+                                                     risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
                                                      active=True,
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,

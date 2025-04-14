@@ -13,7 +13,7 @@ def aws_sechub_update_endpoints(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0222_clean_old_sessions'),
+        ('dojo', '0242_clean_old_sessions'),
     ]
 
     operations = [

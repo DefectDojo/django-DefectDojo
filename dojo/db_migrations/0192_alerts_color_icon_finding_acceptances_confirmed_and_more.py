@@ -79,8 +79,8 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 choices=[
-                    ("Critial", "Critical"),
-                    ("Hight", "Hight"),
+                    ("Critical", "Critical"),
+                    ("High", "High"),
                     ("Medium", "Medium"),
                     ("Low", "Low"),
                 ],

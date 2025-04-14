@@ -28,6 +28,16 @@ class TransferFindingFindingsSerializer(serializers.ModelSerializer):
         model = TransferFindingFinding
         fields = '__all__'
 
+class TransferFindingFindingCreateSerializer(serializers.ModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=True, required=True)
+    class Meta:
+        model = TransferFindingFinding
+        fields = '__all__'
+
+class TransferFindingBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferFinding
+        fields = '__all__'
 
 class TransferFindingFindingSerializer(serializers.ModelSerializer):
     findings = FindingTfSerlilizer(read_only=True)
@@ -65,6 +75,10 @@ class TransferFindingFindingSerializer(serializers.ModelSerializer):
         model = TransferFindingFinding
         fields = '__all__'
 
+class TransferFindingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferFinding
+        fields = '__all__'
 
 class TransferFindingSerializer(serializers.ModelSerializer):
 

@@ -36,7 +36,9 @@
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
     "pdfmake": "^0.2.18",
-    "startbootstrap-sb-admin-2": "1.0.7"
+    "startbootstrap-sb-admin-2": "1.0.7",
+    "prismjs": "^1.27.0",
+    "typeit": "^8.7.1"
   },
   "engines": {
     "yarn": ">= 1.0.0"

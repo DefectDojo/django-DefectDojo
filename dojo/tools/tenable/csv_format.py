@@ -300,5 +300,6 @@ class TenableCSVParser:
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
             find.unsaved_tags = [row.get("Custom Tag", settings.DD_CUSTOM_TAG_PARSER.get("tenable"))]
+            find.unique_id_from_tool = row.get("Custom Id", "No Custom Id")
 
         return list(dupes.values())

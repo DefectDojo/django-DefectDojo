@@ -95,7 +95,7 @@ def query_contacts(*args):
     for contact_dict in contacts:
         contacts_dict.update({value: key for key, value in contact_dict.items()})
     return contacts_dict
-    
+
 
 def get_authorized_contacts_for_product_type(severity, product, product_type):
     contacts_result = []
@@ -103,7 +103,11 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     product_obj = Product.objects.get(id=product)
     product_type_obj = Product_Type.objects.get(id=product_type)
-    type_contacts = rule["type_contacts"][json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type_obj.name.split(" - ")[0]]]
+    risk_rule_map = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])
+    product_type_prefix_key = (
+        lambda prefix: prefix[0] if prefix and prefix[0] in risk_rule_map else "DEFAULT"
+    )(product_type_obj.name.split(" - "))
+    type_contacts = rule["type_contacts"][risk_rule_map[product_type_prefix_key]]
     contacts_list = type_contacts["users"]
 
     if user.is_superuser:
@@ -128,7 +132,7 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
                 user_leader = dict_inverter.get(contact_type, "Leader")
                 message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
                 raise ValueError(message)
-    
+
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
         return Dojo_User.objects.filter(id__in=contacts_result)
