@@ -572,7 +572,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
 
     def test_mitigated_csv_findings(self):
-        with open(get_unit_tests_scans_path("generic") / "generic_report3.csv", encoding="utf-8") as file:
+        with (get_unit_tests_scans_path("generic") / "generic_report3.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(2, len(findings))
