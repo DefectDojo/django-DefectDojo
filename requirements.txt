@@ -30,7 +30,7 @@ PyGithub==1.58.2
 lxml==5.3.2
 Markdown==3.8
 openpyxl==3.1.5
-Pillow==11.1.0  # required by django-imagekit
+Pillow==11.2.1  # required by django-imagekit
 psycopg[c]==3.2.6
 cryptography==44.0.2
 python-dateutil==2.9.0.post0
