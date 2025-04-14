@@ -18,7 +18,6 @@ services:
       NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
       DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
       DD_UWSGI_PORT: "${DD_UWSGI_PORT:-3031}"
-      DD_SESSION_COOKIE_AGE: 330
     volumes:
       - defectdojo_media:/usr/share/nginx/html/media
     ports:
@@ -48,7 +47,6 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
-      DD_SESSION_COOKIE_AGE: 330
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -66,7 +64,6 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
-      DD_SESSION_COOKIE_AGE: 330
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -83,7 +80,6 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
-      DD_SESSION_COOKIE_AGE: 330
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -104,7 +100,6 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
       DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
-      DD_SESSION_COOKIE_AGE: 330
     volumes:
         - type: bind
           source: ./docker/extra_settings
