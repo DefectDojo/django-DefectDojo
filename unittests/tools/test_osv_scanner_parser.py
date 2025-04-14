@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestOSVScannerParser(DojoTestCase):
     def test_no_findings(self):
-        with open(get_unit_tests_scans_path("osv_scanner") / "no_findings.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("osv_scanner") / "no_findings.json").open(encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_some_findings(self):
-        with open(get_unit_tests_scans_path("osv_scanner") / "some_findings.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("osv_scanner") / "some_findings.json").open(encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -24,7 +24,7 @@ class TestOSVScannerParser(DojoTestCase):
             self.assertEqual(finding.severity, "Low")
 
     def test_many_findings(self):
-        with open(get_unit_tests_scans_path("osv_scanner") / "many_findings.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("osv_scanner") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(66, len(findings))
