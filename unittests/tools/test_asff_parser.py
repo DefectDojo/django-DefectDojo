@@ -44,7 +44,7 @@ class TestAsffParser(DojoTestCase):
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
-            self.common_check_finding(findings[0], data, 0, parser)
+            self.common_check_finding(findings[0], data, 0)
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
@@ -53,7 +53,7 @@ class TestAsffParser(DojoTestCase):
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 5)
             for index, finding in enumerate(findings):
-                self.common_check_finding(finding, data, index, parser)
+                self.common_check_finding(finding, data, index)
 
     def test_asff_guardduty(self):
         data = self.load_sample_json("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
@@ -62,6 +62,6 @@ class TestAsffParser(DojoTestCase):
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 1)
             for index, finding in enumerate(findings):
-                self.common_check_finding(finding, data, index, parser, guarddutydate=True)
+                self.common_check_finding(finding, data, index, guarddutydate=True)
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
             self.assertTrue(finding.active)
