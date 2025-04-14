@@ -73,7 +73,7 @@ class NoseyParkerParser:
                 f"Line #{line_num} \n"
             )
             # Internal de-duplication
-            key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
+            key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8"), usedforsecurity=False).hexdigest()
 
             # If secret already exists with the same filepath/secret/linenum
             if key in self.dupes:
@@ -133,7 +133,7 @@ class NoseyParkerParser:
                                 f"Line #{line_num} \n"
                 )
             # Internal de-duplication
-            key = hashlib.md5((filepath + "|" + rule_text_id + "|" + str(line_num)).encode("utf-8")).hexdigest()
+            key = hashlib.md5((filepath + "|" + rule_text_id + "|" + str(line_num)).encode("utf-8"), usedforsecurity=False).hexdigest()
 
             # If secret already exists with the same filepath/secret/linenum
             if key in self.dupes:

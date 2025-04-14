@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestMSDefenderParser(DojoTestCase):
 
     def test_parse_many_findings(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "report_many_vulns.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "report_many_vulns.json").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -16,7 +16,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual("CVE-5678-9887_wjeriowerjoiewrjoweirjeowij", finding.title)
 
     def test_parse_one_finding(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "report_one_vuln.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "report_one_vuln.json").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -27,14 +27,14 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual("CVE-1234-5678", finding.unsaved_vulnerability_ids[0])
 
     def test_parse_no_finding(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "report_no_vuln.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "report_no_vuln.json").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_defender_zip(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "defender.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "defender.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -47,7 +47,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual("1.1.1.1", finding.unsaved_endpoints[0].host)
 
     def test_parser_defender_wrong_machines_zip(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "defender_wrong_machines.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "defender_wrong_machines.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -57,7 +57,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual("CVE-5678-9887_wjeriowerjoiewrjoweirjeowij", finding.title)
 
     def test_parser_defender_multiple_files_zip(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "defender_multiple_files.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "defender_multiple_files.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -70,7 +70,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual("1.1.1.1", finding.unsaved_endpoints[0].host)
 
     def test_parser_defender_issue_11217(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "issue_11217.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "issue_11217.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -83,7 +83,7 @@ class TestMSDefenderParser(DojoTestCase):
 
     def test_parser_defender_error_handling(self):
         """https://github.com/DefectDojo/django-DefectDojo/issues/11896 handle missing values properly, i.e. defenderAvStatus"""
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "defender_error_handling.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "defender_error_handling.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -92,7 +92,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual(3, len(finding.unsaved_endpoints))
 
     def test_parser_defender_empty_machines(self):
-        testfile = open(get_unit_tests_scans_path("ms_defender") / "empty_machines.zip", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("ms_defender") / "empty_machines.zip").open(encoding="utf-8")
         parser = MSDefenderParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
