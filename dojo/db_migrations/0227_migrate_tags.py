@@ -55,12 +55,12 @@ def clean_all_tag_fields(apps, schema_editor):
         # will only process 500 objects at a time
         for instance in queryset.iterator(chunk_size=500):
             # Get the current list of tags to work with
-            raw_tags = TaggedModel.tags.all()
+            raw_tags = instance.tags.all()
             # Clean each tag here while preserving the original value
             cleaned_tags = {tag.name: clean_tag_value(tag.name) for tag in raw_tags}
             # Quick check to avoid writing things without impact
             if cleaned_tags:
-                TaggedModel.tags.set(list(cleaned_tags.values()), clear=True)
+                instance.tags.set(list(cleaned_tags.values()), clear=True)
                 count_per_model += 1
                 # Update the running list of cleaned tags with the changes on this model
                 unique_tags_per_model.update(cleaned_tags)
