@@ -114,7 +114,7 @@ services:
       - defectdojo_postgres:/var/lib/postgresql/data
   redis:
     # Pinning to this version due to licensing constraints
-    image: redis:7.2.5-alpine@sha256:6aaf3f5e6bc8a592fbfe2cccf19eb36d27c39d12dab4f4b01556b7449e7b1f44
+    image: redis:7.2.7-alpine@sha256:ddd16a9b1575a774c7e62956be8daa1de5b32cfb5c25b7a216aefed8e0919f9b
     volumes:
       - defectdojo_redis:/data
 volumes:
