@@ -174,7 +174,7 @@ In the `dojo/settings/template-local_settings.py` you'll find instructions on ho
 This toolbar allows you to debug SQL queries, and shows some other interesting information.
 
 
-# Exploitation, versioning
+# Explicit Versioning
 ## Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 
