@@ -8,17 +8,24 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Apr 2025: v2.45
+
+### Apr 7, 2025: v2.45.0
+- **(Beta UI)** Added Calendar view to Beta UI: Calendar view now displays Tests and Engagements, and can be filtered.  Clicking on a Calendar entry now displays a more detailed description of the object.
+![image](images/pro_calendar_view.png)
+- **(Universal Parser)** Added the ability to map an EPSS score from a file.  Note that this field **will** be updated by EPSS database sync, but this gives a user the ability to capture that field from initial import.
+
 ## Mar 2025: v2.44
 
-### Mar 31, 2025, v2.44.4
+### Mar 31, 2025: v2.44.4
 
 - **(Beta UI)** Group and Configuration permissions can now be assigned quickly from a User page.  For more information, see [DefectDojo Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/).
 
-### Mar 24, 2025, v2.44.3
+### Mar 24, 2025: v2.44.3
 
 - **(Import)** Generic Findings Import will now parse tags in the JSON payload when Async Import is enabled.
 
-### Mar 17, 2025, v2.44.2
+### Mar 17, 2025: v2.44.2
 
 - **(Beta UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/) for more details.
 

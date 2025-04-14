@@ -177,7 +177,7 @@ Example of use:
 from cvss.cvss3 import CVSS3
 import cvss.parser
 vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+if len(vectors) > 0 and type(vectors[0]) is CVSS3:
     print(vectors[0].severities())  # this is the 3 severities
 
     cvssv3 = vectors[0].clean_vector()
@@ -192,7 +192,7 @@ Good example:
 
 ```python
 vectors = cvss.parser.parse_cvss_from_text(item['cvss_vect'])
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+if len(vectors) > 0 and type(vectors[0]) is CVSS3:
     finding.cvss = vectors[0].clean_vector()
     finding.severity = vectors[0].severities()[0]  # if your tool does generate severity
 ```
