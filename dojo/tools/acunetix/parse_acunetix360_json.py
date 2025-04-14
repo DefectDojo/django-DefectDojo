@@ -45,10 +45,10 @@ class AcunetixJSONParser:
     def get_dedupe_fields(self) -> list[str]:
         """
         Return the list of fields used for deduplication in the Acunetix 360 Parser.
-        - title: Set to the name outputted by the Acunetix 360 Scanner.
-        - description: Set to Description variable outputted from Acunetix 360 Scanner.
 
         Fields:
+        - title: Set to the name outputted by the Acunetix 360 Scanner.
+        - description: Set to Description variable outputted from Acunetix 360 Scanner.
         """
         return [
             "title",
