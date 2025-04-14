@@ -3617,7 +3617,7 @@ def generate_token_generative_ia(request, fid):
     headers = {"Authorization": f"Bearer {access_token}"}
     
     response = requests.request("GET",
-                                url=f"{url}/devsecops/recommendation-process/362488",
+                                url=f"{url}/devsecops/recommendation-process/{fid}",
                                 headers=headers,
                                 )
 
