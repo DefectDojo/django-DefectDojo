@@ -1,10 +1,15 @@
 import hashlib
+import json
+import logging
+from datetime import datetime
 
+import dateutil
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
 __author__ = "properam"
+logger = logging.getLogger(__name__)
 
 
 class ImmuniwebParser:
@@ -15,9 +20,14 @@ class ImmuniwebParser:
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "XML Scan Result File from Imuniweb Scan."
+        return "XML or JSON Scan Result File from Imuniweb Scan."
 
     def get_findings(self, file, test):
+        if file.name.lower().endswith(".xml"):
+            return self.get_findings_from_xml(file, test)
+        return self.get_findings_from_json(file, test)
+
+    def get_findings_from_xml(self, file, test):
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
         # validate XML file
@@ -85,3 +95,68 @@ class ImmuniwebParser:
                 finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())
+
+    def get_findings_from_json(self, file, test):
+        findings = []
+
+        root = json.load(file)
+
+        for section in root:
+            data = root.get(section)
+            findings.extend(
+                self.get_findings_from_domains_json(section, data, test),
+            )
+
+        return findings
+
+    def get_findings_from_domains_json(self, section, data, test):
+        findings = []
+        for item in data:
+            if not item.get("remediations", []):
+                continue
+
+            # the json contains different types of extra/context information
+            title = item.get("type", "unknown") + ": " + item.get("name", "unknown")
+            title += " - " + item["leak_name"] if item.get("leak_name") else ""
+            date = dateutil.parser.parse(item["discovered"]) if item.get("discovered") else datetime.now()
+
+            tag = item["tag"] if item.get("tag") else None
+            endpoints = []
+            if item.get("link", None):
+                endpoints.append(Endpoint.from_uri(item["link"]) if "://" in item["link"] else Endpoint.from_uri("https://" + item["link"]))
+            if item.get("ip", None):
+                endpoints.append(Endpoint.from_uri(item["ip"]))
+
+            # censor passwords in examples
+            # this is a bit of a hack, but it's unclear what fields the json can contain
+            if "examples" in item:
+                for example in item["examples"]:
+                    if "password" in example:
+                        example["password"] = "REDACTED"  # noqa: S105
+
+            remediations = item.get("remediations", [])
+
+            for remediation in remediations:
+                description = mitigation = remediation
+                # the json contains different types of extra/context information
+                # we just include everything in the description for now as it's unclear which fields are relevant
+                description += "\n\n"
+                description += " ## Details\n"
+                description += "```\n"
+                description += json.dumps(item, indent=4)
+                description += "```\n"
+
+                finding = Finding(
+                    title=title,
+                    test=test,
+                    date=date,
+                    description=description,
+                    mitigation=mitigation,
+                    severity="Informational",
+                    dynamic_finding=True,
+                )
+                finding.unsaved_tags = [tag] if tag else None
+                finding.unsaved_endpoints = endpoints
+
+                findings.append(finding)
+        return findings
