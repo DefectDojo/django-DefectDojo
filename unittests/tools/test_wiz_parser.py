@@ -7,7 +7,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestWizParser(DojoTestCase):
     def test_no_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "no_findings.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "no_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -16,7 +16,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_one_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "one_finding.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "one_finding.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -28,7 +28,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
 
     def test_multiple_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "multiple_findings.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "multiple_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -67,7 +67,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
 
     def test_sca_format(self):
-        with open(get_unit_tests_scans_path("wiz") / "sca_format.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "sca_format.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
