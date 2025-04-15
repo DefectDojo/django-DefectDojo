@@ -125,8 +125,6 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(16, finding.cwe)
             self.assertEqual(0.8269, finding.epss_score)
 
-
-
     def test_parse_some_findings_csv_bytes_nessus_legacy(self):
         """This tests is designed to test the parser with different read modes"""
         with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", encoding="utf-8") as testfile:

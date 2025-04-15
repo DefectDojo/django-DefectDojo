@@ -110,7 +110,7 @@ class TenableCSVParser:
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
 
-            severity_justification = f"Severity: {severity}"
+            severity_justification = f"Severity: {severity}\n"
             for field in (
                 "VPR score",
                 "EPSS Score",
@@ -127,11 +127,11 @@ class TenableCSVParser:
             ):
                 severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
 
-            cwe=0
+            cwe = 0
             xref = row.get("XREF")
             if xref:
                 for ref in xref.split(";"):
-                    key_value=ref.split(":")
+                    key_value = ref.split(":")
                     if len(key_value) == 2 and key_value[0] == "CWE":
                         with contextlib.suppress(ValueError, TypeError):
                             cwe = int(key_value[1])
@@ -168,7 +168,7 @@ class TenableCSVParser:
                     mitigation=mitigation,
                     impact=impact,
                     references=references,
-                    severity_justification=severity_justification
+                    severity_justification=severity_justification,
                 )
 
                 # manage CVSS vector (only v3.x for now)
