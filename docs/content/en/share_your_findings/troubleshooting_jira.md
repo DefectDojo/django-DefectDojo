@@ -1,6 +1,7 @@
 ---
 title: "Troubleshooting Jira errors"
 description: "Fixing issues with a Jira integration"
+weight: 2
 ---
 
 Here are some common issues with the Jira integration, and ways to address them.
