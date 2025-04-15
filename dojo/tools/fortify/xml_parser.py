@@ -15,19 +15,19 @@ class FortifyXMLParser:
 
     def xml_structure_24_2(self, root, test):
         items = []
-        for Issues in root.findall("Issues"):
-            for Issue in Issues.iter("Issue"):
-                CheckTypeID = Issue.find("CheckTypeID").text
-                EngineType = Issue.find("EngineType").text
-                URL = Issue.find("URL").text
-                Scheme = Issue.find("Scheme").text
-                Host = Issue.find("Host").text
-                Port = Issue.find("Port").text
-                VulnerableSession = Issue.find("VulnerableSession").text
-                VulnerabilityID = Issue.find("VulnerabilityID").text
-                Severity = Issue.find("Severity").text
-                Name = Issue.find("Name").text
-                RawResponse = Issue.find("RawResponse").text
+        for issues in root.findall("Issues"):
+            for issue in issues.iter("Issue"):
+                CheckTypeID = issue.find("CheckTypeID").text
+                EngineType = issue.find("EngineType").text
+                URL = issue.find("URL").text
+                Scheme = issue.find("Scheme").text
+                Host = issue.find("Host").text
+                Port = issue.find("Port").text
+                VulnerableSession = issue.find("VulnerableSession").text
+                VulnerabilityID = issue.find("VulnerabilityID").text
+                Severity = issue.find("Severity").text
+                Name = issue.find("Name").text
+                RawResponse = issue.find("RawResponse").text
                 description = ""
                 description += "**CheckTypeID:** " + CheckTypeID + "\n"
                 description += "**URL:** " + URL + "\n"
