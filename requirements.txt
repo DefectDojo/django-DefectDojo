@@ -23,7 +23,7 @@ django-watson==1.6.3
 django-prometheus==2.3.1
 Django==5.1.8
 djangorestframework==3.16.0
-html2text==2024.2.26
+html2text==2025.4.15
 humanize==4.12.2
 jira==3.8.0
 PyGithub==1.58.2
