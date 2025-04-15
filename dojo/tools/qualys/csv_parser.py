@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 def get_fields(self) -> list[str]:
     """
-    Return the list of fields used in the Qualys Parser.
+    Return the list of fields used in the Qualys CSV Parser.
 
     Fields:
     - title: Set to gid and vulnerability name from Qualys Scanner
@@ -48,7 +48,7 @@ def get_fields(self) -> list[str]:
 
 def get_dedupe_fields(self) -> list[str]:
     """
-    Return the list of fields used for deduplication in the Qualys Parser.
+    Return the list of fields used for deduplication in the Qualys CSV Parser.
 
     Fields:
     - title: Set to gid and vulnerability name from Qualys Scanner
