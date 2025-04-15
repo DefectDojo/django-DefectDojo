@@ -1502,6 +1502,7 @@ class ImportReimportMixin:
         self.assertEqual(0, active_finding_after.get("count", 0))
         self.assertEqual(2, false_p_finding_after.get("count", 0))
 
+
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ["dojo_testdata.json"]
 

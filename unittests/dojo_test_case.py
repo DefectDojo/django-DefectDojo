@@ -521,7 +521,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
             if active is not None:
                 payload["active"] = active
-            
+
             if verified is not None:
                 payload["verified"] = verified
 

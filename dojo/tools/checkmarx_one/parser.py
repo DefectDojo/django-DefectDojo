@@ -339,11 +339,11 @@ class CheckmarxOneParser:
         Determine the state of the findings as set by Checkmarx One docs
         https://docs.checkmarx.com/en/34965-68516-managing--triaging--vulnerabilities0.html#UUID-bc2397a3-1614-48bc-ff2f-1bc342071c5a_UUID-ad4991d6-161f-f76e-7d04-970f158eff9b
         """
-        state = data.get("state") 
+        state = data.get("state")
         return {
-            "active": state in ["TO_VERIFY", "PROPOSED_NOT_EXPLOITABLE", "CONFIRMED", "URGENT"],
-            "verified": state in ["NOT_EXPLOITABLE", "CONFIRMED", "URGENT"],
-            "false_p": state in ["NOT_EXPLOITABLE"],
+            "active": state in {"TO_VERIFY", "PROPOSED_NOT_EXPLOITABLE", "CONFIRMED", "URGENT"},
+            "verified": state in {"NOT_EXPLOITABLE", "CONFIRMED", "URGENT"},
+            "false_p": state == "NOT_EXPLOITABLE",
             # These are not managed by checkmarx one, but is nice to explicitly set them
             "duplicate": False,
             "out_of_scope": False,
