@@ -9,7 +9,6 @@ from cpe import CPE
 from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.tools.tenable.utils import parse_cwe_from_ref
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,7 +126,6 @@ class TenableCSVParser:
                 "XREF",
             ):
                 severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
-
 
             # cwe = parse_cwe_from_ref(row.get("XREF"))  # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
             cwe = 0

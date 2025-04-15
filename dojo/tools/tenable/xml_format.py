@@ -6,7 +6,6 @@ from defusedxml import ElementTree
 from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.tools.tenable.utils import parse_cwe_from_ref
 
 LOGGER = logging.getLogger(__name__)
 
