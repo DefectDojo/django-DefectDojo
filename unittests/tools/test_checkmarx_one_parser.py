@@ -153,3 +153,15 @@ class TestCheckmarxOneParser(DojoTestCase):
             sast_finding = findings[124]
             self.maxDiff = None
             test_sast_finding(sast_finding)
+
+    def test_checkmarx_one_false_positive_status(self):
+        with (get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            # check the first first finding is false positive
+            self.assertEqual(True, findings[0].false_p)
+            self.assertEqual(False, findings[0].active)
+            # check the first second finding is not false positive
+            self.assertEqual(False, findings[1].false_p)
+            self.assertEqual(True, findings[1].active)
