@@ -204,10 +204,11 @@ class TestTenableParser(DojoTestCase):
             for i in [0, 1, 2, 3, 4]:
                 finding = findings[i]
                 self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
-                self.assertIsNone(finding.cwe)
+
             finding = findings[0]
             self.assertEqual("High", finding.severity)
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
+            self.assertEqual(79, finding.cwe)
 
     def test_parse_one_findings_xml_nessus_was_legacy(self):
         with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.xml", encoding="utf-8") as testfile:
@@ -219,7 +220,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
-            self.assertIsNone(finding.cwe)
+            self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
 
@@ -249,6 +250,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("7.1", finding.cvssv3_score)
             self.assertEqual("High", finding.severity)
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual(0, finding.cwe)
 
     def test_parse_one_findings_csv_nessus_was_legacy(self):
         with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.csv", encoding="utf-8") as testfile:

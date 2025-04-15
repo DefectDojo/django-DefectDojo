@@ -9,6 +9,7 @@ from cpe import CPE
 from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding, Test
+from dojo.tools.tenable.utils import parse_cwe_from_ref
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,15 +128,7 @@ class TenableCSVParser:
             ):
                 severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
 
-            cwe = 0
-            xref = row.get("XREF")
-            if xref:
-                for ref in xref.split(";"):
-                    key_value = ref.split(":")
-                    if len(key_value) == 2 and key_value[0] == "CWE":
-                        with contextlib.suppress(ValueError, TypeError):
-                            cwe = int(key_value[1])
-                            break
+            cwe = parse_cwe_from_ref(row.get("XREF"))
 
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
