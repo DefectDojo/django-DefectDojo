@@ -34,6 +34,10 @@ class GenericCSVParser:
             # manage active
             if "Active" in row:
                 finding.active = self._convert_bool(row.get("Active"))
+            if "IsMitigated" in row:
+                finding.is_mitigated = self._convert_bool(row.get("IsMitigated"))
+            if "MitigatedDate" in row:
+                finding.mitigated = parse(row["MitigatedDate"])
             # manage mitigation
             if "Mitigation" in row:
                 finding.mitigation = row["Mitigation"]

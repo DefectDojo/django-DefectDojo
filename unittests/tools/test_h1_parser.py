@@ -1,3 +1,6 @@
+from datetime import date, datetime
+from unittest.mock import patch
+
 from dateutil import parser as date_parser
 
 from dojo.models import Test
@@ -7,27 +10,65 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_many.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "vuln_disclosure_many.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
+            self.assertEqual(True, findings[0].active)
+            self.assertEqual(False, findings[0].is_mitigated)
+            self.assertEqual(True, findings[1].active)
+            self.assertEqual(False, findings[1].is_mitigated)
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_one.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "vuln_disclosure_one.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.assertEqual(True, findings[0].active)
+            self.assertEqual(False, findings[0].is_mitigated)
 
     def test_parse_file_with_no_vuln_has_no_finding(self):
-        with open(get_unit_tests_scans_path("h1") / "vuln_disclosure_zero.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "vuln_disclosure_zero.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
+    def test_parse_file_with_multiple_vuln_has_multiple_finding_including_closed_findings(self):
+        with patch("django.utils.timezone.now") as mock_now:
+            mock_now.return_value = datetime(2024, 10, 1, 12, 0, 0)
+
+            with (get_unit_tests_scans_path("h1") / "vuln_disclosure_main_state.json").open(encoding="utf-8") as testfile:
+                parser = H1Parser()
+                findings = parser.get_findings(testfile, Test())
+                self.assertEqual(4, len(findings))
+
+            with self.subTest(i=1):
+                self.assertEqual(True, findings[0].active)
+                self.assertEqual(False, findings[0].is_mitigated)
+                self.assertEqual(None, findings[0].mitigated)
+
+            with self.subTest(i=2):
+                self.assertEqual(True, findings[1].active)
+                self.assertEqual(False, findings[1].is_mitigated)
+                self.assertEqual(None, findings[1].mitigated)
+
+            with self.subTest(i=3):
+                self.assertEqual(False, findings[2].active)
+                self.assertEqual(True, findings[2].is_mitigated)
+                self.assertEqual(date(2016, 10, 3), findings[2].mitigated.date())
+
+            with self.subTest(i=4):
+                self.assertEqual(False, findings[3].active)
+                self.assertEqual(True, findings[3].is_mitigated)
+                self.assertEqual(mock_now.return_value.date(), findings[3].mitigated.date())
+                self.assertEqual(6.3, findings[3].cvssv3_score)
+                self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", findings[3].cvssv3)
+                self.assertIn("**Asset Identifier**: example.com", findings[3].description)
+
 
 class HackerOneBugBountyProgramTests(DojoTestCase):
     def test_bug_bounty_hacker_one_many_findings_json(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_many.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_many.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -71,7 +112,7 @@ class HackerOneBugBountyProgramTests(DojoTestCase):
                 self.assertIn("CVE-2017-12615", finding.unsaved_vulnerability_ids)
 
     def test_bug_bounty_hacker_one_one_findings_json(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_one.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_one.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -89,13 +130,13 @@ class HackerOneBugBountyProgramTests(DojoTestCase):
                 self.assertIn("**Reporter**: reporter", finding.description)
 
     def test_bug_bounty_hacker_one_zero_findings_json(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_zero.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_zero.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_bug_bounty_hacker_one_many_findings_csv(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_many.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_many.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -139,7 +180,7 @@ class HackerOneBugBountyProgramTests(DojoTestCase):
                 self.assertIn("CVE-2017-12615", finding.unsaved_vulnerability_ids)
 
     def test_bug_bounty_hacker_one_one_findings_csv(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_one.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_one.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -157,7 +198,7 @@ class HackerOneBugBountyProgramTests(DojoTestCase):
                 self.assertIn("**Reporter**: reporter", finding.description)
 
     def test_bug_bounty_hacker_one_zero_findings_csv(self):
-        with open(get_unit_tests_scans_path("h1") / "bug_bounty_zero.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("h1") / "bug_bounty_zero.json").open(encoding="utf-8") as testfile:
             parser = H1Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))

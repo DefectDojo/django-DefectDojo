@@ -6,6 +6,7 @@ import re
 import warnings
 from contextlib import suppress
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
@@ -66,7 +67,7 @@ IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, "created"),
     (IMPORT_CLOSED_FINDING, "closed"),
     (IMPORT_REACTIVATED_FINDING, "reactivated"),
-    (IMPORT_UNTOUCHED_FINDING, "left untouched"),
+    (IMPORT_UNTOUCHED_FINDING, "untouched"),
 ]
 
 
@@ -170,6 +171,8 @@ class Regulation(models.Model):
     EDUCATION_CATEGORY = "education"
     MEDICAL_CATEGORY = "medical"
     CORPORATE_CATEGORY = "corporate"
+    SECURITY_CATEGORY = "security"
+    GOVERNMENT_CATEGORY = "government"
     OTHER_CATEGORY = "other"
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _("Privacy")),
@@ -177,12 +180,14 @@ class Regulation(models.Model):
         (EDUCATION_CATEGORY, _("Education")),
         (MEDICAL_CATEGORY, _("Medical")),
         (CORPORATE_CATEGORY, _("Corporate")),
+        (SECURITY_CATEGORY, _("Security")),
+        (GOVERNMENT_CATEGORY, _("Government")),
         (OTHER_CATEGORY, _("Other")),
     )
 
     name = models.CharField(max_length=128, unique=True, help_text=_("The name of the regulation."))
     acronym = models.CharField(max_length=20, unique=True, help_text=_("A shortened representation of the name."))
-    category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_("The subject of the regulation."))
+    category = models.CharField(max_length=16, choices=CATEGORY_CHOICES, help_text=_("The subject of the regulation."))
     jurisdiction = models.CharField(max_length=64, help_text=_("The territory over which the regulation applies."))
     description = models.TextField(blank=True, help_text=_("Information about the regulation's purpose."))
     reference = models.URLField(blank=True, help_text=_("An external URL for more information."))
@@ -1048,7 +1053,7 @@ class SLA_Configuration(models.Model):
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
-                update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
+                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1155,7 +1160,7 @@ class Product(models.Model):
     lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
     origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
     user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_("Estimate the number of user records within the application."))
-    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_("Estimate the application's revenue."))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal("0.00"))], help_text=_("Estimate the application's revenue."))
     external_audience = models.BooleanField(default=False, help_text=_("Specify if the application is used by people outside the organization."))
     internet_accessible = models.BooleanField(default=False, help_text=_("Specify if the application is accessible from the public internet."))
     regulations = models.ManyToManyField(Regulation, blank=True)
@@ -1209,7 +1214,7 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.product.helpers import update_sla_expiration_dates_product_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
@@ -2674,6 +2679,7 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
 
         from dojo.finding import helper as finding_helper
 
@@ -3038,7 +3044,7 @@ class Finding(models.Model):
         return self.date
 
     def get_sla_period(self):
-        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        sla_configuration = self.test.engagement.product.sla_configuration
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
@@ -3135,6 +3141,7 @@ class Finding(models.Model):
         return self.finding_group is not None
 
     def save_no_options(self, *args, **kwargs):
+        logger.debug("save_no_options")
         return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 

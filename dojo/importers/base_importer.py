@@ -711,7 +711,8 @@ class BaseImporter(ImporterOptions):
         """
         finding.active = False
         finding.is_mitigated = True
-        finding.mitigated = self.scan_date
+        if not finding.mitigated:
+            finding.mitigated = self.scan_date
         finding.mitigated_by = self.user
         finding.notes.create(
             author=self.user,

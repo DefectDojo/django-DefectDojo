@@ -33,6 +33,7 @@ from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
@@ -1376,23 +1377,24 @@ def handle_uploaded_threat(f, eng):
     path = Path(f.name)
     extension = path.suffix
     # Check if threat folder exist.
-    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
+    threat_dir = Path(settings.MEDIA_ROOT) / "threat"
+    if not threat_dir.is_dir():
         # Create the folder
-        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
-    with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
-              "wb+") as destination:
+        threat_dir.mkdir()
+    eng_path = threat_dir / f"{eng.id}{extension}"
+    with eng_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
+    eng.tmodel_path = str(eng_path)
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     path = Path(f.name)
     extension = path.suffix
-    with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
-              "wb+") as destination:
+    sel_path = Path(settings.MEDIA_ROOT) / "selenium" / f"{cred.id}{extension}"
+    with sel_path.open("wb+") as destination:
         destination.writelines(chunk for chunk in f.chunks())
-    cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
+    cred.selenium_script = str(sel_path)
     cred.save()
 
 
@@ -1828,17 +1830,6 @@ def user_post_save(sender, instance, created, **kwargs):
         instance.save()
 
 
-def is_safe_url(url):
-    try:
-        # available in django 3+
-        from django.utils.http import url_has_allowed_host_and_scheme
-    except ImportError:
-        # django < 3
-        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
-
-    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
-
-
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
     if return_url is None or not return_url.strip():
@@ -1862,7 +1853,7 @@ def redirect_to_return_url_or_else(request, or_else):
 
 def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
-    if is_safe_url(redirect_to):
+    if url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=None):
         return HttpResponseRedirect(redirect_to)
     msg = "invalid redirect, host and scheme not in allowed_hosts"
     raise ValueError(msg)
@@ -2213,7 +2204,7 @@ def add_error_message_to_response(message):
 
 def add_field_errors_to_response(form):
     if form and get_current_request():
-        for field, error in form.errors.items():
+        for error in form.errors.values():
             add_error_message_to_response(error)
 
 
@@ -2228,17 +2219,18 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     the first X items.
     """
     # force ordering by id to make our paging work
-    last_id = None
+    last_id = 0
     models = models.order_by()
     if order == "asc":
         logger.debug("ordering ascending")
         models = models.order_by("id")
-        last_id = 0
     elif order == "desc":
         logger.debug("ordering descending")
         models = models.order_by("-id")
         # get maximum, which is the first due to descending order
-        last_id = models.first().id + 1
+        first = models.first()
+        if first:
+            last_id = models.first().id + 1
     else:
         msg = "order must be asc or desc"
         raise ValueError(msg)
@@ -2249,22 +2241,18 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     i = 0
     batch = []
     total_pages = (total_count // page_size) + 2
-    # logger.info('pages to process: %d', total_pages)
+    # logger.debug("pages to process: %d", total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
-    for p in range(1, total_pages):
-        # logger.info('page: %d', p)
+    for _p in range(1, total_pages):
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
         else:
             page = models.filter(id__lt=last_id)[:page_size]
 
-        # logger.info('page query: %s', page.query)
-        # if p == 23:
-        #     raise ValueError('bla')
+        logger.debug("page query: %s", page.query)
         for model in page:
             i += 1
             last_id = model.id
-            # logger.info('last_id: %s', last_id)
 
             function(model)
 
@@ -2633,10 +2621,8 @@ def get_open_findings_burndown(product):
                         info_count -= 1
 
         f_day = [critical_count, high_count, medium_count, low_count, info_count]
-        if min(f_day) < running_min:
-            running_min = min(f_day)
-        if max(f_day) > running_max:
-            running_max = max(f_day)
+        running_min = min(running_min, *f_day)
+        running_max = max(running_max, *f_day)
 
         past_90_days["Critical"].append([d_start * 1000, critical_count])
         past_90_days["High"].append([d_start * 1000, high_count])
@@ -2703,7 +2689,7 @@ def generate_file_response_from_file_path(
     # Generate the FileResponse
     full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
-        open(file_path, "rb"),
+        path.open("rb"),
         filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )

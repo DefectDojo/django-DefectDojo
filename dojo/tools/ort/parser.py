@@ -1,6 +1,6 @@
 import hashlib
 import json
-from collections import namedtuple
+from typing import NamedTuple
 
 from dojo.models import Finding
 
@@ -40,12 +40,12 @@ class OrtParser:
 
         return tree
 
-    def get_items(self, evaluatedModel, test):
+    def get_items(self, evaluated_model, test):
         items = {}
-        packages = evaluatedModel["packages"]
-        dependency_trees = evaluatedModel["dependency_trees"]
-        rule_violations = evaluatedModel["rule_violations"]
-        licenses = evaluatedModel["licenses"]
+        packages = evaluated_model["packages"]
+        dependency_trees = evaluated_model["dependency_trees"]
+        rule_violations = evaluated_model["rule_violations"]
+        licenses = evaluated_model["licenses"]
         rule_violations_unresolved = get_unresolved_rule_violations(
             rule_violations,
         )
@@ -56,7 +56,7 @@ class OrtParser:
         for model in rule_violations_models:
             item = get_item(model, test)
             unique_key = hashlib.md5(
-                (item.title + item.references).encode(),
+                (item.title + item.references).encode(), usedforsecurity=False,
             ).hexdigest()
             items[unique_key] = item
 
@@ -175,17 +175,11 @@ how to fix : {model.rule_violation['how_to_fix']}"""
     )
 
 
-# TODO: with python 3.7
-# @dataclass
-# class RuleViolationModel:
-#     pkg: dict
-#     license_id: str
-#     projects: []
-#     rule_violation: dict
-
-RuleViolationModel = namedtuple(
-    "RuleViolationModel", ["pkg", "license_id", "projects", "rule_violation"],
-)
+class RuleViolationModel(NamedTuple):
+    pkg: dict
+    license_id: str
+    projects: []
+    rule_violation: dict
 
 
 def get_severity(rule_violation):

@@ -5,21 +5,21 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestRubocopParser(DojoTestCase):
     def test_parser_empty(self):
-        testfile = open(get_unit_tests_scans_path("rubocop") / "empty.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("rubocop") / "empty.json").open(encoding="utf-8")
         parser = RubocopParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_zero_findings(self):
-        testfile = open(get_unit_tests_scans_path("rubocop") / "zero_vulns.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("rubocop") / "zero_vulns.json").open(encoding="utf-8")
         parser = RubocopParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_one_vuln(self):
-        testfile = open(get_unit_tests_scans_path("rubocop") / "one_finding.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("rubocop") / "one_finding.json").open(encoding="utf-8")
         parser = RubocopParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -33,7 +33,7 @@ class TestRubocopParser(DojoTestCase):
             self.assertEqual("Security/MarshalLoad", finding.vuln_id_from_tool)
 
     def test_parser_many_vulns(self):
-        testfile = open(get_unit_tests_scans_path("rubocop") / "many_vulns.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("rubocop") / "many_vulns.json").open(encoding="utf-8")
         parser = RubocopParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

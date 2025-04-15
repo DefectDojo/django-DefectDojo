@@ -177,7 +177,7 @@ Example of use:
 from cvss.cvss3 import CVSS3
 import cvss.parser
 vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+if len(vectors) > 0 and type(vectors[0]) is CVSS3:
     print(vectors[0].severities())  # this is the 3 severities
 
     cvssv3 = vectors[0].clean_vector()
@@ -192,7 +192,7 @@ Good example:
 
 ```python
 vectors = cvss.parser.parse_cvss_from_text(item['cvss_vect'])
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+if len(vectors) > 0 and type(vectors[0]) is CVSS3:
     finding.cvss = vectors[0].clean_vector()
     finding.severity = vectors[0].severities()[0]  # if your tool does generate severity
 ```
@@ -298,16 +298,16 @@ or like this:
 $ ./run-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
 {{< /highlight >}}
 
-Example for the blackduck hub parser:
+Example for the aqua parser:
 
 {{< highlight bash >}}
-$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_aqua_parser.TestAquaParser -v2'
 {{< /highlight >}}
 
 or like this:
 
 {{< highlight bash >}}
-$ ./run-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
+$ ./run-unittest.sh --test-case unittests.tools.test_aqua_parser.TestAquaParser
 {{< /highlight >}}
 
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
