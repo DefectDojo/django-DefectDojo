@@ -235,7 +235,7 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
             
             create_notification(
                 event="finding_exclusion_expired",
-                subject="⚠️Finding Exclusion Expired",
+                subject=f"⚠️Finding Exclusion Expired - {expired_fex.unique_id_from_tool}",
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
                 description=f"All findings added via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the {expired_fex.type}.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
@@ -455,11 +455,11 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 
 @app.task
-def update_finding_prioritization_per_cve(finding, priorization) -> None:
+def update_finding_prioritization_per_cve(vulnerability_id, scan_type, priorization) -> None:
     findings = Finding.objects.filter(
-        (Q(cve=finding.cve) & ~Q(cve=None))
-        | (Q(vuln_id_from_tool=finding.cve) & ~Q(vuln_id_from_tool=None)),
-        test__scan_type=finding.test.scan_type,
+        (Q(cve=vulnerability_id) & ~Q(cve=None))
+        | (Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)),
+        test__scan_type=scan_type,
         active=True,
     ).filter(blacklist_tag_filter)
     for finding_update in findings:
@@ -483,7 +483,7 @@ def identify_critical_vulnerabilities(findings) -> int:
     
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
-        update_finding_prioritization_per_cve.apply_async(args=(finding, priority,))
+        update_finding_prioritization_per_cve.apply_async(args=(finding.cve, finding.test.scan_type, priority,))
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list", status="Accepted")

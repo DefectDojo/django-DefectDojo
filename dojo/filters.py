@@ -44,6 +44,9 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.helper import (
     ACCEPTED_FINDINGS_QUERY,
+    PENDING_ACCEPTANCE_QUERY,
+    REJECTED_ACCEPTANCE_QUERY,
+    EXPIRED_ACCEPTANCE_QUERY,
     CLOSED_FINDINGS_QUERY,
     FALSE_POSITIVE_FINDINGS_QUERY,
     INACTIVE_FINDINGS_QUERY,
@@ -53,6 +56,12 @@ from dojo.finding.helper import (
     UNDER_REVIEW_QUERY,
     VERIFIED_FINDINGS_QUERY,
     WAS_ACCEPTED_FINDINGS_QUERY,
+    ACCEPTED_TRANSFERED_FINDINGS_QUERY,
+    PENDING_TRANSFERED_FINDINGS_QUERY,
+    REJECTED_TRANSFERED_FINDINGS_QUERY,
+    EXPIRED_TRANSFERED_FINDINGS_QUERY,
+    WHITELISTED_FINDINGS_QUERY,
+    BLACKLISTED_FINDINGS_QUERY
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
@@ -171,12 +180,40 @@ class FindingStatusFilter(ChoiceFilter):
 
     def risk_accepted(self, qs, name):
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
+    
+    def pending_acceptance(self, qs, name):
+        return qs.filter(PENDING_ACCEPTANCE_QUERY)
+    
+    def rejected_acceptance(self, qs, name):
+        return qs.filter(REJECTED_ACCEPTANCE_QUERY)
+    
+    def expired_acceptance(self, qs, name):
+        return qs.filter(EXPIRED_ACCEPTANCE_QUERY)
 
     def closed(self, qs, name):
         return qs.filter(CLOSED_FINDINGS_QUERY)
 
     def under_review(self, qs, name):
         return qs.filter(UNDER_REVIEW_QUERY)
+    
+    def transfer_accepted(self, qs, name):
+        return qs.filter(ACCEPTED_TRANSFERED_FINDINGS_QUERY)
+    
+    def transfer_pending(self, qs, name):
+        return qs.filter(PENDING_TRANSFERED_FINDINGS_QUERY)
+    
+    def transfer_rejected(self, qs, name):
+        return qs.filter(REJECTED_TRANSFERED_FINDINGS_QUERY)
+    
+    def transfer_expired(self, qs, name):
+        return qs.filter(EXPIRED_TRANSFERED_FINDINGS_QUERY)
+        
+    def on_whitelist(self, qs, name):
+        return qs.filter(WHITELISTED_FINDINGS_QUERY)
+
+    def on_blacklist(self, qs, name):
+        return qs.filter(BLACKLISTED_FINDINGS_QUERY)
+    
 
     options = {
         None: (_("Any"), any),
@@ -186,8 +223,17 @@ class FindingStatusFilter(ChoiceFilter):
         3: (_("False Positive"), false_positive),
         4: (_("Inactive"), inactive),
         5: (_("Risk Accepted"), risk_accepted),
-        6: (_("Closed"), closed),
-        7: (_("Under Review"), under_review),
+        6: (_("Risk Pending"), pending_acceptance),
+        7: (_("Risk Rejected"), rejected_acceptance),
+        8: (_("Risk Expired"), expired_acceptance),
+        9: (_("Closed"), closed),
+        10: (_("Under Review"), under_review),
+        11: (_("Transfer Accepted"), transfer_accepted),
+        12: (_("Transfer Pending"), transfer_pending),
+        13: (_("Transfer Rejected"), transfer_rejected),
+        14: (_("Transfer Expired"), transfer_expired),
+        15: (_("On Whitelist"), on_whitelist),
+        16: (_("On Blacklist"), on_blacklist),
     }
 
     def __init__(self, *args, **kwargs):
