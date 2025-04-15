@@ -17,36 +17,36 @@ class FortifyXMLParser:
         items = []
         for issues in root.findall("Issues"):
             for issue in issues.iter("Issue"):
-                CheckTypeID = issue.find("CheckTypeID").text
-                EngineType = issue.find("EngineType").text
-                URL = issue.find("URL").text
-                Scheme = issue.find("Scheme").text
-                Host = issue.find("Host").text
-                Port = issue.find("Port").text
-                VulnerableSession = issue.find("VulnerableSession").text
-                VulnerabilityID = issue.find("VulnerabilityID").text
-                Severity = issue.find("Severity").text
-                Name = issue.find("Name").text
-                RawResponse = issue.find("RawResponse").text
+                check_type_id = issue.find("CheckTypeID").text
+                engine_type = issue.find("EngineType").text
+                url = issue.find("URL").text
+                scheme = issue.find("Scheme").text
+                host = issue.find("Host").text
+                port = issue.find("Port").text
+                vulnerable_session = issue.find("VulnerableSession").text
+                vulnerability_id = issue.find("VulnerabilityID").text
+                severity = issue.find("Severity").text
+                name = issue.find("Name").text
+                raw_response = issue.find("RawResponse").text
                 description = ""
-                description += "**CheckTypeID:** " + CheckTypeID + "\n"
-                description += "**URL:** " + URL + "\n"
-                description += "**EngineType:** " + EngineType + "\n"
-                description += "**Scheme:** " + Scheme + "\n"
-                description += "**VulnerabilityID:** " + VulnerabilityID + "\n"
-                description += "**VulnerableSession:** " + VulnerableSession + "\n"
+                description += "**CheckTypeID:** " + check_type_id + "\n"
+                description += "**URL:** " + url + "\n"
+                description += "**EngineType:** " + engine_type + "\n"
+                description += "**Scheme:** " + scheme + "\n"
+                description += "**VulnerabilityID:** " + vulnerability_id + "\n"
+                description += "**VulnerableSession:** " + vulnerable_session + "\n"
                 finding = Finding(
-                        title=Name,
-                        severity=self.severity_translator(severity=int(Severity)),
+                        title=name,
+                        severity=self.severity_translator(severity=int(severity)),
                         static_finding=True,
                         test=test,
                         description=description,
                     )
-                if RawResponse is not None:
+                if raw_response is not None:
                     finding.unsaved_req_resp = []
-                    finding.unsaved_req_resp.append({"req": "", "resp": str(RawResponse)})
-                if Host is not None:
-                    finding.unsaved_endpoints = [Endpoint(host=Host, port=Port)]
+                    finding.unsaved_req_resp.append({"req": "", "resp": str(raw_response)})
+                if host is not None:
+                    finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
                 items.append(finding)
         return items
 
