@@ -128,7 +128,7 @@ class TenableCSVParser:
             ):
                 severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
 
-            cwe = parse_cwe_from_ref(row.get("XREF"))
+            # cwe = parse_cwe_from_ref(row.get("XREF"))  # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
 
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
