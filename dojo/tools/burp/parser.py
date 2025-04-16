@@ -3,7 +3,7 @@ import logging
 import re
 
 import html2text
-from defusedxml import ElementTree as etree
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -89,7 +89,7 @@ class BurpParser:
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser())
+        tree = ElementTree.parse(xml_output, ElementTree.XMLParser())
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -115,39 +115,6 @@ class BurpParser:
                 items[dupe_key] = item
 
         return list(items.values())
-
-
-def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
-    """
-    Finds a subnode in the item node and the retrieves a value from it
-
-    @return An attribute value
-    """
-    global ETREE_VERSION
-    node = None
-
-    if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
-        match_obj = re.search(
-            r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr,
-        )
-        if match_obj is not None:
-            node_to_find = match_obj.group(1)
-            xpath_attrib = match_obj.group(2)
-            xpath_value = match_obj.group(3)
-            for node_found in xml_node.findall(node_to_find):
-                if node_found.attrib[xpath_attrib] == xpath_value:
-                    node = node_found
-                    break
-        else:
-            node = xml_node.find(subnode_xpath_expr)
-
-    else:
-        node = xml_node.find(subnode_xpath_expr)
-
-    if node is not None:
-        return node.get(attrib_name)
-
-    return None
 
 
 def do_clean(value):

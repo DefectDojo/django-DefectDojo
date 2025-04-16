@@ -285,9 +285,9 @@ def get_snippet(location):
     return snippet
 
 
-def get_codeFlowsDescription(codeFlows):
+def get_codeFlowsDescription(code_flows):
     description = ""
-    for codeFlow in codeFlows:
+    for codeFlow in code_flows:
         for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue

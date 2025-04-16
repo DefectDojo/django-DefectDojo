@@ -1,7 +1,7 @@
 import contextlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -9,7 +9,7 @@ from dojo.models import Endpoint, Finding
 class OpenVASXMLParser:
     def get_findings(self, filename, test):
         findings = []
-        tree = ET.parse(filename)
+        tree = ElementTree.parse(filename)
         root = tree.getroot()
         if "report" not in root.tag:
             msg = "This doesn't seem to be a valid Greenbone OpenVAS XML file."

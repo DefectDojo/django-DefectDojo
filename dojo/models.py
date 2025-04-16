@@ -6,6 +6,7 @@ import re
 import warnings
 from contextlib import suppress
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
@@ -170,6 +171,8 @@ class Regulation(models.Model):
     EDUCATION_CATEGORY = "education"
     MEDICAL_CATEGORY = "medical"
     CORPORATE_CATEGORY = "corporate"
+    SECURITY_CATEGORY = "security"
+    GOVERNMENT_CATEGORY = "government"
     OTHER_CATEGORY = "other"
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _("Privacy")),
@@ -177,12 +180,14 @@ class Regulation(models.Model):
         (EDUCATION_CATEGORY, _("Education")),
         (MEDICAL_CATEGORY, _("Medical")),
         (CORPORATE_CATEGORY, _("Corporate")),
+        (SECURITY_CATEGORY, _("Security")),
+        (GOVERNMENT_CATEGORY, _("Government")),
         (OTHER_CATEGORY, _("Other")),
     )
 
     name = models.CharField(max_length=128, unique=True, help_text=_("The name of the regulation."))
     acronym = models.CharField(max_length=20, unique=True, help_text=_("A shortened representation of the name."))
-    category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_("The subject of the regulation."))
+    category = models.CharField(max_length=16, choices=CATEGORY_CHOICES, help_text=_("The subject of the regulation."))
     jurisdiction = models.CharField(max_length=64, help_text=_("The territory over which the regulation applies."))
     description = models.TextField(blank=True, help_text=_("Information about the regulation's purpose."))
     reference = models.URLField(blank=True, help_text=_("An external URL for more information."))
@@ -1155,7 +1160,7 @@ class Product(models.Model):
     lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
     origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
     user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_("Estimate the number of user records within the application."))
-    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_("Estimate the application's revenue."))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal("0.00"))], help_text=_("Estimate the application's revenue."))
     external_audience = models.BooleanField(default=False, help_text=_("Specify if the application is used by people outside the organization."))
     internet_accessible = models.BooleanField(default=False, help_text=_("Specify if the application is accessible from the public internet."))
     regulations = models.ManyToManyField(Regulation, blank=True)

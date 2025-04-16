@@ -1,3 +1,4 @@
+# noqa: N999 - see https://github.com/DefectDojo/django-DefectDojo/pull/11647
 #########################################################################################################
 # It is not recommended to edit file 'settings.dist.py', for production deployments.                        #
 # Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
@@ -225,6 +226,9 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    # When interacting with jira tickets that attached finding groups, we should no be opening any findings
+    # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
+    DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
@@ -1634,6 +1638,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
 # LOGGING
@@ -1802,10 +1807,12 @@ SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 VULNERABILITY_URLS = {
     "ALBA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALBA-2019:3411
     "ALSA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "ASA-": "https://security.archlinux.org/",  # e.g. https://security.archlinux.org/ASA-202003-8
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
+    "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
@@ -1821,11 +1828,15 @@ VULNERABILITY_URLS = {
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
+    "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
+    "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
+    "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
+    "PFPT-SA-": "https://www.proofpoint.com/us/security/security-advisories/",  # e.g. https://www.proofpoint.com/us/security/security-advisories/pfpt-sa-0002
     "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
     "PYSEC-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/PYSEC-2024-48
     "RHBA-": "https://access.redhat.com/errata/",  # e.g. https://access.redhat.com/errata/RHBA-2024:2406
@@ -1836,6 +1847,8 @@ VULNERABILITY_URLS = {
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
+    "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
+    "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
     "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103
