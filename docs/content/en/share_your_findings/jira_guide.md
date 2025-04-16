@@ -61,9 +61,9 @@ Multiple Jira Projects can be handled by a single Jira Instance connection, as l
 Note that the user associated with this connection have permission to create Issues and access data in your Jira instance.
 
 6. You will need to provide values for an Epic Name ID, Re-open Transition ID and Close Transition ID.  These values can be changed later.  While logged into Jira, you can access these values from the following URLs:
-- **Epic Name ID**: visit `https://\<YOUR JIRA URL\>/rest/api/2/field` and search for Epic Name. Copy the number out of cf\[number] and paste it here.
-- **Re-open Transition ID**: visit `https://\<YOUR JIRA URL\>/rest/api/latest/issue/\<ANY VALID ISSUE KEY\>/transitions? expand\-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
-- **Close Transition ID**: Visit `https://\<YOUR JIRA URL\>/rest/api/latest/issue/\<ANY VALID ISSUE KEY\>/transitions? expand\-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
+- **Epic Name ID**: visit `https://<YOUR JIRA URL>/rest/api/2/field` and search for Epic Name. Copy the number out of `number` and paste it here.
+- **Re-open Transition ID**: visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
+- **Close Transition ID**: Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
 
 7. Select the Default issue type which you want to create Issues as in Jira. The options for this are **Bug, Task, Story** and **Epic** (which are standard Jira issue types) as well as **Spike** and **Security**, which are custom issue types. If you have a different Issue Type which you want to use, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
 
