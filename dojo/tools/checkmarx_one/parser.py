@@ -91,7 +91,7 @@ class CheckmarxOneParser:
                             f"**Actual Value**: {instance.get('actualValue')}\n"
                             f"**Expected Value**: {instance.get('expectedValue')}\n"
                         ),
-                        **base_finding_details,
+                        **instance_details,
                     )
                     # Add some details to the description
                     finding.description += (
