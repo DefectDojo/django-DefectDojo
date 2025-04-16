@@ -249,8 +249,8 @@ Here is an example of a **jira\_full** Issue:
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_4.png)
 
 * **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)  
-​  
-​**Here is an example of a jira\_limited Issue:**​
+
+​Here is an example of a **jira\_limited** Issue:​
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_5.png)
 
