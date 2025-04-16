@@ -159,9 +159,9 @@ class TestCheckmarxOneParser(DojoTestCase):
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
-            # check the first first finding is false positive
+            # check the first finding is false positive
             self.assertEqual(True, findings[0].false_p)
             self.assertEqual(False, findings[0].active)
-            # check the first second finding is not false positive
+            # check the second finding is not false positive
             self.assertEqual(False, findings[1].false_p)
             self.assertEqual(True, findings[1].active)
