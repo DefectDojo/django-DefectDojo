@@ -136,15 +136,15 @@ The Standard Jira Configuration adds a few additional steps to allow for more pr
 
 * **Epic Name ID:** If you have multiple Epic types in Jira, you can specify the one you want to use by finding its ID in the Jira Field Spec.
 ​
-To obtain the 'Epic name id' visit `https://\<YOUR JIRA URL\>/rest/api/2/field` and search for Epic Name. Copy the number out of cf\[number] and paste it here.
+To obtain the 'Epic name id' visit `https://<YOUR JIRA URL>/rest/api/2/field` and search for Epic Name. Copy the number out of `number` and paste it here.
 ​  ​
 * **Reopen Transition ID:** If you want a specific Jira Transition to Reopen an issue, you can specify the Transition ID here. If using the Express Jira Configuration, DefectDojo will automatically find an appropriate Transition and create the mapping.
 ​
-Visit `https://\<YOUR JIRA URL\>/rest/api/latest/issue/\<ANY VALID ISSUE KEY\>/transitions? expand\-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
+Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
 ​
 * **Close Transition ID:** If you want a specific Jira Transition to Close an issue, you can specify the Transition ID here. If using the **Express Jira Configuration**, DefectDojo will automatically find an appropriate Transition and create the mapping.
 ​
-Visit `https://\<YOUR JIRA URL\>/rest/api/latest/issue/\<ANY VALID ISSUE KEY\>/transitions? expand\-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
+Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
 ​
 * **Mapping Severity Fields:** Each Jira Issue has an associated Priority, which DefectDojo will automatically assign based on the Severity of a Finding. Enter the names of each Priority which you want to map to, for Info, Low, Medium, High and Critical Severities.
 
