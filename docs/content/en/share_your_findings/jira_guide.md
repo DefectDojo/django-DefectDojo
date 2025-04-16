@@ -480,7 +480,7 @@ Start this process by navigating to the Field Spec URL for your entire Jira inst
 
 Here is an example of a Field Spec URL:
 
-`https://yourcompany\-example.atlassian.net/rest/api/2/field`
+`https://yourcompany-example.atlassian.net/rest/api/2/field`
 
 The API will return a long string of JSON, which should be formatted into readable text (using a code editor, browser extension or <https://jsonformatter.org/>).
 
