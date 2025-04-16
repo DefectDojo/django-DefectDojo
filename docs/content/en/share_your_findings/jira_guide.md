@@ -109,11 +109,11 @@ The Express method allows for a quicker method of linking a Project. Use the Exp
 5. Select your Issue Template, which will determine the Issue Description when Issues are created in Jira.
 
 The two types are:
-\- **Jira\_full**, which will include all Finding information in Jira Issues
-\- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.
-​
+- **Jira\_full**, which will include all Finding information in Jira Issues
+- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.
+
 If you leave this field blank, it will default to **Jira\_full.**
-​
+
 6. Select one or more Jira Resolution types which will change the status of a Finding to Accepted (when the Resolution is triggered on the Issue). If you don’t wish to use this automation, you can leave the field blank.
 ​
 7. Select one or more Jira Resolution types which will change the status of a Finding to False Positive (when the Resolution is triggered on the Issue). If you don’t wish to use this automation, you can leave the field blank.
