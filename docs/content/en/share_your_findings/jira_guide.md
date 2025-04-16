@@ -502,7 +502,7 @@ Jira generates different key values for each Custom Field, but these key values 
 
 Locate an Issue in Jira that contains the Custom Fields which you recorded in Step 2\. Copy the Issue Key for the title (should look similar to “`EXAMPLE-123`”) and navigate to the following URL:
 
-`https://yourcompany\-example.atlassian.net/rest/api/2/issue/EXAMPLE\-123`
+`https://yourcompany-example.atlassian.net/rest/api/2/issue/EXAMPLE-123`
 
 This will return another string of JSON.
 
