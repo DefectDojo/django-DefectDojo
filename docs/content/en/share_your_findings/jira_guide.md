@@ -70,10 +70,10 @@ Note that the user associated with this connection have permission to create Iss
 8. Select your Issue Template, which will determine the Issue Description when Issues are created in Jira.
 
 The two types are:
-\- **Jira\_full**, which will include all Finding information in Jira Issues
-\- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.
-​
-If you leave this field blank, it will default to **Jira\_full.**  If you need a different kind of template, Pro users can reach out to support@defectdojo.com
+- **Jira\_full**, which will include all Finding information in Jira Issues
+- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.
+
+If you leave this field blank, it will default to **Jira\_full.**  If you need a different kind of template, Pro users can reach out to [support@defectdojo.com](mailto:support@defectdojo.com)
 
 9. If you wish, enter the name of a Jira Resolution which will change the status of a Finding to Accepted or to False Positive (when the Resolution is triggered on the Issue).
 
