@@ -8,6 +8,9 @@ If you import a .fpr file, the parser will look for the file 'audit.fvdl' and an
 ### Sample Scan Data
 Sample Fortify scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify).
 
+### Fortify Webinspect report formats.
+Fortify Webinspect released in version 24.2 a new xml report format. This parser is able to handle both report formats. See [this issue](https://github.com/DefectDojo/django-DefectDojo/issues/12065) for further information. 
+
 #### Generate XML Output from Foritfy
 This section describes how to import XML generated from a Fortify FPR. It assumes you 
 already have, or know how to acquire, an FPR file. Once you have the FPR file you will need
