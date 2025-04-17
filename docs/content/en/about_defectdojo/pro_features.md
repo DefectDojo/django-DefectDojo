@@ -54,6 +54,6 @@ Supported tools for Connectors include:
 ### Universal Parser
 Are you using an unsupported or customized scanning tool?  Or do you just wish DefectDojo handled a report slightly differently?
 
-Use DefectDojo Pro's Universal Parser to turn any .json or .csv report into an actionable set of Findings, and have DefectDojo parse the data however you like.  See our [Universal Parser Guide](/en/connecting_your_tools/universal_parser/)
+Use DefectDojo Pro's Universal Parser to turn any .json or .csv report into an actionable set of Findings, and have DefectDojo parse the data however you like.  See our [Universal Parser Guide](/en/connecting_your_tools/parsers/universal_parser/)
 
 ![image](images/universal_parser_3.png)

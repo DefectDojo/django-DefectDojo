@@ -23,7 +23,7 @@ The Import Scan form can be accessed from multiple locations:
 
 ## Accessing the Import Scan Form (Classic UI / Open Source)
 
-In DefectDojo OS, you can access the [Import Scan Form](../import_scan_files/import_scan_ui) from two locations:
+In DefectDojo OS, you can access this form from two locations:
 
 * The Tests section of an Engagement:
     ![image](images/import_scan_os.png)

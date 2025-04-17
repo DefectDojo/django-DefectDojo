@@ -25,4 +25,4 @@ All of these listed reports can be ingested via [Import/Reimport](../import_intr
 
 If your tool is not in this list, there's a good chance that DefectDojo can still import a report from the tool.  Consider the [Generic Findings Import](./generic_findings_import/) method.
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users can import any JSON or CSV report using the [Universal Parser](../universal_parser).
+<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users can import any JSON or CSV report using the [Universal Parser](./universal_parser).
