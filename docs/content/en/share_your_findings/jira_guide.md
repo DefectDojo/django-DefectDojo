@@ -28,7 +28,7 @@ for **Jira Cloud**, you will need:
 * a Jira URL, i.e. https://yourcompany.atlassian.net/
 * an account with permissions to create and update issues in your Jira instance.  This can be:
     * A standard **username / password** combination
-    * A **username / API Key** combination
+    * A **username / API Token** combination
 
 for **Jira Data Center (or Server)**, you will need:
 * a Jira URL, i.e. https://jira.yourcompany.com
