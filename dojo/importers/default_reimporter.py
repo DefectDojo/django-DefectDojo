@@ -525,7 +525,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # Return True here to force the loop to continue
             return existing_finding, True
         if self.do_not_reactivate:
-            self.unchanged_items.append(existing_finding)
             logger.debug(
                 "Skipping reactivating by user's choice do_not_reactivate: "
                 f" - {existing_finding.id}: {existing_finding.title} "
