@@ -3,7 +3,7 @@ import logging
 
 import html2text
 from cvss import CVSS3
-from defusedxml import ElementTree as etree
+from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
@@ -363,8 +363,8 @@ def parse_finding(host, tree):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser()
-    tree = etree.parse(qualys_xml_file, parser)
+    parser = ElementTree.XMLParser()
+    tree = ElementTree.parse(qualys_xml_file, parser)
     host_list = tree.find("HOST_LIST")
     finding_list = []
     if host_list is not None:

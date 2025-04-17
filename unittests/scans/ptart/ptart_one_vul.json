@@ -40,6 +40,9 @@
             "A01:2021-Broken Access Control",
             "A04:2021-Insecure Design"
           ],
+          "cwes": [
+            { "cwe_id": 862, "title": "CWE-862 - Missing Authorization" }
+          ],
           "screenshots": [
             {
               "caption": "Borked",

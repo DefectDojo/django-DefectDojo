@@ -60,7 +60,6 @@ allowedAuthors:
   usernames:
     - mtesauro
     - devGregA
-    - grendel513
     - cneill
     - Maffooch
     - blakeaowens
@@ -71,4 +70,3 @@ allowedAuthors:
     - valentijnscholten
 notificationList:
   - '@mtesauro'
-  - '@grendel513'

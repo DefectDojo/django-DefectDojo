@@ -1,4 +1,4 @@
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 from html2text import html2text
 
 from dojo.models import Endpoint, Finding
@@ -72,7 +72,7 @@ class ZapParser:
         if not file.name.endswith(".xml"):
             msg = "Internal error: Wrong file format, please use xml."
             raise ValueError(msg)
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         items = []
         for node in tree.findall("site"):
             for item in node.findall("alerts/alertitem"):

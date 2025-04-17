@@ -243,7 +243,7 @@ class BaseImporter(ImporterOptions):
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.")
+        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
         return self.process_findings(parsed_findings, sync=False, **kwargs)
 
     def determine_process_method(
@@ -752,7 +752,8 @@ class BaseImporter(ImporterOptions):
         """
         finding.active = False
         finding.is_mitigated = True
-        finding.mitigated = self.scan_date
+        if not finding.mitigated:
+            finding.mitigated = self.scan_date
         finding.mitigated_by = self.user
         finding.notes.create(
             author=self.user,

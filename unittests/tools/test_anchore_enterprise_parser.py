@@ -28,7 +28,7 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
 
     def test_anchore_policy_check_parser_invalid_format(self):
         with open(get_unit_tests_scans_path("anchore_enterprise") / "invalid_checks_format.json", encoding="utf-8") as testfile, \
-          self.assertRaises(Exception):
+           self.assertRaises(ValueError):
             parser = AnchoreEnterpriseParser()
             parser.get_findings(testfile, Test())
 

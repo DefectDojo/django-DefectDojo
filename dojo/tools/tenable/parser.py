@@ -81,9 +81,7 @@ class TenableParser:
         )
 
     def get_findings(self, filename, test):
-        if filename.name.lower().endswith(
-            ".xml",
-        ) or filename.name.lower().endswith(".nessus"):
+        if filename.name.lower().endswith((".xml", ".nessus")):
             return TenableXMLParser().get_findings(filename, test)
         if filename.name.lower().endswith(".csv"):
             return TenableCSVParser().get_findings(filename, test)
