@@ -17,7 +17,7 @@ DefectDojo can parse data from 180+ security reports and counting.
 
 | [Connectors](../connectors/about_connectors): supported tools | [Smart Upload](../import_scan_files/smart_upload/): supported tools |
 | --- | --- |
-| AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, Probely, Semgrep, SonarQube, Snyk, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable | 
+| AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, Probely, Semgrep, SonarQube, Snyk, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable, Wiz | 
 
 # All Supported Tools
 
