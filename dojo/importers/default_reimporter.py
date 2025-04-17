@@ -1,4 +1,5 @@
 import logging
+from datetime import timezone
 from warnings import warn
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -98,6 +99,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings,
             findings_to_mitigate,
             untouched_findings,
+            mitigated_findings,
         ) = self.determine_process_method(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
@@ -119,21 +121,21 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # feature enabled
         test_import_history = self.update_import_history(
             new_findings=new_findings,
-            closed_findings=closed_findings,
+            closed_findings=mitigated_findings + closed_findings,
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
-            len(closed_findings) + len(reactivated_findings) + len(new_findings)
+            len(mitigated_findings) + len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
         self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
             findings_reactivated=reactivated_findings,
-            findings_mitigated=closed_findings,
+            findings_mitigated=mitigated_findings + closed_findings,
             findings_untouched=untouched_findings,
         )
         # Update the test progress to reflect that the import has completed
@@ -144,7 +146,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.test,
             updated_count,
             len(new_findings),
-            len(closed_findings),
+            len(closed_findings) + len(mitigated_findings),
             len(reactivated_findings),
             len(untouched_findings),
             test_import_history,
@@ -167,6 +169,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
+        self.mitigated_items = []
         self.group_names_to_findings_dict = {}
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
@@ -235,14 +238,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 else:
                     finding.save(push_to_jira=self.push_to_jira)
 
-        self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
+        self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items) - set(self.mitigated_items))
         # due to #3958 we can have duplicates inside the same report
         # this could mean that a new finding is created and right after
         # that it is detected as the 'matched existing finding' for a
         # following finding in the same report
         # this means untouched can have this finding inside it,
         # while it is in fact a new finding. So we subtract new_items
-        self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
+        self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items) - set(self.mitigated_items)
         # Process groups
         self.process_groups_for_all_findings(**kwargs)
         # Process the results and return them back
@@ -338,6 +341,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         new_findings = []
         reactivated_findings = []
         findings_to_mitigate = []
+        mitigated_findings = []
         untouched_findings = []
         # First kick off all the workers
         for findings_list in chunk_list:
@@ -357,6 +361,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 serial_reactivated_findings,
                 serial_findings_to_mitigate,
                 serial_untouched_findings,
+                serial_mitigated_findings,
             ) = results
             new_findings += [
                 next(deserialize("json", finding)).object
@@ -374,8 +379,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 next(deserialize("json", finding)).object
                 for finding in serial_untouched_findings
             ]
+            mitigated_findings += [
+                next(deserialize("json", finding)).object
+                for finding in serial_mitigated_findings
+            ]
+
             logger.debug("REIMPORT_SCAN: All Findings Collected")
-        return new_findings, reactivated_findings, findings_to_mitigate, untouched_findings
+        return new_findings, reactivated_findings, findings_to_mitigate, untouched_findings, mitigated_findings
 
     def match_new_finding_to_existing_finding(
         self,
@@ -515,6 +525,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # Return True here to force the loop to continue
             return existing_finding, True
         if self.do_not_reactivate:
+            self.unchanged_items.append(existing_finding)
             logger.debug(
                 "Skipping reactivating by user's choice do_not_reactivate: "
                 f" - {existing_finding.id}: {existing_finding.title} "
@@ -603,6 +614,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                self.mitigated_items.append(existing_finding)
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 logger.debug(
@@ -612,9 +624,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.risk_accepted = unsaved_finding.risk_accepted
                 existing_finding.false_p = unsaved_finding.false_p
                 existing_finding.out_of_scope = unsaved_finding.out_of_scope
+                existing_finding.is_mitigated = True
+                existing_finding.mitigated_by = existing_finding.mitigated_by or unsaved_finding.mitigated_by
+                existing_finding.mitigated = existing_finding.mitigated or unsaved_finding.mitigated or timezone.now()
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+
+                self.mitigated_items.append(existing_finding)
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding)
@@ -744,13 +761,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             serialized_untouched = [
                 serialize("json", [finding]) for finding in self.untouched
             ]
+            serialized_mitigated = [
+                serialize("json", [finding]) for finding in self.mitigated_items
+            ]
             return (
                 serialized_new_items,
                 serialized_reactivated_items,
                 serialized_to_mitigate,
                 serialized_untouched,
+                serialized_mitigated,
             )
-        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched, self.mitigated_items
 
     def calculate_unsaved_finding_hash_code(
         self,
