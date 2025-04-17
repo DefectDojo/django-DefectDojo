@@ -1,12 +1,69 @@
 from defusedxml import ElementTree
 
-from dojo.models import Finding
+from dojo.models import Endpoint, Finding
 
 
 class FortifyXMLParser:
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
+        if root.tag == "Scan":
+            return self.xml_structure_24_2(root, test)
+        if root.tag == "ReportDefinition":
+            return self.xml_structure_before_24_2(root, test)
+        raise ValueError
+
+    def xml_structure_24_2(self, root, test):
+        items = []
+        for issues in root.findall("Issues"):
+            for issue in issues.iter("Issue"):
+                check_type_id = issue.find("CheckTypeID").text
+                engine_type = issue.find("EngineType").text
+                url = issue.find("URL").text
+                scheme = issue.find("Scheme").text
+                host = issue.find("Host").text
+                port = issue.find("Port").text
+                vulnerable_session = issue.find("VulnerableSession").text
+                vulnerability_id = issue.find("VulnerabilityID").text
+                severity = issue.find("Severity").text
+                name = issue.find("Name").text
+                raw_response = issue.find("RawResponse").text
+                description = ""
+                description += "**CheckTypeID:** " + check_type_id + "\n"
+                description += "**URL:** " + url + "\n"
+                description += "**EngineType:** " + engine_type + "\n"
+                description += "**Scheme:** " + scheme + "\n"
+                description += "**VulnerabilityID:** " + vulnerability_id + "\n"
+                description += "**VulnerableSession:** " + vulnerable_session + "\n"
+                finding = Finding(
+                        title=name,
+                        severity=self.severity_translator(severity=int(severity)),
+                        static_finding=True,
+                        test=test,
+                        description=description,
+                    )
+                if raw_response is not None:
+                    finding.unsaved_req_resp = []
+                    finding.unsaved_req_resp.append({"req": "", "resp": str(raw_response)})
+                if host is not None:
+                    finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
+                items.append(finding)
+        return items
+
+    def severity_translator(self, severity):
+        if severity == 0:
+            return "Info"
+        if severity == 1:
+            return "Low"
+        if severity == 2:
+            return "Medium"
+        if severity == 3:
+            return "High"
+        if severity == 4:
+            return "Critical"
+        return "Info"
+
+    def xml_structure_before_24_2(self, root, test):
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
         cat_meta = {}
