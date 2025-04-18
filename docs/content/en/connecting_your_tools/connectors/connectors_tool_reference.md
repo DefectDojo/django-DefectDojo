@@ -187,6 +187,11 @@ On\-premise Tenable Connectors are not available at this time.
 
 See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm) for more info.
 
+## Wiz
 
+Using the Wiz connector requires you to create a service account: see the [Wiz documentation](https://docs.wiz.io/wiz-docs/docs/service-accounts-settings#add-a-service-account) for more info.  You will need a Wiz account to access the documentation.
 
+#### **Connector Mappings**
 
+1. Enter your Wiz Client ID in the Client ID field.
+2. Enter the Wiz Client Secret in the Secret field.

@@ -1,9 +1,58 @@
 ---
 title: "Troubleshooting Jira errors"
 description: "Fixing issues with a Jira integration"
+weight: 2
 ---
 
 Here are some common issues with the Jira integration, and ways to address them.
+
+## Unable to setup Jira configuration in DefectDojo due to 404, 401 or 403 errors
+Jira Cloud:
+- Consult the Jira Cloud REST API documentation on authentication: https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/
+- Verify on the command line that the provided credentials can access the necessary issues in Jira:
+
+```
+curl -D- \
+   -u <emailaddress>:<personal_access_token> \
+   -X GET \
+   -H "Content-Type: application/json" \
+   https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -D- \
+   -u defectdojo@example.com:ATATT1234567890abcdefghijklmnopqrstuvwxyz \
+   -X GET \
+   -H "Content-Type: application/json" \
+   https://defectdojo.atlassian.net/rest/api/latest/issue/VULNERABILITY-1/transitions?expand=transitions.fields
+```
+
+Jira Data Center or Server:
+- Consult the Jira Data Center REST API documentation on authentication:
+    - https://developer.atlassian.com/server/jira/platform/basic-authentication/ (username + password)
+    - https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html (personal access token)
+- Verify on the command line that the provided credentials can access the necessary issues in Jira:
+
+```
+curl -u username:password -X GET -H "Content-Type: application/json" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -u defectdojo@example.com:123456 -X GET -H "Content-Type: application/json" https://defectdojo.atlassian.net/rest/api/latest/issue/VULNERABILITY-1/transitions?expand=transitions.fields
+```
+
+When using personal access tokens:
+```
+curl -H "Authorization: Bearer <personal_access_token>" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
+For example:
+```
+curl -H "Authorization: Bearer ATATT1234567890abcdefghijklmnopqrstuvwxyz" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
+```
+
 
 ## Findings that I 'Push To Jira' do not appear in Jira
 Using the 'Push To Jira' workflow triggers an asynchronous process, however an Issue should be created in Jira fairly quickly after 'Push To Jira' is triggered.
@@ -12,7 +61,7 @@ Using the 'Push To Jira' workflow triggers an asynchronous process, however an I
 
 Common reasons issues are not created:
 * The Default Issue Type you have selected is not usable with the Jira Project
-* Issues in the Project have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../using_custom_fields/))
+* Issues in the Project have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../jira_guide/#custom-fields-in-jira))
 
 
 ## Error: Product Misconfigured or no permissions in Jira?
@@ -24,11 +73,11 @@ This error message can appear when attempting to add a created Jira configuratio
 
 ## Changes made to Jira issues are not updating Findings in DefectDojo
 
-* Start by confirming that the [DefectDojo webhook receiver](../connect_to_jira/#configure-bidirectional-sync-jira-webhook) is configured correctly and can successfully receive updates.
+* Start by confirming that the [DefectDojo webhook receiver](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook) is configured correctly and can successfully receive updates.
 
 * Ensure the SSL certificate used by Defect Dojo is trusted by JIRA. For JIRA Cloud you must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
 
-* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close [Transition IDs](../connect_to_jira/#configure-bidirectional-sync-jira-webhook)).
+* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close [Transition IDs](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook)).
 
 * [Test](https://support.atlassian.com/jira/kb/testing-webhooks-in-jira-cloud/) your JIRA webhook using a public endpoint such as Pipedream or Beeceptor:
 
