@@ -73,7 +73,7 @@ jobs:
           echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
       
       - name: Create release ${{ github.event.inputs.release_number }}
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
           name: '${{ github.event.inputs.release_number }} 🌈'
           tag_name: ${{ github.event.inputs.release_number }}
