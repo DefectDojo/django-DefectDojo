@@ -1,0 +1,119 @@
+Plugin ID,CVE,CVSS v2.0 Base Score,Risk,Host,Protocol,Port,Name,Synopsis,Description,Solution,See Also,Plugin Output,STIG Severity,CVSS v4.0 Base Score,CVSS v4.0 Base+Threat Score,CVSS v3.0 Base Score,CVSS v2.0 Temporal Score,CVSS v3.0 Temporal Score,VPR Score,EPSS Score,Risk Factor,BID,XREF,MSKB,Plugin Publication Date,Plugin Modification Date,Metasploit,Core Impact,CANVAS
+42873,CVE-2016-2183,50,High,192.168.0.100,tcp,3389,SSL Medium Strength Cipher Suites Supported (SWEET32),The remote service supports the use of medium strength SSL ciphers.,"The remote host supports the use of SSL ciphers that offer medium
+ strength encryption. Nessus regards medium strength as any encryption
+ that uses key lengths at least 64 bits and less than 112 bits, or
+ else that uses the 3DES encryption suite.
+
+ Note that it is considerably easier to circumvent medium strength
+ encryption if the attacker is on the same physical network.","Reconfigure the affected application if possible to avoid use of
+ medium strength ciphers.","http://www.nessus.org/u?df5555f5
+ https://sweet32.info","Medium Strength Ciphers (> 64-bit and < 112-bit key, or 3DES)
+
+  Name Code KEX Auth Encryption MAC
+  ---------------------- ---------- --- ---- --------------------- ---
+  DES-CBC3-SHA 0x00, 0x0A RSA RSA 3DES-CBC(168) SHA1
+
+ The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}",,,,75,,,51,3833,Medium,,,,23/11/2009,12/02/2025,,,
+11213,CVE-2003-1567,50,Medium,192.168.0.100,tcp,443,HTTP TRACE / TRACK Methods Allowed,Debugging functions are enabled on the remote web server.,"The remote web server supports the TRACE and/or TRACK methods. TRACE
+ and TRACK are HTTP methods that are used to debug web server
+ connections.",Disable these HTTP methods. Refer to the plugin output for more information.,"http://www.nessus.org/u?e979b5cb
+ http://www.apacheweek.com/issues/03-01-24
+ https://download.oracle.com/sunalerts/1000718.1.html","To disable these methods, add the following lines for each virtual
+ host in your configuration file :
+
+  RewriteEngine on
+  RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+  RewriteRule .* - [F]
+
+ Alternatively, note that Apache versions 1.3.34, 2.0.55, and 2.2
+ support disabling the TRACE method natively via the 'TraceEnable'
+ directive.
+
+ Nessus sent the following TRACE request : \n\n------------------------------ snip ------------------------------\nTRACE /Nessus2034861839.html HTTP/1.1
+ Connection: Close
+ Host: 192.168.0.100
+ Pragma: no-cache
+ User-Agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)
+ Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, image/png, */*
+ Accept-Language: en
+ Accept-Charset: iso-8859-1,*,utf-8
+
+ ------------------------------ snip ------------------------------\n\nand received the following response from the remote server :\n\n------------------------------ snip ------------------------------\nHTTP/1.1 200 OK
+ Date: Tue, 01 Apr 2025 07:32:30 GMT
+ Server: Apache/2.4.37 (rocky) OpenSSL/1.1.1k
+ Keep-Alive: timeout=5, max=100
+ Connection: Keep-Alive
+ Transfer-Encoding: chunked
+ Content-Type: message/http
+
+
+ TRACE /Nessus2034861839.html HTTP/1.1
+ Connection: Keep-Alive
+ Host: 192.168.0.101
+ Pragma: no-cache
+ User-Agent: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)
+ Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, image/png, */*
+ Accept-Language: en
+ Accept-Charset: iso-8859-1,*,utf-8
+
+ ------------------------------ snip ------------------------------\n",,,,53,37,46,40,8269,Medium,9506;9561;11604;33374;37995,CERT:288308;CERT:867593;CWE:16;CWE:200,,23/01/2003,09/04/2024,,,
+187315,CVE-2023-48795,54,Medium,192.168.0.100,tcp,22,SSH Terrapin Prefix Truncation Weakness (CVE-2023-48795),The remote SSH server is vulnerable to a mitm prefix truncation attack.,"The remote SSH server is vulnerable to a man-in-the-middle prefix truncation weakness known as Terrapin. This can
+ allow a remote, man-in-the-middle attacker to bypass integrity checks and downgrade the connection's security.
+
+ Note that this plugin only checks for remote SSH servers that support either ChaCha20-Poly1305 or CBC with
+ Encrypt-then-MAC and do not support the strict key exchange countermeasures. It does not check for vulnerable software
+ versions.",Contact the vendor for an update with the strict key exchange countermeasures or disable the affected algorithms.,https://terrapin-attack.com/,"Supports following ChaCha20-Poly1305 Client to Server algorithm : chacha20-poly1305@openssh.com
+ Supports following Encrypt-then-MAC Client to Server algorithm : umac-64-etm@openssh.com
+ Supports following Encrypt-then-MAC Client to Server algorithm : umac-128-etm@openssh.com
+ Supports following Encrypt-then-MAC Client to Server algorithm : hmac-sha2-256-etm@openssh.com
+ Supports following Encrypt-then-MAC Client to Server algorithm : hmac-sha2-512-etm@openssh.com
+ Supports following Encrypt-then-MAC Client to Server algorithm : hmac-sha1-etm@openssh.com
+ Supports following ChaCha20-Poly1305 Server to Client algorithm : chacha20-poly1305@openssh.com
+ Supports following Encrypt-then-MAC Server to Client algorithm : umac-64-etm@openssh.com
+ Supports following Encrypt-then-MAC Server to Client algorithm : umac-128-etm@openssh.com
+ Supports following Encrypt-then-MAC Server to Client algorithm : hmac-sha2-256-etm@openssh.com
+ Supports following Encrypt-then-MAC Server to Client algorithm : hmac-sha2-512-etm@openssh.com
+ Supports following Encrypt-then-MAC Server to Client algorithm : hmac-sha1-etm@openssh.com",,,,59,42,53,61,7957,Medium,,,,27/12/2023,29/01/2024,,,
+200162,CVE-2024-4577,100,Critical,192.168.0.101,tcp,8080,PHP 8.2.x < 8.2.20 Multiple Vulnerabilities,The version PHP running on the remote web server is affected by multiple vulnerabilities.,"The version of PHP installed on the remote host is prior to 8.2.20. It is, therefore, affected by multiple
+ vulnerabilities as referenced in the Version 8.2.20 advisory.
+
+  - In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, when using Apache and PHP-
+  CGI on Windows, if the system is set up to use certain code pages, Windows may use Best-Fit behavior to
+  replace characters in command line given to Win32 API functions. PHP CGI module may misinterpret those
+  characters as PHP options, which may allow a malicious user to pass options to PHP binary being run, and
+  thus reveal the source code of scripts, run arbitrary PHP code on the server, etc. (CVE-2024-4577)
+
+  - In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, due to a code logic error,
+  filtering functions such as filter_var when validating URLs (FILTER_VALIDATE_URL) for certain types of
+  URLs the function will result in invalid user information (username + password part of URLs) being treated
+  as valid user information. This may lead to the downstream code accepting invalid URLs as valid and
+  parsing them incorrectly. (CVE-2024-5458)
+
+  - In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, the fix for CVE-2024-1874
+  does not work if the command name includes trailing spaces. Original issue: when using proc_open() command
+  with array syntax, due to insufficient escaping, if the arguments of the executed command are controlled
+  by a malicious user, the user can supply arguments that would execute arbitrary commands in Windows shell.
+  (CVE-2024-5585)
+
+ Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version
+ number.",Upgrade to PHP version 8.2.20 or later.,http://php.net/ChangeLog-8.php#8.2.20,"URL : http://192.168.0.101:8080/ (8.2.18 under X-Powered-By: PHP/8.2.18)
+  Installed version : 8.2.18
+  Fixed version : 8.2.20",I,,,98,87,94,96,9438,Critical,,CISA-KNOWN-EXPLOITED:2024/07/03;IAVA:2024-A-0330-S,,06/06/2024,23/10/2024,TRUE,TRUE,TRUE
+200798,CVE-2024-23443,61,Medium,192.168.0.101,tcp,5601,Kibana < 7.17.22 / 8.0.x < 8.14 (ESA-2024-11),The remote host is missing a security update.,"The version of Kibana installed on the remote host is prior to 7.17.22 or 8.14. It is, therefore, affected by a
+ vulnerability as referenced in the ESA-2024-11 advisory.
+
+  - A high-privileged user, allowed to create custom osquery packs 17 could affect the availability of Kibana
+  by uploading a maliciously crafted osquery pack.
+
+ Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version
+ number.",Upgrade to Kibana version 7.17.22 / 8.14 or later.,http://www.nessus.org/u?064dcada,"URL : https://192.168.0.101:5601/
+  Installed version : 7.13.2
+  Fixed version : 7.17.22",II,,,49,45,43,36,2783,Medium,,IAVB:2024-B-0080-S,,21/06/2024,20/8/2024,,,
