@@ -1,5 +1,5 @@
 ---
-title: "External Tools: Universal Importer & DefectDojo-CLI"
+title: "External Tools: Universal Importer & DefectDojo-CLI (Pro)"
 description: "Import files to DefectDojo from the command line"
 draft: false
 weight: 2
