@@ -5,7 +5,7 @@
     {{ block.super }}
     <h3>{% trans "Login" %}</h3>
     <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
-        <fieldset class="col-md-offset-3 col-md-6">
+        <fieldset class="col-md-offset-2 col-md-10">
             {% if "banner_enable"|get_banner_conf %}
                 <div class="well">
                     {{ "banner_message"|get_banner_conf }}
