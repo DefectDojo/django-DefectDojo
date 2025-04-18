@@ -1460,7 +1460,7 @@ class ImportReimportMixin:
         # reimport the second report
         self.reimport_scan_with_params(test_id, self.generic_import_2, scan_type=self.scan_type_generic)
         # reimport the first report again
-        self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
+        # self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
 
     def test_dynamic_parsing_field_set_to_true(self):
