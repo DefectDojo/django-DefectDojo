@@ -3,10 +3,10 @@
 {% url 'view_finding' finding.id as finding_url_ui %}
 {% url 'finding-detail' finding.id as finding_url_api %}
     - id: {{ finding.pk }}
-      title: {{ finding.title | default_if_none:'' }}
-      severity: {{ finding.severity | default_if_none:'' }}
-      url_ui: {{ finding_url_ui|full_url }}
-      url_api: {{ finding_url_api|full_url }}
+      title: {{ finding.title | default_if_none:'' | tojson(0) }}
+      severity: {{ finding.severity | default_if_none:'' | tojson(0) }}
+      url_ui: {{ finding_url_ui | full_url | tojson(0) }}
+      url_api: {{ finding_url_api | full_url | tojson(0) }}
 {% empty %}
     []
 {% endfor %}

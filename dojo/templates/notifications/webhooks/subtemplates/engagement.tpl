@@ -7,7 +7,7 @@
 {% url 'view_engagement' engagement.id as engagement_url_ui %}
 {% url 'engagement-detail' engagement.id as engagement_url_api %}
 engagement:
-    name: {{ engagement.name | default_if_none:'' }}
+    name: {{ engagement.name | default_if_none:'' | tojson(0) }}
     id: {{ engagement.pk }}
-    url_ui: {{ engagement_url_ui|full_url }}
-    url_api: {{ engagement_url_api|full_url }}
+    url_ui: {{ engagement_url_ui | full_url | tojson(0) }}
+    url_api: {{ engagement_url_api | full_url | tojson(0) }}

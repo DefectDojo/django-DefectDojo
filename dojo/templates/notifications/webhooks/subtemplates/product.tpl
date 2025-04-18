@@ -7,7 +7,7 @@
 {% url 'view_product' product.id as product_url_ui %}
 {% url 'product-detail' product.id as product_url_api %}
 product:
-    name: {{ product.name | default_if_none:'' }}
+    name: {{ product.name | default_if_none:'' | tojson(0) }}
     id: {{ product.pk }}
-    url_ui: {{ product_url_ui|full_url }}
-    url_api: {{ product_url_api|full_url }}
+    url_ui: {{ product_url_ui | full_url | tojson(0) }}
+    url_api: {{ product_url_api | full_url | tojson(0) }}
