@@ -121,6 +121,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # feature enabled
         test_import_history = self.update_import_history(
             new_findings=new_findings,
+            # closed_findings=mitigated_findings + closed_findings,
             closed_findings=mitigated_findings + closed_findings,
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
@@ -575,6 +576,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
         existing_finding.notes.add(note)
+        logger.warning(f"VALENTIJN4 reactivated existing {existing_finding.id} unsaved {unsaved_finding.id}")
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
@@ -613,6 +615,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                logger.warning(f"VALENTIJN1 mitigated existing {existing_finding.id} unsaved {unsaved_finding.id}")
+                # raise ValueError("VALENTIJN1")
                 self.mitigated_items.append(existing_finding)
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
@@ -630,9 +634,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
 
+                logger.warning(f"VALENTIJN2 mitigated existing {existing_finding.id} unsaved {unsaved_finding.id}")
+                # raise ValueError("VALENTIJN2")
                 self.mitigated_items.append(existing_finding)
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
+                logger.warning(f"VALENTIJN3 unchanged existing {existing_finding.id} unsaved {unsaved_finding.id}")
                 self.unchanged_items.append(existing_finding)
         # Set the component name and version on the existing finding if it is present
         # on the old finding, but not present on the existing finding (do not override)
