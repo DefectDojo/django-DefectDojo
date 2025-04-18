@@ -264,6 +264,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
         for finding in findings:
+            # Get any status changes that could have occurred earlier in the process
+            # for special statuses only.
+            # An example of such is a finding being reported as false positive, and
+            # reimport makes this change in the database. However, the findings here
+            # are calculated based from the original values before the reimport, so
+            # any updates made during reimport are discarded without first getting the
+            # state of the finding as it stands at this moment
+            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+            # Ensure the finding is not already closed
             if not finding.mitigated or not finding.is_mitigated:
                 logger.debug("mitigating finding: %i:%s", finding.id, finding)
                 self.mitigate_finding(
