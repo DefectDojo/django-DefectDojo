@@ -1,9 +1,9 @@
 ---
-title: "Contact DefectDojo Support"
+title: "Get Support"
 description: "For Pro users: support@defectdojo.com + other options"
 draft: "false"
 pro-feature: true
-weight: 3
+weight: 7
 ---
 
 Need help with DefectDojo? Here are some ways to get assistance.

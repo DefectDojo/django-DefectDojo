@@ -1,8 +1,8 @@
 ---
-title: "🎨 Beta UI Features"
+title: "🎨 Pro UI Changes"
 description: "Working with different UIs in DefectDojo"
 draft: "false"
-weight: 4
+weight: 5
 pro-feature: true
 ---
 
