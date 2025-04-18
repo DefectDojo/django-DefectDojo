@@ -19,7 +19,12 @@ class SnykParser:
         - mitigation: Made from combining data about the cvssScore.
         - component_name: Set to vulnerability packageName from Snyk Parser.
         - component_version: Set to vulnerability version from Snyk Parser.
+        - false_p: Set to false.
+        - duplicate: Set to false.
+        - out_of_scope: Set to false.
         - impact: Set to value of severity.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         - file_path: Made by Snyk parser while removing versions.
         - vuln_id_from_tool: Set to vulnerability id from Snyk Scanner.
         - cvssv3: Set to cvssv3 from Scanner if present.
@@ -34,8 +39,13 @@ class SnykParser:
             "description",
             "mitigation",
             "component_name"
-            "component_version"
-            "impact"
+            "component_version",
+            "false_p",
+            "duplicate",
+            "out_of_scope",
+            "impact",
+            "static_finding",
+            "dynamic_finding",
             "file_path",
             "vuln_id_from_tool",
             "cvssv3",
