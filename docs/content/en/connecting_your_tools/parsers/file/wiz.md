@@ -7,15 +7,19 @@ weight: 1
 # Wiz Scanner Parser Documentation
 
 ## Overview
-The [Wiz](https://www.wiz.io/) parser for DefectDojo supports both Wiz Scanner Standard CSV output and SCA (Software Composition Analysis) .csv output from Wiz.io, allowing import of Wiz.io security findings into DefectDojo. This document covers both .csv formats, including DefectDojo field mappings, unmapped fields, and location of each field's parsing code.
+The [Wiz](https://www.wiz.io/) parser for DefectDojo supports imports from both Wiz Scanner Standard and SCA (Software Composition Analysis) .csv output from Wiz.io. This document details the parsing of both formats into DefectDojo field mappings, unmapped fields, and location of each field's parsing code for easier troubleshooting and analysis.
 
 ## Supported File Types
 The Wiz parser accepts CSV file format. There are two primary formats supported:
 
-1. **Standard Format** - CSV exports with "Title" field (processed by WizParserByTitle class)
-2. **SCA Format** - CSV exports with "Name" and "DetailedName" fields (processed by WizParserByDetailedName class)
+1. **Standard Format** - Issues exports with "Title" field (processed by WizParserByTitle class)
+2. **SCA Format** - Vulnerability exports with "Name" and "DetailedName" fields (processed by WizParserByDetailedName class)
 
-## Standard Format (WizParserByTitle)
+To generate these files, export the findings from the Wiz platform by:
+- Standard Format: Select "Export to CSV" option from the Issues view in the Wiz.io platform
+- SCA Format: Select "Export to CSV" option from the Vulnerability view in the Wiz.io platform
+
+## Standard Format CSV (WizParserByTitle)
 
 ### Total Fields in Standard Format CSV
 - Total data fields: 32
