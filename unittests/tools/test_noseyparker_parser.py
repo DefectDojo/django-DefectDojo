@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestNoseyParkerParser(DojoTestCase):
 
     def test_noseyparker_parser__no_vulns(self):
-        with (get_unit_tests_scans_path("noseyparker") / "noseyparker_zero_vul.jsonl").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("noseyparker") / "noseyparker_zero_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_noseyparker_parser_one_vuln(self):
-        with (get_unit_tests_scans_path("noseyparker") / "noseyparker_one_vul.jsonl").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("noseyparker") / "noseyparker_one_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             finding = findings[0]
@@ -23,7 +23,7 @@ class TestNoseyParkerParser(DojoTestCase):
 
     def test_noseyparker_parser_many_vulns(self):
         # Testfile contains 5 lines (Middle 2 are duplicates and line #4 has 2 of the same exact matches)
-        with (get_unit_tests_scans_path("noseyparker") / "noseyparker_many_vul.jsonl").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("noseyparker") / "noseyparker_many_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -33,7 +33,7 @@ class TestNoseyParkerParser(DojoTestCase):
 
     def test_noseyparker_parser_error(self):
         with self.assertRaises(ValueError) as context, \
-          (get_unit_tests_scans_path("noseyparker") / "empty_with_error.json").open(encoding="utf-8") as testfile:
+          open(get_unit_tests_scans_path("noseyparker") / "empty_with_error.json", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -44,7 +44,7 @@ class TestNoseyParkerParser(DojoTestCase):
             self.assertIn("ECONNREFUSED", str(context.exception))
 
     def test_noseyparker_version_0_22_0(self):
-        with (get_unit_tests_scans_path("noseyparker") / "noseyparker_0_22_0.jsonl").open(encoding="utf-8") as testfile:
+        with open("unittests/scans/noseyparker/noseyparker_0_22_0.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             finding = findings[0]
@@ -55,7 +55,7 @@ class TestNoseyParkerParser(DojoTestCase):
             self.assertEqual("High", finding.severity)
 
     def test_noseyparker_version_0_22_0_without_githistory(self):
-        with (get_unit_tests_scans_path("noseyparker") / "noseyparker_0_22_0_without_githistory.jsonl").open(encoding="utf-8") as testfile:
+        with open("unittests/scans/noseyparker/noseyparker_0_22_0_without_githistory.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             finding = findings[0]

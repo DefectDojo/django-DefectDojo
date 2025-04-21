@@ -9,13 +9,13 @@ class TestWpscanParser(DojoTestCase):
 
     def test_parse_file_empty(self):
         """Report from the tool wich have no data"""
-        with (get_unit_tests_scans_path("wpscan") / "empty.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "empty.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_exemple(self):
-        with (get_unit_tests_scans_path("wpscan") / "sample.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "sample.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -29,7 +29,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2021, 3, 26, 11, 50, 50, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with (get_unit_tests_scans_path("wpscan") / "wordpress_no_vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "wordpress_no_vuln.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -38,7 +38,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual(7, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
-        with (get_unit_tests_scans_path("wpscan") / "wordpress_one_vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "wordpress_one_vuln.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -52,7 +52,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with (get_unit_tests_scans_path("wpscan") / "wordpress_many_vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "wordpress_many_vuln.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -66,7 +66,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_multiple_vuln(self):
-        with (get_unit_tests_scans_path("wpscan") / "wpscan.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "wpscan.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -93,7 +93,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => "confidence": 100,
 
     def test_parse_file_with_multiple_vuln_in_version(self):
-        with (get_unit_tests_scans_path("wpscan") / "wordpress_vuln_version.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "wordpress_vuln_version.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -110,7 +110,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
     def test_parse_file_issue5774(self):
-        with (get_unit_tests_scans_path("wpscan") / "issue5774.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wpscan") / "issue5774.json", encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

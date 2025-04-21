@@ -9,7 +9,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = [get_unit_tests_scans_path("pip_audit") / "empty.json",
                      get_unit_tests_scans_path("pip_audit") / "empty_new.json"]
         for path in testfiles:
-            testfile = path.open(encoding="utf-8")
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -19,7 +19,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = [get_unit_tests_scans_path("pip_audit") / "zero_vulns.json",
                      get_unit_tests_scans_path("pip_audit") / "zero_vulns_new.json"]
         for path in testfiles:
-            testfile = path.open(encoding="utf-8")
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -29,7 +29,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = [get_unit_tests_scans_path("pip_audit") / "many_vulns.json",
                      get_unit_tests_scans_path("pip_audit") / "many_vulns_new.json"]
         for path in testfiles:
-            testfile = path.open(encoding="utf-8")
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()

@@ -7,13 +7,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestScoutSuiteParser(DojoTestCase):
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
-        with (get_unit_tests_scans_path("scout_suite") / "no_vuln.js").open(encoding="utf-8") as test_file:
+        with open(get_unit_tests_scans_path("scout_suite") / "no_vuln.js", encoding="utf-8") as test_file:
             parser = ScoutSuiteParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(0, len(findings))
 
     def test_scout_suite_parser_with_two_findings(self):
-        with (get_unit_tests_scans_path("scout_suite") / "two_findings.js").open(encoding="utf-8") as test_file:
+        with open(get_unit_tests_scans_path("scout_suite") / "two_findings.js", encoding="utf-8") as test_file:
             parser = ScoutSuiteParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(4, len(findings))
@@ -32,7 +32,7 @@ class TestScoutSuiteParser(DojoTestCase):
                 self.assertEqual("gcp:cloudstorage-bucket-no-versioning", finding.vuln_id_from_tool)
 
     def test_get_findings(self):
-        with (get_unit_tests_scans_path("scout_suite") / "new2.js").open(encoding="utf-8") as test_file:
+        with open(get_unit_tests_scans_path("scout_suite") / "new2.js", encoding="utf-8") as test_file:
             parser = ScoutSuiteParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(356, len(findings))
@@ -56,7 +56,7 @@ class TestScoutSuiteParser(DojoTestCase):
                 self.assertEqual("aws:config-recorder-not-configured", finding.vuln_id_from_tool)
 
     def test_get_tests(self):
-        with (get_unit_tests_scans_path("scout_suite") / "new2.js").open(encoding="utf-8") as test_file:
+        with open(get_unit_tests_scans_path("scout_suite") / "new2.js", encoding="utf-8") as test_file:
             parser = ScoutSuiteParser()
             scan_type = parser.get_scan_types()[0]
             tests = parser.get_tests(scan_type, test_file)

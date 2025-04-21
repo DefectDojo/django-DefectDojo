@@ -85,7 +85,7 @@ class TwistlockCSVParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8"), usedforsecurity=False,
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding

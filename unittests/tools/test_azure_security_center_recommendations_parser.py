@@ -8,13 +8,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestAzureSecurityCenterRecommendationsParser(DojoTestCase):
 
     def test_parse_file_with_no_findings(self):
-        with (get_unit_tests_scans_path("azure_security_center_recommendations") / "zero_vulns.csv").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("azure_security_center_recommendations") / "zero_vulns.csv", encoding="utf-8") as testfile:
             parser = AzureSecurityCenterRecommendationsParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_multiple_findings(self):
-        with (get_unit_tests_scans_path("azure_security_center_recommendations") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("azure_security_center_recommendations") / "many_vulns.csv", encoding="utf-8") as testfile:
             parser = AzureSecurityCenterRecommendationsParser()
             findings = parser.get_findings(testfile, Test())
 

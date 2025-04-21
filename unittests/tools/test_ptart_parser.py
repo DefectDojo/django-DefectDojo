@@ -515,19 +515,19 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("https", endpoint.protocol)
 
     def test_ptart_parser_with_empty_json_throws_error(self):
-        with (get_unit_tests_scans_path("ptart") / "empty_with_error.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_no_assessments_has_no_findings(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_zero_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_zero_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_one_assessment_has_one_finding(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_one_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(1, len(findings))
@@ -567,7 +567,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Reference: https://ref.example.com", finding.references)
 
     def test_ptart_parser_with_one_assessment_has_many_findings(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_many_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_many_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(2, len(findings))
@@ -617,7 +617,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual(None, finding.references)
 
     def test_ptart_parser_with_multiple_assessments_has_many_findings_correctly_grouped(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_vulns_with_mult_assessments.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_vulns_with_mult_assessments.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(3, len(findings))
@@ -688,7 +688,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual(None, finding.references)
 
     def test_ptart_parser_with_single_vuln_on_import_test(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_one_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             tests = parser.get_tests("PTART Report", testfile)
             self.assertEqual(1, len(tests))
@@ -735,7 +735,7 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Reference: https://ref.example.com", finding.references)
 
     def test_ptart_parser_with_retest_campaign(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_vuln_plus_retest.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_vuln_plus_retest.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(3, len(findings))
@@ -808,7 +808,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
 
     def test_ptart_parser_with_single_vuln_containing_multiple_cwes(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_one_vul_multiple_cwe.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_multiple_cwe.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             tests = parser.get_tests("PTART Report", testfile)
             self.assertEqual(1, len(tests))
@@ -855,7 +855,7 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Reference: https://ref.example.com", finding.references)
 
     def test_ptart_parser_with_single_vuln_screenshot_with_long_caption(self):
-        with (get_unit_tests_scans_path("ptart") / "ptart_one_vul_screenshot_long.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_screenshot_long.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             tests = parser.get_tests("PTART Report", testfile)
             self.assertEqual(1, len(tests))
