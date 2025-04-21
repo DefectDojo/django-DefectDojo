@@ -38,6 +38,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_ENBABLED_DEBUG_TOOLBAR=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -577,6 +578,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
+ENBABLED_DEBUG_TOOLBAR = env("DD_ENBABLED_DEBUG_TOOLBAR")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
@@ -1275,7 +1277,23 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.request_cache.middleware.RequestCacheMiddleware",
 ]
 
+
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
+if ENBABLED_DEBUG_TOOLBAR:
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]
+    INTERNAL_IPS = [
+        # ...
+        "127.0.0.1",
+        # ...
+    ]
 
 
 # WhiteNoise allows your web app to serve its own static files,
@@ -2425,3 +2443,5 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+

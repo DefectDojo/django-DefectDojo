@@ -1,5 +1,5 @@
+from debug_toolbar.toolbar import debug_toolbar_urls
 import logging
-
 from django.conf import settings
 from django.conf.urls import include
 from django.contrib import admin
@@ -232,6 +232,8 @@ ur += banner_urls
 ur += component_urls
 ur += regulations
 ur += announcement_urls
+if settings.ENBABLED_DEBUG_TOOLBAR:
+    ur += debug_toolbar_urls()
 
 api_v2_urls = [
     #  Django Rest Framework API v2
