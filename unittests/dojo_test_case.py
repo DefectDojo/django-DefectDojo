@@ -632,7 +632,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def post_new_finding_api(self, finding_details: dict, push_to_jira=None, expected_status_code: int = 201):
+    def post_new_finding_api(self, finding_details, push_to_jira=None):
         payload = copy.deepcopy(finding_details)
         if push_to_jira is not None:
             payload["push_to_jira"] = push_to_jira
@@ -640,7 +640,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # logger.debug('posting new finding push_to_jira: %s', payload.get('push_to_jira', None))
 
         response = self.client.post(reverse("finding-list"), payload, format="json")
-        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        self.assertEqual(201, response.status_code, response.content[:1000])
         return response.data
 
     def put_finding_api(self, finding_id, finding_details, push_to_jira=None):

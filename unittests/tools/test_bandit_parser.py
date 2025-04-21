@@ -9,13 +9,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestBanditParser(DojoTestCase):
     def test_bandit_parser_has_no_finding(self):
-        with (get_unit_tests_scans_path("bandit") / "no_vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("bandit") / "no_vuln.json", encoding="utf-8") as testfile:
             parser = BanditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_bandit_parser_has_one_finding(self):
-        with (get_unit_tests_scans_path("bandit") / "one_vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("bandit") / "one_vuln.json", encoding="utf-8") as testfile:
             parser = BanditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -33,7 +33,7 @@ class TestBanditParser(DojoTestCase):
                 self.assertIn("https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html", item.references)
 
     def test_bandit_parser_has_many_findings(self):
-        with (get_unit_tests_scans_path("bandit") / "many_vulns.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("bandit") / "many_vulns.json", encoding="utf-8") as testfile:
             parser = BanditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(214, len(findings))
@@ -48,7 +48,7 @@ class TestBanditParser(DojoTestCase):
                 self.assertIn("https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html", item.references)
 
     def test_bandit_parser_has_many_findings_recent(self):
-        with (get_unit_tests_scans_path("bandit") / "dd.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("bandit") / "dd.json", encoding="utf-8") as testfile:
             parser = BanditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(47, len(findings))
@@ -62,7 +62,7 @@ class TestBanditParser(DojoTestCase):
                 self.assertEqual("Certain", item.get_scanner_confidence_text())
 
     def test_bandit_parser_has_many_findings_recent2(self):
-        with (get_unit_tests_scans_path("bandit") / "dd2.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("bandit") / "dd2.json", encoding="utf-8") as testfile:
             parser = BanditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(165, len(findings))

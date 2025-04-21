@@ -10,7 +10,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "report1.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "report1.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -36,7 +36,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "report2.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "report2.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -50,7 +50,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "android.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "android.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -73,7 +73,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "ios.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "ios.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -94,7 +94,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "mobsf_3_7_9.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "mobsf_3_7_9.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -109,7 +109,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "issue_9132.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "issue_9132.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -120,7 +120,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "allsafe.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "allsafe.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -131,7 +131,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = (get_unit_tests_scans_path("mobsf") / "damnvulnrablebank.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("mobsf") / "damnvulnrablebank.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()

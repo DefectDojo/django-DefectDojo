@@ -9,8 +9,8 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with (
-            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_no_vuln.xml").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_no_vuln.xml", encoding="utf-8",
         ) as testfile:
             parser = MicrofocusWebinspectParser()
             findings = parser.get_findings(testfile, test)
@@ -20,8 +20,8 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with (
-            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_one_vuln.xml").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_one_vuln.xml", encoding="utf-8",
         ) as testfile:
             parser = MicrofocusWebinspectParser()
             findings = parser.get_findings(testfile, test)
@@ -41,8 +41,8 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with (
-            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_many_vuln.xml").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_many_vuln.xml", encoding="utf-8",
         )as testfile:
             parser = MicrofocusWebinspectParser()
             findings = parser.get_findings(testfile, test)
@@ -73,7 +73,7 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
             )
 
     def test_parse_file_version_18_20(self):
-        with (get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_V18_20.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("microfocus_webinspect") / "Webinspect_V18_20.xml", encoding="utf-8") as testfile:
             parser = MicrofocusWebinspectParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -120,8 +120,8 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with (
-            get_unit_tests_scans_path("microfocus_webinspect") / "issue_7690.xml").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("microfocus_webinspect") / "issue_7690.xml", encoding="utf-8",
         ) as testfile:
             parser = MicrofocusWebinspectParser()
             findings = parser.get_findings(testfile, test)

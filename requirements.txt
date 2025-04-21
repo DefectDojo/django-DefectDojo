@@ -2,9 +2,9 @@
 asteval==1.0.6
 bleach==6.2.0
 bleach[css]
-celery==5.5.1
+celery==5.4.0
 defusedxml==0.7.1
-django_celery_results==2.6.0
+django_celery_results==2.5.1
 django-auditlog==3.0.0
 django-dbbackup==4.2.1
 django-environ==0.12.0
@@ -12,8 +12,8 @@ django-filter==25.1
 django-imagekit==5.0.0
 django-multiselectfield==0.1.13
 django-polymorphic==3.1.0
-django-crispy-forms==2.4
-django_extensions==4.1
+django-crispy-forms==2.3
+django_extensions==3.2.3
 django-slack==5.19.0
 # This library is very outdated and not directly. It is used solely for migration
 # purposes to django-tagulous, so it must stay
@@ -23,14 +23,14 @@ django-watson==1.6.3
 django-prometheus==2.3.1
 Django==5.1.8
 djangorestframework==3.16.0
-html2text==2025.4.15
+html2text==2024.2.26
 humanize==4.12.2
 jira==3.8.0
 PyGithub==1.58.2
-lxml==5.3.2
-Markdown==3.8
+lxml==5.3.1
+Markdown==3.7
 openpyxl==3.1.5
-Pillow==11.2.1  # required by django-imagekit
+Pillow==11.1.0  # required by django-imagekit
 psycopg[c]==3.2.6
 cryptography==44.0.2
 python-dateutil==2.9.0.post0
@@ -39,7 +39,7 @@ redis==5.2.1
 requests==2.32.3
 sqlalchemy==2.0.40  # Required by Celery broker transport
 urllib3==1.26.20
-uWSGI==2.0.29
+uWSGI==2.0.28
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1
@@ -69,7 +69,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.3
 pycurl==7.45.6  # Required for Celery Broker AWS (SQS) support
-boto3==1.37.36  # Required for Celery Broker AWS (SQS) support
+boto3==1.37.27  # Required for Celery Broker AWS (SQS) support
 netaddr==1.3.0
 vulners==2.3.6
 fontawesomefree==6.6.0

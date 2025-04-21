@@ -71,7 +71,7 @@ class BundlerAuditParser:
             fingerprint = (
                 "bundler-audit" + gem_name + gem_version + advisory_id + sev
             )
-            dupe_key = hashlib.md5(fingerprint.encode("utf-8"), usedforsecurity=False).hexdigest()
+            dupe_key = hashlib.md5(fingerprint.encode("utf-8")).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
             else:
