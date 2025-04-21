@@ -25,7 +25,7 @@
         {% endblock %}
 
         <!-- jQuery -->
-        <script src="{% static "jquery/dist/jquery.js" %}"></script>
+        <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
         <!--  jQuery UI -->
         <script src="{% static "jquery-ui/dist/jquery-ui.min.js" %}"></script>
         <!-- Bootstrap Core JavaScript -->
@@ -74,9 +74,9 @@
         <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
         <!-- Custom Fonts -->
-        <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-        <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-        <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/fontawesome.min.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/brands.min.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/solid.min.css' %}" rel="stylesheet" type="text/css">
 
         {% block add_css %}
         {% endblock %}
@@ -992,9 +992,9 @@
                         {% endif %}
                     {% endblock %}
                     <!-- end of tabs -->
+                    {% if messages %}
                     <div class="row">
                         <div class="col-lg-12">
-                            {% if messages %}
                                 {% for message in messages %}
                                     <div class="alert {{ message.tags }} alert-dismissible" role="alert">
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -1003,10 +1003,10 @@
                                         {{ message }}
                                     </div>
                                 {% endfor %}
-                            {% endif %}
                         </div>
                         <!-- /.col-lg-12 -->
                     </div>
+                    {% endif %}
                     <!-- /.row -->
                     <div class="row">
                         <div id="base-content" class="col-lg-12">

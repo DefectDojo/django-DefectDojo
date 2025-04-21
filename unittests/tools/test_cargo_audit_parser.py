@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestCargoAuditParser(DojoTestCase):
 
     def test_parse_no_findings(self):
-        with open(get_unit_tests_scans_path("cargo_audit") / "no_findings.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("cargo_audit") / "no_findings.json").open(encoding="utf-8") as testfile:
             parser = CargoAuditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_many_findings(self):
-        with open(get_unit_tests_scans_path("cargo_audit") / "many_findings.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("cargo_audit") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = CargoAuditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
