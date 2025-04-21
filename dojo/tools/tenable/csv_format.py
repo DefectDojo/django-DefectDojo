@@ -293,7 +293,7 @@ class TenableCSVParser:
             protocol = row.get("Protocol", row.get("protocol", ""))
             protocol = protocol.lower() if protocol != "" else None
             port = str(row.get("Port", row.get("asset.port", "")))
-            if isinstance(port, str) and port in ["", "0"]:
+            if isinstance(port, str) and port in {"", "0"}:
                 port = None
             # Update the endpoints
             endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)

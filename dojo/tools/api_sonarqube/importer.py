@@ -33,22 +33,22 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def is_confirmed(state):
-        return state.lower() in [
+        return state.lower() in {
             "confirmed",
             "accepted",
             "detected",
-        ]
+        }
 
     @staticmethod
     def is_closed(state):
-        return state.lower() in [
+        return state.lower() in {
             "resolved",
             "falsepositive",
             "wontfix",
             "closed",
             "dismissed",
             "rejected",
-        ]
+        }
 
     @staticmethod
     def is_reviewed(state):
@@ -205,7 +205,7 @@ class SonarQubeApiImporter:
                 items.append(find)
 
         except Exception as e:
-            logger.exception(e)
+            logger.exception("SonarQube API import issue")
             create_notification(
                 event="sonarqube_failed",
                 title="SonarQube API import issue",
@@ -328,10 +328,8 @@ class SonarQubeApiImporter:
                 find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
                 items.append(find)
 
-            return items
-
         except Exception as e:
-            logger.exception(e)
+            logger.exception("SonarQube API import issue")
             create_notification(
                 event="sonarqube_failed",
                 title="SonarQube API import issue",
@@ -340,6 +338,8 @@ class SonarQubeApiImporter:
                 source="SonarQube API",
                 obj=test.engagement.product,
             )
+
+        return items
 
     @staticmethod
     def clean_rule_description_html(raw_html):

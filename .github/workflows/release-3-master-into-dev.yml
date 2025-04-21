@@ -19,29 +19,31 @@ jobs:
   create_pr_for_merge_back_into_dev:
     runs-on: ubuntu-latest
     steps:
-      
+      - id: Set-GitHub-org
+        run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+
       - name: Checkout master
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: master
-      
+
       - name: Create merge back branch
         run: |
           echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_new }}-${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
-      
+
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
-      
+
       - name: Push new branch
         run: git push origin HEAD:${NEW_BRANCH}
-      
+
       - name: Checkout new branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.NEW_BRANCH }}
-      
+
       - name: Update version numbers in key files
         run: |
           sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number_dev }}"/' dojo/__init__.py
@@ -49,7 +51,7 @@ jobs:
           sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number_dev }}"/' helm/defectdojo/Chart.yaml
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
-      
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
@@ -80,50 +82,49 @@ jobs:
           commit_author: "${{ env.GIT_USERNAME }} <${{ env.GIT_EMAIL }}>"
           commit_message: "Update versions in application files"
           branch: ${{ env.NEW_BRANCH }}
-      - id: set-repo-org
-        run: echo "repoorg=${GITHUB_REPOSITORY%%/*}"  >> $GITHUB_ENV
-      
+
       - name: Create Pull Request
-        env:
-          REPO_ORG: ${{ env.repoorg }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.pulls.create({
-              owner: '${{ env.REPO_ORG }}',
+              owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'
             })
+
   create_pr_for_merge_back_into_bugfix:
     runs-on: ubuntu-latest
     steps:
-      
+      - id: Set-GitHub-org
+        run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+
       - name: Checkout master
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: master
-      
+
       - name: Create merge back branch
         run: |
           echo "NEW_BRANCH=master-into-bugfix/${{ github.event.inputs.release_number_new }}-${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
-      
+
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
-      
+
       - name: Push new branch
         run: git push origin HEAD:${NEW_BRANCH}
-      
+
       - name: Checkout new branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.NEW_BRANCH }}
-      
+
       - name: Update version numbers in key files
         run: |
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
@@ -131,13 +132,13 @@ jobs:
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
-      
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
-      
+
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
         with:
@@ -146,18 +147,14 @@ jobs:
           commit_author: "${{ env.GIT_USERNAME }} <${{ env.GIT_EMAIL }}>"
           commit_message: "Update versions in application files"
           branch: ${{ env.NEW_BRANCH }}
-      - id: set-repo-org
-        run: echo "repoorg=${GITHUB_REPOSITORY%%/*}"  >> $GITHUB_ENV
-      
+
       - name: Create Pull Request
-        env:
-          REPO_ORG: ${{ env.repoorg }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.pulls.create({
-              owner: '${{ env.REPO_ORG }}',
+              owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,

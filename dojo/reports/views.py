@@ -341,7 +341,7 @@ def product_endpoint_report(request, pid):
                    })
 
 
-def generate_report(request, obj, host_view=False):
+def generate_report(request, obj, *, host_view=False):
     user = Dojo_User.objects.get(id=request.user.id)
     product_type = None
     product = None
@@ -548,7 +548,7 @@ def generate_report(request, obj, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
-    elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
+    elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = "Finding"
         template = "dojo/finding_pdf_report.html"
@@ -656,9 +656,9 @@ def prefetch_related_endpoints_for_report(endpoints):
                                      )
 
 
-def get_list_index(list, index):
+def get_list_index(full_list, index):
     try:
-        element = list[index]
+        element = full_list[index]
     except Exception:
         element = None
     return element
@@ -894,9 +894,7 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                num_endpoints = 0
                 for endpoint in finding.endpoints.all():
-                    num_endpoints += 1
                     endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
@@ -904,9 +902,7 @@ class CSVExportView(View):
                 fields.append(endpoint_value)
 
                 vulnerability_ids_value = ""
-                num_vulnerability_ids = 0
-                for vulnerability_id in finding.vulnerability_ids:
-                    num_vulnerability_ids += 1
+                for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break
@@ -917,9 +913,7 @@ class CSVExportView(View):
                 fields.append(vulnerability_ids_value)
                 # Tags
                 tags_value = ""
-                num_tags = 0
-                for tag in finding.tags.all():
-                    num_tags += 1
+                for num_tags, tag in enumerate(finding.tags.all()):
                     if num_tags > 5:
                         tags_value += "..."
                         break
@@ -1049,9 +1043,7 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                num_endpoints = 0
                 for endpoint in finding.endpoints.all():
-                    num_endpoints += 1
                     endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
@@ -1060,9 +1052,7 @@ class ExcelExportView(View):
                 col_num += 1
 
                 vulnerability_ids_value = ""
-                num_vulnerability_ids = 0
-                for vulnerability_id in finding.vulnerability_ids:
-                    num_vulnerability_ids += 1
+                for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break

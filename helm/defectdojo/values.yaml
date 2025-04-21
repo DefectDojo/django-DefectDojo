@@ -131,6 +131,10 @@ monitoring:
 
 annotations: {}
 
+secrets:
+  # Add annotations for secret resources
+  annotations: {}
+
 # Components
 celery:
   broker: redis
@@ -237,6 +241,7 @@ django:
         memory: 256Mi
   nodeSelector: {}
   replicas: 1
+  strategy: {}
   tolerations: []
   uwsgi:
     livenessProbe:
@@ -481,7 +486,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.37.4
+    tag: 1.37.6
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

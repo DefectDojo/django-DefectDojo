@@ -1,6 +1,6 @@
 import logging
 
-from defusedxml import ElementTree as etree
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -21,7 +21,7 @@ class BurpDastardlyParser:
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser(forbid_external=True), forbid_external=True)
+        tree = ElementTree.parse(xml_output, ElementTree.XMLParser(forbid_external=True), forbid_external=True)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):

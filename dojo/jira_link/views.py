@@ -86,7 +86,7 @@ def webhook(request, secret=None):
     try:
         parsed = json.loads(request.body.decode("utf-8"))
         # Check if the events supplied are supported
-        if parsed.get("webhookEvent") not in ["comment_created", "jira:issue_updated"]:
+        if parsed.get("webhookEvent") not in {"comment_created", "jira:issue_updated"}:
             return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
 
         if parsed.get("webhookEvent") == "jira:issue_updated":
@@ -137,7 +137,7 @@ def webhook(request, secret=None):
 
             if findings:
                 for finding in findings:
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_group=jissue.finding_group)
             # Check for any comment that could have come along with the resolution
             if (error_response := check_for_and_create_comment(parsed)) is not None:
                 return error_response
@@ -316,8 +316,8 @@ class NewJiraView(View):
 
             try:
                 jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
-            except Exception as e:
-                logger.exception(e)  # already logged in jira_helper
+            except Exception:
+                logger.exception("Unable to authenticate. Please check credentials.")  # already logged in jira_helper
                 messages.add_message(
                     request,
                     messages.ERROR,
@@ -337,24 +337,26 @@ class NewJiraView(View):
                         open_key = open_key or int(node["id"])
                     if node["to"]["statusCategory"]["name"] == "Done":
                         close_key = close_key or int(node["id"])
-            except Exception as e:
-                logger.exception(e)  # already logged in jira_helper
+            except Exception:
+                msg = "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually"
+                logger.exception(msg)  # already logged in jira_helper
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually",
+                    msg,
                     extra_tags="alert-danger")
                 fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
                 return render(request, self.get_fallback_template(), {"jform": fallback_form})
             # Get the epic id name
             try:
                 epic_name = get_custom_field(jira, "Epic Name")
-            except Exception as e:
-                logger.exception(e)  # already logged in jira_helper
+            except Exception:
+                msg = "Unable to find Epic Name. It will need to be found manually"
+                logger.exception(msg)  # already logged in jira_helper
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Unable to find Epic Name. It will need to be found manually",
+                    msg,
                     extra_tags="alert-danger")
                 fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
                 return render(request, self.get_fallback_template(), {"jform": fallback_form})

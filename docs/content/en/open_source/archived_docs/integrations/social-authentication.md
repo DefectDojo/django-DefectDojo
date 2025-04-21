@@ -307,6 +307,35 @@ Here are suggestion on how to configure Keycloak and DefectDojo:
 7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
    and look up your authorization and token endpoint (use them below)
 
+### Configure OIDC
+Provides the option to authenticate users using a generic OIDC provider.
+
+The minimum configuration requires:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=True,
+    DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, 'https://example.com'),
+    DD_SOCIAL_AUTH_OIDC_KEY=(str, 'YOUR_CLIENT_ID'),
+    DD_SOCIAL_AUTH_OIDC_SECRET=(str, 'YOUR_CLIENT_SECRET')
+    {{< /highlight >}}
+
+The rest of the OIDC configuration will be auto-detected by fetching data from:
+ - <DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT>/.well-known/open-id-configuration/
+
+You can also optionally set the following:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ''),                           #the key associated with the OIDC user IDs
+    DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ''),                     #the key associated with the OIDC usernames
+    DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, ['']),           #list of domains allowed for login
+    DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256","HS256"]),
+    DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ''),
+    {{< /highlight >}}
+
 ### Configure Defect Dojo
 Edit the settings (see [Configuration](../../open_source/installation/configuration)) with the following
    information:

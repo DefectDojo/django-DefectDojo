@@ -28,6 +28,7 @@ services:
       DD_CELERY_BROKER_PORT: "-1"
       DD_CELERY_BROKER_PATH: '/dojo.celerydb.sqlite'
       DD_CELERY_BROKER_PARAMS: ''
+      DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
   celerybeat:
     image: busybox:1.37.0-musl
     entrypoint: ['echo', 'skipping', 'celery beat']
@@ -51,7 +52,7 @@ services:
     image: busybox:1.37.0-musl
     entrypoint: ['echo', 'skipping', 'redis']
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:v2.16.0@sha256:2b02b8844eab42d432d9c4bbd96a20d7ff348292097eeee4546e79252f72c70e
+    image: mccutchen/go-httpbin:2.18.1@sha256:ff73c96c144506048b1357ada7015b3473adc1d5bebc7088bc389bf5e64e114f
 volumes:
   defectdojo_postgres_unit_tests: {}
   defectdojo_media_unit_tests: {}

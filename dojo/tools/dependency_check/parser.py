@@ -61,8 +61,8 @@ class DependencyCheckParser:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
             if package_node:
-                id = package_node.findtext(f"{namespace}id")
-                purl = PackageURL.from_string(id)
+                pck_id = package_node.findtext(f"{namespace}id")
+                purl = PackageURL.from_string(pck_id)
                 purl_parts = purl.to_dict()
                 component_name = (
                     purl_parts["namespace"] + "_"
@@ -97,8 +97,8 @@ class DependencyCheckParser:
                 ".//" + namespace + 'identifier[@type="cpe"]',
             )
             if cpe_node:
-                id = cpe_node.findtext(f"{namespace}name")
-                cpe = CPE(id)
+                cpe_id = cpe_node.findtext(f"{namespace}name")
+                cpe = CPE(cpe_id)
                 component_name = (
                     cpe.get_vendor()[0] + "_"
                     if len(cpe.get_vendor()) > 0
@@ -299,10 +299,7 @@ class DependencyCheckParser:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
             mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
-            mitigation = (
-                mitigation
-                + f"Update {component_name}:{component_version} to at least the version recommended in the description"
-            )
+            mitigation += f"Update {component_name}:{component_version} to at least the version recommended in the description"
             mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False

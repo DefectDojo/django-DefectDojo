@@ -69,7 +69,7 @@ This section summarizes the Graded performance of each Product in your instance,
 
 Finding Counts of each severity are calculated by the tile, but note that Product Grade is only assigned based on Active Findings, so there may be Inactive Findings counted in this table which do not contribute to the Grade.
 
-To understand how grades are calculated, see our guide to **[Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product-health-grade/)**.
+To understand how grades are calculated, see our guide to **[Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product_health_grade/)**.
 
 ## Dashboard Configuration
 

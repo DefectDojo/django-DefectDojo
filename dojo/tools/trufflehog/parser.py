@@ -72,7 +72,7 @@ class TruffleHogParser:
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                finding.description = finding.description + description
+                finding.description += description
                 finding.nb_occurences += 1
                 dupes[dupe_key] = finding
             else:
@@ -179,7 +179,7 @@ class TruffleHogParser:
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                finding.description = finding.description + description
+                finding.description += description
                 finding.nb_occurences += 1
                 dupes[dupe_key] = finding
             else:

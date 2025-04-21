@@ -29,7 +29,7 @@ class TestsslParser:
             # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO
             if row["severity"] == "OK":
                 continue
-            if row["id"] in [
+            if row["id"] in {
                 "rating_spec",
                 "rating_doc",
                 "protocol_support_score",
@@ -40,7 +40,7 @@ class TestsslParser:
                 "cipher_strength_score_weighted",
                 "final_score",
                 "overall_grade",
-            ]:
+            }:
                 continue
             if "grade_cap_reason_" in row["id"]:
                 continue
@@ -60,6 +60,10 @@ class TestsslParser:
                     severity=severity,
                     nb_occurences=1,
                 )
+                # add Reference
+                if "cipher-tls" in row["id"]:
+                    ciphertls = "TLS_" + row["finding"].split("TLS_")[1]
+                    finding.references = "[https://ciphersuite.info/cs/" + ciphertls + "](https://ciphersuite.info/cs/" + ciphertls + ")"
                 # manage CVE
                 if vulnerability:
                     finding.unsaved_vulnerability_ids = [vulnerability]

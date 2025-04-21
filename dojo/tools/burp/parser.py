@@ -3,7 +3,7 @@ import logging
 import re
 
 import html2text
-from defusedxml import ElementTree as etree
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -19,6 +19,54 @@ class BurpParser:
     TODO Test burp output version. Handle what happens if the parser doesn't support it.
     """
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Burp Parser
+
+        Fields:
+        - title: Made using Burp scanner output's name.
+        - url: URL outputted by Burp Scanner.
+        - severity: Severity outputted by Burp Scanner.
+        - param: Burp parameters combined to form param.
+        - scanner_confidence: Converted from Burp format (Certain, Firm, or Tentative) into Defect Dojo integer format.
+        - description: Made by combining URL, url_host, path, and detail.
+        - mitigation: Made using Remediation that was ouputted by Burp scanner
+        - impact: Set to background returned by Burp Scanner.
+        - unique_id_from_tool: Set to serial_number returned by Burp Scanner.
+        - vuln_id_from_tool: Taken from output of Burp Scanner.
+        - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+        """
+        return [
+            "title",
+            "url",
+            "severity",
+            "param",
+            "scanner_confidence",
+            "description",
+            "mitigation",
+            "impact",
+            "unique_id_from_tool",
+            "vuln_id_from_tool",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Burp Parser
+
+        Fields:
+        - title: Made using Burp scanner output's name.
+        - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+        - description: Made by combining URL, url_host, path, and detail.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "description",
+        ]
+
     def get_scan_types(self):
         return ["Burp Scan"]
 
@@ -32,7 +80,7 @@ class BurpParser:
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser(forbid_external=True), forbid_external=True)
+        tree = ElementTree.parse(xml_output, ElementTree.XMLParser(forbid_external=True), forbid_external=True)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -41,8 +89,8 @@ class BurpParser:
             item = get_item(node, test)
             dupe_key = item.vuln_id_from_tool
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
+                items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp += item.unsaved_req_resp
 
                 # Description details of the finding are added
                 items[dupe_key].description = item.description + items[dupe_key].description
@@ -54,39 +102,6 @@ class BurpParser:
                 items[dupe_key] = item
 
         return list(items.values())
-
-
-def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
-    """
-    Finds a subnode in the item node and the retrieves a value from it
-
-    @return An attribute value
-    """
-    global ETREE_VERSION
-    node = None
-
-    if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
-        match_obj = re.search(
-            r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr,
-        )
-        if match_obj is not None:
-            node_to_find = match_obj.group(1)
-            xpath_attrib = match_obj.group(2)
-            xpath_value = match_obj.group(3)
-            for node_found in xml_node.findall(node_to_find):
-                if node_found.attrib[xpath_attrib] == xpath_value:
-                    node = node_found
-                    break
-        else:
-            node = xml_node.find(subnode_xpath_expr)
-
-    else:
-        node = xml_node.find(subnode_xpath_expr)
-
-    if node is not None:
-        return node.get(attrib_name)
-
-    return None
 
 
 def do_clean(value):

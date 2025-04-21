@@ -72,7 +72,7 @@ class SonarQubeApiUpdaterFromSource:
 
     @staticmethod
     def update_finding_status(finding, sonarqube_status):
-        if sonarqube_status in ["OPEN", "REOPENED"]:
+        if sonarqube_status in {"OPEN", "REOPENED"}:
             finding.active = True
             finding.verified = False
             finding.false_p = False

@@ -316,8 +316,10 @@ def finding_sla(finding):
                 sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
 
     if find_sla is not None:
-        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
-                                                                                                                           '<span class="label severity age-' + status + '">' + str(find_sla) + "</span></a>"
+        title = (
+            f'<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="{status_text}">'
+            f'<span class="label severity age-{status}">{find_sla}</span></a>'
+        )
 
     return mark_safe(title)
 
@@ -439,7 +441,7 @@ def colgroup(parser, token):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=True)
             return ""
 
     try:
@@ -622,9 +624,9 @@ def internet_accessible_icon(value):
 
 
 @register.filter
-def get_severity_count(id, table):
-    if table == "test":
-        counts = Finding.objects.filter(test=id). \
+def get_severity_count(elem_id, table_type):
+    if table_type == "test":
+        counts = Finding.objects.filter(test=elem_id). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -651,8 +653,8 @@ def get_severity_count(id, table):
                           then=Value(1)),
                      output_field=IntegerField())),
         )
-    elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
+    elif table_type == "engagement":
+        counts = Finding.objects.filter(test__engagement=elem_id, active=True, duplicate=False). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -679,8 +681,8 @@ def get_severity_count(id, table):
                           then=Value(1)),
                      output_field=IntegerField())),
         )
-    elif table == "product":
-        counts = Finding.objects.filter(test__engagement__product=id). \
+    elif table_type == "product":
+        counts = Finding.objects.filter(test__engagement__product=elem_id). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -738,9 +740,9 @@ def get_severity_count(id, table):
         "Info: " + str(info),
     ))
 
-    if table == "test":
+    if table_type == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table == "engagement" or table == "product":
+    elif table_type == "engagement" or table_type == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
     return ", ".join([str(item) for item in display_counts])
@@ -842,11 +844,15 @@ def vulnerability_url(vulnerability_id):
         if vulnerability_id.upper().startswith(key):
             if key == "GLSA":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
-            if key in ["AVD", "KHV", "C-"]:
+            if key == "SSA:":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
+            if key in {"AVD", "KHV", "C-"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
+            if key == "SUSE-SU-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
             if "&&" in settings.VULNERABILITY_URLS[key]:
                 # Process specific keys specially if need
-                if key in ["CAPEC", "CWE"]:
+                if key in {"CAPEC", "CWE"}:
                     vuln_id = str(vulnerability_id).replace(f"{key}-", "")
                 else:
                     vuln_id = str(vulnerability_id)
@@ -892,8 +898,8 @@ def jiraencode_component(value):
 
 
 @register.filter
-def jira_project(obj, use_inheritance=True):
-    return jira_helper.get_jira_project(obj, use_inheritance)
+def jira_project(obj, *, use_inheritance=True):
+    return jira_helper.get_jira_project(obj, use_inheritance=use_inheritance)
 
 
 @register.filter
@@ -989,7 +995,7 @@ def status_style_color(status: str):
 
 
 @register.filter(needs_autoescape=True)
-def jira_project_tag(product_or_engagement, autoescape=True):
+def jira_project_tag(product_or_engagement, *, autoescape=True):
     if autoescape:
         esc = conditional_escape
     else:
@@ -1043,15 +1049,21 @@ def full_name(user):
     return Dojo_User.generate_full_name(user)
 
 
-@register.filter()
-def import_settings_tag(test_import):
+@register.filter(needs_autoescape=True)
+def import_settings_tag(test_import, *, autoescape=True):
+    if not test_import or not test_import.import_settings:
+        return ""
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        def esc(x):
+            return x
+
     html_contect = """
-    <i class="fa {{ icon }} has-popover {{ color }}"
-        title="<i class='fa {{ icon }}'></i> <b>Import Settings</b>"
-        data-trigger="hover"
-        data-container="body"
-        data-html="true"
-        data-placement="bottom"
+
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
         data-content="
             <b>ID:</b> {{ test_import.id }}<br/>
             <b>Active:</b> {{ test_import.import_settings.active|default_if_none:'' }}<br/>
@@ -1074,8 +1086,8 @@ def import_settings_tag(test_import):
     return template_object.render(context_object)
 
 
-@register.filter()
-def import_history(finding):
+@register.filter(needs_autoescape=True)
+def import_history(finding, *, autoescape=True):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
 

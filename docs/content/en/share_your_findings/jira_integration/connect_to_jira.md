@@ -175,7 +175,7 @@ Jira integrations can be removed from your instance only if no related Issues ha
 
 However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form (Classic UI) or from the **Jira Product Settings** (Beta UI) you can uncheck the "Enable Connection With Jira Project" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
 
-See our guide on [Adding Jira To a Product](../jira_integration/add_jira_to_product) for more information on Product-level settings.
+See our guide on [Adding Jira To a Product](../add_jira_to_product) for more information on Product-level settings.
 
 ## Next steps
 

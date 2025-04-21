@@ -43,9 +43,9 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         result = hashlib.sha256()
         unique_id = (
             "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
-            + "3.12:openssl"
-            + "1.1.1k-r0"
-            + "XRAY-124116"
+            "3.12:openssl"
+            "1.1.1k-r0"
+            "XRAY-124116"
         )
         result.update(unique_id.encode())
         self.assertEqual(result.hexdigest(), item.unique_id_from_tool)

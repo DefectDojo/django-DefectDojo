@@ -118,7 +118,7 @@ def process_component(component):
     fixed_versions = component.get("fixed_versions")
     if fixed_versions:
         mitigation = "**Versions containing a fix:**\n\n- "
-        mitigation = mitigation + "\n- ".join(fixed_versions)
+        mitigation += "\n- ".join(fixed_versions)
     if "impact_paths" in component:
         refs = []
         impact_paths_l1 = component["impact_paths"]

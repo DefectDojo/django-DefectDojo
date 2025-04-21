@@ -9,7 +9,7 @@ weight: 2
 
 ## About External Tools
 
-`defectdojo-cli` and `universal-importer` are command-line tools designed to seamlessly upload scan results into DefectDojo. They streamline both the import and re-import processes of findings and associated objects. These tools are flexible and supports importing and re-importing scan results, making it ideal for users who need robust interaction with the DefectDojo API.
+`defectdojo-cli` and `universal-importer` are command-line tools designed to seamlessly upload scan results into DefectDojo. They streamline both the import and re-import processes of findings and associated objects. These tools are flexible and support importing and re-importing scan results, making it ideal for users who want to quickly set up these interactions with the DefectDojo API.
 
 DefectDojo-CLI has the same functionality as Universal Importer, but also includes the ability to export Findings from DefectDojo to JSON or CSV.
 

@@ -631,7 +631,7 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
-        if self.context["request"].method in ["PATCH", "PUT"] and "password" in data:
+        if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
         if self.context["request"].method == "POST" and "password" not in data and settings.REQUIRE_PASSWORD_ON_USER:
@@ -1304,7 +1304,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             product=endpoint_ins.product,
         )
         if (
-            self.context["request"].method in ["PUT", "PATCH"]
+            self.context["request"].method in {"PUT", "PATCH"}
             and (
                 (endpoint.count() > 1)
                 or (
@@ -1608,7 +1608,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
             validate_findings_have_same_engagement(finding_objects)
-        elif self.context["request"].method in ["PATCH", "PUT"]:
+        elif self.context["request"].method in {"PATCH", "PUT"}:
             existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
             existing_and_new_findings = existing_findings | finding_objects
             validate_findings_have_same_engagement(existing_and_new_findings)
@@ -2476,7 +2476,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
             else:
                 raise serializers.ValidationError('file not allowed')
 
-    def save(self, push_to_jira=False):
+    def save(self, *, push_to_jira=False):
         # Go through the validate method
         data = self.validated_data
         # Extract the data from the form
@@ -2618,7 +2618,7 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         except ValueError as ve:
             raise Exception(ve)
 
-    def save(self, push_to_jira=False):
+    def save(self, *, push_to_jira=False):
         # Go through the validate method
         data = self.validated_data
         # Extract the data from the form
@@ -2724,7 +2724,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
         Languages.objects.filter(product=product).delete()
 
         for name in deserialized:
-            if name not in ["header", "SUM"]:
+            if name not in {"header", "SUM"}:
                 element = deserialized[name]
 
                 try:

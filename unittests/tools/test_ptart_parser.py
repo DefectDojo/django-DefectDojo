@@ -209,6 +209,24 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("screenshot.png", screenshot["title"])
             self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
                             "Invalid Screenshot Data")
+        with self.subTest("Screenshot with overly long caption"):
+            hit = {
+                "screenshots": [{
+                    "caption": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(1, len(screenshots))
+            screenshot = screenshots[0]
+            self.assertEqual("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l...png",
+                             screenshot["title"])
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
 
     def test_ptart_parser_tools_parse_attachment_from_hit(self):
         from dojo.tools.ptart.ptart_parser_tools import parse_attachment_from_hit
@@ -409,6 +427,93 @@ class TestPTARTParser(DojoTestCase):
             }
             self.assertEqual("Reference1: https://ref.example.com\nReference: https://ref3.example.com", parse_references_from_hit(hit))
 
+    def test_ptart_parser_tools_parse_cwe_id_from_cwe(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_cwe_id_from_cwe
+        with self.subTest("Valid CWE"):
+            self.assertEqual(862, parse_cwe_id_from_cwe({"cwe_id": 862, "title": "CWE-862 - Missing Authorization"}))
+        with self.subTest("Invalid CWE ID Type"):
+            self.assertEqual(862, parse_cwe_id_from_cwe({"cwe_id": "862", "title": "CWE-862 - Missing Authorization"}))
+        with self.subTest("Partial CWE Definition (title only)"):
+            self.assertEqual(862, parse_cwe_id_from_cwe({"title": "CWE-862 - Missing Authorization"}))
+        with self.subTest("Empty CWE"):
+            self.assertEqual(None, parse_cwe_id_from_cwe({}))
+        with self.subTest("No CWE"):
+            self.assertEqual(None, parse_cwe_id_from_cwe(None))
+
+    def test_ptart_parser_tools_parse_cwe_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_cwe_from_hit
+        with self.subTest("Valid CWE"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 862,
+                    "title": "CWE-862 - Missing Authorization",
+                }],
+            }
+            self.assertEqual(862, parse_cwe_from_hit(hit))
+        with self.subTest("Partial CWE Definition (title only)"):
+            hit = {
+                "cwes": [{
+                    "title": "CWE-862 - Missing Authorization",
+                }],
+            }
+            self.assertEqual(862, parse_cwe_from_hit(hit))
+        with self.subTest("Multiple CWEs in Hit (retrieves last)"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 862,
+                    "title": "CWE-862 - Missing Authorization",
+                }, {
+                    "cwe_id": 863,
+                    "title": "CWE-863 - Improper Authorization",
+                }],
+            }
+            self.assertEqual(863, parse_cwe_from_hit(hit))
+        with self.subTest("Empty CWEs"):
+            hit = {
+                "cwe": [],
+            }
+            self.assertEqual(None, parse_cwe_from_hit(hit))
+        with self.subTest("No CWE in hit"):
+            hit = {}
+            self.assertEqual(None, parse_cwe_from_hit(hit))
+
+    def test_ptart_parser_tools_parse_endpoints_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_endpoints_from_hit
+        with self.subTest("No Asset"):
+            hit = {}
+            self.assertEqual([], parse_endpoints_from_hit(hit))
+        with self.subTest("Empty Asset"):
+            hit = {
+                "asset": "",
+            }
+            self.assertEqual([], parse_endpoints_from_hit(hit))
+        with self.subTest("Valid Asset"):
+            hit = {
+                "asset": "https://test.example.com",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(1, len(endpoints))
+            endpoint = endpoints[0]
+            self.assertEqual("test.example.com", endpoint.host)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual(None, endpoint.path)
+        with self.subTest("Asset with Invalid Port"):
+            hit = {
+                "asset": "https://test.example.com:<random_port>",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(0, len(endpoints))
+        with self.subTest("Asset with Invalid Protocol"):
+            hit = {
+                "asset": "test.example.com",
+            }
+            endpoints = parse_endpoints_from_hit(hit)
+            self.assertEqual(1, len(endpoints))
+            endpoint = endpoints[0]
+            self.assertEqual("test.example.com", endpoint.host)
+            self.assertEqual("https", endpoint.protocol)
+
     def test_ptart_parser_with_empty_json_throws_error(self):
         with open(get_unit_tests_scans_path("ptart") / "empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
@@ -443,6 +548,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(862, finding.cwe)
                 self.assertEqual(2, len(finding.unsaved_tags))
                 self.assertEqual([
                     "A01:2021-Broken Access Control",
@@ -482,6 +588,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(862, finding.cwe)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
@@ -506,6 +613,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(778, finding.cwe)
                 self.assertEqual(None, finding.references)
 
     def test_ptart_parser_with_multiple_assessments_has_many_findings_correctly_grouped(self):
@@ -530,6 +638,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(862, finding.cwe)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
@@ -554,6 +663,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(778, finding.cwe)
                 self.assertEqual(None, finding.references)
             with self.subTest("New Api: HTML Injection"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00004"), None)
@@ -572,6 +682,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Medium", finding.effort_for_fixing)
                 self.assertEqual("New API", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(79, finding.cwe)
                 self.assertEqual(0, len(finding.unsaved_endpoints))
                 self.assertEqual(0, len(finding.unsaved_files))
                 self.assertEqual(None, finding.references)
@@ -605,6 +716,7 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Low", finding.effort_for_fixing)
             self.assertEqual("Test Assessment", finding.component_name)
             self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+            self.assertEqual(862, finding.cwe)
             self.assertEqual(2, len(finding.unsaved_tags))
             self.assertEqual([
                 "A01:2021-Broken Access Control",
@@ -644,6 +756,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(862, finding.cwe)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
@@ -668,6 +781,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(778, finding.cwe)
                 self.assertEqual(None, finding.references)
             with self.subTest("Retest: Broken Access Control"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002-RT"), None)
@@ -684,6 +798,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Retest: Test Retest", finding.component_name)
                 self.assertEqual("2024-09-08", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(862, finding.cwe)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
@@ -691,3 +806,97 @@ class TestPTARTParser(DojoTestCase):
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Yet another Screenshot.png", screenshot["title"])
                 self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+
+    def test_ptart_parser_with_single_vuln_containing_multiple_cwes(self):
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_multiple_cwe.json", encoding="utf-8") as testfile:
+            parser = PTARTParser()
+            tests = parser.get_tests("PTART Report", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual("Test Report", test.name)
+            self.assertEqual("Test Report", test.type)
+            self.assertEqual("", test.version)
+            self.assertEqual("Mistakes were made\n\nThings were done\n\nThings should be put right", test.description)
+            self.assertEqual("2024-08-11", test.target_start.strftime("%Y-%m-%d"))
+            self.assertEqual("2024-08-16", test.target_end.strftime("%Y-%m-%d"))
+            self.assertEqual(1, len(test.findings))
+            finding = test.findings[0]
+            self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(
+                "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                finding.description)
+            self.assertEqual(
+                "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                finding.mitigation)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+            self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.vuln_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.cve)
+            self.assertEqual("Low", finding.effort_for_fixing)
+            self.assertEqual("Test Assessment", finding.component_name)
+            self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+            self.assertEqual(862, finding.cwe)
+            self.assertEqual(2, len(finding.unsaved_tags))
+            self.assertEqual([
+                "A01:2021-Broken Access Control",
+                "A04:2021-Insecure Design",
+            ], finding.unsaved_tags)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(2, len(finding.unsaved_files))
+            screenshot = finding.unsaved_files[0]
+            self.assertEqual("Borked.png", screenshot["title"])
+            self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+            attachment = finding.unsaved_files[1]
+            self.assertEqual("License", attachment["title"])
+            self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+            self.assertEqual("Reference: https://ref.example.com", finding.references)
+
+    def test_ptart_parser_with_single_vuln_screenshot_with_long_caption(self):
+        with open(get_unit_tests_scans_path("ptart") / "ptart_one_vul_screenshot_long.json", encoding="utf-8") as testfile:
+            parser = PTARTParser()
+            tests = parser.get_tests("PTART Report", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual("Test Report", test.name)
+            self.assertEqual("Test Report", test.type)
+            self.assertEqual("", test.version)
+            self.assertEqual("Mistakes were made\n\nThings were done\n\nThings should be put right", test.description)
+            self.assertEqual("2024-08-11", test.target_start.strftime("%Y-%m-%d"))
+            self.assertEqual("2024-08-16", test.target_end.strftime("%Y-%m-%d"))
+            self.assertEqual(1, len(test.findings))
+            finding = test.findings[0]
+            self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(
+                "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                finding.description)
+            self.assertEqual(
+                "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                finding.mitigation)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+            self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.vuln_id_from_tool)
+            self.assertEqual("PTART-2024-00002", finding.cve)
+            self.assertEqual("Low", finding.effort_for_fixing)
+            self.assertEqual("Test Assessment", finding.component_name)
+            self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+            self.assertEqual(862, finding.cwe)
+            self.assertEqual(2, len(finding.unsaved_tags))
+            self.assertEqual([
+                "A01:2021-Broken Access Control",
+                "A04:2021-Insecure Design",
+            ], finding.unsaved_tags)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(2, len(finding.unsaved_files))
+            screenshot = finding.unsaved_files[0]
+            self.assertEqual("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l...png", screenshot["title"])
+            self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+            attachment = finding.unsaved_files[1]
+            self.assertEqual("License", attachment["title"])
+            self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+            self.assertEqual("Reference: https://ref.example.com", finding.references)

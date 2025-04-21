@@ -14,7 +14,7 @@ DefectDojo handles notifications in two different ways::
 * **System\-Wide Notifications** are sent to all users.
 * **Personal Notifications are set by individual users, and will be received in addition to any System\-Wide Notifications.**
 
-In both cases, [Role\-Based Access Control](../../user_management/about_perms_and_roles/) rules apply, so users will not receive activity notifications for Products or Product Types (or their related objects) which they don’t have access to.
+In both cases, [Role-Based Access Control](../../user_management/about_perms_and_roles/) rules apply, so users will not receive activity notifications for Products or Product Types (or their related objects) which they don’t have access to.
 
 ## Notification Delivery Methods
 

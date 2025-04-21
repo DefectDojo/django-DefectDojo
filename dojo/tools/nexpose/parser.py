@@ -59,9 +59,8 @@ class NexposeParser:
             if len(list(node)) > 0:
                 for child in list(node):
                     ret += self.parse_html_type(child)
-            else:
-                if node.text:
-                    ret += "<li>" + str(node.text).strip() + "</li>"
+            elif node.text:
+                ret += "<li>" + str(node.text).strip() + "</li>"
         if tag == "orderedlist":
             i = 1
             for item in list(node):
@@ -102,25 +101,25 @@ class NexposeParser:
 
         return ret
 
-    def parse_tests_type(self, node, vulnsDefinitions):
+    def parse_tests_type(self, node, vulns_definitions):
         """
         Parse XML element of type TestsType
 
-        @return vulns A list of vulnerabilities according to vulnsDefinitions
+        @return vulns A list of vulnerabilities according to vulns_definitions
         """
         vulns = []
 
         for tests in node.findall("tests"):
             for test in tests.findall("test"):
-                if test.get("id") in vulnsDefinitions and (
+                if test.get("id") in vulns_definitions and (
                     test.get("status")
-                    in [
+                    in {
                         "vulnerable-exploited",
                         "vulnerable-version",
                         "vulnerable-potential",
-                    ]
+                    }
                 ):
-                    vuln = vulnsDefinitions[test.get("id").lower()]
+                    vuln = vulns_definitions[test.get("id").lower()]
                     for desc in list(test):
                         if "pluginOutput" in vuln:
                             vuln[

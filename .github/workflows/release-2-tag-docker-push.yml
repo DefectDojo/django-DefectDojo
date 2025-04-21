@@ -3,7 +3,7 @@ name: "Release-2: Tag, Release, Push"
 env:
   GIT_USERNAME: "DefectDojo release bot"
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
-  workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
+
 on:
   workflow_dispatch:
     inputs:
@@ -32,7 +32,7 @@ jobs:
         run: |
           git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
-  
+
   release-helm-chart:
     needs: tag
     uses: ./.github/workflows/release-x-manual-helm-chart.yml
@@ -40,15 +40,27 @@ jobs:
       release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
-  release-docker-containers:
+  publish-docker-containers:
+    strategy:
+        matrix:
+          platform: ['linux/amd64', 'linux/arm64']
+        fail-fast: false
     needs: tag
     uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
       release_number: ${{ github.event.inputs.release_number }}
+      platform: ${{ matrix.platform }}
+    secrets: inherit
+
+  publish-container-digests:
+    needs: publish-docker-containers
+    uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
+    with:
+        release_number: ${{ github.event.inputs.release_number }}
     secrets: inherit
 
   release-drafter:
-    needs: release-docker-containers
+    needs: publish-container-digests
     uses: ./.github/workflows/release-drafter.yml
     with:
       version: ${{ github.event.inputs.release_number }}

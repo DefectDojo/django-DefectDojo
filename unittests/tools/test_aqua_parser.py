@@ -61,7 +61,7 @@ class TestAquaParser(DojoTestCase):
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
-                    nb_cvssv3 = nb_cvssv3 + 1
+                    nb_cvssv3 += 1
 
             self.assertEqual(0, nb_cvssv3)
 
@@ -72,7 +72,7 @@ class TestAquaParser(DojoTestCase):
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
-                    nb_cvssv3 = nb_cvssv3 + 1
+                    nb_cvssv3 += 1
 
             self.assertEqual(16, nb_cvssv3)
 
@@ -114,6 +114,18 @@ class TestAquaParser(DojoTestCase):
 
     def test_aqua_parser_aqua_devops_empty(self):
         with open(get_unit_tests_scans_path("aqua") / "empty_aquadevops.json", encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(0, len(findings))
+
+    def test_aqua_parser_over_api_v2(self):
+        with open(get_unit_tests_scans_path("aqua") / "over_api_v2.json", encoding="utf-8") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(99, len(findings))
+
+    def test_aqua_parser_over_api_v2_empty(self):
+        with open(get_unit_tests_scans_path("aqua") / "over_api_v2_empty.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
