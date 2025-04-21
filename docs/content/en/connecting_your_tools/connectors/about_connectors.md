@@ -34,6 +34,7 @@ We currently support Connectors for the following tools, with more on the way:
 * **SonarQube**
 * **Snyk**
 * **Tenable**
+* **Wiz**
 
 These Connectors provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
