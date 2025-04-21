@@ -186,7 +186,7 @@ class GitleaksParser:
         severity = "High"
 
         dupe_key = hashlib.md5(
-            (title + secret + str(line)).encode("utf-8"), usedforsecurity=False,
+            (title + secret + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key in dupes:

@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestScantistParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with (get_unit_tests_scans_path("scantist") / "scantist-no-vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("scantist") / "scantist-no-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        with (get_unit_tests_scans_path("scantist") / "scantist-one-vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("scantist") / "scantist-one-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -30,7 +30,7 @@ class TestScantistParser(DojoTestCase):
             )  # Negligible is translated to Informational
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with (get_unit_tests_scans_path("scantist") / "scantist-many-vuln.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("scantist") / "scantist-many-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(17, len(findings))

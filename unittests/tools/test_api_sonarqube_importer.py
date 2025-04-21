@@ -9,47 +9,47 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 def dummy_product(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "product.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "product.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_issues(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "issues.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "issues.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_rule(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "rule.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "rule.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_rule_wo_html_desc(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "rule_wo_html_desc.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "rule_wo_html_desc.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_no_hotspot(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "no_vuln.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "no_vuln.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_one_hotspot(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "one_vuln.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "one_vuln.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_many_hotspots(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "many_vulns.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "many_vulns.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "rule.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "rule.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
 def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
-    with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "rule_wo_risk_description.json").open(encoding="utf-8") as json_file:
+    with open(get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "rule_wo_risk_description.json", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 

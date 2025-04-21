@@ -5,13 +5,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestWizcliImgParser(DojoTestCase):
     def test_no_findings(self):
-        with (get_unit_tests_scans_path("wizcli_img") / "wizcli_img_zero_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wizcli_img") / "wizcli_img_zero_vul.json", encoding="utf-8") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(len(findings), 0)
 
     def test_one_findings(self):
-        with (get_unit_tests_scans_path("wizcli_img") / "wizcli_img_one_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wizcli_img") / "wizcli_img_one_vul.json", encoding="utf-8") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -31,7 +31,7 @@ class TestWizcliImgParser(DojoTestCase):
             )
 
     def test_multiple_findings(self):
-        with (get_unit_tests_scans_path("wizcli_img") / "wizcli_img_many_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("wizcli_img") / "wizcli_img_many_vul.json", encoding="utf-8") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(9, len(findings))

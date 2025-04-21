@@ -10,7 +10,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestNexposeParser(DojoTestCase):
 
     def test_nexpose_parser_has_no_finding(self):
-        with (get_unit_tests_scans_path("nexpose") / "no_vuln.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("nexpose") / "no_vuln.xml", encoding="utf-8") as testfile:
             parser = NexposeParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -29,7 +29,7 @@ class TestNexposeParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with (get_unit_tests_scans_path("nexpose") / "many_vulns.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("nexpose") / "many_vulns.xml", encoding="utf-8") as testfile:
             parser = NexposeParser()
             findings = parser.get_findings(testfile, test)
 
@@ -135,7 +135,7 @@ class TestNexposeParser(DojoTestCase):
             self.assertEqual("udp", endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
-        with (get_unit_tests_scans_path("nexpose") / "report_auth.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("nexpose") / "report_auth.xml", encoding="utf-8") as testfile:
             parser = NexposeParser()
 
             findings = parser.get_findings(testfile, Test())
@@ -167,7 +167,7 @@ class TestNexposeParser(DojoTestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_nexpose_parser_dns(self):
-        with (get_unit_tests_scans_path("nexpose") / "dns.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("nexpose") / "dns.xml", encoding="utf-8") as testfile:
             parser = NexposeParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -208,7 +208,7 @@ class TestNexposeParser(DojoTestCase):
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_nexpose_parser_use_first_seen(self):
-        with (get_unit_tests_scans_path("nexpose") / "dns.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("nexpose") / "dns.xml", encoding="utf-8") as testfile:
             parser = NexposeParser()
             findings = parser.get_findings(testfile, Test())
 

@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestKICSParser(DojoTestCase):
 
     def test_parse_no_findings(self):
-        with (get_unit_tests_scans_path("kics") / "no_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("kics") / "no_findings.json", encoding="utf-8") as testfile:
             parser = KICSParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_many_findings(self):
-        with (get_unit_tests_scans_path("kics") / "many_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("kics") / "many_findings.json", encoding="utf-8") as testfile:
             parser = KICSParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(18, len(findings))

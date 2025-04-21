@@ -37,8 +37,7 @@ $ docker compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
-    
+|`doc/content/en/integrations/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
 
 ## Factory contract
 
@@ -51,7 +50,7 @@ Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded
 3. The name of this class **MUST** be the Python module name without underscores and with `Parser` suffix.
    - ex: `dojo.tools.my_tool.parser.MyToolParser`
 4. This class **MUST** have an empty constructor or no constructor
-5. This class **MUST** implement 4 methods:
+5. This class **MUST** implement 3 methods:
    1. `def get_scan_types(self)` This function return a list of all the *scan_type* supported by your parser. This identifiers are used internally. Your parser can support more than one *scan_type*. For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc...)
    2. `def get_label_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (short label)
    3. `def get_description_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (long description)
@@ -358,7 +357,7 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] with the details of your new parser.  Include the following content headings:
+Please add a new .md file in [`docs/content/en/integrations/parsers`] with the details of your new parser.  Include the following content headings:
 
 * Acceptable File Type(s) - please include how to generate this type of file from the related tool, as some tools have multiple methods or require specific commands.
 * An example unit test block, if applicable.

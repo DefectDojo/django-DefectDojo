@@ -11,13 +11,13 @@ def sample_path(file_name):
 class TestTrivyOperatorParser(DojoTestCase):
 
     def test_configauditreport_no_vuln(self):
-        with sample_path("configauditreport_no_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("configauditreport_no_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 0)
 
     def test_configauditreport_single_vulns(self):
-        with sample_path("configauditreport_single_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("configauditreport_single_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -28,7 +28,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("KSV014 - Root file system is not read-only", finding.title)
 
     def test_configauditreport_many_vulns(self):
-        with sample_path("configauditreport_many.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("configauditreport_many.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 13)
@@ -44,13 +44,13 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("KSV016 - Memory requests not specified", finding.title)
 
     def test_vulnerabilityreport_no_vuln(self):
-        with sample_path("vulnerabilityreport_no_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("vulnerabilityreport_no_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 0)
 
     def test_vulnerabilityreport_single_vulns(self):
-        with sample_path("vulnerabilityreport_single_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("vulnerabilityreport_single_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -63,7 +63,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(4.2, finding.cvssv3_score)
 
     def test_vulnerabilityreport_many(self):
-        with sample_path("vulnerabilityreport_many.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("vulnerabilityreport_many.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 41)
@@ -83,13 +83,13 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(6.5, finding.cvssv3_score)
 
     def test_exposedsecretreport_no_vuln(self):
-        with sample_path("exposedsecretreport_no_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("exposedsecretreport_no_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 0)
 
     def test_exposedsecretreport_single_vulns(self):
-        with sample_path("exposedsecretreport_single_vuln.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("exposedsecretreport_single_vuln.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -100,7 +100,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("Secret detected in root/aws_secret.txt - AWS Secret Access Key", finding.title)
 
     def test_exposedsecretreport_many(self):
-        with sample_path("exposedsecretreport_many.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("exposedsecretreport_many.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
@@ -116,7 +116,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("Secret detected in root/github_secret.txt - GitHub Personal Access Token", finding.title)
 
     def test_vulnerabilityreport_extended(self):
-        with sample_path("vulnerabilityreport_extended.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("vulnerabilityreport_extended.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 5)
@@ -131,7 +131,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("lbc, os-pkgs, ubuntu", str(finding.tags))
 
     def test_cis_benchmark(self):
-        with sample_path("cis_benchmark.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("cis_benchmark.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 795)
@@ -152,19 +152,19 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("AVD-KSV-0012", finding.unsaved_vulnerability_ids[0])
 
     def test_findings_in_list(self):
-        with sample_path("findings_in_list.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("findings_in_list.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 18)
 
     def test_findings_all_reports_in_dict(self):
-        with sample_path("all_reports_in_dict.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("all_reports_in_dict.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 43)
 
     def test_findings_clustercompliancereport(self):
-        with sample_path("clustercompliancereport.json").open(encoding="utf-8") as test_file:
+        with open(sample_path("clustercompliancereport.json"), encoding="utf-8") as test_file:
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)

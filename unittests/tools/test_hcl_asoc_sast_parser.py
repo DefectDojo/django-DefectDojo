@@ -5,14 +5,14 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestHCLASoCSASTParser(DojoTestCase):
 
     def test_no_findings(self):
-        my_file_handle = (get_unit_tests_scans_path("hcl_asoc_sast") / "no_issues.xml").open(encoding="utf-8")
+        my_file_handle = open(get_unit_tests_scans_path("hcl_asoc_sast") / "no_issues.xml", encoding="utf-8")
         parser = HCLASoCSASTParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(0, len(findings))
 
     def test_one_finding(self):
-        my_file_handle = (get_unit_tests_scans_path("hcl_asoc_sast") / "one_issue.xml").open(encoding="utf-8")
+        my_file_handle = open(get_unit_tests_scans_path("hcl_asoc_sast") / "one_issue.xml", encoding="utf-8")
         parser = HCLASoCSASTParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
@@ -22,7 +22,7 @@ class TestHCLASoCSASTParser(DojoTestCase):
         self.assertEqual(findings[0].cwe, 266)
 
     def test_many_findings(self):
-        my_file_handle = (get_unit_tests_scans_path("hcl_asoc_sast") / "many_issues.xml").open(encoding="utf-8")
+        my_file_handle = open(get_unit_tests_scans_path("hcl_asoc_sast") / "many_issues.xml", encoding="utf-8")
         parser = HCLASoCSASTParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()

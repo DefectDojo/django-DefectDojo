@@ -255,7 +255,7 @@ class MendParser:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
             return hashlib.md5(
                 f.description.encode("utf-8")
-                + f.title.encode("utf-8"), usedforsecurity=False,
+                + f.title.encode("utf-8"),
             ).hexdigest()
 
         dupes = {}
