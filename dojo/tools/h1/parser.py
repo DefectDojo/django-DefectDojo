@@ -95,7 +95,7 @@ class HackerOneVulnerabilityDisclosureProgram:
                 cwe = 0
 
             dupe_key = hashlib.md5(
-                str(references + title).encode("utf-8"), usedforsecurity=False,
+                str(references + title).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 finding = dupes[dupe_key]

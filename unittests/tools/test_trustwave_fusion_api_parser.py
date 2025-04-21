@@ -5,15 +5,15 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestTrustwaveFusionAPIParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with (
-            get_unit_tests_scans_path("trustwave_fusion_api") / "trustwave_fusion_api_zero_vul.json").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("trustwave_fusion_api") / "trustwave_fusion_api_zero_vul.json", encoding="utf-8",
         ) as testfile:
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_vuln_with_valid_cve(self):
-        with (get_unit_tests_scans_path("trustwave_fusion_api") / "test_cve.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("trustwave_fusion_api") / "test_cve.json", encoding="utf-8") as testfile:
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -41,8 +41,8 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
             self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with (
-            get_unit_tests_scans_path("trustwave_fusion_api") / "trustwave_fusion_api_many_vul.json").open(encoding="utf-8",
+        with open(
+            get_unit_tests_scans_path("trustwave_fusion_api") / "trustwave_fusion_api_many_vul.json", encoding="utf-8",
         ) as testfile:
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())

@@ -46,7 +46,7 @@ def get_items(tree, test):
             + node.get("test_number")
             + node.get("description")
         )
-        unique_key = hashlib.md5(unique_key.encode("utf-8"), usedforsecurity=False).hexdigest()
+        unique_key = hashlib.md5(unique_key.encode("utf-8")).hexdigest()
         items[unique_key] = item
     return list(items.values())
 

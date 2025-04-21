@@ -76,7 +76,7 @@ class CobaltParser:
                     finding.description = ""
 
                 key = hashlib.md5(
-                    (finding.title + "|" + finding.description).encode("utf-8"), usedforsecurity=False,
+                    (finding.title + "|" + finding.description).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

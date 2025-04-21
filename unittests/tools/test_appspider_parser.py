@@ -9,7 +9,7 @@ class TestAppSpiderParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = (get_unit_tests_scans_path("appspider") / "one_vuln.xml").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("appspider") / "one_vuln.xml", encoding="utf-8")
         parser = AppSpiderParser()
         findings = parser.get_findings(testfile, test)
         for finding in findings:
