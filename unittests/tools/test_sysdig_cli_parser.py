@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestSysdigParsers(DojoTestCase):
 
     def test_sysdig_parser_with_many_vuln_has_many_findings_cli(self):
-        with (get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.csv").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.csv", encoding="utf-8") as testfile:
             parser = SysdigCLIParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -24,7 +24,7 @@ class TestSysdigParsers(DojoTestCase):
             self.assertEqual("0.00587", finding.epss_score)
 
     def test_sysdig_parser_json_with_many_findings_cli(self):
-        with (get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.json", encoding="utf-8") as testfile:
             parser = SysdigCLIParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

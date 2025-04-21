@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestInvictiParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
-        with (get_unit_tests_scans_path("invicti") / "invicti_one_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("invicti") / "invicti_one_finding.json", encoding="utf-8") as testfile:
             parser = InvictiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -26,7 +26,7 @@ class TestInvictiParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
 
     def test_parse_file_with_multiple_finding(self):
-        with (get_unit_tests_scans_path("invicti") / "invicti_many_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("invicti") / "invicti_many_findings.json", encoding="utf-8") as testfile:
             parser = InvictiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(16, len(findings))
@@ -70,7 +70,7 @@ class TestInvictiParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com")
 
     def test_parse_file_issue_9816(self):
-        with (get_unit_tests_scans_path("invicti") / "issue_9816.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("invicti") / "issue_9816.json", encoding="utf-8") as testfile:
             parser = InvictiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -84,7 +84,7 @@ class TestInvictiParser(DojoTestCase):
                 self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
 
     def test_parse_file_issue_10311(self):
-        with (get_unit_tests_scans_path("invicti") / "issue_10311.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("invicti") / "issue_10311.json", encoding="utf-8") as testfile:
             parser = InvictiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))

@@ -6,34 +6,34 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestPWNSASTParser(DojoTestCase):
 
     def test_parse_no_findings(self):
-        with (get_unit_tests_scans_path("pwn_sast") / "no_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("pwn_sast") / "no_findings.json", encoding="utf-8") as testfile:
             parser = PWNSASTParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
-        with (get_unit_tests_scans_path("pwn_sast") / "one_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("pwn_sast") / "one_finding.json", encoding="utf-8") as testfile:
             parser = PWNSASTParser()
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(1, len(findings))
 
     def test_parse_many_finding(self):
-        with (get_unit_tests_scans_path("pwn_sast") / "many_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("pwn_sast") / "many_findings.json", encoding="utf-8") as testfile:
             parser = PWNSASTParser()
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(3, len(findings))
 
     def test_one_dup_finding(self):
-        with (get_unit_tests_scans_path("pwn_sast") / "one_dup_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("pwn_sast") / "one_dup_finding.json", encoding="utf-8") as testfile:
             parser = PWNSASTParser()
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(1, len(findings))
 
     def test_title_is_not_none(self):
-        with (get_unit_tests_scans_path("pwn_sast") / "one_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("pwn_sast") / "one_finding.json", encoding="utf-8") as testfile:
             parser = PWNSASTParser()
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)

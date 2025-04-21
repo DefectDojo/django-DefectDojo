@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestKubeAuditParser(DojoTestCase):
 
     def test_parse_file_has_no_findings(self):
-        testfile = (get_unit_tests_scans_path("kubeaudit") / "kubeaudit.json").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("kubeaudit") / "kubeaudit.json", encoding="utf-8")
         parser = KubeAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

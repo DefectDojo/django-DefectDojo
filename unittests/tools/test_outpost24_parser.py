@@ -5,7 +5,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestOutpost24Parser(DojoTestCase):
     def assert_file_has_n_items(self, filename, item_count):
-        with (filename).open(encoding="utf-8") as file:
+        with open(filename, encoding="utf-8") as file:
             parser = Outpost24Parser()
             findings = parser.get_findings(file, Test())
             for finding in findings:

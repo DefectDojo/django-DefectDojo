@@ -40,7 +40,7 @@ class TestSpotbugsParser(DojoTestCase):
 
     def test_file(self):
         parser = SpotbugsParser()
-        testfile = (get_unit_tests_scans_path("spotbugs") / "many_findings.xml").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("spotbugs") / "many_findings.xml", encoding="utf-8")
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(81, len(findings))
@@ -100,7 +100,7 @@ class TestSpotbugsParser(DojoTestCase):
         There was a big difference between version < 4.4.x and after
         The dictionnary is not in the report anymore
         """
-        testfile = (get_unit_tests_scans_path("spotbugs") / "version_4.4.0.xml").open(encoding="utf-8")
+        testfile = open(get_unit_tests_scans_path("spotbugs") / "version_4.4.0.xml", encoding="utf-8")
         parser = SpotbugsParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
