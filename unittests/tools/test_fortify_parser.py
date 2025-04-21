@@ -123,7 +123,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual(13, finding.line)
 
     def test_fortify_webinspect_4_2_many_findings(self):
-        with (get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml", encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(15, len(findings))
