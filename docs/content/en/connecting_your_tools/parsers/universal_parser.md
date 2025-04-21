@@ -1,8 +1,8 @@
 ---
-title: "🌐 Universal Parser"
+title: "🌐 Universal Parser (Pro)"
 description: ""
 draft: "false"
-weight: 4
+weight: 1
 pro-feature: true
 ---
 
