@@ -65,7 +65,7 @@ class TruffleHogParser:
             strings_found = "".join(
                 string + "\n" for string in json_data.get("stringsFound")
             )
-            dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5((file + reason).encode("utf-8"), usedforsecurity=False).hexdigest()
             description += (
                 "\n**Strings Found:**\n```" + strings_found + "```\n"
             )
@@ -167,7 +167,7 @@ class TruffleHogParser:
                     severity = "Medium"
 
             dupe_key = hashlib.md5(
-                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"),
+                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
 
             if dupe_key in dupes:
