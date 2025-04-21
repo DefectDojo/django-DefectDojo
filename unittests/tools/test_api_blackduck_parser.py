@@ -7,7 +7,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestApiBlackduckParser(DojoTestCase):
 
     def test_bandit_parser_has_many_findings(self):
-        with (get_unit_tests_scans_path("api_blackduck") / "many_vulns.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("api_blackduck") / "many_vulns.json", encoding="utf-8") as testfile:
             parser = ApiBlackduckParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

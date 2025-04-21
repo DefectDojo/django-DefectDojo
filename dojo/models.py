@@ -67,7 +67,7 @@ IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, "created"),
     (IMPORT_CLOSED_FINDING, "closed"),
     (IMPORT_REACTIVATED_FINDING, "reactivated"),
-    (IMPORT_UNTOUCHED_FINDING, "untouched"),
+    (IMPORT_UNTOUCHED_FINDING, "left untouched"),
 ]
 
 
@@ -1053,7 +1053,7 @@ class SLA_Configuration(models.Model):
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
-                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
+                update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1214,7 +1214,7 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
+                from dojo.product.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
@@ -2679,7 +2679,6 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
-        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
 
         from dojo.finding import helper as finding_helper
 
@@ -3044,7 +3043,7 @@ class Finding(models.Model):
         return self.date
 
     def get_sla_period(self):
-        sla_configuration = self.test.engagement.product.sla_configuration
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
@@ -3130,7 +3129,6 @@ class Finding(models.Model):
         return self.finding_group is not None
 
     def save_no_options(self, *args, **kwargs):
-        logger.debug("save_no_options")
         return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 

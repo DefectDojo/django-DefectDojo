@@ -7,8 +7,8 @@ class TestSonarQubeParser(DojoTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 
-    def init(self, report_path):
-        my_file_handle = report_path.open(encoding="utf-8")
+    def init(self, report_filename):
+        my_file_handle = open(report_filename, encoding="utf-8")
         product = Product()
         engagement = Engagement()
         test = Test()

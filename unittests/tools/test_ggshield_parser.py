@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestGgshieldParser(DojoTestCase):
 
     def test_parse_empty(self):
-        with (get_unit_tests_scans_path("ggshield") / "no_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ggshield") / "no_finding.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
-        with (get_unit_tests_scans_path("ggshield") / "one_finding.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ggshield") / "one_finding.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -23,7 +23,7 @@ class TestGgshieldParser(DojoTestCase):
             self.assertEqual("2021-07-05", finding.date)
 
     def test_parse_many_finding(self):
-        with (get_unit_tests_scans_path("ggshield") / "many_findings.json").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("ggshield") / "many_findings.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))

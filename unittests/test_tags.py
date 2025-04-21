@@ -18,7 +18,7 @@ class TagTests(DojoAPITestCase):
         self.scans_path = get_unit_tests_scans_path("zap")
         self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
 
-    def create_finding_with_tags(self, tags: list[str], expected_status_code: int = 201):
+    def create_finding_with_tags(self, tags):
         finding_id = Finding.objects.all().first().id
         finding_details = self.get_finding_api(finding_id)
 
@@ -26,9 +26,9 @@ class TagTests(DojoAPITestCase):
 
         finding_details["title"] = "tags test " + str(random.randint(1, 9999))  # noqa: S311
         finding_details["tags"] = tags
-        response = self.post_new_finding_api(finding_details, expected_status_code=expected_status_code)
+        response = self.post_new_finding_api(finding_details)
 
-        return response["id"] if expected_status_code == 201 else 0
+        return response["id"]
 
     def test_finding_get_tags(self):
         tags = ["tag1", "tag2"]
@@ -165,19 +165,55 @@ class TagTests(DojoAPITestCase):
 
     def test_finding_create_tags_with_commas(self):
         tags = ["one,two"]
-        self.create_finding_with_tags(tags, expected_status_code=400)
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        self.assertEqual(2, len(response.get("tags")))
+        self.assertIn("one", str(response["tags"]))
+        self.assertIn("two", str(response["tags"]))
+
+    def test_finding_create_tags_with_commas_quoted(self):
+        tags = ['"one,two"']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # no splitting due to quotes
+        self.assertEqual(len(tags), len(response.get("tags", None)))
+        for tag in tags:
+            logger.debug("looking for tag %s in tag list %s", tag, response["tags"])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertIn(tag.strip('\"'), response['tags'])
+            self.assertIn(tag, response["tags"])
 
     def test_finding_create_tags_with_spaces(self):
         tags = ["one two"]
-        self.create_finding_with_tags(tags, expected_status_code=400)
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
 
-    def test_finding_create_tags_with_double_quotes(self):
-        tags = ['"one-two"']
-        self.create_finding_with_tags(tags, expected_status_code=400)
+        # the old django-tagging library was splitting this tag into 2 tags
+        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
+        # to keep doing the old behaviour. so this is a small incompatibility, but only for
+        # tags with commas, so should be minor trouble
+        # self.assertEqual(2, len(response.get('tags')))
+        self.assertEqual(1, len(response.get("tags")))
+        self.assertIn("one", str(response["tags"]))
+        self.assertIn("two", str(response["tags"]))
+        # finding.tags: [<Tag: one>, <Tag: two>]
 
-    def test_finding_create_tags_with_single_quotes(self):
-        tags = ["'one-two'"]
-        self.create_finding_with_tags(tags, expected_status_code=400)
+    def test_finding_create_tags_with_spaces_quoted(self):
+        tags = ['"one two"']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # no splitting due to quotes
+        self.assertEqual(len(tags), len(response.get("tags", None)))
+        for tag in tags:
+            logger.debug("looking for tag %s in tag list %s", tag, response["tags"])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertIn(tag.strip('\"'), response['tags'])
+            self.assertIn(tag, response["tags"])
+
+        # finding.tags: <QuerySet [<Tag: one two>]>
 
     def test_finding_create_tags_with_slashes(self):
         tags = ["a/b/c"]
