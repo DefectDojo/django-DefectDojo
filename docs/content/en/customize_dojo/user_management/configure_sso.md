@@ -597,6 +597,10 @@ NOTE: In the case when IDP is configured to use self signed (private) certificat
 than CA needs to be specified by define environments variable
 REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
 
+#### Troubleshooting
+
+The SAML Tracer browser add-on can help troubleshoot SAML problems: [Chrome](https://chromewebstore.google.com/detail/saml-tracer/mpdajninpobndbfcldcmbpnnbhibjmch?hl=en), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/saml-tracer/).
+
 #### Advanced Configuration
 The [djangosaml2](https://github.com/IdentityPython/djangosaml2) plugin has a lot of options. For details take a look at the [plugin documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
