@@ -71,7 +71,6 @@ class CheckmarxOneParser:
                     "description": (
                         f"{query.get('description')}\n\n"
                         f"**Category**: {query.get('category')}\n"),
-                    "verified": query.get("state") != "TO_VERIFY",
                     "test": test,
                 }
                 # Iterate over the individual issues
@@ -81,6 +80,8 @@ class CheckmarxOneParser:
                         date = self._parse_date(instance.get("firstDetectionDate"))
                     else:
                         date = self._parse_date(instance.get("lastDetectionDate"))
+                    instance_details = self.determine_state(instance)
+                    instance_details.update(base_finding_details)
                     # Create the finding object
                     finding = Finding(
                         severity=instance.get("severity").title(),
@@ -90,7 +91,7 @@ class CheckmarxOneParser:
                             f"**Actual Value**: {instance.get('actualValue')}\n"
                             f"**Expected Value**: {instance.get('expectedValue')}\n"
                         ),
-                        **base_finding_details,
+                        **instance_details,
                     )
                     # Add some details to the description
                     finding.description += (
@@ -174,14 +175,15 @@ class CheckmarxOneParser:
                     date = self._parse_date(instance.get("firstFoundDate"))
                 else:
                     date = self._parse_date(instance.get("foundDate"))
+                instance_details = self.determine_state(instance)
+                instance_details.update(base_finding_details)
                 # Create the finding object
                 finding = Finding(
                     severity=instance.get("severity").title(),
                     date=date,
                     file_path=instance.get("destinationFileName"),
                     line=instance.get("destinationLine"),
-                    verified=instance.get("state") != "TO_VERIFY",
-                    **base_finding_details,
+                    **instance_details,
                 )
                 # Add some details to the description
                 if node_snippet := get_node_snippet(instance.get("nodes", [])):
@@ -219,11 +221,9 @@ class CheckmarxOneParser:
                 + "**uri**: " + locations_uri + "\n"
                 + "**startLine**: " + str(locations_startLine) + "\n"
                 + "**endLine**: " + str(locations_endLine) + "\n",
-                false_p=False,
-                duplicate=False,
-                out_of_scope=False,
                 static_finding=True,
                 dynamic_finding=False,
+                **self.determine_state(result),
             )
             findings.append(finding)
         return findings
@@ -273,6 +273,7 @@ class CheckmarxOneParser:
             test=test,
             static_finding=True,
             unique_id_from_tool=unique_id_from_tool,
+            **self.determine_state(vulnerability),
         )
 
     def get_results_kics(
@@ -290,11 +291,11 @@ class CheckmarxOneParser:
             title=description,
             description=description,
             severity=vulnerability.get("severity").title(),
-            verified=vulnerability.get("state") != "TO_VERIFY",
             file_path=file_path,
             test=test,
             static_finding=True,
             unique_id_from_tool=unique_id_from_tool,
+            **self.determine_state(vulnerability),
         )
 
     def get_results_sca(
@@ -311,10 +312,10 @@ class CheckmarxOneParser:
             title=description,
             description=description,
             severity=vulnerability.get("severity").title(),
-            verified=vulnerability.get("state") != "TO_VERIFY",
             test=test,
             static_finding=True,
             unique_id_from_tool=unique_id_from_tool,
+            **self.determine_state(vulnerability),
         )
         if (cveId := vulnerability.get("cveId")) is not None:
             finding.unsaved_vulnerability_ids = [cveId]
@@ -332,3 +333,18 @@ class CheckmarxOneParser:
             findings = self.parse_results(test, results)
 
         return findings
+
+    def determine_state(self, data: dict) -> dict:
+        """
+        Determine the state of the findings as set by Checkmarx One docs
+        https://docs.checkmarx.com/en/34965-68516-managing--triaging--vulnerabilities0.html#UUID-bc2397a3-1614-48bc-ff2f-1bc342071c5a_UUID-ad4991d6-161f-f76e-7d04-970f158eff9b
+        """
+        state = data.get("state")
+        return {
+            "active": state in {"TO_VERIFY", "PROPOSED_NOT_EXPLOITABLE", "CONFIRMED", "URGENT"},
+            "verified": state in {"NOT_EXPLOITABLE", "CONFIRMED", "URGENT"},
+            "false_p": state == "NOT_EXPLOITABLE",
+            # These are not managed by checkmarx one, but is nice to explicitly set them
+            "duplicate": False,
+            "out_of_scope": False,
+        }

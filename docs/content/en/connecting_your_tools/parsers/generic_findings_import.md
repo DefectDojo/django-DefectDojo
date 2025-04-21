@@ -1,7 +1,7 @@
 ---
 title: "Generic Findings Import"
 toc_hide: true
-weight: 1
+weight: 2
 ---
 
 You can use Generic Findings Import as a method to ingest JSON or CSV files into DefectDojo which are not already in the supported parsers list.
