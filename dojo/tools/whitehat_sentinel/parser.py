@@ -234,7 +234,7 @@ class WhiteHatSentinelParser:
             is_mitigated = not active
 
             dupe_key = hashlib.md5(
-                whitehat_vuln["id"].encode("utf-8"),
+                whitehat_vuln["id"].encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
 
             if dupe_key in dupes:
