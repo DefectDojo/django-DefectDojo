@@ -121,3 +121,13 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(13, finding.line)
+
+    def test_fortify_webinspect_4_2_many_findings(self):
+        with (get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(15, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Cookie Security: Cookie not Sent Over SSL", finding.title)
+                self.assertEqual("Medium", finding.severity)

@@ -10,6 +10,9 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Apr 2025: v2.45
 
+### Apr 14, 2025: v2.45.1
+- **(Connectors)** Added a Connector for Wiz: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+
 ### Apr 7, 2025: v2.45.0
 - **(Beta UI)** Added Calendar view to Beta UI: Calendar view now displays Tests and Engagements, and can be filtered.  Clicking on a Calendar entry now displays a more detailed description of the object.
 ![image](images/pro_calendar_view.png)
