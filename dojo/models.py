@@ -3054,22 +3054,11 @@ class Finding(models.Model):
         if not system_settings.enable_finding_sla:
             return
 
-        days_remaining = None
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            days_remaining = sla_period - self.sla_age
+            self.sla_expiration_date = self.get_sla_start_date() + relativedelta(days=sla_period)
         else:
-            self.sla_expiration_date = Finding().sla_expiration_date
-            return
-
-        if days_remaining:
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
-            else:
-                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
+            self.sla_expiration_date = None
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
