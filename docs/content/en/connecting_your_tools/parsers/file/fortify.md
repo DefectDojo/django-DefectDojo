@@ -3,7 +3,7 @@ title: "Fortify"
 toc_hide: true
 ---
 You can either import the findings in .xml or in .fpr file format. </br>
-If you import a .fpr file, the parser will look for the file 'audit.fvdl' and analyze it. An extracted example can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify/audit.fvdl). If also an `audit.xml` is found all vulnerabilities marked with `suppressed="true"` will be marked as false positive.
+If you import a .fpr file, the parser will look for the file 'audit.fvdl' and analyze it. An extracted example can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify/audit.fvdl). The optional `audit.xml` is also parsed. All vulnerabilities marked with `suppressed="true"` will be marked as false positive.
 
 ### Sample Scan Data
 Sample Fortify scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify).
