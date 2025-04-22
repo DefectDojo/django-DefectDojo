@@ -22,7 +22,6 @@ Tags can be formatted in any of the following ways:
 - string-with-hyphens
 - string_with_underscores
 - colons:acceptable
-- "quoted string with spaces"
 
 ## Tag Management (Pro UI)
 
