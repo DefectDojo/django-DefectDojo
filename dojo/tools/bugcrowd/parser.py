@@ -139,7 +139,7 @@ class BugCrowdParser:
                     finding.description = ""
 
                 key = hashlib.md5(
-                    (finding.title + "|" + finding.description).encode("utf-8"),
+                    (finding.title + "|" + finding.description).encode("utf-8"), usedforsecurity=False,
                 ).hexdigest()
 
                 if key not in dupes:

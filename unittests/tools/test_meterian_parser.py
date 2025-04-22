@@ -7,33 +7,33 @@ class TestMeterianParser(DojoTestCase):
 
     def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
         with self.assertRaises(ValueError), \
-          open(get_unit_tests_scans_path("meterian") / "report_invalid.json", encoding="utf-8") as testfile:
+          (get_unit_tests_scans_path("meterian") / "report_invalid.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             parser.get_findings(testfile, Test())
 
     def test_meterianParser_report_has_no_finding(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_no_vulns.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_no_vulns.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
             self.assertEqual(0, len(findings))
 
     def test_meterianParser_report_has_one_findings(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_one_vuln.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_one_vuln.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
             self.assertEqual(1, len(findings))
 
     def test_meterianParser_report_has_many_findings(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_many_vulns.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_many_vulns.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
             self.assertEqual(20, len(findings))
 
     def test_meterianParser_finding_has_fields(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_one_vuln.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_one_vuln.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -70,7 +70,7 @@ class TestMeterianParser(DojoTestCase):
             self.assertEqual(["nodejs"], finding.tags)
 
     def test_meterianParser_finding_has_no_remediation(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_one_vuln_no_remediation.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_one_vuln_no_remediation.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -85,7 +85,7 @@ class TestMeterianParser(DojoTestCase):
             )
 
     def test_meterianParser_dual_language_report_has_two_findins(self):
-        with open(get_unit_tests_scans_path("meterian") / "report_multi_language.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("meterian") / "report_multi_language.json").open(encoding="utf-8") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
 
