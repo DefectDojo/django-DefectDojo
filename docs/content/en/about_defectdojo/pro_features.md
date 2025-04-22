@@ -1,8 +1,8 @@
 ---
-title: "Pro Features List"
+title: "📊 Pro Features List"
 description: "List of Pro Features in DefectDojo"
 draft: "false"
-weight: 2
+weight: 4
 chapter: true
 exclude_search: true
 ---
