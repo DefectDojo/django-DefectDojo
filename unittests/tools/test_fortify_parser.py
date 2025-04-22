@@ -146,7 +146,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertTrue(finding.active)
                 self.assertFalse(finding.false_p)
-                self.assertEqual('', finding.impact)
+                self.assertEqual("", finding.impact)
             with self.subTest(i=1):
                 finding = findings[2]
                 self.assertEqual("Build Misconfiguration - pom.xml: 1 (FF57412F-DD28-44DE-8F4F-0AD39620768C)", finding.title)
