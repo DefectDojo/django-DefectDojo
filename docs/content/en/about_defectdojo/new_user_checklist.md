@@ -2,7 +2,7 @@
 title: "☑️ New User Checklist"
 description: "Get Started With DefectDojo"
 draft: "false"
-weight: 2
+weight: 3
 chapter: true
 ---
 
