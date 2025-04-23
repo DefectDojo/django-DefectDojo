@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
+import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
@@ -3058,9 +3059,8 @@ class Finding(models.Model):
 
         # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
         sla_start_date = self.get_sla_start_date()
-        from dateutil.parser import parse
         if sla_start_date and isinstance(sla_start_date, str):
-            sla_start_date = parse(sla_start_date).date()
+            sla_start_date = dateutil.parser.parse(sla_start_date).date()
 
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
