@@ -1009,8 +1009,8 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
         self.viewset = RiskAcceptanceViewSet
         self.payload = {
             "id": 2,
-            "recommendation": "Fix (The risk is eradicated)",
-            "decision": "Accept (The risk is acknowledged, yet remains)",
+            "recommendation": "F",
+            "decision": "A",
             "path": "No proof has been supplied",
             "name": "string",
             "recommendation_details": "string",
@@ -1046,8 +1046,8 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
     def test_update_forbidden_engagement(self):
         self.payload = {
             "id": 1,
-            "recommendation": "Fix (The risk is eradicated)",
-            "decision": "Accept (The risk is acknowledged, yet remains)",
+            "recommendation": "F",
+            "decision": "A",
             "path": "No proof has been supplied",
             "name": "string",
             "recommendation_details": "string",
