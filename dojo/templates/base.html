@@ -113,7 +113,11 @@
                         <a rel="noopener noreferrer" class="navbar-brand" href="{% url 'home' %}">
                         {% block header_logo %}
                             <div style="padding: 10px;">
-                                <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                                {% if LOGO_URL %}:
+                                    <img src="{{ LOGO_URL }}" alt="DefectDojo Logo" width="240"/>
+                                {% else %}
+                                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                                {% endif %}
                             </div>
                         {% endblock %}
                         </a>

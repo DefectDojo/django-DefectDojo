@@ -31,6 +31,7 @@ def globalize_vars(request):
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
         "RISK_PENDING": settings.RISK_PENDING,
         "HOST_IA_RECOMMENDATION": settings.HOST_IA_RECOMMENDATION,
+        "LOGO_URL": settings.LOGO_URL,
     }
 
 
