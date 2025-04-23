@@ -3056,6 +3056,7 @@ class Finding(models.Model):
         if not system_settings.enable_finding_sla:
             return
 
+        # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
         sla_start_date = self.get_sla_start_date()
         from dateutil.parser import parse
         if sla_start_date and isinstance(sla_start_date, str):
