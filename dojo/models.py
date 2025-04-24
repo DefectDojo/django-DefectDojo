@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
+import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
@@ -2682,6 +2683,9 @@ class Finding(models.Model):
 
         from dojo.finding import helper as finding_helper
 
+        # if not isinstance(self.date, (datetime, date)):
+        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
@@ -3053,9 +3057,14 @@ class Finding(models.Model):
         if not system_settings.enable_finding_sla:
             return
 
+        # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
+        sla_start_date = self.get_sla_start_date()
+        if sla_start_date and isinstance(sla_start_date, str):
+            sla_start_date = dateutil.parser.parse(sla_start_date).date()
+
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            self.sla_expiration_date = self.get_sla_start_date() + relativedelta(days=sla_period)
+            self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
         else:
             self.sla_expiration_date = None
 
