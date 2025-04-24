@@ -102,6 +102,10 @@ class ImportReimportMixin:
         self.anchore_grype_file_name = get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json"
         self.anchore_grype_scan_type = "Anchore Grype"
 
+        self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
+        self.checkmarx_one_two_false_positive = get_unit_tests_scans_path("checkmarx_one") / "two-false-positive.json"
+        self.scan_type_checkmarx_one = "Checkmarx One Scan"
+
     # import zap scan, testing:
     # - import
     # - active/verifed = True
@@ -1481,6 +1485,23 @@ class ImportReimportMixin:
         test = Test.objects.get(id=test_id)
         self.assertFalse(test.test_type.dynamically_generated)
 
+    def test_false_positive_status_applied_after_reimport(self):
+        # Test that checkmarx one with a file that has one open finding, and one false positive finding
+        import0 = self.import_scan_with_params(self.checkmarx_one_open_and_false_positive, scan_type=self.scan_type_checkmarx_one, active=None, verified=None)
+        test_id = import0["test"]
+        active_finding_before = self.get_test_findings_api(test_id, active=True)
+        false_p_finding_before = self.get_test_findings_api(test_id, false_p=True)
+        # Make sure we get the expeceted results
+        self.assertEqual(1, active_finding_before.get("count", 0))
+        self.assertEqual(1, false_p_finding_before.get("count", 0))
+        # reimport the next report that sets the active finding to false positive
+        self.reimport_scan_with_params(test_id, self.checkmarx_one_two_false_positive, scan_type=self.scan_type_checkmarx_one)
+        active_finding_after = self.get_test_findings_api(test_id, active=True)
+        false_p_finding_after = self.get_test_findings_api(test_id, false_p=True)
+        # Make sure we get the expeceted results
+        self.assertEqual(0, active_finding_after.get("count", 0))
+        self.assertEqual(2, false_p_finding_after.get("count", 0))
+
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ["dojo_testdata.json"]
@@ -1814,13 +1835,13 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         activePayload = "not_specified"
         if force_active:
             activePayload = "force_to_true"
-        elif not active:
+        elif active is False:
             activePayload = "force_to_false"
 
         verifiedPayload = "not_specified"
         if force_verified:
             verifiedPayload = "force_to_true"
-        elif not verified:
+        elif verified is False:
             verifiedPayload = "force_to_false"
 
         with Path(filename).open(encoding="utf-8") as testfile:
