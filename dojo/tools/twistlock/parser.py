@@ -113,6 +113,7 @@ class TwistlockCSVParser:
                 data_vulnerability_id,
                 data_severity,
                 data_cvss,
+                data_fix_status
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -187,6 +188,7 @@ class TwistlockCSVParser:
         data_vulnerability_id,
         data_severity,
         data_cvss,
+        data_fix_status
     ):
         return (
             "<p><strong>Description:</strong> "
@@ -262,17 +264,18 @@ class TwistlockCSVParser:
             + "</p><p><strong>Discovered:</strong> "
             + str(data_discovered)
             + "</p>"
-            + self.cib_code(data_registry,
+            + self.custom_id(data_registry,
                  data_repository,
                  data_cloud_id,
                  data_vulnerability_id,
                  data_severity,
                  data_package_name,
                  data_package_version,
-                 data_cvss)
+                 data_cvss,
+                 data_fix_status)
         )
 
-    def cib_code(self,
+    def custom_id(self,
                  data_registry,
                  data_repository,
                  data_cloud_id,
@@ -280,16 +283,26 @@ class TwistlockCSVParser:
                  data_severity,
                  data_package_name,
                  data_package_version,
-                 data_cvss):
-        return ("</p><p><strong>Cod Cib:</strong> "
+                 data_cvss,
+                 data_fix_status):
+        return ("</p><p><strong>CustomId:</strong> "
             + str(data_registry)
+            + "/"
             + str(data_repository)
+            + "@"
             + str(data_cloud_id)
+            + ","
             + str(data_vulnerability_id)
+            + ","
             + str(data_severity)
+            + ","
             + str(data_package_name)
+            + ","
             + str(data_package_version)
+            + ","
             + str(data_cvss)
+            + ","
+            + str(data_fix_status)
             + "</p>")
 
     def procces_executor(self, row, test):
