@@ -56,6 +56,8 @@ class TwistlockCSVParser:
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
         data_unique_id = row.get("Custom Id")
+        data_registry = row.get("Registry", "")
+        data_repository = row.get("Repository", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -252,6 +254,25 @@ class TwistlockCSVParser:
             + str(data_discovered)
             + "</p>"
         )
+
+    def cib_code(data_registry,
+                 data_repository,
+                 data_cloud_id,
+                 data_vulnerability_id,
+                 data_severity,
+                 data_package_name,
+                 data_package_version,
+                 data_cvss):
+        return ("</p><p><strong>Discovered:</strong> "
+            + str(data_registry)
+            + str(data_repository)
+            + str(data_cloud_id)
+            + str(data_vulnerability_id)
+            + str(data_severity)
+            + str(data_package_name)
+            + str(data_package_version)
+            + str(data_cvss)
+            + "</p>")
 
     def procces_executor(self, row, test):
         finding = self.parse_issue(row, test)
