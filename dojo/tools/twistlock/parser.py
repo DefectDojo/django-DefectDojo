@@ -281,7 +281,7 @@ class TwistlockCSVParser:
                  data_package_name,
                  data_package_version,
                  data_cvss):
-        return ("</p><p><strong>Discovered:</strong> "
+        return ("</p><p><strong>Cod Cib:</strong> "
             + str(data_registry)
             + str(data_repository)
             + str(data_cloud_id)
