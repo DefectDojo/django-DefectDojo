@@ -10,10 +10,17 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Apr 2025: v2.45
 
+### Apr 22, 2025: v2.45.2
+
+- **(Beta UI)** Added a link to Universal Importer to the sidebar, which provides access to the [Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/) tools.
+- **(Tools)** Updated Fortify Webinspect parser to handle Fortify's new XML report format.
+
 ### Apr 14, 2025: v2.45.1
+
 - **(Connectors)** Added a Connector for Wiz: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
 
 ### Apr 7, 2025: v2.45.0
+
 - **(Beta UI)** Added Calendar view to Beta UI: Calendar view now displays Tests and Engagements, and can be filtered.  Clicking on a Calendar entry now displays a more detailed description of the object.
 ![image](images/pro_calendar_view.png)
 - **(Universal Parser)** Added the ability to map an EPSS score from a file.  Note that this field **will** be updated by EPSS database sync, but this gives a user the ability to capture that field from initial import.
