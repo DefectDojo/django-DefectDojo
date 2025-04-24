@@ -16,7 +16,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 - **(Beta UI)** Added a link to Universal Importer to the sidebar, which provides access to the [Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/) tools.
 - **(Beta UI)** Added smart Prioritization and Risk fields to DefectDojo Pro, which can be used to more easily triage Findings based on the impact of the Product they contain.  See [Priority](/en/working_with_findings/finding_priority/) documentation for more information.
-- **(Beta UI)** Added a link to Universal Importer to the sidebar, which provides access to the [Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/) tools.
 - **(Tools)** Updated Fortify Webinspect parser to handle Fortify's new XML report format.
 
 ### Apr 14, 2025: v2.45.1
