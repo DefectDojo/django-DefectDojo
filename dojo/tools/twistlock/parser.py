@@ -272,7 +272,8 @@ class TwistlockCSVParser:
                  data_cvss)
         )
 
-    def cib_code(data_registry,
+    def cib_code(self,
+                 data_registry,
                  data_repository,
                  data_cloud_id,
                  data_vulnerability_id,
