@@ -32,7 +32,6 @@ class TwistlockCSVParser:
         data_description = row.get("Description", "")
         data_tag = row.get("Tag", "")
         data_type = row.get("Type")
-        data_package_version = row.get("Package Version", "")
         data_package_license = row.get("Package License", "")
         data_cluster = row.get("Clusters", "")
         data_namespaces = row.get("Namespaces", "")
@@ -109,6 +108,11 @@ class TwistlockCSVParser:
                 data_vulnerability_link,
                 data_account_id,
                 data_discovered,
+                data_registry,
+                data_repository,
+                data_vulnerability_id,
+                data_severity,
+                data_cvss,
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -178,6 +182,11 @@ class TwistlockCSVParser:
         data_vulnerability_link,
         data_account_id,
         data_discovered,
+        data_registry,
+        data_repository,
+        data_vulnerability_id,
+        data_severity,
+        data_cvss,
     ):
         return (
             "<p><strong>Description:</strong> "
@@ -253,6 +262,14 @@ class TwistlockCSVParser:
             + "</p><p><strong>Discovered:</strong> "
             + str(data_discovered)
             + "</p>"
+            + self.cib_code(data_registry,
+                 data_repository,
+                 data_cloud_id,
+                 data_vulnerability_id,
+                 data_severity,
+                 data_package_name,
+                 data_package_version,
+                 data_cvss)
         )
 
     def cib_code(data_registry,
