@@ -36,11 +36,11 @@ data:
   DD_CELERY_WORKER_AUTOSCALE_MAX: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscaleMax | default "8" }}{{ end }}'
   DD_CELERY_WORKER_CONCURRENCY: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.concurrency | default "8" }}{{ end }}'
   DD_CELERY_WORKER_PREFETCH_MULTIPLIER: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.prefetchMultiplier | default "128" }}{{ end }}'
-  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "postgresqlha" }}postgresql{{ end }}
-  DD_DATABASE_HOST: {{ if eq .Values.database "postgresql" }}{{ template "postgresql.hostname" . }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ template "postgresqlha.hostname" . }}{{ end }}
-  DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.primary.service.ports.postgresql }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.service.ports.postgresql }}{{ end }}'
-  DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}
-  DD_DATABASE_NAME: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.database }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.database }}{{ end }}
+  DD_DATABASE_ENGINE: django.db.backends.postgresql
+  DD_DATABASE_HOST: {{ template "postgresql.hostname" . }}
+  DD_DATABASE_PORT: '{{ .Values.postgresql.primary.service.ports.postgresql }}'
+  DD_DATABASE_USER: {{ .Values.postgresql.auth.username }}
+  DD_DATABASE_NAME: {{ .Values.postgresql.auth.database }}
   DD_INITIALIZE: '{{ .Values.initializer.run }}'
   DD_UWSGI_ENDPOINT: /run/defectdojo/uwsgi.sock
   DD_UWSGI_HOST: localhost

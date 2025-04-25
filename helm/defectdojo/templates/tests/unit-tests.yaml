@@ -30,7 +30,7 @@ spec:
             name: {{ $fullName }}
       env:
         - name: DD_DATABASE_USER
-          value: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}
+          value: {{ .Values.postgresql.auth.username }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -42,13 +42,8 @@ spec:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              {{- if eq .Values.database "postgresql" }}
               name: {{ .Values.postgresql.auth.existingSecret }}
               key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
-              {{- else if eq .Values.database "postgresqlha" }}
-              name: "{{ .Values.postgresqlha.postgresql.existingSecret }}"
-              key: postgresql-postgres-password
-              {{- end }}
         - name: DD_DEBUG
           value: 'True'
         - name: DD_SECRET_KEY
