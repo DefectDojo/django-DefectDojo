@@ -52,7 +52,7 @@ All of these metadata fields can be set on the Edit Product form for a given Pro
 - How many Endpoints in the Product are affected by this Finding
 - Whether or not a Finding is Under Review
 
-If Product-level metadata is not set, the Priority level will follow the Severity for a given Finding:
+If no relevant metadata at the Finding or Product level is set, the Priority level will follow the Severity for a given Finding.
 
 - Critical = 90
 - High = 70
