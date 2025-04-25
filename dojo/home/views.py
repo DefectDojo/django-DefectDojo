@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from datetime import timedelta
 
@@ -7,13 +8,17 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+from django.core.cache import cache
 
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
-from dojo.models import Answered_Survey
+from dojo.models import Answered_Survey, GeneralSettings
 from dojo.utils import add_breadcrumb, get_punchcard_data
+from dojo.home.helper import get_key_for_usermember_cache
+
+logger = logging.getLogger(__name__)
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -69,6 +74,71 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     })
 
 
+def dashboard_v2(request: HttpRequest) -> HttpResponse:
+    key = get_key_for_usermember_cache(request)
+    logger.debug(f"Cache key for dashboard: {key}")
+    dashboard_cache = cache.get(key)
+    if dashboard_cache is None:
+        logger.debug("Cache dashboard data not found, creating new cache")
+        dashboard_cache = {}
+        engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
+        findings = get_authorized_findings(Permissions.Finding_View).distinct()
+
+        findings = findings.filter(duplicate=False)
+
+        engagement_count = engagements.filter(active=True).count()
+        dashboard_cache["engagement_count"] = engagement_count
+
+        today = timezone.now().date()
+
+        date_range = [today - timedelta(days=7), today]  # 7 days plus today, identical to last 7 days filter in other places
+        finding_count = findings\
+            .filter(date__range=date_range)\
+            .count()
+        dashboard_cache["finding_count"] = finding_count
+        mitigated_count = findings\
+            .filter(mitigated__date__range=date_range)\
+            .count()
+        dashboard_cache["mitigated_count"] = mitigated_count
+        accepted_count = findings\
+            .filter(risk_acceptance__created__date__range=date_range)\
+            .count()
+        dashboard_cache["accepted_count"] = accepted_count
+
+        severity_count_all = get_severities_all_v2(findings)
+        dashboard_cache["severity_count_all"] = severity_count_all
+        severity_count_by_month = get_severities_by_month(findings, today)
+        dashboard_cache["severity_count_by_month"] = severity_count_by_month
+        punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
+        dashboard_cache["punchcard"] = punchcard
+        dashboard_cache["ticks"] = ticks
+
+        if user_has_configuration_permission(request.user, "dojo.view_engagement_survey"):
+            unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0) \
+                .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
+            dashboard_cache["unassigned_surveys"] = unassigned_surveys
+        else:
+            dashboard_cache["unassigned_surveys"] = None
+        cache.set(key, dashboard_cache, GeneralSettings.get_value("CHACHE_TIMEOUT_DASHBOARD"))
+        logger.debug("Cache set for dashboard data")
+        add_breadcrumb(request=request, clear=True)
+    return render(request, "dojo/dashboard.html", {
+        "engagement_count": dashboard_cache["engagement_count"],
+        "finding_count": dashboard_cache["finding_count"],
+        "mitigated_count": dashboard_cache["mitigated_count"],
+        "accepted_count": dashboard_cache["accepted_count"],
+        "critical": dashboard_cache["severity_count_all"].get("Critical", 0),
+        "high": dashboard_cache["severity_count_all"].get("High", 0),
+        "medium": dashboard_cache["severity_count_all"].get("Medium", 0),
+        "low": dashboard_cache["severity_count_all"].get("Low", 0),
+        "info": dashboard_cache["severity_count_all"].get("Info", 0),
+        "by_month": dashboard_cache["severity_count_by_month"],
+        "punchcard": dashboard_cache["punchcard"],
+        "ticks": dashboard_cache["ticks"],
+        "surveys": dashboard_cache["unassigned_surveys"],
+    })
+
+
 def support(request: HttpRequest) -> HttpResponse:
     add_breadcrumb(title="Support", top_level=not len(request.GET), request=request)
     return render(request, "dojo/support.html", {})
@@ -77,6 +147,11 @@ def support(request: HttpRequest) -> HttpResponse:
 def get_severities_all(findings) -> dict[str, int]:
     severities_all = findings.values("severity").annotate(count=Count("severity")).order_by()
     return defaultdict(lambda: 0, {s["severity"]: s["count"] for s in severities_all})
+
+
+def get_severities_all_v2(findings) -> dict[str, int]:
+    severities_all = findings.values("severity").annotate(count=Count("severity")).order_by()
+    return {s["severity"]: s["count"] for s in severities_all}
 
 
 def get_severities_by_month(findings, today):
