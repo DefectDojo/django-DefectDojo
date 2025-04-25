@@ -32,7 +32,6 @@ class TwistlockCSVParser:
         data_description = row.get("Description", "")
         data_tag = row.get("Tag", "")
         data_type = row.get("Type")
-        data_package_version = row.get("Package Version", "")
         data_package_license = row.get("Package License", "")
         data_cluster = row.get("Clusters", "")
         data_namespaces = row.get("Namespaces", "")
@@ -56,6 +55,8 @@ class TwistlockCSVParser:
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
         data_unique_id = row.get("Custom Id")
+        data_registry = row.get("Registry", "")
+        data_repository = row.get("Repository", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -107,6 +108,12 @@ class TwistlockCSVParser:
                 data_vulnerability_link,
                 data_account_id,
                 data_discovered,
+                data_registry,
+                data_repository,
+                data_vulnerability_id,
+                data_severity,
+                data_cvss,
+                data_fix_status
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -176,6 +183,12 @@ class TwistlockCSVParser:
         data_vulnerability_link,
         data_account_id,
         data_discovered,
+        data_registry,
+        data_repository,
+        data_vulnerability_id,
+        data_severity,
+        data_cvss,
+        data_fix_status
     ):
         return (
             "<p><strong>Description:</strong> "
@@ -251,7 +264,46 @@ class TwistlockCSVParser:
             + "</p><p><strong>Discovered:</strong> "
             + str(data_discovered)
             + "</p>"
+            + self.custom_id(data_registry,
+                 data_repository,
+                 data_cloud_id,
+                 data_vulnerability_id,
+                 data_severity,
+                 data_package_name,
+                 data_package_version,
+                 data_cvss,
+                 data_fix_status)
         )
+
+    def custom_id(self,
+                 data_registry,
+                 data_repository,
+                 data_cloud_id,
+                 data_vulnerability_id,
+                 data_severity,
+                 data_package_name,
+                 data_package_version,
+                 data_cvss,
+                 data_fix_status):
+        return ("</p><p><strong>CustomId:</strong> "
+            + str(data_registry)
+            + "/"
+            + str(data_repository)
+            + "@"
+            + str(data_cloud_id)
+            + ","
+            + str(data_vulnerability_id)
+            + ","
+            + str(data_severity)
+            + ","
+            + str(data_package_name)
+            + ","
+            + str(data_package_version)
+            + ","
+            + str(data_cvss)
+            + ","
+            + str(data_fix_status)
+            + "</p>")
 
     def procces_executor(self, row, test):
         finding = self.parse_issue(row, test)
