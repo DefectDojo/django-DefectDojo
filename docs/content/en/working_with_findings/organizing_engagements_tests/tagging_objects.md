@@ -34,7 +34,7 @@ Tags can be managed in the following ways:
    When a new object is created or edited through the UI or API, there is a field for specifying
    the tags to be set on a given object.
 
-   ![tag](images/tags_Product.png)
+   ![tag](images/tags_product.png)
 
 2. **When Importing/Reimporting Findings**
 
