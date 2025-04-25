@@ -72,6 +72,6 @@ The four assignable Risk levels are:
 
 ![image](images/pro_risk_levels.png)
 
-A Finding's EPSS / exploitability is much more emphasized in the Risk calculation.  As a result, a Finding can have a both a high priority and a low risk value.
+A Finding's EPSS / exploitability is much more emphasized in the Risk calculation.  As a result, a Finding can have both a high priority and a low risk value.
 
 As with Finding Priority, the Risk calculation cannot currently be adjusted.
