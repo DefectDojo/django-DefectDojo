@@ -3007,27 +3007,17 @@ class Finding(models.Model):
         if start_date and isinstance(start_date, str):
             start_date = parse(start_date).date()
 
-        from dojo.utils import get_work_days
-        if settings.SLA_BUSINESS_DAYS:
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                days = get_work_days(self.date, mitigated_date)
-            else:
-                days = get_work_days(self.date, get_current_date())
-        else:
-            if isinstance(start_date, datetime):
-                start_date = start_date.date()
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
 
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                diff = mitigated_date - start_date
-            else:
-                diff = get_current_date() - start_date
-            days = diff.days
+        if self.mitigated:
+            mitigated_date = self.mitigated
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = self.mitigated.date()
+            diff = mitigated_date - start_date
+        else:
+            diff = get_current_date() - start_date
+        days = diff.days
         return max(0, days)
 
     @property
