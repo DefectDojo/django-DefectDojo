@@ -255,10 +255,6 @@ def check_for_and_create_comment(parsed_json):
     # Set the fields for the notes
     author, _ = User.objects.get_or_create(username="JIRA")
     entry = f"({commenter_display_name} ({commenter})): {comment_text}"
-    print("\n\n")
-    print(f"\t entry: {entry}")
-    print(f"\t comment_text_without_defectdojo_user: {comment_text_without_defectdojo_user}")
-    print("\n\n")
     # Iterate (potentially) over each of the findings the note should be added to
     for finding in findings:
         # Determine if the same note body was created by either DefectDojo or Jira
