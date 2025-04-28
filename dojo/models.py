@@ -3849,8 +3849,8 @@ class GITHUB_PKey(models.Model):
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
     url = models.URLField(max_length=2000, verbose_name=_("JIRA URL"), help_text=_("For more information how to configure Jira, read the DefectDojo documentation."))
-    username = models.CharField(max_length=2000)
-    password = models.CharField(max_length=2000)
+    username = models.CharField(max_length=2000, verbose_name=_("Username/Email"), help_text=_("Username or Email Address, see DefectDojo documentation for more information."))
+    password = models.CharField(max_length=2000, verbose_name=_("Password/Token"), help_text=_("Password, API Token, or Personal Access Token, see DefectDojo documentation for more information."))
 
     if hasattr(settings, "JIRA_ISSUE_TYPE_CHOICES_CONFIG"):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG

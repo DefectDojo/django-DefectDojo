@@ -2490,7 +2490,7 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class BaseJiraForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=True, help_text=JIRA_Instance._meta.get_field("password").help_text, label=JIRA_Instance._meta.get_field("password").verbose_name)
 
     def test_jira_connection(self):
         import dojo.jira_link.helper as jira_helper
