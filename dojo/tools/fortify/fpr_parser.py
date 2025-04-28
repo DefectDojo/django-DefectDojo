@@ -17,6 +17,8 @@ class FortifyFPRParser:
         self.snippets: dict[str, SnippetData] = {}
         self.rules: dict[str, RuleData] = {}
         self.vulnerabilities: list[VulnerabilityData] = []
+        self.suppressed: dict[str, bool] = {}
+        self.threaded_comments: dict[str, list[str]] = {}
 
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
@@ -26,31 +28,35 @@ class FortifyFPRParser:
         # Read each file from the zip artifact into a dict with the format of
         # filename: file_content
         zip_data = {name: input_zip.read(name) for name in input_zip.namelist()}
-        root = self.identify_root(zip_data)
-        return self.convert_vulnerabilities_to_findings(root, test)
+        root, self.namespaces = self.identify_root(zip_data, "audit.fvdl", "No audit.fvdl file found in the zip")
+        audit_log, self.namespaces_audit_log = self.identify_root(zip_data, "audit.xml")
+        return self.convert_vulnerabilities_to_findings(root, audit_log, test)
 
-    def identify_root(self, zip_data: dict) -> Element:
-        """Iterate through the zip data to determine which file in the zip could be the XMl to be parsed."""
+    def identify_root(self, zip_data: dict, filename_suffix: str, msg_if_not_found: str | None = None) -> tuple[Element, dict[str, str]]:
+        """Iterate through the zip data to determine which file in the zip could be the XML to be parsed."""
         # Determine where the "audit.fvdl" could be
         audit_file = None
         for file_name in zip_data:
-            if file_name.endswith("audit.fvdl"):
+            if file_name.endswith(filename_suffix):
                 audit_file = file_name
                 break
         # Make sure we have an audit file
-        if audit_file is None:
-            msg = 'A search for an "audit.fvdl" file was not successful. '
-            raise ValueError(msg)
-        # Parser the XML file and determine the name space, if present
-        root = ElementTree.fromstring(zip_data.get(audit_file).decode("utf-8"))
-        self.identify_namespace(root)
-        return root
+        if audit_file is None and msg_if_not_found:
+            raise ValueError(msg_if_not_found)
 
-    def identify_namespace(self, root: Element) -> None:
+        if not audit_file:
+            return None, None
+
+        # Parse the XML file and determine the namespace, if present
+        root = ElementTree.fromstring(zip_data.get(audit_file).decode("utf-8"))
+        namespaces = self.identify_namespace(root)
+        return root, namespaces
+
+    def identify_namespace(self, root: Element) -> dict[str, str]:
         """Determine what the namespace could be, and then set the value in a class var labeled `namespaces`"""
         regex = r"{(.*)}"
         matches = re.match(regex, root.tag)
-        self.namespaces = {"": matches.group(1)}
+        return {"": matches.group(1)}
 
     def parse_related_data(self, root: Element, test: Test) -> None:
         """Parse the XML and generate a list of findings."""
@@ -72,11 +78,37 @@ class FortifyFPRParser:
             if rule_id:
                 self.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
 
-    def convert_vulnerabilities_to_findings(self, root: Element, test: Test) -> list[Finding]:
+    def parse_audit_log(self, audit_log: Element) -> None:
+        logger.debug("Parse audit log")
+        if audit_log is None:
+            return
+
+        for issue in audit_log.find("IssueList", self.namespaces_audit_log).findall("Issue", self.namespaces_audit_log):
+            instance_id = issue.attrib.get("instanceId")
+            if instance_id:
+                suppressed_string = issue.attrib.get("suppressed")
+                suppressed = suppressed_string.lower() == "true" if suppressed_string else False
+                logger.debug(f"Issue: {instance_id} - Suppressed: {suppressed}")
+                self.suppressed[instance_id] = suppressed
+
+                threaded_comments = issue.find("ThreadedComments", self.namespaces_audit_log)
+                logger.debug(f"ThreadedComments: {threaded_comments}")
+                if threaded_comments is not None:
+                    self.threaded_comments[instance_id] = [self.get_comment_text(comment) for comment in threaded_comments.findall("Comment", self.namespaces_audit_log)]
+
+    def get_comment_text(self, comment: Element) -> str:
+        content = comment.findtext("Content", "", self.namespaces_audit_log)
+        username = comment.findtext("Username", "", self.namespaces_audit_log)
+        timestamp = comment.findtext("Timestamp", "", self.namespaces_audit_log)
+
+        return f"{timestamp} - ({username}): {content}"
+
+    def convert_vulnerabilities_to_findings(self, root: Element, audit_log: Element, test: Test) -> list[Finding]:
         """Convert the list of vulnerabilities to a list of findings."""
         """Try to mimic the logic from the xml parser"""
         """Future Improvement: share code between xml and fpr parser (it was split up earlier)"""
         self.parse_related_data(root, test)
+        self.parse_audit_log(audit_log)
 
         findings = []
         for vuln in root.find("Vulnerabilities", self.namespaces):
@@ -91,10 +123,12 @@ class FortifyFPRParser:
 
             finding = Finding(test=test, static_finding=True)
 
+            finding.active, finding.false_p = self.compute_status(vuln_data)
             finding.title = self.format_title(vuln_data, snippet, description, rule)
             finding.description = self.format_description(vuln_data, snippet, description, rule)
             finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
             finding.severity = self.compute_severity(vuln_data, snippet, description, rule)
+            finding.impact = self.format_impact(vuln_data)
 
             finding.file_path = vuln_data.source_location_path
             finding.line = int(self.compute_line(vuln_data, snippet, description, rule))
@@ -267,6 +301,25 @@ class FortifyFPRParser:
             logger.info("Impossible to compute severity due to number format error", exc_info=True)
 
         return "Informational"
+
+    def format_impact(self, vuln_data) -> str:
+        """Format the impact of the vulnerability based on the threaded comments."""
+        logger.debug(f"Threaded comments: {self.threaded_comments}")
+        threaded_comments = self.threaded_comments.get(vuln_data.instance_id)
+        if not threaded_comments:
+            return ""
+
+        impact = "Threaded Comments:\n"
+        for comment in self.threaded_comments[vuln_data.instance_id]:
+            impact += f"{comment}\n"
+
+        return impact
+
+    def compute_status(self, vulnerability) -> tuple[bool, bool]:
+        """Compute the status of the vulnerability based on the instance ID. Return active, false_p"""
+        if vulnerability.instance_id in self.suppressed:
+            return False, True
+        return True, False
 
     def compute_line(self, vulnerability, snippet, description, rule) -> str:
         if snippet and snippet.start_line:

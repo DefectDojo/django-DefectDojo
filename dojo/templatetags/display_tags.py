@@ -3,6 +3,7 @@ import contextlib
 import datetime
 import logging
 import mimetypes
+import re
 from ast import literal_eval
 from itertools import chain
 
@@ -778,10 +779,14 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "ALINUX2-SA-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
             if key == "GLSA":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key == "SSA:":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
+            if key == "SSA-" and not re.findall(r"SSA-\d{4}-", vulnerability_id):
+                return "https://cert-portal.siemens.com/productcert/html/" + str(vulnerability_id.lower()) + ".html"
             if key in {"AVD", "KHV", "C-"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
