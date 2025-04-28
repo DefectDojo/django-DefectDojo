@@ -80,6 +80,9 @@ class TenableCSVParser:
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
+        if "Name" not in reader.fieldnames and "Plugin Name" not in reader.fieldnames and "asset.name" not in reader.fieldnames:
+            msg = "Invalid CSV file: missing 'Name', 'Plugin Name' or 'asset.name' field"
+            raise ValueError(msg)
         dupes = {}
         # Iterate over each line and create findings
         for row in reader:
