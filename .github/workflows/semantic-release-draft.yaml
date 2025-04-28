@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    # if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     name: Semantic Release
     runs-on: ubuntu-latest
     permissions:
@@ -26,7 +26,7 @@ jobs:
 
   releaseDraft:
     name: Release draft
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
+    # if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
     needs: build
     runs-on: ubuntu-latest
     permissions:
