@@ -34,7 +34,7 @@ jobs:
         if: ${{ inputs.from_branch == 'dev' }}
         run: |
           # Expect the last octet in release_number to not be 1-9
-          echo "${{ github.event.inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.0$"
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.0$"
 
       - id: Set-GitHub-org
         run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
