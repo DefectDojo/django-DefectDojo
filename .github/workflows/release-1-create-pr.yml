@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate proper bugfix branch release_number format is being used
-        if: ${{ github.event.inputs.from_branch == 'bugfix' }}
+        if: ${{ inputs.from_branch == 'bugfix' }}
         run: |
           # Expect the last octet in release_number to not be 0
           echo "${{ github.event.inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[1-9]$"
