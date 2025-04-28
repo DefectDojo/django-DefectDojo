@@ -133,7 +133,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
 
     def test_fortify_fpr_suppressed_finding(self):
-        with(get_unit_tests_scans_path("fortify") / "fortify_suppressed_with_comments.fpr").open(encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "fortify_suppressed_with_comments.fpr").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
