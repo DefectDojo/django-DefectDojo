@@ -9,7 +9,7 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       from_branch:
-        description: "Select branch to release from ('release/x.y.z'. If `dev` is entered, a new release branch will be created from `dev`)"
+        description: "Select branch to release from ('release/x.y.z'. If `dev` or `bugfix` is entered, a new release branch will be created from that branch)"
         required: true
         type: choice
         default: 'bugfix'
