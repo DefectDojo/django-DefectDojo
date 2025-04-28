@@ -1,0 +1,59 @@
+name: Semantic Release Draft
+
+on:
+  push:
+    branches:
+      - trunk
+      - feature/version_release
+
+  pull_request:
+    branches-ignore:
+      - sync
+
+jobs:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Verify Conventional Commits
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  releaseDraft:
+    name: Release draft
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      # Generate a token of Github APP only for the truk branch
+      - name: Generate a token of Github APP
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: "lts/*"
+
+      - name: Set up Semantic Release
+        run: npm -g install @semantic-release/git semantic-release@23.0.0
+
+      - name: Semantic Release
+        run: npx semantic-release@23.0.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
