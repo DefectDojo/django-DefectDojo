@@ -579,7 +579,7 @@
                                             {% if finding.notes.all %}
                                                 <i class="glyphicon glyphicon-comment has-popover dojo-sup"
                                                 data-trigger="hover"
-                                                data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0..date }}: {{ finding.notes.all.0 }}"
+                                                data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
                                                 data-placement="left"
                                                 data-container="body"
                                                 data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
