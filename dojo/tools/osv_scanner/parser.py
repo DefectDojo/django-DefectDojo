@@ -5,6 +5,48 @@ from dojo.models import Finding
 
 class OSVScannerParser:
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the OSV Parser.
+
+        Fields:
+        - title: Created from vulnerability id and package name.
+        - description: Custom description made from: vulnerability, source_type, & package_ecosystem.
+        - severity: Set to severity from OSV Scanner that has been translated into Defect Dojo format.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - component_name: Set to package name from OSV Scanner.
+        - component_version: Set to package version from OSV Scanner.
+        - cwe: Set to cwe outputted from OSV Scanner.
+        - file_path: Set to source path from OSV Scanner.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "static_finding",
+            "dynamic_finding",
+            "component_name",
+            "component_version",
+            "cwe",
+            "file_path",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the OSV Parser.
+
+        Fields:
+        - title: Created from vulnerability id and package name.
+        - description: Custom description made from: vulnerability, source_type, & package_ecosystem.
+        - severity: Set to severity from OSV Scanner that has been translated into Defect Dojo format.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+        ]
+
     def get_scan_types(self):
         return ["OSV Scan"]
 

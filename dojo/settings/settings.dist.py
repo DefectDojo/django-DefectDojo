@@ -217,8 +217,6 @@ env = environ.FileAwareEnv(
     # finetuning settings for when enabled
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
-    # Use business day's to calculate SLA's and age instead of calendar days
-    DD_SLA_BUSINESS_DAYS=(bool, False),
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -654,7 +652,6 @@ SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env("DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY")
 SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 2 above, but only with a JIRA link
 SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
-SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")  # Use business days to calculate SLA's and age of a finding instead of calendar days
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -1347,6 +1344,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
+    "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1417,6 +1415,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Threagile risks report": True,
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
+    "Cyberwatch scan (Galeax)": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1598,6 +1597,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
