@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 from django.core.cache import cache
+from django.conf import settings
 
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -75,9 +76,12 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard_v2(request: HttpRequest) -> HttpResponse:
-    key = get_key_for_usermember_cache(request)
-    logger.debug(f"Cache key for dashboard: {key}")
-    dashboard_cache = cache.get(key)
+    dashboard_cache = None
+    if settings.USER_CACHE_REDIS:
+        key = get_key_for_usermember_cache(request)
+        logger.debug(f"Cache user key: {request.user.id}  for dashboard: {key}")
+        dashboard_cache = cache.get(key)
+
     if dashboard_cache is None:
         logger.debug("Cache dashboard data not found, creating new cache")
         dashboard_cache = {}
@@ -86,7 +90,7 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
 
         findings = findings.filter(duplicate=False)
 
-        engagement_count = engagements.filter(active=True).count()
+        engagement_count = engagements.all().count()
         dashboard_cache["engagement_count"] = engagement_count
 
         today = timezone.now().date()
@@ -119,9 +123,10 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
             dashboard_cache["unassigned_surveys"] = unassigned_surveys
         else:
             dashboard_cache["unassigned_surveys"] = None
-        cache.set(key, dashboard_cache, GeneralSettings.get_value("CHACHE_TIMEOUT_DASHBOARD"))
-        logger.debug("Cache set for dashboard data")
         add_breadcrumb(request=request, clear=True)
+        if settings.USER_CACHE_REDIS:
+            cache.set(key, dashboard_cache, GeneralSettings.get_value("CHACHE_TIMEOUT_DASHBOARD"))
+            logger.debug("Cache set for dashboard data")
     return render(request, "dojo/dashboard.html", {
         "engagement_count": dashboard_cache["engagement_count"],
         "finding_count": dashboard_cache["finding_count"],

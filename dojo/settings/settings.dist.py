@@ -524,6 +524,8 @@ env = environ.FileAwareEnv(
 
     # Regex Validation Name
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
+    # Redis
+    DD_USER_CACHE_REDIS=(bool, False),
 )
 
 
@@ -2371,7 +2373,8 @@ CLIENT_SECRET_IA = (
 # ------------------------------------------------------------------------------
 # CACHE REDIS
 # ------------------------------------------------------------------------------
-if os.getenv("DD_USE_CACHE_REDIS") == "true":
+USER_CACHE_REDIS = env("DD_USER_CACHE_REDIS")
+if USER_CACHE_REDIS:
     LOCATION_CACHE = "redis://127.0.0.1:6379"
     OPTIONS_CACHE = {"CLIENT_CLASS": "django_redis.client.DefaultClient"}
     if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
