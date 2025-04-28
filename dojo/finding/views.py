@@ -1384,7 +1384,7 @@ def close_finding(request, fid):
 
                 tf_helper.close_or_reactive_related_finding(event="close",
                                                             parent_finding=finding,
-                                                            notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                            notes=f"finding reactived by the parent finding {finding.id} (policies for the transfer of findings)",
                                                             send_notification=False)
                 return HttpResponseRedirect(
                     reverse("view_test", args=(finding.test.id,)),

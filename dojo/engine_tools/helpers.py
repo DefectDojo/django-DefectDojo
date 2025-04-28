@@ -279,7 +279,7 @@ def check_new_findings_to_exclusion_list():
 
 
 @app.task
-def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
+def add_findings_to_blacklist(unique_id_from_tool, relative_url):
     findings_to_update = Finding.objects.filter(
         Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
         active=True
@@ -298,9 +298,8 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
             finding.tags.add("black_list")
         finding.notes.add(note)
         finding.risk_status = Constants.ON_BLACKLIST.value
-        finding.priority = priority
         
-    Finding.objects.bulk_update(findings_to_update, ["risk_status", "priority"], 1000)
+    Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
     findings_to_update_count = findings_to_update.count()
     logger.info(f"{findings_to_update_count} findings added to blacklist.")
     
@@ -466,6 +465,7 @@ def update_finding_prioritization_per_cve(vulnerability_id, scan_type, priorizat
         finding_update.priority = priorization
 
     Finding.objects.bulk_update(findings, ["priority"], 500)
+    return f"{vulnerability_id} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}."
 
 
 def identify_critical_vulnerabilities(findings) -> int:
@@ -478,7 +478,6 @@ def identify_critical_vulnerabilities(findings) -> int:
     Returns:
         int: Number of critical vulnerabilities
     """
-    finding_exclusion_list = []
     system_user = get_user(settings.SYSTEM_USER)
     
     for finding in findings:
@@ -503,21 +502,14 @@ def identify_critical_vulnerabilities(findings) -> int:
                     accepted_by=system_user
                     
                 )
-                finding_exclusion_list.append(new_finding_exclusion)
+                new_finding_exclusion.save()
                 relative_url = reverse("finding_exclusion", args=[str(new_finding_exclusion.pk)])
-                add_findings_to_blacklist.apply_async(args=(new_finding_exclusion.unique_id_from_tool, relative_url, priority,))
+                add_discussion_to_finding_exclusion(finding_exclusion)
+                add_findings_to_blacklist.apply_async(args=(new_finding_exclusion.unique_id_from_tool, relative_url))
             else:
                 fx = finding_exclusion.first()
                 relative_url = reverse("finding_exclusion", args=[str(fx.pk)])
-                add_findings_to_blacklist.apply_async(args=(fx.unique_id_from_tool, relative_url, priority,))
-
-        
-    FindingExclusion.objects.bulk_create(finding_exclusion_list)
-    
-    for finding_exclusion in finding_exclusion_list:
-        add_discussion_to_finding_exclusion(finding_exclusion)
-            
-    return len(finding_exclusion_list)
+                add_findings_to_blacklist.apply_async(args=(fx.unique_id_from_tool, relative_url))
 
 
 @app.task
@@ -527,16 +519,13 @@ def check_priorization():
     all_vulnerabilities = (
         Finding.objects.filter(active=True)
         .filter(blacklist_tag_filter)
+        .filter(epss_score__isnull=False)
         .order_by("cve", "test__scan_type")
         .distinct("cve", "test__scan_type")
     )
     
     # Identify critical vulnerabilities
-    blacklist_new_items = identify_critical_vulnerabilities(all_vulnerabilities)
-    
-    return {
-        "message": f"{blacklist_new_items} added to blacklist"
-    }
+    identify_critical_vulnerabilities(all_vulnerabilities)
 
 
 @app.task

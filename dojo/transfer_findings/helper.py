@@ -325,6 +325,7 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             transfer_finding_finding.findings.out_of_scope = False
             transfer_finding_finding.findings.is_mitigated = False
             transfer_finding_finding.findings.mitigated = None
+            transfer_finding_finding.findings.risk_status = "Transfer Expired"
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
             transfer_finding_finding_reactive = transfer_finding_finding
 
