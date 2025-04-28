@@ -126,7 +126,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.4.1
+    image: nginx/nginx-prometheus-exporter:1.4.2
     imagePullPolicy: IfNotPresent
 
 annotations: {}
