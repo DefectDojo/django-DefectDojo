@@ -487,7 +487,7 @@ class BaseImporter(ImporterOptions):
             message += "."
         else:
             # Set the message to convey that all findings processed are identical to the last time an import/reimport occurred
-            message = "No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report."
+            message = "No findings were added/updated/closed/reactivated as the report is empty or the findings in Defect Dojo are identical to those in the uploaded report."
 
         return message
 
