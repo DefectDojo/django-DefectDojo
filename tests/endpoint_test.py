@@ -58,6 +58,19 @@ class EndpointTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint updated successfully"))
 
+    def test_view_host(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+        # Navigate to the host page
+        driver.get(self.base_url + "host")
+        # Select one of the previously created endpoint to edit
+        driver.find_element(By.LINK_TEXT, "moving.com.rnd").click()
+        # "Click" the dropdown button to see options
+        driver.find_element(By.ID, "dropdownMenu1").click()
+
+        self.assertTrue(self.is_text_present_on_page(text="Host: moving.com.rnd"))
+
     def test_delete_endpoint(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
