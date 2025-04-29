@@ -175,4 +175,4 @@ but at different levels in the data model:
  - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding
  - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding is part  of
  - Tags (Product): filter on any tags that are attached to the Product of a given Finding is part of
- - Not Tags (Product): filter on any tags that are *not* attached to the Product of a given Finding is part  of
+ - Not Tags (Product): filter on any tags that are *not* attached to the Product of a given Finding
