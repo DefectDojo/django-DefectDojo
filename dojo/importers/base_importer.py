@@ -215,12 +215,12 @@ class BaseImporter(ImporterOptions):
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
-
-        This function will vary by importer, so it is marked as
-        abstract with a prohibitive exception raised if the
-        method is attempted to to be used by the BaseImporter class
         """
-        self.check_child_implementation_exception()
+        # Attempt any preprocessing before generating findings
+        scan = self.process_scan_file(scan)
+        if hasattr(parser, "get_tests"):
+            return self.parse_findings_dynamic_test_type(scan, parser)
+        return self.parse_findings_static_test_type(scan, parser)
 
     def sync_process_findings(
         self,

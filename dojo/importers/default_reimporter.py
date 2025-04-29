@@ -288,21 +288,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         return mitigated_findings
 
-    def parse_findings(
-        self,
-        scan: TemporaryUploadedFile,
-        parser: Parser,
-    ) -> list[Finding]:
-        """
-        Determine how to parse the findings based on the presence of the
-        `get_tests` function on the parser object
-        """
-        # Attempt any preprocessing before generating findings
-        scan = self.process_scan_file(scan)
-        if hasattr(parser, "get_tests"):
-            return self.parse_findings_dynamic_test_type(scan, parser)
-        return self.parse_findings_static_test_type(scan, parser)
-
     def parse_findings_static_test_type(
         self,
         scan: TemporaryUploadedFile,
