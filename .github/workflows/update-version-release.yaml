@@ -1,0 +1,48 @@
+name: Update version Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+
+      # Check out the current repository
+      - name: Fetch Sources
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: Upgrade python.version
+        run: sed -i "s/version = '.*'/version = '${{ env.RELEASE_VERSION }}'/" dojo/version_inner.py
+
+      - name: Save version
+        uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          push-branch: "trunk"
+          commit-message: 'docs: upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
+          force-add: "true"
+          force-push: "true"
+          files: dojo/version_inner.py
+          name: Release Bot
+          email: release-bot@bancolombia.com.co

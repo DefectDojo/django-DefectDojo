@@ -539,14 +539,6 @@
                                                         {% trans "Vulnerability Black & White Lists" %}
                                                     </a>
                                                 </li>
-                                                {% if request.user|is_in_group:"Reviewers_Maintainer" %}
-                                                <li>
-                                                    <a rel="noopener noreferrer" href="{% url 'execute_priorization_check' %}">
-                                                        {% trans "Execute Priorization Check" %}
-                                                    </a>
-                                                </li>
-                                                {% endif %}
-
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>

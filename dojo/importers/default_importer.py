@@ -347,7 +347,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 hp_transfer_finding.close_or_reactive_related_finding(
                     event="close",
                     parent_finding=closed_finding,
-                    notes=f"finding closed by the parent finding {closed_finding.id} (policies for the transfer of findings)",
+                    notes=f"finding reactived by the parent finding {closed_finding.id} (policies for the transfer of findings)",
                     send_notification=False)
 
         return old_findings
