@@ -16,6 +16,7 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
+     System_Settings
 )
 
 logger = logging.getLogger(__name__)
@@ -564,6 +565,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         existing_finding.active = True
         if self.verified is not None:
             existing_finding.verified = self.verified
+        system_settings = System_Settings.objects.get()
+        if (system_settings.enable_transfer_finding and existing_finding.risk_status == "Transfer Accepted") or existing_finding.risk_status == "On Whitelist":
+            existing_finding.active = False
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)

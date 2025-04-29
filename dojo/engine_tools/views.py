@@ -7,12 +7,10 @@ from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
 from dojo.engine_tools.helpers import (
     add_findings_to_whitelist, 
-    get_approvers_members, 
     get_reviewers_members, 
     Constants, 
     expire_finding_exclusion_immediately,
     send_mail_to_cybersecurity,
-    check_priorization,
     has_valid_comments,
     add_findings_to_blacklist,
     remove_findings_from_deleted_finding_exclusions
@@ -53,7 +51,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
-    ).exclude(status__in=["Expired", "Rejected", "Expired"]).first()
+    ).exclude(status__in=["Rejected"]).first()
     
     if duplicate_finding_exclusions:
         if duplicate_finding_exclusions.status == "Accepted":
@@ -432,19 +430,3 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
             extra_tags="alert-success")
     
     return redirect('finding_exclusions')
-
-   
-def execute_priorization_check(request: HttpRequest) -> HttpResponse:
-    """Execute the priorization check task inmediately"""
-    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
-        raise PermissionDenied
-    
-    check_priorization.apply_async()
-    
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Priorization of findings updated",
-        extra_tags="alert-success")
-    
-    return HttpResponseRedirect(reverse("finding_exclusions"))
