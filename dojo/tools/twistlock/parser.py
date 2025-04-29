@@ -5,6 +5,7 @@ import json
 import logging
 import textwrap
 import dateutil
+import base64
 
 from dojo.models import Finding
 from django.conf import settings
@@ -108,12 +109,7 @@ class TwistlockCSVParser:
                 data_vulnerability_link,
                 data_account_id,
                 data_discovered,
-                data_registry,
-                data_repository,
-                data_vulnerability_id,
-                data_severity,
-                data_cvss,
-                data_fix_status
+                data_unique_id
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -183,12 +179,7 @@ class TwistlockCSVParser:
         data_vulnerability_link,
         data_account_id,
         data_discovered,
-        data_registry,
-        data_repository,
-        data_vulnerability_id,
-        data_severity,
-        data_cvss,
-        data_fix_status
+        data_unique_id
     ):
         return (
             "<p><strong>Description:</strong> "
@@ -264,46 +255,14 @@ class TwistlockCSVParser:
             + "</p><p><strong>Discovered:</strong> "
             + str(data_discovered)
             + "</p>"
-            + self.custom_id(data_registry,
-                 data_repository,
-                 data_cloud_id,
-                 data_vulnerability_id,
-                 data_severity,
-                 data_package_name,
-                 data_package_version,
-                 data_cvss,
-                 data_fix_status)
+            + "</p><p><strong>Custom Id:</strong> "
+            + (
+                base64.b64decode(data_unique_id).decode("utf-8")
+                if data_unique_id
+                else "NA"
+            )
+            + "</p>"
         )
-
-    def custom_id(self,
-                 data_registry,
-                 data_repository,
-                 data_cloud_id,
-                 data_vulnerability_id,
-                 data_severity,
-                 data_package_name,
-                 data_package_version,
-                 data_cvss,
-                 data_fix_status):
-        return ("</p><p><strong>Custom Id:</strong> "
-            + str(data_registry)
-            + "/"
-            + str(data_repository)
-            + "@"
-            + str(data_cloud_id)
-            + ","
-            + str(data_vulnerability_id)
-            + ","
-            + str(data_severity)
-            + ","
-            + str(data_package_name)
-            + ","
-            + str(data_package_version)
-            + ","
-            + str(data_cvss)
-            + ","
-            + str(data_fix_status)
-            + "</p>")
 
     def procces_executor(self, row, test):
         finding = self.parse_issue(row, test)
