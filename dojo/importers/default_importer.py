@@ -320,7 +320,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         return old_findings
 
-
     def parse_findings_static_test_type(
         self,
         scan: TemporaryUploadedFile,

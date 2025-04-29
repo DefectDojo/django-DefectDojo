@@ -1,5 +1,6 @@
-from contextlib import suppress
 import importlib
+from contextlib import suppress
+
 from django.conf import settings
 
 
@@ -23,10 +24,10 @@ class OpenSourceParserTest:
         name: str,
         parser_type: str,
         version: str,
-        description: str = None,
-        dynamic_tool: bool = None,
-        static_tool: bool = None,
         *args: list,
+        description: str | None,
+        dynamic_tool: bool | None,
+        static_tool: bool | None,
         **kwargs: dict,
     ):
         instance.name = name
