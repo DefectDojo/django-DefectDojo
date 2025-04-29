@@ -1,5 +1,5 @@
+from debug_toolbar.toolbar import debug_toolbar_urls
 import logging
-
 from django.conf import settings
 from django.conf.urls import include
 from django.contrib import admin
@@ -80,6 +80,7 @@ from dojo.api_v2.views import (
     
 )
 from dojo.api_v2.general_settings.views import GeneralSettingsViewSet
+from dojo.api_v2.manager_cache.views import ManagerCacheApiView
 from dojo.exclusive_permission.view import ExclusivePermissionViewSet
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -117,6 +118,7 @@ from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo.api_v2.manager_cache.urls import urlpatterns as manager_cache_urls
 from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -232,6 +234,8 @@ ur += banner_urls
 ur += component_urls
 ur += regulations
 ur += announcement_urls
+if settings.ENBABLED_DEBUG_TOOLBAR:
+    ur += debug_toolbar_urls()
 
 api_v2_urls = [
     #  Django Rest Framework API v2
@@ -272,6 +276,7 @@ urlpatterns += [
     re_path(r"^{}/(?P<path>.*)$".format(settings.MEDIA_URL.strip("/")), views.protected_serve, {"document_root": settings.MEDIA_ROOT}),
 ]
 
+urlpatterns += manager_cache_urls
 urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 

@@ -36,6 +36,7 @@ from django.utils.functional import cached_property
 from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
+from django.core.cache import cache
 from django_extensions.db.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from polymorphic.base import ManagerInheritanceWarning
@@ -5055,22 +5056,14 @@ class GeneralSettings(models.Model):
 
     def __str__(self):
         return self.name_key
-    
+
     @classmethod
     def validate_status(cls):
         return cls.status if cls.status else False
 
-
     @classmethod
     def get_value(cls, name_key: str, default=None):
-        if cls.validate_status() is False:
-            return False
         variable_object = None
-        try:
-            variable_object = GeneralSettings.objects.get(name_key=name_key)
-        except ObjectDoesNotExist as e:
-            logger.error(f"Variable not found : {name_key}")
-            return default
         rule_data_type = {
             "INT": int,
             "STRING": str,
@@ -5078,8 +5071,26 @@ class GeneralSettings(models.Model):
             "LIST": lambda value: value.split(","),
             "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
         }
-        return rule_data_type[variable_object.data_type](variable_object.value)
+        if settings.USE_CACHE_REDIS:
+            variable_object = cache.get(f"DISPLAY_STATUS:{name_key}")
+            logger.debug(f"Cache key for : {name_key}")
+            if variable_object:
+                return rule_data_type[variable_object["data_type"]](variable_object["value"]) 
 
+        if cls.validate_status() is False:
+            return False
+        try:
+            if variable_object is None:
+                variable_object = GeneralSettings.objects.get(
+                    name_key=name_key)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}, {str(e)}")
+            return default
+        if settings.USE_CACHE_REDIS:
+            cache.set(f"DISPLAY_STATUS:{variable_object.value}",
+                      variable_object.value, timeout=None)
+        variable_result = rule_data_type[variable_object.data_type](variable_object.value) 
+        return variable_result
 
     @classmethod
     def get_list_variable_by_category(cls, category: str, default=[]):
@@ -5094,6 +5105,7 @@ class GeneralSettings(models.Model):
         except ObjectDoesNotExist as e:
             logger.error(str(e))
             return default
+
     
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
