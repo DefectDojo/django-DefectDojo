@@ -77,7 +77,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
 def dashboard_v2(request: HttpRequest) -> HttpResponse:
     dashboard_cache = None
-    if settings.USER_CACHE_REDIS:
+    if settings.USE_CACHE_REDIS:
         key = get_key_for_usermember_cache(request)
         logger.debug(f"Cache user key: {request.user.id}  for dashboard: {key}")
         dashboard_cache = cache.get(key)
@@ -124,7 +124,7 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
         else:
             dashboard_cache["unassigned_surveys"] = None
         add_breadcrumb(request=request, clear=True)
-        if settings.USER_CACHE_REDIS:
+        if settings.USE_CACHE_REDIS:
             cache.set(key, dashboard_cache, GeneralSettings.get_value("CHACHE_TIMEOUT_DASHBOARD"))
             logger.debug("Cache set for dashboard data")
     return render(request, "dojo/dashboard.html", {

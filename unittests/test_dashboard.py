@@ -199,7 +199,7 @@ class TestDashboard(DojoTestCase):
         return self.client.get(reverse("dashboard"))
 
     def test_counters_as_staff_cache(self):
-        settings.USER_CACHE_REDIS = True
+        settings.USE_CACHE_REDIS = True
         self._setup_test_counters_findings(product_id=2)
 
         response = self._request("admin")
@@ -210,7 +210,7 @@ class TestDashboard(DojoTestCase):
         self.assertEqual(3, response.context["accepted_count"])
 
     def test_counters_as_user_cache(self):
-        settings.USER_CACHE_REDIS = True
+        settings.USE_CACHE_REDIS = True
         self._setup_test_counters_findings(product_id=2)
         self._setup_test_counters_findings(product_id=3)
 
