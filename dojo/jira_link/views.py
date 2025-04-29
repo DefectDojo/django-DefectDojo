@@ -215,7 +215,7 @@ def check_for_and_create_comment(parsed_json):
     if comment is None:
         return None
     comment_text = comment.get("body")
-    comment_text_without_defectdojo_user = re.sub(r'^\(.*?\):\s*', '', comment_text)
+    comment_text_without_defectdojo_user = re.sub(r"^\(.*?\):\s*", "", comment_text)
     commenter = ""
     if "name" in comment.get("updateAuthor"):
         commenter = comment.get("updateAuthor", {}).get("name")
