@@ -171,7 +171,7 @@ For the other six tag filters, they follow the same rules as "Tags" and "Not Tag
 but at different levels in the data model:
 
  - Tags (Test): filter on any tags that are attached to the Test of a given Finding
- - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding is part  of
+ - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding
  - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding
  - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding
  - Tags (Product): filter on any tags that are attached to the Product of a given Finding is part of
