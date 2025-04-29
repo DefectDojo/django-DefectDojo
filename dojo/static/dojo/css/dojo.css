@@ -276,11 +276,11 @@ body #header form#api_selector .input input#input_apiKey {
 }
 
 .badge.badge-count {
-    background-color: #d9534f;
+    background-color: #D03540;
 }
 
 .badge.badge-count.badge-count0 {
-    background-color: #5cb85c;
+    background-color: #3a7a3a;
 }
 
 .dropdown-toggle-h {
@@ -331,21 +331,6 @@ form.metric_form p label {
 
 .filters .panel-heading:first-child {
     border-top: 0px solid #ddd;
-}
-
-.panel-blue .panel-heading,
-.panel-blue {
-    color: #f5f5f5;
-    background-color: #546474!important;
-    border-color: #546474!important;
-}
-
-.panel-blue a {
-    color: #546474;
-}
-
-.panel-blue a:hover {
-    color: #38434d;
 }
 
 .nowrap {
@@ -578,27 +563,27 @@ form ul#id_accepted_findings input {
 }
 
 .severity-Low {
-    background-color: #546474;
+    background-color: #147AC1;
 }
 
 .severity-Medium {
-    background-color: #FBE413;
+    background-color: #A46A00;
 }
 
 .severity-High {
-    background-color: #f09835;
+    background-color: #F04421;
 }
 
 .severity-Critical {
-    background-color: #d9534f;
+    background-color: #D03540;
 }
 
 .age-red {
-    background-color: #d9534f;
+    background-color: #D03540;
 }
 
 .age-green {
-    background-color: green;
+    background-color: #3a7a3a;
 }
 
 .age-blue {
@@ -904,7 +889,7 @@ table.centered td {
 }
 
 .text-critical {
-    color: #d9534f
+    color: #D03540
 }
 
 .text-high {
@@ -1355,7 +1340,7 @@ div.custom-search-form {
 .panel-default > .panel-heading {
     color: white;
     font-size: 16px;
-    background-color: rgba(32, 166, 216, 0.75);
+    background-color: #147AC1;
     border-color: #A1C0D7;
 }
 
@@ -1706,7 +1691,7 @@ div.tags .label {
 }
 
 .warning-color {
-    background: red;
+    background: #D03540;
 }
 
 .amber-color {
@@ -1774,19 +1759,19 @@ mark{
 }
 
 .bg-vuln-critical {
-  background-color:#D43F3A
+  background-color:#D03540
 }
 .bg-vuln-high {
-  background-color:#D57A1D
+  background-color: #D64421
 }
 .bg-vuln-medium {
-  background-color:#E4AB18
+  background-color:#A46A00
 }
 .bg-vuln-low {
-  background-color:#4CAE4C
+  background-color:#3a7a3a
 }
 .bg-vuln-info {
-  background-color:#357ABD
+  background-color:#147AC1
 }
 .bg-muted {
   background-color:#777
@@ -1869,4 +1854,92 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .table th:last-child, .table td:last-child {
     border-right: none; 
+}
+
+
+/* Keep the color of the legend in forced color mode */
+.legend td {
+forced-color-adjust: none;
+}
+
+.legend .legendColorBox > div {
+border: 2px solid white;    
+border-radius: 50%;          
+}
+
+.legend .legendColorBox > div > div {
+width: 16px;        
+height: 16px;        
+border-radius: 50%; 
+}
+
+.legend .legendLabel {
+padding-left: 4px;   
+vertical-align: middle;
+forced-color-adjust: auto;
+}
+
+.panel-footer {
+background-color: #fff;
+}
+
+.panel-blue .panel-heading,
+.panel-blue {
+color: #f5f5f5;
+background-color: #147AC1;
+border-color: #147AC1;
+}
+
+.panel-blue a,
+.panel-blue a:hover {
+    color: #147AC1;
+}
+
+.panel-red .panel-heading {
+    border-color: #D03540;
+    background-color: #D03540;
+}
+
+.panel-red a {
+    color: #D03540;
+}
+
+.panel-green .panel-heading {
+    border-color: #3a7a3a;
+    background-color: #3a7a3a;
+}
+
+.panel-green a,
+.panel-green a:hover {
+    color: #3a7a3a;
+}
+
+.panel-yellow,
+.panel-yellow .panel-heading {
+    background-color: #B26400;
+    border-color: #B26400;
+}
+
+.panel-yellow a,
+.panel-yellow a:hover {
+    color: #B26400;
+}
+
+.fa-caret-down,
+.caret {
+    forced-color-adjust: none;
+}
+
+nav .badge.badge-count {
+    border-radius: 15px !important;
+}
+
+
+/* Keep arrows icons in forced color mode  */
+@media (forced-colors: active) {
+
+    .fa-caret-down,
+    .caret {
+        color: ButtonText;
+    }
 }
