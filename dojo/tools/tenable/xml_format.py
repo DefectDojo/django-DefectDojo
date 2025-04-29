@@ -199,6 +199,15 @@ class TenableXMLParser:
                     if cwe_element_text is not None:
                         cwe = cwe_element_text
 
+                    # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
+                    # if not cwe:
+                    #     for ref in item.iter("xref"):
+                    #         ref_text = self.safely_get_element_text(ref)
+                    #         if ref_text is not None:
+                    #             cwe = parse_cwe_from_ref(ref_text)
+                    #             if cwe > 0:
+                    #                 break
+
                     cvssv3 = None
                     cvssv3_element_text = self.safely_get_element_text(
                         item.find("cvss3_vector"),
