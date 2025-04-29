@@ -63,7 +63,7 @@ class EndpointTest(BaseTestCase):
         # to match an admin password in your own container
         driver = self.driver
         # Navigate to the host page
-        driver.get(self.base_url + "host")
+        driver.get(self.base_url + "endpoint/host")
         # Select one of the previously created endpoint to edit
         driver.find_element(By.LINK_TEXT, "moving.com.rnd").click()
         # "Click" the dropdown button to see options
