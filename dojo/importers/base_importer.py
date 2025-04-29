@@ -33,6 +33,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
+from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
@@ -538,6 +539,23 @@ class BaseImporter(ImporterOptions):
             test_type.dynamically_generated = True
             test_type.save()
         return test_type
+    
+    def update_test_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (name := getattr(internal_test, "name", None)) is not None:
+            self.test.name = name
+        if (description := getattr(internal_test, "description", None)) is not None:
+            self.test.description = description
+        if (version := getattr(internal_test, "version", None)) is not None:
+            self.test.version = version
+        self.test.save()
+    
+    def update_test_type_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (static_tool := getattr(internal_test, "static_tool", None)) is not None:
+            self.test.test_type.static_tool = static_tool
+        if (dynamic_tool := getattr(internal_test, "dynamic_tool", None)) is not None:
+            self.test.test_type.dynamic_tool = dynamic_tool
+        self.test.test_type.save()
+        
 
     def verify_tool_configuration_from_test(self):
         """
