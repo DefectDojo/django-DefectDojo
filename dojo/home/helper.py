@@ -9,18 +9,17 @@ def get_key_for_usermember_cache(request: HttpRequest) -> str:
     """
     if request.user.is_superuser:
         return "dashboard_cache_superusuario"
-    # consultar member pro producto
     hashids = Hashids(min_length=8, salt="saltingfactor")
     permission_product = list(
         Product_Member.objects
         .filter(user=request.user)
-        .values_list("id", flat=True)
-        .order_by("id"))
+        .values_list("product", flat=True)
+        .order_by("product"))
     permission_product = hashids.encode(*permission_product)
     permission_product_type = list(
         Product_Type_Member.objects
         .filter(user=request.user)
-        .values_list("id", flat=True)
-        .order_by("id"))
+        .values_list("product_type", flat=True)
+        .order_by("product_type"))
     permission_product_type = hashids.encode(*permission_product_type)
     return f"dashboard:{permission_product}:{permission_product_type}"

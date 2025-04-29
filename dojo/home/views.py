@@ -36,7 +36,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
     today = timezone.now().date()
 
-    date_range = [today - timedelta(days=7), today]  # 7 days plus today, identical to last 7 days filter in other places
+    date_range = [today - timedelta(days=7), today]
     finding_count = findings\
         .filter(date__range=date_range)\
         .count()
