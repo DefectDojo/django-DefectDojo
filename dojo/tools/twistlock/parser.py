@@ -285,7 +285,7 @@ class TwistlockCSVParser:
                  data_package_version,
                  data_cvss,
                  data_fix_status):
-        return ("</p><p><strong>CustomId:</strong> "
+        return ("</p><p><strong>Custom Id:</strong> "
             + str(data_registry)
             + "/"
             + str(data_repository)
