@@ -15,6 +15,9 @@ class GenericJSONParser:
             name=data.get("name", self.ID),
             parser_type=data.get("type", self.ID),
             version=data.get("version"),
+            description=data.get("description"),
+            dynamic_tool=data.get("dynamic_tool"),
+            static_tool=data.get("static_tool"),
         )
         test_internal.findings = []
         for item in data.get("findings", []):
