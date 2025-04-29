@@ -4,6 +4,7 @@ import io
 import logging
 import re
 import sys
+import base64
 
 from cpe import CPE
 from cvss import CVSS3
@@ -152,7 +153,7 @@ class TenableCSVParser:
         + "<p><strong>Exploit Ease:</strong> " + str(data_exploit_ease) + "</p>"
         + "<p><strong>Check Type:</strong> " + str(data_check_type) + "</p>"
         + "<p><strong>Version:</strong> " + str(data_version) + "</p>"
-        + "<p><strong>Custom Id:</strong> " + str(data_custom_id) + "</p>"
+        + "<p><strong>Custom Id:</strong> " + ( base64.b64decode(data_custom_id).decode("utf-8") if data_custom_id else "NA") + "</p>"
     )
 
     def get_severity_by_vpr(self, vpr_score: float):
