@@ -170,7 +170,7 @@ There are ten fields related to tags:
 For the other six tag filters, they follow the same rules as "Tags" and "Not Tags" as above,
 but at different levels in the data model:
 
- - Tags (Test): filter on any tags that are attached to the Test of a given Finding is part of
+ - Tags (Test): filter on any tags that are attached to the Test of a given Finding
  - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding is part  of
  - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding is part of
  - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding is part  of
