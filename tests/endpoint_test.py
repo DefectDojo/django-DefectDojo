@@ -100,6 +100,7 @@ def suite():
     suite.addTest(ProductTest("test_create_product"))
     suite.addTest(EndpointTest("test_create_endpoint"))
     suite.addTest(EndpointTest("test_edit_endpoint"))
+    suite.addTest(EndpointTest("test_view_host"))
     suite.addTest(EndpointTest("test_delete_endpoint"))
     suite.addTest(ProductTest("test_delete_product"))
     return suite
