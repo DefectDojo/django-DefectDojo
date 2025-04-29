@@ -26,7 +26,7 @@ jobs:
 
   releaseDraft:
     name: Release draft
-    # if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
     needs: build
     runs-on: ubuntu-latest
     permissions:
