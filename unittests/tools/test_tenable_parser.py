@@ -1,3 +1,4 @@
+
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.tenable.parser import TenableParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -100,6 +101,32 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
 
+    def test_parse_findings_all_nessus(self):
+        """Test that use a report with all columns selected in generate CSV Report 2025-04-14"""
+        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus-template.csv", encoding="utf-8") as testfile:
+            parser = TenableParser()
+            findings = parser.get_findings(testfile, self.create_test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(5, len(findings))
+            finding = findings[0]
+            self.assertEqual("SSL Medium Strength Cipher Suites Supported (SWEET32)", finding.title)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual(["CVE-2016-2183"], finding.unsaved_vulnerability_ids)
+            self.assertEqual(0, finding.cwe)
+            self.assertEqual(0.3833, finding.epss_score)
+            finding = findings[1]
+            self.assertEqual("HTTP TRACE / TRACK Methods Allowed", finding.title)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(["CVE-2003-1567"], finding.unsaved_vulnerability_ids)
+            self.assertEqual(0, finding.cwe)
+            # self.assertEqual(16, finding.cwe)
+            self.assertEqual(0.8269, finding.epss_score)
+
     def test_parse_some_findings_csv_bytes_nessus_legacy(self):
         """This tests is designed to test the parser with different read modes"""
         with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", encoding="utf-8") as testfile:
@@ -180,9 +207,12 @@ class TestTenableParser(DojoTestCase):
                 finding = findings[i]
                 self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
                 self.assertIsNone(finding.cwe)
+
             finding = findings[0]
             self.assertEqual("High", finding.severity)
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
+            self.assertEqual(None, finding.cwe)
+            # self.assertEqual(79, finding.cwe)
 
     def test_parse_one_findings_xml_nessus_was_legacy(self):
         with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.xml", encoding="utf-8") as testfile:
@@ -194,7 +224,8 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
-            self.assertIsNone(finding.cwe)
+            self.assertEqual(None, finding.cwe)
+            # self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
 
@@ -224,6 +255,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("7.1", finding.cvssv3_score)
             self.assertEqual("High", finding.severity)
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual(0, finding.cwe)
 
     def test_parse_one_findings_csv_nessus_was_legacy(self):
         with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.csv", encoding="utf-8") as testfile:
@@ -318,6 +350,7 @@ class TestTenableParser(DojoTestCase):
             reference = """https://www.openssl.org/blog/blog/2016/08/24/sweet32/
 https://sweet32.info
 Tenable Plugin ID: 42873
+Plugin Information: N/A
 Plugin Publication Date: Nov 23, 2009 12:00:00 UTC
 Plugin Modification Date: Feb 3, 2021 12:00:00 UTC"""
             self.assertEqual(reference, findings[0].references)
