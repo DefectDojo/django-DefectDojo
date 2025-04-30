@@ -1,9 +1,10 @@
 import io
 import json
+
 from django.conf import settings
 from parameterized import parameterized
-from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from dojo.models import Test, User
 from unittests.dojo_test_case import DojoAPITestCase
@@ -30,7 +31,6 @@ class TestGenericMetaImports(DojoAPITestCase):
             "close_old_findings": "true",
         }
 
-
     def _upload_json_as_file(self, data: dict):
         file = io.BytesIO(json.dumps(data).encode("utf-8"))
         file.name = "test.json"
@@ -55,7 +55,7 @@ class TestGenericMetaImports(DojoAPITestCase):
                 "Set Description + Version",
                 {
                     "description": "some description",
-                    "version": "1.0.0-beta"
+                    "version": "1.0.0-beta",
                 },
             ),
             (
@@ -86,7 +86,7 @@ class TestGenericMetaImports(DojoAPITestCase):
                     "dynamic_tool": True,
                 },
             ),
-        ]
+        ],
     )
     def test_value_set_at_import_time(
         self,
@@ -101,7 +101,7 @@ class TestGenericMetaImports(DojoAPITestCase):
         }
         # Iterate over the data and set the values in the file
         file_contents.update(
-            {key: value for key, value in data.items() if value is not None}
+            {key: value for key, value in data.items() if value is not None},
         )
         # Create a pseudo file
         payload["file"] = self._upload_json_as_file(file_contents)
@@ -111,7 +111,7 @@ class TestGenericMetaImports(DojoAPITestCase):
         test = self._get_test_object_from_id(test_id)
         # Make all the appropriate assertions
         self._make_assertions(test, data)
-   
+
     @parameterized.expand(
         [
             (
@@ -159,7 +159,7 @@ class TestGenericMetaImports(DojoAPITestCase):
                     "dynamic_tool_after": False,
                 },
             ),
-        ]
+        ],
     )
     def test_value_set_at_import_time_then_override_at_reimport(
         self,
@@ -174,7 +174,7 @@ class TestGenericMetaImports(DojoAPITestCase):
         }
         # Iterate over the data and set the values in the file
         file_contents.update(
-            {key.replace("_before", ""): value for key, value in data.items() if value is not None and "_before" in key}
+            {key.replace("_before", ""): value for key, value in data.items() if value is not None and "_before" in key},
         )
         # Create a pseudo file
         payload["file"] = self._upload_json_as_file(file_contents)
@@ -184,9 +184,9 @@ class TestGenericMetaImports(DojoAPITestCase):
         test = self._get_test_object_from_id(test_id)
         # Make all the appropriate assertions
         self._make_assertions(test, {key.replace("_before", ""): value for key, value in data.items() if "_before" in key})
-        # Update the file with the contents of the changes 
+        # Update the file with the contents of the changes
         file_contents.update(
-            {key.replace("_after", ""): value for key, value in data.items() if value is not None and "_after" in key}
+            {key.replace("_after", ""): value for key, value in data.items() if value is not None and "_after" in key},
         )
         # Create a pseudo file
         payload["file"] = self._upload_json_as_file(file_contents)
@@ -196,5 +196,3 @@ class TestGenericMetaImports(DojoAPITestCase):
         test = self._get_test_object_from_id(test_id)
         # Make all the appropriate assertions
         self._make_assertions(test, {key.replace("_after", ""): value for key, value in data.items() if "_after" in key})
-
-
