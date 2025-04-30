@@ -9,7 +9,7 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       from_branch:
-        description: "Select branch to release from ('release/x.y.z'. If `dev` or `bugfix` is entered, a new release branch will be created from that branch)"
+        description: "Select branch to release from. Dev branch releases happen the first monday of the month. Otherwise, use bugfix."
         required: true
         type: choice
         default: 'bugfix'
@@ -45,14 +45,8 @@ jobs:
           ref: ${{ github.event.inputs.from_branch }}
 
       - name: Create release branch
-        if: ${{ !startsWith(github.event.inputs.from_branch, 'release/') }}
         run: |
           echo "NEW_BRANCH=release/${{ github.event.inputs.release_number }}" >> $GITHUB_ENV
-
-      - name: Use existing release branch
-        if: startsWith(github.event.inputs.from_branch, 'release/')
-        run: |
-          echo "NEW_BRANCH=${{ github.event.inputs.from_branch }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |
