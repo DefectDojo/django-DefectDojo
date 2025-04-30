@@ -300,7 +300,7 @@ class BaseImporter(ImporterOptions):
         fields used today are `version`, `branch_tag`, `build_id`, and `commit_hash`
         """
         # Add the extra fields to the test if they are specified here
-        if not self.version.isspace() and not getattr(self, "_version_set_by_parser", False):
+        if not self.version.isspace():
             self.test.version = self.version
         if not self.branch_tag.isspace():
             self.test.branch_tag = self.branch_tag
@@ -568,7 +568,6 @@ class BaseImporter(ImporterOptions):
             self.test.description = description
         if (version := getattr(internal_test, "version", None)) is not None:
             self.test.version = version
-            self._version_set_by_parser = True
         self.test.save()
 
     def update_test_type_from_internal_test(self, internal_test: ParserTest) -> None:

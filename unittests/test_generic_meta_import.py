@@ -42,8 +42,6 @@ class TestGenericMetaImports(DojoAPITestCase):
     def _make_assertions(self, test: Test, data: dict) -> None:
         if (description := data.get("description")) is not None:
             self.assertEqual(test.description, description)
-        if (version := data.get("version")) is not None:
-            self.assertEqual(test.version, version)
         if (static_tool := data.get("static_tool")) is not None:
             self.assertEqual(test.test_type.static_tool, static_tool)
         if (dynamic_tool := data.get("dynamic_tool")) is not None:
@@ -52,10 +50,9 @@ class TestGenericMetaImports(DojoAPITestCase):
     @parameterized.expand(
         [
             (
-                "Set Description + Version",
+                "Set Description",
                 {
                     "description": "some description",
-                    "version": "1.0.0-beta",
                 },
             ),
             (
@@ -81,7 +78,6 @@ class TestGenericMetaImports(DojoAPITestCase):
                 "Set all the things",
                 {
                     "description": "some description",
-                    "version": "1.0.0-beta",
                     "static_tool": True,
                     "dynamic_tool": True,
                 },
@@ -115,12 +111,10 @@ class TestGenericMetaImports(DojoAPITestCase):
     @parameterized.expand(
         [
             (
-                "Update Description + Version",
+                "Update Description",
                 {
                     "description_before": "some description",
                     "description_after": "much more detailed description",
-                    "version_before": "1.0.0-beta",
-                    "version_after": "1.0.0",
                 },
             ),
             (
@@ -151,8 +145,6 @@ class TestGenericMetaImports(DojoAPITestCase):
                 {
                     "description_before": "some description",
                     "description_after": "much more detailed description",
-                    "version_before": "1.0.0-beta",
-                    "version_after": "1.0.0",
                     "static_tool_before": False,
                     "static_tool_after": True,
                     "dynamic_tool_before": True,
