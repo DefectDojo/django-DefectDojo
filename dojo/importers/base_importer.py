@@ -562,8 +562,6 @@ class BaseImporter(ImporterOptions):
         return test_type
 
     def update_test_from_internal_test(self, internal_test: ParserTest) -> None:
-        if (name := getattr(internal_test, "name", None)) is not None:
-            self.test.name = name
         if (description := getattr(internal_test, "description", None)) is not None:
             self.test.description = description
         if (version := getattr(internal_test, "version", None)) is not None:
