@@ -108,12 +108,12 @@ Example:
 This parser supports some additional attributes to be able to define custom `TestTypes` as well as influencing some meta fields on the `Test`:
 
 - `name`: The internal name of the tool you are using. This is primarily informational, and used for reading the report manually.
-- `type`: The name of the test type to create in DefectDojo, with the suffix of `(Generic Findings Import)`. The suffix is an important identifier for future users attempting to identify the test type to supply when importing new reports. This value is very important to fetching the correct test type to import findings into, so be sure to keep the `type` consistent from import to import! As an example, a report submitted with a `type` of `Internal Company Tool` will produce a test type in DefectDojo with the title `Internal Company Tool (Generic Findings Import)`. With this newly created test type, you can define custom `HASHCODE_FIELDS` or `DEDUPLICATION_ALGORITHM` in the settings.
-- `version`: The version of the tool you are using. This is primarily informational, and used for reading the report manually, and tracking format changes from version to version.
-- `description`: A brief description of the test. This could be an explanation of what the tool is reporting, where the tools is maintained, who the point of contact is for the tool, or anything you like.
+- `type`: The name of the test type to create in DefectDojo with the suffix of `(Generic Findings Import)`. The suffix is an important identifier for future users attempting to identify the test type to supply when importing new reports. This value is very important when fetching the correct test type to import findings into, so be sure to keep the `type` consistent from import to import! As an example, a report submitted with a `type` of `Internal Company Tool` will produce a test type in DefectDojo with the title `Internal Company Tool (Generic Findings Import)`. With this newly created test type, you can define custom `HASHCODE_FIELDS` or `DEDUPLICATION_ALGORITHM` in the settings.
+- `version`: The version of the tool you are using. This is primarily informational, and is used for reading the report manually and tracking format changes from version to version.
+- `description`: A brief description of the test. This could be an explanation of what the tool is reporting, where the tools is maintained, who the point of contact is for the tool when issues arise, or anything in between.
 - `static_tool`: Dictates that tool used is running static analysis methods to discover vulnerabilities.
 - `dynamic_tool`: Dictates that tool used is running dynamic analysis methods to discover vulnerabilities.
-- `soc`: Dictates that tool is used for reporting alerts in a soc (Pro Edition Only).
+- `soc`: Dictates that tool is used for reporting alerts from a soc (Pro Edition Only).
 
 Example:
 
