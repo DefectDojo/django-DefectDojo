@@ -24,7 +24,7 @@ django-prometheus==2.3.1
 Django==5.1.8
 djangorestframework==3.16.0
 html2text==2025.4.15
-humanize==4.12.2
+humanize==4.12.3
 jira==3.8.0
 PyGithub==1.58.2
 lxml==5.4.0
