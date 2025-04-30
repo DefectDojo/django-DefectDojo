@@ -25,9 +25,9 @@ class OpenSourceParserTest:
         parser_type: str,
         version: str,
         *args: list,
-        description: str | None,
-        dynamic_tool: bool | None,
-        static_tool: bool | None,
+        description: str | None = None,
+        dynamic_tool: bool | None = None,
+        static_tool: bool | None = None,
         **kwargs: dict,
     ):
         instance.name = name
