@@ -18,26 +18,22 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA5yQUUvDMBDHv0te3bpL1nVb3mSCU3QK7V4UkTS9YDRNSpMOxth3N8Ghe1Tfjrvf
-        /37HHUgtPG57Qzh5C6HzfDJpUKEMjXt3mQhGeK+FzSwGMiKN9p0R+3/wJfY7LbFB/7FG063QBuz/
-        umTlrDIDWom/S+6w99rZCFMAmkEG43Jz+ViuH6qf6WZo61gR/pygEYzgJTqxM27fxiurfZdsK+OG
-        JobqQZvmK0J4DLD5/NS8EiGBDNhsDHQMy4oxnk95HsUAFxDhmPfxD9hXuj1nKVQMOF0klhbsm5Xt
-        jVUugjktFlIAzlBJOp2jyJXKFUjFltPZolZFjqxQwM4EwSTDre5FeiEqMZhw56RI7QMxp4qgfd2W
-        5Hh+2JOzaXJ9X5HjJwAAAP//AwDDZr+SIAIAAA==
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-04-29T22:58:24.000+0200","serverTime":"2025-04-30T18:28:06.433+0200","scmInfo":"0bc1b6ccc33af448636c49e0141bd2e25a26f3ec","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 8c11d8d1-da84-4e2a-a7cb-63cbef69e887
+      - 8fcad182-3c98-4e96-af5b-a1160a3b1824
       Atl-Traceid:
-      - 8c11d8d1da844e2aa7cb63cbef69e887
+      - 8fcad1823c984e96af5ba1160a3b1824
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:41 GMT
+      - Wed, 30 Apr 2025 16:28:06 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -47,7 +43,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=164,atl-edge-internal;dur=16,atl-edge-upstream;dur=148,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=185,atl-edge;dur=153,atl-edge-internal;dur=15,atl-edge-upstream;dur=138,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="y6wfF715yosHyXx5_X8ShGAIZPY1L0HPpLRlnpaSp60cYt4ZQoT-WA==",cdn-downstream-fbl;dur=188
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -56,10 +52,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 5538280951642fc71308aa997730220e.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - y6wfF715yosHyXx5_X8ShGAIZPY1L0HPpLRlnpaSp60cYt4ZQoT-WA==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - 239b70996fcc3458f437a05130d2670b
+      - 1d32e42f916907465fdc04628db8b13e
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -86,41 +90,28 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA+xW32/TMBD+V6I8V03bVWOqhBBiICbQhLRuL9OETHJZb3OcYDttyrT/nXPixO5a
-        RjpgvCxP9vl+fOf77uK7EKqCiSSchYXMbyDWKhy45ezyzimgUiXodQFGRQFPSbbQulCzKEogJYMk
-        v8mHTHOmFDIxFKAjCUpHrMBoElmv0XhEH7lA47Td3MKadqfz92dz2gmWAW3PBWpNDkxAtmSayXPJ
-        CdVdOD2qpkd7xi8FLkEqxr82vqIlwioyCXXQ7MF4NB29opiTaTWZ/tsobxT+gNcqY5xTwPFhNT58
-        joBVG/FgUh1MniNiBgmWWXg/8Hlk+PUEJnUeai5NfC6ZTQIqllhozAVJ3wZ1roMgQaVRxDooEGII
-        8jRY5fJ2aKzjXBCz9kTxyDU4gN1FHIyPNi6iI/mcqVvalUJLJhRnGpLTjRNVftNmNUsZVzAIFwiS
-        yXix/gxLINCjgevRFIEnpl3sglpFlVnG5NosJXwvUQIpalmSJxUvIGPmxGAlc6UlimsTc600ZEZi
-        re87vGdW0vZsq0HAmDqGlJVcXzBeQgc4LwiwqYYpONVbh1c+DXohc9oeOCd08E6MLJg3mg1C37YX
-        xisaN5znK0hqpReePsLGxvCE8qptd9Dz3lS7YBKE3iy19bC71hxFHa6ttXXgCv2lEbRFtuc9K9yx
-        MM6zIhdkWffK77ExKZnhOhIqMnH2PlbPqcP7zglbzJ5eX9wsSUwkMPEkZPkSwh1sNZltsKtPatvN
-        77twiRx70jYTX7NvKm0J7D+j1xhodX1iWJHHjE7JUqPb7wFs+1KfNAL+7NFjrc00+9QM2zzVK2K6
-        uQDMCo40511JX95IfzPg/3sj1RMzxeqCPDSk7NO/D0eTid/0Y9crvk/XLx+wCqyym02+6j6NM7Aj
-        6vHhVEjMJeoHr5JfZdZpb7S9lfl936m1jd8JthJoBsw2/h2An9j4TexobErS/8eNGbsGFRkL1TpB
-        EizwekHeh2ppRrTN+GMj/AkAAP//vJfBboMwDIZfpeqht8K60sskVO2wwyR22rmagFrARoERoq6H
-        vvviOIFQOo01aMe6cfLFNs5vPEH2FREMO1ipUaaBHZJqzHtrzPU0mPS99UFftOyRqGtrVG8aVFGR
-        fc6gPGpIzxpyMxnkoEQDadOom/l5h9LE/BLt0P+zFFAvctaUBzldvYlnfOWN62BhgU2InOdS+DnV
-        6StjTlIDFGlZiT7kvGd1+JCkS6iyeKn0L7mQvBandc3uSSyaBbRIqckB2pW292Pfxq6chxGQdhhx
-        o4vXZqge1W4dckAGzav+F/2WNyWq4xwaGJnGthJWzp1LG7mMJyK1zfaTQ33yR1/+mqIWzGHThHF6
-        GD20XMbD8DdiYli7uDyaSyk2Pe9x96AbxGV16sZrLKIb82n4G/yG1cir+A37mZy8u/T2NrBJsZqj
-        XVHwH1BvY17jpKdE/vPeX7C0PL7yCAdUGgp9fNxNMyOLcpWgQk/7Bc/zxU3l0oYZgZMCZBv7Pcic
-        Qd0rB+1tFIM2taXQGeyiiIe7tFsY5eAywDF9q+SoL8eQv0aDOgcK1t35GwAA//8DAFZhNg1MFgAA
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","untranslatedName":"Task","subtask":false,"hierarchyLevel":0,"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0}]},"parent":{"required":false,"schema":{"type":"issuelink","system":"parent"},"name":"Parent","key":"parent","hasDefaultValue":false,"operations":["set"]},"components":{"required":false,"schema":{"type":"array","items":"component","system":"components"},"name":"Components","key":"components","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}}]},"fixVersions":{"required":false,"schema":{"type":"array","items":"version","system":"fixVersions"},"name":"Fix
+        versions","key":"fixVersions","hasDefaultValue":false,"operations":["set","add","remove"],"allowedValues":[]},"priority":{"required":false,"schema":{"type":"priority","system":"priority"},"name":"Priority","key":"priority","hasDefaultValue":true,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/1","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/highest.svg","name":"Highest","id":"1"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high.svg","name":"High","id":"2"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/5","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/lowest.svg","name":"Lowest","id":"5"}],"defaultValue":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"}},"customfield_10014":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-epic-link","customId":10014},"name":"Epic
+        Link","key":"customfield_10014","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - 74905df6-6ef4-4674-88bb-d74b0d749ada
+      - 3232475e-e4b1-4f8a-bc39-b04de968ea5b
       Atl-Traceid:
-      - 74905df66ef4467488bbd74b0d749ada
+      - 3232475ee4b14f8abc39b04de968ea5b
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:41 GMT
+      - Wed, 30 Apr 2025 16:28:06 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -130,7 +121,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=310,atl-edge-internal;dur=16,atl-edge-upstream;dur=295,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD56-P1",cdn-rid;desc="MwHPffzY7HFb3Z2gnD6O_QYywmyxNfU_VhDJFGZhF_k41_8AgQuP5g==",cdn-downstream-fbl;dur=378,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=55,cdn-upstream-fbl;dur=375,atl-edge;dur=301,atl-edge-internal;dur=21,atl-edge-upstream;dur=280,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -139,13 +130,21 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 3cab2977109e9e185607e6a3005951e0.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - MwHPffzY7HFb3Z2gnD6O_QYywmyxNfU_VhDJFGZhF_k41_8AgQuP5g==
+      X-Amz-Cf-Pop:
+      - ORD56-P1
       X-Arequestid:
-      - 5a2c6d93fe1aa907c7f60b3800ac8b63
+      - ebe9ad0e148759b380adecef5152478a
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -158,7 +157,7 @@ interactions:
       "summary": "Zap1: Cookie Without Secure Flag", "description": "\n\n\n\n\n\n*Title*:
       [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/325]\n\n*Defect
       Dojo link:* http://localhost:8080/finding/325 (325)\n\n*Severity:* Low\n\n\n*Due
-      Date:* May 10, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
       Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
       / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
       https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
@@ -166,7 +165,7 @@ interactions:
       accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
       contains sensitive information or is a session token, then\nit should always
       be passed using an encrypted channel. Ensure that the secure\nflag is set for
-      cookies containing such sensitive information.\n\n\n\n\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+      cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "priority": {"name": "Low"}}}'
     headers:
       Accept:
@@ -178,7 +177,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1303'
+      - '1323'
       Content-Type:
       - application/json
       User-Agent:
@@ -187,18 +186,20 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"16130","key":"NTEST-1646","self":"https://defectdojo.atlassian.net/rest/api/2/issue/16130"}'
+      string: '{"id":"18267","key":"NTEST-1886","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18267"}'
     headers:
       Atl-Request-Id:
-      - 42960148-7b09-4478-8263-4d5f6000f176
+      - 8a147f21-0a8e-45c4-ba1b-9cc5241d34b2
       Atl-Traceid:
-      - 429601487b09447882634d5f6000f176
+      - 8a147f210a8e45c4ba1b9cc5241d34b2
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:42 GMT
+      - Wed, 30 Apr 2025 16:28:08 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -208,7 +209,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=756,atl-edge-internal;dur=12,atl-edge-upstream;dur=744,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="EA-cM8dhjPMJAZyO16sdn3oUkqet06bzMuEXR_o4ht4HIdHumtx95A==",cdn-downstream-fbl;dur=866,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=66,cdn-upstream-fbl;dur=862,atl-edge;dur=773,atl-edge-internal;dur=15,atl-edge-upstream;dur=759,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -217,10 +218,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 475bc4efb9c2dcfa6769dde201c9bbbc.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - EA-cM8dhjPMJAZyO16sdn3oUkqet06bzMuEXR_o4ht4HIdHumtx95A==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - d7eb075b0d24e5c5ea50e52bbc5180a9
+      - 48eb5067a25b4ec156cbf429d9aab9f6
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -244,61 +253,44 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1646
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1886
   response:
     body:
-      string: !!binary |
-        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
-        zLUHtHseHh4eAQAA//8DANkuFhi0HAAA
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18267","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18267","key":"NTEST-1886","fields":{"statuscategorychangedate":"2025-04-30T18:28:07.923+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"customfield_10031":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10032":null,"customfield_10033":null,"fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"customfield_10035":null,"resolution":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1886/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"created":"2025-04-30T18:28:07.550+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},"labels":[],"customfield_10016":null,"customfield_10017":null,"customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00t9j:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-04-30T18:28:07.680+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"\n\n\n\n\n\n*Title*:
+        [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/325]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/325 (325)\n\n*Severity:* Low\n\n\n*Due
+        Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+        / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
+        https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10055":null,"customfield_10056":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10049":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"aggregatetimeestimate":null,"summary":"Zap1:
+        Cookie Without Secure Flag","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10003":null,"customfield_10047":null,"customfield_10004":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1886/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18267/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - c0dfda27-991b-492c-a167-f257abaf384e
+      - 5485c21f-1394-482a-b04b-b143c4c398f0
       Atl-Traceid:
-      - c0dfda27991b492ca167f257abaf384e
+      - 5485c21f1394482ab04bb143c4c398f0
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:42 GMT
+      - Wed, 30 Apr 2025 16:28:08 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -308,7 +300,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=300,atl-edge-internal;dur=13,atl-edge-upstream;dur=287,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=314,atl-edge;dur=280,atl-edge-internal;dur=21,atl-edge-upstream;dur=260,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="s2v48iNFZAUnGJ3-ZJpoRIz6YZtoypmGbP7RIo3PszN5CktGwxkJCQ==",cdn-downstream-fbl;dur=317
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -317,10 +309,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 9dbecd95f02024b36225d6b521598db6.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - s2v48iNFZAUnGJ3-ZJpoRIz6YZtoypmGbP7RIo3PszN5CktGwxkJCQ==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - d15a06cd5e8968483e021d576b228add
+      - 39f20f23616f04c1e01f54838d6a6282
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -344,61 +344,44 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/16130
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/18267
   response:
     body:
-      string: !!binary |
-        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
-        nLYHtLYPDw+PAAAA//8DANBAAfi0HAAA
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18267","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18267","key":"NTEST-1886","fields":{"statuscategorychangedate":"2025-04-30T18:28:07.923+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"customfield_10031":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10032":null,"customfield_10033":null,"fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"customfield_10035":null,"resolution":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1886/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"created":"2025-04-30T18:28:07.550+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},"labels":[],"customfield_10016":null,"customfield_10017":null,"customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00t9j:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-04-30T18:28:07.680+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"\n\n\n\n\n\n*Title*:
+        [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/325]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/325 (325)\n\n*Severity:* Low\n\n\n*Due
+        Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+        / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
+        https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10055":null,"customfield_10056":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10049":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"aggregatetimeestimate":null,"summary":"Zap1:
+        Cookie Without Secure Flag","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10003":null,"customfield_10047":null,"customfield_10004":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1886/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18267/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - 2cf982e8-e7b1-4bf3-a545-9be7c5ccfa75
+      - 325fe0cd-6a03-47f2-a174-ea73e0c4f87b
       Atl-Traceid:
-      - 2cf982e8e7b14bf3a5459be7c5ccfa75
+      - 325fe0cd6a0347f2a174ea73e0c4f87b
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:43 GMT
+      - Wed, 30 Apr 2025 16:28:08 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -408,7 +391,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=264,atl-edge-internal;dur=11,atl-edge-upstream;dur=253,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=303,atl-edge;dur=270,atl-edge-internal;dur=14,atl-edge-upstream;dur=255,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="FS3azC_dgbybZHCOhBp4-SOfWp-z8Dyh9DY-9ktx7_hA2hMzk3QoNw==",cdn-downstream-fbl;dur=307
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -417,10 +400,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 a183b6545fea485604515ba7931cb9b8.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - FS3azC_dgbybZHCOhBp4-SOfWp-z8Dyh9DY-9ktx7_hA2hMzk3QoNw==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - 3941cceb1a76f3921e57cf6e40b32ddc
+      - 2b2a5d68010c2d97dff280eeddd67890
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -447,26 +438,22 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA5yQTU/DMAyG/0uubJ2TtfvIDQ2JgWAgtbuAEEpTRwTSpGrSSdO0/04iJtgRuFn2
-        8/qxfCC18LjtDeHkLYTO88mkQYUyNO7dZSIY4b0WNrMYyIg02ndG7P/Bl9jvtMQG/ccaTbdCG7D/
-        65KVs8oMaCX+LrnD3mtnI0wBaAYZjMvN5WO5fqh+ppuhrWNF+HOCRjCCl+jEzrh9G6+s9l2yrYwb
-        mhiqB22arwjhMcDm81PzSoQEMmDFGOgYlhVjPJ/yPIoBLiDCMe/jH7CvdHvOUqgYcLqIeJaz4puV
-        7Y1VLoI5nS2kACxQSTqdo8iVyhVIxZbTYlGrWY5spoCdCYJJhlvdi/RCVGIw4c5JkdoHYk4VQfu6
-        Lcnx/LAnZ9Pk+r4ix08AAAD//wMALyx5nCACAAA=
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-04-29T22:58:24.000+0200","serverTime":"2025-04-30T18:28:09.201+0200","scmInfo":"0bc1b6ccc33af448636c49e0141bd2e25a26f3ec","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 32512088-70a5-4e7a-b30c-a31756b72f7f
+      - 4b4e9c01-7ca1-40fd-8302-09df31b71b54
       Atl-Traceid:
-      - 3251208870a54e7ab30ca31756b72f7f
+      - 4b4e9c017ca140fd830209df31b71b54
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:43 GMT
+      - Wed, 30 Apr 2025 16:28:09 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -476,7 +463,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=146,atl-edge-internal;dur=16,atl-edge-upstream;dur=131,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=196,atl-edge;dur=163,atl-edge-internal;dur=17,atl-edge-upstream;dur=146,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="1OWqprnBD_3STlf26XEUPcIFNwKGVRTgOYb-2qFrMxxJEGs1TPCGgg==",cdn-downstream-fbl;dur=200
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -485,10 +472,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 f9c7cdbfd821ee3522abb640c0e0a228.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - 1OWqprnBD_3STlf26XEUPcIFNwKGVRTgOYb-2qFrMxxJEGs1TPCGgg==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - d4bd649f87cdea63692be9515129eda7
+      - 69ba7dabb321374274d3ef8e707d5892
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -515,41 +510,28 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA+xW32/TMBD+V6I8V03bVWOqhBBiICbQhLRuL9OETHJZb3OcYDttyrT/nXPixO5a
-        RjpgvCxP9vl+fOf77uK7EKqCiSSchYXMbyDWKhy45ezyzimgUiXodQFGRQFPSbbQulCzKEogJYMk
-        v8mHTHOmFDIxFKAjCUpHrMBoElmv0XhEH7lA47Td3MKadqfz92dz2gmWAW3PBWpNDkxAtmSayXPJ
-        CdVdOD2qpkd7xi8FLkEqxr82vqIlwioyCXXQ7MF4NB29opiTaTWZ/tsobxT+gNcqY5xTwPFhNT58
-        joBVG/FgUh1MniNiBgmWWXg/8Hlk+PUEJnUeai5NfC6ZTQIqllhozAVJ3wZ1roMgQaVRxDooEGII
-        8jRY5fJ2aKzjXBCz9kTxyDU4gN1FHIyPNi6iI/mcqVvalUJLJhRnGpLTjRNVftNmNUsZVzAIFwiS
-        yXix/gxLINCjgevRFIEnpl3sglpFlVnG5NosJXwvUQIpalmSJxUvIGPmxGAlc6UlimsTc600ZEZi
-        re87vGdW0vZsq0HAmDqGlJVcXzBeQgc4LwiwqYYpONVbh1c+DXohc9oeOCd08E6MLJg3mg1C37YX
-        xisaN5znK0hqpReePsLGxvCE8qptd9Dz3lS7YBKE3iy19bC71hxFHa6ttXXgCv2lEbRFtuc9K9yx
-        MM6zIhdkWffK77ExKZnhOhIqMnH2PlbPqcP7zglbzJ5eX9wsSUwkMPEkZPkSwh1sNZltsKtPatvN
-        77twiRx70jYTX7NvKm0J7D+j1xhodX1iWJHHjE7JUqPb7wFs+1KfNAL+7NFjrc00+9QM2zzVK2K6
-        uQDMCo40511JX95IfzPg/3sj1RMzxeqCPDSk7NO/D0eTid/0Y9crvk/XLx+wCqyym02+6j6NM7Aj
-        6vHhVEjMJeoHr5JfZdZpb7S9lfl936m1jd8JthJoBsw2/h2An9j4TexobErS/8eNGbsGFRkL1TpB
-        EizwekHeh2ppRrTN+GMj/AkAAP//vJfBboMwDIZfpeqht8K60sskVO2wwyR22rmagFrARoERoq6H
-        vvviOIFQOo01aMe6cfLFNs5vPEH2FREMO1ipUaaBHZJqzHtrzPU0mPS99UFftOyRqGtrVG8aVFGR
-        fc6gPGpIzxpyMxnkoEQDadOom/l5h9LE/BLt0P+zFFAvctaUBzldvYlnfOWN62BhgU2InOdS+DnV
-        6StjTlIDFGlZiT7kvGd1+JCkS6iyeKn0L7mQvBandc3uSSyaBbRIqckB2pW292Pfxq6chxGQdhhx
-        o4vXZqge1W4dckAGzav+F/2WNyWq4xwaGJnGthJWzp1LG7mMJyK1zfaTQ33yR1/+mqIWzGHThHF6
-        GD20XMbD8DdiYli7uDyaSyk2Pe9x96AbxGV16sZrLKIb82n4G/yG1cir+A37mZy8u/T2NrBJsZqj
-        XVHwH1BvY17jpKdE/vPeX7C0PL7yCAdUGgp9fNxNMyOLcpWgQk/7Bc/zxU3l0oYZgZMCZBv7Pcic
-        Qd0rB+1tFIM2taXQGeyiiIe7tFsY5eAywDF9q+SoL8eQv0aDOgcK1t35GwAA//8DAFZhNg1MFgAA
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","untranslatedName":"Task","subtask":false,"hierarchyLevel":0,"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0}]},"parent":{"required":false,"schema":{"type":"issuelink","system":"parent"},"name":"Parent","key":"parent","hasDefaultValue":false,"operations":["set"]},"components":{"required":false,"schema":{"type":"array","items":"component","system":"components"},"name":"Components","key":"components","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}}]},"fixVersions":{"required":false,"schema":{"type":"array","items":"version","system":"fixVersions"},"name":"Fix
+        versions","key":"fixVersions","hasDefaultValue":false,"operations":["set","add","remove"],"allowedValues":[]},"priority":{"required":false,"schema":{"type":"priority","system":"priority"},"name":"Priority","key":"priority","hasDefaultValue":true,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/1","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/highest.svg","name":"Highest","id":"1"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high.svg","name":"High","id":"2"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/5","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/lowest.svg","name":"Lowest","id":"5"}],"defaultValue":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"}},"customfield_10014":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-epic-link","customId":10014},"name":"Epic
+        Link","key":"customfield_10014","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - c1a5d541-f159-41e7-ae8a-c8e221c26208
+      - 5ffbcad0-7663-4faf-951f-802f4c862f91
       Atl-Traceid:
-      - c1a5d541f15941e7ae8ac8e221c26208
+      - 5ffbcad076634faf951f802f4c862f91
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:43 GMT
+      - Wed, 30 Apr 2025 16:28:09 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -559,7 +541,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=316,atl-edge-internal;dur=14,atl-edge-upstream;dur=302,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=292,atl-edge;dur=258,atl-edge-internal;dur=14,atl-edge-upstream;dur=244,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="frxVE3k7HicKqrGQuchqAdENz94JQgyHwNNZHlsoocfSoWWyG9vtxg==",cdn-downstream-fbl;dur=296
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -568,13 +550,21 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 771067dca4682f83a6c9963c412d66cc.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - frxVE3k7HicKqrGQuchqAdENz94JQgyHwNNZHlsoocfSoWWyG9vtxg==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - 7a500fe2f8a298f683e285168938bfda
+      - 4db5db55143d58877d741872662ba89e
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -587,7 +577,7 @@ interactions:
       "summary": "Zap2: Cookie Without Secure Flag", "description": "\n\n\n\n\n\n*Title*:
       [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/326]\n\n*Defect
       Dojo link:* http://localhost:8080/finding/326 (326)\n\n*Severity:* Low\n\n\n*Due
-      Date:* May 10, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
       Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
       / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
       https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
@@ -595,7 +585,7 @@ interactions:
       accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
       contains sensitive information or is a session token, then\nit should always
       be passed using an encrypted channel. Ensure that the secure\nflag is set for
-      cookies containing such sensitive information.\n\n\n\n\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+      cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "priority": {"name": "Low"}}}'
     headers:
       Accept:
@@ -607,7 +597,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1303'
+      - '1323'
       Content-Type:
       - application/json
       User-Agent:
@@ -616,18 +606,20 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"16131","key":"NTEST-1647","self":"https://defectdojo.atlassian.net/rest/api/2/issue/16131"}'
+      string: '{"id":"18269","key":"NTEST-1887","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18269"}'
     headers:
       Atl-Request-Id:
-      - 30478a7d-492b-4a52-bf4f-aeff0e9b5e78
+      - 8f968c05-e98d-4f0a-aa66-57bf8d16e3c1
       Atl-Traceid:
-      - 30478a7d492b4a52bf4faeff0e9b5e78
+      - 8f968c05e98d4f0aaa6657bf8d16e3c1
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:44 GMT
+      - Wed, 30 Apr 2025 16:28:10 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -637,7 +629,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=767,atl-edge-internal;dur=11,atl-edge-upstream;dur=756,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="253vvapwogZcdhC9n7t1UzjJ_NPbt2CpW1PKSFpyv9mmKG7yEdJ49Q==",cdn-downstream-fbl;dur=722,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=57,cdn-upstream-fbl;dur=719,atl-edge;dur=642,atl-edge-internal;dur=17,atl-edge-upstream;dur=625,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -646,10 +638,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 2bdfafaaaec33c116889588ecd9de280.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - 253vvapwogZcdhC9n7t1UzjJ_NPbt2CpW1PKSFpyv9mmKG7yEdJ49Q==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - 1acbb3c061fa9a4cca98447cf9acb1d7
+      - f8511d8ec5e20bc45500757a0308de16
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -673,61 +673,44 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1647
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1887
   response:
     body:
-      string: !!binary |
-        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
-        yWl7QGv7+Pj4CwAA//8DAMYkz2G0HAAA
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18269","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18269","key":"NTEST-1887","fields":{"statuscategorychangedate":"2025-04-30T18:28:10.386+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"customfield_10031":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10032":null,"customfield_10033":null,"fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"customfield_10035":null,"resolution":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1887/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"created":"2025-04-30T18:28:10.077+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},"labels":[],"customfield_10016":null,"customfield_10017":null,"customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00t9r:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-04-30T18:28:10.201+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"\n\n\n\n\n\n*Title*:
+        [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/326]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/326 (326)\n\n*Severity:* Low\n\n\n*Due
+        Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+        / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
+        https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10055":null,"customfield_10056":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10049":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"aggregatetimeestimate":null,"summary":"Zap2:
+        Cookie Without Secure Flag","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10003":null,"customfield_10047":null,"customfield_10004":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1887/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18269/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - d1e0ba12-6897-4feb-9fb2-1789ae61198a
+      - 86ca19bd-ded8-45b7-9cfe-d8cbc42d0387
       Atl-Traceid:
-      - d1e0ba1268974feb9fb21789ae61198a
+      - 86ca19bdded845b79cfed8cbc42d0387
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:45 GMT
+      - Wed, 30 Apr 2025 16:28:10 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -737,7 +720,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=287,atl-edge-internal;dur=15,atl-edge-upstream;dur=273,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=298,atl-edge;dur=265,atl-edge-internal;dur=14,atl-edge-upstream;dur=252,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="QfDA7P2CRZlmJgHFypt3suMoFryvpz5CBFQPqHzgTrxXI8-3vDpoYg==",cdn-downstream-fbl;dur=302
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -746,10 +729,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 848ee9f48eafd6caa6bf5371a2f79f28.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - QfDA7P2CRZlmJgHFypt3suMoFryvpz5CBFQPqHzgTrxXI8-3vDpoYg==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - 4d769f494faf109ad178aa56a538e08c
+      - 7666ef0ee9699e068e6e3c421f0b558b
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -773,61 +764,44 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/16131
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/18269
   response:
     body:
-      string: !!binary |
-        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
-        PzltD2hrHx8ffwEAAP//AwBrS1fBtBwAAA==
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18269","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18269","key":"NTEST-1887","fields":{"statuscategorychangedate":"2025-04-30T18:28:10.386+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"customfield_10031":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10032":null,"customfield_10033":null,"fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"customfield_10035":null,"resolution":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1887/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"created":"2025-04-30T18:28:10.077+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},"labels":[],"customfield_10016":null,"customfield_10017":null,"customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00t9r:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-04-30T18:28:10.201+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"\n\n\n\n\n\n*Title*:
+        [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/326]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/326 (326)\n\n*Severity:* Low\n\n\n*Due
+        Date:* Aug. 28, 2025\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+        / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/118]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n\n*
+        https://mainsite.com/dashboard\n* https://mainsite.com\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10055":null,"customfield_10056":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10049":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"aggregatetimeestimate":null,"summary":"Zap2:
+        Cookie Without Secure Flag","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10003":null,"customfield_10047":null,"customfield_10004":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1887/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18269/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - d5aefd15-a126-43d5-b637-242448d28334
+      - 0ac24f51-ace0-4151-81e0-9e8daf672af2
       Atl-Traceid:
-      - d5aefd15a12643d5b637242448d28334
+      - 0ac24f51ace0415181e09e8daf672af2
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 10 Jan 2025 19:18:45 GMT
+      - Wed, 30 Apr 2025 16:28:11 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -837,7 +811,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=252,atl-edge-internal;dur=16,atl-edge-upstream;dur=236,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=32,cdn-upstream-fbl;dur=380,atl-edge;dur=251,atl-edge-internal;dur=16,atl-edge-upstream;dur=235,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="DFW57-P1",cdn-rid;desc="WAv4Yf2i4HWzx_RO_picuA6rN-RcN0Custe4NvwoW8os_obv7lKgZw==",cdn-downstream-fbl;dur=384
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -846,10 +820,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 a65725dd05dc27eea7ae75a2e122228e.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - WAv4Yf2i4HWzx_RO_picuA6rN-RcN0Custe4NvwoW8os_obv7lKgZw==
+      X-Amz-Cf-Pop:
+      - DFW57-P1
       X-Arequestid:
-      - 17abaf5ad62df4c999a2598305831c33
+      - c7daf17bf1e3a63d4ce6daf7ed722798
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -882,7 +864,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - DefectDojo-2.42.0
+      - DefectDojo-2.45.3
       X-DefectDojo-Event:
       - test_added
       X-DefectDojo-Instance:
@@ -896,9 +878,9 @@ interactions:
         [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
         \   ],\n    \"Content-Length\": [\n      \"843\"\n    ],\n    \"Content-Type\":
         [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
-        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.42.0\"\n    ],\n    \"X-Defectdojo-Event\":
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.45.3\"\n    ],\n    \"X-Defectdojo-Event\":
         [\n      \"test_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
-        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.2:33668\",\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.9:56102\",\n
         \ \"url\": \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
         \\\"Event test_added has occurred.\\\", \\\"title\\\": \\\"Test created for
         Security How-to: 1st Quarter Engagement: ZAP Scan\\\", \\\"user\\\": null,
@@ -934,7 +916,112 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Fri, 10 Jan 2025 19:18:45 GMT
+      - Wed, 30 Apr 2025 16:28:11 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event scan_added has occurred.", "title": "Created/Updated
+      2 findings for Security How-to: 1st Quarter Engagement: ZAP Scan", "user": null,
+      "url_ui": "http://localhost:8080/test/118", "url_api": "http://localhost:8080/api/v2/tests/118/",
+      "product_type": {"name": "ebooks", "id": 2, "url_ui": "http://localhost:8080/product/type/2",
+      "url_api": "http://localhost:8080/api/v2/product_types/2/"}, "product": {"name":
+      "Security How-to", "id": 2, "url_ui": "http://localhost:8080/product/2", "url_api":
+      "http://localhost:8080/api/v2/products/2/"}, "engagement": {"name": "1st Quarter
+      Engagement", "id": 1, "url_ui": "http://localhost:8080/engagement/1", "url_api":
+      "http://localhost:8080/api/v2/engagements/1/"}, "test": {"title": null, "id":
+      118, "url_ui": "http://localhost:8080/test/118", "url_api": "http://localhost:8080/api/v2/tests/118/"},
+      "finding_count": 2, "findings": {"new": [{"id": 325, "title": "Zap1: Cookie
+      Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/325",
+      "url_api": "http://localhost:8080/api/v2/findings/325/"}, {"id": 326, "title":
+      "Zap2: Cookie Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/326",
+      "url_api": "http://localhost:8080/api/v2/findings/326/"}], "reactivated": [],
+      "mitigated": [], "untouched": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1315'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.45.3
+      X-DefectDojo-Event:
+      - scan_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"1315\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.45.3\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"scan_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.9:56108\",\n
+        \ \"url\": \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Event scan_added has occurred.\\\", \\\"title\\\": \\\"Created/Updated
+        2 findings for Security How-to: 1st Quarter Engagement: ZAP Scan\\\", \\\"user\\\":
+        null, \\\"url_ui\\\": \\\"http://localhost:8080/test/118\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/tests/118/\\\", \\\"product_type\\\": {\\\"name\\\":
+        \\\"ebooks\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/2\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/2/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Security How-to\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/2\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/2/\\\"}, \\\"engagement\\\":
+        {\\\"name\\\": \\\"1st Quarter Engagement\\\", \\\"id\\\": 1, \\\"url_ui\\\":
+        \\\"http://localhost:8080/engagement/1\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/1/\\\"},
+        \\\"test\\\": {\\\"title\\\": null, \\\"id\\\": 118, \\\"url_ui\\\": \\\"http://localhost:8080/test/118\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/118/\\\"}, \\\"finding_count\\\":
+        2, \\\"findings\\\": {\\\"new\\\": [{\\\"id\\\": 325, \\\"title\\\": \\\"Zap1:
+        Cookie Without Secure Flag\\\", \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\":
+        \\\"http://localhost:8080/finding/325\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/325/\\\"},
+        {\\\"id\\\": 326, \\\"title\\\": \\\"Zap2: Cookie Without Secure Flag\\\",
+        \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\": \\\"http://localhost:8080/finding/326\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/326/\\\"}], \\\"reactivated\\\":
+        [], \\\"mitigated\\\": [], \\\"untouched\\\": []}}\",\n  \"files\": {},\n
+        \ \"form\": {},\n  \"json\": {\n    \"description\": \"Event scan_added has
+        occurred.\",\n    \"engagement\": {\n      \"id\": 1,\n      \"name\": \"1st
+        Quarter Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/1/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/1\"\n    },\n    \"finding_count\":
+        2,\n    \"findings\": {\n      \"mitigated\": [],\n      \"new\": [\n        {\n
+        \         \"id\": 325,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap1: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/325/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/325\"\n        },\n
+        \       {\n          \"id\": 326,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap2: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/326/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/326\"\n        }\n      ],\n
+        \     \"reactivated\": [],\n      \"untouched\": []\n    },\n    \"product\":
+        {\n      \"id\": 2,\n      \"name\": \"Security How-to\",\n      \"url_api\":
+        \"http://localhost:8080/api/v2/products/2/\",\n      \"url_ui\": \"http://localhost:8080/product/2\"\n
+        \   },\n    \"product_type\": {\n      \"id\": 2,\n      \"name\": \"ebooks\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/product_types/2/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/type/2\"\n    },\n    \"test\": {\n      \"id\":
+        118,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/118/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/118\"\n    },\n    \"title\":
+        \"Created/Updated 2 findings for Security How-to: 1st Quarter Engagement:
+        ZAP Scan\",\n    \"url_api\": \"http://localhost:8080/api/v2/tests/118/\",\n
+        \   \"url_ui\": \"http://localhost:8080/test/118\",\n    \"user\": null\n
+        \ }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 30 Apr 2025 16:28:11 GMT
       Transfer-Encoding:
       - chunked
     status:
