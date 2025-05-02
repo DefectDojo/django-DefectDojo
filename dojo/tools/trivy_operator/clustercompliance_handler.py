@@ -20,8 +20,7 @@ class TrivyClusterComplianceHandler:
                 for control in controls:
                     if control.get("id") == result_id:
                         vulnids = control.get("checks", [])
-                        for vulnid in vulnids:
-                            vulnerabilityids.append(vulnid.get("id"))
+                        vulnerabilityids.extend(vulnid.get("id") for vulnid in vulnids)
                         description += "**description:** " + control.get("description") + "\n"
                 result_name = result.get("name", "")
                 result_severity = result.get("severity", "")
