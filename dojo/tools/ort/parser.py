@@ -64,11 +64,7 @@ class OrtParser:
 
 
 def get_unresolved_rule_violations(rule_violations):
-    rule_violations_unresolved = []
-    for violation in rule_violations:
-        if is_rule_violation_unresolved(violation):
-            rule_violations_unresolved.append(violation)
-    return rule_violations_unresolved
+    return [violation for violation in rule_violations if is_rule_violation_unresolved(violation)]
 
 
 def is_rule_violation_unresolved(rule_violation):
@@ -89,11 +85,7 @@ def find_in_dependency_tree(tree, package_id):
 
 
 def get_project_ids_for_package(dependency_trees, package_id):
-    project_ids = []
-    for project in dependency_trees:
-        if find_in_dependency_tree(project, package_id):
-            project_ids.append(project["pkg"])
-    return project_ids
+    return [project["pkg"] for project in dependency_trees if find_in_dependency_tree(project, package_id)]
 
 
 def get_name_id_for_package(packages, package__id):
@@ -108,14 +100,9 @@ def get_name_id_for_package(packages, package__id):
 def get_rule_violation_models(
     rule_violations_unresolved, packages, licenses, dependency_trees,
 ):
-    models = []
-    for violation in rule_violations_unresolved:
-        models.append(
-            get_rule_violation_model(
+    return [get_rule_violation_model(
                 violation, packages, licenses, dependency_trees,
-            ),
-        )
-    return models
+            ) for violation in rule_violations_unresolved]
 
 
 def get_rule_violation_model(
@@ -124,9 +111,7 @@ def get_rule_violation_model(
     project_ids = get_project_ids_for_package(
         dependency_trees, rule_violation_unresolved["pkg"],
     )
-    project_names = []
-    for proj_id in project_ids:
-        project_names.append(get_name_id_for_package(packages, proj_id))
+    project_names = [get_name_id_for_package(packages, proj_id) for proj_id in project_ids]
     package = find_package_by_id(packages, rule_violation_unresolved["pkg"])
     license_tmp = rule_violation_unresolved.get("license", "unset")
     if "license_source" not in rule_violation_unresolved:

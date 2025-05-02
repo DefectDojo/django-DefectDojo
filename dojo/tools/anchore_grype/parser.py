@@ -207,9 +207,8 @@ class AnchoreGrypeParser:
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:
-            for related_vulnerability in related_vulnerabilities:
-                if related_vulnerability.get("id"):
-                    vulnerability_ids.append(related_vulnerability.get("id"))
+            vulnerability_ids.extend(related_vulnerability_id for related_vulnerability in related_vulnerabilities
+                if (related_vulnerability_id := related_vulnerability.get("id")))
         if vulnerability_ids:
             return vulnerability_ids
         return None

@@ -38,9 +38,7 @@ class NucleiParser:
                 data.append(template)
         elif filecontent[0] == "{":
             file = filecontent.split("\n")
-            for line in file:
-                if line != "":
-                    data.append(json.loads(line))
+            data.extend(json.loads(line) for line in file if line != "")
         dupes = {}
         for item in data:
             logger.debug("Item %s.", str(item))

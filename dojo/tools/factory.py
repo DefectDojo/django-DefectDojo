@@ -57,20 +57,14 @@ def get_inactive_test_types():
 
 
 def get_scan_types_sorted():
-    res = []
     inactive_test_types = get_inactive_test_types()
-    for key in PARSERS:
-        if key not in inactive_test_types:
-            res.append((key, PARSERS[key].get_description_for_scan_types(key)))
+    res = [(key, PARSERS[key].get_description_for_scan_types(key)) for key in PARSERS if key not in inactive_test_types]
     return sorted(res, key=lambda x: x[0].lower())
 
 
 def get_choices_sorted():
-    res = []
     inactive_test_types = get_inactive_test_types()
-    for key in PARSERS:
-        if key not in inactive_test_types:
-            res.append((key, key))
+    res = [(key, key) for key in PARSERS if key not in inactive_test_types]
     return sorted(res, key=lambda x: x[1].lower())
 
 

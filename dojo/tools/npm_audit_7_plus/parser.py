@@ -140,9 +140,8 @@ def get_item(item_node, tree, test):
             and len(item_node["via"]) > 1):
         # we have a multiple CWE vuln which we will capture in the
         # vulnerability_ids and references
-        for vuln in item_node["via"][1:]:  # have to decide if str or object
-            if isinstance(vuln, dict):
-                references.append(vuln["url"])
+        # have to decide if str or object
+        references.extend(vuln["url"] for vuln in item_node["via"][1:] if isinstance(vuln, dict))
 
     dojo_finding = Finding(
         title=title,

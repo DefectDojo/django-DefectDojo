@@ -439,11 +439,9 @@ def vulnerability_id_fix(keyword):
     # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
     # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
 
-    vulnerability_ids = []
     keyword_parts = keyword.split(",")
-    for keyword_part in keyword_parts:
-        if bool(vulnerability_id_pattern.match(keyword_part)):
-            vulnerability_ids.append("'" + keyword_part + "'")
+    vulnerability_ids = [f"'{keyword_part}'" for keyword_part in keyword_parts
+                            if bool(vulnerability_id_pattern.match(keyword_part))]
 
     if vulnerability_ids:
         return " ".join(vulnerability_ids)

@@ -152,8 +152,7 @@ def do_clean_cwe(value):
     if len(value) > 0:
         for x in value:
             if x.text is not None:
-                for detected in re.findall(r"CWE-(\d+)", x.text):
-                    cwes.append(int(detected))
+                cwes.extend(int(detected) for detected in re.findall(r"CWE-(\d+)", x.text))
     return cwes
 
 
