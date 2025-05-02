@@ -27,8 +27,7 @@ class ClairKlarScan:
         items = []
         tree_severity = tree.get(severity)
         if tree_severity:
-            for data in self.get_items_clairklar(tree_severity, test):
-                items.append(data)
+            items = self.get_items_clairklar(tree_severity, test)
             logger.debug("Appended findings for severity " + severity)
         else:
             logger.debug("No findings for severity " + severity)

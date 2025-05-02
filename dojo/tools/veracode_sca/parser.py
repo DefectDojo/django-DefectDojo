@@ -146,13 +146,9 @@ class VeracodeScaParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        csvarray = []
-
-        for row in reader:
-            csvarray.append(row)
 
         findings = []
-        for row in csvarray:
+        for row in reader:
             if row.get("Issue type") != "Vulnerability":
                 continue
 

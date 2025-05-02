@@ -184,7 +184,7 @@ def find_available_notetypes(finding, editing_note):
     multiple_note_types = Note_Type.objects.filter(is_single=False, is_active=True).values_list("id", flat=True)
     available_note_types = []
     for note_type_id in multiple_note_types:
-        available_note_types.append(note_type_id)
+        available_note_types.append(note_type_id)  # TODO: Is it possible to write this nicer?
     for note_type_id in single_note_types:
         for note in notes:
             if note_type_id == note.note_type_id:

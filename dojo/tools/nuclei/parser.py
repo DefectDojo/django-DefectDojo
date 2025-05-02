@@ -33,9 +33,7 @@ class NucleiParser:
         if filecontent == "" or len(filecontent) == 0:
             return []
         if filecontent[0] == "[":
-            content = json.loads(filecontent)
-            for template in content:
-                data.append(template)
+            data = json.loads(filecontent)
         elif filecontent[0] == "{":
             file = filecontent.split("\n")
             for line in file:
