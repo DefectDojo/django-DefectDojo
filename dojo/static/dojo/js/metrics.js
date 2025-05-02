@@ -5,7 +5,7 @@
 function homepage_pie_chart(critical, high, medium, low, info) {
     var data = [{
         label: "Critical",
-        color: "#D03540",
+        color: "#d9534f",
         data: critical
     }, {
         label: "High",
@@ -17,7 +17,7 @@ function homepage_pie_chart(critical, high, medium, low, info) {
         data: medium
     }, {
         label: "Low",
-        color: "#147AC1",
+        color: "#337ab7",
         data: low
     }, {
         label: "Informational",
@@ -83,7 +83,7 @@ function homepage_severity_plot(critical, high, medium, low) {
     var plotObj = $.plot($("#homepage_severity_plot"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -95,7 +95,7 @@ function homepage_severity_plot(critical, high, medium, low) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -138,7 +138,7 @@ function opened_per_month(critical, high, medium, low) {
     $.plot($("#opened_per_month"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -150,7 +150,7 @@ function opened_per_month(critical, high, medium, low) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 };
@@ -185,7 +185,7 @@ function accepted_per_month(critical, high, medium, low) {
     $.plot($("#accepted_per_month"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -197,7 +197,7 @@ function accepted_per_month(critical, high, medium, low) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 };
@@ -232,7 +232,7 @@ function opened_per_week(critical, high, medium, low) {
     var plotObj = $.plot($("#opened_per_week"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -244,7 +244,7 @@ function opened_per_week(critical, high, medium, low) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -279,7 +279,7 @@ function accepted_per_week(critical, high, medium, low) {
     var plotObj = $.plot($("#accepted_per_week"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -291,7 +291,7 @@ function accepted_per_week(critical, high, medium, low) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -300,7 +300,7 @@ function top_ten_products(critical, high, medium, low, ticks) {
     data1 = [
         {
             data: critical,
-            color: "#D03540",
+            color: "#d9534f",
             bars: {fill: 1},
             label: 'Critical',
         },
@@ -319,7 +319,7 @@ function top_ten_products(critical, high, medium, low, ticks) {
         },
         {
             data: low,
-            color: "#147AC1",
+            color: "#337ab7",
             bars: {fill: 1},
             label: 'Low',
         },
@@ -354,7 +354,7 @@ function top_ten_products(critical, high, medium, low, ticks) {
 function severity_pie(critical, high, medium, low) {
     var data = [{
         label: "Critical",
-        color: "#D03540",
+        color: "#d9534f",
         data: critical
     }, {
         label: "High",
@@ -366,7 +366,7 @@ function severity_pie(critical, high, medium, low) {
         data: medium
     }, {
         label: "Low",
-        color: "#147AC1",
+        color: "#337ab7",
         data: low
     }];
 
@@ -395,7 +395,7 @@ function severity_pie(critical, high, medium, low) {
 function total_accepted_pie(critical, high, medium, low) {
     var data = [{
         label: "Critical",
-        color: "#D03540",
+        color: "#d9534f",
         data: critical
     }, {
         label: "High",
@@ -407,7 +407,7 @@ function total_accepted_pie(critical, high, medium, low) {
         data: medium
     }, {
         label: "Low",
-        color: "#147AC1",
+        color: "#337ab7",
         data: low
     }];
 
@@ -436,7 +436,7 @@ function total_accepted_pie(critical, high, medium, low) {
 function total_closed_pie(critical, high, medium, low) {
     var data = [{
         label: "Critical",
-        color: "#D03540",
+        color: "#d9534f",
         data: critical
     }, {
         label: "High",
@@ -448,7 +448,7 @@ function total_closed_pie(critical, high, medium, low) {
         data: medium
     }, {
         label: "Low",
-        color: "#147AC1",
+        color: "#337ab7",
         data: low
     }];
 
@@ -511,7 +511,7 @@ function opened_per_month_2(critical, high, medium, low) {
     var plotObj = $.plot($("#opened_per_month_2"), [{
             data: critical,
             label: " Critical",
-            color: "#D03540",
+            color: "#d9534f",
 
         }, {
             data: high,
@@ -526,7 +526,7 @@ function opened_per_month_2(critical, high, medium, low) {
         }, {
             data: low,
             label: " Low",
-            color: '#147AC1',
+            color: '#337ab7',
 
         }],
         options);
@@ -565,7 +565,7 @@ function active_per_month(critical, high, medium, low) {
     var plotObj = $.plot($("#active_per_month"), [{
             data: critical,
             label: " Critical",
-            color: "#D03540",
+            color: "#d9534f",
 
         }, {
             data: high,
@@ -580,7 +580,7 @@ function active_per_month(critical, high, medium, low) {
         }, {
             data: low,
             label: " Low",
-            color: '#147AC1',
+            color: '#337ab7',
 
         }],
         options);
@@ -619,7 +619,7 @@ function accepted_per_month_2(critical, high, medium, low) {
     var plotObj = $.plot($("#accepted_per_month_2"), [{
             data: critical,
             label: " Critical",
-            color: "#D03540"
+            color: "#d9534f"
         }, {
             data: high,
             label: " High",
@@ -631,7 +631,7 @@ function accepted_per_month_2(critical, high, medium, low) {
         }, {
             data: low,
             label: " Low",
-            color: '#147AC1'
+            color: '#337ab7'
         }],
         options);
 }
@@ -670,7 +670,7 @@ function opened_per_week_2(critical, high, medium, low) {
     var plotObj = $.plot($("#opened_per_week_2"), [{
             data: critical,
             label: " Critical",
-            color: "#D03540"
+            color: "#d9534f"
         }, {
             data: high,
             label: " High",
@@ -682,7 +682,7 @@ function opened_per_week_2(critical, high, medium, low) {
         }, {
             data: low,
             label: " Low",
-            color: '##147AC1'
+            color: '#337ab7'
         }],
         options);
 }
@@ -721,7 +721,7 @@ function accepted_per_week_2(critical, high, medium, low) {
     var plotObj = $.plot($("#accepted_per_week_2"), [{
             data: critical,
             label: " Critical",
-            color: "#D03540"
+            color: "#d9534f"
         }, {
             data: high,
             label: " High",
@@ -733,7 +733,7 @@ function accepted_per_week_2(critical, high, medium, low) {
         }, {
             data: low,
             label: " Low",
-            color: '#147AC1'
+            color: '#337ab7'
         }],
         options);
 }
@@ -845,7 +845,7 @@ function open_findings_burndown(critical, high, medium, low, info, y_max, y_min)
     var plotObj = $.plot($("#open_findings_burndown"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -861,7 +861,7 @@ function open_findings_burndown(critical, high, medium, low, info, y_max, y_min)
             }, {
                 data: info,
                 label: " Info",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -876,9 +876,9 @@ function accepted_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -912,9 +912,9 @@ function accepted_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -968,9 +968,9 @@ function inactive_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1004,9 +1004,9 @@ function inactive_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1060,9 +1060,9 @@ function open_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1096,9 +1096,9 @@ function open_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1152,9 +1152,9 @@ function false_positive_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1188,9 +1188,9 @@ function false_positive_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1244,9 +1244,9 @@ function verified_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1280,9 +1280,9 @@ function verified_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1335,9 +1335,9 @@ function out_of_scope_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1371,9 +1371,9 @@ function out_of_scope_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1426,9 +1426,9 @@ function all_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1462,9 +1462,9 @@ function all_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1518,9 +1518,9 @@ function closed_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1554,9 +1554,9 @@ function closed_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1610,9 +1610,9 @@ function new_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -1646,9 +1646,9 @@ function new_objs(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -1720,7 +1720,7 @@ function open_close_weekly(opened, closed, accepted, ticks) {
     var plotObj = $.plot($("#open_close_weekly"), [{
                 data: opened,
                 label: " Opened",
-                color: "#D03540"
+                color: "#d9534f"
             }, {
                 data: closed,
                 label: " Closed",
@@ -1761,7 +1761,7 @@ function severity_weekly(critical, high, medium, low, info, ticks) {
     var plotObj = $.plot($("#severity_weekly"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540"
+                color: "#d9534f"
             }, {
                 data: high,
                 label: " High",
@@ -1811,7 +1811,7 @@ function severity_counts_weekly(critical, high, medium, ticks) {
     var plotObj = $.plot($("#severity_critical"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540"
+                color: "#d9534f"
             }],
             options);
     var plotObj = $.plot($("#severity_high"), [{
@@ -1823,7 +1823,7 @@ function severity_counts_weekly(critical, high, medium, ticks) {
     var plotObj = $.plot($("#severity_medium"), [{
                 data: medium,
                 label: " Medium",
-                color: "#f0ad4e"
+                color: "#f0de28"
             }],
             options);
 }
@@ -1925,7 +1925,7 @@ function open_bug_count_by_month(critical, high, medium, low, ticks) {
     var plotObj = $.plot($("#chart_div"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -1974,7 +1974,7 @@ function accepted_bug_count_by_month(critical, high, medium, low, ticks) {
     var plotObj = $.plot($("#chart_div2"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -1986,7 +1986,7 @@ function accepted_bug_count_by_month(critical, high, medium, low, ticks) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -2025,7 +2025,7 @@ function open_bug_count_by_week(critical, high, medium, low, ticks) {
     var plotObj = $.plot($("#chart_div3"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -2037,7 +2037,7 @@ function open_bug_count_by_week(critical, high, medium, low, ticks) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -2076,7 +2076,7 @@ function accepted_bug_count_by_week(critical, high, medium, low, ticks) {
     var plotObj = $.plot($("#chart_div4"), [{
                 data: critical,
                 label: " Critical",
-                color: "#D03540",
+                color: "#d9534f",
             }, {
                 data: high,
                 label: " High",
@@ -2088,7 +2088,7 @@ function accepted_bug_count_by_week(critical, high, medium, low, ticks) {
             }, {
                 data: low,
                 label: " Low",
-                color: '#147AC1',
+                color: '#337ab7',
             }],
             options);
 }
@@ -2142,9 +2142,9 @@ function accepted_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -2178,9 +2178,9 @@ function accepted_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -2234,7 +2234,7 @@ function accepted_findings(d1, d2, d3, d4, d5, ticks) {
 
 function finding_age(data_1, ticks) {
     var dataset = [
-        {data: data_1, color: "#147AC1", fillColor: "#147AC1"}
+        {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
     ];
 
     var options = {
@@ -2242,7 +2242,7 @@ function finding_age(data_1, ticks) {
             bars: {
                 show: true,
                 fill: true,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             }
         },
         bars: {
@@ -2286,9 +2286,9 @@ function open_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -2322,9 +2322,9 @@ function open_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
@@ -2378,9 +2378,9 @@ function closed_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 1,
-                fillColor: "#D03540"
+                fillColor: "#d9534f"
             },
-            color: "#D03540"
+            color: "#d9534f"
         },
         {
             label: "High",
@@ -2414,9 +2414,9 @@ function closed_findings(d1, d2, d3, d4, d5, ticks) {
                 fill: true,
                 lineWidth: 1,
                 order: 4,
-                fillColor: "#147AC1"
+                fillColor: "#337ab7"
             },
-            color: "#147AC1"
+            color: "#337ab7"
         },
         {
             label: "info",
