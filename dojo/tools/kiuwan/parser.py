@@ -42,13 +42,9 @@ class KiuwanParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        csvarray = []
-
-        for row in reader:
-            csvarray.append(row)
 
         dupes = {}
-        for row in csvarray:
+        for row in reader:
             finding = Finding(test=test)
             findingdict = {}
             severityfilter = Severityfilter()

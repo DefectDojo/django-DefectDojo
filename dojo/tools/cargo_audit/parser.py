@@ -101,8 +101,7 @@ class CargoAuditParser:
                 )
                 date = advisory.get("date")
 
-                for alias in advisory.get("aliases", []):
-                    vulnerability_ids.append(alias)
+                vulnerability_ids = advisory.get("aliases", [])
 
                 package_name = item.get("package").get("name")
                 package_version = item.get("package").get("version")

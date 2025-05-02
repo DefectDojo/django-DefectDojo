@@ -27,13 +27,9 @@ class BugCrowdParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        csvarray = []
-
-        for row in reader:
-            csvarray.append(row)
 
         dupes = {}
-        for row in csvarray:
+        for row in reader:
             finding = Finding(test=test)
 
             url = row.get("bug_url", None)

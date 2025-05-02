@@ -47,9 +47,7 @@ class MSDefenderParser:
             vulnerabilities = []
             machines = {}
             for vulnerabilityfile in vulnerabilityfiles:
-                output = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
-                for data in output:
-                    vulnerabilities.append(data)
+                vulnerabilities = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
             for machinefile in machinefiles:
                 output = json.loads(zipdata[machinefile].decode("ascii"))["value"]
                 for data in output:
