@@ -29,13 +29,13 @@ class AnchoreCTLPoliciesParser:
         find_date = datetime.now()
         items = []
 
-        if not isinstance(data, dict):
-            msg = "This doesn't look like a valid Anchore CTRL Policies report: Expected a dictionary at the root of the JSON data"
+        if not isinstance(data, list):
+            msg = "This doesn't look like a valid Anchore CTRL Policies report: Expected a list with image data at the root of the JSON data"
             raise TypeError(msg)
 
         for image in data:
             if not isinstance(image, dict) or image.get("detail") is None or not isinstance(image.get("detail"), list):
-                msg = "This doesn't look like a valid Anchore CTRL Policies report, missing 'detail' key for image with a list as value"
+                msg = "This doesn't look like a valid Anchore CTRL Policies report, missing 'detail' list object key for image"
                 raise ValueError(msg)
 
             for result in image["detail"]:
