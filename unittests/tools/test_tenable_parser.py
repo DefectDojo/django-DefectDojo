@@ -103,7 +103,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_findings_all_nessus(self):
         """Test that use a report with all columns selected in generate CSV Report 2025-04-14"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus-template.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus-template.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:

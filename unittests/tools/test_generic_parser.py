@@ -700,7 +700,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual(.23474, finding.epss_percentile)
 
     def test_parse_json_custom_test_with_meta(self):
-        with open(get_unit_tests_scans_path("generic") / "generic_custom_test_with_meta.json", encoding="utf-8") as file:
+        with (get_unit_tests_scans_path("generic") / "generic_custom_test_with_meta.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             tests = parser.get_tests(parser.get_scan_types()[0], file)
             self.assertEqual(1, len(tests))
