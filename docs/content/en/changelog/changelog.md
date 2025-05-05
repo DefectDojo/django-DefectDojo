@@ -10,6 +10,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Apr 2025: v2.45
 
+### Apr 28, 2025: v2.45.3
+
+- **(Tools)** Fortify parser can now assign False Positive status to Findings according to the audit.xml file.
+- **(Import)** Reimporting a scan can now handle special statuses assigned by a tool.  Now, if a Finding was initially imported as Active, but the status was changed to False Positive, Out Of Scope or Risk Accepted by a subsequent report, that status will now be respected and applied to the Finding by Reimport.
+
 ### Apr 22, 2025: v2.45.2
 
 ![image](images/risk_table.png)

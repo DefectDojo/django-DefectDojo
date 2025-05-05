@@ -9,8 +9,13 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       from_branch:
-        description: "Select branch to release from ('release/x.y.z'. If `dev` is entered, a new release branch will be created from `dev`)"
+        description: "Select branch to release from. Dev branch releases happen the first monday of the month. Otherwise, use bugfix."
         required: true
+        type: choice
+        default: 'bugfix'
+        options:
+          - bugfix
+          - dev
       release_number:
         description: "Release version (x.y.z format)"
         required: true
@@ -19,23 +24,29 @@ jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate proper bugfix branch release_number format is being used
+        if: ${{ inputs.from_branch == 'bugfix' }}
+        run: |
+          # Expect the last octet in release_number to not be 0
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[1-9]$"
+
+      - name: Validate proper dev branch release_number format is being used
+        if: ${{ inputs.from_branch == 'dev' }}
+        run: |
+          # Expect the last octet in release_number to not be 1-9
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.0$"
+
       - id: Set-GitHub-org
         run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
 
       - name: Checkout from_branch branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.from_branch }}
+          ref: ${{ inputs.from_branch }}
 
       - name: Create release branch
-        if: ${{ !startsWith(github.event.inputs.from_branch, 'release/') }}
         run: |
-          echo "NEW_BRANCH=release/${{ github.event.inputs.release_number }}" >> $GITHUB_ENV
-
-      - name: Use existing release branch
-        if: startsWith(github.event.inputs.from_branch, 'release/')
-        run: |
-          echo "NEW_BRANCH=${{ github.event.inputs.from_branch }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=release/${{ inputs.release_number }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |
@@ -43,7 +54,7 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
 
       - name: Push branch
-        if: "!startsWith('${{ github.event.inputs.from_branch }}', 'release/')"
+        if: "!startsWith('${{ inputs.from_branch }}', 'release/')"
         run: git push origin HEAD:${NEW_BRANCH}
 
       - name: Checkout release branch
@@ -53,9 +64,9 @@ jobs:
 
       - name: Update version numbers in key files
         run: |
-          sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number }}"/' dojo/__init__.py
-          sed -ri 's/"version": ".*"/"version": "${{ github.event.inputs.release_number }}"/' components/package.json
-          sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number }}"/' helm/defectdojo/Chart.yaml
+          sed -ri 's/__version__ = ".*"/__version__ = "${{ inputs.release_number }}"/' dojo/__init__.py
+          sed -ri 's/"version": ".*"/"version": "${{ inputs.release_number }}"/' components/package.json
+          sed -ri 's/appVersion: ".*"/appVersion: "${{ inputs.release_number }}"/' helm/defectdojo/Chart.yaml
 
           if grep "\-dev" helm/defectdojo/Chart.yaml; then
               echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
@@ -77,7 +88,7 @@ jobs:
           grep -H version helm/defectdojo/Chart.yaml
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

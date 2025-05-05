@@ -1575,7 +1575,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     "low": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
                     "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "total": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
-                "left untouched": {
+                "untouched": {
                     "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
@@ -1625,7 +1625,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0}},
-                "left untouched": {
+                "untouched": {
                     "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},

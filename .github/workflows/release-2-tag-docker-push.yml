@@ -10,6 +10,7 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       release_number:
+        type: string
         description: 'Release version (x.y.z format)'
         required: true
 
@@ -27,28 +28,21 @@ jobs:
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
 
-      - name: Create new tag ${{ github.event.inputs.release_number }}
+      - name: Create new tag ${{ inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
-          git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
-          git push origin ${{ github.event.inputs.release_number }}
-
-  release-helm-chart:
-    needs: tag
-    uses: ./.github/workflows/release-x-manual-helm-chart.yml
-    with:
-      release_number: ${{ github.event.inputs.release_number }}
-    secrets: inherit
+          git tag -a ${{ inputs.release_number }} -m "[bot] release ${{ inputs.release_number }}"
+          git push origin ${{ inputs.release_number }}
 
   publish-docker-containers:
-    strategy:
-        matrix:
-          platform: ['linux/amd64', 'linux/arm64']
-        fail-fast: false
     needs: tag
+    strategy:
+      matrix:
+          platform: ['linux/amd64', 'linux/arm64']
+      fail-fast: false
     uses: ./.github/workflows/release-x-manual-docker-containers.yml
     with:
-      release_number: ${{ github.event.inputs.release_number }}
+      release_number: ${{ inputs.release_number }}
       platform: ${{ matrix.platform }}
     secrets: inherit
 
@@ -56,12 +50,29 @@ jobs:
     needs: publish-docker-containers
     uses: ./.github/workflows/release-x-manual-merge-container-digests.yml
     with:
-        release_number: ${{ github.event.inputs.release_number }}
+      release_number: ${{ inputs.release_number }}
+    secrets: inherit
+
+  # for releases we need to tag the images with the latest tag
+  # this could be parametrized in the merge-container-digests workflow
+  # but it's simpler to just add a explicit workflow for this here
+  tag-as-latest:
+    needs: publish-container-digests
+    uses: ./.github/workflows/release-x-manual-tag-as-latest.yml
+    with:
+      release_number: ${{ inputs.release_number }}
+    secrets: inherit
+
+  release-helm-chart:
+    needs: publish-container-digests
+    uses: ./.github/workflows/release-x-manual-helm-chart.yml
+    with:
+      release_number: ${{ inputs.release_number }}
     secrets: inherit
 
   release-drafter:
     needs: publish-container-digests
     uses: ./.github/workflows/release-drafter.yml
     with:
-      version: ${{ github.event.inputs.release_number }}
+      version: ${{ inputs.release_number }}
     secrets: inherit

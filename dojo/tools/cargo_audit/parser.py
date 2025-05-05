@@ -44,16 +44,15 @@ class CargoAuditParser:
         Return the list of fields used for deduplication in the Cargo Audit Parser.
 
         Fields:
-        - vulnerability_ids:
         - severity: Set to "High" regardless of context.
         - component_name: Set to name of package provided by the Cargo Audit Scanner.
         - component_version: Set to version of package provided by the Cargo Audit Scanner.
         - vuln_id_from_tool: Set to id provided by the Cargo Audit Scanner.
 
-        NOTE: Dedupe fields in settings.dist.py list vulnerability_ids and vuln_id_from_tool
+        NOTE: vulnerability_ids is not provided by parser.
+        NOTE: vulnerability_ids appears to be stored in unsaved_vulnerability_ids.
         """
         return [
-            "vulnerability_ids",
             "severity",
             "component_name",
             "component_version",
