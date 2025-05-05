@@ -67,7 +67,7 @@ class TalismanParser:
                             + file_path
                             + description
                             + severity
-                        ).encode("utf-8"),
+                        ).encode("utf-8"), usedforsecurity=False,
                     ).hexdigest()
 
                     if key not in dupes:

@@ -27,6 +27,7 @@ class CheckmarxParser:
         - severity: Set to severity outputted by Checkmarx Scanner.
         - file_path: Set to filename outputted by Checkmarx Scanner.
         - date: Set to date outputted by Checkmarx Scanner.
+        - static_finding: Set to true.
         - nb_occurences: Inittially set to 1 and then updated accordingly.
         - line: Set to line outputted by Checkmarx Scanner.
         - unique_id_from_tool: [If mode set to detailed] Set to the unique pathId outputted by Checkmarx Parser.
@@ -48,6 +49,7 @@ class CheckmarxParser:
             "severity",
             "file_path",
             "date",
+            "static_finding",
             "nb_occurences",
             "line",
             "unique_id_from_tool",

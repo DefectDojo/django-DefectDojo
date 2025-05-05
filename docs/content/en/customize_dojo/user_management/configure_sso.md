@@ -315,8 +315,9 @@ In order to use Google Authentication, a Google Authentication Server will need 
     - **Google OAuth Secret** should be set to your **Client Secret Key**.
     - **Whitelisted Domains** can be set to the domain name used by your organization.  However, this will allow login from any user with this domain name in their Google email address.
     - Alternatively, if you only want to allow specific Google email addresses to log in to DefectDojo, you can enter those in the **Whitelisted E-mail Addresses** section of the form. `(appsecuser1@xyz.com,appsecuser2@xyz.com)`, etc.
+    - Note that you must add at least one user or domain to the whitelist, or DefectDojo will not allow any users to log in using Google OAuth.
 
-2. Check the **Enable Azure AD OAuth** box.  Submit the form, and `Login With Google` will be added as an option to the Login menu.
+2. Check the **Enable Google OAuth** box.  Submit the form, and `Login With Google` will be added as an option to the Login menu.
 
 ### Open-Source
 

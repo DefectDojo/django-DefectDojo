@@ -118,7 +118,7 @@ from dojo.tools.factory import (
     requires_tool_type,
 )
 from dojo.user.utils import get_configuration_permissions_codenames
-from dojo.utils import is_scan_file_too_large
+from dojo.utils import is_scan_file_too_large, tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -225,6 +225,8 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
+            # Validate the tag to ensure it doesn't contain invalid characters
+            tag_validator(s, exception_class=RestFrameworkValidationError)
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
             data_safe.extend(substrings)
 
@@ -1525,8 +1527,6 @@ class TestImportSerializer(serializers.ModelSerializer):
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
-    recommendation = serializers.SerializerMethodField()
-    decision = serializers.SerializerMethodField()
     path = serializers.SerializerMethodField()
 
     def create(self, validated_data):
@@ -1553,14 +1553,6 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         for finding in findings_to_remove:
             ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
-
-    @extend_schema_field(serializers.CharField())
-    def get_recommendation(self, obj):
-        return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
-
-    @extend_schema_field(serializers.CharField())
-    def get_decision(self, obj):
-        return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.decision)
 
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
