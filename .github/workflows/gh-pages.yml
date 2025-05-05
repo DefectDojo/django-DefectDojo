@@ -52,6 +52,7 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+        if: github.repository == 'DefectDojo/django-DefectDojo' # Deploy docs only in core repo, not in forks - it would just fail in fork
         with: # publishes to the `gh-pages` branch by default
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/public

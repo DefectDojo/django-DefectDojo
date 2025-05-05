@@ -38,7 +38,7 @@ pytz==2025.1
 redis==5.2.1
 requests==2.32.3
 sqlalchemy==2.0.40  # Required by Celery broker transport
-urllib3==1.26.20
+urllib3==2.4.0
 uWSGI==2.0.29
 vobject==0.9.9
 whitenoise==5.2.0
@@ -75,3 +75,4 @@ vulners==2.3.6
 fontawesomefree==6.6.0
 PyYAML==6.0.2
 pyopenssl==25.0.0
+parameterized==0.9.0

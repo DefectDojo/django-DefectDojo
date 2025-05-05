@@ -9,8 +9,13 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       from_branch:
-        description: "Select branch to release from ('release/x.y.z'. If `dev` is entered, a new release branch will be created from `dev`)"
+        description: "Select branch to release from. Dev branch releases happen the first monday of the month. Otherwise, use bugfix."
         required: true
+        type: choice
+        default: 'bugfix'
+        options:
+          - bugfix
+          - dev
       release_number:
         description: "Release version (x.y.z format)"
         required: true
@@ -19,6 +24,18 @@ jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate proper bugfix branch release_number format is being used
+        if: ${{ inputs.from_branch == 'bugfix' }}
+        run: |
+          # Expect the last octet in release_number to not be 0
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[1-9]$"
+
+      - name: Validate proper dev branch release_number format is being used
+        if: ${{ inputs.from_branch == 'dev' }}
+        run: |
+          # Expect the last octet in release_number to not be 1-9
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.0$"
+
       - id: Set-GitHub-org
         run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
 
@@ -28,14 +45,8 @@ jobs:
           ref: ${{ inputs.from_branch }}
 
       - name: Create release branch
-        if: ${{ !startsWith(inputs.from_branch, 'release/') }}
         run: |
           echo "NEW_BRANCH=release/${{ inputs.release_number }}" >> $GITHUB_ENV
-
-      - name: Use existing release branch
-        if: startsWith(inputs.from_branch, 'release/')
-        run: |
-          echo "NEW_BRANCH=${{ inputs.from_branch }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |

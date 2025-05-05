@@ -651,7 +651,12 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             parser = GenericParser()
             tests = parser.get_tests(parser.get_scan_types()[0], file)
             self.assertEqual(1, len(tests))
-            findings = tests[0].findings
+            # Verify that the name of the tests are accurate
+            test = tests[0]
+            self.assertEqual(test.name, "Test 1")
+            self.assertEqual(test.type, "Tool 1")
+            self.assertEqual(test.version, None)
+            findings = test.findings
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -693,3 +698,17 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             finding = findings[0]
             self.assertEqual(.00042, finding.epss_score)
             self.assertEqual(.23474, finding.epss_percentile)
+
+    def test_parse_json_custom_test_with_meta(self):
+        with (get_unit_tests_scans_path("generic") / "generic_custom_test_with_meta.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            tests = parser.get_tests(parser.get_scan_types()[0], file)
+            self.assertEqual(1, len(tests))
+            # Verify that the name of the tests are accurate
+            test = tests[0]
+            self.assertEqual(test.name, "Test 1")
+            self.assertEqual(test.type, "Tool 1")
+            self.assertEqual(test.version, "1.0.0")
+            self.assertEqual(test.description, "The contents of this report is from a tool that gathers vulnerabilities both statically and dynamically")
+            self.assertEqual(test.dynamic_tool, True)
+            self.assertEqual(test.static_tool, True)
