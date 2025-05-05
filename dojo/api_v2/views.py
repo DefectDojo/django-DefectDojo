@@ -1062,7 +1062,7 @@ class FindingViewSet(
                 data=request.data
             )
             if findings_close.is_valid():
-                logger.debug("BULK_CLOSE: Finding serializer si Valid")
+                logger.debug("BULK_CLOSE: Finding serializer is Valid")
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
