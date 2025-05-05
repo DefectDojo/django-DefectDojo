@@ -2818,9 +2818,15 @@ class FindingCloseSerializer(serializers.ModelSerializer):
         )
 
 
+class FindingsCloseBulkSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=True)
+    is_mitigated = serializers.BooleanField(required=True)
+    mitigated = serializers.DateTimeField(required=False)
+
+
 class FindingCloseBulkSerializer(serializers.Serializer):
     verify = serializers.BooleanField(required=False, default=False)
-    findings = FindingCloseSerializer(many=True, required=True)
+    findings = FindingsCloseBulkSerializer(many=True, required=True)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
