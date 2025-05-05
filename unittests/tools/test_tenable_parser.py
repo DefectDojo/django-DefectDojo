@@ -12,7 +12,7 @@ class TestTenableParser(DojoTestCase):
         return test
 
     def test_parse_some_findings_nessus_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -29,7 +29,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_csv_nessus_legacy(self):
         """Test one report provided by a user"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -59,7 +59,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_csv2_nessus_legacy(self):
         """Test that use default columns of Nessus Pro 8.13.1 (#257)"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-default.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-default.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -81,7 +81,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_csv2_all_nessus_legacy(self):
         """Test that use a report with all columns of Nessus Pro 8.13.1 (#257)"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -129,19 +129,19 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_csv_bytes_nessus_legacy(self):
         """This tests is designed to test the parser with different read modes"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv", "rb") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open("rb") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -150,7 +150,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_samples_nessus_legacy(self):
         """Test that come from samples repo"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_v_unknown.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_v_unknown.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -181,7 +181,7 @@ class TestTenableParser(DojoTestCase):
 
     def test_parse_some_findings_with_cvssv3_nessus_legacy(self):
         """Test with cvssv3"""
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_with_cvssv3.nessus", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_with_cvssv3.nessus").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -196,7 +196,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
 
     def test_parse_many_findings_xml_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -215,7 +215,7 @@ class TestTenableParser(DojoTestCase):
             # self.assertEqual(79, finding.cwe)
 
     def test_parse_one_findings_xml_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -230,7 +230,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
 
     def test_parse_no_findings_xml_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -239,7 +239,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_parse_many_findings_csv_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -258,7 +258,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(0, finding.cwe)
 
     def test_parse_one_findings_csv_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -274,13 +274,13 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
 
     def test_parse_no_findings_csv_nessus_was_legacy(self):
-        with open(get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             self.assertEqual(0, len(findings))
 
     def test_parse_many_tenable_vulns(self):
-        with open(get_unit_tests_scans_path("tenable") / "tenable_many_vuln.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable") / "tenable_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -300,7 +300,7 @@ class TestTenableParser(DojoTestCase):
                 self.assertEqual("CVE-2023-32233", vulnerability_id)
 
     def test_parse_issue_6992(self):
-        with open(get_unit_tests_scans_path("tenable/nessus") / "issue_6992.nessus", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "issue_6992.nessus").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -310,7 +310,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("High", findings[0].severity)
 
     def test_parse_nessus_new(self):
-        with open(get_unit_tests_scans_path("tenable/nessus") / "nessus_new.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_new.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             self.assertEqual(99, len(findings))
@@ -321,7 +321,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("3.1", finding.cvssv3_score)
 
     def test_parse_issue_9612(self):
-        with open(get_unit_tests_scans_path("tenable") / "issue_9612.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable") / "issue_9612.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -331,7 +331,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("Critical", findings[0].severity)
 
     def test_parse_issue_11102(self):
-        with open(get_unit_tests_scans_path("tenable") / "issue_11102.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable") / "issue_11102.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:
@@ -341,7 +341,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("Reconfigure the affected application if possible to avoid use of medium strength ciphers.", findings[0].mitigation)
 
     def test_parse_issue_11127(self):
-        with open(get_unit_tests_scans_path("tenable") / "issue_11102.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("tenable") / "issue_11102.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:

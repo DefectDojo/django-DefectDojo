@@ -5,7 +5,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestGCloudArtifactScanParser(DojoTestCase):
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with open(get_unit_tests_scans_path("gcloud_artifact_scan") / "many_vulns.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gcloud_artifact_scan") / "many_vulns.json").open(encoding="utf-8") as testfile:
             parser = GCloudArtifactScanParser()
             findings = parser.get_findings(testfile, Test())
         self.assertEqual(7, len(findings))
