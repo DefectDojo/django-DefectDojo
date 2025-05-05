@@ -1054,6 +1054,7 @@ class FindingViewSet(
     )
     @action(detail=False, methods=["POST"])
     def bulk_close(self, request):
+        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data["findings"])}")
         errors = []
         success = []
         if request.method == "POST":
@@ -1061,12 +1062,15 @@ class FindingViewSet(
                 data=request.data
             )
             if findings_close.is_valid():
+                logger.debug("BULK_CLOSE: Finding serializer si Valid")
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
+                        logger.debug(f"BULK_CLOSE: finding_close {finding_close["id"]}")
                         try:
                             finding = Finding.objects.get(id=finding_close["id"])
                         except Finding.DoesNotExist:
+                            logger.debug(f"BULK_CLOSE: Finding {finding_close["id"]} not found")
                             continue
                         finding.is_mitigated = finding_close["is_mitigated"]
                         finding.mitigated = finding_close.get("mitigated", timezone.now())
@@ -1093,13 +1097,16 @@ class FindingViewSet(
                         findings.append(finding)
                         system_settings = System_Settings.objects.get()
                         if system_settings.enable_transfer_finding:
+                            logger.debug(f"BULK_CLOSE: Init transfer finding close or reactive {finding.id}")
                             helper_tf.close_or_reactive_related_finding(
                                 event="close",
                                 parent_finding=finding,
                                 notes=f"finding reactived by the parent finding {finding.id} (policies for the transfer of findings)",
                                 send_notification=False)
+                            logger.debug(f"BULK_CLOSE: Finish transfer finding close or reactive {finding.id}")
 
                 except Exception as e:
+                    logger.error(f"BULK_CLOSE: Error finding close {e}")
                     raise ApiError.internal_server_error(detail=str(e))
                 
                 try:
@@ -1112,11 +1119,14 @@ class FindingViewSet(
                                                                "duplicate",
                                                                "out_of_scope"])
                 except Exception as e:
+                    logger.error(f"BULK_CLOSE: bulk update {str(e)}")
                     raise ApiError.internal_server_error(
-                        detail=str(f"Error Closed finding bulk: {e}"))
+                        detail=str(f"Error Closed finding bulk: {str(e)}"))
             else:
+                logger.debug(f"BULK_CLOSE: Finding serializer is not valid {findings_close.errors}")
                 return http_response.bad_request(data=findings_close.errors)
             if findings_close.data["verify"] is True:
+                logger.debug("BULK_CLOSE: Verify finding is True")
                 for finding_close in findings_close.data["findings"]:
                     try:
                         finding = Finding.objects.get(id=finding_close["id"])
@@ -1125,7 +1135,10 @@ class FindingViewSet(
                         else:
                             errors.append({finding.id: "Not closed"})
                     except Finding.DoesNotExist:
+                        logger.error(f"BULK_CLOSE: Finding error {finding_close["id"]} not found")
                         errors.append({finding_close['id']: "not found"})
+            logger.debug(f"BULK_CLOSE: finish process Success {success}")
+            logger.debug(f"BULK_CLOSE: finish process Error {errors}")
             return http_response.ok(data={"success": success, "errors": errors})
 
     @extend_schema(
