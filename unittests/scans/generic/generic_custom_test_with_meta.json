@@ -1,0 +1,15 @@
+{
+    "name": "Test 1",
+    "type": "Tool 1",
+    "version": "1.0.0",
+    "description": "The contents of this report is from a tool that gathers vulnerabilities both statically and dynamically",
+    "dynamic_tool": true,
+    "static_tool": true,
+    "findings": [
+        {
+            "title": "test title",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau",
+            "severity": "Medium"
+        }
+    ]
+}

@@ -68,7 +68,7 @@ If you have a testing and remediation effort related to a specific aspect of you
 
 ‘This Finding was discovered by our scanning tool, but after reviewing the Finding we have discovered that this reported vulnerability does not exist.’
 
-Once you’ve reviewed a Finding, you might discover that the vulnerability reported does not actually exist. The False Positive status allows DefectDojo to keep track of this information, and future imports will also apply the False Positive status to this Finding.
+Once you’ve reviewed a Finding, you might discover that the vulnerability reported does not actually exist. The False Positive status will be maintained by reimport and prevent matching findings from being opened or closed, which assists with noise reduction.  
 
 If a different scanning tool finds a similar Finding, it will not be recorded as a False Positive. DefectDojo can only compare Findings within the same tool to determine if a Finding has already been recorded.
 

@@ -8,6 +8,7 @@ on:
 jobs:
   notify-reviewers:
     runs-on: ubuntu-latest
+    if: github.repository == 'DefectDojo/django-DefectDojo' # Notify only in core repo, not in forks - it would just fail in fork
 
     steps:
       - name: Checkout repository

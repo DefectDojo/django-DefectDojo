@@ -144,12 +144,44 @@ class TenableCSVParser:
                 raw_severity = int_severity
             # convert the severity to something dojo likes
             severity = self._convert_severity(raw_severity)
+
+            epss_score = None
+            epss_score_string = row.get("EPSS Score") if "EPSS Score" in row else None
+            # example seen so far are "1234" for an actual score of "0.1234" so let's prepend that instead of "risky" divisions
+            if epss_score_string:
+                if "0." not in epss_score_string:
+                    epss_score_string = "0." + epss_score_string
+                epss_score = float(epss_score_string)
+
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
+
+            severity_justification = f"Severity: {severity}\n"
+            for field in (
+                "VPR score",
+                "EPSS Score",
+                "Risk Factor",
+                "STIG Severity",
+                "CVSS v4.0 Base Score",
+                "CVSS v4.0 Base+Threat Score",
+                "CVSS v3.0 Base Score",
+                "CVSS v3.0 Temporal Score",
+                "Metasploit",
+                "Core Impact",
+                "CANVAS",
+                "XREF",
+            ):
+                severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
+
+            # cwe = parse_cwe_from_ref(row.get("XREF"))  # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
+
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
-            references = row.get("See Also", row.get("definition.see_also", "N/A"))
+            references = ""
+            references += row.get("References") if "References" in row else ""
+            references += row.get("See Also", row.get("definition.see_also", "N/A"))
             references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
+            references += "\nPlugin Information: " + row.get("Plugin Information", "N/A")
             references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
             references += "\nPlugin Modification Date: " + row.get("Plugin Modification Date", "N/A")
             # Determine if the current row has already been processed
@@ -169,9 +201,12 @@ class TenableCSVParser:
                     test=test,
                     description=description,
                     severity=severity,
+                    # cwe=cwe,
+                    epss_score=epss_score,
                     mitigation=mitigation,
                     impact=impact,
                     references=references,
+                    severity_justification=severity_justification,
                 )
 
                 # manage CVSS vector (only v3.x for now)
