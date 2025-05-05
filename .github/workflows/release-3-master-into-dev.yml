@@ -29,7 +29,7 @@ jobs:
 
       - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_new }}-${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=master-into-dev/${{ inputs.release_number_new }}-${{ inputs.release_number_dev }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |
@@ -46,9 +46,9 @@ jobs:
 
       - name: Update version numbers in key files
         run: |
-          sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number_dev }}"/' dojo/__init__.py
-          sed -ri 's/"version": ".*"/"version": "${{ github.event.inputs.release_number_dev }}"/' components/package.json
-          sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number_dev }}"/' helm/defectdojo/Chart.yaml
+          sed -ri 's/__version__ = ".*"/__version__ = "${{ inputs.release_number_dev }}"/' dojo/__init__.py
+          sed -ri 's/"version": ".*"/"version": "${{ inputs.release_number_dev }}"/' components/package.json
+          sed -ri 's/appVersion: ".*"/appVersion: "${{ inputs.release_number_dev }}"/' helm/defectdojo/Chart.yaml
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
 
@@ -60,8 +60,8 @@ jobs:
 
       - name: Create upgrade notes to documentation
         run: |
-          minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
-          patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
+          minorv=$(echo ${{ inputs.release_number_dev }} | cut -d '.' -f -2)
+          patchv=$(echo ${{ inputs.release_number_dev }} | cut -d '-' -f -1)
           weight=$(date +%Y%m%d)
           echo -n "---
           title: 'Upgrading to DefectDojo Version $minorv.x'
@@ -72,10 +72,10 @@ jobs:
           There are no special instructions for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
           " > docs/content/en/open_source/upgrading/$minorv.md
           git add docs/content/en/open_source/upgrading/$minorv.md
-        if: endsWith(github.event.inputs.release_number_new, '.0') && endsWith(github.event.inputs.release_number_dev, '.0-dev')
+        if: endsWith(inputs.release_number_new, '.0') && endsWith(inputs.release_number_dev, '.0-dev')
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -91,7 +91,7 @@ jobs:
             github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back ${{ inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'
@@ -110,7 +110,7 @@ jobs:
 
       - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=master-into-bugfix/${{ github.event.inputs.release_number_new }}-${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=master-into-bugfix/${{ inputs.release_number_new }}-${{ inputs.release_number_dev }}" >> $GITHUB_ENV
 
       - name: Configure git
         run: |
@@ -127,9 +127,9 @@ jobs:
 
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
-          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
+          sed -ri "s/__version__ = '.*'/__version__ = '${{ inputs.release_number_dev }}'/" dojo/__init__.py
+          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ inputs.release_number_dev }}\"/" components/package.json
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
 
@@ -140,7 +140,7 @@ jobs:
           grep version components/package.json
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -156,7 +156,7 @@ jobs:
             github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back ${{ inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'bugfix'

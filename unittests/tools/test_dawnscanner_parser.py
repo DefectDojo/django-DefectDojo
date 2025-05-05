@@ -7,7 +7,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestDawnScannerParser(DojoTestCase):
     def test_burp_with_one_vuln_has_one_finding(self):
-        with open(get_unit_tests_scans_path("dawnscanner") / "dawnscanner_v1.6.9.json", encoding="utf-8") as test_file:
+        with (get_unit_tests_scans_path("dawnscanner") / "dawnscanner_v1.6.9.json").open(encoding="utf-8") as test_file:
             parser = DawnScannerParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:

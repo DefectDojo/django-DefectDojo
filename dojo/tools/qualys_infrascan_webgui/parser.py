@@ -123,6 +123,45 @@ def qualys_convert_severity(raw_val):
 
 
 class QualysInfrascanWebguiParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Infrastructure Webgui Parser.
+
+        Fields:
+        - title: Set to title from Qualys Infrastructure Webgui Scanner.
+        - mitigation: Set to solution from Qualys Infrastructure Webgui Scanner.
+        - description: Custom description made from: description, category, QID, port, and result evidence.
+        - severity: Set to severity from Qualys Infrastructure Webgui Scanner translated into DefectDojo formant.
+        - impact: Set to consequence from Qualys Infrastructure Webgui Scanner.
+        - vuln_id_from_tool: Set to gid from Qualys Infrastructure Webgui Scanner.
+        - date: Set to datetime from Qualys Infrastructure Webgui Scanner.
+        """
+        return [
+            "title",
+            "mitigation",
+            "description",
+            "severity",
+            "impact",
+            "vuln_id_from_tool",
+            "date",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Infrastructure Webgui Parser.
+
+        Fields:
+        - title: Set to title from Qualys Infrastructure Webgui Scanner.
+        - severity: Set to severity from Qualys Infrastructure Webgui Scanner translated into DefectDojo formant.
+
+        NOTE: endpoints is not provided by parser
+        """
+        return [
+            "title",
+            "severity",
+        ]
+
     def get_scan_types(self):
         return ["Qualys Infrastructure Scan (WebGUI XML)"]
 
