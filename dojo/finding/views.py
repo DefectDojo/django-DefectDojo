@@ -11,6 +11,7 @@ from itertools import chain
 from pathlib import Path
 
 from django.conf import settings
+from django.template.loader import render_to_string
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -3616,5 +3617,15 @@ def generate_token_generative_ia(request, fid):
                                 url=f"{url}/devsecops/recommendation-process/{fid}",
                                 headers=headers,
                                 )
+    if response.status_code != 200:
+        logger.error("Error getting IA recommendation: %s", response.text)
+        raise ApiError.internal_server_error(response.text)
 
-    return JsonResponse(response.json())
+    finding = get_object_or_404(Finding, id=fid)
+    
+    finding.ia_recommendation = response.json()
+    finding.ia_recommendation["data"]["like_status"] = None
+    finding.save()
+    contex = finding_helper.parser_ia_recommendation(
+        response.json())
+    return JsonResponse(contex, status=200)

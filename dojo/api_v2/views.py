@@ -1284,7 +1284,7 @@ class FindingViewSet(
         serialized_notes = serializers.FindingToNotesSerializer(
             {"finding_id": finding, "notes": notes},
         )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK) 
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)
     
     @extend_schema(
         methods=["GET"],
@@ -1295,25 +1295,64 @@ class FindingViewSet(
         request=IARecommendationSerializer,
         responses={status.HTTP_201_CREATED: IARecommendationSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @extend_schema(
+        methods=["PATCH"],
+        request=IARecommendationSerializer,
+        responses={status.HTTP_201_CREATED: IARecommendationSerializer},
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
     def ia_recommendation(self, request, pk=None):
-        finding = get_authorized_findings(
-            Permissions.Finding_Add_Recommendation,
-            Finding.objects.filter(id=pk),
-            request.user).first()
-        if request.method == "POST":
-            serializer = IARecommendationSerializer(
-                data=request.data,
+        try:
+            finding = Finding.objects.get(id=pk)
+        except Finding.DoesNotExist:
+            raise ApiError.not_found(
+                detail=f"Finding with id {pk} does not exist"
             )
-            if serializer.is_valid():
-                finding.ia_recommendation = serializer.validated_data
-                finding.save()
-                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
-            else:
-                return http_response.bad_request(data=serializer.errors)
-        elif request.method == "GET":
-            return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
 
+        if user_has_permission(request.user,
+                               finding,
+                               Permissions.Finding_Add_Recommendation):
+            if request.method == "POST":
+                serializer = IARecommendationSerializer(
+                    data=request.data,
+                )
+                if serializer.is_valid():
+                    finding.ia_recommendation = serializer.validated_data
+                    finding.save()
+                    return http_response.ok(
+                        IARecommendationSerializer(finding.ia_recommendation).data)
+                else:
+                    return http_response.bad_request(data=serializer.errors)
+            elif request.method == "GET":
+                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+            elif request.method == "PATCH":
+                serializer = IARecommendationSerializer(
+                    data=request.data,
+                )
+                if serializer.is_valid():
+                    data = serializer.data["data"]
+                    ia_recommendation_dict = finding.ia_recommendation
+                    if data.get("recommendations"):
+                        ia_recommendation_dict["data"]["recommendations"] = (
+                            data.get("recommendations"))
+                    if data.get("mitigations"):
+                        ia_recommendation_dict["data"]["mitigations"] = (
+                            data.get("mitigations"))
+                    if data.get("files_to_fix"):
+                        ia_recommendation_dict["data"]["files_to_fix"] = (
+                            serializer.data.get("files_to_fix"))
+                    if "like_status" in data:
+                        ia_recommendation_dict["data"]["like_status"] = (
+                            data.get("like_status"))
+                    finding.ia_recommendation = ia_recommendation_dict
+                    finding.save()
+                    return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+                else:
+                    return http_response.error(serializer.errors)
+        else:
+            return http_response.forbidden(
+                detail="You do not have permission to add IA recommendation to this finding"
+            )
         return http_response.non_authoritative_information()
 
     @extend_schema(

@@ -5072,7 +5072,7 @@ class GeneralSettings(models.Model):
             "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
         }
         if settings.USE_CACHE_REDIS:
-            variable_object = cache.get(f"DISPLAY_STATUS:{name_key}")
+            variable_object = cache.get(f"GENERAL_SETTINGS:{name_key}")
             logger.debug(f"Cache key for : {name_key}")
             if variable_object:
                 return rule_data_type[variable_object["data_type"]](variable_object["value"]) 
@@ -5087,7 +5087,7 @@ class GeneralSettings(models.Model):
             logger.error(f"Variable not found : {name_key}, {str(e)}")
             return default
         if settings.USE_CACHE_REDIS:
-            cache.set(f"DISPLAY_STATUS:{variable_object.value}",
+            cache.set(f"GENERAL_SETTINGS:{variable_object.value}",
                       variable_object.value, timeout=None)
         variable_result = rule_data_type[variable_object.data_type](variable_object.value) 
         return variable_result
