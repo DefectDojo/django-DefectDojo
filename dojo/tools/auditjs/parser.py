@@ -3,7 +3,7 @@ import re
 from json.decoder import JSONDecodeError
 
 import cvss.parser
-from cvss import CVSS2, CVSS3
+from cvss import CVSS2, CVSS3, CVSS4
 
 from dojo.models import Finding
 
@@ -96,22 +96,32 @@ class AuditJSParser:
                         cvss_vectors = cvss.parser.parse_cvss_from_text(
                             vulnerability["cvssVector"],
                         )
-                        if len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS3,
-                        ):
-                            # Only set finding vector if it's version 3
-                            cvss_vector = cvss_vectors[0].clean_vector()
-                            severity = cvss_vectors[0].severities()[0]
-                        elif len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS2,
-                        ):
-                            # Otherwise add it to description
-                            description = (
-                                description
-                                + "\nCVSS V2 Vector:"
-                                + cvss_vectors[0].clean_vector()
+
+                        if len(cvss_vectors) > 0:
+                            vector_obj = cvss_vectors[0]
+
+                            if isinstance(vector_obj, CVSS4):
+                                severity = vector_obj.severities()[0]
+
+                            elif isinstance(vector_obj, CVSS3):
+                                cvss_vector = vector_obj.clean_vector()
+                                severity = vector_obj.severities()[0]
+
+                            elif isinstance(vector_obj, CVSS2):
+                                description += "\nCVSS V2 Vector:" + vector_obj.clean_vector()
+                                severity = vector_obj.severities()[0]
+
+                            else:
+                                raise ValueError(
+                                    f"Unsupported CVSS version detected in parser: {type(vector_obj).__name__}"
+                                )
+                        else:
+                            # Explicitly raise an error if no CVSS vectors are found,
+                            # to avoid 'NoneType' errors during severity processing later.
+                            raise ValueError(
+                                "No CVSS vectors found. Please check that parse_cvss_from_text() " \
+                                "correctly parses the provided cvssVector."
                             )
-                            severity = cvss_vectors[0].severities()[0]
                     else:
                         # If there is no vector, calculate severity based on
                         # score and CVSS V3 (AuditJS does not always include
