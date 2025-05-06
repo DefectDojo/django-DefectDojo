@@ -7,7 +7,7 @@
 
 ## Checklist:
 
-- [ ] The pull request is complete according to the guide of [contributing](hthttps://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md) of this project
+- [ ] The pull request is complete according to the guide of [contributing](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md) of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
