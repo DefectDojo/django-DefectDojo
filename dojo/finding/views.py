@@ -3607,7 +3607,7 @@ def generate_token_generative_ia(request, fid):
                                 )
     if response.status_code != 200:
         logger.error("Error generating token for IA recommendation: %s", response.text)
-        raise ApiError.internal_server_error(response.text)
+        return JsonResponse({"status": "error get token"}, status=500)
 
     # get Recommendation
     access_token = response.json()["data"]["access_token"]
@@ -3619,7 +3619,7 @@ def generate_token_generative_ia(request, fid):
                                 )
     if response.status_code != 200:
         logger.error("Error getting IA recommendation: %s", response.text)
-        raise ApiError.internal_server_error(response.text)
+        return JsonResponse({"status": "error", "message": response.text}, status=500)
 
     finding = get_object_or_404(Finding, id=fid)
     
