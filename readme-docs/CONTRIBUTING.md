@@ -96,3 +96,28 @@ Requested changes from reviewers should stay within the scope of the PR.
 Please do not resolve comments without any discussion. If you decide not to make a suggested change,
 make sure to leave a brief reply as a response so that everyone
 is on the same page. The reviewer can then resolve the comment if the reasoning is acceptable.
+
+## [Semantic Release](https://semantic-release.gitbook.io/semantic-release)
+
+Available types:
+ - feat: A new feature
+ - fix: A bug fix
+ - docs: Documentation only changes
+ - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+ - refactor: A code change that neither fixes a bug nor adds a feature
+ - perf: A code change that improves performance
+ - test: Adding missing tests or correcting existing tests
+ - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+ - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)
+ - removed: Elimination of obsolete features
+ - deprecated: Use when marking features as obsolete
+ - security: Use to identify security fixes
+ - chore: Other changes that don't modify src or test files
+ - featurerelease: A new feature of release
+ - securitypatchrelease: A security path of release
+ - fixpatchrelease: A fix path of release
+ - breakingrelease: break of release
+ - breaking: break
+ - revert: Reverts a previous commit
+
+You can find out more here. [Semantic Versioning](https://semver.org/)
