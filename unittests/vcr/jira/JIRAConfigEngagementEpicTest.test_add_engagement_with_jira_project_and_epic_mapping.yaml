@@ -1,13 +1,13 @@
 interactions:
 - request:
     body: '{"description": "Event engagement_added has occurred.", "title": "Engagement
-      created for &quot;Python How-to&quot;: new engagement", "user": null, "url_ui":
-      "http://localhost:8080/engagement/7", "url_api": "http://localhost:8080/api/v2/engagements/7/",
-      "product_type": {"name": "books", "id": 1, "url_ui": "http://localhost:8080/product/type/1",
-      "url_api": "http://localhost:8080/api/v2/product_types/1/"}, "product": {"name":
-      "Python How-to", "id": 1, "url_ui": "http://localhost:8080/product/1", "url_api":
-      "http://localhost:8080/api/v2/products/1/"}, "engagement": {"name": "new engagement",
-      "id": 7, "url_ui": "http://localhost:8080/engagement/7", "url_api": "http://localhost:8080/api/v2/engagements/7/"}}'
+      created for \"Python How-to\": new engagement", "user": null, "url_ui": "http://localhost:8080/engagement/7",
+      "url_api": "http://localhost:8080/api/v2/engagements/7/", "product_type": {"name":
+      "books", "id": 1, "url_ui": "http://localhost:8080/product/type/1", "url_api":
+      "http://localhost:8080/api/v2/product_types/1/"}, "product": {"name": "Python
+      How-to", "id": 1, "url_ui": "http://localhost:8080/product/1", "url_api": "http://localhost:8080/api/v2/products/1/"},
+      "engagement": {"name": "new engagement", "id": 7, "url_ui": "http://localhost:8080/engagement/7",
+      "url_api": "http://localhost:8080/api/v2/engagements/7/"}}'
     headers:
       Accept:
       - application/json
@@ -18,11 +18,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '710'
+      - '702'
       Content-Type:
       - application/json
       User-Agent:
-      - DefectDojo-2.42.3
+      - DefectDojo-2.45.3
       X-DefectDojo-Event:
       - engagement_added
       X-DefectDojo-Instance:
@@ -34,15 +34,15 @@ interactions:
       string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
         \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
         [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
-        \   ],\n    \"Content-Length\": [\n      \"710\"\n    ],\n    \"Content-Type\":
+        \   ],\n    \"Content-Length\": [\n      \"702\"\n    ],\n    \"Content-Type\":
         [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
-        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.42.3\"\n    ],\n    \"X-Defectdojo-Event\":
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.45.3\"\n    ],\n    \"X-Defectdojo-Event\":
         [\n      \"engagement_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n
         \     \"http://localhost:8080\"\n    ]\n  },\n  \"method\": \"POST\",\n  \"origin\":
-        \"172.18.0.2:48456\",\n  \"url\": \"http://webhook.endpoint:8080/post\",\n
+        \"172.18.0.9:34022\",\n  \"url\": \"http://webhook.endpoint:8080/post\",\n
         \ \"data\": \"{\\\"description\\\": \\\"Event engagement_added has occurred.\\\",
-        \\\"title\\\": \\\"Engagement created for &quot;Python How-to&quot;: new engagement\\\",
-        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/engagement/7\\\",
+        \\\"title\\\": \\\"Engagement created for \\\\\\\"Python How-to\\\\\\\": new
+        engagement\\\", \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/engagement/7\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/7/\\\", \\\"product_type\\\":
         {\\\"name\\\": \\\"books\\\", \\\"id\\\": 1, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/1\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/1/\\\"}, \\\"product\\\":
@@ -59,9 +59,9 @@ interactions:
         \   },\n    \"product_type\": {\n      \"id\": 1,\n      \"name\": \"books\",\n
         \     \"url_api\": \"http://localhost:8080/api/v2/product_types/1/\",\n      \"url_ui\":
         \"http://localhost:8080/product/type/1\"\n    },\n    \"title\": \"Engagement
-        created for &quot;Python How-to&quot;: new engagement\",\n    \"url_api\":
-        \"http://localhost:8080/api/v2/engagements/7/\",\n    \"url_ui\": \"http://localhost:8080/engagement/7\",\n
-        \   \"user\": null\n  }\n}\n"
+        created for \\\"Python How-to\\\": new engagement\",\n    \"url_api\": \"http://localhost:8080/api/v2/engagements/7/\",\n
+        \   \"url_ui\": \"http://localhost:8080/engagement/7\",\n    \"user\": null\n
+        \ }\n}\n"
     headers:
       Access-Control-Allow-Credentials:
       - 'true'
@@ -70,7 +70,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 29 Jan 2025 20:45:18 GMT
+      - Wed, 30 Apr 2025 16:23:42 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -95,26 +95,22 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA5yQUUvDMBDHv0te3bqkS2mXN5ngFJ1Cu5eJSJpcMJompUkHY+y7m+DQ+aa+HXe/
-        //2OO6CWe9gMBjH0GkLv2WwmQYEI0r25jAfDvdfcZhYCmiCpfW/4/h98DcNOC5Dg31dg+iXYAMNf
-        lyydVWYEK+B3yR0MXjsbYYIxyXCGp/X68rFePTTf0/XYtbFC7ClBEzzBz9EJvXH7Ll7Z7PtkWxo3
-        yhhqR23kZwSxGMjL8tS84iGBOc6LKSbTvGoIZZSweZVhjC9whGPexz/A0OjuB7tocsJowUiVUUK/
-        WNHdWOUiqIqCAJRz0koQVAgOwElbSUUWJVeERoFqC8jPBMEkw60eeHohKD6acOcET+0DMqcKgX3Z
-        1Oh4ftjW2TS5vm/Q8QMAAP//AwDv8BdOIAIAAA==
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-04-29T22:58:24.000+0200","serverTime":"2025-04-30T18:23:42.478+0200","scmInfo":"0bc1b6ccc33af448636c49e0141bd2e25a26f3ec","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 0142053b-a7dc-4dfd-b59f-77a77e6ddd88
+      - 6af19709-e928-4ec7-9500-a6bcf64a94d4
       Atl-Traceid:
-      - 0142053ba7dc4dfdb59f77a77e6ddd88
+      - 6af19709e9284ec79500a6bcf64a94d4
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:18 GMT
+      - Wed, 30 Apr 2025 16:23:42 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -124,7 +120,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=170,atl-edge-internal;dur=16,atl-edge-upstream;dur=155,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=20,cdn-upstream-fbl;dur=399,atl-edge;dur=316,atl-edge-internal;dur=14,atl-edge-upstream;dur=302,atl-edge-pop;desc="aws-us-east-1",cdn-cache-miss,cdn-pop;desc="ORD56-P1",cdn-rid;desc="Kd0c8DMTzurmrrMBZ5YAL7WlVVSbQZZxOEdT5hMhO2Bk2XdYK3ItRA==",cdn-downstream-fbl;dur=403
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -133,10 +129,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 5b8f26c7595104a396342213c43d8b98.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - Kd0c8DMTzurmrrMBZ5YAL7WlVVSbQZZxOEdT5hMhO2Bk2XdYK3ItRA==
+      X-Amz-Cf-Pop:
+      - ORD56-P1
       X-Arequestid:
-      - fdc0e3fa7a97f7656746ccc3405af67e
+      - 8ec8683265d84b3dc1da60445ee79828
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -163,41 +167,28 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA+xW32/TMBD+V6I8V03bVWOqhBBiICbQhLRuL9OETHJZb3OcYDttyrT/nXPixO5a
-        RjpgvCxP9vl+fOf77uK7EKqCiSSchYXMbyDWKhy45ezyzimgUiXodQFGRQFPSbbQulCzKEogJYMk
-        v8mHTHOmFDIxFKAjCUpHrMBoElmv0XhEH7lA47Td3MKadqfz92dz2gmWAW3PBWpNDkxAtmSayXPJ
-        CdVdOD2qpkd7xi8FLkEqxr82vqIlwioyCXXQ7MF4NB29opiTaTWZ/tsobxT+gNcqY5xTwPFhNT58
-        joBVG/FgUh1MniNiBgmWWXg/8Hlk+PUEJnUeai5NfC6ZTQIqllhozAVJ3wZ1roMgQaVRxDooEGII
-        8jRY5fJ2aKzjXBCz9kTxyDU4gN1FHIyPNi6iI/mcqVvalUJLJhRnGpLTjRNVftNmNUsZVzAIFwiS
-        yXix/gxLINCjgevRFIEnpl3sglpFlVnG5NosJXwvUQIpalmSJxUvIGPmxGAlc6UlimsTc600ZEZi
-        re87vGdW0vZsq0HAmDqGlJVcXzBeQgc4LwiwqYYpONVbh1c+DXohc9oeOCd08E6MLJg3mg1C37YX
-        xisaN5znK0hqpReePsLGxvCE8qptd9Dz3lS7YBKE3iy19bC71hxFHa6ttXXgCv2lEbRFtuc9K9yx
-        MM6zIhdkWffK77ExKZnhOhIqMnH2PlbPqcP7zglbzJ5eX9wsSUwkMPEkZPkSwh1sNZltsKtPatvN
-        77twiRx70jYTX7NvKm0J7D+j1xhodX1iWJHHjE7JUqPb7wFs+1KfNAL+7NFjrc00+9QM2zzVK2K6
-        uQDMCo40511JX95IfzPg/3sj1RMzxeqCPDSk7NO/D0eTid/0Y9crvk/XLx+wCqyym02+6j6NM7Aj
-        6vHhVEjMJeoHr5JfZdZpb7S9lfl936m1jd8JthJoBsw2/h2An9j4TexobErS/8eNGbsGFRkL1TpB
-        EizwekHeh2ppRrTN+GMj/AkAAP//vJfBboMwDIZfpeqht8K60sskVO2wwyR22rmagFrARoERoq6H
-        vvviOIFQOo01aMe6cfLFNs5vPEH2FREMO1ipUaaBHZJqzHtrzPU0mPS99UFftOyRqGtrVG8aVFGR
-        fc6gPGpIzxpyMxnkoEQDadOom/l5h9LE/BLt0P+zFFAvctaUBzldvYlnfOWN62BhgU2InOdS+DnV
-        6StjTlIDFGlZiT7kvGd1+JCkS6iyeKn0L7mQvBandc3uSSyaBbRIqckB2pW292Pfxq6chxGQdhhx
-        o4vXZqge1W4dckAGzav+F/2WNyWq4xwaGJnGthJWzp1LG7mMJyK1zfaTQ33yR1/+mqIWzGHThHF6
-        GD20XMbD8DdiYli7uDyaSyk2Pe9x96AbxGV16sZrLKIb82n4G/yG1cir+A37mZy8u/T2NrBJsZqj
-        XVHwH1BvY17jpKdE/vPeX7C0PL7yCAdUGgp9fNxNMyOLcpWgQk/7Bc/zxU3l0oYZgZMCZBv7Pcic
-        Qd0rB+1tFIM2taXQGeyiiIe7tFsY5eAywDF9q+SoL8eQv0aDOgcK1t35GwAA//8DAFZhNg1MFgAA
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","untranslatedName":"Task","subtask":false,"hierarchyLevel":0,"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0}]},"parent":{"required":false,"schema":{"type":"issuelink","system":"parent"},"name":"Parent","key":"parent","hasDefaultValue":false,"operations":["set"]},"components":{"required":false,"schema":{"type":"array","items":"component","system":"components"},"name":"Components","key":"components","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}}]},"fixVersions":{"required":false,"schema":{"type":"array","items":"version","system":"fixVersions"},"name":"Fix
+        versions","key":"fixVersions","hasDefaultValue":false,"operations":["set","add","remove"],"allowedValues":[]},"priority":{"required":false,"schema":{"type":"priority","system":"priority"},"name":"Priority","key":"priority","hasDefaultValue":true,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/1","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/highest.svg","name":"Highest","id":"1"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high.svg","name":"High","id":"2"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/5","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/lowest.svg","name":"Lowest","id":"5"}],"defaultValue":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"}},"customfield_10014":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-epic-link","customId":10014},"name":"Epic
+        Link","key":"customfield_10014","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - 1f2a65fd-a609-4604-a5b0-57706c020c82
+      - 0f03dd41-a463-46e5-bb94-ab4949b45e85
       Atl-Traceid:
-      - 1f2a65fda6094604a5b057706c020c82
+      - 0f03dd41a46346e5bb94ab4949b45e85
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:18 GMT
+      - Wed, 30 Apr 2025 16:23:43 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -207,7 +198,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=288,atl-edge-internal;dur=15,atl-edge-upstream;dur=270,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="M_3oZdIgh3rGOfLfMy6TpK5Y-oP1XKWWQUOQwHOiOxdI0X8mxQJuPw==",cdn-downstream-fbl;dur=447,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=65,cdn-upstream-fbl;dur=444,atl-edge;dur=355,atl-edge-internal;dur=17,atl-edge-upstream;dur=338,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -216,13 +207,21 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 36e36df999d8d13e1e708941d33a5866.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - M_3oZdIgh3rGOfLfMy6TpK5Y-oP1XKWWQUOQwHOiOxdI0X8mxQJuPw==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - a2c7004340d79a5385a3da9a87056ab4
+      - c98a8df1e27f386dd155e374408dd339
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -249,26 +248,22 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA5yQUUvDMBDHv0te3bpc19ItbzLBKTqFdi+KSJpcMJompUkHY+y7m6Cw+aa+HXe/
-        //2OO5CWe9wOhjDyFkLv2WwmUaEI0r27jAfDvdfcZhYDmRCpfW/4/h98jcNOC5ToP9Zo+hXagMNf
-        l6ycVWZEK/B3yR0OXjsbYaAUMprRab25fKzXD81puhm7NlaEPSdoQif0JTqxN27fxSubfZ9sK+NG
-        GUPtqI38ihAWA3lVfTeveEhgTvNySmGaLxooWAFsvsgopRc0wjHv4x9waHT3g102ObCiZLDMoDqx
-        oruxykVQlSUgVnNoJYpCCI7IoV1IBcuKKyiiQLUl5meCYJLhVg88vRAVH024c4Kn9oGY74qgfd3W
-        5Hh+2JOzaXJ935DjJwAAAP//AwCGwdS4IAIAAA==
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-04-29T22:58:24.000+0200","serverTime":"2025-04-30T18:23:43.402+0200","scmInfo":"0bc1b6ccc33af448636c49e0141bd2e25a26f3ec","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - a128a453-82a5-46fe-a051-0d622a2f0da1
+      - c7b97827-1755-4de6-aa7a-507289d22131
       Atl-Traceid:
-      - a128a45382a546fea0510d622a2f0da1
+      - c7b9782717554de6aa7a507289d22131
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:19 GMT
+      - Wed, 30 Apr 2025 16:23:43 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -278,7 +273,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=162,atl-edge-internal;dur=14,atl-edge-upstream;dur=149,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="dKisb8BoI_Mt_XbGepch_aZp21wttgb_-AWR47klCYCAKG-78tc2Tw==",cdn-downstream-fbl;dur=233,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=57,cdn-upstream-fbl;dur=230,atl-edge;dur=152,atl-edge-internal;dur=15,atl-edge-upstream;dur=138,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -287,10 +282,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 e61f6cd3dfbf1a805c935627b416490e.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - dKisb8BoI_Mt_XbGepch_aZp21wttgb_-AWR47klCYCAKG-78tc2Tw==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - 4c5701eb45fee93086d2d076d9db96b1
+      - 6608d2f06d9a1abf8d69bd0184ab0d2b
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -317,42 +320,31 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Epic&expand=projects.issuetypes.fields
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAAA+xWW0/bMBT+K1aeS0JLxVClaZqASWwTmsTlZULIbU5bg2NnttMmQ/3vO6e5OKVs
-        S9nGXshTfHIu37G/88UPAeQpV3EwClKj72DibNDzr6OvD95BWJuBK1IgFwtyira5c6kdRVEMUwyI
-        9Z0OuZPcWsFVqMBFBqyLeCqiQVRljfr7+GAKQUnrxT0UuDq/PL24xJXiCeDySgnnMAEV5AvuuLky
-        ElE9BMOjfHi0Y/1MiQUYy+VtmStaCFhG1FADrfrQ3x/uv8Gag2E+GP7bKu+s+A5vbcKlxIL9w7x/
-        +BIF87riwSA/GLxExQRikSXBqtfmEfHrGUxqMjzNpRjsxIjUCa3Q+p6NxYxlFgyzTpuCuTl3TAHE
-        ljnNxsDGRt+DYrFeqpAdG+AOYjYu2EdhOLvQU7fkBtgeOjClHcNGHNOGxSDBQUjVJ1ohM7t0IRI+
-        AxtRhPV92AhSMQntYubJf4oWXGXKGa6sJFDnG19sNnbc3gejKZcWesFcgOFmMi8+wwIQTL/nZ3cq
-        QMY0RtULjpDNkoSbgl4NfMuEAXR0JsNMdjKHhNMXAofh1hmhCJstrIOELFX0qsF7UVnqWa49EBi3
-        JzDlmXTXXGbQANYpAqZTIiIgD1xw06ZHJ2TeuwXOGz28M7Kxy9KzRNiO7YTxBmVISr2EeO30yt8O
-        /P0tS1d06BOdpFqBon9O+9SroK1j58ZwopbAA8cQH9+mQSup58GxN9Y8aPl1JELA45gqAdUzkOgF
-        BE+QgzrbOMwurW3PWjuFb+SkZa07aXt2baWeu0q6O01d7dsCWZs8wC+NUwnOB+0AbHtTnzVxf3b3
-        qKJJPD6V2lYNFW2ASFIpUFb9kb5eVf5mwf93VSmVKUPVTda/zVskTL+/4xSX8cFaZcK0yIUNZwZA
-        zXWKbA/vUKNHs/ke6eee5GOgTsuYM0y/ruhHijSVrW8BjXZtwdtpvFZ0I8ivcYtKc5fWHmsvbXAp
-        OI0YtHN69B9EzipnL75t112g9yoN/rX6pkZoI9yjW87POmu8N3StsrWFrXGrla0xbDVQKug2/icA
-        P1PZhP4BAAD//7xYwW6DMAz9lx16XLaWHhHabZOYVKm79kAZAlQGGxBVPfTfZ8cJOINJlKAea7Dz
-        Yr/afuDZAis/d5DrIDkYsjzNILo9y1/JiCeoxgnJcAO7Xg7sEKmBuXaGuVkGJjUUG+g7NRkNdeMM
-        1VsGKjDSxhlWZwPScwa5XQzkgKKhshmo24frAXcv/k90g35PKoyMHW9aB4tKbEI3zZy8PHUuZuR4
-        f0ZOSC+Njxxk3qDt/du3sSurOTdz2gzXYx2thxySweDVz6HfyrbC9R9lz8Qydkx4fnwSFEg0MoXS
-        tsGPTOqLP/nyY5IBMEdtG8XZF0qXWflg/iwnzNrn5YW/SrmxvKfdg24QV9+XXq4jiWbWk/kz/MzK
-        6gq/QdkqJd+X1wrgUmKtywUQ/pTUQSzrGvKiVczbp79qsuq8l8cPkLO7CJ/5ONy5uSGLdlVAQTD4
-        pSyK1Sy6dGlGwCmI/mlJxq8FFh2MNyODMXVU6A1uWcTDBUWLjkUimgT1fqD3bV/prFuzQZ0DN/LD
-        9RcAAP//AwBwEqjntBYAAA==
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10000","id":"10000","description":"A
+        big user story that needs to be broken down. Created by Jira Software - do
+        not edit or delete.","iconUrl":"https://defectdojo.atlassian.net/images/icons/issuetypes/epic.svg","name":"Epic","untranslatedName":"Epic","subtask":false,"hierarchyLevel":1,"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10000","id":"10000","description":"A
+        big user story that needs to be broken down. Created by Jira Software - do
+        not edit or delete.","iconUrl":"https://defectdojo.atlassian.net/images/icons/issuetypes/epic.svg","name":"Epic","subtask":false,"hierarchyLevel":1}]},"components":{"required":false,"schema":{"type":"array","items":"component","system":"components"},"name":"Components","key":"components","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}}]},"customfield_10011":{"required":false,"schema":{"type":"string","custom":"com.pyxis.greenhopper.jira:gh-epic-label","customId":10011},"name":"Epic
+        Name","key":"customfield_10011","hasDefaultValue":false,"operations":["set"]},"fixVersions":{"required":false,"schema":{"type":"array","items":"version","system":"fixVersions"},"name":"Fix
+        versions","key":"fixVersions","hasDefaultValue":false,"operations":["set","add","remove"],"allowedValues":[]},"priority":{"required":false,"schema":{"type":"priority","system":"priority"},"name":"Priority","key":"priority","hasDefaultValue":true,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/1","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/highest.svg","name":"Highest","id":"1"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high.svg","name":"High","id":"2"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/4","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/low.svg","name":"Low","id":"4"},{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/5","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/lowest.svg","name":"Lowest","id":"5"}],"defaultValue":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"}},"customfield_10014":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-epic-link","customId":10014},"name":"Epic
+        Link","key":"customfield_10014","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - 73c8b0f9-1d75-4368-acd7-aa0789b267cf
+      - 71778293-41e4-43a2-bba0-62ca40c1905e
       Atl-Traceid:
-      - 73c8b0f91d754368acd7aa0789b267cf
+      - 7177829341e443a2bba062ca40c1905e
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:19 GMT
+      - Wed, 30 Apr 2025 16:23:43 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -362,7 +354,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=297,atl-edge-internal;dur=15,atl-edge-upstream;dur=282,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="kCRrafBXnH6Ao4668Di4X-zfuIIyiISUqNG4uefJlDrU77hgIVTdqg==",cdn-downstream-fbl;dur=333,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=56,cdn-upstream-fbl;dur=331,atl-edge;dur=256,atl-edge-internal;dur=18,atl-edge-upstream;dur=238,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -371,13 +363,21 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 f82a4020c8fc9b14a403737c65661074.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - kCRrafBXnH6Ao4668Di4X-zfuIIyiISUqNG4uefJlDrU77hgIVTdqg==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - ad710f2110169e1ee2d8b1c8c01707f3
+      - 02e0063e85db7de3f693f95ab9029c67
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -407,18 +407,20 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"16611","key":"NTEST-1828","self":"https://defectdojo.atlassian.net/rest/api/2/issue/16611"}'
+      string: '{"id":"18155","key":"NTEST-1830","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18155"}'
     headers:
       Atl-Request-Id:
-      - e5d301a0-db46-476e-a680-b2b0eb8a1db6
+      - 05e1afff-12a9-450e-b9de-fcf7259a4a72
       Atl-Traceid:
-      - e5d301a0db46476ea680b2b0eb8a1db6
+      - 05e1afff12a9450eb9defcf7259a4a72
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:20 GMT
+      - Wed, 30 Apr 2025 16:23:45 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -428,7 +430,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=750,atl-edge-internal;dur=13,atl-edge-upstream;dur=737,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD56-P1",cdn-rid;desc="b0UAhMmguWyTv95Evp4KyvPQj5Sg93v_CZeDN5OvPpQgZTLydN-68g==",cdn-downstream-fbl;dur=873,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=62,cdn-upstream-fbl;dur=870,atl-edge;dur=786,atl-edge-internal;dur=15,atl-edge-upstream;dur=771,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -437,10 +439,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 c1388c9ad241eb02cd4ddbe69b1a2d34.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - b0UAhMmguWyTv95Evp4KyvPQj5Sg93v_CZeDN5OvPpQgZTLydN-68g==
+      X-Amz-Cf-Pop:
+      - ORD56-P1
       X-Arequestid:
-      - 4476e86ab623cefcadc29c6eea3b1844
+      - c7c28b6474367809d0f45d2201d8a6eb
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:
@@ -464,52 +474,36 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1828
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1830
   response:
     body:
-      string: !!binary |
-        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
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18155","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18155","key":"NTEST-1830","fields":{"statuscategorychangedate":"2025-04-30T18:23:44.992+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10000","id":"10000","description":"A
+        big user story that needs to be broken down. Created by Jira Software - do
+        not edit or delete.","iconUrl":"https://defectdojo.atlassian.net/images/icons/issuetypes/epic.svg","name":"Epic","subtask":false,"hierarchyLevel":1},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"fixVersions":[],"customfield_10033":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"aggregatetimespent":null,"resolution":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"lastViewed":null,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1830/watchers","watchCount":1,"isWatching":true},"created":"2025-04-30T18:23:44.633+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},"customfield_10023":null,"labels":[],"customfield_10026":null,"customfield_10016":null,"customfield_10017":"teal","customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00sx3:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-04-30T18:23:44.761+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"new
+        engagement","customfield_10010":null,"customfield_10055":null,"customfield_10011":"new
+        engagement","customfield_10056":null,"customfield_10012":{"self":"https://defectdojo.atlassian.net/rest/api/2/customFieldOption/10016","value":"To
+        Do","id":"10016"},"customfield_10013":"ghx-label-11","customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10049":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"aggregatetimeestimate":null,"attachment":[],"customfield_10009":null,"summary":"new
+        engagement","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10047":null,"customfield_10003":null,"customfield_10048":null,"customfield_10004":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-1830/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18155/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - fc062cd3-da38-4d95-8b00-ecc24bb3dcb2
+      - 5f0659c7-5b3c-4bc2-8bf5-053a88006161
       Atl-Traceid:
-      - fc062cd3da384d958b00ecc24bb3dcb2
+      - 5f0659c75b3c4bc28bf5053a88006161
       Cache-Control:
       - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Wed, 29 Jan 2025 20:45:20 GMT
+      - Wed, 30 Apr 2025 16:23:45 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -519,7 +513,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - atl-edge;dur=271,atl-edge-internal;dur=14,atl-edge-upstream;dur=258,atl-edge-pop;desc="aws-us-east-1"
+      - cdn-cache-miss,cdn-pop;desc="ORD58-P1",cdn-rid;desc="V7l25GXPxmIUA1lRT2C2YBKpySbfjWDak_CEAv9wxZFUMrH0OSDm-g==",cdn-downstream-fbl;dur=358,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=63,cdn-upstream-fbl;dur=356,atl-edge;dur=272,atl-edge-internal;dur=19,atl-edge-upstream;dur=253,atl-edge-pop;desc="aws-us-east-1"
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -528,10 +522,18 @@ interactions:
       - chunked
       Vary:
       - Accept-Encoding
+      Via:
+      - 1.1 bd02c4a72f88f2bbd693051675941962.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - V7l25GXPxmIUA1lRT2C2YBKpySbfjWDak_CEAv9wxZFUMrH0OSDm-g==
+      X-Amz-Cf-Pop:
+      - ORD58-P1
       X-Arequestid:
-      - 446c00b1e72bcc391857513273a2fa6a
+      - 8ec2bc5269a95ba5dfa77a91fbd97e91
+      X-Cache:
+      - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
       X-Xss-Protection:

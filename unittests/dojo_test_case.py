@@ -513,13 +513,17 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         with (get_unit_tests_path() / filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
-                    "active": active,
-                    "verified": verified,
                     "scan_type": scan_type,
                     "file": testfile,
                     "version": "1.0.1",
                     "close_old_findings": close_old_findings,
             }
+
+            if active is not None:
+                payload["active"] = active
+
+            if verified is not None:
+                payload["verified"] = verified
 
             if engagement:
                 payload["engagement"] = engagement
@@ -632,7 +636,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def post_new_finding_api(self, finding_details, push_to_jira=None):
+    def post_new_finding_api(self, finding_details: dict, push_to_jira=None, expected_status_code: int = 201):
         payload = copy.deepcopy(finding_details)
         if push_to_jira is not None:
             payload["push_to_jira"] = push_to_jira
@@ -640,7 +644,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # logger.debug('posting new finding push_to_jira: %s', payload.get('push_to_jira', None))
 
         response = self.client.post(reverse("finding-list"), payload, format="json")
-        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def put_finding_api(self, finding_id, finding_details, push_to_jira=None):
@@ -669,7 +673,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json["count"], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None, severity=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, false_p=None, component_name=None, component_version=None, severity=None):
         payload = {"test": test_id}
         if active is not None:
             payload["active"] = active
@@ -677,6 +681,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload["verified"] = verified
         if is_mitigated is not None:
             payload["is_mitigated"] = is_mitigated
+        if false_p is not None:
+            payload["false_p"] = false_p
         if component_name is not None:
             payload["component_name"] = component_name
         if severity is not None:

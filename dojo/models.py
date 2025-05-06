@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
+import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
@@ -2683,6 +2684,9 @@ class Finding(models.Model):
 
         from dojo.finding import helper as finding_helper
 
+        # if not isinstance(self.date, (datetime, date)):
+        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
@@ -3007,27 +3011,17 @@ class Finding(models.Model):
         if start_date and isinstance(start_date, str):
             start_date = parse(start_date).date()
 
-        from dojo.utils import get_work_days
-        if settings.SLA_BUSINESS_DAYS:
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                days = get_work_days(self.date, mitigated_date)
-            else:
-                days = get_work_days(self.date, get_current_date())
-        else:
-            if isinstance(start_date, datetime):
-                start_date = start_date.date()
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
 
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                diff = mitigated_date - start_date
-            else:
-                diff = get_current_date() - start_date
-            days = diff.days
+        if self.mitigated:
+            mitigated_date = self.mitigated
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = self.mitigated.date()
+            diff = mitigated_date - start_date
+        else:
+            diff = get_current_date() - start_date
+        days = diff.days
         return max(0, days)
 
     @property
@@ -3054,22 +3048,16 @@ class Finding(models.Model):
         if not system_settings.enable_finding_sla:
             return
 
-        days_remaining = None
+        # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
+        sla_start_date = self.get_sla_start_date()
+        if sla_start_date and isinstance(sla_start_date, str):
+            sla_start_date = dateutil.parser.parse(sla_start_date).date()
+
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            days_remaining = sla_period - self.sla_age
+            self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
         else:
-            self.sla_expiration_date = Finding().sla_expiration_date
-            return
-
-        if days_remaining:
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
-            else:
-                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
+            self.sla_expiration_date = None
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
@@ -3861,8 +3849,8 @@ class GITHUB_PKey(models.Model):
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
     url = models.URLField(max_length=2000, verbose_name=_("JIRA URL"), help_text=_("For more information how to configure Jira, read the DefectDojo documentation."))
-    username = models.CharField(max_length=2000)
-    password = models.CharField(max_length=2000)
+    username = models.CharField(max_length=2000, verbose_name=_("Username/Email"), help_text=_("Username or Email Address, see DefectDojo documentation for more information."))
+    password = models.CharField(max_length=2000, verbose_name=_("Password/Token"), help_text=_("Password, API Token, or Personal Access Token, see DefectDojo documentation for more information."))
 
     if hasattr(settings, "JIRA_ISSUE_TYPE_CHOICES_CONFIG"):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG

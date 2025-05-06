@@ -1,6 +1,7 @@
 import logging
 from unittest.mock import patch
 
+import django
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
@@ -45,7 +46,7 @@ class TestSLACalculations(DojoTestCase):
         self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
         self.assertEqual(self.sla_config.high, finding.sla_days_remaining())
 
-    # Finding within SLA should have correct sla_exration_date and days_remaining
+    # Finding within SLA should have correct sla_expiration_date and days_remaining
     def test_active_within_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
@@ -58,7 +59,7 @@ class TestSLACalculations(DojoTestCase):
             self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
             self.assertEqual(self.sla_config.high - 10, finding.sla_days_remaining())
 
-    # Finding outside SLA should have correct sla_exration_date and days_remaining
+    # Finding outside SLA should have correct sla_expiration_date and days_remaining
     def test_active_outside_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
@@ -71,7 +72,7 @@ class TestSLACalculations(DojoTestCase):
             self.assertEqual((self.now + relativedelta(days=self.sla_config.high)).date(), finding.sla_expiration_date)
             self.assertEqual(self.sla_config.high - 50, finding.sla_days_remaining())
 
-    # Finding mitigated inside SLA should have correct sla_exration_date and days_remaining
+    # Finding mitigated inside SLA should have correct sla_expiration_date and days_remaining
     def test_mitigated_inside_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
@@ -111,7 +112,7 @@ class TestSLACalculations(DojoTestCase):
             self.assertTrue("within SLA" in finding_sla(finding))
             self.assertTrue(">20<" in finding_sla(finding))
 
-    # Finding mitigated outside SLA should have correct sla_exration_date and days_remaining
+    # Finding mitigated outside SLA should have correct sla_expiration_date and days_remaining
     def test_mitigated_outside_sla(self):
         finding = Finding(test=Test.objects.get(id=89), title="Test Finding", severity="High")
         finding.save()
@@ -153,3 +154,29 @@ class TestSLACalculations(DojoTestCase):
             self.assertTrue("Out of SLA" in finding_sla(finding))
             self.assertTrue("15 days past" in finding_sla(finding))
             self.assertTrue(">15<" in finding_sla(finding))
+
+    # test implicit parsing of finding.date (GitHub #12299)
+    def test_finding_date_formats(self):
+        with self.subTest(i=0):
+            # date set to now shouldn't result in an error
+            finding = Finding(test=Test.objects.get(id=89), title="Test Finding 1", severity="High")
+            finding.date = timezone.now()
+            finding.save()
+
+        with self.subTest(i=1):
+            # date set to simple date string shouldn't result in an error
+            finding = Finding(test=Test.objects.get(id=89), title="Test Finding 2", severity="High")
+            finding.date = "2025-04-23"
+            finding.save()
+
+        with self.subTest(i=2):
+            # date set to ISO date string shouldn't result in an error
+            finding = Finding(test=Test.objects.get(id=89), title="Test Finding 3", severity="High")
+            finding.date = "2025-04-23T12:00:00Z"[:10]
+            finding.save()
+
+        with self.subTest(i=3) and self.assertRaises(django.core.exceptions.ValidationError):
+            # date set to ISO datetime string will result in a Django Error, not an error in our code
+            finding = Finding(test=Test.objects.get(id=89), title="Test Finding 3", severity="High")
+            finding.date = "2025-04-23T12:00:00+02:00"
+            finding.save()

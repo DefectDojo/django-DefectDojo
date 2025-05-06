@@ -315,8 +315,9 @@ In order to use Google Authentication, a Google Authentication Server will need 
     - **Google OAuth Secret** should be set to your **Client Secret Key**.
     - **Whitelisted Domains** can be set to the domain name used by your organization.  However, this will allow login from any user with this domain name in their Google email address.
     - Alternatively, if you only want to allow specific Google email addresses to log in to DefectDojo, you can enter those in the **Whitelisted E-mail Addresses** section of the form. `(appsecuser1@xyz.com,appsecuser2@xyz.com)`, etc.
+    - Note that you must add at least one user or domain to the whitelist, or DefectDojo will not allow any users to log in using Google OAuth.
 
-2. Check the **Enable Azure AD OAuth** box.  Submit the form, and `Login With Google` will be added as an option to the Login menu.
+2. Check the **Enable Google OAuth** box.  Submit the form, and `Login With Google` will be added as an option to the Login menu.
 
 ### Open-Source
 
@@ -596,6 +597,10 @@ NOTE: *DD_SITE_URL* might also need to be set depending on the choices you make 
 NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
 REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
+
+#### Troubleshooting
+
+The SAML Tracer browser add-on can help troubleshoot SAML problems: [Chrome](https://chromewebstore.google.com/detail/saml-tracer/mpdajninpobndbfcldcmbpnnbhibjmch?hl=en), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/saml-tracer/).
 
 #### Advanced Configuration
 The [djangosaml2](https://github.com/IdentityPython/djangosaml2) plugin has a lot of options. For details take a look at the [plugin documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
