@@ -32,7 +32,7 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.tools.factory import get_parser
 from dojo.utils import max_safe
 
@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 
 
 class Parser:
-
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
@@ -57,7 +56,6 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
-
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
@@ -244,7 +242,10 @@ class BaseImporter(ImporterOptions):
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
+        warn(
+            "This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.",
+            stacklevel=2,
+        )
         return self.process_findings(parsed_findings, sync=False, **kwargs)
 
     def determine_process_method(
@@ -365,7 +366,9 @@ class BaseImporter(ImporterOptions):
         import_settings["tags"] = self.tags
         # Add the list of endpoints that were added exclusively at import time
         if len(self.endpoints_to_add) > 0:
-            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
+            import_settings["endpoints"] = [
+                str(endpoint) for endpoint in self.endpoints_to_add
+            ]
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -379,29 +382,37 @@ class BaseImporter(ImporterOptions):
 
         # Create a history record for each finding
         for finding in closed_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CLOSED_FINDING,
-            ))
+            self.create_import_history_record_safe(
+                Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_CLOSED_FINDING,
+                )
+            )
         for finding in new_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CREATED_FINDING,
-            ))
+            self.create_import_history_record_safe(
+                Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_CREATED_FINDING,
+                )
+            )
         for finding in reactivated_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_REACTIVATED_FINDING,
-            ))
+            self.create_import_history_record_safe(
+                Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_REACTIVATED_FINDING,
+                )
+            )
         for finding in untouched_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_UNTOUCHED_FINDING,
-            ))
+            self.create_import_history_record_safe(
+                Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_UNTOUCHED_FINDING,
+                )
+            )
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
@@ -422,13 +433,17 @@ class BaseImporter(ImporterOptions):
         test_import_finding_action,
     ):
         """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
-        logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
+        logger.debug(
+            f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}"
+        )
         try:
             test_import_finding_action.save()
         except IntegrityError as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
             logger.warning("Error creating Test_Import_Finding_Action: %s", e)
-            logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
+            logger.debug(
+                "Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?"
+            )
 
     def add_tags_safe(
         self,
@@ -436,11 +451,17 @@ class BaseImporter(ImporterOptions):
         tag,
     ):
         """Adds tags to a finding or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
-        if not isinstance(finding_or_endpoint, Finding) and not isinstance(finding_or_endpoint, Endpoint):
+        if not isinstance(finding_or_endpoint, Finding) and not isinstance(
+            finding_or_endpoint, Endpoint
+        ):
             msg = "finding_or_endpoint must be a Finding or Endpoint object"
             raise TypeError(msg)
 
-        msg = "finding" if isinstance(finding_or_endpoint, Finding) else "endpoint" if isinstance(finding_or_endpoint, Endpoint) else "unknown"
+        msg = (
+            "finding"
+            if isinstance(finding_or_endpoint, Finding)
+            else "endpoint" if isinstance(finding_or_endpoint, Endpoint) else "unknown"
+        )
         logger.debug(f" adding tag: {tag} to " + msg + f"{finding_or_endpoint.id}")
 
         try:
@@ -506,8 +527,13 @@ class BaseImporter(ImporterOptions):
         ```
         """
         # Break the list of parsed findings into "chunk_size" lists
-        chunk_list = [finding_list[i:i + chunk_size] for i in range(0, len(finding_list), chunk_size)]
-        logger.debug(f"Split endpoints/findings into {len(chunk_list)} chunks of {chunk_size}")
+        chunk_list = [
+            finding_list[i : i + chunk_size]
+            for i in range(0, len(finding_list), chunk_size)
+        ]
+        logger.debug(
+            f"Split endpoints/findings into {len(chunk_list)} chunks of {chunk_size}"
+        )
         return chunk_list
 
     def update_test_progress(
@@ -535,7 +561,9 @@ class BaseImporter(ImporterOptions):
         """
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
-            logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+            logger.info(
+                f"Created new Test_Type with name {test_type.name} because a report is being imported"
+            )
             test_type.dynamically_generated = True
             test_type.save()
         return test_type
@@ -657,7 +685,10 @@ class BaseImporter(ImporterOptions):
                 burp_rr = BurpRawRequestResponse(
                     finding=finding,
                     burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
+                    burpResponseBase64=base64.b64encode(
+                        req_resp["resp"].encode("utf-8")
+                    ),
+                )
                 burp_rr.clean()
                 burp_rr.save()
 
@@ -667,7 +698,8 @@ class BaseImporter(ImporterOptions):
             burp_rr = BurpRawRequestResponse(
                 finding=finding,
                 burpRequestBase64=base64.b64encode(unsaved_request.encode()),
-                burpResponseBase64=base64.b64encode(unsaved_response.encode()))
+                burpResponseBase64=base64.b64encode(unsaved_response.encode()),
+            )
             burp_rr.clean()
             burp_rr.save()
 
@@ -684,11 +716,15 @@ class BaseImporter(ImporterOptions):
         finding and and product
         """
         # Save the unsaved endpoints
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
+        self.endpoint_manager.chunk_endpoints_and_disperse(
+            finding, finding.unsaved_endpoints
+        )
         # Check for any that were added in the form
         if len(endpoints_to_add) > 0:
             logger.debug("endpoints_to_add: %s", endpoints_to_add)
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
+            self.endpoint_manager.chunk_endpoints_and_disperse(
+                finding, endpoints_to_add
+            )
 
     def process_vulnerability_ids(
         self,
@@ -716,7 +752,9 @@ class BaseImporter(ImporterOptions):
             Vulnerability_Id.objects.filter(finding=finding).delete()
 
             # user the helper function
-            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
+            finding_helper.save_vulnerability_ids(
+                finding, finding.unsaved_vulnerability_ids
+            )
 
         return finding
 
@@ -760,14 +798,16 @@ class BaseImporter(ImporterOptions):
             entry=note_message,
         )
         # Mitigate the endpoint statuses
-        self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
+        self.endpoint_manager.mitigate_endpoint_status(
+            finding.status_finding.all(), self.user, kwuser=self.user, sync=True
+        )
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
             finding.save(dedupe_option=False)
         else:
             finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
-    
+
     def notify_scan_added(
         self,
         test,
@@ -788,13 +828,17 @@ class BaseImporter(ImporterOptions):
         logger.debug("Scan added notifications")
 
         new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
-        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
-        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
-        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
-
-        title = (
-            f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
+        findings_mitigated = sorted(
+            findings_mitigated, key=lambda x: x.numerical_severity
         )
+        findings_reactivated = sorted(
+            findings_reactivated, key=lambda x: x.numerical_severity
+        )
+        findings_untouched = sorted(
+            findings_untouched, key=lambda x: x.numerical_severity
+        )
+
+        title = f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
 
         create_notification(
             event="scan_added_empty" if updated_count == 0 else "scan_added",
@@ -810,3 +854,28 @@ class BaseImporter(ImporterOptions):
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
+
+        # Notify if the test tag redteam
+        if test.tags.filter(name="redteam").exists():
+            email_notification_manager = EmailNotificationManger()
+            email_notification_manager.send_mail_notification(
+                event="scan_added",
+                subject=f"🧑🏼‍💻 Scan added of RedTeam Report Type",
+                user=None,
+                title=title,
+                description="Scan added of RedTeam Report Type:",
+                findings_new=new_findings,
+                findings_mitigated=findings_mitigated,
+                findings_reactivated=findings_reactivated,
+                findings_untouched=findings_untouched,
+                finding_count=updated_count,
+                test=test,
+                engagement=test.engagement,
+                product=test.engagement.product,
+                product_type=test.engagement.product.prod_type,
+                url=reverse("view_test", args=(test.id,)),
+                url_api=reverse("test-detail", args=(test.id,)),
+                recipient=list(
+                    settings.PROVIDERS_CYBERSECURITY_EMAIL.get("redteam", []).split(":")
+                ),
+            )

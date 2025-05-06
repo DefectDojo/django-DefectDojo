@@ -3192,6 +3192,10 @@ class Finding(models.Model):
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
             return
+        
+        if self.test.engagement.product.prod_type.name == system_settings.orphan_findings:
+            # Orphan findings are not subject to SLA
+            return
 
         days_remaining = None
         sla_period, enforce_period = self.get_sla_period()
