@@ -942,6 +942,15 @@ def edit_product(request, pid):
         jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
             initial_sla_config = Product.objects.get(pk=form.instance.id).sla_configuration
+
+            # check if SLA Configuration has product type is the same
+            if form.instance.sla_configuration.name == "Orphan" and form.instance.prod_type.name != system_settings.orphan_findings:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     _("The SLA configuration 'Orphan' can only be assigned to the product type 'Orphan'."),
+                                     extra_tags="alert-danger")
+                return HttpResponseRedirect(reverse("view_product", args=(pid,)))
+
             form.save()
             msg = "Product updated successfully."
             # check if the SLA config was changed, append additional context to message
