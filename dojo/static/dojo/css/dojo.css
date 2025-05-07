@@ -1929,3 +1929,60 @@ align-items: center;
 justify-content: center;
 height: 100%;
 }
+
+#feedback-container {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #bdb9b9;
+    text-align: center;
+}
+
+.rating-tag {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #eef1f5;
+    border: 1px solid #ccd2d9;
+    border-radius: 30px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.534);
+    text-align: center;
+    margin-top: 30px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+.rating-title {
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    font-size: small;
+    color: #03b3f5;
+  }
+
+.rotated-icon{
+    transform: rotate(180deg);
+}
+
+.feedback-btn.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: default;
+}
+
+.feedback-btn:hover {
+    font-size: 1.8rem;
+    transform: scale(1.2);
+    cursor: pointer;
+    color: #4caf50;
+  }
+
+.feedback-btn.selected {
+color: #4caf50;
+}
+
+#feedback-thankyou {
+    display: none;
+    margin-top: 10px;
+    font-size: small;
+    color: #b82424
+}

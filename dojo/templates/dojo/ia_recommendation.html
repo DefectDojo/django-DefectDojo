@@ -1,45 +1,21 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recomendaciones de Seguridad</title>
-    {% load static %}
-    {% block dojo_css %}
-            <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
-    {% endblock %}
-    
-</head>
-<body>
+{% load display_tags %}
+<div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4></div>
+<div id="ia_recommendation" class="panel-body collapse">
     <div id="id_recommendation_content">
-        <h5>IA Recommendations</h5>
-        <ul>
-            {%for recommendation in recommendations%}
-                <li class="recommendation-item">{{recommendation}}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    
-    <div id="id_mitigations_contect">
-        <h5>Mitigations</h5>
-        {% for mitigation in mitigations%}
-            <pre><code class="language-css">{{mitigation}}</code></pre>
-        {% endfor %}
+        {{finding|render_ia_recommendation | safe}}
+        
     </div>
 
-    <div id="id_files_to_fix_content">
-        <h5>files to fix</h5>
-        <ul>
-            {% for file in files_to_fix %}
-                <li class="file-path">{{file}}</li>
-            {% endfor %}
-        </ul>
+    {% if finding|enable_like_status %} 
+    <div id="like_status" style="display: {{ finding|enable_like_status|yesno:'block,none;'}}">
+        <div class="rating-tag">
+            <p class="rating-title">¿Te fue útil esta respuesta?</p>
+            <div class="feedback-buttons">
+                <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="Me fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
+                <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="No me ayudó"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
+            </div>
+            <div id="feedback-thankyou" class="thank-you">¡Gracias por tu opinión!</div>
+        </div>
     </div>
-
-    <script>
-        new ClipboardJS('.copy-btn');
-        Prism.highlightAll();
-    </script>
-
-</body>
-</html>
+    {% endif %}
+</div>

@@ -29,7 +29,7 @@ from django.utils.translation import gettext as _
 from dojo.engine_tools.models import FindingExclusion
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
-
+from dojo.finding.helper import parser_ia_recommendation
 from dojo.models import (
     Benchmark_Product,
     Check_List,
@@ -1139,14 +1139,20 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
 
 
 @register.filter()
-def render_ia_recommendation(ia_recommendation: str):
-    data = ia_recommendation.get("data")
-    if not data or not all(key in data for key in ["recommendations", "mitigations", "files_to_fix"]):
-        return "An error occurred. Please click the 'Recommendation AI' 🤖 button to try again."
-        
-    rendered = render_to_string("dojo/ia_recommendation.html", {
-        "recommendations": data["recommendations"],
-        "mitigations": data["mitigations"],
-        "files_to_fix": data["files_to_fix"]
-    })
-    return rendered
+def render_ia_recommendation(finding):
+    if finding.ia_recommendation is None:
+        return 'Click the 🤖 bot button to generate a recommendation using AI.'
+    context = parser_ia_recommendation(
+        finding.ia_recommendation)
+    return context["ia_recommendations"]
+
+
+@register.filter()
+def enable_like_status(finding):
+    if finding.ia_recommendation:
+        if "data" in finding.ia_recommendation:
+            if "like_status" in finding.ia_recommendation["data"]:
+                like_status = finding.ia_recommendation["data"]["like_status"]
+                if like_status is None:
+                    return True
+    return False

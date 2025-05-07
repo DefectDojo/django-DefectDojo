@@ -1,6 +1,8 @@
 import logging
+import markdown
 import re
 from time import strftime
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
@@ -699,6 +701,9 @@ def rule_tags_enable_ia_recommendation(*args, **kwargs):
                 "TAGS_IA_RECOMMENDATION", [])
     if any(tag_enabled in tags for tag_enabled in tags_enabled):
         return True
+    logger.debug("Tags IA_RECOMMENDATION not pass rule: %s not found in %s",
+                 tags,
+                 tags_enabled)
     return False
 
 
@@ -710,7 +715,8 @@ def rule_repository_enable_ia_recommendation(*args, **kwargs):
     if engagement.source_code_management_server is not None:
         if engagement.source_code_management_server.name in repositories:
             return True
-    logger.debug("Repository IA_RECOMMENDATION not pass rule: %s or %s", engagement.source_code_management_server.name)
+    logger.debug("Repository IA_RECOMMENDATION not pass rule: %s",
+                 engagement.source_code_management_server.name)
     return False
 
 
@@ -748,7 +754,7 @@ def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
        product.name not in product_exclude):
         return True
     logger.debug("Product or product_type IA_RECOMMENDATION not pass rule: %s",
-                 product.prod_type.name, finding.cve)
+                 product.prod_type.name)
     return False
 
 
@@ -765,3 +771,28 @@ def enable_flow_ia_recommendation(**kwargs):
         if rule(finding=finding) is False:
             return False
     return True
+
+
+def parser_ia_recommendation(ia_recommendation: dict = {}):
+    markdown_code = ""
+    context = {}
+    if recomendations := ia_recommendation["data"].get("recommendations", None):
+        markdown_code = "\n###✅ Recommendations\n<br>"
+        for recomendation in recomendations:
+            markdown_code += "- " + recomendation + "<br>"
+
+    if mitigations := ia_recommendation["data"].get("mitigations", None):
+        markdown_code += "\n###🛠️ Mitigations\n<br>"
+        for mitigation in mitigations:
+            markdown_code += mitigation + "<br>"
+
+    if files_to_fix := ia_recommendation["data"].get("files_to_fix", None):
+        markdown_code += "\n###📌 Files_to_fix\n<br>"
+        for file_to_fix in files_to_fix:
+            markdown_code += "```" + file_to_fix + "```"
+
+    markdown_code = markdown_code.replace("'", "`")
+    html = markdown.markdown(markdown_code)
+    context["ia_recommendations"] = html
+    context["like_status"] = ia_recommendation["data"].get("like_status", None)
+    return context
