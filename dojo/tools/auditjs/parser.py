@@ -85,10 +85,7 @@ class AuditJSParser:
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        msg = (
-                            "Missing mandatory attributes (id, title, description). Please check your report or ask "
-                            "community."
-                        )
+                        msg = "Missing mandatory attributes (id, title, description). Please check your report or ask community."
                         raise ValueError(msg)
                     if "cvssScore" in vulnerability:
                         cvss_score = vulnerability["cvssScore"]
@@ -101,6 +98,7 @@ class AuditJSParser:
                             vector_obj = cvss_vectors[0]
 
                             if isinstance(vector_obj, CVSS4):
+                                description += "\nCVSS V4 Vector:" + vector_obj.clean_vector()
                                 severity = vector_obj.severities()[0]
 
                             elif isinstance(vector_obj, CVSS3):
@@ -112,16 +110,13 @@ class AuditJSParser:
                                 severity = vector_obj.severities()[0]
 
                             else:
-                                raise ValueError(
-                                    f"Unsupported CVSS version detected in parser: {type(vector_obj).__name__}"
-                                )
+                                msg = "Unsupported CVSS version detected in parser."
+                                raise ValueError(msg)
                         else:
                             # Explicitly raise an error if no CVSS vectors are found,
                             # to avoid 'NoneType' errors during severity processing later.
-                            raise ValueError(
-                                "No CVSS vectors found. Please check that parse_cvss_from_text() " \
-                                "correctly parses the provided cvssVector."
-                            )
+                            msg = "No CVSS vectors found. Please check that parse_cvss_from_text() correctly parses the provided cvssVector."
+                            raise ValueError(msg)
                     else:
                         # If there is no vector, calculate severity based on
                         # score and CVSS V3 (AuditJS does not always include
