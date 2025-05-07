@@ -134,7 +134,15 @@ def get_item(vuln, test, check_type):
 
         # More detailed mitigation
         m_txt = soup.findAll(id=lambda x: x and x.startswith('fix'))[0].parent
-        mitigation += str(m_txt)
+        mitigation += str(m_txt) + "\n"
+
+    if "benchmarks" in vuln:
+        bms = vuln['benchmarks'].keys()
+        if len(bms) > 0:
+            mitigation += f"\nBenchmarks:\n"
+            for bm in bms:
+                for gl in vuln['benchmarks'][bm]:
+                    mitigation += f"- {bm} # {gl['name']} : {gl['description']}\n"
 
     file_path = vuln.get("file_path", None)
     source_line = None
