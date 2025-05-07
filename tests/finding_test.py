@@ -119,6 +119,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
+        # id_tags it the hidden input field, so it doesn't have autcompletion and tabbing functionality
+        driver.find_element(By.ID, "id_tags").send_keys("tag1, tag2")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -130,6 +132,8 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="REF-3"))
         self.assertTrue(self.is_text_present_on_page(text="REF-4"))
         self.assertTrue(self.is_text_present_on_page(text="Additional Vulnerability Ids"))
+        self.assertTrue(self.is_text_present_on_page(text="Search tag1"))
+        self.assertTrue(self.is_text_present_on_page(text="Search tag2"))
 
     def test_add_image(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
