@@ -2677,4 +2677,5 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
         error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
 
     if error_messages:
+        logger.debug(f"Tag validation failed: {error_messages}")
         raise exception_class(error_messages)
