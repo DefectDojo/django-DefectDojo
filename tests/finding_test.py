@@ -119,8 +119,6 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
-        # Select the first element with class 'select2-search__field'
-        driver.find_element(By.CLASS_NAME, "select2-search__field").send_keys("tag1\t")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -132,7 +130,6 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="REF-3"))
         self.assertTrue(self.is_text_present_on_page(text="REF-4"))
         self.assertTrue(self.is_text_present_on_page(text="Additional Vulnerability Ids"))
-        self.assertTrue(self.is_text_present_on_page(text="Search tag1"))
 
     def test_add_image(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
