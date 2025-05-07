@@ -341,6 +341,7 @@ class ProductForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -608,6 +609,7 @@ class ImportScanForm(forms.Form):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -717,6 +719,7 @@ class ReImportScanForm(forms.Form):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -1033,6 +1036,7 @@ class EngForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Engagement
@@ -1091,6 +1095,7 @@ class TestForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -1190,6 +1195,7 @@ class AddFindingForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1270,6 +1276,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1330,6 +1337,7 @@ class PromoteFindingForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1455,6 +1463,7 @@ class FindingForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     def _post_clean(self):
         super()._post_clean()
@@ -1534,6 +1543,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "mitigation", "impact", "references", "tags"]
@@ -1567,6 +1577,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1623,6 +1634,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1676,6 +1688,7 @@ class EditEndpointForm(forms.ModelForm):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class AddEndpointForm(forms.Form):
@@ -1742,6 +1755,7 @@ class AddEndpointForm(forms.Form):
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteEndpointForm(forms.ModelForm):
