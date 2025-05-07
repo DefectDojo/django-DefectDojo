@@ -120,6 +120,22 @@ def get_item(vuln, test, check_type):
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
+    mitigation = ""
+    if "guideline" in vuln:
+        plain_url = f"{vuln['guideline']}.plain.html".replace("docs.prismacloud.io", "docs.prismacloud.io/docs")
+        plain_req = requests.get(plain_url)
+        plain_html = plain_req.text
+
+        soup = BeautifulSoup(plain_html, 'html.parser')
+
+        # More detailed description
+        d_txt = soup.find(id='description').parent
+        description += str(d_txt)
+
+        # More detailed mitigation
+        m_txt = soup.findAll(id=lambda x: x and x.startswith('fix'))[0].parent
+        mitigation += str(m_txt)
+
     file_path = vuln.get("file_path", None)
     source_line = None
     if "file_line_range" in vuln:
@@ -133,8 +149,6 @@ def get_item(vuln, test, check_type):
     severity = "Medium"
     if "severity" in vuln and vuln["severity"] is not None:
         severity = vuln["severity"].capitalize()
-
-    mitigation = ""
 
     references = vuln.get("guideline", "")
     return Finding(
