@@ -6,20 +6,20 @@ weight: 5
 pro-feature: true
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Beta UI and associated features are only available in DefectDojo Pro.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Pro UI and associated features are only available in DefectDojo Pro.</span>
 
-In late 2023, DefectDojo Inc. released a new UI for DefectDojo Pro, which has since been in Beta for Pro customers to test and experiment with.
+In late 2023, DefectDojo Inc. released a new UI for DefectDojo Pro, which has since been in Pro for Pro customers to test and experiment with.
 
-The Beta UI brings the following enhancements to DefectDojo:
+The Pro UI brings the following enhancements to DefectDojo:
 
 - Modern and sleek design, built using Vue.js
 - Optimized data delivery and load times, especially for large datasets
 - Access to new Pro features, including [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](/en/connecting_your_tools/external_tools/), and Pro Metrics views
 - Improved UI workflows: better filtering, dashboards, and navigation
 
-## Switching To The Beta UI
+## Switching To The Pro UI
 
-To access the Beta UI, open your User Options menu from the top-right hand corner.  You can also switch back to the Classic UI from the same menu.
+To access the Pro UI, open your User Options menu from the top-right hand corner.  You can also switch back to the Classic UI from the same menu.
 
 ![image](images/beta-classic-uis.png)
 
@@ -37,7 +37,7 @@ To access the Beta UI, open your User Options menu from the top-right hand corne
 
 The Enterprise settings section contains the System Settings, Jira Instances, Deduplication Settings, SAML, OAuth, Login and MFA forms.
 
-5. The beta UI also has a **new table format** to help with navigation.  This table is used with all [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/). Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+5. The Pro UI also has a **new table format** to help with navigation.  This table is used with all [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/). Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
 
 6. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 
@@ -48,7 +48,7 @@ In this screenshot we are filtering for all Findings that are in 'Product One'. 
 
 ## New Dashboards
 
-New metrics visualizations are included in the Beta UI.  All of these reports can be filtered and exported as PDF to share them with a wider audience.
+New metrics visualizations are included in the Pro UI.  All of these reports can be filtered and exported as PDF to share them with a wider audience.
 
 ![image](images/program_insights.png)
 

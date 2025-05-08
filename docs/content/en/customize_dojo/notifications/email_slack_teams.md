@@ -79,7 +79,7 @@ You’ll now need to configure the Slack integration on DefectDojo to complete t
 
 ![image](images/Configure_a_Slack_Integration_2.png)
 
-3. Open DefectDojo in a new tab, and navigate to **Configuration \> System Settings** from the sidebar. (In the Beta UI, this form is located under **Enterprise Settings > System Settings**.)
+3. Open DefectDojo in a new tab, and navigate to **Configuration \> System Settings** from the sidebar. (In the Pro UI, this form is located under **Enterprise Settings > System Settings**.)
 4. Check the **Enable Slack notifications** box.
 5. Paste the **Bot User OAuth Token** from Step 1 in the **Slack token** field.
 6. The **Slack Channel** field should correspond to the channel in your workspace where you want your notifications to be written by a DefectDojo bot.
@@ -114,7 +114,7 @@ Microsoft Teams can receive notifications to a specific channel. To do this, you
 1. Complete the process listed in the **[Microsoft Teams Documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet)** for creating a new Incoming Webhook. Keep your unique webhook.office.com link handy as you will need it in subsequent steps.  
 ​
 ![image](images/Configure_a_Microsoft_Teams_Integration.png)
-2. In DefectDojo, navigate to **Configuration \> System Settings** from the sidebar. (In the Beta UI, this form is located under **Enterprise Settings > System Settings**.)
+2. In DefectDojo, navigate to **Configuration \> System Settings** from the sidebar. (In the Pro UI, this form is located under **Enterprise Settings > System Settings**.)
 3. Check the **Enable Microsoft Teams notifications** box. This will open a hidden section of the form, labeled **‘Msteams url**’.  
 ​
 ![image](images/Configure_a_Microsoft_Teams_Integration_2.png)
@@ -129,7 +129,7 @@ Microsoft Teams can receive notifications to a specific channel. To do this, you
 
 Notifications from DefectDojo can also be sent to a specific email address.
 
-1. From the System Settings page (**Configuration > System Settings** in the Classic UI, or **Enterprise Settings > System Settings** in the Beta UI) navigate to Enable Mail (email) Notifications. 
+1. From the System Settings page (**Configuration > System Settings** in the Classic UI, or **Enterprise Settings > System Settings** in the Pro UI) navigate to Enable Mail (email) Notifications. 
 
 2. Check the **Enable mail notifications** box, and then enter the email address where you want these notifications to be sent (mail notifications to).
 
