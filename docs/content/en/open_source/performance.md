@@ -15,17 +15,6 @@ change many filters to only search on names, rather than the objects themselves.
 This change will save many large queries, and will improve the performance of UI
 based interactions.
 
-## Asynchronous Import
-
-DefectDojo offers an experimental feature to aynschronously import security reports. 
-This feature works in most use cases, but struggles when doing things such as pushing 
-to Jira during the import process. Because Endpoints are still being processed and 
-created even after the import procedure is completed, pushing Findings to Jira can
-result in incomplete Jira tickets. It is advised to wait until after import has been
-completed (reaches 100%).
-
-To enable this feature, set `ASYNC_FINDING_IMPORT` to True in `local_settings.py`
-
 ## Asynchronous Delete
 
 For larger instances, deleting an object can take minutes for all related objects to be 
