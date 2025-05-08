@@ -658,7 +658,7 @@ class ViewFinding(View):
         ) = jira_helper.can_be_pushed_to_jira(finding)
         # Check the error code
         if error_code:
-            logger.error(error_code)
+            logger.debug(error_code)
 
         return {
             "can_be_pushed_to_jira": can_be_pushed_to_jira,

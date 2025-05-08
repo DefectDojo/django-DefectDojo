@@ -135,7 +135,7 @@ class SSLyzeXMLParser:
                         )
                 if title and description is not None:
                     dupe_key = hashlib.md5(
-                        str(description + title).encode("utf-8"),
+                        str(description + title).encode("utf-8"), usedforsecurity=False,
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]

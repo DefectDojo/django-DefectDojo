@@ -25,6 +25,7 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
@@ -1623,35 +1624,6 @@ def get_celery_worker_status():
         return False
 
 
-def get_work_days(start: date, end: date):
-    """
-    Math function to get workdays between 2 dates.
-    Can be used only as fallback as it doesn't know
-    about specific country holidays or extra working days.
-    https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
-    """
-    # if the start date is on a weekend, forward the date to next Monday
-    if start.weekday() > WEEKDAY_FRIDAY:
-        start += timedelta(days=7 - start.weekday())
-
-    # if the end date is on a weekend, rewind the date to the previous Friday
-    if end.weekday() > WEEKDAY_FRIDAY:
-        end -= timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
-
-    if start > end:
-        return 0
-    # that makes the difference easy, no remainders etc
-    diff_days = (end - start).days + 1
-    weeks = int(diff_days / 7)
-
-    remainder = end.weekday() - start.weekday() + 1
-
-    if remainder != 0 and end.weekday() < start.weekday():
-        remainder += 5
-
-    return weeks * 5 + remainder
-
-
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab:
     def __init__(self, product, title=None, tab=None):
@@ -2241,22 +2213,18 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     i = 0
     batch = []
     total_pages = (total_count // page_size) + 2
-    # logger.info('pages to process: %d', total_pages)
+    # logger.debug("pages to process: %d", total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
     for _p in range(1, total_pages):
-        # logger.info('page: %d', p)
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
         else:
             page = models.filter(id__lt=last_id)[:page_size]
 
-        # logger.info('page query: %s', page.query)
-        # if p == 23:
-        #     raise ValueError('bla')
+        logger.debug("page query: %s", page.query)
         for model in page:
             i += 1
             last_id = model.id
-            # logger.info('last_id: %s', last_id)
 
             function(model)
 
@@ -2482,26 +2450,17 @@ def calculate_finding_age(f):
     if start_date and isinstance(start_date, str):
         start_date = parse(start_date).date()
 
-    if settings.SLA_BUSINESS_DAYS:
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            days = get_work_days(f.get("date"), mitigated_date)
-        else:
-            days = get_work_days(f.get("date"), timezone.now().date())
-    else:
-        if isinstance(start_date, datetime):
-            start_date = start_date.date()
+    if isinstance(start_date, datetime):
+        start_date = start_date.date()
 
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            diff = mitigated_date - start_date
-        else:
-            diff = timezone.now().date() - start_date
-        days = diff.days
+    if f.get("mitigated"):
+        mitigated_date = f.get("mitigated")
+        if isinstance(mitigated_date, datetime):
+            mitigated_date = f.get("mitigated").date()
+        diff = mitigated_date - start_date
+    else:
+        diff = timezone.now().date() - start_date
+    days = diff.days
     return max(0, days)
 
 
@@ -2701,3 +2660,22 @@ def generate_file_response_from_file_path(
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
     response["Content-Length"] = file_size
     return response
+
+
+def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
+    TAG_PATTERN = re.compile(r'[ ,\'"]')
+    error_messages = []
+
+    if isinstance(value, list):
+        for tag in value:
+            if TAG_PATTERN.search(tag):
+                error_messages.append(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes.")
+    elif isinstance(value, str):
+        if TAG_PATTERN.search(value):
+            error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")
+    else:
+        error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
+
+    if error_messages:
+        logger.debug(f"Tag validation failed: {error_messages}")
+        raise exception_class(error_messages)

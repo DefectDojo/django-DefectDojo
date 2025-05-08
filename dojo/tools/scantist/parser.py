@@ -85,7 +85,7 @@ class ScantistParser:
             if item:
                 hash_key = hashlib.md5(
                     node.get("Public ID").encode("utf-8")
-                    + node.get("Library").encode("utf-8"),
+                    + node.get("Library").encode("utf-8"), usedforsecurity=False,
                 ).hexdigest()
 
                 items[hash_key] = get_findings(node, test)

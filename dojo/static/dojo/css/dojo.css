@@ -85,6 +85,20 @@ a {
     background-color: #38434d!important;
 }
 
+.panel-heading .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+#base-content .clearfix .pagination .dropdown-toggle:focus {
+    outline: 5px auto #599fd0;
+    outline-offset: -3px;
+}
+.table-responsive .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    text-decoration: none;
+}
+
 /*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;

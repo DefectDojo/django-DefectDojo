@@ -18,9 +18,11 @@ class BanditParser:
         - file_path: Set to filename from Bandit Scanner.
         - line: Set to line from Bandit Scanner.
         - date: Set to date from Bandit Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         - vuln_id_from_tool: Made from joining test_name and test_id.
         - nb_occurences: Initially set to 1 then updated.
-        - scanner_condifence: Set to confidence value if one is returned from the Bandit Scanner.
+        - scanner_confidence: Set to confidence value if one is returned from the Bandit Scanner.
         """
         return [
             "title",
@@ -29,6 +31,8 @@ class BanditParser:
             "file_path",
             "line",
             "date",
+            "static_finding",
+            "dynamic_finding",
             "vuln_id_from_tool",
             "nb_occurences",
             "scanner_confidence",
