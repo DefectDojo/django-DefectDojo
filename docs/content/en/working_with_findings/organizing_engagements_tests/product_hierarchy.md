@@ -112,11 +112,29 @@ Tests are a grouping of activities conducted by engineers to attempt to discover
 Tests always have:
 
 * a unique **Test Title**
-* a specific **Test Type (**API Test, Nessus Scan, etc)
+* a specific **Test Type** (API Test, Nessus Scan, etc)
 * an associated test **Environment**
 * an associated **Engagement**
 
-Tests can be created in different ways. Scan data can be directly imported to an Engagement, which will then create a new Test containing that data. Tests can also be created in advance without scan data, as part of planning future Engagements.
+Tests can be created in different ways.  Tests can be automatically created when scan data is imported directly into to an Engagement, resulting in a new Test containing the scan data. Tests can also be created in anticipation of planning future engagements, or for manually entered security findings requiring tracking and remediation.
+
+### **Test Types**
+
+DefectDojo supports two categories of Test Types:
+
+1. **Parser-based Test Types**: These correspond to specific security scanners that produce output in formats like XML, JSON, or CSV. When importing scan results, DefectDojo uses specialized parsers to convert the scanner output into Findings.
+
+2. **Non-parser Test Types**: These are used for manually created findings not imported from a scan files. 
+The following Test Types appear in the "Scan Type" dropdown when creating a new test, but will not appear when selecting "Import Scan":
+   * API Test
+   * Static Check
+   * Pen Test
+   * Web Application Test
+   * Security Research
+   * Threat Modeling
+   * Manual Code Review
+
+Non-parser Test Types should be used when you need to manually create findings that require remediation but don't originate from automated scanner output.
 
 #### **How do Tests interact with each other?**
 
