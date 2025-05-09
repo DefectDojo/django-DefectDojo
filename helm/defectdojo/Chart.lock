@@ -2,9 +2,6 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 16.7.0
-- name: postgresql-ha
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.4.11
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 19.6.4
