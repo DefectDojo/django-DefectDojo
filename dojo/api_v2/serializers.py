@@ -1125,20 +1125,16 @@ class EngagementToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         engagement = data.get("engagement_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            engagement, engagement.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        engagement, engagement.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"engagement_id": engagement.id, "files": new_files}
 
 
@@ -1497,15 +1493,11 @@ class TestToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         test = data.get("test_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
-                    "title": file.title,
-                },
-            )
+        new_files = [{
+                "id": file.id,
+                "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
+                "title": file.title,
+            } for file in files]
         return {"test_id": test.id, "files": new_files}
 
 
@@ -1787,10 +1779,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             vulnerability_id_set = validated_data.pop("vulnerability_id_set")
             vulnerability_ids = []
             if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
+                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids(instance, vulnerability_ids)
 
         instance = super(TaggitSerializer, self).update(
@@ -1921,8 +1910,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Process the vulnerability IDs specially
         parsed_vulnerability_ids = []
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
-            for vulnerability_id in vulnerability_ids:
-                parsed_vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
             validated_data["cve"] = parsed_vulnerability_ids[0]
         # Create a findings in memory so that we have access to unsaved_vulnerability_ids
         new_finding = Finding(**validated_data)
@@ -2020,9 +2008,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         if vulnerability_id_set:
-            vulnerability_ids = []
-            for vulnerability_id in vulnerability_id_set:
-                vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            vulnerability_ids = [vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set]
             validated_data["cve"] = vulnerability_ids[0]
             save_vulnerability_ids_template(
                 new_finding_template, vulnerability_ids,
@@ -2040,10 +2026,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             vulnerability_ids = []
             if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
+                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
         return super(TaggitSerializer, self).update(instance, validated_data)
@@ -2710,20 +2693,16 @@ class FindingToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         finding = data.get("finding_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            finding, finding.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        finding, finding.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"finding_id": finding.id, "files": new_files}
 
 

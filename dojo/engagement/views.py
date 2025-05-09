@@ -1597,10 +1597,8 @@ def csv_export(request):
     first_row = True
     for engagement in engagements:
         if first_row:
-            fields = []
-            for key in dir(engagement):
-                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_"):
-                    fields.append(key)
+            fields = [key for key in dir(engagement)
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_")]
             fields.append("tests")
 
             writer.writerow(fields)

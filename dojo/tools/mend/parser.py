@@ -141,8 +141,7 @@ class MendParser:
             if "sourceFiles" in node:
                 try:
                     sourceFiles_node = node.get("sourceFiles")
-                    for sfile in sourceFiles_node:
-                        filepaths.append(sfile.get("localPath"))
+                    filepaths.extend(sfile.get("localPath") for sfile in sourceFiles_node)
                 except Exception:
                     logger.exception(
                         "Error handling local paths for vulnerability.",
@@ -217,17 +216,13 @@ class MendParser:
                     "vulnerabilities" in lib_node
                     and len(lib_node.get("vulnerabilities")) > 0
                 ):
-                    for vuln in lib_node.get("vulnerabilities"):
-                        findings.append(
-                            _build_common_output(vuln, lib_node.get("name")),
-                        )
+                    findings.extend(_build_common_output(vuln, lib_node.get("name")) for vuln in lib_node.get("vulnerabilities"))
 
         elif "vulnerabilities" in content:
             # likely a manual json export for vulnerabilities only for a project.
             # Vulns are standalone, and library is a property.
             tree_node = content["vulnerabilities"]
-            for node in tree_node:
-                findings.append(_build_common_output(node))
+            findings.extend(_build_common_output(node) for node in tree_node)
 
         elif "components" in content:
             # likely a Mend Platform or 3.0 API SCA output - "library" is replaced as "component"
@@ -238,18 +233,14 @@ class MendParser:
                     "response" in comp_node
                     and len(comp_node.get("response")) > 0
                 ):
-                    for vuln in comp_node.get("response"):
-                        findings.append(
-                            _build_common_output(vuln, comp_node.get("name")),
-                        )
+                    findings.extend(_build_common_output(vuln, comp_node.get("name")) for vuln in comp_node.get("response"))
 
         elif "response" in content:
             # New schema: handle response array
             tree_node = content["response"]
             if tree_node:
-                for node in tree_node:
-                    if node.get("findingInfo", {}).get("status") == "ACTIVE":
-                        findings.append(_build_common_output(node))
+                findings.extend(_build_common_output(node) for node in tree_node
+                                                            if node.get("findingInfo", {}).get("status") == "ACTIVE")
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""

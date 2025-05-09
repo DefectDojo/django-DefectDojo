@@ -629,9 +629,7 @@ def removeLoop(finding_id, counter):
 
 def add_endpoints(new_finding, form):
     added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
-    endpoint_ids = []
-    for endpoint in added_endpoints:
-        endpoint_ids.append(endpoint.id)
+    endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
     new_finding.endpoints.set(form.cleaned_data["endpoints"] | Endpoint.objects.filter(id__in=endpoint_ids))
 
