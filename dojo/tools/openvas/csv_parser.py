@@ -263,10 +263,7 @@ class OpenVASCSVParser:
         return date_column_strategy
 
     def read_column_names(self, row):
-        column_names = {}
-        for index, column in enumerate(row):
-            column_names[index] = column
-        return column_names
+        return dict(enumerate(row))
 
     def get_findings(self, filename, test):
         column_names = {}
