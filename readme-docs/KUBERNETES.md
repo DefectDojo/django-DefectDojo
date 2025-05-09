@@ -435,7 +435,7 @@ Before installing the DefectDojo Helm chart, it's important to customize the `va
 ```yaml
 postgresql:
   enabled: false # Disable the creation of the database in the cluster
-  postgresServer: "127.0.0.1" # Required to skip certains tests not useful on external instances
+  postgresServer: "127.0.0.1" # Required to skip certain tests not useful on external instances
   auth:
     username: defectdojo # your database user
     database: defectdojo # your database name
