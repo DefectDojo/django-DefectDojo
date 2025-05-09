@@ -2629,9 +2629,11 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    # Clean the title by removing some problematic characters
+    cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
 
     return generate_file_response_from_file_path(
-        file_path, file_name=file_object.title, file_size=file_object.file.size,
+        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
     )
 
 
