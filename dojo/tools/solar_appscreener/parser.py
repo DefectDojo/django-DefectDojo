@@ -27,13 +27,9 @@ class SolarAppscreenerParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        csvarray = []
-
-        for row in reader:
-            csvarray.append(row)
 
         items = []
-        for row in csvarray:
+        for row in reader:
             finding = Finding(test=test)
             finding.title = row.get("Vulnerability", "")
             finding.description = row.get("Description", "")

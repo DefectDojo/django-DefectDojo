@@ -54,13 +54,11 @@ missing_deps = {
 missing_packages = []
 for d in missing_deps:
     all_packages = find_packages(d)
-    packages = [
+    missing_packages = [
         p
         for p in all_packages
         if not any(
             p.endswith(suffix) for suffix in ["-dbg", "-test", "tests", "-dev", "-mesa"]
         )
     ]
-    for p in packages:
-        missing_packages.append(p)
 logger.info("missing_packages: " + (" ".join(missing_packages)))
