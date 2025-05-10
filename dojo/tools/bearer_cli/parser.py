@@ -46,6 +46,7 @@ class BearerCLIParser:
                     sast_source_line=bearerfinding["source"]["start"],
                     sast_source_file_path=bearerfinding["filename"],
                     vuln_id_from_tool=bearerfinding["id"],
+                    unique_id_from_tool=bearerfinding["fingerprint"],
                 )
 
                 items.append(finding)
