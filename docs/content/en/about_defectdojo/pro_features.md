@@ -12,7 +12,7 @@ DefectDojo Pro comes with many additional features.  Here is list of those featu
 ## Improved UX
 
 ### Pro UI
-DefectDojo's UI has been reworked in DefectDojo Pro to be faster, more functional and to be better at navigating through enterprise-level data volume.  It also includes a dark mode.  See our [Beta UI Guide](../ui_pro_vs_os) for more information.
+DefectDojo's UI has been reworked in DefectDojo Pro to be faster, more functional and to be better at navigating through enterprise-level data volume.  It also includes a dark mode.  See our [Pro UI Guide](../ui_pro_vs_os) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 

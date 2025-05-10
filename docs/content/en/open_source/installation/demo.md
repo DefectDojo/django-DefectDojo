@@ -1,5 +1,5 @@
 ---
-title: "Demo"
+title: "Online Demo"
 description: "There is DefectDojo demo site running the latest officially released version"
 draft: false
 weight: 6
