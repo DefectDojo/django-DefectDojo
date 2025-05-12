@@ -816,7 +816,7 @@ class CSVExportView(View):
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
-        allowed_foreign_keys = get_attributes()
+        allowed_foreign_keys = get_foreign_keys()
         first_row = True
 
         for finding in findings:
@@ -940,7 +940,7 @@ class ExcelExportView(View):
         self.font_bold = font_bold
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
-        allowed_foreign_keys = get_attributes()
+        allowed_foreign_keys = get_foreign_keys()
 
         row_num = 1
         for finding in findings:
