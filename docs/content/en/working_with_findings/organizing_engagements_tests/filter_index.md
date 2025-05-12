@@ -4,9 +4,9 @@ description: "Reference for all filters in DefectDojo"
 weight: 5
 ---
 
-**Note: Currently this article only covers Finding Filters available in the DefectDojo Pro Beta UI, but this article will be expanded in the future to govern more object types, along with Open-Source filters.** 
+**Note: Currently this article only covers Finding Filters available in the DefectDojo Pro UI, but this article will be expanded in the future to govern more object types, along with Open-Source filters.** 
 
-Here is a list of filters that can be applied in the DefectDojo Beta UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, creating custom [Dashboard Tiles](/en/customize_dojo/dashboard_notifications/about_custom_dashboard_tiles/), or creating automation via [Rules Engine](/en/customize_dojo/rules_engine/).
+Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, creating custom [Dashboard Tiles](/en/customize_dojo/dashboards/about_custom_dashboard_tiles/), or creating automation via [Rules Engine](/en/customize_dojo/rules_engine/).
 
 ## Findings
 These fields are specific to DefectDojo Findings and are used to organize a Finding.  Each of these filters is a separate column in the All Findings table.
