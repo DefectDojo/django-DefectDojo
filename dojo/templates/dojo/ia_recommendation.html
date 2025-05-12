@@ -6,7 +6,6 @@
         
     </div>
 
-    {% if finding|enable_like_status %} 
     <div id="like_status" style="display: {{ finding|enable_like_status|yesno:'block,none;'}}">
         <div class="rating-tag">
             <p class="rating-title">¿Te fue útil esta respuesta?</p>
@@ -17,5 +16,4 @@
             <div id="feedback-thankyou" class="thank-you">¡Gracias por tu opinión!</div>
         </div>
     </div>
-    {% endif %}
 </div>
