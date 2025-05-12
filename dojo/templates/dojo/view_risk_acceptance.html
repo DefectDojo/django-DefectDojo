@@ -136,7 +136,12 @@
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
-                        <td>{{ risk_acceptance.accepted_by }}</td>
+                        <td>
+                            {% for accepted_by in risk_acceptance.accepted_by|literal_eval_recommended_acceptors%}
+                            👤 {{accepted_by}}</br>
+                            {% endfor %}
+                        </td>
+
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
@@ -289,7 +294,8 @@
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
+                        <td>{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
+                        {% comment %} <td> <span style="color: green;">{{ finding.accepted_by}} </span></td> {% endcomment %}
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                             <form method="post">

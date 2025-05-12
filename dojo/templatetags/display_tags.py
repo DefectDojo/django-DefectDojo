@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 import base64
 import json
 import contextlib
@@ -1156,3 +1157,37 @@ def enable_like_status(finding):
                 if like_status is None:
                     return True
     return False
+
+
+@register.filter()
+def render_risk_acceptance_accepted_by(finding: Finding):
+    accepted_by = finding.accepted_by
+    accepted_by_user = ""
+    if finding.risk_acceptance.accepted_by:
+        accepted_by_recommendation_ra = eval(finding.risk_acceptance.accepted_by)
+        for user in accepted_by_recommendation_ra:
+            status = "⏳"
+            name_parts = re.findall(r'[A-Z][a-z]*', user)
+            accepte_by_finding = [item.strip() for item in accepted_by.split(",")]
+            if accepte_by_finding != ['']:
+                if (user in accepte_by_finding or
+                    all(
+                        x not in accepte_by_finding
+                        for x in accepted_by_recommendation_ra)):
+                    status = "✅"
+            if len(name_parts) > 2:
+                accepted_by_user += f"👤 {name_parts[0]} {name_parts[3]} {status}"
+            elif len(name_parts) == 2:
+                accepted_by_user += f"👤 {name_parts[0]} {name_parts[1]} {status}"
+            else:
+                logger.debug(f"name user '{user}' not match whit regex ")
+                accepted_by_user += f"👤 {user} {status}"
+            accepted_by_user += "</br>"
+        logger.debug(f"render_accepted_by_context is {accepted_by_user}")
+    return accepted_by_user
+
+
+@register.filter()
+def literal_eval_recommended_acceptors(accepted_by):
+    users = eval(accepted_by)
+    return users
