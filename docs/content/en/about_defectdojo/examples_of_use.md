@@ -36,14 +36,17 @@ Each of these report categories can be handled by a separate Engagement, with a 
 
 ![image](images/example_product_hierarchy_bigcorp.png)
 
-- If a Product has a CI/CD pipeline, all of the results from that pipeline can be continuously imported into a single open-ended Engagement. Each tool used will create a separate Test within the 'CI/CD' Engagement, which can be continuously updated with new data.
+- If a Product has a CI/CD pipeline, all of the results from that pipeline can be continuously imported into a single open-ended Engagement. Each tool used will create a separate Test within the 'CI/CD' Engagement, which can be continuously updated with new data.  
+(See our guide to [Reimport](/en/connecting_your_tools/import_scan_files/using_reimport/))
 - Each Pen Test effort can have a separate Engagement created to contain all of the results: e.g. 'Q1 Pen Test 2024', 'Q2 Pen Test 2024', etc.
 - BigCorp will likely want to run their own mock PCI Audit so that they're prepared for the real thing when it happens. The results of those audits can also be stored as a separate Engagement.
+
+
 
 #### RBAC Model
 
 - Each BISO has Reader access assigned for each business unit (Product Type) that they're in charge of.
-- Each Product Owner has Writer access for the Product that they're in charge of.  Within their Product, these Product Owners can interact with DefectDojo - they can keep notes, set up pipelines, create Risk Acceptances or use other features.
+- Each Product Owner has Writer access for the Product that they're in charge of.  Within their Product, these Product Owners can interact with DefectDojo - they can keep notes, set up [CI/CD pipelines](/en/connecting_your_tools/import_scan_files/api_pipeline_modelling/), create Risk Acceptances or use other features.
 - Developers at BigCorp have no access to DefectDojo at all, and they don't need it - the Product Owner can push Jira tickets directly from DefectDojo which contain all of the relevant vulnerability information.  The developers are already using Jira, so they don't have to track remediation any differently than a different development task.
 
 ### Embedded Systems: Version-Controlled Reporting
@@ -98,11 +101,13 @@ Key Concerns for Kate's Cloud Service:
 
 #### Tagging Shared Services
 
-Because Kate's model contains many shared services that can impact other Products, the team Tags the results to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be traced back to the relevant teams, and reports in DefectDojo.  Each of these Shared Services are in a single Product Type that separates them from the main Cloud offerings.
+Because Kate's model contains many shared services that can impact other Products, the team [Tags](/en/working_with_findings/organizing_engagements_tests/tagging_objects/) the results to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be traced back to the relevant teams, and reports in DefectDojo.  Each of these Shared Services are in a single Product Type that separates them from the main Cloud offerings.
 
 ![image](images/example_product_hierarchy_microservices.png)
 
 Because the company is rapidly growing, with frequently changing tech leads, Kate can use Tags to track which tech lead is currently responsible for each cloud product, avoiding the need for constant manual updates to their DefectDojo system.  These Tech Lead associations are tracked by a service that's external to DefectDojo and can govern the import pipelines or call the DefectDojo API.
+
+For more information on Tagging, see our guide to [Tags](/en/working_with_findings/organizing_engagements_tests/tagging_objects/).
 
 #### RBAC Model
 
