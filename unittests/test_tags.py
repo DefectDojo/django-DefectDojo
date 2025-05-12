@@ -214,9 +214,9 @@ class TagTests(DojoAPITestCase):
                 "engagement": [1],
                 "file": [testfile],
                 "scan_type": ["ZAP Scan"],
-                "tags": ["bug,security", "urgent"],
+                "tags": ["bug,security", "urgent"], # Attempting to mimic the two "tag" fields (-F 'tags=tag1' -F 'tags=tag2')
             }
-            response = self.multipart_import_scan(data, 201)
+            response = self.import_scan(data, 201)
             # Make sure the serializer returns the correct tags
             success_tags = ["bug", "security", "urgent"]
             self.assertEqual(response["tags"], success_tags)
