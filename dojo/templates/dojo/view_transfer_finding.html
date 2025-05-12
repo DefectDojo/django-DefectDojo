@@ -176,10 +176,19 @@ h3{
                             </td>
                             <td>{{transfer_findings.id}}</td>
                             <td>
-                              <a href="#" class="table-link cls_transfer_finding_show_modal" id="id_transfer_finding_show_modal" type="button" 
-                              data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
-                              data-product-type-id={{transfer_findings.origin_product_type.id}}>
-                                 {{transfer_findings.title}} <i class="fa-solid fa-magnifying-glass-plus"></i> </a>
+                                <a href="#" class="table-link cls_transfer_finding_show_modal" id="id_transfer_finding_show_modal" type="button" 
+                                data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
+                                data-product-type-id={{transfer_findings.origin_product_type.id}}>
+                                  {{transfer_findings.title}} <i class="fa-solid fa-magnifying-glass-plus"></i> </a>
+                              {% if transfer_findings.notes%}
+                                <i class="glyphicon glyphicon-comment has-popover dojo-sup"
+                                  data-trigger="hover"
+                                  data-content="{{transfer_findings.notes}}"
+                                  data-placement="right"
+                                  data-container="body"
+                                  data-original-title "Title"
+                                  title=""></i>
+                              {% endif %}
                             </td>
                             <td>{{transfer_findings.date}}</td>
                             <td>{{transfer_findings.expiration_date}}</td>

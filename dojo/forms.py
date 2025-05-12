@@ -1193,7 +1193,7 @@ class TransferFindingForm(forms.ModelForm):
     destination_product_type = forms.ModelChoiceField(queryset=Product_Type.objects.all(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
     notes = forms.CharField(
-        required=False, max_length=2400, widget=forms.Textarea, label="Notes"
+        required=True, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
 
