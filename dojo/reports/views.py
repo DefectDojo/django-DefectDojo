@@ -944,6 +944,7 @@ class ExcelExportView(View):
 
         row_num = 1
         for finding in findings:
+            logger.debug(f"processing finding: {finding.id}")
             if row_num == 1:
                 col_num = 1
                 for key in dir(finding):
@@ -955,7 +956,7 @@ class ExcelExportView(View):
                             cell.font = font_bold
                             col_num += 1
                     except Exception as exc:
-                        logger.error("Error in attribute: " + str(exc))
+                        logger.warning(f"Error in attribute: {key}" + str(exc))
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
                         col_num += 1
                         continue
@@ -1007,7 +1008,7 @@ class ExcelExportView(View):
                             worksheet.cell(row=row_num, column=col_num, value=value)
                             col_num += 1
                     except Exception as exc:
-                        logger.error("Error in attribute: " + str(exc))
+                        logger.warning(f"Error in attribute: {key}" + str(exc))
                         worksheet.cell(row=row_num, column=col_num, value="Value not supported")
                         col_num += 1
                         continue
