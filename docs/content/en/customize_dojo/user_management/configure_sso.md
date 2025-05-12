@@ -16,6 +16,8 @@ Users can connect to DefectDojo with a Username and Password, but if you prefer,
 
 All of these methods can only be configured by a Superuser in DefectDojo.  DefectDojo Pro users can quickly set up SSO through their system settings, while Open Source users will need to configure these settings on the back-end by setting an environment variable within Docker.  This article covers both methods of configuration.
 
+**NOTE: DefectDojo Pro users will all need to add the IP addresses of SAML or SSO services to their Firewall whitelist.  See [Firewall Rules](/en/cloud_management/using-cloud-manager/#changing-your-firewall-settings) for more information.**
+
 ## Disable username / password use
 You may wish to disable traditional username/password login on your instance.
 
