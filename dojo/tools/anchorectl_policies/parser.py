@@ -45,17 +45,17 @@ class AnchoreCTLPoliciesParser:
                         "lastEvaluation": evaluation.get("evaluationTime", ""),
                         "policyId": data.get("policyId", ""),
                         "status": evaluation.get("status", ""),
-                        "tag": data.get("evaluatedTag", "")
+                        "tag": data.get("evaluatedTag", ""),
                     }
-                    
+
                     # Process details if they exist
                     for detail in evaluation.get("details", []):
                         processed_item["detail"].append(detail)
-                    
+
                     processed_data.append(processed_item)
-            
+
             data = processed_data
-        
+
         if not isinstance(data, list):
             msg = "This doesn't look like a valid Anchore CTRL Policies report: Expected a list with image data at the root of the JSON data or an object with 'evaluations' array"
             raise TypeError(msg)
@@ -64,12 +64,12 @@ class AnchoreCTLPoliciesParser:
             # Skip empty images
             if len(data) == 0:
                 continue
-                
+
             # Check for valid structure
             if not isinstance(image, dict):
                 msg = "This doesn't look like a valid Anchore CTRL Policies report, expected dict object for image"
-                raise ValueError(msg)
-                
+                raise TypeError(msg)
+
             # Handle legacy format with detail field
             if image.get("detail") is not None and isinstance(image.get("detail"), list):
                 details = image.get("detail")
@@ -88,28 +88,22 @@ class AnchoreCTLPoliciesParser:
                     description = result.get("description", "No description provided")
                     policy_id = result.get("policyId", image.get("policyId", "unknown"))
                     status = result.get("status", "unknown")
-                    
+
                     # Handle image tag from different possible locations
                     image_name = result.get("tag", image.get("tag", "unknown:latest"))
-                    
+
                     trigger_id = result.get("triggerId", "unknown")
-                    
+
                     # Split repo and tag safely
                     if ":" in image_name:
                         repo, tag = image_name.split(":", 1)
                     else:
                         repo = image_name
                         tag = "latest"
-                        
+
                     severity, active = get_severity(status, description)
                     vulnerability_id = extract_vulnerability_id(trigger_id)
-                    title = (
-                        policy_id
-                        + " - gate|"
-                        + gate
-                        + " - trigger|"
-                        + trigger_id
-                    )
+                    title = policy_id + " - gate|" + gate + " - trigger|" + trigger_id
                     find = Finding(
                         title=title,
                         test=test,

@@ -35,7 +35,7 @@ class TestAnchoreCTLPoliciesParser(DojoTestCase):
             self.assertEqual(singleFinding.severity, "Critical")
             self.assertEqual(singleFinding.title, "RootUser - gate|dockerfile - trigger|b2605c2ddbdb02b8e2365c9248dada5a")
             self.assertEqual(singleFinding.description, "CRITICAL User root found as effective user, which is not on the allowed list")
-            
+
     # Tests for the new AnchoreCTL format
     def test_new_format_anchore_engine_parser_has_no_finding(self):
         with (get_unit_tests_scans_path("anchorectl_policies") / "new_format_no_violation.json").open(encoding="utf-8") as testfile:
