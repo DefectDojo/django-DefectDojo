@@ -78,7 +78,7 @@ class MobSFScorecardParser:
 
         dd_findings = {}
 
-        for finding_severity in finding_severities:
+        for finding_severity, finding_severitieskey in finding_severities.items():
             if finding_severity in data.get("appsec", {}):
                 for mobsf_finding in data["appsec"][finding_severity]:
 
@@ -93,7 +93,7 @@ class MobSFScorecardParser:
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
                             description=f"**Category:** {section}\n\n{description}",
-                            severity=finding_severities[finding_severity],
+                            severity=finding_severitieskey,
                             references=None,
                             date=find_date,
                             static_finding=True,

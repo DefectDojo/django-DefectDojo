@@ -59,9 +59,9 @@ def get_inactive_test_types():
 def get_scan_types_sorted():
     res = []
     inactive_test_types = get_inactive_test_types()
-    for key in PARSERS:
+    for key, item in PARSERS.items():
         if key not in inactive_test_types:
-            res.append((key, PARSERS[key].get_description_for_scan_types(key)))
+            res.append((key, item.get_description_for_scan_types(key)))
     return sorted(res, key=lambda x: x[0].lower())
 
 

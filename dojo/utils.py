@@ -1909,7 +1909,7 @@ def sla_compute_and_notify(*args, **kwargs):
         return title
 
     def _create_notifications():
-        for pt in combined_notifications:
+        for pt in combined_notifications:  # noqa: PLC0206
             for p in combined_notifications[pt]:
                 for kind in combined_notifications[pt][p]:
                     # creating notifications on per-finding basis
