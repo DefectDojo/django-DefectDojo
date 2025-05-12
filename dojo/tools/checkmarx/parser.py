@@ -176,9 +176,9 @@ class CheckmarxParser:
                     dupes[key].vuln_id_from_tool = ",".join(
                         vuln_ids_from_tool[key],
                     )[:500]
-        for lang, key in language_list.items():
+        for lang, file in language_list.items():
             add_language(
-                test.engagement.product, lang, files=key,
+                test.engagement.product, lang, files=file,
             )
 
         return list(dupes.values())
