@@ -208,7 +208,7 @@ class TagTests(DojoAPITestCase):
         for tag in tags:
             self.assertIn(tag, response["tags"])
 
-    def test_import_reimport_multipart_tags(self):
+    def test_import_multipart_tags(self):
         with (self.zap_sample5_filename).open(encoding="utf-8") as testfile:
             data = {
                 "engagement": [1],
