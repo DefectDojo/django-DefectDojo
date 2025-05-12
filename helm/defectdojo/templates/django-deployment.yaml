@@ -116,9 +116,7 @@ spec:
         command: ["/cloud_sql_proxy"]
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
-        {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
         {{- end }}
@@ -206,13 +204,8 @@ spec:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              {{- if eq .Values.database "postgresql" }}
-                name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
-                key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
-              {{- else if eq .Values.database "postgresqlha" }}
-                name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
-                key: postgresql-postgres-password
-              {{- end }}
+              name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:
