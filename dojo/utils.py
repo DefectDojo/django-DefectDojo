@@ -1909,9 +1909,9 @@ def sla_compute_and_notify(*args, **kwargs):
         return title
 
     def _create_notifications():
-        for prodtype, comb_notif_prodtype in combined_notifications.items():
-            for prod, comb_notif_prod in comb_notif_prodtype.items():
-                for kind, comb_notif_kind in comb_notif_prod.items():
+        for pt in combined_notifications:
+            for p in combined_notifications[pt]:
+                for kind in combined_notifications[pt][p]:
                     # creating notifications on per-finding basis
 
                     # we need this list for combined notification feature as we
