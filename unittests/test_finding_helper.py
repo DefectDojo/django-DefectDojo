@@ -1,9 +1,10 @@
 import datetime
 import logging
 from unittest import mock
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from crum import impersonate
+from dojo.models import ApiError
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -15,6 +16,8 @@ from dojo.finding.helper import (
     rule_cve_enable_ia_recommendation,
     rule_product_type_or_product_enable_ia_recommendation,
     enable_flow_ia_recommendation,
+    bulk_close_all_findings,
+    bulk_edit_finding,
 
     )
 
@@ -24,7 +27,8 @@ from dojo.models import (
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
-    GeneralSettings)
+    GeneralSettings,
+    Dojo_User,)
 
 
 from .dojo_test_case import DojoTestCase
@@ -349,3 +353,91 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         mock_get_value.return_value = ["Product Type1"]
         result = rule_product_type_or_product_enable_ia_recommendation(finding=mock_finding)
         self.assertFalse(result)
+
+
+class TestFindingHelper(DojoTestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user = MagicMock()
+        self.findings = list(Finding.objects.filter(test__engagement=1))
+        self.user = Dojo_User.objects.get(id=1)
+
+
+    @patch("dojo.finding.helper.bulk_edit_finding")
+    def test_bulk_close_all_findings(self, mock_bulk_edit_finding):
+        bulk_close_all_findings(self.findings, self.user)
+
+        for finding in self.findings:
+            for e_status in finding.status_finding.all():
+                self.assertEqual(e_status.mitigated_by, self.user)
+                self.assertIsNotNone(e_status.mitigated)
+                self.assertTrue(e_status.mitigated)
+                self.assertIsNotNone(e_status.last_modified)
+
+        mock_bulk_edit_finding.assert_called_once_with(
+            self.findings,
+            fields=[
+                "is_mitigated",
+                "mitigated",
+                "mitigated_by",
+                "active",
+                "false_p",
+                "duplicate",
+                "out_of_scope",
+            ],
+            values=[
+                True,
+                ANY,
+                self.user,
+                False,
+                False,
+                False,
+                False,
+            ],
+        )
+
+    def test_bulk_close_all_findings_empty_list(self):
+        result = bulk_close_all_findings([], self.user)
+        self.assertTrue(result)
+
+    def test_bulk_edit_finding_success(self):
+        bulk_edit_finding(
+            self.findings,
+            fields=["is_mitigated", "active"],
+            values=[True, False],
+        )
+        """Verified that all findings are mitigated and inactive"""
+        for finding in self.findings:
+            self.assertTrue(finding.is_mitigated)
+            self.assertFalse(finding.active)
+
+    def test_bulk_edit_finding_no_findings(self):
+        """verified that no findings are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding([], fields=["is_mitigated"], values=[True])
+        self.assertEqual(str(context.exception.detail), "No findings to edit")
+
+    def test_bulk_edit_finding_no_fields(self):
+        """verified that no fields are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings, fields=[], values=[True])
+        self.assertEqual(str(context.exception.detail), "No fields to update")
+
+    def test_bulk_edit_finding_no_values(self):
+        """verified that no values are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings, fields=["is_mitigated"], values=[])
+        self.assertEqual(str(context.exception.detail), "No values to update")
+
+    def test_bulk_edit_finding_mismatched_fields_and_values(self):
+        """verified that the number of fields and values do not match"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings,
+                              fields=["is_mitigated"],
+                              values=[True, False])
+        self.assertEqual(
+            str(context.exception.detail),
+            "Number of fields and values do not match"
+        )

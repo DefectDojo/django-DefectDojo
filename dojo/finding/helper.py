@@ -1,11 +1,12 @@
-import logging
 import markdown
+import logging
 import re
 from time import strftime
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -28,6 +29,7 @@ from dojo.models import (
     ExclusivePermission,
     GeneralSettings
 )
+from dojo.api_v2.api_error import ApiError
 from dojo.notes.helper import delete_related_notes
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -796,3 +798,82 @@ def parser_ia_recommendation(ia_recommendation: dict = {}):
     context["ia_recommendations"] = html
     context["like_status"] = ia_recommendation["data"].get("like_status", None)
     return context
+
+
+def bulk_close_all_findings(findings: list[Finding], user):
+    findings_update = []
+    if not findings:
+        logger.debug("Findings List is empty")
+        return True
+    for finding in findings:
+        endpoints_status = finding.status_finding.all()
+        for e_status in endpoints_status:
+            e_status.mitigated_by = user
+            e_status.mitigated = timezone.now()
+            e_status.mitigated_time = timezone.now()
+            e_status.mitigated = True
+            e_status.last_modified = timezone.now()
+            e_status.save()
+        findings_update.append(finding)
+    bulk_edit_finding(
+        findings_update,
+        fields=["is_mitigated",
+                "mitigated",
+                "mitigated_by",
+                "active",
+                "false_p",
+                "duplicate",
+                "out_of_scope"],
+        values=[
+            True,
+            timezone.now(),
+            user,
+            False,
+            False,
+            False,
+            False
+        ])
+
+
+def bulk_edit_finding(findings, *args, **kwargs):
+    """
+    Bulk edit findings
+    """
+    if not findings:
+        raise ApiError.bad_request(
+            detail="No findings to edit")
+
+    fields = kwargs.get("fields", [])
+    if not fields:
+        raise ApiError.bad_request(
+            detail="No fields to update")
+
+    values = kwargs.get("values", [])
+    if not values:
+        raise ApiError.bad_request(
+            detail="No values to update")
+
+    if len(fields) != len(values):
+        raise ApiError.bad_request(
+            detail="Number of fields and values do not match")
+    try:
+        """Set finding attributes"""
+        for finding in findings:
+            for field, value in zip(fields, values):
+                setattr(finding, field, value)
+    except Exception as e:
+        logger.error(f"BULK_EDIT: bulk update setattr {str(e)}")
+        raise ApiError.internal_server_error(
+            detail=str(f"Error editing finding bulk: {str(e)}"))
+
+    try:
+        with transaction.atomic():
+            Finding.objects.bulk_update(
+                objs=findings,
+                fields=fields,
+                batch_size=500)
+    except Exception as e:
+        logger.error(f"BULK_EDIT: bulk update {str(e)}")
+        raise ApiError.internal_server_error(
+            detail=str(f"Error editing finding bulk: {str(e)}"))
+    return True
