@@ -1909,9 +1909,9 @@ def sla_compute_and_notify(*args, **kwargs):
         return title
 
     def _create_notifications():
-        for pt in combined_notifications:
-            for p in combined_notifications[pt]:
-                for kind in combined_notifications[pt][p]:
+        for prodtype, comb_notif_prodtype in combined_notifications.items():
+            for prod, comb_notif_prod in comb_notif_prodtype.items():
+                for kind, comb_notif_kind in comb_notif_prod.items():
                     # creating notifications on per-finding basis
 
                     # we need this list for combined notification feature as we
@@ -1919,7 +1919,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     # create_notification() arguments
                     findings_list = []
 
-                    for n in combined_notifications[pt][p][kind]:
+                    for n in comb_notif_kind:
                         title = _notification_title_for_finding(n.finding, kind, n.finding.sla_days_remaining())
 
                         create_notification(
@@ -1936,8 +1936,8 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): product type '{pt}', product '{p}'"
-                    product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
+                    title_combined = f"SLA alert ({kind}): product type '{prodtype}', product '{prod}'"
+                    product = comb_notif_kind[0].finding.test.engagement.product
                     create_notification(
                         event="sla_breach_combined",
                         title=title_combined,
