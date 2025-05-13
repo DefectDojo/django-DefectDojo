@@ -23,7 +23,6 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
             msg = "Unsupported CVSS(4) version detected."
             raise exception_class(msg)
         if isinstance(vector_obj, CVSS2):
-            # CVSS2 is not supported yet by the parse_cvss_from_text function, but let's prepare for it anyway: https://github.com/RedHatProductSecurity/cvss/issues/53
             msg = "Unsupported CVSS(2) version detected."
             raise exception_class(msg)
 
