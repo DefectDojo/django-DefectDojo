@@ -78,22 +78,22 @@ class MobSFScorecardParser:
 
         dd_findings = {}
 
-        for finding_severity, finding_severitieskey in finding_severities.items():
-            if finding_severity in data.get("appsec", {}):
-                for mobsf_finding in data["appsec"][finding_severity]:
+        for mobsf_severity, defectdojo_severity in finding_severities.items():
+            if mobsf_severity in data.get("appsec", {}):
+                for mobsf_finding in data["appsec"][mobsf_severity]:
 
                     section = str(mobsf_finding.get("section", ""))
                     title = str(mobsf_finding.get("title", ""))
                     description = str(mobsf_finding.get("description", ""))
 
-                    unique_key = f"{finding_severity}-{section}-{title}-{description}"
+                    unique_key = f"{mobsf_severity}-{section}-{title}-{description}"
 
                     finding = Finding(
                             title=title,
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
                             description=f"**Category:** {section}\n\n{description}",
-                            severity=finding_severitieskey,
+                            severity=defectdojo_severity,
                             references=None,
                             date=find_date,
                             static_finding=True,
