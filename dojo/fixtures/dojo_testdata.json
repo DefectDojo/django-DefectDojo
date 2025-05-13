@@ -1785,6 +1785,7 @@
       "under_defect_review": false,
       "defect_review_requested_by": null,
       "is_mitigated": false,
+      "accepted_by": null,
       "mitigated": null,
       "mitigated_by": null,
       "reporter": 1,
