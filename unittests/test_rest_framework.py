@@ -1281,6 +1281,42 @@ class FindingsTest(BaseClass.BaseClassTest):
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
         self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
+    # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
+    def test_cvss3_validation(self):
+        with self.subTest(i=0):
+            self.assertEqual(None, Finding.objects.get(id=2).cvssv3)
+            result = self.client.patch(self.url + "2/", data={"cvssv3": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"})
+            self.assertEqual(result.status_code, status.HTTP_200_OK)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", Finding.objects.get(id=2).cvssv3)
+
+        with self.subTest(i=1):
+            # extra slash makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/"})
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(result.json()["cvssv3"], ["No CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
+
+        with self.subTest(i=2):
+            # no CVSS version prefix makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"})
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(result.json()["cvssv3"], ["No CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
+
+        with self.subTest(i=3):
+            # CVSS4 version makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"})
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(result.json()["cvssv3"], ["No CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
+
+        with self.subTest(i=4):
+            # CVSS4 version makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P"})
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(result.json()["cvssv3"], ["No CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
+
 
 class FindingMetadataTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]

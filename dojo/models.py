@@ -44,6 +44,8 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
+from dojo.validators import cvss3_validator  # to avoid circular import
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -2331,8 +2333,9 @@ class Finding(models.Model):
                               verbose_name=_("EPSS percentile"),
                               help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
                               validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex],
+    # cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    # cvssv3 = models.TextField(validators=[cvssv3_regex],
+    cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
                               verbose_name=_("CVSS v3"),
@@ -3516,8 +3519,10 @@ class Finding_Template(models.Model):
                            blank=False,
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
+    # cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    # cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
+    cvssv3 = models.TextField(validators=[cvss3_validator], max_length=117, null=True)
+
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)

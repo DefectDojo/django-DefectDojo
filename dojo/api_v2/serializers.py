@@ -119,6 +119,7 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large, tag_validator
+from dojo.validators import cvss3_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1838,6 +1839,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # doing it here instead of in update because update doesn't know if the value changed
         self.process_risk_acceptance(data)
 
+        cvss3_validator(data.get("cvssv3"), exception_class=RestFrameworkValidationError)
+
         return data
 
     def validate_severity(self, value: str) -> str:
@@ -1967,6 +1970,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
             msg = "Active findings cannot be risk accepted."
             raise serializers.ValidationError(msg)
 
+        cvss3_validator(data.get("cvssv3"), exception_class=RestFrameworkValidationError)
+
         return data
 
     def validate_severity(self, value: str) -> str:
@@ -1993,6 +1998,8 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
+        cvss3_validator(validated_data.get("cvssv3"), exception_class=RestFrameworkValidationError)
+
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # Save vulnerability ids and pop them
@@ -2016,9 +2023,12 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             new_finding_template.save()
 
         self._save_tags(new_finding_template, to_be_tagged)
+
         return new_finding_template
 
     def update(self, instance, validated_data):
+        cvss3_validator(validated_data.get("cvssv3"), exception_class=RestFrameworkValidationError)
+
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
             vulnerability_id_set = validated_data.pop(
