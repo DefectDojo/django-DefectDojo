@@ -1311,10 +1311,10 @@ class FindingsTest(BaseClass.BaseClassTest):
             self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
 
         with self.subTest(i=4):
-            # CVSS4 version makes it invalid
-            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P"})
+            # CVSS2 style vector makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/Au:N/C:P/I:P/A:P"})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["No CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["Unsupported CVSS(2) version detected."])
             self.assertEqual(None, Finding.objects.get(id=3).cvssv3)
 
 
