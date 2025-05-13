@@ -39,7 +39,7 @@ class TestAuditJSParser(DojoTestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            # Notice that there are 13 vulnerabilities but 1 duplicate in this report
+            # Notice that there are 15 vulnerabilities but 1 duplicate in this report
             self.assertEqual(14, len(findings))
 
             # Tests for vulnerabilities with CVSS V4 vector
