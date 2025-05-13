@@ -80,6 +80,7 @@ steps:
     inputs:
       SonarQube: SonarQube
       scannerMode: CLI
+      jdkversion: 'JAVA_HOME_17_X64'
       configMode: manual
       cliProjectKey: "$(DefinitionName)"
       cliProjectName: "$(DefinitionName)"
