@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='finding',
             name='cvssv3',
-            field=models.TextField(help_text='Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.', max_length=117, null=True, validators=[dojo.validators.cvss3_validator], verbose_name='CVSS v3'),
+            field=models.TextField(help_text='Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding.', max_length=117, null=True, validators=[dojo.validators.cvss3_validator], verbose_name='CVSS v3 vector'),
         ),
         migrations.AlterField(
             model_name='finding_template',
             name='cvssv3',
-            field=models.TextField(max_length=117, null=True, validators=[dojo.validators.cvss3_validator]),
+            field=models.TextField(help_text='Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding.', max_length=117, null=True, validators=[dojo.validators.cvss3_validator], verbose_name='CVSS v3 vector'),
         ),
     ]

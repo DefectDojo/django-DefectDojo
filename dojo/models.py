@@ -2338,8 +2338,8 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw."))
+                              verbose_name=_("CVSS v3 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
                                         verbose_name=_("CVSSv3 score"),
@@ -3521,7 +3521,7 @@ class Finding_Template(models.Model):
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
     # cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     # cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
-    cvssv3 = models.TextField(validators=[cvss3_validator], max_length=117, null=True)
+    cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
 
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
