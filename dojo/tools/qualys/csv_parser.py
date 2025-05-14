@@ -197,7 +197,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         # Clean up the CVE data appropriately
         cve_list = _clean_cve_data(cve_data)
 
-        if "CVSS3 Base" in report_finding:
+        if "CVSS3 Base" in report_finding:  # TODO: VECTOR
             cvssv3 = _extract_cvss_vectors(
                         report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"],
                     )

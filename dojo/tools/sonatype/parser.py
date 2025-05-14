@@ -63,7 +63,7 @@ def get_finding(security_issue, component, test):
         finding.cwe = security_issue["cwe"]
 
     if "cvssVector" in security_issue:
-        finding.cvssv3 = security_issue["cvssVector"]
+        finding.cvssv3 = security_issue["cvssVector"]  # TODO: VECTOR
 
     if "pathnames" in component:
         finding.file_path = " ".join(component["pathnames"])[:1000]
