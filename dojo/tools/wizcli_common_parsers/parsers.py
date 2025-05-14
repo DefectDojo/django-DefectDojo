@@ -23,16 +23,14 @@ class WizcliParsers:
             return SEVERITY_MAPPING.get(severity_str.upper(), "Info")
         return "Info"  # Default if severity is missing or None
 
-                for vulnerability in vulnerabilities:
-                    vuln_name = vulnerability.get("name", "N/A")
-                    severity = vulnerability.get("severity", "low").lower().capitalize()
-                    fixed_version = vulnerability.get("fixedVersion", "N/A")
-                    source = vulnerability.get("source", "N/A")
-                    description = vulnerability.get("description", "N/A")
-                    score = vulnerability.get("score", "N/A")
-                    exploitability_score = vulnerability.get("exploitabilityScore", "N/A")
-                    has_exploit = vulnerability.get("hasExploit", False)
-                    has_cisa_kev_exploit = vulnerability.get("hasCisaKevExploit", False)
+    @staticmethod
+    def extract_reference_link(text):
+        """Extracts potential URL from remediation instructions."""
+        if not text:
+            return None
+        # Basic regex to find URLs, might need refinement
+        match = re.search(r"(https?://[^\s)]+)", text)
+        return match.group(1) if match else None
 
                     finding_description = (
                         f"**Library Name**: {lib_name}\n"
