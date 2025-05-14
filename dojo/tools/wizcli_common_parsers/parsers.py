@@ -32,19 +32,106 @@ class WizcliParsers:
         match = re.search(r"(https?://[^\s)]+)", text)
         return match.group(1) if match else None
 
-                    finding_description = (
-                        f"**Library Name**: {lib_name}\n"
-                        f"**Library Version**: {lib_version}\n"
-                        f"**Library Path**: {lib_path}\n"
-                        f"**Vulnerability Name**: {vuln_name}\n"
-                        f"**Fixed Version**: {fixed_version}\n"
-                        f"**Source**: {source}\n"
-                        f"**Description**: {description}\n"
-                        f"**Score**: {score}\n"
-                        f"**Exploitability Score**: {exploitability_score}\n"
-                        f"**Has Exploit**: {has_exploit}\n"
-                        f"**Has CISA KEV Exploit**: {has_cisa_kev_exploit}\n"
-                    )
+    @staticmethod
+    def _generate_unique_id(components: list) -> str:
+        """
+        Generates a stable unique ID for findings.
+
+        Args:
+            components: List of components to use for ID generation
+
+        """
+        # Filter out None and empty values
+        filtered_components = [str(c).strip() for c in components if c is not None and str(c).strip()]
+
+        # Sort components for consistent order regardless of input order
+        filtered_components = sorted(filtered_components)
+
+        id_string = "|".join(filtered_components)
+        hash_object = hashlib.sha256(id_string.encode("utf-8"))
+        return hash_object.hexdigest()
+
+    @staticmethod
+    def parse_libraries(libraries_data, test):
+        """
+        Parses library vulnerability data into granular DefectDojo findings.
+        Creates one finding per unique vulnerability (CVE/ID) per library instance (name/version/path).
+        """
+        findings_list = []
+        if not libraries_data:
+            return findings_list
+
+        for lib_item in libraries_data:
+            lib_name = lib_item.get("name", "N/A")
+            lib_version = lib_item.get("version", "N/A")
+            lib_path = lib_item.get("path", "N/A")
+            lib_line = lib_item.get("startLine")
+
+            vulnerabilities_in_lib_instance = lib_item.get("vulnerabilities", [])
+            if not vulnerabilities_in_lib_instance:
+                continue
+
+            for vuln_data in vulnerabilities_in_lib_instance:
+                vuln_name = vuln_data.get("name", "N/A")
+                severity_str = vuln_data.get("severity")
+                severity = WizcliParsers.get_severity(severity_str)
+                fixed_version = vuln_data.get("fixedVersion")
+                source_url = vuln_data.get("source", "N/A")
+                vuln_description_from_wiz = vuln_data.get("description")
+                score_str = vuln_data.get("score")
+                has_exploit = vuln_data.get("hasExploit", False)
+                has_cisa_kev_exploit = vuln_data.get("hasCisaKevExploit", False)
+
+                title = f"{lib_name} {lib_version} - {vuln_name}"
+
+                description_parts = [
+                    f"**Vulnerability**: `{vuln_name}`",
+                    f"**Severity**: {severity}",
+                    f"**Library**: `{lib_name}`",
+                    f"**Version**: `{lib_version}`",
+                    f"**Path/Manifest**: `{lib_path}`",
+                ]
+                if lib_line is not None:
+                    description_parts.append(f"**Line in Manifest**: {lib_line}")
+
+                if fixed_version:
+                    description_parts.append(f"**Fixed Version**: {fixed_version}")
+                    mitigation = f"Update `{lib_name}` to version `{fixed_version}` or later in path/manifest `{lib_path}`."
+                else:
+                    description_parts.append("**Fixed Version**: N/A")
+                    mitigation = f"No fixed version available from Wiz. Investigate `{vuln_name}` for `{lib_name}` in `{lib_path}` and apply vendor guidance or risk acceptance."
+
+                description_parts.append(f"**Source**: {source_url}")
+                if vuln_description_from_wiz:
+                    description_parts.append(f"\n**Details from Wiz**:\n{vuln_description_from_wiz}\n")
+                if score_str is not None:
+                    description_parts.append(f"**CVSS Score (from Wiz)**: {score_str}")
+                description_parts.extend([
+                    f"**Has Exploit (Known)**: {has_exploit}",
+                    f"**In CISA KEV**: {has_cisa_kev_exploit}",
+                ])
+
+                failed_policies = vuln_data.get("failedPolicyMatches", [])
+                if failed_policies:
+                    description_parts.append("\n**Failed Policies**:")
+                    for match in failed_policies:
+                        policy = match.get("policy", {})
+                        description_parts.append(f"- {policy.get('name', 'N/A')} (ID: {policy.get('id', 'N/A')})")
+                ignored_policies = vuln_data.get("ignoredPolicyMatches", [])
+                if ignored_policies:
+                    description_parts.append("\n**Ignored Policies**:")
+                    for match in ignored_policies:
+                        policy = match.get("policy", {})
+                        reason = match.get("ignoreReason", "N/A")
+                        description_parts.append(f"- {policy.get('name', 'N/A')} (ID: {policy.get('id', 'N/A')}), Reason: {reason}")
+
+                full_description = "\n".join(description_parts)
+                references = source_url if source_url != "N/A" else None
+
+                # Generate unique ID using stable components including file path
+                unique_id = WizcliParsers._generate_unique_id(
+                    [lib_name, lib_version, vuln_name, lib_path],
+                )
 
                     finding = Finding(
                         title=f"{lib_name} - {vuln_name}",
