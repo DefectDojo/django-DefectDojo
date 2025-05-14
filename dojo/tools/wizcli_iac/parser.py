@@ -1,37 +1,64 @@
 import json
+import logging
 
-from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
+from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers  # Adjust import path
+
+logger = logging.getLogger(__name__)
 
 
-class WizcliIaCParser:
-    """
-    Wizcli IaC Scan results in JSON file format.
-    """
+class WizcliIacParser:
+
+    """Wiz CLI IaC Scan results in JSON file format."""
 
     def get_scan_types(self):
         return ["Wizcli IaC Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Wizcli IaC Scan"
+        return "Wiz CLI Scan (IaC)"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Wizcli IaC Scan results in JSON file format."
+        return "Parses Wiz CLI Infrastructure as Code (IaC) scan results in JSON format."
 
-    def get_findings(self, filename, test):
-        scan_data = filename.read()
+    def get_findings(self, file, test):
         try:
-            data = json.loads(scan_data.decode("utf-8"))
-        except Exception:
+            scan_data = file.read()
+            if isinstance(scan_data, bytes):
+                try:
+                    scan_data = scan_data.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    scan_data = scan_data.decode("utf-8")
             data = json.loads(scan_data)
+        except json.JSONDecodeError as e:
+            msg = f"Invalid JSON format: {e}"
+            logger.error(msg)
+            raise ValueError(msg) from e
+        except Exception as e:
+            msg = f"Error processing report file: {e}"
+            logger.error(msg)
+            raise ValueError(msg) from e
+
         findings = []
-        results = data.get("result", {})
+        results_data = data.get("result", {})
 
-        rule_matches = results.get("ruleMatches", None)
+        if not results_data:
+            logger.warning("No 'result' key found in the Wiz report.")
+            return findings
+
+        # Parse Rule Matches (IaC findings)
+        rule_matches = results_data.get("ruleMatches")
         if rule_matches:
+            logger.debug(f"Parsing {len(rule_matches)} rule match entries.")
             findings.extend(WizcliParsers.parse_rule_matches(rule_matches, test))
+        else:
+            logger.debug("No 'ruleMatches' data found in results.")
 
-        secrets = results.get("secrets", None)
+        # Parse Secrets (if present in IaC scans)
+        secrets = results_data.get("secrets")
         if secrets:
+            logger.debug(f"Parsing {len(secrets)} secret entries.")
             findings.extend(WizcliParsers.parse_secrets(secrets, test))
+        else:
+            logger.debug("No 'secrets' data found in results.")
 
+        logger.info(f"WizcliIacParser processed {len(findings)} findings.")
         return findings
