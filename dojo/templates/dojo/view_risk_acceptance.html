@@ -294,8 +294,7 @@
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td>{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
-                        {% comment %} <td> <span style="color: green;">{{ finding.accepted_by}} </span></td> {% endcomment %}
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                             <form method="post">
