@@ -170,7 +170,7 @@ class AquaParser:
             severity_justification += "\nAqua severity classification: {}".format(vuln.get("aqua_severity_classification"))
             severity_justification += "\nAqua scoring system: {}".format(vuln.get("aqua_scoring_system"))
             if "nvd_score_v3" in vuln:
-                cvssv3 = vuln.get("nvd_vectors_v3")
+                cvssv3 = vuln.get("nvd_vectors_v3")  # TODO: VECTOR
         if "aqua_score" in vuln:
             if score is None:
                 score = vuln.get("aqua_score")
@@ -193,7 +193,7 @@ class AquaParser:
                 )
             severity_justification += "\nNVD v3 vectors: {}".format(vuln.get("nvd_vectors_v3"))
             # Add the CVSS3 to Finding
-            cvssv3 = vuln.get("nvd_vectors_v3")
+            cvssv3 = vuln.get("nvd_vectors_v3")  # TODO: VECTOR
         if "nvd_score" in vuln:
             if score is None:
                 score = vuln.get("nvd_score")
