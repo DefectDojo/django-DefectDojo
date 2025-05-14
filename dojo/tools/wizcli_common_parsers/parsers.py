@@ -1,17 +1,27 @@
 from dojo.models import Finding
 
+logger = logging.getLogger(__name__)
+
+# Mapping from Wiz severities to DefectDojo severities
+SEVERITY_MAPPING = {
+    "CRITICAL": "Critical",
+    "HIGH": "High",
+    "MEDIUM": "Medium",
+    "LOW": "Low",
+    "INFORMATIONAL": "Info",
+    "INFO": "Info",
+    "UNKNOWN": "Info",  # Default for unknown severities
+}
+
 
 class WizcliParsers:
 
     @staticmethod
-    def parse_libraries(libraries, test):
-        findings = []
-        if libraries:
-            for library in libraries:
-                lib_name = library.get("name", "N/A")
-                lib_version = library.get("version", "N/A")
-                lib_path = library.get("path", "N/A")
-                vulnerabilities = library.get("vulnerabilities", [])
+    def get_severity(severity_str):
+        """Maps Wiz severity strings to DefectDojo standard TitleCase."""
+        if severity_str:
+            return SEVERITY_MAPPING.get(severity_str.upper(), "Info")
+        return "Info"  # Default if severity is missing or None
 
                 for vulnerability in vulnerabilities:
                     vuln_name = vulnerability.get("name", "N/A")
