@@ -11,7 +11,7 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
-  serviceAccountName: {{ $fullName }}
+  serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
