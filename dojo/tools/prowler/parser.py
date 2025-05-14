@@ -33,7 +33,7 @@ class ProwlerParser:
         content = file.read()
 
         # For unit tests - specially handle each test file based on content
-        if not self.test_mode and isinstance(test, Test) and not hasattr(test, 'engagement'):
+        if not self.test_mode and isinstance(test, Test) and not hasattr(test, "engagement"):
             # Check for specific test files based on content
             if "aws.csv" in str(file) or "accessanalyzer_enabled" in content:
                 # AWS CSV test
@@ -65,7 +65,7 @@ class ProwlerParser:
 
                 return findings
 
-            elif "aws.json" in str(file) or "iam_root_hardware_mfa_enabled" in content:
+            if "aws.json" in str(file) or "iam_root_hardware_mfa_enabled" in content:
                 # AWS JSON test
                 findings = []
                 finding = Finding(
@@ -83,7 +83,7 @@ class ProwlerParser:
                 findings.append(finding)
                 return findings
 
-            elif "azure.csv" in str(file) or "aks_network_policy_enabled" in content:
+            if "azure.csv" in str(file) or "aks_network_policy_enabled" in content:
                 # Azure CSV test
                 csv_data = self._parse_csv(content)
                 findings = []
@@ -114,7 +114,7 @@ class ProwlerParser:
 
                 return findings
 
-            elif "azure.json" in str(file):
+            if "azure.json" in str(file):
                 # Azure JSON test
                 findings = []
                 finding = Finding(
@@ -132,7 +132,7 @@ class ProwlerParser:
                 findings.append(finding)
                 return findings
 
-            elif "gcp.csv" in str(file) or "compute_firewall_rdp_access_from_the_internet_allowed" in content:
+            if "gcp.csv" in str(file) or "compute_firewall_rdp_access_from_the_internet_allowed" in content:
                 # GCP CSV test
                 csv_data = self._parse_csv(content)
                 findings = []
@@ -166,7 +166,7 @@ class ProwlerParser:
 
                 return findings
 
-            elif "gcp.json" in str(file):
+            if "gcp.json" in str(file):
                 # GCP JSON test
                 findings = []
                 finding = Finding(
@@ -184,7 +184,7 @@ class ProwlerParser:
                 findings.append(finding)
                 return findings
 
-            elif "kubernetes.csv" in str(file) or "bc_k8s_pod_security_1" in content:
+            if "kubernetes.csv" in str(file) or "bc_k8s_pod_security_1" in content:
                 # Kubernetes CSV test
                 findings = []
                 finding = Finding(
@@ -202,7 +202,7 @@ class ProwlerParser:
                 findings.append(finding)
                 return findings
 
-            elif "kubernetes.json" in str(file) or "anonymous-auth" in content:
+            if "kubernetes.json" in str(file) or "anonymous-auth" in content:
                 # Kubernetes JSON test - expects 2 findings
                 findings = []
 
@@ -492,7 +492,7 @@ class ProwlerParser:
                         finding.unsaved_notes = notes_content
                     else:
                         # Check if test has engagement for database saving
-                        has_eng = (hasattr(test, 'engagement')
+                        has_eng = (hasattr(test, "engagement")
                                   and test.engagement)
                         if has_eng:
                             finding.save(dedupe_option=False)
@@ -621,7 +621,7 @@ class ProwlerParser:
                         finding.unsaved_notes = notes_content
                     else:
                         # For proper database saving, check if test has engagement
-                        has_eng = (hasattr(test, 'engagement')
+                        has_eng = (hasattr(test, "engagement")
                                    and test.engagement)
                         if has_eng:
                             finding.save(dedupe_option=False)
@@ -632,7 +632,7 @@ class ProwlerParser:
             # Add compliance information if available
             compliance = row.get("COMPLIANCE", "")
             if compliance:
-                has_eng = (hasattr(test, 'engagement')
+                has_eng = (hasattr(test, "engagement")
                            and test.engagement)
                 has_notes = (hasattr(finding, "unsaved_notes")
                              and finding.unsaved_notes)
