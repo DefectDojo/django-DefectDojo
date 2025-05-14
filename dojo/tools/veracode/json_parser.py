@@ -126,7 +126,7 @@ class VeracodeJSONParser:
         if uncleaned_cvss := finding_details.get("cvss"):
             if isinstance(uncleaned_cvss, str):
                 if uncleaned_cvss.startswith(("CVSS:3.1/", "CVSS:3.0/")):
-                    finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
+                    finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)  # TODO: VECTOR
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{uncleaned_cvss}").clean_vector(output_prefix=True)
             elif isinstance(uncleaned_cvss, float | int):
