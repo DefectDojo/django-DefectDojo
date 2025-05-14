@@ -1,0 +1,72 @@
+[
+  {
+    "message": "Project <project_id> does not have active API Keys.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 3,
+    "severity": "Medium",
+    "status": "New",
+    "status_code": "PASS",
+    "status_detail": "Project <project_id> does not have active API Keys.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "cloud": {
+      "region": "global"
+    },
+    "remediation": {
+    },
+    "risk_details": "Security risks involved in using API-Keys appear below: API keys are simple encrypted strings, API keys do not identify the user or the application making the API request, API keys are typically accessible to clients, making it easy to discover and steal an API key.",
+    "time": 1739539640,
+    "time_dt": "2025-02-14T14:27:20.697446",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  },
+  {
+    "message": "AR Container Analysis is not enabled in project <project_id>.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 3,
+    "severity": "Medium",
+    "status": "New",
+    "status_code": "FAIL",
+    "status_detail": "AR Container Analysis is not enabled in project <project_id>.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "cloud": {
+      "region": "global"
+    },
+    "remediation": {
+    },
+    "risk_details": "Without image vulnerability scanning, container images stored in Artifact Registry may contain known vulnerabilities, increasing the risk of exploitation by malicious actors.",
+    "time": 1739539640,
+    "time_dt": "2025-02-14T14:27:20.697446",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  }
+]

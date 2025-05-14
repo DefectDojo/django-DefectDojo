@@ -1,0 +1,72 @@
+[
+  {
+    "message": "IAM Access Analyzer in account <account_uid> is not enabled.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 2,
+    "severity": "Low",
+    "status": "New",
+    "status_code": "FAIL",
+    "status_detail": "IAM Access Analyzer in account <account_uid> is not enabled.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "cloud": {
+      "region": "<region>"
+    },
+    "remediation": {
+    },
+    "risk_details": "AWS IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, that are shared with an external entity. This lets you identify unintended access to your resources and data, which is a security risk. IAM Access Analyzer uses a form of mathematical analysis called automated reasoning, which applies logic and mathematical inference to determine all possible access paths allowed by a resource policy.",
+    "time": 1739539623,
+    "time_dt": "2025-02-14T14:27:03.913874",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  },
+  {
+    "message": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 3,
+    "severity": "Medium",
+    "status": "New",
+    "status_code": "MANUAL",
+    "status_detail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "cloud": {
+      "region": "<region>"
+    },
+    "remediation": {
+    },
+    "risk_details": "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question.",
+    "time": 1739539623,
+    "time_dt": "2025-02-14T14:27:03.913874",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  }
+]

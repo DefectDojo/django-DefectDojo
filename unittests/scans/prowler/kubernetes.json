@@ -1,0 +1,66 @@
+[
+  {
+    "message": "AlwaysPullImages admission control plugin is not set in pod <pod>.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 3,
+    "severity": "Medium",
+    "status": "New",
+    "status_code": "FAIL",
+    "status_detail": "AlwaysPullImages admission control plugin is not set in pod <pod>.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "remediation": {
+    },
+    "risk_details": "Without AlwaysPullImages, once an image is pulled to a node, any pod can use it without any authorization check, potentially leading to security risks.",
+    "time": 1739539658,
+    "time_dt": "2025-02-14T14:27:38.533897",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  },
+  {
+    "message": "API Server does not have anonymous-auth enabled in pod <pod>.",
+    "metadata": {
+      "version": "1.4.0"
+    },
+    "severity_id": 4,
+    "severity": "High",
+    "status": "New",
+    "status_code": "PASS",
+    "status_detail": "API Server does not have anonymous-auth enabled in pod <pod>.",
+    "status_id": 1,
+    "unmapped": {
+    },
+    "activity_name": "Create",
+    "activity_id": 1,
+    "finding_info": {
+      "uid": "<finding_uid>"
+    },
+    "resources": [
+    ],
+    "category_name": "Findings",
+    "category_uid": 2,
+    "class_name": "Detection Finding",
+    "class_uid": 2004,
+    "remediation": {
+    },
+    "risk_details": "Enabling anonymous access to the API server can expose the cluster to unauthorized access and potential security vulnerabilities.",
+    "time": 1739539658,
+    "time_dt": "2025-02-14T14:27:38.533897",
+    "type_uid": 200401,
+    "type_name": "Detection Finding: Create"
+  }
+]
