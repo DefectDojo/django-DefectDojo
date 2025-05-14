@@ -1563,6 +1563,7 @@
     <script type="application/javascript">
        
         // DataTables Setup
+        let enableRecomendation = false;
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
@@ -1744,9 +1745,17 @@
         }
        
         $(document).ready(function() {
+            $('#ia_recommendation').on('show.bs.collapse', function () {
+                console.log("show", enableRecomendation)
+                if(enableRecomendation == false){
+                    $('#like_status').css('display', 'block');
+                }
+                setTimeout(() => { openedByButton = false }, 100);
+            });
             $('#id_button_ia_recommendation').click(async function(event)
             {
                 let finding_id = $(this).data('fid-recommendation')
+                enableRecomendation = true;
                 $('#like_status').css('display', 'none');
                 $('#id_recommendation_content').empty();
                 $('#id_mitigations_contect').empty();
@@ -1757,28 +1766,53 @@
             });
             // ia recommendation
             $(document).on('click', '#thumbs-up', function(event) {
-                $(this).addClass('feedback-btn disabled');
+                if ($(this).hasClass('selected')) {
+                    return;
+                }
+                console.log("no paso")
+                $(this).addClass('feedback-btn selected');
+                $('#thumbs-down').removeClass('feedback-btn selected')
+                $('#thumbs-down').removeClass('feedback-btn.disabled')
                 $(this).removeClass('hover');
+                $(this).removeClass('click');
                 $(this).off('mouseenter mouseleave');
                 vote(true, $(this));
             });
             
             $(document).on('click', '#thumbs-down', function(event) {
-                $(this).addClass('feedback-btn disabled');
+                if ($(this).hasClass('selected')) {
+                    console.log("ya esta seleccionado")
+                    return;
+                }
+                $(this).addClass('feedback-btn selected');
+                $('#thumbs-up').removeClass('feedback-btn selected')
+                $('#thumbs-up').removeClass('feedback-btn.disabled')
                 $(this).removeClass('hover');
                 $(this).off('mouseenter mouseleave');
                 vote(false, $(this));
             });
         
         $('#thumbs-up').on('mouseenter', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).addClass('feedback-btn hover');
         }).on('mouseleave', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).removeClass('feedback-btn hover');
         });
 
         $('#thumbs-down').on('mouseenter', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).addClass('feedback-btn hover');
         }).on('mouseleave', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).removeClass('feedback-btn hover');
         });
     });
