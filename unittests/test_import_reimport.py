@@ -2,6 +2,7 @@ import datetime
 
 # from unittest import skip
 import logging
+from pathlib import Path
 
 from django.test import override_settings
 from django.test.client import Client
@@ -12,7 +13,7 @@ from rest_framework.test import APIClient
 
 from dojo.models import Finding, Test, Test_Type, User
 
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 from .test_utils import assertTestImportModelsCreated
 
 logger = logging.getLogger(__name__)
@@ -54,53 +55,56 @@ PRODUCT_TYPE_NAME_DEFAULT = "Type type"
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin:
     def __init__(self, *args, **kwargs):
-        self.scans_path = "/scans/"
 
-        self.zap_sample0_filename = self.scans_path + "zap/0_zap_sample.xml"
-        self.zap_sample1_filename = self.scans_path + "zap/1_zap_sample_0_and_new_absent.xml"
-        self.zap_sample2_filename = self.scans_path + "zap/2_zap_sample_0_and_new_endpoint.xml"
-        self.zap_sample3_filename = self.scans_path + "zap/3_zap_sampl_0_and_different_severities.xml"
+        self.zap_sample0_filename = get_unit_tests_scans_path("zap") / "0_zap_sample.xml"
+        self.zap_sample1_filename = get_unit_tests_scans_path("zap") / "1_zap_sample_0_and_new_absent.xml"
+        self.zap_sample2_filename = get_unit_tests_scans_path("zap") / "2_zap_sample_0_and_new_endpoint.xml"
+        self.zap_sample3_filename = get_unit_tests_scans_path("zap") / "3_zap_sampl_0_and_different_severities.xml"
 
-        self.anchore_file_name = self.scans_path + "anchore_engine/one_vuln_many_files.json"
+        self.anchore_file_name = get_unit_tests_scans_path("anchore_engine") / "one_vuln_many_files.json"
         self.scan_type_anchore = "Anchore Engine Scan"
 
-        self.acunetix_file_name = self.scans_path + "acunetix/one_finding.xml"
+        self.acunetix_file_name = get_unit_tests_scans_path("acunetix") / "one_finding.xml"
         self.scan_type_acunetix = "Acunetix Scan"
 
-        self.gitlab_dep_scan_components_filename = f"{self.scans_path}gitlab_dep_scan/gl-dependency-scanning-report-many-vuln_v15.json"
+        self.gitlab_dep_scan_components_filename = get_unit_tests_scans_path("gitlab_dep_scan") / "gl-dependency-scanning-report-many-vuln_v15.json"
         self.scan_type_gtlab_dep_scan = "GitLab Dependency Scanning Report"
 
-        self.sonarqube_file_name1 = self.scans_path + "sonarqube/sonar-6-findings.html"
-        self.sonarqube_file_name2 = self.scans_path + "sonarqube/sonar-6-findings-1-unique_id_changed.html"
+        self.sonarqube_file_name1 = get_unit_tests_scans_path("sonarqube") / "sonar-6-findings.html"
+        self.sonarqube_file_name2 = get_unit_tests_scans_path("sonarqube") / "sonar-6-findings-1-unique_id_changed.html"
         self.scan_type_sonarqube_detailed = "SonarQube Scan detailed"
 
-        self.veracode_many_findings = self.scans_path + "veracode/many_findings.xml"
-        self.veracode_same_hash_code_different_unique_id = self.scans_path + "veracode/many_findings_same_hash_code_different_unique_id.xml"
-        self.veracode_same_unique_id_different_hash_code = self.scans_path + "veracode/many_findings_same_unique_id_different_hash_code.xml"
-        self.veracode_different_hash_code_different_unique_id = self.scans_path + "veracode/many_findings_different_hash_code_different_unique_id.xml"
-        self.veracode_mitigated_findings = self.scans_path + "veracode/mitigated_finding.xml"
+        self.veracode_many_findings = get_unit_tests_scans_path("veracode") / "many_findings.xml"
+        self.veracode_same_hash_code_different_unique_id = get_unit_tests_scans_path("veracode") / "many_findings_same_hash_code_different_unique_id.xml"
+        self.veracode_same_unique_id_different_hash_code = get_unit_tests_scans_path("veracode") / "many_findings_same_unique_id_different_hash_code.xml"
+        self.veracode_different_hash_code_different_unique_id = get_unit_tests_scans_path("veracode") / "many_findings_different_hash_code_different_unique_id.xml"
+        self.veracode_mitigated_findings = get_unit_tests_scans_path("veracode") / "mitigated_finding.xml"
         self.scan_type_veracode = "Veracode Scan"
 
-        self.clair_few_findings = self.scans_path + "clair/clair_few_vuln.json"
-        self.clair_empty = self.scans_path + "clair/clair_empty.json"
+        self.clair_few_findings = get_unit_tests_scans_path("clair") / "clair_few_vuln.json"
+        self.clair_empty = get_unit_tests_scans_path("clair") / "clair_empty.json"
         self.scan_type_clair = "Clair Scan"
 
         self.scan_type_generic = "Generic Findings Import"
-        self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
-        self.generic_import_1 = self.scans_path + "generic/test_import_report1.json"
-        self.generic_import_2 = self.scans_path + "generic/test_import_report2.json"
+        self.generic_filename_with_file = get_unit_tests_scans_path("generic") / "test_with_image.json"
+        self.generic_import_1 = get_unit_tests_scans_path("generic") / "test_import_report1.json"
+        self.generic_import_2 = get_unit_tests_scans_path("generic") / "test_import_report2.json"
 
-        self.aws_prowler_file_name = self.scans_path + "aws_prowler/many_vuln.json"
-        self.aws_prowler_file_name_plus_one = self.scans_path + "aws_prowler/many_vuln_plus_one.json"
+        self.aws_prowler_file_name = get_unit_tests_scans_path("aws_prowler") / "many_vuln.json"
+        self.aws_prowler_file_name_plus_one = get_unit_tests_scans_path("aws_prowler") / "many_vuln_plus_one.json"
         self.scan_type_aws_prowler = "AWS Prowler Scan"
 
-        self.nuclei_empty = self.scans_path + "nuclei/empty.jsonl"
+        self.nuclei_empty = get_unit_tests_scans_path("nuclei") / "empty.jsonl"
 
-        self.gitlab_dast_file_name = f"{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json"
+        self.gitlab_dast_file_name = get_unit_tests_scans_path("gitlab_dast") / "gitlab_dast_one_vul_v15.json"
         self.scan_type_gitlab_dast = "GitLab DAST Report"
 
-        self.anchore_grype_file_name = self.scans_path + "anchore_grype/check_all_fields.json"
+        self.anchore_grype_file_name = get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json"
         self.anchore_grype_scan_type = "Anchore Grype"
+
+        self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
+        self.checkmarx_one_two_false_positive = get_unit_tests_scans_path("checkmarx_one") / "two-false-positive.json"
+        self.scan_type_checkmarx_one = "Checkmarx One Scan"
 
     # import zap scan, testing:
     # - import
@@ -367,7 +371,7 @@ class ImportReimportMixin:
         logger.debug("reimporting exact same original veracode mitigated xml report again")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
-                                                                     verified=True, forceActive=True, forceVerified=True)
+                                                                     verified=True, force_active=True, force_verified=True)
 
         test_id = import_veracode_many_findings["test"]
 
@@ -1115,7 +1119,7 @@ class ImportReimportMixin:
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(0, active_findings_before)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         self.assertEqual(reimport0["test"], test_id)
@@ -1188,31 +1192,16 @@ class ImportReimportMixin:
 
         count = 0
         for finding in active_findings_after["results"]:
-            if "v0.0.0-20190219172222-a4c6cb3142f2" == finding["component_version"]:
+            if finding["component_version"] == "v0.0.0-20190219172222-a4c6cb3142f2" or finding["component_version"] == "v0.0.0-20190308221718-c2843e01d9a2" or finding["component_version"] == "v0.0.0-20200302210943-78000ba7a073":
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
                 self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.0.0-20190308221718-c2843e01d9a2" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.0.0-20200302210943-78000ba7a073" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.3.0" == finding["component_version"]:
+                count += 1
+            elif finding["component_version"] == "v0.3.0" or finding["component_version"] == "v0.3.2":
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
                 self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/text", finding["component_name"])
-                count = count + 1
-            elif "v0.3.2" == finding["component_version"]:
-                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
-                self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/text", finding["component_name"])
-                count = count + 1
+                count += 1
 
         self.assertEqual(5, count)
 
@@ -1347,11 +1336,11 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings_count, 4)
 
     def test_import_reimport_generic(self):
-        """This test do a basic import and re-import of a generic JSON report
+        """
+        This test do a basic import and re-import of a generic JSON report
 
         This test is useful because some features are only activated in generic JSON format
         """
-
         import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id = import0["test"]
@@ -1376,12 +1365,12 @@ class ImportReimportMixin:
         self.assert_finding_count_json(1, findings)
 
     def test_import_nuclei_emptyc(self):
-        """This test do a basic import of Nuclei report with no vulnerability
+        """
+        This test do a basic import of Nuclei report with no vulnerability
 
         This test is useful because Nuclei use jsonl for his format so it can generate empty files.
         It tests the condition limit of loading an empty file.
         """
-
         import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
 
         test_id = import0["test"]
@@ -1456,8 +1445,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 
@@ -1477,6 +1466,41 @@ class ImportReimportMixin:
         # reimport the first report again
         self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
+
+    def test_dynamic_parsing_field_set_to_true(self):
+        # Test that a generic finding import creates a new test type
+        # with the dynamically_generated field set to True
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertTrue(test.test_type.dynamically_generated)
+
+    def test_dynamic_parsing_field_set_to_false(self):
+        # Test that a ZAP import does not create a new test type
+        # and that the dynamically_generated field set to False
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertFalse(test.test_type.dynamically_generated)
+
+    def test_false_positive_status_applied_after_reimport(self):
+        # Test that checkmarx one with a file that has one open finding, and one false positive finding
+        import0 = self.import_scan_with_params(self.checkmarx_one_open_and_false_positive, scan_type=self.scan_type_checkmarx_one, active=None, verified=None)
+        test_id = import0["test"]
+        active_finding_before = self.get_test_findings_api(test_id, active=True)
+        false_p_finding_before = self.get_test_findings_api(test_id, false_p=True)
+        # Make sure we get the expeceted results
+        self.assertEqual(1, active_finding_before.get("count", 0))
+        self.assertEqual(1, false_p_finding_before.get("count", 0))
+        # reimport the next report that sets the active finding to false positive
+        self.reimport_scan_with_params(test_id, self.checkmarx_one_two_false_positive, scan_type=self.scan_type_checkmarx_one)
+        active_finding_after = self.get_test_findings_api(test_id, active=True)
+        false_p_finding_after = self.get_test_findings_api(test_id, false_p=True)
+        # Make sure we get the expeceted results
+        self.assertEqual(0, active_finding_after.get("count", 0))
+        self.assertEqual(2, false_p_finding_after.get("count", 0))
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
@@ -1551,7 +1575,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     "low": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
                     "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "total": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
-                "left untouched": {
+                "untouched": {
                     "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
@@ -1601,7 +1625,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0}},
-                "left untouched": {
+                "untouched": {
                     "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
                     "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
@@ -1756,7 +1780,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         ImportReimportMixin.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -1792,7 +1816,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
 
         test = Test.objects.get(id=response.url.split("/")[-1])
-        # f = open('response.html', 'w+')
+        # f = Path('response.html').open('w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()
         self.assertEqual(302, response.status_code, response.content[:1000])
@@ -1804,23 +1828,23 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split("/")[-1])
         return {"test": test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", active=True, verified=False,
+    def import_scan_with_params_ui(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                    push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
-                                   forceActive=False, forceVerified=False):
+                                   force_active=False, force_verified=False):
 
         activePayload = "not_specified"
-        if forceActive:
+        if force_active:
             activePayload = "force_to_true"
-        elif not active:
+        elif active is False:
             activePayload = "force_to_false"
 
         verifiedPayload = "not_specified"
-        if forceVerified:
+        if force_verified:
             verifiedPayload = "force_to_true"
-        elif not verified:
+        elif verified is False:
             verifiedPayload = "force_to_false"
 
-        with open(get_unit_tests_path() + filename) as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
@@ -1847,11 +1871,9 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if service is not None:
                 payload["service"] = service
 
-            result = self.import_scan_ui(engagement, payload)
+            return self.import_scan_ui(engagement, payload)
 
-            return result
-
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *, active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         # Mimic old functionality for active/verified to avoid breaking tests
         activePayload = "force_to_true"
         if not active:
@@ -1860,7 +1882,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if not verified:
             verifiedPayload = "force_to_false"
 
-        with open(get_unit_tests_path() + filename) as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
@@ -1880,8 +1902,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if scan_date is not None:
                 payload["scan_date"] = scan_date
 
-            result = self.reimport_scan_ui(test_id, payload)
-            return result
+            return self.reimport_scan_ui(test_id, payload)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

@@ -14,7 +14,7 @@
                     <h3 class="pull-left">{% trans "Description" %}</h3>
                     <div class="dropdown pull-right">
                       <div class="btn-group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true" aria-label="Product type options">
                                       <span class="fa-solid fa-bars"></span>
                                       <span class="caret"></span>
                                   </button>
@@ -54,23 +54,27 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">{% trans "Products" %}</h4>
-                        {% if pt|has_object_permission:"Product_Type_Add_Product" %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
-                                <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                                            <span class="fa-solid fa-bars"></span>
-                                            <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li>
-                                        <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
-                                        <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}</a>
-                                    </li>
-                                </ul>
+                                <button name="Show Filters" id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                                {% if pt|has_object_permission:"Product_Type_Add_Product" %}
+                                    <button name="Add Product" aria-label="Add product" class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                                <span class="fa-solid fa-bars"></span>
+                                                <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                        <li>
+                                            <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                            <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}</a>
+                                        </li>
+                                    </ul>
+                                {% endif %}
                             </div>
                         </div>
-                        {% endif %}
                     </div>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
                 {% if products %}
                     <div class="clearfix pagination-in-panel">
@@ -131,7 +135,7 @@
                         <div class="clearfix">
                             <h4 class="pull-left">{% trans "Members" %}</h4>
                             &nbsp;
-                            <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                            <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#productproduct-type-membership--roles" target="_blank">
                                 <i class="fa-solid fa-circle-question"></i></a>
                             {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
@@ -151,7 +155,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if members %}
+                    {% if members or global_members %}
                         <div class="table-responsive">
                             <table class="tablesorter-bootstrap table table-condensed table-striped">
                                 <thead>
@@ -189,6 +193,14 @@
                                         <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
+                                {% for member in global_members %}
+                                    <tr>
+                                        <td>
+                                        </td>
+                                        <td name="member_global_user">{{ member.user.get_full_name }}</td>
+                                        <td name="member_global_role">{{ member.role }} (Global role)</td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -204,7 +216,7 @@
                     <div class="clearfix">
                         <h4 class="pull-left">{% trans "Groups" %}</h4>
                         &nbsp;
-                        <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                        <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#group-memberships" target="_blank">
                             <i class="fa-solid fa-circle-question"></i></a>
                         {% if pt|has_object_permission:"Product_Type_Group_Add" %}
                         <div class="dropdown pull-right">
@@ -224,7 +236,7 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if groups %}
+                {% if groups or global_groups %}
                 <div class="table-responsive">
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
@@ -260,6 +272,14 @@
                             </td>
                             <td name="product_type_group_group">{{ group.group.name }}</td>
                             <td name="product_type_group_role">{{ group.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for group in global_groups %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="product_type_group_global_group">{{ group.group.name }}</td>
+                            <td name="product_type_group_global_role">{{ group.role }} (Global role)</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -308,4 +328,7 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

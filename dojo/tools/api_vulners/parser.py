@@ -20,6 +20,7 @@ vulners_severity_mapping = {
 
 
 class ApiVulnersParser:
+
     """Parser that can load data from Vulners Scanner API"""
 
     def get_scan_types(self):
@@ -54,9 +55,9 @@ class ApiVulnersParser:
 
         # for each issue found
         for component in report:
-            id = component.get("vulnID")
-            vuln = vulns.get(id, {})
-            title = component.get("title", id)
+            vuln_id = component.get("vulnID")
+            vuln = vulns.get(vuln_id, {})
+            title = component.get("title", vuln_id)
             family = component.get("family")
             agentip = component.get("agentip")
             agentfqdn = component.get("agentfqdn")
@@ -70,7 +71,7 @@ class ApiVulnersParser:
                 mitigation=component.get("cumulativeFix"),
                 static_finding=False,  # by definition
                 dynamic_finding=True,  # by definition
-                vuln_id_from_tool="VNS/" + id,
+                vuln_id_from_tool="VNS/" + vuln_id,
                 component_name=agentfqdn
                 if agentfqdn != "unknown"
                 else agentip,
@@ -78,7 +79,7 @@ class ApiVulnersParser:
 
             endpoint = Endpoint(host=agentip)
             finding.unsaved_endpoints = [endpoint]
-            finding.unsaved_vulnerability_ids = ["VNS/" + id]
+            finding.unsaved_vulnerability_ids = ["VNS/" + vuln_id]
 
             # CVE List
             cve_ids = vuln.get("cvelist", [])
@@ -96,7 +97,7 @@ class ApiVulnersParser:
 
             # References
             references = (
-                f"**Vulners ID** \nhttps://vulners.com/{family}/{id} \n"
+                f"**Vulners ID** \nhttps://vulners.com/{family}/{vuln_id} \n"
             )
             if len(cve_ids):
                 references += "**Related CVE** \n"

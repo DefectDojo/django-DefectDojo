@@ -14,10 +14,10 @@ def _process_field_attributes(field, attr, process):
     # decorate field.as_widget method with updated attributes
     old_as_widget = field.as_widget
 
-    def as_widget(self, widget=None, attrs=None, only_initial=False):
+    def as_widget(self, widget=None, attrs=None, *, only_initial=False):
         attrs = attrs or {}
         process(widget or self.field.widget, attrs, attribute, value)
-        return old_as_widget(widget, attrs, only_initial)
+        return old_as_widget(widget, attrs, only_initial=only_initial)
 
     bound_method = type(old_as_widget)
     try:
@@ -63,14 +63,13 @@ def is_file(field):
 
 @register.filter
 def is_text(field):
-    return isinstance(field.field.widget, forms.TextInput) or \
-            isinstance(field.field.widget, forms.Textarea)
+    return isinstance(field.field.widget, forms.TextInput | forms.Textarea)
 
 
 @register.filter
 def sum_dict(d):
     total = 0
-    for key, value in list(d.items()):
+    for value in d.values():
         total += value
     return total
 
@@ -80,7 +79,6 @@ def nice_title(title):
     pat = re.compile(r"Finding [0-9][0-9][0-9]:*")
     s = pat.split(title, 2)
     try:
-        ret = s[1]
-        return ret
+        return s[1]
     except:
         return title

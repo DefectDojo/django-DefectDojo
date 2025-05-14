@@ -13,10 +13,7 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
     if user is None:
         return Finding_Group.objects.none()
 
-    if queryset is None:
-        finding_groups = Finding_Group.objects.all()
-    else:
-        finding_groups = queryset
+    finding_groups = Finding_Group.objects.all() if queryset is None else queryset
 
     if user.is_superuser:
         return finding_groups
@@ -46,10 +43,8 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
         test__engagement__product__member=Exists(authorized_product_roles),
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         test__engagement__product__authorized_group=Exists(authorized_product_groups))
-    finding_groups = finding_groups.filter(
+    return finding_groups.filter(
         Q(test__engagement__product__prod_type__member=True)
         | Q(test__engagement__product__member=True)
         | Q(test__engagement__product__prod_type__authorized_group=True)
         | Q(test__engagement__product__authorized_group=True))
-
-    return finding_groups

@@ -2,27 +2,27 @@ from datetime import datetime
 
 from dateutil.tz import tzoffset
 
-from dojo.models import Test
+from dojo.models import Test, Test_Type
 from dojo.tools.nuclei.parser import NucleiParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_empty(self):
-        with open("unittests/scans/nuclei/empty.jsonl") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "empty.jsonl").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_no_findings(self):
-        with open("unittests/scans/nuclei/no_findings.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "no_findings.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_issue_9201(self):
-        with open("unittests/scans/nuclei/issue_9201.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "issue_9201.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -32,7 +32,7 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
 
     def test_parse_many_findings(self):
-        with open("unittests/scans/nuclei/many_findings.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -151,7 +151,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
 
     def test_parse_many_findings_new(self):
-        with open("unittests/scans/nuclei/many_findings_new.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "many_findings_new.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -192,7 +192,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("prometheus-metrics", finding.vuln_id_from_tool)
 
     def test_parse_many_findings_third(self):
-        with open("unittests/scans/nuclei/many_findings_third.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "many_findings_third.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -226,7 +226,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("asp.net-favicon", finding.component_name)
 
     def test_parse_many_findings_v3(self):
-        with open("unittests/scans/nuclei/multiple_v3.json") as testfile:
+        with (get_unit_tests_scans_path("nuclei") / "multiple_v3.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -236,3 +236,48 @@ class TestNucleiParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
+
+    def test_parse_invalid_cwe(self):
+        with (get_unit_tests_scans_path("nuclei") / "invalid_cwe.json").open(encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(0, finding.cwe)
+
+    def test_parse_same_template_multiple_matches(self):
+        with (get_unit_tests_scans_path("nuclei") / "multiple_matches.json").open(encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("turquoise-estrellita-69.tiiny.site", finding.unsaved_endpoints[0].host)
+
+            # required to compute hash code, same as in test_endpoint_model - move to some test utils module?
+            from django.contrib.auth import get_user_model
+            user, _ = get_user_model().objects.get_or_create(username="importer")
+            product_type = self.create_product_type("prod_type")
+            product = self.create_product("test_deduplicate_finding", prod_type=product_type)
+            engagement = self.create_engagement("eng", product)
+            Test_Type.objects.create(name="Nuclei Scan")
+            test = self.create_test(engagement=engagement, scan_type="Nuclei Scan", title="test")
+            for finding in findings:
+                finding.test = test
+                finding.reporter = user
+                finding.save(dedupe_option=False)
+
+            self.assertEqual(
+                (
+                    findings[0].compute_hash_code(),
+                    findings[1].compute_hash_code(),
+                ),
+                (
+                    "e7ffb8136ce875351828c8f27f930a05b6cab0a52d31e3961df7a0031fffe37f",
+                    "65e95106ab3c53cd42f384804a4a9087f43616f863e90c34818086862df253ec",
+                ),
+            )

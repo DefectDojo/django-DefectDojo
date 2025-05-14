@@ -6,6 +6,63 @@ from dojo.models import Finding
 
 
 class SnykCodeParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Snyk Code Parser
+
+        Fields:
+        - title: Made using the title from Snyk Code scanner.
+        - severity: Set to severity from Snyk Code Scanner converted to Defect Dojo format.
+        - severity_justification: Made using severity and CVSS score from Snyk Code Parser.
+        - description: Made by combining package name, version, vulnerable version(s), and description from Snyk Code Scanner.
+        - mitigation: Set to a string and is added on if more context is available.
+        - component_name: Set to component_name from Snyk Code Scanner.
+        - component_version: Set to version from Snyk Code Scanner.
+        - false_p: Set to false.
+        - duplicate: Set to false.
+        - out_of_scope: Set to false.
+        - impact: Set to same value as severity.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - file_path: Set to from value in the Snyk Code scanner output.
+        - vuln_id_from_tool: Set to id from Snyk Code scanner.
+        - cvssv3: Set to cvssv3 from Snyk Code scanner if available.
+        - cwe: Set to the cwe values outputted from Burp Scanner.
+        """
+        return [
+            "title",
+            "severity",
+            "severity_justification",
+            "description",
+            "mitigation",
+            "component_name",
+            "component_version",
+            "false_p",
+            "duplicate",
+            "out_of_scope",
+            "impact",
+            "static_finding",
+            "dynamic_finding",
+            "file_path",
+            "vuln_id_from_tool",
+            "cvssv3",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Snyk Code Parser
+
+        Fields:
+        - vuln_id_from_tool: Set to id from Snyk Code scanner.
+        - file_path: Set to from value in the Snyk Code scanner output.
+        """
+        return [
+            "vuln_id_from_tool",
+            "file_path",
+        ]
+
     def get_scan_types(self):
         return ["Snyk Code Scan"]
 
@@ -23,8 +80,7 @@ class SnykCodeParser:
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         return list(self.get_items(tree, test)) if tree else []
@@ -235,7 +291,7 @@ class SnykCodeParser:
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             vuln_id_from_tool=ruleId,
             file_path=locations_uri,
             title=ruleId + "_" + locations_uri,
@@ -258,4 +314,3 @@ class SnykCodeParser:
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

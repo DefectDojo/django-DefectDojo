@@ -1,12 +1,12 @@
 from dojo.models import Test
 from dojo.tools.netsparker.parser import NetsparkerParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestNetsparkerParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
-        with open("unittests/scans/netsparker/netsparker_one_finding.json") as testfile:
+        with (get_unit_tests_scans_path("netsparker") / "netsparker_one_finding.json").open(encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -26,7 +26,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
 
     def test_parse_file_with_multiple_finding(self):
-        with open("unittests/scans/netsparker/netsparker_many_findings.json") as testfile:
+        with (get_unit_tests_scans_path("netsparker") / "netsparker_many_findings.json").open(encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(16, len(findings))
@@ -70,7 +70,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com")
 
     def test_parse_file_issue_9816(self):
-        with open("unittests/scans/netsparker/issue_9816.json") as testfile:
+        with (get_unit_tests_scans_path("netsparker") / "issue_9816.json").open(encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -84,7 +84,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
 
     def test_parse_file_issue_10311(self):
-        with open("unittests/scans/netsparker/issue_10311.json") as testfile:
+        with (get_unit_tests_scans_path("netsparker") / "issue_10311.json").open(encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -96,3 +96,17 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual(614, finding.cwe)
                 self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
+
+    def test_parse_file_issue_11020(self):
+        with (get_unit_tests_scans_path("netsparker") / "issue_11020.json").open(encoding="utf-8") as testfile:
+            parser = NetsparkerParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Low", finding.severity)
+                self.assertEqual(205, finding.cwe)
+                self.assertEqual("08/10/2024", finding.date.strftime("%d/%m/%Y"))

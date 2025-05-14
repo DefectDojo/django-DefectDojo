@@ -1,7 +1,7 @@
 import io
 import json
 import logging
-import os
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -71,11 +71,12 @@ def is_jira_configured_and_enabled(obj):
     if not is_jira_enabled():
         return False
 
-    if get_jira_project(obj) is None:
+    jira_project = get_jira_project(obj)
+    if jira_project is None:
         logger.debug('JIRA project not found for: "%s" not doing anything', obj)
         return False
 
-    return True
+    return jira_project.enabled
 
 
 def is_push_to_jira(instance, push_to_jira_parameter=None):
@@ -88,6 +89,10 @@ def is_push_to_jira(instance, push_to_jira_parameter=None):
     if push_to_jira_parameter is not None:
         return push_to_jira_parameter
 
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        return False
+
     # push_to_jira was not specified, so look at push_all_issues in JIRA_Project
     return jira_project.push_all_issues
 
@@ -96,9 +101,20 @@ def is_push_all_issues(instance):
     if not is_jira_configured_and_enabled(instance):
         return False
 
-    jira_project = get_jira_project(instance)
-    if jira_project:
+    if jira_project := get_jira_project(instance):
+        # Check to see if jira project is disabled to prevent pushing findings
+        if not jira_project.enabled:
+            return None
         return jira_project.push_all_issues
+    return None
+
+
+def _safely_get_finding_group_status(finding_group: Finding_Group) -> str:
+    # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
+    try:
+        return finding_group.status()
+    except TypeError:  # TypeError: 'str' object is not callable
+        return finding_group.status
 
 
 # checks if a finding can be pushed to JIRA
@@ -107,8 +123,12 @@ def is_push_all_issues(instance):
 # returns True/False, error_message, error_code
 def can_be_pushed_to_jira(obj, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
-    if not get_jira_project(obj):
+    jira_project = get_jira_project(obj)
+    if not jira_project:
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira project configuration for this product.", "error_no_jira_project"
+
+    if not jira_project.enabled:
+        return False, f"{to_str_typed(obj)} cannot be pushed to jira as the jira project is not enabled.", "error_no_jira_project"
 
     if not hasattr(obj, "has_jira_issue"):
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.", "error_no_jira_issue_attribute"
@@ -133,9 +153,11 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        if not active or not verified:
-            logger.debug("Findings must be active and verified to be pushed to JIRA")
-            return False, "Findings must be active and verified to be pushed to JIRA", "not_active_or_verified"
+        isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
+
+        if not active or (not verified and isenforced):
+            logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
+            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
 
         jira_minimum_threshold = None
         if System_Settings.objects.get().jira_minimum_severity:
@@ -147,7 +169,8 @@ def can_be_pushed_to_jira(obj, form=None):
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
-        if "Active" not in obj.status():
+        # Determine if the finding group is not active
+        if "Active" not in _safely_get_finding_group_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
     else:
@@ -157,7 +180,7 @@ def can_be_pushed_to_jira(obj, form=None):
 
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
-def get_jira_project(obj, use_inheritance=True):
+def get_jira_project(obj, *, use_inheritance=True):
     if not is_jira_enabled():
         return None
 
@@ -173,14 +196,11 @@ def get_jira_project(obj, use_inheritance=True):
         if obj.jira_project:
             return obj.jira_project
         # some old jira_issue records don't have a jira_project, so try to go via the finding instead
-        elif hasattr(obj, "finding") and obj.finding:
+        if (hasattr(obj, "finding") and obj.finding) or (hasattr(obj, "engagement") and obj.engagement):
             return get_jira_project(obj.finding, use_inheritance=use_inheritance)
-        elif hasattr(obj, "engagement") and obj.engagement:
-            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
-        else:
-            return None
+        return None
 
-    if isinstance(obj, Finding) or isinstance(obj, Stub_Finding):
+    if isinstance(obj, Finding | Stub_Finding):
         finding = obj
         return get_jira_project(finding.test)
 
@@ -205,12 +225,11 @@ def get_jira_project(obj, use_inheritance=True):
         if use_inheritance:
             logger.debug("delegating to product %s for %s", engagement.product, engagement)
             return get_jira_project(engagement.product)
-        else:
-            logger.debug("not delegating to product %s for %s", engagement.product, engagement)
-            return None
+        logger.debug("not delegating to product %s for %s", engagement.product, engagement)
+        return None
 
     if isinstance(obj, Product):
-        # TODO refactor relationships, but now this would brake APIv1 (and v2?)
+        # TODO: refactor relationships, but now this would brake APIv1 (and v2?)
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None
@@ -241,7 +260,7 @@ def get_jira_url(obj):
     issue = get_jira_issue(obj)
     if issue is not None:
         return get_jira_issue_url(issue)
-    elif isinstance(obj, Finding):
+    if isinstance(obj, Finding):
         # finding must only have url if there is a jira_issue
         # engagement can continue to show url of jiraproject instead of jira issue
         return None
@@ -265,10 +284,7 @@ def get_jira_issue_url(issue):
 
 def get_jira_project_url(obj):
     logger.debug("getting jira project url")
-    if not isinstance(obj, JIRA_Project):
-        jira_project = get_jira_project(obj)
-    else:
-        jira_project = obj
+    jira_project = get_jira_project(obj) if not isinstance(obj, JIRA_Project) else obj
 
     if jira_project:
         logger.debug("getting jira project url2")
@@ -319,20 +335,19 @@ def get_jira_issue_template(obj):
         template_dir = "issue-trackers/jira_full/"
 
     if isinstance(obj, Finding_Group):
-        return os.path.join(template_dir, "jira-finding-group-description.tpl")
-    else:
-        return os.path.join(template_dir, "jira-description.tpl")
+        return Path(template_dir) / "jira-finding-group-description.tpl"
+    return Path(template_dir) / "jira-description.tpl"
 
 
 def get_jira_creation(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding | Engagement | Finding_Group):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_creation
     return None
 
 
 def get_jira_change(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding | Engagement | Finding_Group):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_change
     else:
@@ -352,11 +367,12 @@ def has_jira_issue(obj):
 
 
 def get_jira_issue(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding | Engagement | Finding_Group):
         try:
             return obj.jira_issue
         except JIRA_Issue.DoesNotExist:
             return None
+    return None
 
 
 def has_jira_configured(obj):
@@ -391,15 +407,14 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         connect_method = get_jira_connect_method()
         jira = connect_method(jira_server, jira_username, jira_password)
 
-        logger.debug("logged in to JIRA ""%s"" successfully", jira_server)
+        logger.debug("logged in to JIRA %s successfully", jira_server)
 
-        return jira
     except JIRAError as e:
-        logger.exception(e)
+        logger.exception("logged in to JIRA %s unsuccessful", jira_server)
 
         error_message = e.text if hasattr(e, "text") else e.message if hasattr(e, "message") else e.args[0]
 
-        if e.status_code in [401, 403]:
+        if e.status_code in {401, 403}:
             log_jira_generic_alert("JIRA Authentication Error", error_message)
         else:
             log_jira_generic_alert("Unknown JIRA Connection Error", error_message)
@@ -408,12 +423,14 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         raise
 
     except requests.exceptions.RequestException as re:
-        logger.exception(re)
+        logger.exception("Unknown JIRA Connection Error")
         error_message = re.text if hasattr(re, "text") else re.message if hasattr(re, "message") else re.args[0]
         log_jira_generic_alert("Unknown JIRA Connection Error", re)
 
         add_error_message_to_response("Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. " + str(error_message))
         raise
+
+    return jira
 
 
 # Gets a connection to a Jira server based on the finding
@@ -424,6 +441,7 @@ def get_jira_connection(obj):
 
     if jira_instance is not None:
         return get_jira_connection_raw(jira_instance.url, jira_instance.username, jira_instance.password)
+    return None
 
 
 def jira_get_resolution_id(jira, issue, status):
@@ -447,7 +465,7 @@ def jira_transition(jira, issue, transition_id):
             return True
     except JIRAError as jira_error:
         logger.debug("error transitioning jira issue " + issue.key + " " + str(jira_error))
-        logger.exception(jira_error)
+        logger.exception("Error with Jira transation issue")
         alert_text = f"JiraError HTTP {jira_error.status_code}"
         if jira_error.url:
             alert_text += f" url: {jira_error.url}"
@@ -468,6 +486,7 @@ def get_jira_updated(finding):
         project = get_jira_project(finding)
         issue = jira_get_issue(project, j_issue)
         return issue.fields.updated
+    return None
 
 
 # Used for unit testing so geting all the connections is manadatory
@@ -481,6 +500,7 @@ def get_jira_status(finding):
         project = get_jira_project(finding)
         issue = jira_get_issue(project, j_issue)
         return issue.fields.status
+    return None
 
 
 # Used for unit testing so geting all the connections is manadatory
@@ -494,10 +514,11 @@ def get_jira_comments(finding):
         project = get_jira_project(finding)
         issue = jira_get_issue(project, j_issue)
         return issue.fields.comment.comments
+    return None
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
+    """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title=title,
@@ -506,8 +527,8 @@ def log_jira_generic_alert(title, description):
         source="JIRA")
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, obj):
+    """Creates a notification for JIRA errors when handling a specific (finding/group/epic) object"""
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
@@ -516,6 +537,19 @@ def log_jira_alert(error, obj):
         icon="bullseye",
         source="Push to JIRA",
         obj=obj)
+
+
+def log_jira_cannot_be_pushed_reason(error, obj):
+    """Creates an Alert for GUI display  when handling a specific (finding/group/epic) object"""
+    create_notification(
+        event="jira_update",
+        title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
+        description=obj.__class__.__name__ + ": " + error,
+        url=obj.get_absolute_url(),
+        icon="bullseye",
+        source="Push to JIRA",
+        obj=obj,
+        alert_only=True)
 
 
 # Displays an alert for Jira notifications
@@ -553,14 +587,14 @@ def get_labels(obj):
         if prod_name_label not in labels:
             labels.append(prod_name_label)
 
-    if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
+    if system_settings.add_vulnerability_id_to_jira_label or (jira_project and jira_project.add_vulnerability_id_to_jira_label):
         if isinstance(obj, Finding) and obj.vulnerability_ids:
-            for id in obj.vulnerability_ids:
-                labels.append(id)
+            for vul_id in obj.vulnerability_ids:
+                labels.append(vul_id)
         elif isinstance(obj, Finding_Group):
             for finding in obj.findings.all():
-                for id in finding.vulnerability_ids:
-                    labels.append(id)
+                for vul_id in finding.vulnerability_ids:
+                    labels.append(vul_id)
 
     return labels
 
@@ -568,7 +602,7 @@ def get_labels(obj):
 def get_tags(obj):
     # Update Label with system setttings label
     tags = []
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+    if isinstance(obj, Finding | Engagement):
         obj_tags = obj.tags.all()
         if obj_tags:
             for tag in obj_tags:
@@ -617,7 +651,7 @@ def jira_priority(obj):
 def jira_environment(obj):
     if isinstance(obj, Finding):
         return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
-    elif isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding_Group):
         envs = [
             jira_environment(finding)
             for finding in obj.findings.all()
@@ -625,8 +659,7 @@ def jira_environment(obj):
 
         jira_environments = [env for env in envs if env]
         return "\n".join(jira_environments)
-    else:
-        return ""
+    return ""
 
 
 def push_to_jira(obj, *args, **kwargs):
@@ -638,35 +671,47 @@ def push_to_jira(obj, *args, **kwargs):
         finding = obj
         if finding.has_jira_issue:
             return update_jira_issue_for_finding(finding, *args, **kwargs)
-        else:
-            return add_jira_issue_for_finding(finding, *args, **kwargs)
+        return add_jira_issue_for_finding(finding, *args, **kwargs)
 
-    elif isinstance(obj, Engagement):
+    if isinstance(obj, Engagement):
         engagement = obj
         if engagement.has_jira_issue:
             return update_epic(engagement, *args, **kwargs)
-        else:
-            return add_epic(engagement, *args, **kwargs)
+        return add_epic(engagement, *args, **kwargs)
 
-    elif isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding_Group):
         group = obj
         if group.has_jira_issue:
             return update_jira_issue_for_finding_group(group, *args, **kwargs)
-        else:
-            return add_jira_issue_for_finding_group(group, *args, **kwargs)
+        return add_jira_issue_for_finding_group(group, *args, **kwargs)
 
-    else:
-        logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
+    logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
+    return None
 
 
-def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
+def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
     try:
         return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
     except JIRAError as e:
-        logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
-        logger.exception(e)
-        log_jira_alert(e.text, obj)
-        return False
+        """
+        We must try to accommodate the following:
+
+        The request contains a next-gen issue. This operation can't add next-gen issues to epics.
+        To add a next-gen issue to an epic, use the Edit issue operation and set the parent property
+        (i.e., '"parent":{"key":"PROJ-123"}' where "PROJ-123" has an issue type at level one of the issue type hierarchy).
+        See <a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/"> developer.atlassian.com </a> for more details.
+        """
+        try:
+            if "The request contains a next-gen issue." in str(e):
+                # Attempt to update the issue manually
+                for issue_key in issue_keys:
+                    issue = jira.issue(issue_key)
+                    epic = jira.issue(epic_id)
+                    issue.update(parent={"key": epic.key})
+        except JIRAError as e:
+            logger.exception("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
+            log_jira_alert(e.text, obj)
+            return False
 
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
@@ -700,8 +745,10 @@ def prepare_jira_issue_fields(
         epic_name_field=None,
         default_assignee=None,
         duedate=None,
-        issuetype_fields=[]):
+        issuetype_fields=None):
 
+    if issuetype_fields is None:
+        issuetype_fields = []
     fields = {
             "project": {"key": project_key},
             "issuetype": {"name": issuetype_name},
@@ -737,9 +784,9 @@ def prepare_jira_issue_fields(
 
 
 def add_jira_issue(obj, *args, **kwargs):
-    def failure_to_add_message(message: str, exception: Exception, object: Any) -> bool:
+    def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
         if exception:
-            logger.exception(exception)
+            logger.error(exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -758,10 +805,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
         else:
-            log_jira_alert(error_message, obj)
+            log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
         return False
@@ -771,7 +820,7 @@ def add_jira_issue(obj, *args, **kwargs):
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
     except Exception as e:
-        message = f"The following jira instance could not be connected: {jira_instance} - {e.text}"
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
         return failure_to_add_message(message, e, obj)
     # Set the list of labels to set on the jira issue
     labels = get_labels(obj) + get_tags(obj)
@@ -779,6 +828,7 @@ def add_jira_issue(obj, *args, **kwargs):
         labels = list(dict.fromkeys(labels))  # de-dup
     # Determine what due date to set on the jira issue
     duedate = None
+
     if System_Settings.objects.get().enable_finding_sla:
         duedate = obj.sla_deadline()
     # Set the fields that will compose the jira issue
@@ -898,7 +948,7 @@ def update_jira_issue_for_finding_group(finding_group, *args, **kwargs):
 def update_jira_issue(obj, *args, **kwargs):
     def failure_to_update_message(message: str, exception: Exception, obj: Any) -> bool:
         if exception:
-            logger.exception(exception)
+            logger.error(exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -1022,13 +1072,10 @@ def get_jira_issue_from_jira(find):
         jira = get_jira_connection(jira_instance)
 
         logger.debug("getting issue from JIRA")
-        issue_from_jira = jira.issue(j_issue.jira_id)
-
-        return issue_from_jira
+        return jira.issue(j_issue.jira_id)
 
     except JIRAError as e:
-        logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return None
 
@@ -1054,15 +1101,12 @@ def issue_from_jira_is_active(issue_from_jira):
     if not issue_from_jira.fields.resolution:
         return True
 
-    if issue_from_jira.fields.resolution == "None":
-        return True
-
     # some kind of resolution is present that is not null or None
-    return False
+    return issue_from_jira.fields.resolution == "None"
 
 
-def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
-    status_list = obj.status()
+def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
+    status_list = _safely_get_finding_group_status(obj)
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
@@ -1095,6 +1139,7 @@ def get_issuetype_fields(
 
     issuetype_fields = None
     use_cloud_api = jira.deploymentType.lower() == "cloud" or jira._version < (9, 0, 0)
+
     try:
         if use_cloud_api:
             try:
@@ -1105,7 +1150,6 @@ def get_issuetype_fields(
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
                 raise
-
             project = None
             try:
                 project = meta["projects"][0]
@@ -1162,16 +1206,16 @@ def is_jira_project_valid(jira_project):
     try:
         jira = get_jira_connection(jira_project)
         get_issuetype_fields(jira, jira_project.project_key, jira_project.jira_instance.default_issue_type)
-        return True
     except JIRAError:
         logger.debug("invalid JIRA Project Config, can't retrieve metadata for '%s'", jira_project)
         return False
+    return True
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
-        basename = os.path.basename(file)
+        basename = Path(file).name
 
     # Check to see if the file has been uploaded to Jira
     # TODO: JIRA: check for local existince of attachment as it currently crashes if local attachment doesn't exist
@@ -1184,13 +1228,14 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     issue=issue, attachment=attachment, filename=jira_filename)
             else:
                 # read and upload a file
-                with open(file, "rb") as f:
+                with Path(file).open("rb") as f:
                     jira.add_attachment(issue=issue, attachment=f)
-            return True
         except JIRAError as e:
-            logger.exception(e)
+            logger.exception("Unable to add attachment")
             log_jira_alert("Attachment: " + e.text, finding)
             return False
+        return True
+    return None
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -1233,18 +1278,20 @@ def close_epic(eng, push_to_jira, **kwargs):
                 r = requests.post(
                     url=req_url,
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-                    json=json_data)
+                    json=json_data,
+                    timeout=settings.REQUESTS_TIMEOUT,
+                )
                 if r.status_code != 204:
                     logger.warning(f"JIRA close epic failed with error: {r.text}")
                     return False
-                return True
             except JIRAError as e:
-                logger.exception(e)
+                logger.exception("Jira Engagement/Epic Close Error")
                 log_jira_generic_alert("Jira Engagement/Epic Close Error", str(e))
                 return False
-    else:
-        add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
-        return False
+            return True
+        return None
+    add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
+    return False
 
 
 @dojo_model_to_id
@@ -1271,16 +1318,22 @@ def update_epic(engagement, **kwargs):
             if not epic_name:
                 epic_name = engagement.name
 
-            issue.update(summary=epic_name, description=epic_name)
-            return True
+            jira_issue_update_kwargs = {
+                "summary": epic_name,
+                "description": epic_name,
+            }
+            if (epic_priority := kwargs.get("epic_priority")) is not None:
+                jira_issue_update_kwargs["priority"] = {"name": epic_priority}
+            issue.update(**jira_issue_update_kwargs)
         except JIRAError as e:
-            logger.exception(e)
+            logger.exception("Jira Engagement/Epic Update Error")
             log_jira_generic_alert("Jira Engagement/Epic Update Error", str(e))
             return False
-    else:
-        add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
 
-        return False
+        return True
+
+    add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
+    return False
 
 
 @dojo_model_to_id
@@ -1299,6 +1352,7 @@ def add_epic(engagement, **kwargs):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
+        epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
         issue_dict = {
@@ -1308,14 +1362,16 @@ def add_epic(engagement, **kwargs):
             "summary": epic_name,
             "description": epic_name,
             "issuetype": {
-                "name": getattr(jira_project, "epic_issue_type_name", "Epic"),
+                "name": epic_issue_type_name,
             },
-            get_epic_name_field_name(jira_instance): epic_name,
         }
         if kwargs.get("epic_priority"):
             issue_dict["priority"] = {"name": kwargs.get("epic_priority")}
         try:
             jira = get_jira_connection(jira_instance)
+            # Determine if we should add the epic name or not
+            if (epic_name_field := get_epic_name_field_name(jira_instance)) in get_issuetype_fields(jira, jira_project.project_key, epic_issue_type_name):
+                issue_dict[epic_name_field] = epic_name
             logger.debug("add_epic: %s", issue_dict)
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
@@ -1324,38 +1380,37 @@ def add_epic(engagement, **kwargs):
                 engagement=engagement,
                 jira_project=jira_project)
             j_issue.save()
-            return True
         except JIRAError as e:
             # should we try to parse the errors as JIRA is very strange in how it responds.
             # for example a non existent project_key leads to "project key is required" which sounds like something is missing
             # but it's just a non-existent project (or maybe a project for which the account has no create permission?)
             #
             # {"errorMessages":[],"errors":{"project":"project is required"}}
-            logger.exception(e)
             error = str(e)
             message = ""
             if "customfield" in error:
                 message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_instance.url + \
                     "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
+            logger.exception(message)
 
             log_jira_generic_alert("Jira Engagement/Epic Creation Error",
                                    message + error)
             return False
-    else:
-        add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
-        return False
+
+        return True
+
+    add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
+    return False
 
 
 def jira_get_issue(jira_project, issue_key):
     try:
         jira_instance = jira_project.jira_instance
         jira = get_jira_connection(jira_instance)
-        issue = jira.issue(issue_key)
+        return jira.issue(issue_key)
 
-        return issue
     except JIRAError as jira_error:
-        logger.debug("error retrieving jira issue " + issue_key + " " + str(jira_error))
-        logger.exception(jira_error)
+        logger.exception("error retrieving jira issue %s", issue_key)
         log_jira_generic_alert("error retrieving jira issue " + issue_key, str(jira_error))
         return None
 
@@ -1366,7 +1421,7 @@ def jira_get_issue(jira_project, issue_key):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def add_comment(obj, note, force_push=False, **kwargs):
+def add_comment(obj, note, *, force_push=False, **kwargs):
     if not is_jira_configured_and_enabled(obj):
         return False
 
@@ -1381,32 +1436,52 @@ def add_comment(obj, note, force_push=False, **kwargs):
                 j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    f"({note.author.get_full_name() if note.author.get_full_name() else note.author.username}): {note.entry}")
-                return True
+                    f"({note.author.get_full_name() or note.author.username}): {note.entry}")
             except JIRAError as e:
                 log_jira_generic_alert("Jira Add Comment Error", str(e))
                 return False
+            return True
+        return None
+    return None
 
 
 def add_simple_jira_comment(jira_instance, jira_issue, comment):
     try:
+        jira_project = get_jira_project(jira_issue)
+
+        # Check to see if jira project is disabled to prevent pushing findings
+        if not jira_project.enabled:
+            log_jira_generic_alert("JIRA Project is disabled", "Push to JIRA for Epic skipped because JIRA Project is disabled")
+            return False
+
         jira = get_jira_connection(jira_instance)
 
         jira.add_comment(
             jira_issue.jira_id, comment,
         )
-        return True
     except Exception as e:
         log_jira_generic_alert("Jira Add Comment Error", str(e))
         return False
+    return True
+
+
+def jira_already_linked(finding, jira_issue_key, jira_id) -> Finding | None:
+    jira_issues = JIRA_Issue.objects.filter(jira_id=jira_id, jira_key=jira_issue_key).exclude(engagement__isnull=False)
+    jira_issues = jira_issues.exclude(finding=finding)
+
+    return jira_issues.first()
 
 
 def finding_link_jira(request, finding, new_jira_issue_key):
     logger.debug("linking existing jira issue %s for finding %i", new_jira_issue_key, finding.id)
 
-    existing_jira_issue = jira_get_issue(get_jira_project(finding), new_jira_issue_key)
-
     jira_project = get_jira_project(finding)
+    existing_jira_issue = jira_get_issue(jira_project, new_jira_issue_key)
+
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        add_error_message_to_response("Push to JIRA for finding skipped because JIRA Project is disabled")
+        return False
 
     if not existing_jira_issue:
         raise ValueError("JIRA issue not found or cannot be retrieved: " + new_jira_issue_key)
@@ -1434,9 +1509,13 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 def finding_group_link_jira(request, finding_group, new_jira_issue_key):
     logger.debug("linking existing jira issue %s for finding group %i", new_jira_issue_key, finding_group.id)
 
-    existing_jira_issue = jira_get_issue(get_jira_project(finding_group), new_jira_issue_key)
-
     jira_project = get_jira_project(finding_group)
+    existing_jira_issue = jira_get_issue(jira_project, new_jira_issue_key)
+
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        add_error_message_to_response("Push to JIRA for group skipped because JIRA Project is disabled")
+        return False
 
     if not existing_jira_issue:
         raise ValueError("JIRA issue not found or cannot be retrieved: " + new_jira_issue_key)
@@ -1537,9 +1616,9 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
-            except Exception as e:
+            except Exception:
                 error = True
-                logger.exception(e)
+                logger.exception("Unable to store Jira project")
         else:
             logger.debug(jform.errors)
             error = True
@@ -1603,8 +1682,8 @@ def escape_for_jira(text):
     return text.replace("|", "%7D")
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue) -> bool:
-    """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
+    """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper
     status_changed = False
     resolved = resolution_id is not None
@@ -1623,7 +1702,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                     owner=finding.reporter,
                 )
                 finding.test.engagement.risk_acceptance.add(ra)
-                ra_helper.add_findings_to_risk_acceptance(ra, [finding])
+                ra_helper.add_findings_to_risk_acceptance(User.objects.get_or_create(username="JIRA")[0], ra, [finding])
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
             if not finding.false_p:
@@ -1633,30 +1712,28 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.mitigated = None
                 finding.is_mitigated = False
                 finding.false_p = True
-                ra_helper.risk_unaccept(finding)
+                ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
                 status_changed = True
-        else:
-            # Mitigated by default as before
-            if not finding.is_mitigated:
-                logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
-                finding.active = False
-                finding.mitigated = jira_now
-                finding.is_mitigated = True
-                finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-                finding.endpoints.clear()
-                finding.false_p = False
-                ra_helper.risk_unaccept(finding)
-                status_changed = True
-    else:
-        if not finding.active:
-            # Reopen / Open Jira issue
-            logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
-            finding.active = True
-            finding.mitigated = None
-            finding.is_mitigated = False
+        # Mitigated by default as before
+        elif not finding.is_mitigated:
+            logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
+            finding.active = False
+            finding.mitigated = jira_now
+            finding.is_mitigated = True
+            finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
+            finding.endpoints.clear()
             finding.false_p = False
-            ra_helper.risk_unaccept(finding)
+            ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
+    elif not finding.active and (finding_group is None or settings.JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN):
+        # Reopen / Open Jira issue
+        logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
+        finding.active = True
+        finding.mitigated = None
+        finding.is_mitigated = False
+        finding.false_p = False
+        ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
+        status_changed = True
 
     # for findings in a group, there is no jira_issue attached to the finding
     jira_issue.jira_change = jira_now
@@ -1664,3 +1741,23 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if status_changed:
         finding.save()
     return status_changed
+
+
+def save_and_push_to_jira(finding):
+    # Manage the jira status changes
+    push_to_jira_decision = False
+    # Determine if the finding is in a group. if so, not push to jira yet
+    finding_in_group = finding.has_finding_group
+    # Check if there is a jira issue that needs to be updated
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+    # Only push if the finding is not in a group
+    if jira_issue_exists:
+        # Determine if any automatic sync should occur
+        push_to_jira_decision = is_push_all_issues(finding) \
+            or get_jira_instance(finding).finding_jira_sync
+    # Save the finding
+    finding.save(push_to_jira=(push_to_jira_decision and not finding_in_group))
+    # we only push the group after saving the finding to make sure
+    # the updated data of the finding is pushed as part of the group
+    if push_to_jira_decision and finding_in_group:
+        push_to_jira(finding.finding_group)

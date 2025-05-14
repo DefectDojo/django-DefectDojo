@@ -17,8 +17,7 @@ class AWSProwlerV3plusParser:
     def get_findings(self, file, test):
         if file.name.lower().endswith(".ocsf.json"):
             return AWSProwlerV4Parser().process_ocsf_json(file, test)
-        elif file.name.lower().endswith(".json"):
+        if file.name.lower().endswith(".json"):
             return AWSProwlerV3Parser().process_json(file, test)
-        else:
-            msg = "Unknown file format"
-            raise ValueError(msg)
+        msg = "Unknown file format"
+        raise ValueError(msg)

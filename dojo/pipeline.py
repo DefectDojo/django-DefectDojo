@@ -31,7 +31,7 @@ def social_uid(backend, details, response, *args, **kwargs):
                 "first_name": first_name,
                 "last_name": last_name,
                 "uid": uid}
-    elif settings.GOOGLE_OAUTH_ENABLED and isinstance(backend, GoogleOAuth2):
+    if settings.GOOGLE_OAUTH_ENABLED and isinstance(backend, GoogleOAuth2):
         """Return user details from Google account"""
         if "sub" in response:
             google_uid = response["sub"]
@@ -51,15 +51,13 @@ def social_uid(backend, details, response, *args, **kwargs):
                 "first_name": first_name,
                 "last_name": last_name,
                 "uid": google_uid}
-    else:
-        uid = backend.get_user_id(details, response)
-        # Used for most backends
-        if uid:
-            return {"uid": uid}
-        # Until OKTA PR in social-core is merged
-        # This modified way needs to work
-        else:
-            return {"uid": response.get("preferred_username")}
+    uid = backend.get_user_id(details, response)
+    # Used for most backends
+    if uid:
+        return {"uid": uid}
+    # Until OKTA PR in social-core is merged
+    # This modified way needs to work
+    return {"uid": response.get("preferred_username")}
 
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
@@ -83,7 +81,11 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                 request_headers = {"Authorization": "Bearer " + token}
                 if is_group_id(group_from_response):
                     logger.debug("detected " + group_from_response + " as groupID and will fetch the displayName from microsoft graph")
-                    group_name_request = requests.get((str(soc.extra_data["resource"]) + "/v1.0/groups/" + str(group_from_response) + "?$select=displayName"), headers=request_headers)
+                    group_name_request = requests.get(
+                        (str(soc.extra_data["resource"]) + "/v1.0/groups/" + str(group_from_response) + "?$select=displayName"),
+                        headers=request_headers,
+                        timeout=settings.REQUESTS_TIMEOUT,
+                    )
                     group_name_request.raise_for_status()
                     group_name_request_json = group_name_request.json()
                     group_name = group_name_request_json["displayName"]
@@ -105,10 +107,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
 
 def is_group_id(group):
-    if re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group):
-        return True
-    else:
-        return False
+    return bool(re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group))
 
 
 def assign_user_to_groups(user, group_names, social_provider):
@@ -177,13 +176,12 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
 
 def sanitize_username(username):
     allowed_chars_regex = re.compile(r"[\w@.+_-]")
-    allowed_chars = filter(lambda char: allowed_chars_regex.match(char), list(username))
+    allowed_chars = filter(allowed_chars_regex.match, list(username))
     return "".join(allowed_chars)
 
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
-        return
-    else:
-        details["username"] = sanitize_username(details.get("username"))
-        return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
+        return None
+    details["username"] = sanitize_username(details.get("username"))
+    return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

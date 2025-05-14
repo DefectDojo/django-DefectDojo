@@ -32,7 +32,7 @@ class DeepfenceThreatmapperCompliance:
         description += "**test_number:** " + str(test_number) + "\n"
         description += "**count:** " + str(count) + "\n"
         description += "**doc_id:** " + str(doc_id) + "\n"
-        finding = Finding(
+        return Finding(
             title="Threatmapper_Compliance_Report-" + test_number,
             description=description,
             severity=self.compliance_severity(status),
@@ -40,14 +40,11 @@ class DeepfenceThreatmapperCompliance:
             dynamic_finding=True,
             test=test,
         )
-        return finding
 
-    def compliance_severity(self, input):
-        if input == "pass":
+    def compliance_severity(self, severity_input):
+        if severity_input == "pass" or severity_input == "info":
             output = "Info"
-        elif input == "info":
-            output = "Info"
-        elif input == "warn":
+        elif severity_input == "warn":
             output = "Medium"
         else:
             output = "Info"

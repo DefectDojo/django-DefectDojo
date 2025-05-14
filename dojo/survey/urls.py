@@ -77,4 +77,7 @@ urlpatterns = [
     re_path(r"^empty_questionnaire/(?P<esid>\d+)/new_engagement$",
         views.engagement_empty_survey,
         name="engagement_empty_survey"),
+    re_path(r"^empty_questionnaire/(?P<esid>\d+)/existing_engagement$",
+        views.ExistingEngagementEmptySurveyView.as_view(),
+        name="existing_engagement_empty_survey"),
 ]

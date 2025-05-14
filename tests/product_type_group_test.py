@@ -5,7 +5,7 @@ from base_test_class import BaseTestCase
 from group_test import GroupTest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
@@ -18,7 +18,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element(By.ID, "addProductTypeGroup").click()
         # Select the product type 'Research and Development'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_product_types")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_product_types")))
         except TimeoutException:
             self.fail("Timed out waiting for product types dropdown to initialize ")
         driver.execute_script("document.getElementsByName('product_types')[0].style.display = 'inline'")
@@ -75,7 +75,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element(By.ID, "addProductTypeGroup").click()
         # Select the group 'Group Name'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_groups")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_groups")))
         except TimeoutException:
             self.fail("Timed out waiting for groups dropdown to initialize ")
         driver.execute_script("document.getElementsByName('groups')[0].style.display = 'inline'")
@@ -147,7 +147,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Group Name")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed group is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuGroup").click()
         driver.find_element(By.ID, "viewGroup").click()

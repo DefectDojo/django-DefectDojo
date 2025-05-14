@@ -2,7 +2,7 @@ import datetime
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.contrast.parser import ContrastParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestContrastParser(DojoTestCase):
@@ -11,7 +11,7 @@ class TestContrastParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open("unittests/scans/contrast/contrast-node-goat.csv") as testfile:
+        with (get_unit_tests_scans_path("contrast") / "contrast-node-goat.csv").open(encoding="utf-8") as testfile:
             parser = ContrastParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:
@@ -30,7 +30,7 @@ class TestContrastParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/login.mvc", endpoint.path)
             with self.subTest(i=11):
                 finding = findings[11]
@@ -45,18 +45,18 @@ class TestContrastParser(DojoTestCase):
                 self.assertEqual(4, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/services/SoapRequest", endpoint.path)
                 endpoint = finding.unsaved_endpoints[1]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/attack", endpoint.path)
 
     def test_example2_report(self):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open("unittests/scans/contrast/vulnerabilities2020-09-21.csv") as testfile:
+        with (get_unit_tests_scans_path("contrast") / "vulnerabilities2020-09-21.csv").open(encoding="utf-8") as testfile:
             parser = ContrastParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:

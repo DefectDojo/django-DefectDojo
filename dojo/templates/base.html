@@ -25,7 +25,7 @@
         {% endblock %}
 
         <!-- jQuery -->
-        <script src="{% static "jquery/dist/jquery.js" %}"></script>
+        <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
         <!--  jQuery UI -->
         <script src="{% static "jquery-ui/dist/jquery-ui.min.js" %}"></script>
         <!-- Bootstrap Core JavaScript -->
@@ -74,14 +74,14 @@
         <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
         <!-- Custom Fonts -->
-        <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-        <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-        <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/fontawesome.min.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/brands.min.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/solid.min.css' %}" rel="stylesheet" type="text/css">
 
         {% block add_css %}
         {% endblock %}
         <link rel="stylesheet" href="{% static "jquery-ui/dist/themes/flick/jquery-ui.min.css" %}">
-        <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
+        <link rel="shortcut icon" type="image/png" href="{% static "dojo/img/favicon.png" %}"/>
         <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
         {% block dojo_css %}
@@ -111,7 +111,9 @@
                         </button>
                         <a class="navbar-brand" href="{% url 'home' %}">
                         {% block header_logo %}
-                            <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                            <div style="padding: 10px;">
+                                <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                            </div>
                         {% endblock %}
                         </a>
 
@@ -124,7 +126,7 @@
                                 <div class="custom-search-form">
                                     <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
                                         <div class="input-group">
-                                            <input id="simple_search" label="simple_search" aria_label="simple_search" type="text" name="query" class="form-control"
+                                            <input id="simple_search" label="simple_search" aria-label="simple_search" type="text" name="query" class="form-control"
                                                 placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                                             <span class="input-group-btn">
                                                 <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
@@ -157,7 +159,7 @@
                                     {% if request.user.is_authenticated %}
                                         <li>
                                             <a href="{% url 'view_profile' %}">
-                                                <i class="fa-solid fa-user fa-fw"></i> 
+                                                <i class="fa-solid fa-user fa-fw"></i>
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
@@ -436,7 +438,7 @@
                                                 </a>
                                                 <ul class="nav nav-second-level">
                                                     {% if "auth.view_user"|has_configuration_permission:request %}
-                                                        <li>    
+                                                        <li>
                                                             <a href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
@@ -541,6 +543,13 @@
                                                         {% trans "Notifications" %}
                                                     </a>
                                                 </li>
+                                                {% if system_settings.enable_webhooks_notifications and "dojo.view_notification_webhooks"|has_configuration_permission:request %}
+                                                <li>
+                                                    <a href="{% url 'notification_webhooks' %}">
+                                                        {% trans "Notification Webhooks" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
                                                 <li>
                                                     <a href="{% url 'regulations' %}">
                                                         {% trans "Regulations" %}
@@ -580,8 +589,8 @@
                                     {% block support-tab %}
                                         <li>
                                             <a href="{% url 'support' %}" aria-disabled="true" aria-expanded="false" aria-label="Support">
-                                                <i class="fa-solid fa-life-ring fa-fw"></i>
-                                                <span>{% trans "Get Support" %}</span>
+                                                <i class="fa-solid fa-level-up fa-fw"></i>
+                                                <span>{% trans "Upgrade" %}</span>
                                             </a>
                                         </li>
                                     {% endblock %}
@@ -657,7 +666,7 @@
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
-                                                    {% if product_tab.engagements > 0 %} 
+                                                    {% if product_tab.engagements > 0 %}
                                                         <span class="badge">{{ product_tab.engagements }}</span>
                                                     {% endif %}
                                                 </span>
@@ -983,9 +992,9 @@
                         {% endif %}
                     {% endblock %}
                     <!-- end of tabs -->
+                    {% if messages %}
                     <div class="row">
                         <div class="col-lg-12">
-                            {% if messages %}
                                 {% for message in messages %}
                                     <div class="alert {{ message.tags }} alert-dismissible" role="alert">
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -994,10 +1003,10 @@
                                         {{ message }}
                                     </div>
                                 {% endfor %}
-                            {% endif %}
                         </div>
                         <!-- /.col-lg-12 -->
                     </div>
+                    {% endif %}
                     <!-- /.row -->
                     <div class="row">
                         <div id="base-content" class="col-lg-12">
@@ -1127,6 +1136,9 @@
                 {% endif %}
 
                 function htmlEscape(str) {
+                    if (!str) {
+                        return '';
+                    }
                     return str
                         .replace(/\n/g, " ")
                         .replace(/&/g, '&amp;')

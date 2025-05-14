@@ -5,15 +5,15 @@ from base_test_class import BaseTestCase
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 
 class NotificationTest(BaseTestCase):
 
-    def __init__(self, method_name, type):
+    def __init__(self, method_name, notif_type):
         super().__init__(method_name)
-        self.type = type
+        self.type = notif_type
 
     def enable_notification(self):
         driver = self.driver
@@ -41,11 +41,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_personal_notification(self):
         # Login to the site. Password will have to be modified
@@ -56,13 +58,9 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "notifications")
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
         except NoSuchElementException:
-            if self.type == "msteams":
-                # msteam should be not in personal notifications
-                assert True
-            else:
-                assert False
+            # msteam should be not in personal notifications
+            self.assertEqual(self.type, "msteams")
 
     def test_disable_system_notification(self):
         # Login to the site. Password will have to be modified
@@ -72,11 +70,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications/system")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_system_notification(self):
         # Login to the site. Password will have to be modified
@@ -84,12 +84,13 @@ class NotificationTest(BaseTestCase):
         driver = self.driver
 
         self.enable_notification()
-        driver.get(self.base_url + "notifications/system")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
+            in_place = True
         except NoSuchElementException:
-            assert False
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_disable_template_notification(self):
         # Login to the site. Password will have to be modified
@@ -99,11 +100,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications/template")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_template_notification(self):
         # Login to the site. Password will have to be modified
@@ -114,13 +117,9 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "notifications/template")
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
         except NoSuchElementException:
-            if self.type == "msteams":
-                # msteam should be not in personal notifications
-                assert True
-            else:
-                assert False
+            # msteam should be not in personal notifications
+            self.assertEqual(self.type, "msteams")
 
     def test_user_mail_notifications_change(self):
         # Login to the site. Password will have to be modified
@@ -131,7 +130,7 @@ class NotificationTest(BaseTestCase):
         actions = ActionChains(driver)
         configuration_menu = driver.find_element(By.ID, "menu_configuration")
         actions.move_to_element(configuration_menu).perform()
-        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
+        wait.until(expected_conditions.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
         originally_selected = {
             "product_added": driver.find_element(By.XPATH,
@@ -159,24 +158,29 @@ def suite():
     suite.addTest(NotificationTest("test_disable_personal_notification", "mail"))
     suite.addTest(NotificationTest("test_disable_personal_notification", "slack"))
     suite.addTest(NotificationTest("test_disable_personal_notification", "msteams"))
+    suite.addTest(NotificationTest("test_disable_personal_notification", "webhooks"))
     # now test when enabled
     suite.addTest(NotificationTest("test_enable_personal_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_personal_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_personal_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_personal_notification", "webhooks"))
     # Now switch to system notifications
     suite.addTest(NotificationTest("test_disable_system_notification", "mail"))
     suite.addTest(NotificationTest("test_disable_system_notification", "slack"))
     suite.addTest(NotificationTest("test_disable_system_notification", "msteams"))
+    suite.addTest(NotificationTest("test_disable_system_notification", "webhooks"))
     # now test when enabled
     suite.addTest(NotificationTest("test_enable_system_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_system_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_system_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_system_notification", "webhooks"))
     # not really for the user we created, but still related to user settings
     suite.addTest(NotificationTest("test_user_mail_notifications_change", "mail"))
     # now do short test for the template
     suite.addTest(NotificationTest("test_enable_template_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_template_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_template_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_template_notification", "webhooks"))
 
     return suite
 

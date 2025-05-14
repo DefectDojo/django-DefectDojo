@@ -34,7 +34,7 @@ class GosecParser:
 
             #           Finding details information
             findingdetail += f"Filename: {filename}\n\n"
-            findingdetail += f"Line number: {str(line)}\n\n"
+            findingdetail += f"Line number: {line}\n\n"
             findingdetail += f"Issue Confidence: {scanner_confidence}\n\n"
             findingdetail += "Code:\n\n"
             findingdetail += "```{}```".format(item["code"])
@@ -58,10 +58,7 @@ class GosecParser:
             if "-" in line:
                 # if this is a range, only point to the beginning.
                 line = line.split("-", 1)[0]
-            if line.isdigit():
-                line = int(line)
-            else:
-                line = None
+            line = int(line) if line.isdigit() else None
 
             dupe_key = title + item["file"] + str(line)
 

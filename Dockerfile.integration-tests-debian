@@ -1,8 +1,9 @@
 
 # code: language=Dockerfile
 
-FROM openapitools/openapi-generator-cli:v7.7.0@sha256:99924315933d49e7b33a7d2074bb2b64fc8def8f74519939036e24eb48f00336 AS openapitools
-FROM python:3.11.9-slim-bookworm@sha256:8c1036ec919826052306dfb5286e4753ffd9d5f6c24fbc352a5399c3b405b57e AS build
+FROM openapitools/openapi-generator-cli:v7.13.0@sha256:d01768f74ed889de3b76196658a7fcc69a4208d2da11d6e6415303776013d6c9 AS openapitools
+# currently only supports x64, no arm yet due to chrome and selenium dependencies
+FROM python:3.11.11-slim-bookworm@sha256:42420f737ba91d509fc60d5ed65ed0492678a90c561e1fa08786ae8ba8b52eda AS build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -25,8 +26,13 @@ RUN pip install --no-cache-dir selenium==4.9.0 requests
 
 # Install the latest Google Chrome stable release
 WORKDIR /opt/chrome
+
+# TODO: figure out whatever fix is necessary to use Chrome >= 128 and put this back in the RUN below so we stay
+# up-to-date
+# chrome_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chrome[] | select(.platform == "linux64").url') && \
+
 RUN \
-  chrome_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chrome[] | select(.platform == "linux64").url') && \
+  chrome_url="https://storage.googleapis.com/chrome-for-testing-public/127.0.6533.119/linux64/chrome-linux64.zip" && \
   wget $chrome_url && \
   unzip chrome-linux64.zip && \
   rm -rf chrome-linux64.zip && \
@@ -49,8 +55,12 @@ RUN apt-get install -y libxi6 libgconf-2-4 jq libjq1 libonig5 libxkbcommon0 libx
 
 # Installing the latest stable Google Chrome driver release
 WORKDIR /opt/chrome-driver
+# TODO: figure out whatever fix is necessary to use Chrome >= 128 and put this back in the RUN below so we stay
+# up-to-date
+# chromedriver_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chromedriver[] | select(.platform == "linux64").url') && \
+
 RUN \
-  chromedriver_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chromedriver[] | select(.platform == "linux64").url') && \
+  chromedriver_url="https://storage.googleapis.com/chrome-for-testing-public/127.0.6533.119/linux64/chromedriver-linux64.zip" && \
   wget $chromedriver_url && \
   unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
   rm -rf chromedriver-linux64.zip && \

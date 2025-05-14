@@ -1,13 +1,12 @@
-from os import path
 
 from dojo.models import Test
 from dojo.tools.bundler_audit.parser import BundlerAuditParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestBundlerAuditParser(DojoTestCase):
     def test_get_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/bundler_audit/bundler-audit_v0.6.1.txt")) as testfile:
+        with (get_unit_tests_scans_path("bundler_audit") / "bundler-audit_v0.6.1.txt").open(encoding="utf-8") as testfile:
             parser = BundlerAuditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
@@ -29,7 +28,7 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("2.2.3", finding.component_version)
 
     def test_get_findings_version9(self):
-        with open(path.join(path.dirname(__file__), "../scans/bundler_audit/version_9.0.txt")) as testfile:
+        with (get_unit_tests_scans_path("bundler_audit") / "version_9.0.txt").open(encoding="utf-8") as testfile:
             parser = BundlerAuditParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))

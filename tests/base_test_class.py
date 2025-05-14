@@ -2,12 +2,13 @@ import logging
 import os
 import re
 import unittest
+from pathlib import Path
 
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 # import time
@@ -26,7 +27,7 @@ def on_exception_html_source_logger(func):
         except Exception:
             logger.info(f"exception occured at url: {self.driver.current_url}")
             logger.info(f"page source: {self.driver.page_source}")
-            f = open("selenium_page_source.html", "w", encoding="utf-8")
+            f = Path("selenium_page_source.html").open("w", encoding="utf-8")
             f.writelines(self.driver.page_source)
             # time.sleep(30)
             raise
@@ -34,7 +35,7 @@ def on_exception_html_source_logger(func):
     return wrapper
 
 
-def set_suite_settings(suite, jira=False, github=False, block_execution=False):
+def set_suite_settings(suite, *, jira=False, github=False, block_execution=False):
     if jira:
         suite.addTest(BaseTestCase("enable_jira"))
     else:
@@ -79,7 +80,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
 
-            dd_driver_options.set_capability("acceptInsecureCerts", True)
+            dd_driver_options.set_capability(name="acceptInsecureCerts", value=True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
             desired = webdriver.DesiredCapabilities.CHROME
@@ -94,7 +95,7 @@ class BaseTestCase(unittest.TestCase):
                 f"starting chromedriver with options: {vars(dd_driver_options)} {desired}",
             )
 
-            # TODO - this filter needs to be removed
+            # TODO: - this filter needs to be removed
             import warnings
             warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
             warnings.filterwarnings("ignore", message="use options instead of chrome_options")
@@ -237,16 +238,10 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
-        no_content = None
-        try:
-            no_content = self.driver.find_element(By.ID, no_content_id)
-        except:
-            pass
-
-        if no_content is None:
+        if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(
-                EC.presence_of_element_located((By.ID, wrapper_id)),
+                expected_conditions.presence_of_element_located((By.ID, wrapper_id)),
             )
 
     def is_element_by_css_selector_present(self, selector, text=None):
@@ -264,12 +259,12 @@ class BaseTestCase(unittest.TestCase):
 
         return False
 
-    def is_element_by_id_present(self, id):
+    def is_element_by_id_present(self, elem_id):
         try:
-            self.driver.find_element(By.ID, id)
-            return True
+            self.driver.find_element(By.ID, elem_id)
         except NoSuchElementException:
             return False
+        return True
 
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-success", text=text)
@@ -291,24 +286,24 @@ class BaseTestCase(unittest.TestCase):
         body = self.driver.find_element(By.TAG_NAME, "body")
         return re.search(text, body.text)
 
-    def element_exists_by_id(self, id):
-        elems = self.driver.find_elements(By.ID, id)
+    def element_exists_by_id(self, elem_id):
+        elems = self.driver.find_elements(By.ID, elem_id)
         return len(elems) > 0
 
-    def change_system_setting(self, id, enable=True):
-        logger.info("changing system setting " + id + " enable: " + str(enable))
+    def change_system_setting(self, setting_id, *, enable=True):
+        logger.info("changing system setting " + setting_id + " enable: " + str(enable))
         driver = self.driver
         driver.get(self.base_url + "system_settings")
 
-        is_enabled = driver.find_element(By.ID, id).is_selected()
+        is_enabled = driver.find_element(By.ID, setting_id).is_selected()
         if (enable and not is_enabled) or (not enable and is_enabled):
-            # driver.find_element(By.XPATH, '//*[@id=' + id + ']').click()
-            driver.find_element(By.ID, id).click()
+            # driver.find_element(By.XPATH, '//*[@id=' + setting_id + ']').click()
+            driver.find_element(By.ID, setting_id).click()
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
 
-        is_enabled = driver.find_element(By.ID, id).is_selected()
+        is_enabled = driver.find_element(By.ID, setting_id).is_selected()
 
         if enable:
             self.assertTrue(is_enabled)
@@ -318,11 +313,11 @@ class BaseTestCase(unittest.TestCase):
 
         return is_enabled
 
-    def enable_system_setting(self, id):
-        return self.change_system_setting(id, enable=True)
+    def enable_system_setting(self, setting_id):
+        return self.change_system_setting(setting_id, enable=True)
 
-    def disable_system_setting(self, id):
-        return self.change_system_setting(id, enable=False)
+    def disable_system_setting(self, setting_id):
+        return self.change_system_setting(setting_id, enable=False)
 
     def enable_jira(self):
         return self.enable_system_setting("id_enable_jira")
@@ -336,10 +331,10 @@ class BaseTestCase(unittest.TestCase):
     def enable_github(self):
         return self.enable_system_setting("id_enable_github")
 
-    def set_block_execution(self, block_execution=True):
+    def set_block_execution(self, *, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        logger.info(f"setting block execution to: {str(block_execution)}")
+        logger.info(f"setting block execution to: {block_execution}")
         driver = self.driver
         driver.get(self.base_url + "profile")
         if (
@@ -350,9 +345,9 @@ class BaseTestCase(unittest.TestCase):
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
-            self.assertTrue(
-                driver.find_element(By.ID, "id_block_execution").is_selected()
-                == block_execution,
+            self.assertEqual(
+                driver.find_element(By.ID, "id_block_execution").is_selected(),
+                block_execution,
             )
         return driver
 
@@ -407,7 +402,6 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
-
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log("browser"):
             """
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
@@ -419,7 +413,7 @@ class BaseTestCase(unittest.TestCase):
             accepted_javascript_messages = r"(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)"
 
             if entry["level"] == "SEVERE":
-                # TODO actually this seems to be the previous url
+                # TODO: actually this seems to be the previous url
                 # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
@@ -453,7 +447,6 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def tearDownDriver(cls):
         logger.info(f"tearDownDriver: {cls.__name__}")
-        global dd_driver
         if dd_driver:
             if (
                 not dd_driver_options.experimental_options
@@ -483,8 +476,7 @@ class WebdriverOnlyNewLogFacade:
 
                 # save the last timestamp only if newer
                 # in this set of logs
-                if entry["timestamp"] > last_timestamp:
-                    last_timestamp = entry["timestamp"]
+                last_timestamp = max(last_timestamp, entry["timestamp"])
 
         # store the very last timestamp
         self.last_timestamp = last_timestamp

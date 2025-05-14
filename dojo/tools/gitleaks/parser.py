@@ -5,9 +5,53 @@ from dojo.models import Finding
 
 
 class GitleaksParser:
-    """
-    A class that can be used to parse the Gitleaks JSON report files
-    """
+
+    """A class that can be used to parse the Gitleaks JSON report files"""
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Gitleaks Parser.
+
+        Fields:
+        - title: Made using issue rule and filepath from Gitleaks Scanner.
+        - description: Custom description made from commit details.
+        - severity: Set to high and inccreased to critical if "Github", "AWS", or "Heroku" are in the isssue rule.
+        - file_path: Set to issuel file from Gitleaks Scanner.
+        - line: Set to line number from Gitleaks Scanner.
+        - dynamic_finding: Set to false.
+        - static_finding: Set to true.
+        - nb_occurences: Inittially set to 1 and incremented based on number of occurences.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "file_path",
+            "line",
+            "dynamic_finding",
+            "static_finding",
+            "nb_occurences",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Gitleaks Parser.
+
+        Fields:
+        - title: Made using issue rule and filepath from Gitleaks Scanner.
+        - line: Set to line number from Gitleaks Scanner.
+        - file_path: Set to issuel file from Gitleaks Scanner.
+        - description: Custom description made from commit details.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        NOTE: cwe is not provided by parser.
+        """
+        return [
+            "title",
+            "line",
+            "file_path",
+            "description",
+        ]
 
     def get_scan_types(self):
         return ["Gitleaks Scan"]
@@ -19,9 +63,7 @@ class GitleaksParser:
         return "Import Gitleaks Scan findings in JSON format."
 
     def get_findings(self, filename, test):
-        """
-        Converts a Gitleaks report to DefectDojo findings
-        """
+        """Converts a Gitleaks report to DefectDojo findings"""
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:
@@ -61,10 +103,10 @@ class GitleaksParser:
         description += "**Reason:** " + reason + "\n"
         description += "**Path:** " + file_path + "\n"
         if "lineNumber" in issue:
-            description += "**Line:** %i\n" % issue["lineNumber"]
+            description += f"**Line:** {issue['lineNumber']}\n"
             line = issue["lineNumber"]
         if "operation" in issue:
-            description += "**Operation:** " + issue["operation"] + "\n"
+            description += f"**Operation:** {issue['operation']}\n"
         if "leakURL" in issue:
             description += (
                 "**Leak URL:** ["
@@ -107,10 +149,7 @@ class GitleaksParser:
     def get_finding_current(self, issue, test, dupes):
         reason = issue.get("Description")
         line = issue.get("StartLine")
-        if line:
-            line = int(line)
-        else:
-            line = 0
+        line = int(line) if line else 0
         match = issue.get("Match")
         secret = issue.get("Secret")
         file_path = issue.get("File")
@@ -134,7 +173,7 @@ class GitleaksParser:
             if len(message.split("\n")) > 1:
                 description += (
                     "**Commit message:**"
-                    + "\n```\n"
+                    "\n```\n"
                     + message.replace("```", "\\`\\`\\`")
                     + "\n```\n"
                 )
@@ -152,7 +191,7 @@ class GitleaksParser:
         severity = "High"
 
         dupe_key = hashlib.md5(
-            (title + secret + str(line)).encode("utf-8"),
+            (title + secret + str(line)).encode("utf-8"), usedforsecurity=False,
         ).hexdigest()
 
         if dupe_key in dupes:

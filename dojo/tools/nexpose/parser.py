@@ -10,6 +10,7 @@ from dojo.models import Endpoint, Finding
 
 
 class NexposeParser:
+
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
@@ -58,9 +59,8 @@ class NexposeParser:
             if len(list(node)) > 0:
                 for child in list(node):
                     ret += self.parse_html_type(child)
-            else:
-                if node.text:
-                    ret += "<li>" + str(node.text).strip() + "</li>"
+            elif node.text:
+                ret += "<li>" + str(node.text).strip() + "</li>"
         if tag == "orderedlist":
             i = 1
             for item in list(node):
@@ -101,25 +101,25 @@ class NexposeParser:
 
         return ret
 
-    def parse_tests_type(self, node, vulnsDefinitions):
+    def parse_tests_type(self, node, vulns_definitions):
         """
         Parse XML element of type TestsType
 
-        @return vulns A list of vulnerabilities according to vulnsDefinitions
+        @return vulns A list of vulnerabilities according to vulns_definitions
         """
         vulns = []
 
         for tests in node.findall("tests"):
             for test in tests.findall("test"):
-                if test.get("id") in vulnsDefinitions and (
+                if test.get("id") in vulns_definitions and (
                     test.get("status")
-                    in [
+                    in {
                         "vulnerable-exploited",
                         "vulnerable-version",
                         "vulnerable-potential",
-                    ]
+                    }
                 ):
-                    vuln = vulnsDefinitions[test.get("id").lower()]
+                    vuln = vulns_definitions[test.get("id").lower()]
                     for desc in list(test):
                         if "pluginOutput" in vuln:
                             vuln[
@@ -141,9 +141,7 @@ class NexposeParser:
         return vulns
 
     def get_vuln_definitions(self, tree):
-        """
-        @returns vulns A dict of Vulnerability Definitions
-        """
+        """@returns vulns A dict of Vulnerability Definitions"""
         vulns = {}
         url_index = 0
         for vulnsDef in tree.findall("VulnerabilityDefinitions"):
@@ -266,7 +264,7 @@ class NexposeParser:
                                         "severity": "Info",
                                         "tags": [
                                             re.sub(
-                                                "[^A-Za-z0-9]+",
+                                                r"[^A-Za-z0-9]+",
                                                 "-",
                                                 service.get("name").lower(),
                                             ).rstrip("-"),
@@ -287,7 +285,7 @@ class NexposeParser:
             for vuln in host["vulns"]:
                 dupe_key = vuln["severity"] + vuln["name"]
 
-                find = self.findings(dupe_key, dupes, test, vuln)
+                find = self.findings(dupe_key, dupes, vuln)
 
                 endpoint = Endpoint(host=host["name"])
                 find.unsaved_endpoints.append(endpoint)
@@ -298,7 +296,7 @@ class NexposeParser:
                 for vuln in service["vulns"]:
                     dupe_key = vuln["severity"] + vuln["name"]
 
-                    find = self.findings(dupe_key, dupes, test, vuln)
+                    find = self.findings(dupe_key, dupes, vuln)
 
                     endpoint = Endpoint(
                         host=host["name"],
@@ -318,7 +316,7 @@ class NexposeParser:
         return list(dupes.values())
 
     @staticmethod
-    def findings(dupe_key, dupes, test, vuln):
+    def findings(dupe_key, dupes, vuln):
         """ """
         if dupe_key in dupes:
             find = dupes[dupe_key]
@@ -335,7 +333,7 @@ class NexposeParser:
                 mitigation=html2text.html2text(vuln.get("resolution"))
                 if vuln.get("resolution")
                 else None,
-                impact=vuln.get("vector") if vuln.get("vector") else None,
+                impact=vuln.get("vector") or None,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,

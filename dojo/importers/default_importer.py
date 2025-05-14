@@ -1,13 +1,13 @@
 import logging
-from typing import List, Tuple
+from warnings import warn
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
+from django.urls import reverse
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -16,6 +16,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -37,12 +38,14 @@ class DefaultImporterOptions(ImporterOptions):
 
 
 class DefaultImporter(BaseImporter, DefaultImporterOptions):
+
     """
     The classic importer process used by DefectDojo
 
     This Importer is intended to be used when auditing the history
     of findings at a given point in time is required
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             self,
@@ -84,7 +87,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         The full step process of taking a scan report, and converting it to
         findings in the database. This entails the the following actions:
@@ -103,12 +106,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        self.parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser)
         # process the findings in the foreground or background
-        new_findings = self.determine_process_method(self.parsed_findings, **kwargs)
+        new_findings = self.determine_process_method(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(self.test.finding_set.values(), **kwargs)
+        closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
         self.update_timestamps()
         # Update the test meta
@@ -125,9 +128,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
-        notifications_helper.notify_test_created(self.test)
+        create_notification(
+            event="test_added",
+            title=f"Test created for {self.test.engagement.product}: {self.test.engagement.name}: {self.test}",
+            test=self.test,
+            engagement=self.test.engagement,
+            product=self.test.engagement.product,
+            url=reverse("view_test", args=(self.test.id,)),
+            url_api=reverse("test-detail", args=(self.test.id,)),
+        )
         updated_count = len(new_findings) + len(closed_findings)
-        notifications_helper.notify_scan_added(
+        self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
@@ -141,9 +152,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -155,9 +166,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for unsaved_finding in parsed_findings:
+        for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
@@ -231,9 +242,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Closes old findings based on a hash code match at either the product
         or the engagement scope. Closing an old finding entails setting the
@@ -244,28 +255,44 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # First check if close old findings is desired
         if not self.close_old_findings_toggle:
             return []
-        logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
-        # Close old active findings that are not reported by this scan.
-        # Refactoring this to only call test.finding_set.values() once.
-        mitigated_hash_codes = []
+
+        logger.debug("IMPORT_SCAN: Closing findings no longer present in scan report")
+        # Remove all the findings that are coming from the report already mitigated
         new_hash_codes = []
-        for finding in findings:
-            new_hash_codes.append(finding["hash_code"])
-            if getattr(finding, "is_mitigated", None):
-                mitigated_hash_codes.append(finding["hash_code"])
-                for hash_code in new_hash_codes:
-                    if hash_code == finding["hash_code"]:
-                        new_hash_codes.remove(hash_code)
+        new_unique_ids_from_tool = []
+        for finding in findings.values():
+            # Do not process closed findings in the report
+            if finding.get("is_mitigated", False):
+                continue
+            # Grab the hash code
+            if (hash_code := finding.get("hash_code")) is not None:
+                new_hash_codes.append(hash_code)
+            if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
+                new_unique_ids_from_tool.append(unique_id_from_tool)
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
-        old_findings = Finding.objects.exclude(
-            test=self.test,
-        ).exclude(
-            hash_code__in=new_hash_codes,
-        ).filter(
+        old_findings = Finding.objects.filter(
             test__test_type=self.test.test_type,
             active=True,
-        )
+        ).exclude(test=self.test)
+        # Filter further based on the deduplication algorithm set on the test
+        self.deduplication_algorithm = self.determine_deduplication_algorithm()
+        if self.deduplication_algorithm in {"hash_code", "legacy"}:
+            old_findings = old_findings.exclude(
+                hash_code__in=new_hash_codes,
+            )
+        if self.deduplication_algorithm == "unique_id_from_tool":
+            old_findings = old_findings.exclude(
+                unique_id_from_tool__in=new_unique_ids_from_tool,
+            )
+        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            old_findings = old_findings.exclude(
+                (Q(hash_code__isnull=False) & Q(hash_code__in=new_hash_codes))
+                | (
+                    Q(unique_id_from_tool__isnull=False)
+                    & Q(unique_id_from_tool__in=new_unique_ids_from_tool)
+                ),
+            )
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)
@@ -284,7 +311,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "This finding has been automatically closed "
                     "as it is not present anymore in recent scans."
                 ),
-                self.findings_groups_enabled,
+                finding_groups_enabled=self.findings_groups_enabled,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
@@ -293,36 +320,20 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         return old_findings
 
-    def parse_findings(
-        self,
-        scan: TemporaryUploadedFile,
-        parser: Parser,
-    ) -> List[Finding]:
-        """
-        Determine how to parse the findings based on the presence of the
-        `get_tests` function on the parser object
-        """
-        # Attempt any preprocessing before generating findings
-        if len(self.parsed_findings) == 0 and self.test is None:
-            scan = self.process_scan_file(scan)
-            if hasattr(parser, "get_tests"):
-                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
-            else:
-                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
-        return self.parsed_findings
-
     def parse_findings_static_test_type(
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Creates a test object as part of the import process as there is not one present
         at the time of import. Once the test is created, proceed with the traditional
         file import as usual from the base class
         """
         # by default test_type == scan_type
-        self.test = self.create_test(self.scan_type)
+        # Create a new test if it has not already been created
+        if not self.test:
+            self.test = self.create_test(self.scan_type)
         logger.debug("IMPORT_SCAN: Parse findings")
         # Use the parent method for the rest of this
         return super().parse_findings_static_test_type(scan, parser)
@@ -331,57 +342,26 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Uses the parser to fetch any tests that may have been created
         by the API based parser, aggregates all findings from each test
         into a single test, and then renames the test is applicable
         """
         logger.debug("IMPORT_SCAN parser v2: Create Test and parse findings")
-        tests = self.parse_dynamic_test_type_tests(scan, parser)
-        parsed_findings = []
-        # Make sure we have at least one test returned
-        if len(tests) == 0:
-            logger.info(f"No tests found in import for {self.scan_type}")
-            self.test = None
-            return parsed_findings
-        # for now we only consider the first test in the list and artificially aggregate all findings of all tests
-        # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
-        # when there is more than 1 test
-        #
-        # we also aggregate the label of the Test_type to show the user the original self.scan_type
-        # only if they are different. This is to support meta format like SARIF
-        # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
-        test_type_name = self.scan_type
-        # Determine if we should use a custom test type name
-        if tests[0].type:
-            test_type_name = f"{tests[0].type} Scan"
-            if test_type_name != self.scan_type:
-                test_type_name = f"{test_type_name} ({self.scan_type})"
-        # Create a new test
-        self.test = self.create_test(test_type_name)
-        # This part change the name of the Test
-        # we get it from the data of the parser
-        test_raw = tests[0]
-        if test_raw.name:
-            self.test.name = test_raw.name
-        if test_raw.description:
-            self.test.description = test_raw.description
-        self.test.save()
-        logger.debug("IMPORT_SCAN parser v2: Parse findings (aggregate)")
-        # Aggregate all the findings and return them with the newly created test
-        return self.parse_dynamic_test_type_findings_from_tests(tests)
+        return super().parse_findings_dynamic_test_type(scan, parser)
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
+        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
         chunk_list = self.chunk_findings(parsed_findings)
         results_list = []
         new_findings = []

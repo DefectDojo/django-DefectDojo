@@ -4,9 +4,52 @@ from dojo.models import Finding
 
 
 class WhispersParser:
-    """
-    Identify hardcoded secrets in static structured text
-    """
+
+    """Identify hardcoded secrets in static structured text"""
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Whispers Parser
+
+        Fields:
+        - title: Made by combining message, key, file, and line from Whispers Scanner.
+        - description: Made by combining the finding's title with the value from Whispers Scanner.
+        - mitigation: Set to a general message for CWE 798.
+        - cwe: Set to 798.
+        - severity: Set to severity from Whispers scanner that has been converted to Defect Dojo format.
+        - file_path: Set to file from Whispers scanner.
+        - line: Set to line from Whispers scanner.
+        - vuln_id_from_tool: Set to message from Whispers scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        """
+        return [
+            "title",
+            "description",
+            "mitigation",
+            "cwe",
+            "severity",
+            "file_path",
+            "line",
+            "vuln_id_from_tool",
+            "static_finding",
+            "dynamic_finding",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Whispers Parser
+
+        Fields:
+        - vuln_id_from_tool: Set to message from Whispers scanner.
+        - file_path: Set to file from Whispers scanner.
+        - line: Set to line from Whispers scanner.
+        """
+        return [
+            "vuln_id_from_tool",
+            "file_path",
+            "line",
+        ]
 
     SEVERITY_MAP = {
         # Whispers 2.1

@@ -18,7 +18,7 @@
           <h3 class="pull-left">{% trans "Description" %}</h3>
           <div class="dropdown pull-right">
             <div class="btn-group">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" aria-label="Options">
                 <span class="fa-solid fa-bars"></span>
                 <span class="caret"></span>
               </button>
@@ -41,19 +41,21 @@
                         <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit Custom Fields" %}
                     </a>
                   </li>
-                  <li role="separator" class="divider"></li>
+                {% endif %}
+                <li role="separator" class="divider"></li>
+                {% if prod|has_object_permission:"Product_API_Scan_Configuration_Add" %}
                   <li role="presentation">
-                      <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                          <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
-                      </a>
-                  </li>
-                  <li role="presentation">
-                      <a title="View API Scan Configurations"
-                         href="{% url 'view_api_scan_configurations' prod.id %}">
-                          <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
-                      </a>
+                    <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                      <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
+                    </a>
                   </li>
                 {% endif %}
+                <li role="presentation">
+                    <a title="View API Scan Configurations"
+                        href="{% url 'view_api_scan_configurations' prod.id %}">
+                        <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
+                    </a>
+                </li>
                 {% if system_settings.enable_product_tracking_files %}
                   <li role="separator" class="divider"></li>
                   {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
@@ -120,29 +122,29 @@
 <div class="col-md-12">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa-solid fa-chart-pie" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
     </div>
     <table class="table table-condensed">
       <tbody>
         <tr>
           <td class="col-sm-2 bg-vuln-critical vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}?severity=Critical" style="color:#FFFFFF;text-decoration:none">{{ critical }}<span class="hidden-xs"><br>
+              <a aria-label="{{ critical }} critical findings" href="{% url 'product_open_findings' prod.id %}?severity=Critical" style="color:#FFFFFF;text-decoration:none">{{ critical }}<span class="hidden-xs"><br>
               <small>{% trans "CRITICAL" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-high vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}?severity=High" style="color:#FFFFFF;text-decoration:none">{{ high }}<span class="hidden-xs"><br>
+              <a aria-label="{{ high }} high severity findings" href="{% url 'product_open_findings' prod.id %}?severity=High" style="color:#FFFFFF;text-decoration:none">{{ high }}<span class="hidden-xs"><br>
               <small>{% trans "HIGH" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-medium vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}?severity=Medium" style="color:#FFFFFF;text-decoration:none">{{ medium }}<span class="hidden-xs"><br>
+              <a aria-label="{{ medium }} medium severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Medium" style="color:#FFFFFF;text-decoration:none">{{ medium }}<span class="hidden-xs"><br>
               <small>{% trans "MEDIUM" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-low vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}?severity=Low" style="color:#FFFFFF;text-decoration:none">{{ low }}<span class="hidden-xs"><br>
+              <a aria-label="{{ low }} low severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Low" style="color:#FFFFFF;text-decoration:none">{{ low }}<span class="hidden-xs"><br>
               <small>{% trans "LOW" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-vuln-info vuln-count text-center">
-              <a href="{% url 'product_open_findings' prod.id %}?severity=Info" style="color:#FFFFFF;text-decoration:none">{{ info }}<span class="hidden-xs"><br>
+              <a aria-label="{{ informational }} informational severity findings" href="{% url 'product_open_findings' prod.id %}?severity=Info" style="color:#FFFFFF;text-decoration:none">{{ info }}<span class="hidden-xs"><br>
               <small>{% trans "INFORMATIONAL" %}</small></span></a>
           </td>
           <td class="col-sm-2 bg-muted vuln-count text-center">
@@ -275,7 +277,7 @@
             <div class="clearfix">
                 <h4 class="pull-left">{% trans "Members" %}</h4>
                 &nbsp;
-                <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#productproduct-type-membership--roles" target="_blank">
                     <i class="fa-solid fa-circle-question"></i></a>
                 {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
@@ -295,7 +297,7 @@
                 {% endif %}
             </div>
         </div>
-        {% if product_members or product_type_members %}
+        {% if product_members or product_type_members or global_product_members %}
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -342,9 +344,18 @@
                             <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
-                                    {{ member.product_type }}
+                                    Product type: {{ member.product_type }}
                                 </a>
                             </td>
+                            <td>{{ member.role }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for member in global_product_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td>{{ member.user.get_full_name }}</td>
+                            <td>Global role</td>
                             <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
@@ -363,7 +374,7 @@
               <div class="clearfix">
                   <h4 class="pull-left">{% trans "Groups" %}</h4>
                   &nbsp;
-                  <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                  <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#group-memberships" target="_blank">
                       <i class="fa-solid fa-circle-question"></i></a>
                   {% if prod|has_object_permission:"Product_Group_Add" %}
                   <div class="dropdown pull-right">
@@ -383,7 +394,7 @@
                   {% endif %}
               </div>
           </div>
-          {% if product_groups or product_type_groups %}
+          {% if product_groups or product_type_groups or global_product_groups %}
           <div class="table-responsive">
               <table class="tablesorter-bootstrap table table-condensed table-striped">
                   <thead>
@@ -435,6 +446,14 @@
                       <td>{{ type_group.role }}</td>
                   </tr>
                   {% endfor %}
+                  {% for type_group in global_product_groups %}
+                  <tr>
+                      <td></td>
+                      <td>{{ type_group.group.name }}</td>
+                      <td>Global role</td>
+                      <td>{{ type_group.role }}</td>
+                  </tr>
+                  {% endfor %}
                   </tbody>
               </table>
           </div>
@@ -461,7 +480,7 @@
           </tr>
           <tr>
             <td><strong>{% trans "Product Type" %}</strong></td>
-            <td>{{ prod.prod_type|notspecified }}</td>
+            <td><a title="{% trans "Product Type" %}" href="{% url 'view_product_type' prod.prod_type.id %}">{{ prod.prod_type }}</a></td>
           </tr>
           <tr>
             <td><strong>{% trans "Platform" %}</strong></td>
@@ -668,7 +687,7 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
-            {% if c != "msteams" and c in enabled_notifications %}
+            {% if c != "msteams" and c != "webhooks" and c in enabled_notifications %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
             {% endif %}
             {% endfor %}

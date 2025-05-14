@@ -1,6 +1,7 @@
 import base64
 import re
 from datetime import datetime
+from urllib.parse import urlparse
 
 from defusedxml import ElementTree
 
@@ -33,11 +34,10 @@ def truncate_str(value: str, maxlen: int):
 
 # Parse 'CWE-XXXX' format to strip just the numbers
 def get_cwe(cwe):
-    cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
+    cweSearch = re.search(r"CWE-([0-9]*)", cwe, re.IGNORECASE)
     if cweSearch:
         return cweSearch.group(1)
-    else:
-        return 0
+    return 0
 
 
 def attach_unique_extras(
@@ -65,10 +65,9 @@ def attach_unique_extras(
         finding.param = param
         finding.payload = payload
         finding.test = test
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         parsedUrl = urlparse(endpoint)
@@ -123,10 +122,9 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
@@ -170,8 +168,7 @@ def decode_tag(tag):
     if tag is not None:
         if tag.get("base64") == "true":
             return base64.b64decode(tag.text).decode("utf8", "replace")
-        else:
-            return tag.text
+        return tag.text
     return ""
 
 
@@ -187,7 +184,7 @@ def get_request_response(payloads):
 
 
 def get_unique_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False,
+    vulnerabilities, test, *, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -201,10 +198,7 @@ def get_unique_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -254,7 +248,7 @@ def get_unique_vulnerabilities(
 # Traverse and retreive any information in the VULNERABILITY_LIST
 # section of the report. This includes all endpoints and request/response pairs
 def get_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False,
+    vulnerabilities, test, *, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -268,10 +262,7 @@ def get_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -293,7 +284,7 @@ def get_vulnerabilities(
         else:
             finding_date = None
 
-        finding = findings.get(qid, None)
+        finding = findings.get(qid)
         findings[qid] = attach_extras(
             urls, req_resps[0], req_resps[1], finding, finding_date, qid, test,
         )
@@ -302,14 +293,14 @@ def get_vulnerabilities(
 
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
-def get_glossary_item(glossary, finding, is_info=False, enable_weakness=False):
+def get_glossary_item(glossary, finding, *, is_info=False, enable_weakness=False):
     title = glossary.findtext("TITLE")
     if title is not None:
         finding.title = str(title)
     severity = glossary.findtext("SEVERITY")
     if severity is not None:
         group = glossary.findtext("GROUP")
-        if is_info and (not enable_weakness or group in ("DIAG", "IG")):
+        if is_info and (not enable_weakness or group in {"DIAG", "IG"}):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
@@ -344,6 +335,7 @@ def get_unique_items(
     glossary,
     is_app_report,
     test,
+    *,
     enable_weakness=False,
 ):
     ig_qid_list = [int(ig.findtext("QID")) for ig in info_gathered]
@@ -352,26 +344,28 @@ def get_unique_items(
     findings = {}
 
     for unique_id, finding in get_unique_vulnerabilities(
-        vulnerabilities, test, False, is_app_report,
+        vulnerabilities, test, is_info=False, is_app_report=is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[unique_id] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=False, enable_weakness=enable_weakness,
             )
     for unique_id, finding in get_unique_vulnerabilities(
-        info_gathered, test, True, is_app_report,
+        info_gathered, test, is_info=True, is_app_report=is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness,
+            final_finding = get_glossary_item(
+                glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[unique_id] = get_info_item(info_gathered[index], finding)
+            findings[unique_id] = get_info_item(info_gathered[index], final_finding)
     return findings
 
 
@@ -382,6 +376,7 @@ def get_items(
     glossary,
     is_app_report,
     test,
+    *,
     enable_weakness=False,
 ):
     ig_qid_list = [int(ig.findtext("QID")) for ig in info_gathered]
@@ -391,29 +386,31 @@ def get_items(
     findings = {}
 
     for qid, finding in get_vulnerabilities(
-        vulnerabilities, test, False, is_app_report,
+        vulnerabilities, test, is_info=False, is_app_report=is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=False, enable_weakness=enable_weakness,
             )
     for qid, finding in get_vulnerabilities(
-        info_gathered, test, True, is_app_report,
+        info_gathered, test, is_info=True, is_app_report=is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness,
+            final_finding = get_glossary_item(
+                glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[qid] = get_info_item(info_gathered[index], finding)
+            findings[qid] = get_info_item(info_gathered[index], final_finding)
 
     return findings
 
 
-def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
+def qualys_webapp_parser(qualys_xml_file, test, unique, *, enable_weakness=False):
     if qualys_xml_file is None:
         return []
 
@@ -446,7 +443,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 glossary,
                 is_app_report,
                 test,
-                enable_weakness,
+                enable_weakness=enable_weakness,
             ).values(),
         )
     else:
@@ -457,14 +454,60 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 glossary,
                 is_app_report,
                 test,
-                enable_weakness,
+                enable_weakness=enable_weakness,
             ).values(),
         )
 
-    return items
+    return list(items)
 
 
 class QualysWebAppParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Webapp Parser.
+
+        Fields:
+        - date: Set to date from Qualys Webapp Scanner.
+        - vuln_id_from_tool: Set to qid from Qualys Webapp Scanner.
+        - unique_id_from_tool: Set to the unique id from Qualys Webapp Scanner.
+        - param: Set to param from Qualys Webapp Scanner.
+        - payload: Set to payload from Qualys Webapp Scanner.
+        - active: Set to true or false based on finding status.
+        - title: Set to title from Qualys Webapp Scanner.
+        - severity: Set to severity from Qualys Webapp Scanner translated into DefectDojo formant.
+        - description: Custom description made from description and data from Qualys Webapp Scanner.
+        - impact: Set to title from Qualys Webapp Scanner.
+        - mitigation: Set to solution from Qualys Webapp Scanner.
+        - cwe: Set to cwe from Qualys Webapp Scanner.
+        """
+        return [
+            "date",
+            "vuln_id_from_tool",
+            "unique_id_from_tool",
+            "param",
+            "payload",
+            "active",
+            "title",
+            "severity",
+            "impact",
+            "mitigation",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Webapp Parser.
+
+        Fields:
+        - title: Set to title from Qualys Webapp Scanner.
+        - unique_id_from_tool: Set to the unique id from Qualys Webapp Scanner.
+        """
+        return [
+            "title",
+            "unique_id_from_tool",
+        ]
+
     def get_scan_types(self):
         return ["Qualys Webapp Scan"]
 
@@ -478,5 +521,5 @@ class QualysWebAppParser:
         self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN,
     ):
         return qualys_webapp_parser(
-            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness,
+            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness=enable_weakness,
         )

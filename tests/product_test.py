@@ -25,8 +25,7 @@ class WaitForPageLoad:
         while time.time() < self.timeout:
             if self.page_has_loaded():
                 return True
-            else:
-                time.sleep(0.2)
+            time.sleep(0.2)
         msg = f"Timeout waiting for {self.timeout}s"
         raise Exception(msg)
 
@@ -537,7 +536,7 @@ class ProductTest(BaseTestCase):
         driver.get(self.base_url + "metrics?date=5&view=dashboard")
 
 
-def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+def add_product_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase("test_login"))

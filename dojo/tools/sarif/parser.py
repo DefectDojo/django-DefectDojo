@@ -15,10 +15,78 @@ CWE_REGEX = r"cwe-\d+"
 
 
 class SarifParser:
-    """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
+
+    """
+    OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Sarif Parser
+
+        Fields:
+        - title: Made using rule and id from Sarif scanner.
+        - severity: Set to severity from Sarif Scanner converted to Defect Dojo format.
+        - description: Made by combining message, location, and rule from Sarif Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - false_p: Set to true or false based on suppression status from Sarif scanner.
+        - active: Set to true or false based on suppression status from Sarif scanner.
+        - file_path: Set to physical location from Sarif scanner.
+        - line: Set to start line from Sarif scanner.
+        - vuln_id_from_tool: Set to rule id from Sarif scanner.
+        - cwe: Set to the cwe values outputted from Sarif Scanner.
+        - cvssv3: Set to properties and securitiy-severity from Sarif scanner if available.
+        - cvssv3_score: Set to properties and securitiy-severity from Sarif scanner if available.
+        - mitigation: Set to altered version of finding's description.
+        - date: Set to the date outputted from Sarif Scanner converted to datetime.
+        - tags: Set to tags from Sarif scanner.
+        - unique_id_from_tool: Set to the hash fingerpring value outputted from Sarif Scanner.
+
+        NOTE: This parser supports tags.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "static_finding",
+            "dynamic_finding",
+            "false_p",
+            "active",
+            "file_path",
+            "line",
+            "vuln_id_from_tool",
+            "cwe",
+            "cvssv3",
+            "cvssv3_score",
+            "mitigation",
+            "date",
+            "tags",
+            "unique_id_from_tool",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Sarif Parser
+
+        Fields:
+        - title: Made using rule and id from Sarif scanner.
+        - cwe: Set to the cwe values outputted from Sarif Scanner.
+        - line: Set to start line from Sarif scanner.
+        - file_path: Set to physical location from Sarif scanner.
+        - description: Made by combining message, location, and rule from Sarif Scanner.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "line",
+            "file_path",
+            "description",
+        ]
 
     def get_scan_types(self):
         return ["SARIF"]
@@ -44,7 +112,7 @@ class SarifParser:
         for run in tree.get("runs", []):
             test = ParserTest(
                 name=run["tool"]["driver"]["name"],
-                type=run["tool"]["driver"]["name"],
+                parser_type=run["tool"]["driver"]["name"],
                 version=run["tool"]["driver"].get("version"),
             )
             test.findings = self.__get_items_from_run(run)
@@ -59,9 +127,9 @@ class SarifParser:
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
         for result in run.get("results", []):
-            item = get_item(result, rules, artifacts, run_date)
-            if item is not None:
-                items.append(item)
+            result_items = get_items_from_result(result, rules, artifacts, run_date)
+            if result_items:
+                items.extend(result_items)
         return items
 
     def __get_last_invocation_date(self, data):
@@ -124,15 +192,14 @@ def get_result_cwes_properties(result):
 
 def get_artifacts(run):
     artifacts = {}
-    custom_index = 0  # hack because some tool doesn't generate this attribute
-    for tree_artifact in run.get("artifacts", []):
+    for custom_index, tree_artifact in enumerate(run.get("artifacts", [])):
         artifacts[tree_artifact.get("index", custom_index)] = tree_artifact
-        custom_index += 1
     return artifacts
 
 
 def get_message_from_multiformatMessageString(data, rule):
-    """Get a message from multimessage struct
+    """
+    Get a message from multimessage struct
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """
@@ -146,18 +213,17 @@ def get_message_from_multiformatMessageString(data, rule):
                 text = text.replace(substitution_str, arguments[i])
             else:
                 return text
-    else:
-        # TODO manage markdown
-        return data.get("text")
+        return None
+    # TODO: manage markdown
+    return data.get("text")
 
 
 def cve_try(val):
     # Match only the first CVE!
-    cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
+    cveSearch = re.search(r"(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
     if cveSearch:
         return cveSearch.group(1).upper()
-    else:
-        return None
+    return None
 
 
 def get_title(result, rule):
@@ -187,48 +253,48 @@ def get_title(result, rule):
     return textwrap.shorten(title, 150)
 
 
-def get_snippet(result):
+def get_snippet(location):
+
     snippet = None
-    if "locations" in result:
-        location = result["locations"][0]
-        if "physicalLocation" in location:
-            if "region" in location["physicalLocation"]:
-                if "snippet" in location["physicalLocation"]["region"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["region"]["snippet"]
-                    ):
-                        snippet = location["physicalLocation"]["region"][
-                            "snippet"
-                        ]["text"]
-            if (
-                snippet is None
-                and "contextRegion" in location["physicalLocation"]
-            ):
-                if "snippet" in location["physicalLocation"]["contextRegion"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["contextRegion"][
-                            "snippet"
-                        ]
-                    ):
-                        snippet = location["physicalLocation"][
-                            "contextRegion"
-                        ]["snippet"]["text"]
+
+    if location and "physicalLocation" in location:
+        if "region" in location["physicalLocation"]:
+            if "snippet" in location["physicalLocation"]["region"]:
+                if (
+                    "text"
+                    in location["physicalLocation"]["region"]["snippet"]
+                ):
+                    snippet = location["physicalLocation"]["region"][
+                        "snippet"
+                    ]["text"]
+        if (
+            snippet is None
+            and "contextRegion" in location["physicalLocation"]
+        ):
+            if "snippet" in location["physicalLocation"]["contextRegion"]:
+                if (
+                    "text"
+                    in location["physicalLocation"]["contextRegion"][
+                        "snippet"
+                    ]
+                ):
+                    snippet = location["physicalLocation"][
+                        "contextRegion"
+                    ]["snippet"]["text"]
+
     return snippet
 
 
-def get_codeFlowsDescription(codeFlows):
+def get_codeFlowsDescription(code_flows):
     description = ""
-    for codeFlow in codeFlows:
+    for codeFlow in code_flows:
         for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue
 
             description = f"**{_('Code flow')}:**\n"
-            line = 1
 
-            for location in threadFlow.get("locations", []):
+            for line, location in enumerate(threadFlow.get("locations", [])):
                 physicalLocation = location.get("location", {}).get("physicalLocation", {})
                 region = physicalLocation.get("region", {})
                 uri = physicalLocation.get("artifactLocation").get("uri")
@@ -238,15 +304,15 @@ def get_codeFlowsDescription(codeFlows):
                 snippet = ""
 
                 if "startLine" in region:
-                    start_line = f":L{str(region.get('startLine'))}"
+                    start_line = f":L{region.get('startLine')}"
 
                 if "startColumn" in region:
-                    start_column = f":C{str(region.get('startColumn'))}"
+                    start_column = f":C{region.get('startColumn')}"
 
                 if "snippet" in region:
                     snippet = f"\t-\t{region.get('snippet').get('text')}"
 
-                description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
+                description += f"{line + 1}. {uri}{start_line}{start_column}{snippet}\n"
 
                 if "message" in location.get("location", {}):
                     message_field = location.get("location", {}).get("message", {})
@@ -257,12 +323,10 @@ def get_codeFlowsDescription(codeFlows):
 
                     description += f"\t{message}\n"
 
-                line += 1
-
     return description
 
 
-def get_description(result, rule):
+def get_description(result, rule, location):
     description = ""
     message = ""
     if "message" in result:
@@ -270,8 +334,8 @@ def get_description(result, rule):
             result["message"], rule,
         )
         description += f"**Result message:** {message}\n"
-    if get_snippet(result) is not None:
-        description += f"**Snippet:**\n```\n{get_snippet(result)}\n```\n"
+    if get_snippet(location) is not None:
+        description += f"**Snippet:**\n```\n{get_snippet(location)}\n```\n"
     if rule is not None:
         if "name" in rule:
             description += f"**{_('Rule name')}:** {rule.get('name')}\n"
@@ -295,10 +359,7 @@ def get_description(result, rule):
     if len(result.get("codeFlows", [])) > 0:
         description += get_codeFlowsDescription(result["codeFlows"])
 
-    if description.endswith("\n"):
-        description = description[:-1]
-
-    return description
+    return description.removesuffix("\n")
 
 
 def get_references(rule):
@@ -327,14 +388,13 @@ def cvss_to_severity(cvss):
 
     if cvss >= 9:
         return severity_mapping.get(5)
-    elif cvss >= 7:
+    if cvss >= 7:
         return severity_mapping.get(4)
-    elif cvss >= 4:
+    if cvss >= 4:
         return severity_mapping.get(3)
-    elif cvss > 0:
+    if cvss > 0:
         return severity_mapping.get(2)
-    else:
-        return severity_mapping.get(1)
+    return severity_mapping.get(1)
 
 
 def get_severity(result, rule):
@@ -344,17 +404,16 @@ def get_severity(result, rule):
         if "defaultConfiguration" in rule:
             severity = rule["defaultConfiguration"].get("level")
 
-    if "note" == severity:
+    if severity == "note":
         return "Info"
-    elif "warning" == severity:
+    if severity == "warning":
         return "Medium"
-    elif "error" == severity:
+    if severity == "error":
         return "High"
-    else:
-        return "Medium"
+    return "Medium"
 
 
-def get_item(result, rules, artifacts, run_date):
+def get_items_from_result(result, rules, artifacts, run_date):
     # see
     # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
     # / 3.27.9
@@ -369,100 +428,117 @@ def get_item(result, rules, artifacts, run_date):
     if result.get("suppressions"):
         suppressed = True
 
-    # if there is a location get it
-    file_path = None
-    line = None
+    # if there is a location get all files into files list
+
+    files = []
+
     if "locations" in result:
-        location = result["locations"][0]
-        if "physicalLocation" in location:
-            file_path = location["physicalLocation"]["artifactLocation"]["uri"]
+        for location in result["locations"]:
 
-            # 'region' attribute is optionnal
-            if "region" in location["physicalLocation"]:
-                # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
-                # need to check whether it is byteOffset
-                if "byteOffset" in location["physicalLocation"]["region"]:
-                    pass
-                else:
-                    line = location["physicalLocation"]["region"]["startLine"]
+            file_path = None
+            line = None
 
-    # test rule link
-    rule = rules.get(result.get("ruleId"))
+            if "physicalLocation" in location:
+                file_path = location["physicalLocation"]["artifactLocation"]["uri"]
 
-    finding = Finding(
-        title=get_title(result, rule),
-        severity=get_severity(result, rule),
-        description=get_description(result, rule),
-        static_finding=True,  # by definition
-        dynamic_finding=False,  # by definition
-        false_p=suppressed,
-        active=not suppressed,
-        file_path=file_path,
-        line=line,
-        references=get_references(rule),
-    )
+                # 'region' attribute is optionnal
+                if "region" in location["physicalLocation"]:
+                    # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
+                    # need to check whether it is byteOffset
+                    if "byteOffset" in location["physicalLocation"]["region"]:
+                        pass
+                    else:
+                        line = location["physicalLocation"]["region"]["startLine"]
 
-    if "ruleId" in result:
-        finding.vuln_id_from_tool = result["ruleId"]
-        # for now we only support when the id of the rule is a CVE
-        if cve_try(result["ruleId"]):
-            finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
-    # some time the rule id is here but the tool doesn't define it
-    if rule is not None:
-        cwes_extracted = get_rule_cwes(rule)
-        if len(cwes_extracted) > 0:
-            finding.cwe = cwes_extracted[-1]
+            files.append((file_path, line, location))
 
-        # Some tools such as GitHub or Grype return the severity in properties
-        # instead
-        if "properties" in rule and "security-severity" in rule["properties"]:
-            try:
-                cvss = float(rule["properties"]["security-severity"])
-                severity = cvss_to_severity(cvss)
-                finding.cvssv3_score = cvss
-                finding.severity = severity
-            except ValueError:
-                if rule["properties"]["security-severity"].lower().capitalize() in ["Info", "Low", "Medium", "High", "Critical"]:
-                    finding.severity = rule["properties"]["security-severity"].lower().capitalize()
-                else:
-                    finding.severity = "Info"
+    if not files:
+        files.append((None, None, None))
 
-    # manage the case that some tools produce CWE as properties of the result
-    cwes_properties_extracted = get_result_cwes_properties(result)
-    if len(cwes_properties_extracted) > 0:
-        finding.cwe = cwes_properties_extracted[-1]
+    result_items = []
 
-    # manage fixes provided in the report
-    if "fixes" in result:
-        finding.mitigation = "\n".join(
-            [fix.get("description", {}).get("text") for fix in result["fixes"]],
+    for file_path, line, location in files:
+
+        # test rule link
+        rule = rules.get(result.get("ruleId"))
+
+        finding = Finding(
+            title=get_title(result, rule),
+            severity=get_severity(result, rule),
+            description=get_description(result, rule, location),
+            static_finding=True,  # by definition
+            dynamic_finding=False,  # by definition
+            false_p=suppressed,
+            active=not suppressed,
+            file_path=file_path,
+            line=line,
+            references=get_references(rule),
         )
 
-    if run_date:
-        finding.date = run_date
+        if "ruleId" in result:
+            finding.vuln_id_from_tool = result["ruleId"]
+            # for now we only support when the id of the rule is a CVE
+            if cve_try(result["ruleId"]):
+                finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
+        # some time the rule id is here but the tool doesn't define it
+        if rule is not None:
+            cwes_extracted = get_rule_cwes(rule)
+            if len(cwes_extracted) > 0:
+                finding.cwe = cwes_extracted[-1]
 
-    # manage tags provided in the report and rule and remove duplicated
-    tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
-    tags = [s.removeprefix("external/cwe/") for s in tags]
-    finding.tags = tags
+            # Some tools such as GitHub or Grype return the severity in properties
+            # instead
+            if "properties" in rule and "security-severity" in rule["properties"]:
+                try:
+                    cvss = float(rule["properties"]["security-severity"])
+                    severity = cvss_to_severity(cvss)
+                    finding.cvssv3_score = cvss
+                    finding.severity = severity
+                except ValueError:
+                    if rule["properties"]["security-severity"].lower().capitalize() in {"Info", "Low", "Medium", "High", "Critical"}:
+                        finding.severity = rule["properties"]["security-severity"].lower().capitalize()
+                    else:
+                        finding.severity = "Info"
 
-    # manage fingerprints
-    # fingerprinting in SARIF is more complete than in current implementation
-    # SARIF standard make it possible to have multiple version in the same report
-    # for now we just take the first one and keep the format to be able to
-    # compare it
-    if result.get("fingerprints"):
-        hashes = get_fingerprints_hashes(result["fingerprints"])
-        first_item = next(iter(hashes.items()))
-        finding.unique_id_from_tool = first_item[1]["value"]
-    elif result.get("partialFingerprints"):
-        # for this one we keep an order to have id that could be compared
-        hashes = get_fingerprints_hashes(result["partialFingerprints"])
-        sorted_hashes = sorted(hashes.keys())
-        finding.unique_id_from_tool = "|".join(
-            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
-        )
-    return finding
+        # manage the case that some tools produce CWE as properties of the result
+        cwes_properties_extracted = get_result_cwes_properties(result)
+        if len(cwes_properties_extracted) > 0:
+            finding.cwe = cwes_properties_extracted[-1]
+
+        # manage fixes provided in the report
+        if "fixes" in result:
+            finding.mitigation = "\n".join(
+                [fix.get("description", {}).get("text") for fix in result["fixes"]],
+            )
+
+        if run_date:
+            finding.date = run_date
+
+        # manage tags provided in the report and rule and remove duplicated
+        tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
+        tags = [s.removeprefix("external/cwe/") for s in tags]
+        finding.tags = tags
+
+        # manage fingerprints
+        # fingerprinting in SARIF is more complete than in current implementation
+        # SARIF standard make it possible to have multiple version in the same report
+        # for now we just take the first one and keep the format to be able to
+        # compare it
+        if result.get("fingerprints"):
+            hashes = get_fingerprints_hashes(result["fingerprints"])
+            first_item = next(iter(hashes.items()))
+            finding.unique_id_from_tool = first_item[1]["value"]
+        elif result.get("partialFingerprints"):
+            # for this one we keep an order to have id that could be compared
+            hashes = get_fingerprints_hashes(result["partialFingerprints"])
+            sorted_hashes = sorted(hashes.keys())
+            finding.unique_id_from_tool = "|".join(
+                [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
+            )
+
+        result_items.append(finding)
+
+    return result_items
 
 
 def get_fingerprints_hashes(values):

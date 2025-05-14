@@ -3,7 +3,7 @@ import json
 from collections import OrderedDict
 
 from django import forms
-from django.forms import Widget as form_widget
+from django.forms import Widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
 from django.template.loader import render_to_string
@@ -56,7 +56,7 @@ class TableOfContentsForm(forms.Form):
         exclude = []
 
 
-class Div(form_widget):
+class Div(Widget):
     def __init__(self, attrs=None):
         # Use slightly better defaults than HTML's 20x2 box
         default_attrs = {"style": "width:100%;min-height:400px"}
@@ -269,8 +269,9 @@ class FindingList(Widget):
             self.form = None
         self.multiple = "true"
         self.widget_class = "finding-list"
-        self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
-                          "report."
+        self.extra_help = (
+            "You can use this form to filter findings and select only the ones to be included in the report."
+        )
         self.title_words = get_words_for_field(Finding, "title")
         self.component_words = get_words_for_field(Finding, "component_name")
 
@@ -339,8 +340,9 @@ class EndpointList(Widget):
         else:
             self.paged_endpoints = self.endpoints
         self.multiple = "true"
-        self.extra_help = "You can use this form to filter endpoints and select only the ones to be included in the " \
-                          "report."
+        self.extra_help = (
+            "You can use this form to filter endpoints and select only the ones to be included in the report."
+        )
 
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_endpoint_list.html",
@@ -363,20 +365,26 @@ class EndpointList(Widget):
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False, finding_images=False,
+def report_widget_factory(json_data=None, request=None, user=None, *, finding_notes=False, finding_images=False,
                           host=None):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
+
     for idx, widget in enumerate(widgets):
         if list(widget.keys())[0] == "page-break":
             selected_widgets[list(widget.keys())[0] + "-" + str(idx)] = PageBreak()
+
         if list(widget.keys())[0] == "endpoint-list":
             endpoints = Endpoint.objects.filter(finding__active=True,
-                                                finding__verified=True,
                                                 finding__false_p=False,
                                                 finding__duplicate=False,
                                                 finding__out_of_scope=False,
-                                                ).distinct()
+                                                )
+            if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+                endpoints = endpoints.filter(finding__verified=True)
+
+            endpoints = endpoints.distinct()
+
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item["name"] in d:

@@ -17,8 +17,7 @@ class NspParser:
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree, test)
-        else:
-            return []
+        return []
 
     def parse_json(self, json_output):
         try:
@@ -56,7 +55,7 @@ def get_item(item_node, test):
     else:
         severity = "Critical"
 
-    finding = Finding(
+    return Finding(
         title=item_node["title"]
         + " - "
         + "("
@@ -89,5 +88,3 @@ def get_item(item_node, test):
         mitigated=None,
         impact="No impact provided",
     )
-
-    return finding

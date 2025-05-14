@@ -7,6 +7,7 @@ from dojo.tools.parser_test import ParserTest
 
 
 class ScoutSuiteParser:
+
     """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
 
     ID = "Scout Suite"
@@ -69,7 +70,7 @@ class ScoutSuiteParser:
         tests = []
         test = ParserTest(
             name=self.ID,
-            type=data["provider_name"],
+            parser_type=data["provider_name"],
             version=last_run.get("version"),
         )
         test.description = test_description
@@ -119,10 +120,10 @@ class ScoutSuiteParser:
                                     or key[i - 1] == "PolicyDocument"
                                 ):
                                     break
-                        i = i + 1
+                        i += 1
 
                     self.recursive_print(lookup)
-                    description_text = description_text + self.item_data
+                    description_text += self.item_data
                     self.item_data = ""
 
                     find = Finding(
@@ -150,8 +151,7 @@ class ScoutSuiteParser:
     def formatview(self, depth):
         if depth > 1:
             return "* "
-        else:
-            return ""
+        return ""
 
     def recursive_print(self, src, depth=0, key=""):
         def tabs(n):
@@ -166,7 +166,7 @@ class ScoutSuiteParser:
                 self.recursive_print(litem, depth + 2)
         else:
             if self.pdepth != depth:
-                self.item_data = self.item_data + "\n"
+                self.item_data += "\n"
             if key:
                 self.item_data = (
                     self.item_data

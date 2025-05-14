@@ -6,6 +6,53 @@ from dojo.models import Finding
 
 
 class BanditParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Bandit Parser.
+
+        Fields:
+        - title: Set to the issue_text outputted by th Bandit Scanner.
+        - description: Custom description made from: test_name, test_id, filename, line_number, issue_confidence, and code segments.
+        - severity: Set to issue_severity from Bandit Scanner.
+        - file_path: Set to filename from Bandit Scanner.
+        - line: Set to line from Bandit Scanner.
+        - date: Set to date from Bandit Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - vuln_id_from_tool: Made from joining test_name and test_id.
+        - nb_occurences: Initially set to 1 then updated.
+        - scanner_confidence: Set to confidence value if one is returned from the Bandit Scanner.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "file_path",
+            "line",
+            "date",
+            "static_finding",
+            "dynamic_finding",
+            "vuln_id_from_tool",
+            "nb_occurences",
+            "scanner_confidence",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Bandit Parser.
+
+        Fields:
+        - file_path: Set to filename from Bandit Scanner.
+        - line: Set to line from Bandit Scanner.
+        - vuln_id_from_tool: Made from joining test_name and test_id.
+        """
+        return [
+            "file_path",
+            "line",
+            "vuln_id_from_tool",
+        ]
+
     def get_scan_types(self):
         return ["Bandit Scan"]
 
@@ -64,11 +111,10 @@ class BanditParser:
         return results
 
     def convert_confidence(self, value):
-        if "high" == value.lower():
+        if value.lower() == "high":
             return 2
-        elif "medium" == value.lower():
+        if value.lower() == "medium":
             return 3
-        elif "low" == value.lower():
+        if value.lower() == "low":
             return 6
-        else:
-            return None
+        return None

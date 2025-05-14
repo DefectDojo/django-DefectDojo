@@ -16,19 +16,19 @@ def engagement_post_save(sender, instance, created, **kwargs):
     if created:
         title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
         create_notification(event="engagement_added", title=title, engagement=instance, product=instance.product,
-                            url=reverse("view_engagement", args=(instance.id,)))
+                            url=reverse("view_engagement", args=(instance.id,)), url_api=reverse("engagement-detail", args=(instance.id,)))
 
 
 @receiver(pre_save, sender=Engagement)
 def engagement_pre_save(sender, instance, **kwargs):
     old = sender.objects.filter(pk=instance.pk).first()
     if old and instance.status != old.status:
-        if instance.status in ["Cancelled", "Completed"]:
+        if instance.status in {"Cancelled", "Completed"}:
             create_notification(event="engagement_closed",
                                 title=_("Closure of %s") % instance.name,
                                 description=_('The engagement "%s" was closed') % (instance.name),
                                 engagement=instance, url=reverse("engagement_all_findings", args=(instance.id, )))
-        elif instance.status in ["In Progress"] and old.status not in ["Not Started"]:
+        elif instance.status == "In Progress" and old.status != "Not Started":
             create_notification(event="engagement_reopened",
                                 title=_("Reopening of %s") % instance.name,
                                 engagement=instance,

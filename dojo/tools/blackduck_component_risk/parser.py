@@ -5,6 +5,7 @@ from .importer import BlackduckCRImporter
 
 
 class BlackduckComponentRiskParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
@@ -57,8 +58,8 @@ class BlackduckComponentRiskParser:
         for component_id, component in components.items():
             source = {}
             # Find the sources.csv data for this component
-            for id, src in sources.items():
-                if id in component_id:
+            for source_id, src in sources.items():
+                if source_id in component_id:
                     source = src
             if component.get("Component policy status") == "In Violation":
                 # We have us a license risk:
@@ -86,7 +87,7 @@ class BlackduckComponentRiskParser:
                 title = "Review " + self.license_title(component)
                 description = self.license_description(component, source)
                 severity = self.license_severity(component)
-                mitigation = self.license_mitigation(component, False)
+                mitigation = self.license_mitigation(component, violation=False)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(
@@ -174,7 +175,7 @@ class BlackduckComponentRiskParser:
             desc += "**Scan:** Unable to find scan in source data."
         return desc
 
-    def license_mitigation(self, component, violation=True):
+    def license_mitigation(self, component, *, violation=True):
         """
         Uses Component name and Component version name to display the package.
         :param component: Dictionary containing all components.
@@ -206,10 +207,9 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        title = "Security Risk: {}:{}".format(
+        return "Security Risk: {}:{}".format(
             vulns[0]["Component name"], vulns[0]["Component version name"],
         )
-        return title
 
     def security_description(self, vulns):
         """
@@ -243,7 +243,7 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        map = {
+        severity_map = {
             "HIGH": "High",
             "MEDIUM": "Medium",
             "LOW": "Low",
@@ -253,7 +253,7 @@ class BlackduckComponentRiskParser:
         }
         sev = "None"
         try:
-            sev = map[component.get("License Risk")]
+            sev = severity_map[component.get("License Risk")]
         except KeyError:
             sev = "None"
         return sev
@@ -266,7 +266,7 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        map = {
+        severity_map = {
             "HIGH": "High",
             "MEDIUM": "Medium",
             "LOW": "Low",
@@ -278,7 +278,7 @@ class BlackduckComponentRiskParser:
         for vuln in vulns:
             if float(vuln["Base score"]) > max_severity:
                 max_severity = float(vuln["Base score"])
-                sev = map[vuln["Security Risk"]]
+                sev = severity_map[vuln["Security Risk"]]
         return sev
 
     def security_mitigation(self, vulns):
@@ -289,10 +289,9 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        mit = "Update component {}:{} to a secure version".format(
+        return "Update component {}:{} to a secure version".format(
             vulns[0]["Component name"], vulns[0]["Component version name"],
         )
-        return mit
 
     def security_impact(self, vulns):
         """
@@ -303,8 +302,7 @@ class BlackduckComponentRiskParser:
         """
         max_impact = 0.0
         for vuln in vulns:
-            if float(vuln["Impact"]) > max_impact:
-                max_impact = float(vuln["Impact"])
+            max_impact = max(max_impact, float(vuln["Impact"]))
         return max_impact
 
     def security_references(self, vulns):

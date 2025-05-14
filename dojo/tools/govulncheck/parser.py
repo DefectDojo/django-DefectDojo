@@ -41,7 +41,7 @@ class GovulncheckParser:
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
         for elem in data:
-            if "finding" in elem.keys():
+            if "finding" in elem:
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
@@ -50,7 +50,7 @@ class GovulncheckParser:
                         version = trace.get("version", "Unknown version")
                         package = trace.get("module", "Unknown package")
                         function = trace.get("function", "Unknown function")
-                        filename = filename = trace.get("position", {}).get("filename", "Unknown filename")
+                        filename = trace.get("position", {}).get("filename", "Unknown filename")
                         line = trace.get("position", {}).get("line", "Unknown line")
                         trace_info_str = f"\tModule: {module}, Version: {version}, Package: {package}, Function: {function}, File: {filename}, Line: {line}"
                         trace_info_strs.append(trace_info_str)
@@ -59,12 +59,12 @@ class GovulncheckParser:
     def get_affected_version(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract the first affected version.
         for elem in data:
-            if "finding" in elem.keys():
+            if "finding" in elem:
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
                     for trace in trace_info:
-                        if "version" in trace.keys():
+                        if "version" in trace:
                             return trace.get("version")
         return ""
 
@@ -83,7 +83,8 @@ class GovulncheckParser:
                     for cve, elems in groupby(
                         list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0],
                     ):
-                        first_elem = list(islice(elems, 1))
+                        elem_values = list(elems)
+                        first_elem = list(islice(elem_values, 1))
                         d = {
                             "cve": cve,
                             "severity": SEVERITY,
@@ -110,7 +111,7 @@ class GovulncheckParser:
                         impact = set(
                             self.get_location(data, first_elem[0]["CallSink"]),
                         )
-                        for elem in elems:
+                        for elem in elem_values:
                             impact.update(
                                 self.get_location(data, elem["CallSink"]),
                             )
@@ -127,7 +128,7 @@ class GovulncheckParser:
             elif isinstance(data, list):
                 # Parsing for new govulncheck output format
                 for elem in data:
-                    if "osv" in elem.keys():
+                    if "osv" in elem:
                         cve = elem["osv"]["aliases"][0]
                         osv_data = elem["osv"]
                         affected_package = osv_data["affected"][0]["package"]
@@ -137,7 +138,7 @@ class GovulncheckParser:
                         formatted_ranges = []
                         summary = osv_data.get("summary", "Unknown")
                         component_name = affected_package["name"]
-                        id = osv_data["id"]
+                        osv_id = osv_data["id"]
 
                         for r in affected_ranges:
                             events = r["events"]
@@ -179,10 +180,7 @@ class GovulncheckParser:
 
                         affected_version = self.get_affected_version(data, osv_data["id"])
 
-                        if "severity" in elem["osv"].keys():
-                            severity = elem["osv"]["severity"]
-                        else:
-                            severity = SEVERITY
+                        severity = elem["osv"].get("severity", SEVERITY)
 
                         d = {
                             "cve": cve,
@@ -195,7 +193,7 @@ class GovulncheckParser:
                             "references": references,
                             "file_path": path,
                             "url": db_specific_url,
-                            "unique_id_from_tool": id,
+                            "unique_id_from_tool": osv_id,
                         }
 
                         findings.append(Finding(**d))

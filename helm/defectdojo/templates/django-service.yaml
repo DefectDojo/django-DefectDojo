@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- if .Values.django.service.annotations }}
   annotations:
   {{- range $key, $value := .Values.django.service.annotations }}
@@ -35,9 +38,8 @@ spec:
     port: 9113
     targetPort: http-metrics
     {{- end }}
-{{- if .Values.django.serviceType }}
-  type: {{ .Values.django.serviceType }}
-{{- end }}
-{{- if .Values.gke.useGKEIngress }}
+{{- if .Values.django.service.type }}
+  type: {{ .Values.django.service.type }}
+{{- else if .Values.gke.useGKEIngress }}
   type: NodePort
 {{- end }}

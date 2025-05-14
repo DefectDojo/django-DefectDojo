@@ -8,12 +8,58 @@ from dojo.models import Endpoint, Finding
 
 
 class AcunetixJSONParser:
+
     """This parser is written for Acunetix JSON Findings."""
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Acunetix 360 Parser.
+
+        Fields:
+        - title: Set to the name outputted by the Acunetix 360 Scanner.
+        - description: Set to Description variable outputted from Acunetix 360 Scanner.
+        - severity: Set to severity from Acunetix 360 Scanner converted into Defect Dojo format.
+        - mitigation: Set to RemedialProcedure variable outputted from Acunetix 360 Scanner if it is present.
+        - impact: Set to Impact variable outputted from Acunetix 360 Scanner if it is present.
+        - date: Set to FirstSeenDate variable outputted from Acunetix 360 Scanner if present. If not, it is set to Generated variable from output.
+        - cwe: Set to converted cwe in Classification variable outputted from Acunetix 360 Scanner if it is present.
+        - static_finding: Set to True.
+        - cvssv3: Set to converted cvssv3 in Classification variable outputted from Acunetix 360 Scanner if it is present.
+        - risk_accepted: Set to True if AcceptedRisk is present in State variable outputted from Acunetix 360 Scanner. No value if variable is not present.
+        - active: Set to false.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "mitigation",
+            "impact",
+            "date",
+            "cwe",
+            "static_finding",
+            "cvssv3",
+            "risk_accepted",
+            "active",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Acunetix 360 Parser.
+
+        Fields:
+        - title: Set to the name outputted by the Acunetix 360 Scanner.
+        - description: Set to Description variable outputted from Acunetix 360 Scanner.
+        """
+        return [
+            "title",
+            "description",
+        ]
+
     def get_findings(self, filename, test):
         dupes = {}
         data = json.load(filename)
         dupes = {}
-        scan_date = parser.parse(data["Generated"])
+        scan_date = parser.parse(data["Generated"], dayfirst=True)
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
         for item in data["Vulnerabilities"]:
@@ -27,7 +73,7 @@ class AcunetixJSONParser:
             else:
                 cwe = None
             sev = item["Severity"]
-            if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+            if sev not in {"Info", "Low", "Medium", "High", "Critical"}:
                 sev = "Info"
             if item["RemedialProcedure"] is not None:
                 mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
@@ -49,10 +95,7 @@ class AcunetixJSONParser:
                         + references
                     )
             url = item["Url"]
-            if item["Impact"] is not None:
-                impact = text_maker.handle(item.get("Impact", ""))
-            else:
-                impact = None
+            impact = text_maker.handle(item.get("Impact", "")) if item["Impact"] is not None else None
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
@@ -94,7 +137,7 @@ class AcunetixJSONParser:
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             if item.get("FirstSeenDate"):
-                parseddate = parser.parse(item["FirstSeenDate"])
+                parseddate = parser.parse(item["FirstSeenDate"], dayfirst=True)
                 finding.date = parseddate
             if dupe_key in dupes:
                 find = dupes[dupe_key]

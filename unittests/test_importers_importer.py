@@ -12,16 +12,16 @@ from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.utils import get_object_or_none
 
-from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path
+from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path, get_unit_tests_scans_path
 from .test_utils import assertImportModelsCreated
 
 logger = logging.getLogger(__name__)
 
-NPM_AUDIT_NO_VULN_FILENAME = "scans/npm_audit/no_vuln.json"
+NPM_AUDIT_NO_VULN_FILENAME = get_unit_tests_scans_path("npm_audit") / "no_vuln.json"
 NPM_AUDIT_SCAN_TYPE = "NPM Audit Scan"
 
-ACUNETIX_AUDIT_ONE_VULN_FILENAME = "scans/acunetix/one_finding.xml"
-ENDPOINT_META_IMPORTER_FILENAME = "endpoint_meta_import/no_endpoint_meta_import.csv"
+ACUNETIX_AUDIT_ONE_VULN_FILENAME = get_unit_tests_scans_path("acunetix") / "one_finding.xml"
+ENDPOINT_META_IMPORTER_FILENAME = get_unit_tests_path() / "endpoint_meta_import" / "no_endpoint_meta_import.csv"
 
 ENGAGEMENT_NAME_DEFAULT = "Engagement 1"
 ENGAGEMENT_NAME_NEW = "Engagement New 1"
@@ -39,7 +39,7 @@ TEST_TITLE_NEW = "lol importing via reimport"
 
 class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
-        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
+        with (get_unit_tests_path() / "scans" / "acunetix" / "one_finding.xml").open(encoding="utf-8") as scan:
             scan_type = "Acunetix Scan"
             user, _created = User.objects.get_or_create(username="admin")
             product_type, _created = Product_Type.objects.get_or_create(name="test")
@@ -80,7 +80,7 @@ class TestDojoDefaultImporter(DojoTestCase):
                 self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
     def test_import_scan(self):
-        with open(get_unit_tests_path() + "/scans/sarif/spotbugs.sarif") as scan:
+        with (get_unit_tests_path() / "scans" / "sarif" / "spotbugs.sarif").open(encoding="utf-8") as scan:
             scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
             user, _ = User.objects.get_or_create(username="admin")
             product_type, _ = Product_Type.objects.get_or_create(name="test2")
@@ -114,7 +114,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             self.assertEqual(0, len_closed_findings)
 
     def test_import_scan_without_test_scan_type(self):
-        with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json") as scan:
+        with (get_unit_tests_scans_path("gitlab_sast") / "gl-sast-report-1-vuln_v15.json").open(encoding="utf-8") as scan:
             # GitLabSastParser implements get_tests but report has no scanner name
             scan_type = GitlabSastParser().get_scan_types()[0]
             user, _ = User.objects.get_or_create(username="admin")
@@ -151,7 +151,7 @@ class TestDojoDefaultImporter(DojoTestCase):
 
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         DojoAPITestCase.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -316,7 +316,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
 class FlexibleReimportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         DojoAPITestCase.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)

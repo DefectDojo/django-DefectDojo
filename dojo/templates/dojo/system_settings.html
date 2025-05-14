@@ -62,7 +62,7 @@ Django forms are very rigid so without crispy-forms we're forced to use javascri
         }
 
         $(function () {
-            $.each(['slack','msteams','mail', 'grade'], function (index, value) {
+            $.each(['slack','msteams','mail','webhooks','grade'], function (index, value) {
                 updatenotificationsgroup(value);
                 $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
             });

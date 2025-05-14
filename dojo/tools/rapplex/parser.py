@@ -7,9 +7,9 @@ from dojo.models import Endpoint, Finding
 
 
 class RapplexParser:
-    """
-    Rapplex - Web Application Security Scanner
-    """
+
+    """Rapplex - Web Application Security Scanner"""
+
     def get_scan_types(self):
         return ["Rapplex Scan"]
 
@@ -51,14 +51,14 @@ class RapplexParser:
                     issue_sections = issue_definition.get("Sections", {})
                     ref = html2text(issue_sections.get("References", ""))
                     rem = issue_sections.get("Remediation", "")
-                    sum = issue_sections.get("Summary", "")
+                    summary = issue_sections.get("Summary", "")
 
                     finding = Finding(
                         title=title,
                         test=test,
                         severity=severity_level,
                         date=formatted_date,
-                        description=sum,
+                        description=summary,
                         mitigation=rem,
                         cwe=cwe_val,
                         references=ref,

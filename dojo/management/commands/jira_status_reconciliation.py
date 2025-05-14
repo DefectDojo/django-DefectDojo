@@ -21,7 +21,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
     logger.debug("mode: %s product:%s engagement: %s dryrun: %s", mode, product, engagement, dryrun)
 
-    if mode and mode not in ("push_status_to_jira", "import_status_from_jira", "reconcile"):
+    if mode and mode not in {"push_status_to_jira", "import_status_from_jira", "reconcile"}:
         logger.info("mode must be one of reconcile, push_status_to_jira or import_status_from_jira")
         return False
 
@@ -59,8 +59,8 @@ def jira_status_reconciliation(*args, **kwargs):
         issue_from_jira = jira_helper.get_jira_issue_from_jira(find)
 
         if not issue_from_jira:
-            message = "%s;%s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;unable to retrieve JIRA Issue;%s" % \
-                (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
+            message = "{};{}/finding/{};{};{};{};{};{};{};{};{};{};{};{};unable to retrieve JIRA Issue;{}".format(
+                find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
                             find.jira_issue.jira_change, None, find.last_status_update, None, find.last_reviewed, None, "error")
             messages.append(message)
             logger.info(message)
@@ -75,39 +75,37 @@ def jira_status_reconciliation(*args, **kwargs):
         # convert from str to datetime
         issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
 
-        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated
-
         flag1, flag2, flag3 = None, None, None
 
         if mode == "reconcile" and not find.last_status_update:
-            message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;skipping finding with no last_status_update;%s" % \
-                (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
+            message = "{}; {}/finding/{};{};{};{};{};{};{};{};{};{};{};{};skipping finding with no last_status_update;{}".format(
+                find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
                 find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, "skipped")
             messages.append(message)
             logger.info(message)
             continue
-        elif find.risk_accepted:
-            message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%sskipping risk accepted findings;%s" % \
-                (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+        if find.risk_accepted:
+            message = "{}; {}/finding/{};{};{};{};{};{};{};{};{};{};{};{}skipping risk accepted findings;{}".format(
+                find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
                 find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, "skipped")
             messages.append(message)
             logger.info(message)
         elif jira_helper.issue_from_jira_is_active(issue_from_jira) and find.active:
-            message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are active/open;%s" % \
-                (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+            message = "{}; {}/finding/{};{};{};{};{};{};{};{};{};{};{};{};no action both sides are active/open;{}".format(
+                find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
                     find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, "equal")
             messages.append(message)
             logger.info(message)
         elif not jira_helper.issue_from_jira_is_active(issue_from_jira) and not find.active:
-            message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are inactive/closed;%s" % \
-                (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+            message = "{}; {}/finding/{};{};{};{};{};{};{};{};{};{};{};{};no action both sides are inactive/closed;{}".format(
+                find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
                 find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, "equal")
             messages.append(message)
             logger.info(message)
 
         else:
             # statuses are different
-            if mode in ("push_status_to_jira", "import_status_from_jira"):
+            if mode in {"push_status_to_jira", "import_status_from_jira"}:
                 action = mode
             else:
                 # reconcile
@@ -148,15 +146,11 @@ def jira_status_reconciliation(*args, **kwargs):
 
                 status_changed = jira_helper.process_resolution_from_jira(find, resolution_id, resolution_name, assignee_name, issue_from_jira.fields.updated, find.jira_issue) if not dryrun else "dryrun"
                 if status_changed:
-                    message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s finding in defectdojo;%s" % \
-                        (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
-                        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, message_action, status_changed)
+                    message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated};{message_action} finding in defectdojo;{status_changed}"
                     messages.append(message)
                     logger.info(message)
                 else:
-                    message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no changes made from jira resolution;%s" % \
-                        (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
-                        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
+                    message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated};no changes made from jira resolution;{status_changed}"
                     messages.append(message)
                     logger.info(message)
 
@@ -171,24 +165,18 @@ def jira_status_reconciliation(*args, **kwargs):
                 status_changed = jira_helper.push_status_to_jira(find, jira_instance, jira, issue_from_jira, save=True) if not dryrun else "dryrun"
 
                 if status_changed:
-                    message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s jira issue;%s;" % \
-                        (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3, message_action,
-                        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
+                    message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{message_action};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated} jira issue;{status_changed};"
                     messages.append(message)
                     logger.info(message)
                 else:
                     if status_changed is None:
                         status_changed = "Error"
-                    message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no changes made while pushing status to jira;%s" % \
-                        (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
-                        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
+                    message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated};no changes made while pushing status to jira;{status_changed}"
                     messages.append(message)
 
                     logger.info(message)
             else:
-                message = "%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;unable to determine source of truth;%s" % \
-                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
-                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
+                message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated};unable to determine source of truth;{status_changed}"
                 messages.append(message)
 
                 logger.info(message)
@@ -196,9 +184,11 @@ def jira_status_reconciliation(*args, **kwargs):
     logger.info("results (semicolon seperated)")
     for message in messages:
         logger.info(message)
+    return None
 
 
 class Command(BaseCommand):
+
     """
     Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
     Risk Accepted findings are skipped.'
@@ -212,10 +202,11 @@ class Command(BaseCommand):
     help = "Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
         Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped."
 
-    mode_help = \
-        "- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status" \
-        "- push_status_to_jira: update JIRA status for all JIRA issues connected to a Defect Dojo finding (will not push summary/description, only status)" \
+    mode_help = (
+        "- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status"
+        "- push_status_to_jira: update JIRA status for all JIRA issues connected to a Defect Dojo finding (will not push summary/description, only status)"
         "- import_status_from_jira: update Defect Dojo finding status from JIRA"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--mode", help=self.mode_help)

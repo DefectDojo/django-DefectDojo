@@ -16,7 +16,7 @@ def close_engagement(eng):
     eng.save()
 
     if jira_helper.get_jira_project(eng):
-        jira_helper.close_epic(eng, True)
+        jira_helper.close_epic(eng, push_to_jira=True)
 
 
 def reopen_engagement(eng):

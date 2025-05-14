@@ -1,12 +1,11 @@
-import os.path
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.trustwave.parser import TrustwaveParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 def sample_path(file_name):
-    return os.path.join(get_unit_tests_path() + "/scans/trustwave", file_name)
+    return get_unit_tests_scans_path("trustwave") / file_name
 
 
 class TestTrustwaveParser(DojoTestCase):
@@ -15,7 +14,7 @@ class TestTrustwaveParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open(sample_path("many_vulns.csv")) as test_file:
+        with sample_path("many_vulns.csv").open(encoding="utf-8") as test_file:
             parser = TrustwaveParser()
             findings = parser.get_findings(test_file, test)
             for finding in findings:

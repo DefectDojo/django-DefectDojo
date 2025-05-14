@@ -13,42 +13,37 @@ class Permission_Helper:
     def display_name(self):
         if self.name == "bannerconf":
             return "Login Banner"
-        elif self.name == "cred user":
+        if self.name == "cred user":
             return "Credentials"
-        elif self.name == "github conf":
+        if self.name == "github conf":
             return "GitHub Configurations"
-        elif self.name == "engagement survey":
+        if self.name == "engagement survey":
             return "Questionnaires"
-        elif self.name == "permission":
+        if self.name == "permission":
             return "Configuration Permissions"
-        elif self.name == "sla configuration":
+        if self.name == "sla configuration":
             return "SLA Configurations"
-        else:
-            return self.name.title() + "s"
+        return self.name.title() + "s"
 
     def view_codename(self):
         if self.view:
             return f'view_{self.name.replace(" ", "_")}'
-        else:
-            return None
+        return None
 
     def add_codename(self):
         if self.add:
             return f'add_{self.name.replace(" ", "_")}'
-        else:
-            return None
+        return None
 
     def change_codename(self):
         if self.change:
             return f'change_{self.name.replace(" ", "_")}'
-        else:
-            return None
+        return None
 
     def delete_codename(self):
         if self.delete:
             return f'delete_{self.name.replace(" ", "_")}'
-        else:
-            return None
+        return None
 
     def codenames(self):
         codenames = []
@@ -95,30 +90,28 @@ def get_configuration_permissions_fields():
         questionnaire_permissions = []
 
     rules_permissions = []
-    permission_fields = [
+    return [
         Permission_Helper(name="cred user", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="development environment", app="dojo", add=True, change=True, delete=True),
-        Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True)] + \
-        github_permissions + \
-        google_sheet_permissions + [
-        Permission_Helper(name="group", app="auth", view=True, add=True)] + \
-        jira_permissions + [
+        Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True),
+        *github_permissions,
+        *google_sheet_permissions,
+        Permission_Helper(name="group", app="auth", view=True, add=True),
+        *jira_permissions,
         Permission_Helper(name="language type", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="bannerconf", app="dojo", change=True),
         Permission_Helper(name="announcement", app="dojo", change=True),
         Permission_Helper(name="note type", app="dojo", view=True, add=True, change=True, delete=True),
-        Permission_Helper(name="product type", app="dojo", add=True)] + \
-        questionnaire_permissions + [
-        Permission_Helper(name="regulation", app="dojo", add=True, change=True, delete=True)] + \
-        rules_permissions + [
+        Permission_Helper(name="product type", app="dojo", add=True),
+        *questionnaire_permissions,
+        Permission_Helper(name="regulation", app="dojo", add=True, change=True, delete=True),
+        *rules_permissions,
         Permission_Helper(name="sla configuration", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="test type", app="dojo", add=True, change=True),
         Permission_Helper(name="tool configuration", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="tool type", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="user", app="auth", view=True, add=True, change=True, delete=True),
     ]
-
-    return permission_fields
 
 
 def get_configuration_permissions_codenames():

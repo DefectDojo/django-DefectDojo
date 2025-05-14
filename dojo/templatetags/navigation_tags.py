@@ -69,7 +69,7 @@ def dojo_sort(request, display="Name", value="title", default=None):
 
 
 class PaginationNav:
-    def __init__(self, page_number=None, display=None, is_current=False):
+    def __init__(self, page_number=None, display=None, *, is_current=False):
         self.page_number = page_number
         self.is_current = is_current
         self.display = display or page_number or ""
@@ -116,8 +116,10 @@ def paginate(page, adjacent=2):
 
     # append last element and ellipsis if applicable
     if ellipsis_post:
-        pages.append(PaginationNav(display="..."))
-        pages.append(create_page_nav(page.paginator.num_pages))
+        pages.extend((
+            PaginationNav(display="..."),
+            create_page_nav(page.paginator.num_pages),
+        ))
 
     # determine whether we need a 'previous' link and build it
     if page.has_previous():

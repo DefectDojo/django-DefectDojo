@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class KubeHunterParser:
-    """
-    kube-hunter hunts for security weaknesses in Kubernetes clusters. The tool was developed to increase awareness and visibility for security issues in Kubernetes environments.
-    """
+
+    """kube-hunter hunts for security weaknesses in Kubernetes clusters. The tool was developed to increase awareness and visibility for security issues in Kubernetes environments."""
 
     def get_scan_types(self):
         return ["KubeHunter Scan"]
@@ -40,10 +39,7 @@ class KubeHunterParser:
             # Finding severity
             severity = item.get("severity", "info")
             allowed_severity = ["info", "low", "medium", "high", "critical"]
-            if severity.lower() in allowed_severity:
-                severity = severity.capitalize()
-            else:
-                severity = "Info"
+            severity = severity.capitalize() if severity.lower() in allowed_severity else "Info"
 
             # Finding mitigation and reference
             avd_reference = item.get("avd_reference")

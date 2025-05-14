@@ -49,9 +49,8 @@ RISK_TO_CWE_MAP = {
 
 
 class ThreagileParser:
-    """
-    Import ThreaAgile threatmodel risk finding in JSON format
-    """
+
+    """Import ThreaAgile threatmodel risk finding in JSON format"""
 
     REQUIRED_FIELDS = ["category", "title", "severity", "synthetic_id",
                        "exploitation_impact"]
@@ -80,7 +79,7 @@ class ThreagileParser:
         findings = []
         for item in tree:
             for field in self.REQUIRED_FIELDS:
-                if field not in item.keys():
+                if field not in item:
                     msg = f"Invalid ThreAgile risks file, missing field {field}"
                     raise ValueError(msg)
             severity = item.get("severity", "info").capitalize()

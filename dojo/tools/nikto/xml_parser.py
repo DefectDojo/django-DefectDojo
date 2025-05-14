@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class NiktoXMLParser:
     def process_xml(self, file, test):
         dupes = {}
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
         if scan is not None:
@@ -35,10 +35,7 @@ class NiktoXMLParser:
             sentences = re.split(
                 r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", description,
             )
-            if len(sentences) > 0:
-                titleText = sentences[0][:900]
-            else:
-                titleText = description[:900]
+            titleText = sentences[0][:900] if len(sentences) > 0 else description[:900]
             # Description
             description = "\n".join(
                 [
@@ -49,7 +46,7 @@ class NiktoXMLParser:
             )
             # Manage severity the same way with JSON
             severity = "Info"  # Nikto doesn't assign severity, default to Info
-            if item.get("osvdbid") is not None and "0" != item.get("osvdbid"):
+            if item.get("osvdbid") is not None and item.get("osvdbid") != "0":
                 severity = "Medium"
             finding = Finding(
                 title=titleText,

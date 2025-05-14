@@ -8,9 +8,8 @@ from dojo.models import Endpoint, Finding
 
 
 class TrustwaveFusionAPIParser:
-    """
-    Import Trustwave Fusion Report from its API in JSON format
-    """
+
+    """Import Trustwave Fusion Report from its API in JSON format"""
 
     def get_scan_types(self):
         return ["Trustwave Fusion API Scan"]
@@ -49,12 +48,11 @@ class TrustwaveFusionAPIParser:
         """Convert severity value"""
         if num_severity >= -10:
             return "Low"
-        elif -11 >= num_severity > -26:
+        if -11 >= num_severity > -26:
             return "Medium"
-        elif num_severity <= -26:
+        if num_severity <= -26:
             return "High"
-        else:
-            return "Info"
+        return "Info"
 
 
 def get_item(vuln, test):
@@ -78,9 +76,8 @@ def get_item(vuln, test):
         and location["domain"] != "None"
     ):
         endpoint = Endpoint(host=str(location["domain"]))
-    else:  # no domain, use ip instead
-        if "ip" in location and location["ip"] and location["ip"] != "None":
-            endpoint = Endpoint(host=str(location["ip"]))
+    elif "ip" in location and location["ip"] and location["ip"] != "None":
+        endpoint = Endpoint(host=str(location["ip"]))
     # check for protocol
     if (
         "applicationProtocol" in location
@@ -134,7 +131,7 @@ def get_item(vuln, test):
             cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
         )
 
-        finding.component_name = component_name if component_name else None
+        finding.component_name = component_name or None
         finding.component_version = (
             cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
         )

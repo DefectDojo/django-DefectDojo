@@ -9,12 +9,12 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from product_test import ProductTest, WaitForPageLoad
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
 logger = logging.getLogger(__name__)
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class FindingTest(BaseTestCase):
@@ -68,13 +68,13 @@ class FindingTest(BaseTestCase):
 
     def check_file(self, file_name):
         file_found = False
-        for i in range(1, 30):
+        for _ in range(1, 30):
             time.sleep(1)
             if Path(file_name).is_file():
                 file_found = True
                 break
         self.assertTrue(file_found, f"Cannot find {file_name}")
-        os.remove(file_name)
+        Path(file_name).unlink()
 
     def test_csv_export(self):
         driver = self.driver
@@ -146,8 +146,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Manage Files").click()
         # select first file input field: form-0-image
         # Set full image path for image file 'strange.png
-        image_path = os.path.join(dir_path, "finding_image.png")
-        driver.find_element(By.ID, "id_form-0-file").send_keys(image_path)
+        image_path = dir_path / "finding_image.png"
+        driver.find_element(By.ID, "id_form-0-file").send_keys(str(image_path))
         driver.find_element(By.ID, "id_form-0-title").send_keys("Image Title")
         # Save uploaded image
         with WaitForPageLoad(driver, timeout=50):
@@ -192,7 +192,7 @@ class FindingTest(BaseTestCase):
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_reviewers")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_reviewers")))
         except TimeoutException:
             self.fail("Timed out waiting for reviewer dropdown to initialize ")
 
@@ -280,7 +280,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(pre_status != post_status)
+        self.assertNotEqual(pre_status, post_status)
 
     def test_open_finding(self):
         driver = self.driver
@@ -303,7 +303,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         post_status = driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(pre_status != post_status)
+        self.assertNotEqual(pre_status, post_status)
 
     @on_exception_html_source_logger
     def test_simple_accept_finding(self):
@@ -312,8 +312,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -326,9 +324,9 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
         # This will throw exception if the test fails due to invalid xpath
-        # TODO risk acceptance doesn't mitigate endpoints currently
+        # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
-        # self.assertTrue(pre_status != post_status)
+        # self.assertNotEqual(pre_status, post_status)
 
     def test_unaccept_finding(self):
         driver = self.driver
@@ -336,8 +334,6 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
-        # Get the status of the current endpoint
-        driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -350,9 +346,9 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
         # This will throw exception if the test fails due to invalid xpath
-        # TODO risk acceptance doesn't mitigate endpoints currently
+        # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
-        # self.assertTrue(pre_status != post_status)
+        # self.assertNotEqual(pre_status, post_status)
 
     def test_make_finding_a_template(self):
         driver = self.driver
@@ -466,8 +462,8 @@ class FindingTest(BaseTestCase):
         # Select `Default` as the Environment
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
         # upload scan file
-        file_path = os.path.join(dir_path, "zap_sample.xml")
-        driver.find_element(By.NAME, "file").send_keys(file_path)
+        file_path = dir_path / "zap_sample.xml"
+        driver.find_element(By.NAME, "file").send_keys(str(file_path))
         # Click Submit button
         with WaitForPageLoad(driver, timeout=50):
             driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
@@ -506,7 +502,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
 
-def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+def add_finding_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase("test_login"))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 

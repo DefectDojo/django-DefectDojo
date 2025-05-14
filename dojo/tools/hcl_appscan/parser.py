@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -15,20 +15,20 @@ class HCLAppScanParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import XML output of HCL AppScan."
 
-    def xmltreehelper(self, input):
-        if input.text is None:
+    def xmltreehelper(self, xml_input):
+        if xml_input.text is None:
             output = None
-        elif "\n" in input.text:
+        elif "\n" in xml_input.text:
             output = ""
-            for i in input:
+            for i in xml_input:
                 output = output + " " + i.text
         else:
-            output = " " + input.text
+            output = " " + xml_input.text
         return output
 
     def get_findings(self, file, test):
         findings = []
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         root = tree.getroot()
         if "xml-report" not in root.tag:
             msg = "This doesn't seem to be a valid HCLAppScan xml file."
@@ -42,10 +42,7 @@ class HCLAppScanParser:
                     match item.tag:
                         case "severity":
                             output = self.xmltreehelper(item)
-                            if output is None:
-                                severity = "Info"
-                            else:
-                                severity = output.strip(" ").capitalize()
+                            severity = "Info" if output is None else output.strip(" ").capitalize()
                         case "cwe":
                             cwe = int(self.xmltreehelper(item))
                         case "remediation":
@@ -102,7 +99,7 @@ class HCLAppScanParser:
                         case "port":
                             port = self.xmltreehelper(item)
                             description = description + "Port:" + port + "\n"
-                finding = Finding(
+                prepared_finding = Finding(
                     title=title,
                     description=description,
                     severity=severity,
@@ -111,13 +108,12 @@ class HCLAppScanParser:
                     dynamic_finding=True,
                     static_finding=False,
                 )
-                findings.append(finding)
+                findings.append(prepared_finding)
                 try:
-                    finding.unsaved_endpoints = []
+                    prepared_finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=host, port=port)
-                    finding.unsaved_endpoints.append(endpoint)
+                    prepared_finding.unsaved_endpoints.append(endpoint)
                 except UnboundLocalError:
                     pass
             return findings
-        else:
-            return findings
+        return findings

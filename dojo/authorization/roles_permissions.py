@@ -12,9 +12,9 @@ class Roles(IntEnum):
     def has_value(cls, value):
         try:
             Roles(value)
-            return True
         except ValueError:
             return False
+        return True
 
 
 def django_enum(cls):
@@ -129,9 +129,9 @@ class Permissions(IntEnum):
     def has_value(cls, value):
         try:
             Permissions(value)
-            return True
         except ValueError:
             return False
+        return True
 
     @classmethod
     def get_engagement_permissions(cls):
@@ -517,9 +517,7 @@ def get_roles_with_permissions():
 
 
 def get_global_roles_with_permissions():
-    """
-    Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
-    """
+    """Extra permissions for global roles, on top of the permissions granted to the "normal" roles above."""
     return {
         Roles.Maintainer: {Permissions.Product_Type_Add},
         Roles.Owner: {Permissions.Product_Type_Add},

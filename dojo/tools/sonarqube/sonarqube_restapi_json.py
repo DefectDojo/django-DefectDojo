@@ -115,6 +115,7 @@ class SonarQubeRESTAPIJSON:
                         component_version=component_version,
                         cwe=cwe,
                         cvssv3_score=cvss,
+                        file_path=component,
                         tags=["vulnerability"],
                     )
                     vulnids = []
@@ -183,6 +184,7 @@ class SonarQubeRESTAPIJSON:
                         severity=self.severitytranslator(issue.get("severity")),
                         static_finding=True,
                         dynamic_finding=False,
+                        file_path=component,
                         tags=["code_smell"],
                     )
                 items.append(item)
@@ -225,6 +227,7 @@ class SonarQubeRESTAPIJSON:
                     severity=self.severitytranslator(hotspot.get("vulnerabilityProbability")),
                     static_finding=True,
                     dynamic_finding=False,
+                    file_path=component,
                     tags=["hotspot"],
                 )
                 items.append(item)
@@ -233,12 +236,11 @@ class SonarQubeRESTAPIJSON:
     def severitytranslator(self, severity):
         if severity == "BLOCKER":
             return "High"
-        elif severity == "MAJOR":
+        if severity == "MAJOR":
             return "Medium"
-        elif severity == "MINOR":
+        if severity == "MINOR":
             return "Low"
-        else:
-            return severity.lower().capitalize()
+        return severity.lower().capitalize()
 
     def returncomponent(self, json_content, key):
         components = json_content.get("components")

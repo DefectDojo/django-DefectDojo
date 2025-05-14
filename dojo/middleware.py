@@ -1,5 +1,6 @@
 import logging
-from re import compile
+import re
+from contextlib import suppress
 from threading import local
 from urllib.parse import quote
 
@@ -13,12 +14,13 @@ from django.utils.functional import SimpleLazyObject
 
 logger = logging.getLogger(__name__)
 
-EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip("/"))]
+EXEMPT_URLS = [re.compile(settings.LOGIN_URL.lstrip("/"))]
 if hasattr(settings, "LOGIN_EXEMPT_URLS"):
-    EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
+    EXEMPT_URLS += [re.compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
 
 class LoginRequiredMiddleware:
+
     """
     Middleware that requires a user to be authenticated to view any page other
     than LOGIN_URL. Exemptions to this requirement can optionally be specified
@@ -34,12 +36,16 @@ class LoginRequiredMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        assert hasattr(request, "user"), "The Login Required middleware\
- requires authentication middleware to be installed. Edit your\
- MIDDLEWARE_CLASSES setting to insert\
- 'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
- work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
- 'django.core.context_processors.auth'."
+        if not hasattr(request, "user"):
+            msg = (
+                "The Login Required middleware "
+                "requires authentication middleware to be installed. Edit your "
+                "MIDDLEWARE_CLASSES setting to insert "
+                "'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't "
+                "work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes "
+                "'django.core.context_processors.auth'."
+            )
+            raise AttributeError(msg)
         if not request.user.is_authenticated:
             path = request.path_info.lstrip("/")
             if not any(m.match(path) for m in EXEMPT_URLS):
@@ -51,13 +57,10 @@ class LoginRequiredMiddleware:
 
         if request.user.is_authenticated:
             logger.debug("Authenticated user: %s", str(request.user))
-            try:
+            with suppress(ModuleNotFoundError):  # to avoid unittests to fail
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
-            except:
-                # to avoid unittests to fail
-                pass
             path = request.path_info.lstrip("/")
             from dojo.models import Dojo_User
             if Dojo_User.force_password_reset(request.user) and path != "change_password":
@@ -92,7 +95,7 @@ class DojoSytemSettingsMiddleware:
         return None
 
     @classmethod
-    def cleanup(cls, *args, **kwargs):
+    def cleanup(cls, *args, **kwargs):  # noqa: ARG003
         if hasattr(cls._thread_local, "system_settings"):
             del cls._thread_local.system_settings
 
@@ -118,7 +121,7 @@ class System_Settings_Manager(models.Manager):
             return System_Settings()
         return from_db
 
-    def get(self, no_cache=False, *args, **kwargs):
+    def get(self, no_cache=False, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         if no_cache:
             # logger.debug('no_cache specified or cached value found, loading system settings from db')
             return self.get_from_db(*args, **kwargs)
@@ -133,6 +136,7 @@ class System_Settings_Manager(models.Manager):
 
 
 class APITrailingSlashMiddleware:
+
     """
     Middleware that will send a more informative error response to POST requests
     made without the trailing slash. When this middleware is not active, POST requests
@@ -156,9 +160,8 @@ class APITrailingSlashMiddleware:
 
 
 class AdditionalHeaderMiddleware:
-    """
-    Middleware that will add an arbitray amount of HTTP Request headers toall requests.
-    """
+
+    """Middleware that will add an arbitray amount of HTTP Request headers toall requests."""
 
     def __init__(self, get_response):
 

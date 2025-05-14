@@ -17,8 +17,7 @@ class KubeBenchParser:
         tree = json.load(json_output)
         if "Controls" in tree:
             return self.get_chapters(tree["Controls"], test)
-        else:
-            return self.get_chapters(tree, test)
+        return self.get_chapters(tree, test)
 
     def get_chapters(self, tree, test):
         items = []
@@ -105,7 +104,7 @@ def get_item(vuln, test, description):
     mitigation = vuln.get("remediation", None)
     vuln_id_from_tool = test_number
 
-    finding = Finding(
+    return Finding(
         title=title,
         test=test,
         description=description,
@@ -115,5 +114,3 @@ def get_item(vuln, test, description):
         static_finding=True,
         dynamic_finding=False,
     )
-
-    return finding

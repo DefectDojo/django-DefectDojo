@@ -56,14 +56,13 @@ def edit_sla_config(request, slaid):
                                     "SLA Configuration Deleted.",
                                     extra_tags="alert-success")
             return HttpResponseRedirect(reverse("sla_config"))
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 "The Default SLA Configuration cannot be deleted.",
-                                 extra_tags="alert-danger")
-            return HttpResponseRedirect(reverse("sla_config"))
+        messages.add_message(request,
+                             messages.ERROR,
+                             "The Default SLA Configuration cannot be deleted.",
+                             extra_tags="alert-danger")
+        return HttpResponseRedirect(reverse("sla_config"))
 
-    elif request.method == "POST":
+    if request.method == "POST":
         form = SLAConfigForm(request.POST, instance=sla_config)
         if form.is_valid():
             form.save(commit=True)

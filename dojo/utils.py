@@ -1,13 +1,17 @@
 import binascii
 import calendar as tcalendar
 import hashlib
+import importlib
 import logging
 import mimetypes
 import os
+import pathlib
 import re
 from calendar import monthrange
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -21,6 +25,7 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
@@ -29,6 +34,7 @@ from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
@@ -72,7 +78,8 @@ Helper functions for DefectDojo
 
 
 def do_false_positive_history(finding, *args, **kwargs):
-    """Replicate false positives across product.
+    """
+    Replicate false positives across product.
 
     Mark finding as false positive if the same finding was previously marked
     as false positive in the same product, beyond that, retroactively mark
@@ -84,6 +91,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -95,8 +103,10 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-        + "that were previously marked as false positive",
+        (
+            "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
+            "that were previously marked as false positive"
+        ),
         len(existing_fp_findings),
     )
 
@@ -132,7 +142,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
 
 def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
-    """Customizable lookup that returns all existing findings for a given finding.
+    """
+    Customizable lookup that returns all existing findings for a given finding.
 
     Takes one finding as an argument and returns all findings that are equal to it
     on the same product, engagement or test. For now, only one custom filter can
@@ -144,6 +155,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -178,7 +190,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool":
+    if deduplication_algorithm == "unique_id_from_tool":
         return (
             Finding.objects.filter(
                 **custom_filter,
@@ -188,7 +200,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+    if deduplication_algorithm == "unique_id_from_tool_or_hash_code":
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
@@ -199,7 +211,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         deduplicationLogger.debug(query.query)
         return query
 
-    elif deduplication_algorithm == "legacy":
+    if deduplication_algorithm == "legacy":
         # This is the legacy reimport behavior. Although it's pretty flawed and
         # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -214,9 +226,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             ).order_by("id")
         )
 
-    else:
-        logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
-        return None
+    logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
+    return None
 
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
@@ -295,6 +306,9 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
+        return dedupe_method(new_finding, *args, **kwargs)
+
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -316,6 +330,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicate_legacy(new_finding)
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return None
 
 
 def deduplicate_legacy(new_finding):
@@ -669,12 +684,14 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count["zero"])
-        counts.append(o_count["one"])
-        counts.append(o_count["two"])
-        counts.append(o_count["three"])
-        counts.append(total)
-        counts.append(o_count["closed"])
+        counts.extend((
+            o_count["zero"],
+            o_count["one"],
+            o_count["two"],
+            o_count["three"],
+            total,
+            o_count["closed"],
+        ))
 
         stuff.append(counts)
         o_stuff.append(counts[:-1])
@@ -687,16 +704,19 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count["zero"])
-        a_counts.append(a_count["one"])
-        a_counts.append(a_count["two"])
-        a_counts.append(a_count["three"])
-        a_counts.append(a_total)
+        a_counts.extend((
+            a_count["zero"],
+            a_count["one"],
+            a_count["two"],
+            a_count["three"],
+            a_total,
+        ))
         a_stuff.append(a_counts)
 
 
 def add_breadcrumb(parent=None,
                    title=None,
+                   *,
                    top_level=True,
                    url=None,
                    request=None,
@@ -704,8 +724,7 @@ def add_breadcrumb(parent=None,
     if clear:
         request.session["dojo_breadcrumbs"] = None
         return
-    else:
-        crumbs = request.session.get("dojo_breadcrumbs", None)
+    crumbs = request.session.get("dojo_breadcrumbs", None)
 
     if top_level or crumbs is None:
         crumbs = [
@@ -752,9 +771,8 @@ def add_breadcrumb(parent=None,
                             crumbs = crumbs[:crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
-                    else:
-                        if crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                    elif crumb in crumbs:
+                        crumbs = crumbs[:crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 
@@ -770,11 +788,7 @@ def is_title_in_breadcrumbs(title):
     if breadcrumbs is None:
         return False
 
-    for breadcrumb in breadcrumbs:
-        if breadcrumb.get("title") == title:
-            return True
-
-    return False
+    return any(breadcrumb.get("title") == title for breadcrumb in breadcrumbs)
 
 
 def get_punchcard_data(objs, start_date, weeks, view="Finding"):
@@ -784,7 +798,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # reminder: The first week of a year is the one that contains the year's first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
         if view == "Finding":
             severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
@@ -833,27 +847,26 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
             if created < start_of_week:
                 raise ValueError("date found outside supported range: " + str(created))
+            if created >= start_of_week and created < start_of_next_week:
+                # add day count to current week data
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
             else:
-                if created >= start_of_week and created < start_of_next_week:
-                    # add day count to current week data
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
-                else:
-                    # created >= start_of_next_week, so store current week, prepare for next
-                    while created >= start_of_next_week:
-                        week_data, label = get_week_data(start_of_week, tick, day_counts)
-                        punchcard.extend(week_data)
-                        ticks.append(label)
-                        tick += 1
+                # created >= start_of_next_week, so store current week, prepare for next
+                while created >= start_of_next_week:
+                    week_data, label = get_week_data(start_of_week, tick, day_counts)
+                    punchcard.extend(week_data)
+                    ticks.append(label)
+                    tick += 1
 
-                        # new week, new values!
-                        day_counts = [0, 0, 0, 0, 0, 0, 0]
-                        start_of_week = start_of_next_week
-                        start_of_next_week += relativedelta(weeks=1)
+                    # new week, new values!
+                    day_counts = [0, 0, 0, 0, 0, 0, 0]
+                    start_of_week = start_of_next_week
+                    start_of_next_week += relativedelta(weeks=1)
 
-                    # finally a day that falls into the week bracket
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
+                # finally a day that falls into the week bracket
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
@@ -873,11 +886,11 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
             punch.append(punch[2])
             punch[2] = (sqrt(punch[2] / pi)) / ratio
 
-        return punchcard, ticks
-
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
+
+    return punchcard, ticks
 
 
 def get_week_data(week_start_date, tick, day_counts):
@@ -1127,71 +1140,135 @@ def opened_in_period(start_date, end_date, **kwargs):
         end_date.month,
         end_date.day,
         tzinfo=timezone.get_current_timezone())
-    opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=(
-            "Critical", "High", "Medium",
-            "Low")).values("numerical_severity").annotate(
-                Count("numerical_severity")).order_by("numerical_severity")
-    total_opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=("Critical", "High", "Medium", "Low")).aggregate(
-            total=Sum(
-                Case(
-                    When(
-                        severity__in=("Critical", "High", "Medium", "Low"),
-                        then=Value(1)),
-                    output_field=IntegerField())))["total"]
-
-    oip = {
-        "S0":
-        0,
-        "S1":
-        0,
-        "S2":
-        0,
-        "S3":
-        0,
-        "Total":
-        total_opened_in_period,
-        "start_date":
-        start_date,
-        "end_date":
-        end_date,
-        "closed":
-        Finding.objects.filter(
-            mitigated__date__range=[start_date, end_date],
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
             severity__in=("Critical", "High", "Medium", "Low")).aggregate(
                 total=Sum(
                     Case(
                         When(
                             severity__in=("Critical", "High", "Medium", "Low"),
                             then=Value(1)),
-                        output_field=IntegerField())))["total"],
-        "to_date_total":
-        Finding.objects.filter(
-            date__lte=end_date.date(),
-            verified=True,
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                verified=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
+    else:
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
-            severity__in=("Critical", "High", "Medium", "Low")).count(),
-    }
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                total=Sum(
+                    Case(
+                        When(
+                            severity__in=("Critical", "High", "Medium", "Low"),
+                            then=Value(1)),
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
 
     for o in opened_in_period:
         oip[o["numerical_severity"]] = o["numerical_severity__count"]
@@ -1208,8 +1285,7 @@ class FileIterWrapper:
         data = self.flo.read(self.chunk_size)
         if data:
             return data
-        else:
-            raise StopIteration
+        raise StopIteration
 
     def __iter__(self):
         return self
@@ -1229,9 +1305,7 @@ def get_cal_event(start_date, end_date, summary, description, uid):
 
 
 def named_month(month_number):
-    """
-    Return the name of the month, given the number.
-    """
+    """Return the name of the month, given the number."""
     return date(1900, month_number, 1).strftime("%B")
 
 
@@ -1244,7 +1318,8 @@ def normalize_query(query_string,
 
 
 def build_query(query_string, search_fields):
-    """ Returns a query, that is a combination of Q objects. That combination
+    """
+    Returns a query, that is a combination of Q objects. That combination
     aims to search keywords within a model by testing the given search fields.
 
     """
@@ -1255,15 +1330,9 @@ def build_query(query_string, search_fields):
         for field_name in search_fields:
             q = Q(**{f"{field_name}__icontains": term})
 
-            if or_query:
-                or_query = or_query | q
-            else:
-                or_query = q
+            or_query = or_query | q if or_query else q
 
-        if query:
-            query = query & or_query
-        else:
-            query = or_query
+        query = query & or_query if query else or_query
     return query
 
 
@@ -1279,16 +1348,14 @@ def template_search_helper(fields=None, query_string=None):
         return findings
 
     entry_query = build_query(query_string, fields)
-    found_entries = findings.filter(entry_query)
-
-    return found_entries
+    return findings.filter(entry_query)
 
 
 def get_page_items(request, items, page_size, prefix=""):
     return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
 
 
-def get_page_items_and_count(request, items, page_size, prefix="", do_count=True):
+def get_page_items_and_count(request, items, page_size, prefix="", *, do_count=True):
     page_param = prefix + "page"
     page_size_param = prefix + "page_size"
 
@@ -1308,26 +1375,27 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     # Check if threat folder exist.
-    if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
+    threat_dir = Path(settings.MEDIA_ROOT) / "threat"
+    if not threat_dir.is_dir():
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
-    with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
-              "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
+        threat_dir.mkdir()
+    eng_path = threat_dir / f"{eng.id}{extension}"
+    with eng_path.open("wb+") as destination:
+        destination.writelines(chunk for chunk in f.chunks())
+    eng.tmodel_path = str(eng_path)
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
-    _name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
-              "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-    cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
+    path = Path(f.name)
+    extension = path.suffix
+    sel_path = Path(settings.MEDIA_ROOT) / "selenium" / f"{cred.id}{extension}"
+    with sel_path.open("wb+") as destination:
+        destination.writelines(chunk for chunk in f.chunks())
+    cred.selenium_script = str(sel_path)
     cred.save()
 
 
@@ -1423,8 +1491,7 @@ def decrypt(key, iv, encrypted_text):
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
-    decrypted_text = _unpad_string(decrypted_text)
-    return decrypted_text
+    return _unpad_string(decrypted_text)
 
 
 def _pad_string(value):
@@ -1513,14 +1580,18 @@ def calculate_grade(product, *args, **kwargs):
 
     if system_settings.enable_product_grade:
         logger.debug("calculating product grade for %s:%s", product.id, product.name)
-        severity_values = Finding.objects.filter(
-            ~Q(severity="Info"),
-            active=True,
-            duplicate=False,
-            verified=True,
-            false_p=False,
-            test__engagement__product=product).values("severity").annotate(
-                Count("numerical_severity")).order_by()
+        findings = Finding.objects.filter(
+                ~Q(severity="Info"),
+                active=True,
+                duplicate=False,
+                false_p=False,
+                test__engagement__product=product)
+
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_product_grading", True):
+            findings = findings.filter(verified=True)
+
+        severity_values = findings.values("severity").annotate(
+                    Count("numerical_severity")).order_by()
 
         low = 0
         medium = 0
@@ -1551,36 +1622,6 @@ def get_celery_worker_status():
         return res.get(timeout=5)
     except:
         return False
-
-
-def get_work_days(start: date, end: date):
-    """
-    Math function to get workdays between 2 dates.
-    Can be used only as fallback as it doesn't know
-    about specific country holidays or extra working days.
-    https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
-    """
-
-    # if the start date is on a weekend, forward the date to next Monday
-    if start.weekday() > WEEKDAY_FRIDAY:
-        start = start + timedelta(days=7 - start.weekday())
-
-    # if the end date is on a weekend, rewind the date to the previous Friday
-    if end.weekday() > WEEKDAY_FRIDAY:
-        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
-
-    if start > end:
-        return 0
-    # that makes the difference easy, no remainders etc
-    diff_days = (end - start).days + 1
-    weeks = int(diff_days / 7)
-
-    remainder = end.weekday() - start.weekday() + 1
-
-    if remainder != 0 and end.weekday() < start.weekday():
-        remainder = 5 + remainder
-
-    return weeks * 5 + remainder
 
 
 # Used to display the counts and enabled tabs in the product view
@@ -1683,7 +1724,7 @@ def add_language(product, language, files=1, code=1):
 
 
 # Apply finding template data by matching CWE + Title or CWE
-def apply_cwe_to_template(finding, override=False):
+def apply_cwe_to_template(finding, *, override=False):
     if System_Settings.objects.get().enable_template_match or override:
         # Attempt to match on CWE and Title First
         template = Finding_Template.objects.filter(
@@ -1709,8 +1750,8 @@ def truncate_with_dots(the_string, max_length_including_dots):
     return (the_string[:max_length_including_dots - 3] + "..." if len(the_string) > max_length_including_dots else the_string)
 
 
-def max_safe(list):
-    return max(i for i in list if i is not None)
+def max_safe(full_list):
+    return max(i for i in full_list if i is not None)
 
 
 def get_full_url(relative_url):
@@ -1720,9 +1761,8 @@ def get_full_url(relative_url):
 def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
-    else:
-        logger.warning("SITE URL undefined in settings, full_url cannot be created")
-        return "settings.SITE_URL"
+    logger.warning("SITE URL undefined in settings, full_url cannot be created")
+    return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=User)
@@ -1762,24 +1802,13 @@ def user_post_save(sender, instance, created, **kwargs):
         instance.save()
 
 
-def is_safe_url(url):
-    try:
-        # available in django 3+
-        from django.utils.http import url_has_allowed_host_and_scheme
-    except ImportError:
-        # django < 3
-        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
-
-    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
-
-
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
-        return_url = request.GET["return_url"] if "return_url" in request.GET else None
+        return_url = request.GET["return_url"] if "return_url" in request.GET else None  # noqa: SIM401
 
-    return return_url if return_url else None
+    return return_url or None
 
 
 def redirect_to_return_url_or_else(request, or_else):
@@ -1788,16 +1817,15 @@ def redirect_to_return_url_or_else(request, or_else):
     if return_url:
         # logger.debug('redirecting to %s: ', return_url.strip())
         return redirect(request, return_url.strip())
-    elif or_else:
+    if or_else:
         return redirect(request, or_else)
-    else:
-        messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
-        return redirect(request, request.get_full_path())
+    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    return redirect(request, request.get_full_path())
 
 
 def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
-    if is_safe_url(redirect_to):
+    if url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=None):
         return HttpResponseRedirect(redirect_to)
     msg = "invalid redirect, host and scheme not in allowed_hosts"
     raise ValueError(msg)
@@ -1836,7 +1864,7 @@ def sla_compute_and_notify(*args, **kwargs):
     import dojo.jira_link.helper as jira_helper
 
     class NotificationEntry:
-        def __init__(self, finding=None, jira_issue=None, do_jira_sla_comment=False):
+        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
             self.finding = finding
             self.jira_issue = jira_issue
             self.do_jira_sla_comment = do_jira_sla_comment
@@ -1872,9 +1900,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
@@ -1965,11 +1993,19 @@ def sla_compute_and_notify(*args, **kwargs):
             for finding in findings:
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
 
-                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
                     post_breach_no_notify_count += 1
                     # Skip finding notification if breached for too long
                     logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
@@ -2140,12 +2176,13 @@ def add_error_message_to_response(message):
 
 def add_field_errors_to_response(form):
     if form and get_current_request():
-        for field, error in form.errors.items():
+        for error in form.errors.values():
             add_error_message_to_response(error)
 
 
 def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
-    """ Using the default for model in queryset can be slow for large querysets. Even
+    """
+    Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
     In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
@@ -2154,19 +2191,20 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     the first X items.
     """
     # force ordering by id to make our paging work
-    last_id = None
+    last_id = 0
     models = models.order_by()
     if order == "asc":
         logger.debug("ordering ascending")
         models = models.order_by("id")
-        last_id = 0
     elif order == "desc":
         logger.debug("ordering descending")
         models = models.order_by("-id")
         # get maximum, which is the first due to descending order
-        last_id = models.first().id + 1
+        first = models.first()
+        if first:
+            last_id = models.first().id + 1
     else:
-        msg = "order must be ""asc"" or ""desc"""
+        msg = "order must be asc or desc"
         raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
@@ -2175,22 +2213,18 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     i = 0
     batch = []
     total_pages = (total_count // page_size) + 2
-    # logger.info('pages to process: %d', total_pages)
+    # logger.debug("pages to process: %d", total_pages)
     logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
-    for p in range(1, total_pages):
-        # logger.info('page: %d', p)
+    for _p in range(1, total_pages):
         if order == "asc":
             page = models.filter(id__gt=last_id)[:page_size]
         else:
             page = models.filter(id__lt=last_id)[:page_size]
 
-        # logger.info('page query: %s', page.query)
-        # if p == 23:
-        #     raise ValueError('bla')
+        logger.debug("page query: %s", page.query)
         for model in page:
             i += 1
             last_id = model.id
-            # logger.info('last_id: %s', last_id)
 
             function(model)
 
@@ -2211,7 +2245,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 
 def to_str_typed(obj):
-    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    """For code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
     return f"{type(obj)}: {obj}"
 
 
@@ -2220,7 +2254,7 @@ def get_product(obj):
     if not obj:
         return None
 
-    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding | Finding_Group):
         return obj.test.engagement.product
 
     if isinstance(obj, Test):
@@ -2231,6 +2265,7 @@ def get_product(obj):
 
     if isinstance(obj, Product):
         return obj
+    return None
 
 
 def prod_name(obj):
@@ -2242,7 +2277,7 @@ def prod_name(obj):
 
 # Returns image locations by default (i.e. uploaded_files/09577eb1-6ccb-430b-bc82-0742d4c97a09.png)
 # if return_objects=True, return the FileUPload object instead of just the file location
-def get_file_images(obj, return_objects=False):
+def get_file_images(obj, *, return_objects=False):
     logger.debug("getting images for %s:%s", type(obj), obj)
     files = None
     if not obj:
@@ -2298,9 +2333,9 @@ class async_delete:
     @dojo_async_task
     @app.task
     def delete_chunk(self, objects, **kwargs):
-        for object in objects:
+        for obj in objects:
             try:
-                object.delete()
+                obj.delete()
             except AssertionError:
                 logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
                 # The id must be None
@@ -2308,45 +2343,45 @@ class async_delete:
 
     @dojo_async_task
     @app.task
-    def delete(self, object, **kwargs):
-        logger.debug("ASYNC_DELETE: Deleting " + self.get_object_name(object) + ": " + str(object))
-        model_list = self.mapping.get(self.get_object_name(object), None)
+    def delete(self, obj, **kwargs):
+        logger.debug("ASYNC_DELETE: Deleting " + self.get_object_name(obj) + ": " + str(obj))
+        model_list = self.mapping.get(self.get_object_name(obj), None)
         if model_list:
             # The object to be deleted was found in the object list
-            self.crawl(object, model_list)
+            self.crawl(obj, model_list)
         else:
             # The object is not supported in async delete, delete normally
-            logger.debug("ASYNC_DELETE: " + self.get_object_name(object) + " async delete not supported. Deleteing normally: " + str(object))
-            object.delete()
+            logger.debug("ASYNC_DELETE: " + self.get_object_name(obj) + " async delete not supported. Deleteing normally: " + str(obj))
+            obj.delete()
 
     @dojo_async_task
     @app.task
-    def crawl(self, object, model_list, **kwargs):
-        logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(object) + ": " + str(object))
+    def crawl(self, obj, model_list, **kwargs):
+        logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
         for model_info in model_list:
             model = model_info[0]
             model_query = model_info[1]
-            filter_dict = {model_query: object}
+            filter_dict = {model_query: obj}
             objects_to_delete = model.objects.filter(**filter_dict)
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
                 logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
                 self.delete_chunk(chunk)
-        self.delete_chunk([object])
-        logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(object) + ": " + str(object))
+        self.delete_chunk([obj])
+        logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
-    def chunk_list(self, model, list):
+    def chunk_list(self, model, full_list):
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
         # Break the list of objects into "chunk_size" lists
-        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        chunk_list = [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
         logger.debug("ASYNC_DELETE: Split " + self.get_object_name(model) + " into " + str(len(chunk_list)) + " chunks of " + str(chunk_size))
         return chunk_list
 
-    def get_object_name(self, object):
-        if object.__class__.__name__ == "ModelBase":
-            return object.__name__
-        return object.__class__.__name__
+    def get_object_name(self, obj):
+        if obj.__class__.__name__ == "ModelBase":
+            return obj.__name__
+        return obj.__class__.__name__
 
 
 @receiver(user_logged_in)
@@ -2354,33 +2389,22 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("login user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
     if "username" in credentials:
-        logger.warning("login failed for: {credentials} via ip: {ip}".format(
-            credentials=credentials["username"],
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.warning("login failed for: %s via ip: %s", credentials["username"], request.META["REMOTE_ADDR"])
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.error("login failed because of missing username via ip: %s", request.META["REMOTE_ADDR"])
 
 
 def get_password_requirements_string():
@@ -2426,27 +2450,18 @@ def calculate_finding_age(f):
     if start_date and isinstance(start_date, str):
         start_date = parse(start_date).date()
 
-    if settings.SLA_BUSINESS_DAYS:
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            days = get_work_days(f.get("date"), mitigated_date)
-        else:
-            days = get_work_days(f.get("date"), timezone.now().date())
-    else:
-        if isinstance(start_date, datetime):
-            start_date = start_date.date()
+    if isinstance(start_date, datetime):
+        start_date = start_date.date()
 
-        if f.get("mitigated"):
-            mitigated_date = f.get("mitigated")
-            if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get("mitigated").date()
-            diff = mitigated_date - start_date
-        else:
-            diff = timezone.now().date() - start_date
-        days = diff.days
-    return days if days > 0 else 0
+    if f.get("mitigated"):
+        mitigated_date = f.get("mitigated")
+        if isinstance(mitigated_date, datetime):
+            mitigated_date = f.get("mitigated").date()
+        diff = mitigated_date - start_date
+    else:
+        diff = timezone.now().date() - start_date
+    days = diff.days
+    return max(0, days)
 
 
 def get_open_findings_burndown(product):
@@ -2569,10 +2584,8 @@ def get_open_findings_burndown(product):
                         info_count -= 1
 
         f_day = [critical_count, high_count, medium_count, low_count, info_count]
-        if min(f_day) < running_min:
-            running_min = min(f_day)
-        if max(f_day) > running_max:
-            running_max = max(f_day)
+        running_min = min(running_min, *f_day)
+        running_max = max(running_max, *f_day)
 
         past_90_days["Critical"].append([d_start * 1000, critical_count])
         past_90_days["High"].append([d_start * 1000, high_count])
@@ -2586,8 +2599,26 @@ def get_open_findings_burndown(product):
     return past_90_days
 
 
+def get_custom_method(setting_name: str) -> Callable | None:
+    """
+    Attempts to load and return the method specified by fully-qualified name at the given setting.
+
+    :param setting_name: The name of the setting that holds the fqname of the Python method we want to load
+    :return: The callable if it was able to be loaded, else None
+    """
+    if fq_name := getattr(settings, setting_name, None):
+        try:
+            mn, _, fn = fq_name.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return None
+
+
 def generate_file_response(file_object: FileUpload) -> FileResponse:
-    """Serve an uploaded file in a uniformed way.
+    """
+    Serve an uploaded file in a uniformed way.
 
     This function assumes all permissions have previously validated/verified
     by the caller of this function.
@@ -2598,14 +2629,55 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-    _, file_extension = os.path.splitext(file_path)
+    # Clean the title by removing some problematic characters
+    cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
+
+    return generate_file_response_from_file_path(
+        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
+    )
+
+
+def generate_file_response_from_file_path(
+    file_path: str, file_name: str | None = None, file_size: int | None = None,
+) -> FileResponse:
+    """Serve an local file in a uniformed way."""
+    # Determine the file path
+    path = Path(file_path)
+    file_path_without_extension = path.parent / path.stem
+    file_extension = path.suffix
+    # Determine the file name if not supplied
+    if file_name is None:
+        file_name = file_path_without_extension.rsplit("/")[-1]
+    # Determine the file size if not supplied
+    if file_size is None:
+        file_size = pathlib.Path(file_path).stat().st_size
     # Generate the FileResponse
+    full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
-        open(file_path, "rb"),
-        filename=f"{file_object.title}{file_extension}",
+        path.open("rb"),
+        filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )
     # Add some important headers
-    response["Content-Disposition"] = f'attachment; filename="{file_object.title}{file_extension}"'
-    response["Content-Length"] = file_object.file.size
+    response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
+    response["Content-Length"] = file_size
     return response
+
+
+def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
+    TAG_PATTERN = re.compile(r'[ ,\'"]')
+    error_messages = []
+
+    if isinstance(value, list):
+        for tag in value:
+            if TAG_PATTERN.search(tag):
+                error_messages.append(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes.")
+    elif isinstance(value, str):
+        if TAG_PATTERN.search(value):
+            error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")
+    else:
+        error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
+
+    if error_messages:
+        logger.debug(f"Tag validation failed: {error_messages}")
+        raise exception_class(error_messages)

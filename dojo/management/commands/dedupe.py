@@ -27,10 +27,12 @@ def generate_hash_code(f):
 
 
 class Command(BaseCommand):
+
     """
     Updates hash codes and/or runs deduplication for findings. Hashcode calculation always runs in the foreground, dedupe by default runs in the background.
     Usage: manage.py dedupe [--parser "Parser1 Scan" --parser "Parser2 Scan"...] [--hash_code_only] [--dedupe_only] [--dedupe_sync]'
     """
+
     help = 'Usage: manage.py dedupe [--parser "Parser1 Scan" --parser "Parser2 Scan"...] [--hash_code_only] [--dedupe_only] [--dedupe_sync]'
 
     def add_arguments(self, parser):
@@ -65,7 +67,7 @@ class Command(BaseCommand):
 
             # only prefetch here for hash_code calculation
             finds = findings.prefetch_related("endpoints", "test__test_type")
-            mass_model_updater(Finding, finds, lambda f: generate_hash_code(f), fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
+            mass_model_updater(Finding, finds, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
 
             logger.info("######## Done Updating Hashcodes########")
 
@@ -74,7 +76,7 @@ class Command(BaseCommand):
             if get_system_setting("enable_deduplication"):
                 logger.info("######## Start deduplicating (%s) ########", ("foreground" if dedupe_sync else "background"))
                 if dedupe_sync:
-                    mass_model_updater(Finding, findings, lambda f: do_dedupe_finding(f), fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
+                    mass_model_updater(Finding, findings, do_dedupe_finding, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
                 else:
                     # async tasks only need the id
                     mass_model_updater(Finding, findings.only("id"), lambda f: do_dedupe_finding_task(f.id), fields=None, order="desc", log_prefix="deduplicating ")

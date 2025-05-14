@@ -20,20 +20,11 @@ logger = logging.getLogger(__name__)
 def endpoint_filter(**kwargs):
     qs = Endpoint.objects.all()
 
-    if kwargs.get("protocol"):
-        qs = qs.filter(protocol__iexact=kwargs["protocol"])
-    else:
-        qs = qs.filter(protocol__isnull=True)
+    qs = qs.filter(protocol__iexact=kwargs["protocol"]) if kwargs.get("protocol") else qs.filter(protocol__isnull=True)
 
-    if kwargs.get("userinfo"):
-        qs = qs.filter(userinfo__exact=kwargs["userinfo"])
-    else:
-        qs = qs.filter(userinfo__isnull=True)
+    qs = qs.filter(userinfo__exact=kwargs["userinfo"]) if kwargs.get("userinfo") else qs.filter(userinfo__isnull=True)
 
-    if kwargs.get("host"):
-        qs = qs.filter(host__iexact=kwargs["host"])
-    else:
-        qs = qs.filter(host__isnull=True)
+    qs = qs.filter(host__iexact=kwargs["host"]) if kwargs.get("host") else qs.filter(host__isnull=True)
 
     if kwargs.get("port"):
         if (kwargs.get("protocol")) and \
@@ -42,26 +33,16 @@ def endpoint_filter(**kwargs):
             qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
         else:
             qs = qs.filter(port__exact=kwargs["port"])
+    elif (kwargs.get("protocol")) and (kwargs["protocol"].lower() in SCHEME_PORT_MAP):
+        qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
     else:
-        if (kwargs.get("protocol")) and (kwargs["protocol"].lower() in SCHEME_PORT_MAP):
-            qs = qs.filter(Q(port__isnull=True) | Q(port__exact=SCHEME_PORT_MAP[kwargs["protocol"].lower()]))
-        else:
-            qs = qs.filter(port__isnull=True)
+        qs = qs.filter(port__isnull=True)
 
-    if kwargs.get("path"):
-        qs = qs.filter(path__exact=kwargs["path"])
-    else:
-        qs = qs.filter(path__isnull=True)
+    qs = qs.filter(path__exact=kwargs["path"]) if kwargs.get("path") else qs.filter(path__isnull=True)
 
-    if kwargs.get("query"):
-        qs = qs.filter(query__exact=kwargs["query"])
-    else:
-        qs = qs.filter(query__isnull=True)
+    qs = qs.filter(query__exact=kwargs["query"]) if kwargs.get("query") else qs.filter(query__isnull=True)
 
-    if kwargs.get("fragment"):
-        qs = qs.filter(fragment__exact=kwargs["fragment"])
-    else:
-        qs = qs.filter(fragment__isnull=True)
+    qs = qs.filter(fragment__exact=kwargs["fragment"]) if kwargs.get("fragment") else qs.filter(fragment__isnull=True)
 
     if kwargs.get("product"):
         qs = qs.filter(product__exact=kwargs["product"])
@@ -79,17 +60,16 @@ def endpoint_get_or_create(**kwargs):
         count = qs.count()
         if count == 0:
             return Endpoint.objects.get_or_create(**kwargs)
-        elif count == 1:
+        if count == 1:
             return qs.order_by("id").first(), False
-        else:
-            logger.warning(
-                f"Endpoints in your database are broken. "
-                f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them.",
-            )
-            # Get the oldest endpoint first, and return that instead
-            # a datetime is not captured on the endpoint model, so ID
-            # will have to work here instead
-            return qs.order_by("id").first(), False
+        logger.warning(
+            f"Endpoints in your database are broken. "
+            f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them.",
+        )
+        # Get the oldest endpoint first, and return that instead
+        # a datetime is not captured on the endpoint model, so ID
+        # will have to work here instead
+        return qs.order_by("id").first(), False
 
 
 def clean_hosts_run(apps, change):
@@ -124,12 +104,13 @@ def clean_hosts_run(apps, change):
 
                         if parts.protocol:
                             if endpoint.protocol and (endpoint.protocol != parts.protocol):
-                                message = f"has defined protocol ({endpoint.protocol}) and it is not the same as protocol in host " \
-                                          f"({parts.protocol})"
+                                message = (
+                                    f"has defined protocol ({endpoint.protocol}) and it is not the same as protocol in host "
+                                    f"({parts.protocol})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.protocol = parts.protocol
+                            elif change:
+                                endpoint.protocol = parts.protocol
 
                         if parts.userinfo:
                             if change:
@@ -145,42 +126,46 @@ def clean_hosts_run(apps, change):
                         if parts.port:
                             try:
                                 if (endpoint.port is not None) and (int(endpoint.port) != parts.port):
-                                    message = f"has defined port number ({endpoint.port}) and it is not the same as port number in " \
-                                              f"host ({parts.port})"
+                                    message = (
+                                        f"has defined port number ({endpoint.port}) and it is not the same as port number in "
+                                        f"host ({parts.port})"
+                                    )
                                     err_log(message, html_log, endpoint_html_log, endpoint)
-                                else:
-                                    if change:
-                                        endpoint.port = parts.port
+                                elif change:
+                                    endpoint.port = parts.port
                             except ValueError:
                                 message = f"uses non-numeric port: {endpoint.port}"
                                 err_log(message, html_log, endpoint_html_log, endpoint)
 
                         if parts.path:
                             if endpoint.path and (endpoint.path != parts.path):
-                                message = f"has defined path ({endpoint.path}) and it is not the same as path in host " \
-                                          f"({parts.path})"
+                                message = (
+                                    f"has defined path ({endpoint.path}) and it is not the same as path in host "
+                                    f"({parts.path})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.path = parts.path
+                            elif change:
+                                endpoint.path = parts.path
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
-                                message = f"has defined query ({endpoint.query}) and it is not the same as query in host " \
-                                          f"({parts.query})"
+                                message = (
+                                    f"has defined query ({endpoint.query}) and it is not the same as query in host "
+                                    f"({parts.query})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.query = parts.query
+                            elif change:
+                                endpoint.query = parts.query
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
-                                message = f"has defined fragment ({endpoint.fragment}) and it is not the same as fragment in host " \
-                                          f"({parts.fragment})"
+                                message = (
+                                    f"has defined fragment ({endpoint.fragment}) and it is not the same as fragment in host "
+                                    f"({parts.fragment})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
-                            else:
-                                if change:
-                                    endpoint.fragment = parts.fragment
+                            elif change:
+                                endpoint.fragment = parts.fragment
 
                         if change and (endpoint.pk not in broken_endpoints):  # do not save broken endpoints
                             endpoint.save()
@@ -227,8 +212,8 @@ def clean_hosts_run(apps, change):
                     to_be_deleted.update(ep_ids[1:])
                     if change:
                         message = "Merging Endpoints {} into '{}'".format(
-                            [f"{str(x)} (id={x.pk})" for x in ep[1:]],
-                            f"{str(ep[0])} (id={ep[0].pk})")
+                            [f"{x} (id={x.pk})" for x in ep[1:]],
+                            f"{ep[0]} (id={ep[0].pk})")
                         html_log.append(message)
                         logger.info(message)
                         Endpoint_Status_model.objects\
@@ -268,12 +253,11 @@ def validate_endpoints_to_add(endpoints_to_add):
     endpoints = endpoints_to_add.split()
     for endpoint in endpoints:
         try:
-            if "://" in endpoint:  # is it full uri?
-                endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
-            else:
-                # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
-                # format doesn't follow RFC 3986 but users use it
-                endpoint_ins = Endpoint.from_uri("//" + endpoint)
+            # is it full uri?
+            # 1. from_uri validate URI format + split to components
+            # 2. from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+            #    format doesn't follow RFC 3986 but users use it
+            endpoint_ins = Endpoint.from_uri(endpoint) if "://" in endpoint else Endpoint.from_uri("//" + endpoint)
             endpoint_ins.clean()
             endpoint_list.append([
                 endpoint_ins.protocol,
@@ -325,7 +309,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 'The column "hostname" must be present to map host to Endpoint.',
                 extra_tags="alert-danger")
             return HttpResponseRedirect(reverse("import_endpoint_meta", args=(product.id, )))
-        elif origin == "API":
+        if origin == "API":
             msg = 'The column "hostname" must be present to map host to Endpoint.'
             raise ValidationError(msg)
 
@@ -361,14 +345,14 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                         for tag in existing_tags:
                             if item[0] not in tag:
                                 continue
-                            else:
-                                # found existing. Update it
-                                existing_tags.remove(tag)
-                                break
+                            # found existing. Update it
+                            existing_tags.remove(tag)
+                            break
                         existing_tags += [item[0] + ":" + item[1]]
                     # if tags are not supposed to be added, this value remain unchanged
                     endpoint.tags = existing_tags
             endpoint.save()
+    return None
 
 
 def remove_broken_endpoint_statuses(apps):

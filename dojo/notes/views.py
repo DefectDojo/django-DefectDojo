@@ -20,26 +20,26 @@ from dojo.models import Cred_User, Engagement, Finding, Note_Type, NoteHistory, 
 logger = logging.getLogger(__name__)
 
 
-def delete_note(request, id, page, objid):
-    note = get_object_or_404(Notes, id=id)
+def delete_note(request, note_id, page, objid):
+    note = get_object_or_404(Notes, id=note_id)
     reverse_url = None
     object_id = None
 
     if page == "engagement":
-        object = get_object_or_404(Engagement, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Engagement, id=objid)
+        object_id = obj.id
         reverse_url = "view_engagement"
     elif page == "test":
-        object = get_object_or_404(Test, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Test, id=objid)
+        object_id = obj.id
         reverse_url = "view_test"
     elif page == "finding":
-        object = get_object_or_404(Finding, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Finding, id=objid)
+        object_id = obj.id
         reverse_url = "view_finding"
     elif page == "cred":
-        object = get_object_or_404(Cred_User, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Cred_User, id=objid)
+        object_id = obj.id
         reverse_url = "view_cred_details"
 
     form = DeleteNoteForm(request.POST, instance=note)
@@ -47,7 +47,7 @@ def delete_note(request, id, page, objid):
     if page is None:
         raise PermissionDenied
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_Delete)
+        user_has_permission_or_403(request.user, obj, Permissions.Note_Delete)
 
     if form.is_valid():
         note.delete()
@@ -64,8 +64,8 @@ def delete_note(request, id, page, objid):
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-def edit_note(request, id, page, objid):
-    note = get_object_or_404(Notes, id=id)
+def edit_note(request, note_id, page, objid):
+    note = get_object_or_404(Notes, id=note_id)
     reverse_url = None
     object_id = None
 
@@ -73,24 +73,24 @@ def edit_note(request, id, page, objid):
         raise PermissionDenied
 
     if page == "engagement":
-        object = get_object_or_404(Engagement, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Engagement, id=objid)
+        object_id = obj.id
         reverse_url = "view_engagement"
     elif page == "test":
-        object = get_object_or_404(Test, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Test, id=objid)
+        object_id = obj.id
         reverse_url = "view_test"
     elif page == "finding":
-        object = get_object_or_404(Finding, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Finding, id=objid)
+        object_id = obj.id
         reverse_url = "view_finding"
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
+        user_has_permission_or_403(request.user, obj, Permissions.Note_Edit)
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
-        available_note_types = find_available_notetypes(object, note)
+        available_note_types = find_available_notetypes(obj, note)
 
     if request.method == "POST":
         if note_type_activation:
@@ -114,25 +114,23 @@ def edit_note(request, id, page, objid):
             history.save()
             note.history.add(history)
             note.save()
-            object.last_reviewed = note.date
-            object.last_reviewed_by = request.user
-            object.save()
+            obj.last_reviewed = note.date
+            obj.last_reviewed_by = request.user
+            obj.save()
             form = NoteForm()
             messages.add_message(request,
                                 messages.SUCCESS,
                                 _("Note edited."),
                                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
-        else:
-            messages.add_message(request,
-                                messages.SUCCESS,
-                                _("Note was not succesfully edited."),
-                                extra_tags="alert-danger")
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            _("Note was not succesfully edited."),
+                            extra_tags="alert-danger")
+    elif note_type_activation:
+        form = TypedNoteForm(available_note_types=available_note_types, instance=note)
     else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types, instance=note)
-        else:
-            form = NoteForm(instance=note)
+        form = NoteForm(instance=note)
 
     return render(
         request, "dojo/edit_note.html", {
@@ -143,28 +141,28 @@ def edit_note(request, id, page, objid):
         })
 
 
-def note_history(request, id, page, objid):
-    note = get_object_or_404(Notes, id=id)
+def note_history(request, note_id, page, objid):
+    note = get_object_or_404(Notes, id=note_id)
     reverse_url = None
     object_id = None
 
     if page == "engagement":
-        object = get_object_or_404(Engagement, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Engagement, id=objid)
+        object_id = obj.id
         reverse_url = "view_engagement"
     elif page == "test":
-        object = get_object_or_404(Test, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Test, id=objid)
+        object_id = obj.id
         reverse_url = "view_test"
     elif page == "finding":
-        object = get_object_or_404(Finding, id=objid)
-        object_id = object.id
+        obj = get_object_or_404(Finding, id=objid)
+        object_id = obj.id
         reverse_url = "view_finding"
 
     if page is None:
         raise PermissionDenied
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_View_History)
+        user_has_permission_or_403(request.user, obj, Permissions.Note_View_History)
 
     history = note.history.all()
 
@@ -195,5 +193,4 @@ def find_available_notetypes(finding, editing_note):
             available_note_types.append(note_type_id)
     available_note_types.append(editing_note.note_type_id)
     available_note_types = list(set(available_note_types))
-    queryset = Note_Type.objects.filter(id__in=available_note_types).order_by("-id")
-    return queryset
+    return Note_Type.objects.filter(id__in=available_note_types).order_by("-id")

@@ -7,7 +7,9 @@ from dojo.models import Finding
 
 
 class AnchoreGrypeParser:
-    """Anchore Grype JSON report format generated with `-o json` option.
+
+    """
+    Anchore Grype JSON report format generated with `-o json` option.
 
     command: `grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json`
     """
@@ -185,12 +187,9 @@ class AnchoreGrypeParser:
         return list(dupes.values())
 
     def _convert_severity(self, val):
-        if "Unknown" == val:
+        if val == "Unknown" or val == "Negligible":
             return "Info"
-        elif "Negligible" == val:
-            return "Info"
-        else:
-            return val.title()
+        return val.title()
 
     def get_cvss(self, cvss):
         if cvss:
@@ -213,5 +212,4 @@ class AnchoreGrypeParser:
                     vulnerability_ids.append(related_vulnerability.get("id"))
         if vulnerability_ids:
             return vulnerability_ids
-        else:
-            return None
+        return None

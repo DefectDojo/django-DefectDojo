@@ -1,25 +1,24 @@
-import os.path
 import re
 
 from dojo.models import Test
 from dojo.tools.trivy.parser import TrivyParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 def sample_path(file_name):
-    return os.path.join(get_unit_tests_path() + "/scans/trivy", file_name)
+    return get_unit_tests_scans_path("trivy") / file_name
 
 
 class TestTrivyParser(DojoTestCase):
 
     def test_legacy_no_vuln(self):
-        with open(sample_path("legacy_no_vuln.json")) as test_file:
+        with sample_path("legacy_no_vuln.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             trivy_findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(trivy_findings), 0)
 
     def test_legacy_many_vulns(self):
-        with open(sample_path("legacy_many_vulns.json")) as test_file:
+        with sample_path("legacy_many_vulns.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 93)
@@ -32,13 +31,13 @@ class TestTrivyParser(DojoTestCase):
             self.assertEqual("1.8.2.2", finding.component_version)
 
     def test_scheme_2_no_vuln(self):
-        with open(sample_path("scheme_2_no_vuln.json")) as test_file:
+        with sample_path("scheme_2_no_vuln.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             trivy_findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(trivy_findings), 0)
 
     def test_scheme_2_many_vulns(self):
-        with open(sample_path("scheme_2_many_vulns.json")) as test_file:
+        with sample_path("scheme_2_many_vulns.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 5)
@@ -74,7 +73,7 @@ class TestTrivyParser(DojoTestCase):
             self.assertFalse(finding.dynamic_finding)
 
     def test_misconfigurations_and_secrets(self):
-        with open(sample_path("misconfigurations_and_secrets.json")) as test_file:
+        with sample_path("misconfigurations_and_secrets.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 5)
@@ -106,7 +105,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
             self.assertEqual(["secret"], finding.tags)
 
     def test_kubernetes(self):
-        with open(sample_path("kubernetes.json")) as test_file:
+        with sample_path("kubernetes.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 20)
@@ -177,7 +176,7 @@ Number  Content
             self.assertEqual("default / Deployment / redis-follower", finding.service)
 
     def test_license_scheme(self):
-        with open(sample_path("license_scheme.json")) as test_file:
+        with sample_path("license_scheme.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 19)
@@ -193,7 +192,7 @@ Number  Content
             self.assertEqual(description, finding.description)
 
     def test_issue_9092(self):
-        with open(sample_path("issue_9092.json")) as test_file:
+        with sample_path("issue_9092.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -202,7 +201,7 @@ Number  Content
             self.assertEqual(finding.file_path, "requirements.txt")
 
     def test_issue_9170(self):
-        with open(sample_path("issue_9170.json")) as test_file:
+        with sample_path("issue_9170.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 37)
@@ -211,7 +210,7 @@ Number  Content
             self.assertEqual("KSV116 - Runs with a root primary or supplementary GID", finding.title)
 
     def test_issue_9263(self):
-        with open(sample_path("issue_9263.json")) as test_file:
+        with sample_path("issue_9263.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -219,9 +218,15 @@ Number  Content
             self.assertEqual("High", finding.severity)
 
     def test_issue_9333(self):
-        with open(sample_path("issue_9333.json")) as test_file:
+        with sample_path("issue_9333.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 13)
             finding = findings[0]
             self.assertEqual("Low", finding.severity)
+
+    def test_issue_10991(self):
+        with sample_path("issue_10991.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 37)

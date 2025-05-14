@@ -1,0 +1,680 @@
+{
+    "findings": [
+        {
+            "awsAccountId": "012345678901",
+            "description": "A memory leak flaw was found in the Linux kernel in the ccp_run_aes_gcm_cmd() function in drivers/crypto/ccp/ccp-ops.c, which allows attackers to cause a denial of service (memory consumption). This vulnerability is similar with the older CVE-2019-18808.",
+            "epss": {
+                "score": 0.00075
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00037f625ee77ac186869f906eb73366",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 5.5,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 5.5,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-06-14T04:03:53.051000+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 5.5,
+                        "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2021-3744",
+                "vendorSeverity": "unimportant",
+                "vulnerabilityId": "CVE-2021-3744",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.232-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "MEDIUM",
+            "status": "CLOSED",
+            "title": "CVE-2021-3744 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-06-14T04:03:53.051000+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "In the Linux kernel, the following vulnerability has been resolved:  fpga: manager: add owner module and take its refcount  The current implementation of the fpga manager assumes that the low-level module registers a driver for the parent device and uses its owner pointer to take the module's refcount. This approach is problematic since it can lead to a null pointer dereference while attempting to get the manager if the parent device does not have a driver.  To address this problem, add a module owner pointer to the fpga_manager struct and use it to take the module's refcount. Modify the functions for registering the manager to take an additional owner module parameter and rename them to avoid conflicts. Use the old function names for helper macros that automatically set the module that registers the manager as the owner. This ensures compatibility with existing low-level control modules and reduces the chances of registering a manager without setting the owner.  Also, update the documentation to keep it cons",
+            "epss": {
+                "score": 0.00045
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00222d5d29811496c48d6e3a6f6e2bf7",
+            "firstObservedAt": "2024-06-27T00:56:32.023000+02:00",
+            "fixAvailable": "NO",
+            "lastObservedAt": "2024-06-27T00:56:32.023000+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2024-37021",
+                "vendorSeverity": "not yet assigned",
+                "vulnerabilityId": "CVE-2024-37021",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "NotAvailable",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "NotAvailable",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "UNTRIAGED",
+            "status": "ACTIVE",
+            "title": "CVE-2024-37021 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-06-27T00:56:32.023000+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "A flaw use-after-free in function sco_sock_sendmsg() of the Linux kernel HCI subsystem was found in the way user calls ioct UFFDIO_REGISTER or other way triggers race condition of the call sco_conn_del() together with the call sco_sock_sendmsg() with the expected controllable faulting memory page. A privileged local user could use this flaw to crash the system or escalate their privileges on the system.",
+            "epss": {
+                "score": 0.00042
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00264176c0e6a64e6465830320e8ccd9",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 7.0,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 7.0,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-06-14T04:03:53.051000+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 7.0,
+                        "scoringVector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2021-3640",
+                "vendorSeverity": "not yet assigned",
+                "vulnerabilityId": "CVE-2021-3640",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.232-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "HIGH",
+            "status": "ACTIVE",
+            "title": "CVE-2021-3640 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-06-14T04:03:53.051000+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "In the Linux kernel, the following vulnerability has been resolved:  net:emac/emac-mac: Fix a use after free in emac_mac_tx_buf_send  In emac_mac_tx_buf_send, it calls emac_tx_fill_tpd(..,skb,..). If some error happens in emac_tx_fill_tpd(), the skb will be freed via dev_kfree_skb(skb) in error branch of emac_tx_fill_tpd(). But the freed skb is still used via skb->len by netdev_sent_queue(,skb->len).  As i observed that emac_tx_fill_tpd() haven't modified the value of skb->len, thus my patch assigns skb->len to 'len' before the possible free and use 'len' instead of skb->len later.",
+            "epss": {
+                "score": 0.00044
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/0027f58875add9818da30aaf4d8d69a3",
+            "firstObservedAt": "2024-03-05T00:56:23.134000+01:00",
+            "fixAvailable": "YES",
+            "lastObservedAt": "2024-06-14T04:03:53.051000+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2021-47013",
+                "vendorSeverity": "not yet assigned",
+                "vulnerabilityId": "CVE-2021-47013",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.194-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "UNTRIAGED",
+            "status": "ACTIVE",
+            "title": "CVE-2021-47013 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-06-14T04:03:53.051000+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "In libxml2 before 2.9.14, several buffer handling functions in buf.c (xmlBuf*) and tree.c (xmlBuffer*) don't check for integer overflows. This can result in out-of-bounds memory writes. Exploitation requires a victim to open a crafted, multi-gigabyte XML file. Other software using libxml2's buffer functions, for example libxslt through 1.1.35, is affected as well.",
+            "epss": {
+                "score": 0.0015
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00657fce9f7e60372fcfda10e636c2b0",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 6.5,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 6.5,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 6.5,
+                        "scoringVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [
+                    "https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1010526"
+                ],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2022-29824",
+                "vendorSeverity": "not yet assigned",
+                "vulnerabilityId": "CVE-2022-29824",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:2.9.4+dfsg1-7+deb10u4",
+                        "name": "libxml2",
+                        "packageManager": "OS",
+                        "release": "7+b3",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "2.9.4+dfsg1"
+                    },
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:2.9.4+dfsg1-7+deb10u4",
+                        "name": "libxml2",
+                        "packageManager": "OS",
+                        "release": "7",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "2.9.4+dfsg1"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "MEDIUM",
+            "status": "ACTIVE",
+            "title": "CVE-2022-29824 - libxml2, libxml2",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-02-02T16:30:33.045000+01:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "An array indexing vulnerability was found in the netfilter subsystem of the Linux kernel. A missing macro could lead to a miscalculation of the `h->nets` array offset, providing attackers with the primitive to arbitrarily increment/decrement a memory buffer out-of-bound. This issue may allow a local user to crash the system or potentially escalate their privileges on the system.",
+            "epss": {
+                "score": 0.00044
+            },
+            "exploitAvailable": "YES",
+            "exploitabilityDetails": {
+                "lastKnownExploitAt": "2024-07-30T09:04:56+02:00"
+            },
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00679d1d8da777d13bdd24b20c403aac",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 7.8,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 7.8,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-07-31T17:59:32+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 7.8,
+                        "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2023-42753",
+                "vendorSeverity": "not yet assigned",
+                "vulnerabilityId": "CVE-2023-42753",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.304-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "HIGH",
+            "status": "ACTIVE",
+            "title": "CVE-2023-42753 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-07-31T17:59:32+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "An issue was discovered in the Linux kernel before 5.11.8. kernel/bpf/verifier.c performs undesirable out-of-bounds speculation on pointer arithmetic, leading to side-channel attacks that defeat Spectre mitigations and obtain sensitive information from kernel memory, aka CID-f232326f6966. This affects pointer types that do not define a ptr_limit.",
+            "epss": {
+                "score": 0.00047
+            },
+            "exploitAvailable": "YES",
+            "exploitabilityDetails": {
+                "lastKnownExploitAt": "2024-07-15T18:13:11+02:00"
+            },
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/0068a17c3e52bcf1bf60921d799fae20",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 4.7,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 4.7,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-07-31T17:59:32+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 4.7,
+                        "scoringVector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2020-27170",
+                "vendorSeverity": "unimportant",
+                "vulnerabilityId": "CVE-2020-27170",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.181-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:d667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "MEDIUM",
+            "status": "ACTIVE",
+            "title": "CVE-2020-27170 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-07-31T17:59:32+02:00"
+        },
+        {
+            "awsAccountId": "012345678901",
+            "description": "The xz_decomp function in xzlib.c in libxml2 2.9.1 does not properly detect compression errors, which allows context-dependent attackers to cause a denial of service (process hang) via crafted XML data.",
+            "epss": {
+                "score": 0.0097
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/000e155e74c3ccb3b2e13d08a65ccafc",
+            "firstObservedAt": "2023-07-30T11:11:39.233000+02:00",
+            "fixAvailable": "YES",
+            "lastObservedAt": "2024-03-19T15:31:08.006000+01:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 2.6,
+                        "scoringVector": "AV:N/AC:H/Au:N/C:N/I:N/A:P",
+                        "source": "NVD",
+                        "version": "2.0"
+                    }
+                ],
+                "referenceUrls": [
+                    "https://security.gentoo.org/glsa/201701-37",
+                    "https://support.apple.com/HT206168",
+                    "https://support.apple.com/HT206167",
+                    "https://bugzilla.gnome.org/show_bug.cgi?id=757466",
+                    "https://support.apple.com/HT206166",
+                    "https://support.apple.com/HT206169"
+                ],
+                "relatedVulnerabilities": [],
+                "source": "NVD",
+                "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2015-8035",
+                "vendorCreatedAt": "2015-11-18T17:59:09+01:00",
+                "vendorSeverity": "LOW",
+                "vendorUpdatedAt": "2019-03-08T17:06:36+01:00",
+                "vulnerabilityId": "CVE-2015-8035",
+                "vulnerablePackages": [
+                    {
+                        "arch": "X86_64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:2.9.1-6.el7.4",
+                        "name": "libxml2",
+                        "packageManager": "OS",
+                        "release": "6.el7_2.3",
+                        "remediation": "yum update libxml2",
+                        "version": "2.9.1"
+                    },
+                    {
+                        "arch": "X86_64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:2.9.1-6.el7.4",
+                        "name": "libxml2-python",
+                        "packageManager": "OS",
+                        "release": "6.el7_2.3",
+                        "remediation": "yum update libxml2-python",
+                        "version": "2.9.1"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEc2Instance": {
+                            "iamInstanceProfileArn": "arn:aws:iam::012345678901:instance-profile/AmazonEC2RoleforSSM",
+                            "imageId": "ami-01234567890abcdef",
+                            "ipV4Addresses": [
+                                "8.84.11.16",
+                                "10.52.88.71"
+                            ],
+                            "ipV6Addresses": [],
+                            "keyName": "my-key",
+                            "launchedAt": "2023-07-30T17:07:50+02:00",
+                            "platform": "CENTOS_7",
+                            "subnetId": "subnet-01234567890abcdef",
+                            "type": "t3a.2xlarge",
+                            "vpcId": "vpc-01234567890abcdef"
+                        }
+                    },
+                    "id": "i-0b22a22eec53b9321",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {
+                        "Backup_Policy": "Monthly",
+                        "Name": "my-instance"
+                    },
+                    "type": "AWS_EC2_INSTANCE"
+                }
+            ],
+            "severity": "LOW",
+            "status": "ACTIVE",
+            "title": "CVE-2015-8035 - libxml2, libxml2-python",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-03-19T15:31:08.006000+01:00"
+        }
+    ]
+}

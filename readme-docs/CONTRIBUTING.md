@@ -18,20 +18,13 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
-## Submission Pre-Approval -- DefectDojo is Feature Complete
+## Submission Pre-Approval
 
-We are narrowing the scope of new additions to DefectDojo v2 in order to stabilize the API and data model for v3.
-Generally speaking, we will no longer accept new API routes, UI routes or views, or new models. One exception is that we
-**will** still accept new parsers and improvements to existing fields/functionality. Simple updates to the data model
-are acceptable as long as they do not introduce additional complexity, until the community has agreed on a "data model
-freeze date", at which point we will stop accepting updates adding new fields or changing existing fields for any reason
-other than bugfixes or stability improvements/etc. Once v3 is released, no further data model updates to v2 will be
-approved. We don't want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria
-for approval, please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
+We don't want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria for approval, please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
 `enhancement-approved` label to your issue and you can begin building it out.
 
 Below are some representative examples of what we will and won't support going forward. If you have suggestions or other
-feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp-slack.herokuapp.com/).
+feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp.org/slack/invite).
 
 **Acceptable examples:**
 
@@ -54,7 +47,7 @@ feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](htt
 
 ## Writing a New Parser
 
-Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
+Please see [the parser guide](https://docs.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
 ## Modifying DefectDojo and Testing
 
@@ -65,6 +58,12 @@ For changes that require additional settings, you can now use local_settings.py 
 ## Python3 Version
 For compatibility reasons, the code in dev branch should be python3.11 compliant.
 
+## Database migrations
+When changes are made to the database model, a database migration is needed. This migration can be generated using something like
+`docker compose exec uwsgi bash -c "python manage.py makemigrations"`.
+This will result in a new file in the `dojo/db_migrations` folder that can be committed to `git`
+When making downstream database model changes in your fork of Defect Dojo please be aware of the risks of getting out of sync with our upstream migrations.
+It requiers proper knowledge of [Django Migrations](https://docs.djangoproject.com/en/5.0/topics/migrations/) to reconcile the migrations before you can upgrade to a newer version of Defect Dojo.
 
 ## Submitting Pull Requests
 

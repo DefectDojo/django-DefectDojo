@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class DependencyTrackParser:
+
     """
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 
@@ -92,16 +93,15 @@ class DependencyTrackParser:
         severity = dependency_track_severity.lower()
         if severity == "critical":
             return "Critical"
-        elif severity == "high":
+        if severity == "high":
             return "High"
-        elif severity == "medium":
+        if severity == "medium":
             return "Medium"
-        elif severity == "low":
+        if severity == "low":
             return "Low"
-        elif severity.startswith("info"):
+        if severity.startswith("info"):
             return "Informational"
-        else:
-            return None
+        return None
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """
@@ -138,10 +138,7 @@ class DependencyTrackParser:
             component_version = dependency_track_finding["component"]["version"]
         else:
             component_version = None
-        if component_version is not None:
-            version_description = component_version
-        else:
-            version_description = ""
+        version_description = component_version if component_version is not None else ""
 
         title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
 
@@ -175,13 +172,15 @@ class DependencyTrackParser:
             component_description = f"Version {component_version} of the {component_name} component"
         else:
             component_description = f"The {component_name} component"
-        vulnerability_description = "You are using a component with a known vulnerability. " \
-                f"{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
-                f"identified by {source}."
+        vulnerability_description = (
+            "You are using a component with a known vulnerability. "
+            f"{component_description} is affected by the vulnerability with an id of {vuln_id} as "
+            f"identified by {source}."
+        )
         # Append purl info if it is present
         if "purl" in dependency_track_finding["component"] and dependency_track_finding["component"]["purl"] is not None:
             component_purl = dependency_track_finding["component"]["purl"]
-            vulnerability_description = vulnerability_description + f"\nThe purl of the affected component is: {component_purl}."
+            vulnerability_description += f"\nThe purl of the affected component is: {component_purl}."
             # there is no file_path in the report, but defect dojo needs it otherwise it skips deduplication:
             # see https://github.com/DefectDojo/django-DefectDojo/issues/3647
             # might be no longer needed in the future, and is not needed if people use the default
@@ -192,11 +191,11 @@ class DependencyTrackParser:
 
         # Append other info about vulnerability description info if it is present
         if "title" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["title"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding["vulnerability"]["title"])
+            vulnerability_description += "\nVulnerability Title: {title}".format(title=dependency_track_finding["vulnerability"]["title"])
         if "subtitle" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["subtitle"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
+            vulnerability_description += "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
         if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
+            vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
         if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
             vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
 
@@ -212,18 +211,12 @@ class DependencyTrackParser:
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get("analysis")
-        is_false_positive = True if analysis is not None and analysis.get("state") == "FALSE_POSITIVE" else False
+        is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
 
         # Get the EPSS details
-        if "epssPercentile" in dependency_track_finding["vulnerability"]:
-            epss_percentile = dependency_track_finding["vulnerability"]["epssPercentile"]
-        else:
-            epss_percentile = None
+        epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
 
-        if "epssScore" in dependency_track_finding["vulnerability"]:
-            epss_score = dependency_track_finding["vulnerability"]["epssScore"]
-        else:
-            epss_score = None
+        epss_score = dependency_track_finding["vulnerability"].get("epssScore", None)
 
         # Build and return Finding model
         finding = Finding(

@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from django.test.client import Client
 from django.urls import reverse
@@ -16,11 +17,11 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class EndpointMetaImportMixin:
     def __init__(self, *args, **kwargs):
-        self.meta_import_full = "endpoint_meta_import/full_endpoint_meta_import.csv"
-        self.meta_import_no_hostname = "endpoint_meta_import/no_hostname_endpoint_meta_import.csv"
-        self.meta_import_updated_added = "endpoint_meta_import/updated_added_endpoint_meta_import.csv"
-        self.meta_import_updated_removed = "endpoint_meta_import/updated_removed_endpoint_meta_import.csv"
-        self.meta_import_updated_changed = "endpoint_meta_import/updated_changed_endpoint_meta_import.csv"
+        self.meta_import_full = get_unit_tests_path() / "endpoint_meta_import" / "full_endpoint_meta_import.csv"
+        self.meta_import_no_hostname = get_unit_tests_path() / "endpoint_meta_import" / "no_hostname_endpoint_meta_import.csv"
+        self.meta_import_updated_added = get_unit_tests_path() / "endpoint_meta_import" / "updated_added_endpoint_meta_import.csv"
+        self.meta_import_updated_removed = get_unit_tests_path() / "endpoint_meta_import" / "updated_removed_endpoint_meta_import.csv"
+        self.meta_import_updated_changed = get_unit_tests_path() / "endpoint_meta_import" / "updated_changed_endpoint_meta_import.csv"
         self.updated_tag_host = "feedback.internal.google.com"
 
     def test_endpoint_meta_import_endpoint_create_tag_create_meta_create(self):
@@ -159,7 +160,7 @@ class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -178,7 +179,7 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -204,9 +205,9 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
         response = self.client_ui.post(reverse("import_endpoint_meta", args=(product, )), payload)
         self.assertEqual(302, response.status_code, response.content[:1000])
 
-    def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
+    def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, *, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        with open(get_unit_tests_path() + "/" + filename) as testfile:
+        with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,

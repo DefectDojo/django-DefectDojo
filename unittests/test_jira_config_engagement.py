@@ -30,6 +30,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-project_key": "IUNSEC",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
         }
@@ -47,6 +48,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-project_key": "IUNSEC",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-epic-form-push_to_jira": "on",
@@ -65,6 +67,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-inherit_from_product": "on",
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -85,6 +88,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-project_key": "ISEC",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
         }
@@ -102,6 +106,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-project_key": "ISEC2",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
         }
@@ -118,6 +123,7 @@ class JIRAConfigEngagementBase:
             "jira-project-form-inherit_from_product": "on",
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -126,12 +132,12 @@ class JIRAConfigEngagementBase:
         }
 
     def get_expected_redirect_engagement(self, engagement):
-        return "/engagement/%i" % engagement.id
+        return f"/engagement/{engagement.id}"
 
     def get_expected_redirect_edit_engagement(self, engagement):
-        return "/engagement/edit/%i" % engagement.id
+        return f"/engagement/edit/{engagement.id}"
 
-    def add_engagement_jira(self, data, expect_redirect_to=None, expect_200=False):
+    def add_engagement_jira(self, data, expect_redirect_to=None, *, expect_200=False):
         response = self.client.get(reverse("new_eng_for_prod", args=(self.product_id, )))
 
         # logger.debug('before: JIRA_Project last')
@@ -164,7 +170,7 @@ class JIRAConfigEngagementBase:
 
         return engagement
 
-    def add_engagement_jira_with_data(self, data, expected_delta_jira_project_db, expect_redirect_to=None, expect_200=False):
+    def add_engagement_jira_with_data(self, data, expected_delta_jira_project_db, expect_redirect_to=None, *, expect_200=False):
         jira_project_count_before = self.db_jira_project_count()
 
         response = self.add_engagement_jira(data, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
@@ -173,16 +179,16 @@ class JIRAConfigEngagementBase:
 
         return response
 
-    def add_engagement_with_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def add_engagement_with_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_with_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def add_engagement_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def add_engagement_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_with_jira_project_data_and_epic_mapping(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def edit_engagement_jira(self, engagement, data, expect_redirect_to=None, expect_200=False):
+    def edit_engagement_jira(self, engagement, data, expect_redirect_to=None, *, expect_200=False):
         response = self.client.get(reverse("edit_engagement", args=(engagement.id, )))
 
         # logger.debug('before: JIRA_Project last')
@@ -211,13 +217,13 @@ class JIRAConfigEngagementBase:
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
 
-    def edit_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def edit_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.edit_jira_project_for_engagement_with_data(engagement, self.get_engagement_with_jira_project_data(engagement), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def edit_jira_project_for_engagement2(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def edit_jira_project_for_engagement2(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
         return self.edit_jira_project_for_engagement_with_data(engagement, self.get_engagement_with_jira_project_data2(engagement), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def empty_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False, expect_error=False):
+    def empty_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False, expect_error=False):
         jira_project_count_before = self.db_jira_project_count()
 
         if not expect_redirect_to and not expect_200:
@@ -365,5 +371,5 @@ class JIRAConfigEngagementTest_Inheritance(JIRAConfigEngagementTest):
         product = Product.objects.get(id=self.product_id)
         self.assertIsNotNone(jira_helper.get_jira_project(product))
 
-# TODO UI
+# TODO: UI
 # linking / unlinking

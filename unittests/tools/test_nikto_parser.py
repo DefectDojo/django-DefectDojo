@@ -1,6 +1,6 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nikto.parser import NiktoParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestNiktoParser(DojoTestCase):
@@ -10,7 +10,7 @@ class TestNiktoParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        with open("unittests/scans/nikto/nikto-report-old-format.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "nikto-report-old-format.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:
@@ -19,7 +19,7 @@ class TestNiktoParser(DojoTestCase):
             self.assertEqual(1, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/nikto/nikto-report-zero-vuln.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "nikto-report-zero-vuln.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
@@ -29,7 +29,7 @@ class TestNiktoParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        with open("unittests/scans/nikto/nikto-report-one-vuln.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "nikto-report-one-vuln.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:
@@ -42,7 +42,7 @@ class TestNiktoParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        with open("unittests/scans/nikto/nikto-report-many-vuln.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "nikto-report-many-vuln.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:
@@ -51,7 +51,7 @@ class TestNiktoParser(DojoTestCase):
             self.assertEqual(len(findings), 10)
 
     def test_parse_file_json_with_multiple_vuln_has_multiple_findings(self):
-        with open("unittests/scans/nikto/juice-shop.json") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "juice-shop.json").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -59,7 +59,7 @@ class TestNiktoParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(11, len(findings))
             for finding in findings:
-                if "OSVDB-3092" == finding.unique_id_from_tool:
+                if finding.unique_id_from_tool == "OSVDB-3092":
                     self.assertEqual("001811", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Medium", finding.severity)
@@ -68,13 +68,13 @@ class TestNiktoParser(DojoTestCase):
                     self.assertEqual(443, endpoint.port)
                     self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                     self.assertEqual("public/", endpoint.path)
-                if ("Retrieved via header: 1.1 vegur" == finding.title and "Info" == finding.severity):
+                if (finding.title == "Retrieved via header: 1.1 vegur" and finding.severity == "Info"):
                     self.assertEqual(1, len(finding.unsaved_endpoints))
-                if ("Potentially Interesting Backup/Cert File Found. " == finding.title and "Info" == finding.severity):
+                if (finding.title == "Potentially Interesting Backup/Cert File Found. " and finding.severity == "Info"):
                     self.assertEqual(140, len(finding.unsaved_endpoints))
 
     def test_parse_file_json_with_uri_errors(self):
-        with open("unittests/scans/nikto/nikto-output.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "nikto-output.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -82,7 +82,7 @@ class TestNiktoParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(13, len(findings))
             for finding in findings:
-                if "favicon.ico file identifies this server as: Apache Tomcat" == finding.title:
+                if finding.title == "favicon.ico file identifies this server as: Apache Tomcat":
                     self.assertEqual("500008", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Medium", finding.severity)
@@ -92,7 +92,7 @@ class TestNiktoParser(DojoTestCase):
                     # self.assertEqual(443, endpoint.port)
                     # self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                     # self.assertEqual("public/", endpoint.path)
-                elif "/examples/servlets/index.html: Apache Tomcat default JSP pages present." == finding.title:
+                elif finding.title == "/examples/servlets/index.html: Apache Tomcat default JSP pages present.":
                     self.assertEqual("000366", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Info", finding.severity)
@@ -103,7 +103,7 @@ class TestNiktoParser(DojoTestCase):
                     self.assertEqual("examples/servlets/index.html", endpoint.path)
 
     def test_parse_file_json_another(self):
-        with open("unittests/scans/nikto/tdh.json") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "tdh.json").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -134,7 +134,7 @@ class TestNiktoParser(DojoTestCase):
                 self.assertIsNone(endpoint.path)
 
     def test_parse_file_xml_another(self):
-        with open("unittests/scans/nikto/tdh.xml") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "tdh.xml").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -176,7 +176,7 @@ class TestNiktoParser(DojoTestCase):
                 self.assertIsNone(endpoint.path)
 
     def test_parse_file_issue_9274(self):
-        with open("unittests/scans/nikto/issue_9274.json") as testfile:
+        with (get_unit_tests_scans_path("nikto") / "issue_9274.json").open(encoding="utf-8") as testfile:
             parser = NiktoParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

@@ -20,10 +20,7 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
     if user is None:
         return Endpoint.objects.none()
 
-    if queryset is None:
-        endpoints = Endpoint.objects.all().order_by("id")
-    else:
-        endpoints = queryset
+    endpoints = Endpoint.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return endpoints
@@ -53,11 +50,9 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
-    endpoints = endpoints.filter(
+    return endpoints.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return endpoints
 
 
 def get_authorized_endpoint_status(permission, queryset=None, user=None):
@@ -68,10 +63,7 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
     if user is None:
         return Endpoint_Status.objects.none()
 
-    if queryset is None:
-        endpoint_status = Endpoint_Status.objects.all().order_by("id")
-    else:
-        endpoint_status = queryset
+    endpoint_status = Endpoint_Status.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return endpoint_status
@@ -101,8 +93,6 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
         endpoint__product__member=Exists(authorized_product_roles),
         endpoint__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         endpoint__product__authorized_group=Exists(authorized_product_groups))
-    endpoint_status = endpoint_status.filter(
+    return endpoint_status.filter(
         Q(endpoint__product__prod_type__member=True) | Q(endpoint__product__member=True)
         | Q(endpoint__product__prod_type__authorized_group=True) | Q(endpoint__product__authorized_group=True))
-
-    return endpoint_status

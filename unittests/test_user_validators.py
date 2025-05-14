@@ -27,6 +27,7 @@ class TestUserValidators(DojoTestCase):
         self,
         minimum_password_length=0,
         maximum_password_length=50,
+        *,
         number_character_required=False,
         special_character_required=False,
         lowercase_character_required=False,
@@ -142,7 +143,7 @@ class TestUserValidators(DojoTestCase):
 
     def test_form_invalid_current_pass(self):
         self.set_policy()
-        form = self.form_test("x", current_password="not current password")
+        form = self.form_test("x", current_password="not current password")  # noqa: S106
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors["__all__"][0],
@@ -158,6 +159,6 @@ class TestUserValidators(DojoTestCase):
 
     def test_form_diff_confirm_password(self):
         self.set_policy()
-        form = self.form_test(password="x", confirm_password="y")
+        form = self.form_test(password="x", confirm_password="y")  # noqa: S106
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["__all__"][0], "Passwords do not match.")

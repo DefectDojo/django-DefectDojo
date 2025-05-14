@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class ApiBugcrowdParser:
-    """
-    Import from Bugcrowd API /submissions
-    """
+
+    """Import from Bugcrowd API /submissions"""
 
     def get_scan_types(self):
         return [SCAN_BUGCROWD_API]
@@ -106,11 +105,7 @@ class ApiBugcrowdParser:
                 except (
                     ValueError
                 ):  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error(
-                        "Error parsing bugcrowd bug_url : {}".format(
-                            entry["attributes"]["bug_url"].strip(),
-                        ),
-                    )
+                    logger.error("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
                 bug_url = entry["attributes"]["bug_url"]
 
             description = "\n".join(
@@ -160,7 +155,7 @@ class ApiBugcrowdParser:
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}",
+                            f"{bug_endpoint} bug url from bugcrowd failed to parse to endpoint, error= {e}",
                         )
                 except ValidationError:
                     logger.error(
@@ -199,13 +194,12 @@ class ApiBugcrowdParser:
 
         if entry["attributes"]["state"] in allowed_states:
             return True
-        else:
-            msg = (
-                "{} not in allowed bugcrowd submission states".format(
-                    entry["attributes"]["state"],
-                )
+        msg = (
+            "{} not in allowed bugcrowd submission states".format(
+                entry["attributes"]["state"],
             )
-            raise ValueError(msg)
+        )
+        raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""
@@ -216,16 +210,15 @@ class ApiBugcrowdParser:
         """Convert severity value"""
         if bugcrowd_severity == 5:
             return "Info"
-        elif bugcrowd_severity == 4:
+        if bugcrowd_severity == 4:
             return "Low"
-        elif bugcrowd_severity == 3:
+        if bugcrowd_severity == 3:
             return "Medium"
-        elif bugcrowd_severity == 2:
+        if bugcrowd_severity == 2:
             return "High"
-        elif bugcrowd_severity == 1:
+        if bugcrowd_severity == 1:
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     def is_active(self, bugcrowd_state):
         return (bugcrowd_state == "unresolved") or not (

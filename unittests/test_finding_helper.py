@@ -53,7 +53,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             status_fields = self.get_status_fields(finding)
 
-            finding.title = finding.title + "!!!"
+            finding.title += "!!!"
             finding.save()
 
             self.assertEqual(
@@ -96,7 +96,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.timezone.utc)
+        custom_mitigated = datetime.datetime.now(datetime.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -118,7 +118,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.timezone.utc)
+        custom_mitigated = datetime.datetime.now(datetime.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -140,7 +140,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
     def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
-        custom_mitigated = datetime.datetime.now(datetime.timezone.utc)
+        custom_mitigated = datetime.datetime.now(datetime.UTC)
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -191,7 +191,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
+                # TODO: marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
@@ -209,7 +209,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
+                # TODO: marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 

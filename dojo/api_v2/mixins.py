@@ -20,17 +20,16 @@ class DeletePreviewModelMixin:
     )
     @action(detail=True, methods=["get"], filter_backends=[], suffix="List")
     def delete_preview(self, request, pk=None):
-        object = self.get_object()
+        obj = self.get_object()
 
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([object])
+        collector.collect([obj])
         rels = collector.nested()
 
         def flatten(elem):
             if isinstance(elem, list):
                 return itertools.chain.from_iterable(map(flatten, elem))
-            else:
-                return [elem]
+            return [elem]
 
         rels = [
             {

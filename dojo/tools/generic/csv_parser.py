@@ -34,6 +34,10 @@ class GenericCSVParser:
             # manage active
             if "Active" in row:
                 finding.active = self._convert_bool(row.get("Active"))
+            if "IsMitigated" in row:
+                finding.is_mitigated = self._convert_bool(row.get("IsMitigated"))
+            if "MitigatedDate" in row:
+                finding.mitigated = parse(row["MitigatedDate"])
             # manage mitigation
             if "Mitigation" in row:
                 finding.mitigation = row["Mitigation"]
@@ -53,7 +57,7 @@ class GenericCSVParser:
             if "CVE" in row and [row["CVE"]]:
                 finding.unsaved_vulnerability_ids = [row["CVE"]]
             # manage Vulnerability Id
-            if "Vulnerability Id" in row and row["Vulnerability Id"]:
+            if row.get("Vulnerability Id"):
                 if finding.unsaved_vulnerability_ids:
                     finding.unsaved_vulnerability_ids.append(
                         row["Vulnerability Id"],
@@ -65,6 +69,12 @@ class GenericCSVParser:
             # manage CWE
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
+
+            if "epss_score" in row:
+                finding.epss_score = float(row["epss_score"])
+
+            if "epss_percentile" in row:
+                finding.epss_percentile = float(row["epss_percentile"])
 
             if "CVSSV3" in row:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
@@ -102,8 +112,7 @@ class GenericCSVParser:
     def _convert_bool(self, val):
         return val.lower()[0:1] == "t"  # bool False by default
 
-    def get_severity(self, input):
-        if input in ["Info", "Low", "Medium", "High", "Critical"]:
-            return input
-        else:
-            return "Info"
+    def get_severity(self, severity_input):
+        if severity_input in {"Info", "Low", "Medium", "High", "Critical"}:
+            return severity_input
+        return "Info"

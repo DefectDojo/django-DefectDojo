@@ -22,6 +22,7 @@ is added to each
 
 
 class NpmAudit7PlusParser:
+
     """Represents the parser class."""
 
     def get_scan_types(self):
@@ -44,7 +45,7 @@ class NpmAudit7PlusParser:
     def parse_json(self, json_output):
         """Parse the json format to get findings."""
         if json_output is None:
-            return
+            return None
         try:
             data = json_output.read()
             try:
@@ -82,7 +83,7 @@ class NpmAudit7PlusParser:
         """Return the individual items found in report."""
         items = {}
 
-        for key, node in tree.items():
+        for node in tree.values():
             item = get_item(node, tree, test)
             unique_key = item.title + item.severity
             items[unique_key] = item
@@ -94,7 +95,6 @@ def get_item(item_node, tree, test):
     """Return the individual Findigns from items found in report."""
     references = []
     mitigation = ""
-    test = test
     static_finding = True
     title = ""
     unique_id_from_tool = ""
@@ -121,7 +121,7 @@ def get_item(item_node, tree, test):
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
-        cwe = item_node["via"][0]["cwe"][0]
+        cwe = item_node["via"][0]["cwe"][0] if len(item_node["via"][0]["cwe"]) > 0 else None
         references.append(item_node["via"][0]["url"])
         unique_id_from_tool = str(item_node["via"][0]["source"])
         cvssv3 = item_node["via"][0]["cvss"]["vectorString"]
@@ -144,15 +144,11 @@ def get_item(item_node, tree, test):
             if isinstance(vuln, dict):
                 references.append(vuln["url"])
 
-    if len(cwe):
-        cwe = int(cwe.split("-")[1])
-
     dojo_finding = Finding(
         title=title,
         test=test,
         severity=severity,
         description=description,
-        cwe=cwe,
         mitigation=mitigation,
         references=", ".join(references),
         component_name=component_name,
@@ -165,6 +161,10 @@ def get_item(item_node, tree, test):
         dynamic_finding=False,
         vuln_id_from_tool=unique_id_from_tool,
     )
+
+    if cwe is not None:
+        cwe = int(cwe.split("-")[1])
+        dojo_finding.cwe = cwe
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
         dojo_finding.cvssv3 = cvssv3
@@ -210,10 +210,9 @@ def get_vuln_description(item_node, tree):
                 if tree[effect]["name"] != ev["name"]:
                     description += ("  Depends on vulnerable versions of "
                                     + ev["name"] + "\n")
-            else:
-                if tree[effect]["name"] != ev:
-                    description += ("  Depends on vulnerable versions of "
-                                    + ev + "\n")
+            elif tree[effect]["name"] != ev:
+                description += ("  Depends on vulnerable versions of "
+                                + ev + "\n")
         for en in tree[effect]["nodes"]:
             description += "  " + en + "\n"
 

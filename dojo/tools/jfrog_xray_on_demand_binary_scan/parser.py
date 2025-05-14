@@ -7,6 +7,7 @@ from dojo.models import Finding
 
 
 class JFrogXrayOnDemandBinaryScanParser:
+
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
@@ -47,10 +48,7 @@ def get_component_name_version(name):
 
 def get_severity(vulnerability):
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity
@@ -66,8 +64,7 @@ def get_references(vulnerability):
             else:
                 ref += "- " + reference + "\n"
         return ref
-    else:
-        return None
+    return None
 
 
 def get_remediation(extended_information):
@@ -108,7 +105,7 @@ def process_component(component):
     fixed_versions = component.get("fixed_versions")
     if fixed_versions:
         mitigation = "**Versions containing a fix:**\n\n- "
-        mitigation = mitigation + "\n- ".join(fixed_versions)
+        mitigation += "\n- ".join(fixed_versions)
     if "impact_paths" in component:
         refs = []
         impact_paths_l1 = component["impact_paths"]
@@ -125,8 +122,7 @@ def process_component(component):
 
 def get_cve(vulnerability):
     if "cves" in vulnerability:
-        cves = vulnerability["cves"]
-        return cves
+        return vulnerability["cves"]
     return []
 
 
@@ -137,8 +133,7 @@ def get_vuln_id_from_tool(vulnerability):
 
 
 def clean_title(title):
-    if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: "):]
+    title = title.removeprefix("Issue summary: ")
     if "\n" in title:
         title = title[:title.index("\n")]
     return title
@@ -163,8 +158,8 @@ def get_item_set(vulnerability):
             cvss_v3 = cves[0]["cvss_v3_vector"]
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
-    for component_name, component in vulnerability.get("components", {}).items():
-        component_name, component_version = get_component_name_version(component_name)
+    for component_name_with_version, component in vulnerability.get("components", {}).items():
+        component_name, component_version = get_component_name_version(component_name_with_version)
         mitigation, impact = process_component(component)
 
         title = clean_title(vulnerability["summary"])

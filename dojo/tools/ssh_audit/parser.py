@@ -14,23 +14,24 @@ class SSHAuditParser:
         return "Import result of SSH Audit JSON output."
 
     def convert_cvss_score(self, raw_value):
-        """According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
+        """
+        According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
                         None 	0.0
         Low 	0.0-3.9 	Low 	0.1-3.9
         Medium 	4.0-6.9 	Medium 	4.0-6.9
         High 	7.0-10.0 	High 	7.0-8.9
-        Critical 	9.0-10.0"""
+        Critical 	9.0-10.0
+        """
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def get_findings(self, filename, test):
         items = []
@@ -42,15 +43,19 @@ class SSHAuditParser:
             title = data["banner"]["raw"]
             for cve in data["cves"]:
                 cvename = cve["name"]
-                description = [f"**CVE**: {cvename}"]
-                description.append(f"**Description**: {cve['description']}")
-                description.append(f"**Banner**: {title}")
+                description = [
+                    f"**CVE**: {cvename}",
+                    f"**Description**: {cve['description']}",
+                    f"**Banner**: {title}",
+                ]
                 severity = self.convert_cvss_score(raw_value=cve["cvssv2"])
                 finding = Finding(title=str(title) + "_" + str(cvename),
                         test=test,
                         description="\n".join(description),
                         severity=severity,
                         static_finding=False)
+                finding.unsaved_vulnerability_ids = []
+                finding.unsaved_vulnerability_ids.append(cvename)
                 items.append(finding)
                 finding.unsaved_endpoints = []
                 endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])

@@ -1,7 +1,7 @@
+import datetime
 import hashlib
 import logging
 import re
-from datetime import datetime
 
 import dateutil
 from cpe import CPE
@@ -46,12 +46,11 @@ class DependencyCheckParser:
             return related_dependency.findtext(
                 f"{namespace}fileName",
             ), related_dependency.findtext(f"{namespace}filePath")
-        else:
-            # without filename, it would be just a duplicate finding so we have to skip it. filename
-            # is only present for relateddependencies since v6.0.0
-            # logger.debug('related_dependency: %s',
-            # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
-            return None, None
+        # without filename, it would be just a duplicate finding so we have to skip it. filename
+        # is only present for relateddependencies since v6.0.0
+        # logger.debug('related_dependency: %s',
+        # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+        return None, None
 
     def get_component_name_and_version_from_dependency(
         self, dependency, related_dependency, namespace,
@@ -61,8 +60,8 @@ class DependencyCheckParser:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
             if package_node:
-                id = package_node.findtext(f"{namespace}id")
-                purl = PackageURL.from_string(id)
+                pck_id = package_node.findtext(f"{namespace}id")
+                purl = PackageURL.from_string(pck_id)
                 purl_parts = purl.to_dict()
                 component_name = (
                     purl_parts["namespace"] + ":"
@@ -75,7 +74,7 @@ class DependencyCheckParser:
                     if purl_parts["name"] and len(purl_parts["name"]) > 0
                     else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     purl_parts["version"]
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
@@ -97,8 +96,8 @@ class DependencyCheckParser:
                 ".//" + namespace + 'identifier[@type="cpe"]',
             )
             if cpe_node:
-                id = cpe_node.findtext(f"{namespace}name")
-                cpe = CPE(id)
+                cpe_id = cpe_node.findtext(f"{namespace}name")
+                cpe = CPE(cpe_id)
                 component_name = (
                     cpe.get_vendor()[0] + ":"
                     if len(cpe.get_vendor()) > 0
@@ -107,7 +106,7 @@ class DependencyCheckParser:
                 component_name += (
                     cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     cpe.get_version()[0]
                     if len(cpe.get_version()) > 0
@@ -128,7 +127,7 @@ class DependencyCheckParser:
                     component_version = maven_parts[2]
                     return component_name, component_version
 
-        # TODO what happens when there multiple evidencecollectednodes with
+        # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
         evidence_collected_node = dependency.find(
             namespace + "evidenceCollected",
@@ -282,7 +281,7 @@ class DependencyCheckParser:
                 ref_name = reference_node.findtext(f"{namespace}name")
                 if ref_url == ref_name:
                     reference_detail += (
-                        f"**Source:** {ref_source}\n" f"**URL:** {ref_url}\n\n"
+                        f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
                     )
                 else:
                     reference_detail += (
@@ -299,11 +298,8 @@ class DependencyCheckParser:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
             mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
-            mitigation = (
-                mitigation
-                + f"Update {component_name}:{component_version} to at least the version recommended in the description"
-            )
-            mitigated = datetime.utcnow()
+            mitigation += f"Update {component_name}:{component_version} to at least the version recommended in the description"
+            mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False
             tags.append("suppressed")

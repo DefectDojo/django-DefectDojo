@@ -1,12 +1,13 @@
 import re
 
 import html2text
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
 
 class SpotbugsParser:
+
     """Parser for XML ouput file from Spotbugs (https://github.com/spotbugs/spotbugs)"""
 
     def get_scan_types(self):
@@ -25,7 +26,7 @@ class SpotbugsParser:
 
         SEVERITY = {"1": "High", "2": "Medium", "3": "Low"}
 
-        tree = ET.parse(filename)
+        tree = ElementTree.parse(filename)
         root = tree.getroot()
 
         html_parser = html2text.HTML2Text()
@@ -35,7 +36,7 @@ class SpotbugsParser:
         for pattern in root.findall("BugPattern"):
             # Parse <BugPattern>...<Details> html content
             html_text = html_parser.handle(
-                ET.tostring(pattern.find("Details"), method="text").decode(
+                ElementTree.tostring(pattern.find("Details"), method="text").decode(
                     "utf-8",
                 ),
             )
@@ -85,10 +86,7 @@ class SpotbugsParser:
                 desc += message + "\n"
 
             shortmessage_extract = bug.find("ShortMessage")
-            if shortmessage_extract is not None:
-                title = shortmessage_extract.text
-            else:
-                title = bug.get("type")
+            title = shortmessage_extract.text if shortmessage_extract is not None else bug.get("type")
             severity = SEVERITY[bug.get("priority")]
             description = desc
 

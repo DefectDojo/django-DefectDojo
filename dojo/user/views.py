@@ -70,7 +70,7 @@ class DojoLoginView(LoginView):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            _(f'Hello {name}! Your last login was {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
+            _("Hello %s! Your last login was %s (%s)") % (name, naturaltime(last_login), last_login.strftime("%Y-%m-%d %I:%M:%S %p")),
             extra_tags="alert-success")
         return response
 
@@ -126,6 +126,7 @@ def login_view(request):
         settings.AUTH0_OAUTH2_ENABLED,
         settings.KEYCLOAK_OAUTH2_ENABLED,
         settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
+        settings.OIDC_AUTH_ENABLED,
         settings.SAML2_ENABLED,
     ]) == 1 and "force_login_form" not in request.GET:
         if settings.GOOGLE_OAUTH_ENABLED:
@@ -138,6 +139,8 @@ def login_view(request):
             social_auth = "gitlab"
         elif settings.KEYCLOAK_OAUTH2_ENABLED:
             social_auth = "keycloak"
+        elif settings.OIDC_AUTH_ENABLED:
+            social_auth = "oidc"
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = "auth0"
         elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
@@ -158,13 +161,12 @@ def logout_view(request):
 
     if not settings.SHOW_LOGIN_FORM:
         return login_view(request)
-    else:
-        messages.add_message(request,
-                         messages.SUCCESS,
-                         _("You have logged out successfully."),
-                         extra_tags="alert-success")
+    messages.add_message(request,
+                     messages.SUCCESS,
+                     _("You have logged out successfully."),
+                     extra_tags="alert-success")
 
-        return HttpResponseRedirect(reverse("login"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 @user_passes_test(lambda u: u.is_active)
@@ -228,10 +230,7 @@ def view_profile(request):
     group_members = get_authorized_group_members_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-    if user_contact is None:
-        contact_form = UserContactInfoForm()
-    else:
-        contact_form = UserContactInfoForm(instance=user_contact)
+    contact_form = UserContactInfoForm() if user_contact is None else UserContactInfoForm(instance=user_contact)
 
     global_role = user.global_role if hasattr(user, "global_role") else None
     if global_role is None:
@@ -394,16 +393,10 @@ def edit_user(request, uid):
     form = EditDojoUserForm(instance=user)
 
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-    if user_contact is None:
-        contact_form = UserContactInfoForm()
-    else:
-        contact_form = UserContactInfoForm(instance=user_contact)
+    contact_form = UserContactInfoForm() if user_contact is None else UserContactInfoForm(instance=user_contact)
 
     global_role = user.global_role if hasattr(user, "global_role") else None
-    if global_role is None:
-        global_role_form = GlobalRoleForm()
-    else:
-        global_role_form = GlobalRoleForm(instance=global_role)
+    global_role_form = GlobalRoleForm() if global_role is None else GlobalRoleForm(instance=global_role)
 
     if request.method == "POST":
         form = EditDojoUserForm(request.POST, instance=user)
@@ -657,7 +650,7 @@ class DojoPasswordResetForm(PasswordResetForm):
                 connection.open()
                 connection.close()
         except Exception as e:
-            logger.error(f"SMTP Server Connection Failure: {str(e)}")
+            logger.error(f"SMTP Server Connection Failure: {e}")
             msg = "SMTP server is not configured correctly..."
             raise ValidationError(msg)
 

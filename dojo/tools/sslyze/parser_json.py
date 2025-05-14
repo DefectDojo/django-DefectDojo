@@ -2,7 +2,7 @@ import json
 
 from dojo.models import Endpoint, Finding
 
-# FIXME discuss this list as maintenance subject
+# TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
 TLS12_RECOMMENDED_CIPHERS = [
     "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
@@ -71,12 +71,13 @@ REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
 class SSLyzeJSONParser:
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
 
         if tree:
             return self.get_items(tree, test)
+        return None
 
     def parse_json(self, json_output):
         try:
@@ -403,7 +404,7 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
             return get_finding(
                 title, description, None, REFERENCES, test, endpoint,
             )
-        elif "result" in weak_node:
+        if "result" in weak_node:
             weak_node_result = weak_node["result"]
             if (
                 "accepted_cipher_suites" in weak_node_result
@@ -622,5 +623,4 @@ def get_endpoint(node):
             port = si_node["port"]
     if hostname is not None:
         return Endpoint(host=hostname, port=port)
-    else:
-        return None
+    return None

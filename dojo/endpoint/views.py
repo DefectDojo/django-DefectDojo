@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q, QuerySet
 from django.http import HttpResponseRedirect
@@ -37,7 +38,7 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
-def process_endpoints_view(request, host_view=False, vulnerable=False):
+def process_endpoints_view(request, *, host_view=False, vulnerable=False):
 
     if vulnerable:
         endpoints = Endpoint.objects.filter(
@@ -60,10 +61,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
-    if vulnerable:
-        view_name = "Vulnerable"
-    else:
-        view_name = "All"
+    view_name = "Vulnerable" if vulnerable else "All"
 
     if host_view:
         view_name += " Hosts"
@@ -97,9 +95,8 @@ def get_endpoint_ids(endpoints):
         key = f"{e.host}-{e.product.id}"
         if key in hosts:
             continue
-        else:
-            hosts.append(key)
-            ids.append(e.id)
+        hosts.append(key)
+        ids.append(e.id)
     return ids
 
 
@@ -119,7 +116,7 @@ def vulnerable_endpoint_hosts(request):
     return process_endpoints_view(request, host_view=True, vulnerable=True)
 
 
-def process_endpoint_view(request, eid, host_view=False):
+def process_endpoint_view(request, eid, *, host_view=False):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
     if host_view:
@@ -178,7 +175,7 @@ def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -306,8 +303,7 @@ def add_meta_data(request, eid):
                                  extra_tags="alert-success")
             if "add_another" in request.POST:
                 return HttpResponseRedirect(reverse("add_endpoint_meta_data", args=(eid,)))
-            else:
-                return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
+            return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
     else:
         form = DojoMetaDataForm()
 
@@ -326,12 +322,12 @@ def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()
@@ -385,38 +381,37 @@ def endpoint_bulk_update_all(request, pid=None):
                     messages.SUCCESS,
                     f"Bulk delete of {deleted_endpoint_count} endpoints was successful.",
                     extra_tags="alert-success")
-        else:
-            if endpoints_to_update:
+        elif endpoints_to_update:
 
-                if pid is not None:
-                    product = get_object_or_404(Product, id=pid)
-                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+            if pid is not None:
+                product = get_object_or_404(Product, id=pid)
+                user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
 
-                skipped_endpoint_count = total_endpoint_count - endpoints.count()
-                updated_endpoint_count = endpoints.count()
+            skipped_endpoint_count = total_endpoint_count - endpoints.count()
+            updated_endpoint_count = endpoints.count()
 
-                if skipped_endpoint_count > 0:
-                    add_error_message_to_response(f"Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.")
+            if skipped_endpoint_count > 0:
+                add_error_message_to_response(f"Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.")
 
-                eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
-                    mitigated=True,
-                    mitigated_by=request.user,
-                    mitigated_time=timezone.now(),
-                    last_modified=timezone.now(),
-                )
+            eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
+                mitigated=True,
+                mitigated_by=request.user,
+                mitigated_time=timezone.now(),
+                last_modified=timezone.now(),
+            )
 
-                if updated_endpoint_count > 0:
-                    messages.add_message(request,
-                                        messages.SUCCESS,
-                                        f"Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.",
-                                        extra_tags="alert-success")
-            else:
+            if updated_endpoint_count > 0:
                 messages.add_message(request,
-                                     messages.ERROR,
-                                     "Unable to process bulk update. Required fields were not selected.",
-                                     extra_tags="alert-danger")
+                                    messages.SUCCESS,
+                                    f"Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.",
+                                    extra_tags="alert-success")
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 "Unable to process bulk update. Required fields were not selected.",
+                                 extra_tags="alert-danger")
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
@@ -436,12 +431,12 @@ def endpoint_status_bulk_update(request, fid):
                     finding__id=fid)
                 for status in status_list:
                     if status in enable:
-                        endpoint_status.__setattr__(status, True)
+                        endpoint_status.__setattr__(status, True)  # noqa: PLC2801
                         if status == "mitigated":
                             endpoint_status.mitigated_by = request.user
                             endpoint_status.mitigated_time = timezone.now()
                     else:
-                        endpoint_status.__setattr__(status, False)
+                        endpoint_status.__setattr__(status, False)  # noqa: PLC2801
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
             messages.add_message(request,
@@ -467,6 +462,9 @@ def prefetch_for_endpoints(endpoints):
 
 
 def migrate_endpoints_view(request):
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
 
     view_name = "Migrate endpoints"
 
@@ -503,8 +501,8 @@ def import_endpoint_meta(request, pid):
             try:
                 endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin="UI", request=request)
             except Exception as e:
-                logger.exception(e)
-                add_error_message_to_response(f"An exception error occurred during the report import:{str(e)}")
+                logger.exception("An exception error occurred during the report import")
+                add_error_message_to_response(f"An exception error occurred during the report import:{e}")
             return HttpResponseRedirect(reverse("endpoint") + "?product=" + pid)
 
     add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)

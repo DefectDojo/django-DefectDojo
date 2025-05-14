@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List, Tuple
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
@@ -14,7 +13,7 @@ from .dojo_test_case import DojoTestCase
 User = get_user_model()
 
 
-def create(when: datetime, product_id: int, titles_and_severities: List[Tuple[str, str]]):
+def create(when: datetime, product_id: int, titles_and_severities: list[tuple[str, str]]):
     with patch("django.db.models.fields.timezone.now") as mock_now:
         mock_now.return_value = when
         engagement = Engagement.objects.create(product_id=product_id, target_start=when.date(), target_end=when.date())
@@ -25,7 +24,7 @@ def create(when: datetime, product_id: int, titles_and_severities: List[Tuple[st
         )
 
 
-def create_with_duplicates(when: datetime, product_id: int, titles_and_severities: List[Tuple[str, str]]):
+def create_with_duplicates(when: datetime, product_id: int, titles_and_severities: list[tuple[str, str]]):
     with patch("django.db.models.fields.timezone.now") as mock_now:
         mock_now.return_value = when
         engagement = Engagement.objects.create(product_id=product_id, target_start=when.date(), target_end=when.date())
@@ -118,9 +117,9 @@ class TestDashboard(DojoTestCase):
         response = self._request("admin")
 
         self.assertEqual(3, response.context["engagement_count"])
-        self.assertEqual(4, response.context["finding_count"])
-        self.assertEqual(2, response.context["mitigated_count"])
-        self.assertEqual(2, response.context["accepted_count"])
+        self.assertEqual(11, response.context["finding_count"])
+        self.assertEqual(3, response.context["mitigated_count"])
+        self.assertEqual(3, response.context["accepted_count"])
 
     def test_counters_as_user(self):
         self._setup_test_counters_findings(product_id=2)
@@ -129,9 +128,9 @@ class TestDashboard(DojoTestCase):
         response = self._request("user1")
 
         self.assertEqual(3, response.context["engagement_count"])
-        self.assertEqual(4, response.context["finding_count"])
-        self.assertEqual(2, response.context["mitigated_count"])
-        self.assertEqual(2, response.context["accepted_count"])
+        self.assertEqual(11, response.context["finding_count"])
+        self.assertEqual(3, response.context["mitigated_count"])
+        self.assertEqual(3, response.context["accepted_count"])
 
     def _setup_test_charts_findings(self, product_id: int):
         when = self.year_ago

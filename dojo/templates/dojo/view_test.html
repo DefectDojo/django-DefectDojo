@@ -35,7 +35,9 @@
                             type="button"
                             id="dropdownMenu1"
                             data-toggle="dropdown"
-                            aria-expanded="true">
+                            aria-expanded="true"
+                            aria-label="Test options"        
+                            >
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
@@ -158,7 +160,7 @@
                     {% endif %}
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
-                        <td>{{ test.total_reimport_count }}</td>
+                        <td class="text-right">{{ test.total_reimport_count }}</td>
                     {% endif %}
                     {% if test.api_scan_configuration %}
                         <td>
@@ -208,6 +210,7 @@
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
+                                    aria-label="Filters"
                                     data-toggle="collapse"
                                     data-target="#import-history-filters"
                                     class="btn btn-primary toggle-filters">
@@ -274,6 +277,8 @@
                                             {% for action in finding_action_list %}
                                                 {{ action.list|length }} {{ action.grouper }}
                                                 {% if not forloop.last %},{% endif %}
+                                            {% empty %}
+                                                There were no findings created, closed, or modified
                                             {% endfor %}
                                         </a>
                                     </td>
@@ -518,6 +523,7 @@
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;
                         <button id="show-filters"
+                                aria-label="Filters"
                                 data-toggle="collapse"
                                 data-target="#the-filters"
                                 class="btn btn-primary toggle-filters">
@@ -528,7 +534,8 @@
                                     type="button"
                                     id="dropdownMenu_test_add"
                                     data-toggle="dropdown"
-                                    aria-expanded="true">
+                                    aria-expanded="true"
+                                    aria-label="Add finding">
                                 <span class="fa-solid fa-plus"></span>
                                 <span class="caret"></span>
                             </button>
@@ -554,7 +561,8 @@
                                 type="button"
                                 id="dropdownMenu1"
                                 data-toggle="dropdown"
-                                aria-expanded="true">
+                                aria-expanded="true"
+                                aria-label="Report options">
                             <span class="fa-solid fa-download"></span>
                             <span class="caret"></span>
                         </button>
@@ -848,6 +856,12 @@
                                 {{ bulk_edit_form.media.css }}
                                 {{ bulk_edit_form.media.js }}
                                 {{ bulk_edit_form.tags }}
+                                {% if bulk_edit_form.disclaimer %}
+                                    <div style="background-color:#DADCE2; border:1px #003333; padding:.3em; margin:.1em; ">
+                                        <div style="color:#ff0000;">Disclaimer</div>
+                                        <div>{{ bulk_edit_form.disclaimer }}</div>
+                                    </div>
+                                {% endif %}
                                 <input type="submit"
                                     class="btn btn-sm btn-secondary"
                                     value="Submit"
@@ -1080,8 +1094,7 @@
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                                     <li role="presentation">
-                                                                        <a href
-                                                                        {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
+                                                                        <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                         </a>
                                                                     </li>
@@ -1165,7 +1178,7 @@
                                         {% if finding.notes.all %}
                                             <i class="glyphicon glyphicon-comment has-popover dojo-sup"
                                             data-trigger="hover"
-                                            data-content="{{ finding.notes.all.0 }}"
+                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
                                             data-placement="left"
                                             data-container="body"
                                             data-original-title="Most Recent Note ({{ finding.notes.count }} total)"

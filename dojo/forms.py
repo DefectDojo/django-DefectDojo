@@ -4,6 +4,7 @@ import pickle
 import re
 import warnings
 from datetime import date, datetime
+from pathlib import Path
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -31,6 +32,7 @@ from tagulous.forms import TagField
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.models import (
@@ -71,6 +73,7 @@ from dojo.models import (
     JIRA_Project,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Objects_Product,
     Product,
@@ -107,6 +110,7 @@ from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
+    tag_validator,
 )
 from dojo.widgets import TableCheckboxWidget
 
@@ -138,6 +142,7 @@ class MultipleSelectWithPop(forms.SelectMultiple):
 
 
 class MonthYearWidget(Widget):
+
     """
     A Widget that splits date input into two <select> boxes for month and year,
     with 'day' defaulting to the first of the month.
@@ -146,11 +151,12 @@ class MonthYearWidget(Widget):
 
     django/trunk/django/forms/extras/widgets.py
     """
+
     none_value = (0, "---")
     month_field = "%s_month"
     year_field = "%s_year"
 
-    def __init__(self, attrs=None, years=None, required=True):
+    def __init__(self, attrs=None, years=None, *, required=True):
         # years is an optional list/tuple of years to use in the
         # "year" select box.
         self.attrs = attrs or {}
@@ -173,10 +179,7 @@ class MonthYearWidget(Widget):
 
         output = []
 
-        if "id" in self.attrs:
-            id_ = self.attrs["id"]
-        else:
-            id_ = f"id_{name}"
+        id_ = self.attrs.get("id", f"id_{name}")
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -198,10 +201,9 @@ class MonthYearWidget(Widget):
 
         return mark_safe("\n".join(output))
 
-    def id_for_label(self, id_):
+    @classmethod
+    def id_for_label(cls, id_):
         return f"{id_}_month"
-
-    id_for_label = classmethod(id_for_label)
 
     def value_from_datadict(self, data, files, name):
         y = data.get(self.year_field % name)
@@ -284,7 +286,7 @@ class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        exclude = [""]
+        exclude = ["dynamically_generated"]
 
 
 class Development_EnvironmentForm(forms.ModelForm):
@@ -320,18 +322,26 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
+        if prod_type_id := kwargs.get("instance", Product()).prod_type_id:  # we are editing existing instance
+            self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
 
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
             self.fields["sla_configuration"].disabled = True
-            self.fields["sla_configuration"].widget.attrs["message"] = "Finding SLA expiration dates are currently being recalculated. " + \
-                                                                       "This field cannot be changed until the calculation is complete."
+            self.fields["sla_configuration"].widget.attrs["message"] = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
 
     class Meta:
         model = Product
         fields = ["name", "description", "tags", "product_manager", "technical_contact", "team_manager", "prod_type", "sla_configuration", "regulations",
                 "business_criticality", "platform", "lifecycle", "origin", "user_records", "revenue", "external_audience", "enable_product_tag_inheritance",
                 "internet_accessible", "enable_simple_risk_acceptance", "enable_full_risk_acceptance", "disable_sla_breach_notifications"]
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -579,10 +589,10 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         tool_type = requires_tool_type(scan_type)
         if requires_file(scan_type) and not file:
-            msg = _(f"Uploading a Report File is required for {scan_type}")
+            msg = _("Uploading a Report File is required for %s") % scan_type
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get("api_scan_configuration")
@@ -593,10 +603,13 @@ class ImportScanForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -607,8 +620,7 @@ class ImportScanForm(forms.Form):
         return date
 
     def get_scan_type(self):
-        TGT_scan = self.cleaned_data["scan_type"]
-        return TGT_scan
+        return self.cleaned_data["scan_type"]
 
 
 class ReImportScanForm(forms.Form):
@@ -694,7 +706,7 @@ class ReImportScanForm(forms.Form):
             msg = _("Uploading a report file is required for re-uploading findings.")
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
@@ -704,6 +716,10 @@ class ReImportScanForm(forms.Form):
                 raise forms.ValidationError(msg)
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -747,6 +763,24 @@ class UploadThreatForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".jpg,.png,.pdf"}),
         label="Select Threat Model")
+
+    def clean(self):
+        if (file := self.cleaned_data.get("file", None)) is not None:
+            path = Path(file.name)
+            ext = path.suffix
+            valid_extensions = [".jpg", ".png", ".pdf"]
+            if ext.lower() not in valid_extensions:
+                if accepted_extensions := f"{', '.join(valid_extensions)}":
+                    msg = (
+                        "Unsupported extension. Supported extensions are as "
+                        f"follows: {accepted_extensions}"
+                    )
+                else:
+                    msg = (
+                        "File uploads are prohibited due to the list of acceptable "
+                        "file extensions being empty"
+                    )
+                raise ValidationError(msg)
 
 
 class MergeFindings(forms.ModelForm):
@@ -840,6 +874,8 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             self.fields["expiration_date"].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields["accepted_findings"].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
@@ -851,7 +887,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
         for form in self.forms:
             file = form.cleaned_data.get("file", None)
             if file:
-                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                path = Path(file.name)
+                ext = path.suffix
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
                     if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -931,8 +968,10 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. "
-                  + "Without a name the target start date will be set.")
+        help_text=(
+            "Add a descriptive name to identify this engagement. "
+            "Without a name the target start date will be set."
+        ))
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label="Product",
@@ -995,6 +1034,10 @@ class EngForm(forms.ModelForm):
             return False
         return True
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
+
     class Meta:
         model = Engagement
         exclude = ("first_contacted", "real_start", "engagement_type", "inherited_tags",
@@ -1049,6 +1092,10 @@ class TestForm(forms.ModelForm):
         fields = ["title", "test_type", "target_start", "target_end", "description",
                   "environment", "percent_complete", "tags", "lead", "version", "branch_tag", "build_id", "commit_hash",
                   "api_scan_configuration"]
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -1142,10 +1189,13 @@ class AddFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1220,10 +1270,13 @@ class AdHocFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1278,10 +1331,13 @@ class PromoteFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1351,11 +1407,10 @@ class FindingForm(forms.ModelForm):
         # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk acceptance
         if not hasattr(self.instance, "test") or (not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance):
             del self.fields["risk_accepted"]
-        else:
-            if self.instance.risk_accepted:
-                self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
-            elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
-                self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.risk_accepted:
+            self.fields["risk_accepted"].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+        elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            self.fields["risk_accepted"].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
 
         # self.fields['tags'].widget.choices = t
         if req_resp:
@@ -1402,10 +1457,13 @@ class FindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     def _post_clean(self):
         super()._post_clean()
@@ -1483,6 +1541,10 @@ class ApplyFindingTemplateForm(forms.Form):
 
         return cleaned_data
 
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
+
     class Meta:
         fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "mitigation", "impact", "references", "tags"]
         order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact", "is_mitigated")
@@ -1512,6 +1574,10 @@ class FindingTemplateForm(forms.ModelForm):
         model = Finding_Template
         order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact")
         exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve")
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1552,6 +1618,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
         self.fields["severity"].required = False
         # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields["tags"].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1563,6 +1631,10 @@ class FindingBulkUpdateForm(forms.ModelForm):
             msg = "False positive findings cannot be verified."
             raise forms.ValidationError(msg)
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
     class Meta:
         model = Finding
@@ -1613,6 +1685,10 @@ class EditEndpointForm(forms.ModelForm):
             raise forms.ValidationError(msg, code="invalid")
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class AddEndpointForm(forms.Form):
@@ -1673,10 +1749,13 @@ class AddEndpointForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_process = endpoints_to_add_list
+        self.endpoints_to_process = endpoints_to_add_list
 
         return cleaned_data
+
+    def clean_tags(self):
+        tag_validator(self.cleaned_data.get("tags"))
+        return self.cleaned_data.get("tags")
 
 
 class DeleteEndpointForm(forms.ModelForm):
@@ -1695,6 +1774,11 @@ class NoteForm(forms.ModelForm):
     class Meta:
         model = Notes
         fields = ["entry", "private"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class TypedNoteForm(NoteForm):
@@ -1747,6 +1831,8 @@ class CloseFindingForm(forms.ModelForm):
             self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def _post_clean(self):
         super()._post_clean()
@@ -1799,6 +1885,11 @@ class DefectFindingForm(forms.ModelForm):
         model = Notes
         fields = ["entry"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
+
 
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(
@@ -1812,6 +1903,11 @@ class ClearFindingReviewForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ["active", "verified", "false_p", "out_of_scope", "duplicate", "is_mitigated"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class ReviewFindingForm(forms.Form):
@@ -1850,6 +1946,8 @@ class ReviewFindingForm(forms.Form):
         self.reviewer_queryset = users
         # Set the users in the form
         self.fields["reviewers"].choices = self._get_choices(self.reviewer_queryset)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     @staticmethod
     def _get_choices(queryset):
@@ -1935,9 +2033,7 @@ class MetricsFilterForm(forms.Form):
 
     # add the ability to exclude the exclude_product_types field
     def __init__(self, *args, **kwargs):
-        exclude_product_types = kwargs.get("exclude_product_types", False)
-        if "exclude_product_types" in kwargs:
-            del kwargs["exclude_product_types"]
+        exclude_product_types = kwargs.pop("exclude_product_types", False)
         super().__init__(*args, **kwargs)
         if exclude_product_types:
             del self.fields["exclude_product_types"]
@@ -2165,8 +2261,9 @@ class ChangePasswordForm(forms.Form):
 
 
 class AddDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput,
-        required=False,
+        required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
         help_text="")
 
@@ -2183,6 +2280,7 @@ class AddDojoUserForm(forms.ModelForm):
 
 
 class EditDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = Dojo_User
@@ -2287,6 +2385,13 @@ class ReportOptionsForm(forms.Form):
     include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
     report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if get_system_setting("disclaimer_reports_forced"):
+            self.fields["include_disclaimer"].disabled = True
+            self.fields["include_disclaimer"].initial = "1"  # represents yes
+            self.fields["include_disclaimer"].help_text = "Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
+
 
 class CustomReportOptionsForm(forms.Form):
     yes_no = (("0", "No"), ("1", "Yes"))
@@ -2374,16 +2479,15 @@ class ExpressGITHUBForm(forms.ModelForm):
 def get_jira_issue_template_dir_choices():
     template_root = settings.JIRA_TEMPLATE_ROOT
     template_dir_list = [("", "---")]
-    for base_dir, dirnames, filenames in os.walk(template_root):
+    for base_dir, dirnames, _filenames in os.walk(template_root):
         # for filename in filenames:
         #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
         #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
         #     template_list.append((os.path.join(base_dir, filename), filename))
 
         for dirname in dirnames:
-            if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
-                base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
+            clean_base_dir = base_dir.removeprefix(settings.TEMPLATE_DIR_PREFIX)
+            template_dir_list.append((str(Path(clean_base_dir) / dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
     return template_dir_list
@@ -2400,7 +2504,7 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class BaseJiraForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=True, help_text=JIRA_Instance._meta.get_field("password").help_text, label=JIRA_Instance._meta.get_field("password").verbose_name)
 
     def test_jira_connection(self):
         import dojo.jira_link.helper as jira_helper
@@ -2422,7 +2526,7 @@ class BaseJiraForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class JIRAForm(BaseJiraForm):
+class AdvancedJIRAForm(BaseJiraForm):
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
@@ -2442,8 +2546,11 @@ class JIRAForm(BaseJiraForm):
         exclude = [""]
 
 
-class ExpressJIRAForm(BaseJiraForm):
+class JIRAForm(BaseJiraForm):
     issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
+    issue_template_dir = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
 
     class Meta:
         model = JIRA_Instance
@@ -2515,7 +2622,7 @@ class ToolTypeForm(forms.ModelForm):
         exclude = ["product"]
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance", None)
+        instance = kwargs.get("instance")
         self.newly_created = True
         if instance is not None:
             self.newly_created = instance.pk is None
@@ -2592,8 +2699,10 @@ class SLAConfigForm(forms.ModelForm):
 
         # if this sla config has findings being asynchronously updated, disable the days by severity fields
         if self.instance.async_updating:
-            msg = "Finding SLA expiration dates are currently being recalculated. " + \
-                  "This field cannot be changed until the calculation is complete."
+            msg = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
             self.fields["critical"].disabled = True
             self.fields["enforce_critical"].disabled = True
             self.fields["critical"].widget.attrs["message"] = msg
@@ -2679,9 +2788,7 @@ class ObjectSettingsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        form_data = self.cleaned_data
-
-        return form_data
+        return self.cleaned_data
 
 
 class CredMappingForm(forms.ModelForm):
@@ -2721,6 +2828,11 @@ class EngagementPresetsForm(forms.ModelForm):
     class Meta:
         model = Engagement_Presets
         exclude = ["product"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class DeleteEngagementPresetsForm(forms.ModelForm):
@@ -2773,6 +2885,32 @@ class NotificationsForm(forms.ModelForm):
     class Meta:
         model = Notifications
         exclude = ["template"]
+
+
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Notification_Webhooks
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop("is_superuser", False)
+        super().__init__(*args, **kwargs)
+        if not is_superuser:  # Only superadmins can edit owner
+            self.fields["owner"].disabled = True  # TODO: needs to be tested
+
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].disabled = True
+        self.fields["url"].disabled = True
+
+    class Meta:
+        model = Notification_Webhooks
+        fields = ["id", "name", "url"]
 
 
 class ProductNotificationsForm(forms.ModelForm):
@@ -2829,7 +2967,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ["product", "engagement"]
-        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
+        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2867,6 +3005,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields["custom_fields"].disabled = False
                 self.fields["default_assignee"].disabled = False
                 self.fields["jira_labels"].disabled = False
+                self.fields["enabled"].disabled = False
                 self.fields["add_vulnerability_id_to_jira_label"].disabled = False
                 self.fields["push_all_issues"].disabled = False
                 self.fields["enable_engagement_epic_mapping"].disabled = False
@@ -2891,6 +3030,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial["custom_fields"] = jira_project_product.custom_fields
                     self.initial["default_assignee"] = jira_project_product.default_assignee
                     self.initial["jira_labels"] = jira_project_product.jira_labels
+                    self.initial["enabled"] = jira_project_product.enabled
                     self.initial["add_vulnerability_id_to_jira_label"] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial["push_all_issues"] = jira_project_product.push_all_issues
                     self.initial["enable_engagement_epic_mapping"] = jira_project_product.enable_engagement_epic_mapping
@@ -2906,6 +3046,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields["custom_fields"].disabled = True
                     self.fields["default_assignee"].disabled = True
                     self.fields["jira_labels"].disabled = True
+                    self.fields["enabled"].disabled = True
                     self.fields["add_vulnerability_id_to_jira_label"].disabled = True
                     self.fields["push_all_issues"].disabled = True
                     self.fields["enable_engagement_epic_mapping"].disabled = True
@@ -2942,9 +3083,9 @@ class JIRAProjectForm(forms.ModelForm):
             if self.target == "engagement":
                 msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product"
                 raise ValidationError(msg)
-            else:
-                msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
-                raise ValidationError(msg)
+            msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
+            raise ValidationError(msg)
+        return None
 
 
 class GITHUBFindingForm(forms.Form):
@@ -2983,9 +3124,10 @@ class JIRAFindingForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 
@@ -3029,7 +3171,7 @@ class JIRAFindingForm(forms.Form):
         elif self.cleaned_data.get("push_to_jira", None):
             active = self.finding_form["active"].value()
             verified = self.finding_form["verified"].value()
-            if not active or not verified:
+            if not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))):
                 logger.debug("Findings must be active and verified to be pushed to JIRA")
                 error_message = "Findings must be active and verified to be pushed to JIRA"
                 self.add_error("push_to_jira", ValidationError(error_message, code="not_active_or_verified"))
@@ -3086,9 +3228,10 @@ class JIRAImportScanForm(forms.Form):
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
-            self.fields["push_to_jira"].help_text = \
-                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+            self.fields["push_to_jira"].help_text = (
+                "Push all issues is enabled on this product. If you do not wish to push all issues"
                 " to JIRA, please disable Push all issues on this product."
+            )
             self.fields["push_to_jira"].widget.attrs["checked"] = "checked"
             self.fields["push_to_jira"].disabled = True
 
@@ -3128,8 +3271,7 @@ class LoginBanner(forms.Form):
     )
 
     def clean(self):
-        cleaned_data = super().clean()
-        return cleaned_data
+        return super().clean()
 
 
 class AnnouncementCreateForm(forms.ModelForm):
@@ -3154,18 +3296,15 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    """ Base class for a Question
-    """
+
+    """Base class for a Question"""
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = "post"
 
         # If true crispy-forms will render a <form>..</form> tags
-        self.helper.form_tag = kwargs.get("form_tag", True)
-
-        if "form_tag" in kwargs:
-            del kwargs["form_tag"]
+        self.helper.form_tag = kwargs.pop("form_tag", True)
 
         self.engagement_survey = kwargs.get("engagement_survey")
 
@@ -3177,13 +3316,12 @@ class QuestionForm(forms.Form):
 
         self.helper.form_class = kwargs.get("form_class", "")
 
-        self.question = kwargs.get("question")
+        self.question = kwargs.pop("question", None)
 
         if not self.question:
             msg = "Need a question to render"
             raise ValueError(msg)
 
-        del kwargs["question"]
         super().__init__(*args, **kwargs)
 
 
@@ -3198,10 +3336,7 @@ class TextQuestionForm(QuestionForm):
             question=self.question,
         )
 
-        if initial_answer.exists():
-            initial_answer = initial_answer[0].answer
-        else:
-            initial_answer = ""
+        initial_answer = initial_answer[0].answer if initial_answer.exists() else ""
 
         self.fields["answer"] = forms.CharField(
             label=self.question.text,
@@ -3363,7 +3498,7 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
-            elif expiration.day == today.day:
+            if expiration.day == today.day:
                 msg = "The expiration cannot be today"
                 raise forms.ValidationError(msg)
         else:
@@ -3453,8 +3588,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
     def decompress(self, value):
         if value:
             return pickle.loads(value)
-        else:
-            return [None, None, None, None, None, None]
+        return [None, None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
         return "<br/>".join(rendered_widgets)
@@ -3550,6 +3684,18 @@ class AddEngagementForm(forms.Form):
         self.fields["product"].queryset = get_authorized_products(Permissions.Engagement_Add)
 
 
+class ExistingEngagementForm(forms.Form):
+    engagement = forms.ModelChoiceField(
+        queryset=Engagement.objects.none(),
+        required=True,
+        widget=forms.widgets.Select(),
+        help_text="Select which Engagement to link the Questionnaire to")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_Edit).order_by("-target_start")
+
+
 class ConfigurationPermissionsForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
@@ -3586,12 +3732,11 @@ class ConfigurationPermissionsForm(forms.Form):
             else:
                 msg = "Neither user or group are set"
                 raise Exception(msg)
+        # Checkbox is unset
+        elif self.user:
+            self.user.user_permissions.remove(self.permissions[codename])
+        elif self.group:
+            self.group.auth_group.permissions.remove(self.permissions[codename])
         else:
-            # Checkbox is unset
-            if self.user:
-                self.user.user_permissions.remove(self.permissions[codename])
-            elif self.group:
-                self.group.auth_group.permissions.remove(self.permissions[codename])
-            else:
-                msg = "Neither user or group are set"
-                raise Exception(msg)
+            msg = "Neither user or group are set"
+            raise Exception(msg)

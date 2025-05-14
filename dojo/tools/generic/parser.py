@@ -20,17 +20,17 @@ class GenericParser:
     def get_findings(self, filename, test):
         if filename.name.lower().endswith(".csv"):
             return GenericCSVParser()._get_findings_csv(filename)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             data = json.load(filename)
             test_internal = GenericJSONParser()._get_test_json(data)
             return test_internal.findings
-        else:  # default to CSV like before
-            return GenericCSVParser()._get_findings_csv(filename)
+        # default to CSV like before
+        return GenericCSVParser()._get_findings_csv(filename)
 
     def get_tests(self, scan_type, filename):
         # if the file is a CSV just use the old function
         if filename.name.lower().endswith(".csv"):
-            test = ParserTest(name=self.ID, type=self.ID, version=None)
+            test = ParserTest(name=self.ID, parser_type=self.ID, version=None)
             test.findings = GenericCSVParser()._get_findings_csv(filename)
             return [test]
         # we manage it like a JSON file (default)

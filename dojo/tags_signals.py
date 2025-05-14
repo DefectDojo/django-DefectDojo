@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(signals.m2m_changed, sender=Product.tags.through)
 def product_tags_post_add_remove(sender, instance, action, **kwargs):
-    if action in ["post_add", "post_remove"]:
+    if action in {"post_add", "post_remove"}:
         running_async_process = False
         with contextlib.suppress(AttributeError):
             running_async_process = instance.running_async_process
@@ -28,7 +28,7 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 @receiver(signals.m2m_changed, sender=Test.tags.through)
 @receiver(signals.m2m_changed, sender=Finding.tags.through)
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
-    if action in ["post_add", "post_remove"]:
+    if action in {"post_add", "post_remove"}:
         if inherit_product_tags(instance):
             tag_list = [tag.name for tag in instance.tags.all()]
             if propagate_inheritance(instance, tag_list=tag_list):
@@ -46,8 +46,10 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
             instance.inherit_tags(tag_list)
 
 
-def propagate_inheritance(instance, tag_list=[]):
+def propagate_inheritance(instance, tag_list=None):
     # Get the expected product tags
+    if tag_list is None:
+        tag_list = []
     product_inherited_tags = [tag.name for tag in get_product(instance).tags.all()]
     existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
     # Check if product tags already matches inherited tags
@@ -77,3 +79,4 @@ def get_product(instance):
         return instance.engagement.product
     if isinstance(instance, Finding):
         return instance.test.engagement.product
+    return None

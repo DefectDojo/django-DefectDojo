@@ -4,7 +4,6 @@ import logging
 import operator
 from datetime import datetime
 from functools import reduce
-from typing import Tuple
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -41,6 +40,7 @@ from dojo.forms import (
     TestForm,
     TypedNoteForm,
 )
+from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
@@ -173,7 +173,7 @@ class ViewTest(View):
     def get_form(self, request: HttpRequest, context: dict):
         return (
             self.get_typed_note_form(request, context)
-            if context.get("note_type_activation", 0)
+            if context.get("note_type_activation")
             else self.get_note_form(request)
         )
 
@@ -372,7 +372,7 @@ def copy_test(request, tid):
                 messages.SUCCESS,
                 "Test Copied successfully.",
                 extra_tags="alert-success")
-            create_notification(event="test_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+            create_notification(event="test_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title=f"Copying of {test.title}",
                                 description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
@@ -380,12 +380,11 @@ def copy_test(request, tid):
                                 recipients=[test.engagement.lead],
                                 icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Unable to copy test, please try again.",
-                extra_tags="alert-danger")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Unable to copy test, please try again.",
+            extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
     return render(request, "dojo/copy_object.html", {
@@ -434,10 +433,17 @@ def test_ics(request, tid):
     cal = get_cal_event(
         start_date,
         end_date,
-        _(f"Test: {test.test_type.name} ({test.engagement.product.name}"),
+        _("Test: %s (%s)") % (
+            test.test_type.name,
+            test.engagement.product.name,
+        ),
         _(
-            f"Set aside for test {test.test_type.name}, on product {test.engagement.product.name}. "
-            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}",
+            "Set aside for test %s, on product %s. "
+            "Additional detail can be found at %s",
+        ) % (
+            test.test_type.name,
+            test.engagement.product.name,
+            request.build_absolute_uri(reverse("view_test", args=(test.id,))),
         ),
         uid,
     )
@@ -532,6 +538,7 @@ class AddFindingView(View):
             finding.reporter = request.user
             finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
             finding.tags = context["form"].cleaned_data["tags"]
+            finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
             # Save and add new endpoints
             finding_helper.add_endpoints(finding, context["form"])
@@ -539,9 +546,8 @@ class AddFindingView(View):
             finding.save()
 
             return finding, request, True
-        else:
-            add_error_message_to_response("The form has errors, please correct them below.")
-            add_field_errors_to_response(context["form"])
+        add_error_message_to_response("The form has errors, please correct them below.")
+        add_field_errors_to_response(context["form"])
 
         return finding, request, False
 
@@ -583,8 +589,7 @@ class AddFindingView(View):
                 )
 
             return request, True, push_to_jira
-        else:
-            add_field_errors_to_response(context["jform"])
+        add_field_errors_to_response(context["jform"])
 
         return request, False, False
 
@@ -624,9 +629,9 @@ class AddFindingView(View):
             # Create a notification
             create_notification(
                 event="finding_added",
-                title=_(f"Addition of {finding.title}"),
+                title=_("Addition of %s") % finding.title,
                 finding=finding,
-                description=_(f'Finding "{finding.title}" was added by {request.user}'),
+                description=_('Finding "%s" was added by %s') % (finding.title, request.user),
                 url=reverse("view_finding", args=(finding.id,)),
                 icon="exclamation-triangle")
             # Add a success message
@@ -664,10 +669,8 @@ class AddFindingView(View):
         if success:
             if "_Finished" in request.POST:
                 return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-            else:
-                return HttpResponseRedirect(reverse("add_findings", args=(test.id,)))
-        else:
-            context["form_error"] = True
+            return HttpResponseRedirect(reverse("add_findings", args=(test.id,)))
+        context["form_error"] = True
         # Render the form
         return render(request, self.get_template(), context)
 
@@ -746,11 +749,10 @@ def add_temp_finding(request, tid, fid):
                                  extra_tags="alert-success")
 
             return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 _("The form has errors, please correct them below."),
-                                 extra_tags="alert-danger")
+        messages.add_message(request,
+                             messages.ERROR,
+                             _("The form has errors, please correct them below."),
+                             extra_tags="alert-danger")
 
     else:
         form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={"active": False,
@@ -806,9 +808,7 @@ def search(request, tid):
 
 class ReImportScanResultsView(View):
     def get_template(self) -> str:
-        """
-        Returns the template that will be presented to the user
-        """
+        """Returns the template that will be presented to the user"""
         return "dojo/import_scan_results.html"
 
     def get_form(
@@ -817,22 +817,17 @@ class ReImportScanResultsView(View):
         test: Test,
         **kwargs: dict,
     ) -> ReImportScanForm:
-        """
-        Returns the default import form for importing findings
-        """
+        """Returns the default import form for importing findings"""
         if request.method == "POST":
             return ReImportScanForm(request.POST, request.FILES, test=test, **kwargs)
-        else:
-            return ReImportScanForm(test=test, **kwargs)
+        return ReImportScanForm(test=test, **kwargs)
 
     def get_jira_form(
         self,
         request: HttpRequest,
         test: Test,
-    ) -> Tuple[JIRAImportScanForm | None, bool]:
-        """
-        Returns a JiraImportScanForm if jira is enabled
-        """
+    ) -> tuple[JIRAImportScanForm | None, bool]:
+        """Returns a JiraImportScanForm if jira is enabled"""
         jira_form = None
         push_all_jira_issues = False
         # Decide if we need to present the Push to JIRA form
@@ -858,7 +853,7 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test_id: int,
-    ) -> Tuple[HttpRequest, dict]:
+    ) -> tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
         the request and context dict back to be rendered
@@ -870,12 +865,9 @@ class ReImportScanResultsView(View):
         # by default we keep a trace of the scan_type used to create the test
         # if it's not here, we use the "name" of the test type
         # this feature exists to provide custom label for tests for some parsers
-        if test.scan_type:
-            scan_type = test.scan_type
-        else:
-            scan_type = test.test_type.name
+        scan_type = test.scan_type or test.test_type.name
         # Set the product tab
-        product_tab = Product_Tab(test.engagement.product, title=_(f"Re-upload a {scan_type}"), tab="engagements")
+        product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
         form = self.get_form(
@@ -925,9 +917,7 @@ class ReImportScanResultsView(View):
         form: ReImportScanForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the form and manipulate the input in any way that is appropriate
-        """
+        """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
         context.update({
             "scan": request.FILES.get("file", None),
@@ -979,15 +969,20 @@ class ReImportScanResultsView(View):
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
         return None
 
+    def get_reimporter(
+        self,
+        context: dict,
+    ) -> BaseImporter:
+        """Gets the reimporter to use"""
+        return DefaultReImporter(**context)
+
     def reimport_findings(
         self,
         context: dict,
     ) -> str | None:
-        """
-        Attempt to import with all the supplied information
-        """
+        """Attempt to import with all the supplied information"""
         try:
-            importer_client = DefaultReImporter(**context)
+            importer_client = self.get_reimporter(context)
             (
                 context["test"],
                 finding_count,
@@ -1008,7 +1003,7 @@ class ReImportScanResultsView(View):
                 untouched_finding_count=untouched_finding_count,
             ))
         except Exception as e:
-            logger.exception(e)
+            logger.exception("An exception error occurred during the report import")
             return f"An exception error occurred during the report import: {e}"
         return None
 
@@ -1016,18 +1011,14 @@ class ReImportScanResultsView(View):
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a successful import
-        """
+        """Redirect the user to a place that indicates a successful import"""
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a failed import
-        """
+        """Redirect the user to a place that indicates a failed import"""
         return HttpResponseRedirect(reverse(
             "re_import_scan_results",
             args=(context.get("test").id, ),
@@ -1038,9 +1029,7 @@ class ReImportScanResultsView(View):
         request: HttpRequest,
         test_id: int,
     ) -> HttpResponse:
-        """
-        Process GET requests for the ReImport View
-        """
+        """Process GET requests for the ReImport View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1054,9 +1043,7 @@ class ReImportScanResultsView(View):
         request: HttpRequest,
         test_id: int,
     ) -> HttpResponse:
-        """
-        Process POST requests for the ReImport View
-        """
+        """Process POST requests for the ReImport View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,

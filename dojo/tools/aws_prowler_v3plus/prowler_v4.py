@@ -15,8 +15,9 @@ class AWSProwlerV4Parser:
         # https://docs.prowler.com/projects/prowler-open-source/en/latest/tutorials/reporting/#json
         for deserialized in data:
 
+            mute_status = deserialized.get("status")
             status = deserialized.get("status_code")
-            if status.upper() != "FAIL":
+            if (status.upper() != "FAIL") or (status.upper() == "FAIL" and mute_status == "Suppressed"):
                 continue
 
             account_id = deserialized.get("cloud", {}).get("account", {}).get("uid", "")
@@ -36,7 +37,8 @@ class AWSProwlerV4Parser:
             documentation = deserialized.get("remediation", {}).get("references", "")
             documentation = str(documentation) + "\n" + str(deserialized.get("unmapped", {}).get("related_url", ""))
             security_domain = deserialized.get("resources", [{}])[0].get("type", "")
-            timestamp = deserialized.get("event_time")
+            # Prowler v4.5.0 changed 'event_time' key in report with 'time_dt'
+            timestamp = deserialized.get("time_dt") or deserialized.get("event_time")
             resource_arn = deserialized.get("resources", [{}])[0].get("uid", "")
             resource_id = deserialized.get("resources", [{}])[0].get("name", "")
             unique_id_from_tool = deserialized.get("finding_info", {}).get("uid", "")

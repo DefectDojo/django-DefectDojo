@@ -85,6 +85,20 @@ a {
     background-color: #38434d!important;
 }
 
+.panel-heading .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+#base-content .clearfix .pagination .dropdown-toggle:focus {
+    outline: 5px auto #599fd0;
+    outline-offset: -3px;
+}
+.table-responsive .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    text-decoration: none;
+}
+
 /*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;
@@ -444,6 +458,11 @@ form ul {
     list-style-type: none;
     margin-left: 0px;
     padding-left: 0px
+}
+
+form ul li a#reset-password,
+form ul li a#forgot-username {
+    color: rgb(51, 122, 183)
 }
 
 form ul#id_accepted_findings {
@@ -1278,7 +1297,7 @@ div.custom-search-form {
 }
 
 .dojo-filter-set.form-inline .filter-form-control {
-    width: auto!important;
+    width: 100%!important;
     vertical-align: middle;
 }
 
@@ -1832,6 +1851,14 @@ small {
     min-width:200px;
 }
 
+#toggleBox {
+    background-color: transparent!important;
+    border: none!important;
+    font-weight: bold!important;
+    position: absolute!important;
+    left: 0!important;
+}
+
 .EasyMDEContainer .table {
     width: unset!important;
 }
@@ -1849,4 +1876,11 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.table th, .table td {
+    border-right: 1px solid #ddd;
+}
+.table th:last-child, .table td:last-child {
+    border-right: none; 
 }

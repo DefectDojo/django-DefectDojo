@@ -1,11 +1,13 @@
 import base64
 import logging
-from typing import List, Tuple
+from warnings import warn
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.db import IntegrityError
+from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
@@ -29,19 +31,22 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
+from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
+from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
 
 
 class Parser:
+
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
     """
 
-    def get_findings(scan_type: str, test: Test) -> List[Finding]:
+    def get_findings(scan_type: str, test: Test) -> list[Finding]:
         """
         Stub function to make the hinting happier. The actual class
         is loosely obligated to have this function defined.
@@ -52,11 +57,13 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
+
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
     or even extended
     """
+
     def __init__(
         self,
         *args: list,
@@ -86,7 +93,7 @@ class BaseImporter(ImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         A helper method that executes the entire import process in a single method.
         This includes parsing the file, processing the findings, and returning the
@@ -96,9 +103,9 @@ class BaseImporter(ImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Make the conversion from unsaved Findings in memory to Findings that are saved in the
         database with and ID associated with them. This processor will also save any associated
@@ -108,9 +115,9 @@ class BaseImporter(ImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Identify any findings that have been imported before,
         but are no longer present in later reports so that
@@ -144,7 +151,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Parse the scan report submitted with the parser class and generate some findings
         that are not saved to the database yet. This step is crucial in determining if
@@ -165,25 +172,44 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Test]:
-        """
-        Use the API configuration object to get the tests to be used by the parser
-        """
+    ) -> list[Test]:
+        """Use the API configuration object to get the tests to be used by the parser"""
         try:
             return parser.get_tests(self.scan_type, scan)
         except ValueError as e:
             logger.warning(e)
             raise ValidationError(e)
 
-    def parse_dynamic_test_type_findings_from_tests(
-        self,
-        tests: List[Test],
-    ) -> List[Finding]:
-        """
-        currently we only support import one Test
-        so for parser that support multiple tests (like SARIF)
-        we aggregate all the findings into one uniq test
-        """
+    def consolidate_dynamic_tests(self, tests: list[Test]) -> list[Finding]:
+        parsed_findings = []
+        # Make sure we have at least one test returned
+        if len(tests) == 0:
+            logger.info(f"No tests found in import for {self.scan_type}")
+            self.test = None
+            return parsed_findings
+        # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+        # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+        # when there is more than 1 test
+        #
+        # we also aggregate the label of the Test_type to show the user the original self.scan_type
+        # only if they are different. This is to support meta format like SARIF
+        # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
+        test_raw = tests[0]
+        test_type_name = self.scan_type
+        # Create a new test if it has not already been created
+        if not self.test:
+            # Determine if we should use a custom test type name
+            if test_raw.type:
+                test_type_name = f"{tests[0].type} Scan"
+                if test_type_name != self.scan_type:
+                    test_type_name = f"{test_type_name} ({self.scan_type})"
+            self.test = self.create_test(test_type_name)
+        # This part change the name of the Test
+        # we get it from the data of the parser
+        # Update the test and test type with meta from the raw test
+        self.update_test_from_internal_test(test_raw)
+        self.update_test_type_from_internal_test(test_raw)
+        # Aggregate all of the findings into a single place
         parsed_findings = []
         for test_raw in tests:
             parsed_findings.extend(test_raw.findings)
@@ -193,7 +219,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Use the API configuration object to get the tests to be used by the parser
         to dump findings into
@@ -201,28 +227,28 @@ class BaseImporter(ImporterOptions):
         This version of this function is intended to be extended by children classes
         """
         tests = self.parse_dynamic_test_type_tests(scan, parser)
-        return self.parse_dynamic_test_type_findings_from_tests(tests)
+        return self.consolidate_dynamic_tests(tests)
 
     def parse_findings(
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
-
-        This function will vary by importer, so it is marked as
-        abstract with a prohibitive exception raised if the
-        method is attempted to to be used by the BaseImporter class
         """
-        self.check_child_implementation_exception()
+        # Attempt any preprocessing before generating findings
+        scan = self.process_scan_file(scan)
+        if hasattr(parser, "get_tests"):
+            return self.parse_findings_dynamic_test_type(scan, parser)
+        return self.parse_findings_static_test_type(scan, parser)
 
     def sync_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Processes findings in a synchronous manner such that all findings
         will be processed in a worker/process/thread
@@ -231,21 +257,22 @@ class BaseImporter(ImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
+        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
         return self.process_findings(parsed_findings, sync=False, **kwargs)
 
     def determine_process_method(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determines whether to process the scan iteratively, or in chunks,
         based upon the ASYNC_FINDING_IMPORT setting
@@ -255,11 +282,17 @@ class BaseImporter(ImporterOptions):
                 parsed_findings,
                 **kwargs,
             )
-        else:
-            return self.sync_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
+        return self.sync_process_findings(
+            parsed_findings,
+            **kwargs,
+        )
+
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
 
     def update_test_meta(self):
         """
@@ -276,7 +309,7 @@ class BaseImporter(ImporterOptions):
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
 
-        return None
+        return
 
     def update_timestamps(self):
         """
@@ -318,15 +351,21 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: List[Finding] = [],
-        closed_findings: List[Finding] = [],
-        reactivated_findings: List[Finding] = [],
-        untouched_findings: List[Finding] = [],
+        new_findings: list[Finding] | None = None,
+        closed_findings: list[Finding] | None = None,
+        reactivated_findings: list[Finding] | None = None,
+        untouched_findings: list[Finding] | None = None,
     ) -> Test_Import:
-        """
-        Creates a record of the import or reimport operation that has occurred.
-        """
+        """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
+        if untouched_findings is None:
+            untouched_findings = []
+        if reactivated_findings is None:
+            reactivated_findings = []
+        if closed_findings is None:
+            closed_findings = []
+        if new_findings is None:
+            new_findings = []
         if settings.TRACK_IMPORT_HISTORY is False:
             return None
         # Log the current state of what has occurred in case there could be
@@ -358,52 +397,79 @@ class BaseImporter(ImporterOptions):
             commit_hash=self.commit_hash,
             type=self.import_type,
         )
-        # Define all of the respective import finding actions for the test import object
-        test_import_finding_action_list = []
+
+        # Create a history record for each finding
         for finding in closed_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for closed finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_CLOSED_FINDING,
             ))
         for finding in new_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for created finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_CREATED_FINDING,
             ))
         for finding in reactivated_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for reactivated finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_REACTIVATED_FINDING,
             ))
         for finding in untouched_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for untouched finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_UNTOUCHED_FINDING,
             ))
-        # Bulk create all the defined objects
-        Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
             for finding in test_import.findings_affected.all():
                 for tag in self.tags:
-                    finding.tags.add(tag)
+                    self.add_tags_safe(finding, tag)
         # Add any tags to any endpoints of the findings imported if necessary
         if self.apply_tags_to_endpoints and self.tags:
             for finding in test_import.findings_affected.all():
                 for endpoint in finding.endpoints.all():
                     for tag in self.tags:
-                        endpoint.tags.add(tag)
+                        self.add_tags_safe(endpoint, tag)
 
         return test_import
+
+    def create_import_history_record_safe(
+        self,
+        test_import_finding_action,
+    ):
+        """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
+        logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
+        try:
+            test_import_finding_action.save()
+        except IntegrityError as e:
+            # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
+            logger.warning("Error creating Test_Import_Finding_Action: %s", e)
+            logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
+
+    def add_tags_safe(
+        self,
+        finding_or_endpoint,
+        tag,
+    ):
+        """Adds tags to a finding or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
+        if not isinstance(finding_or_endpoint, Finding) and not isinstance(finding_or_endpoint, Endpoint):
+            msg = "finding_or_endpoint must be a Finding or Endpoint object"
+            raise TypeError(msg)
+
+        msg = "finding" if isinstance(finding_or_endpoint, Finding) else "endpoint" if isinstance(finding_or_endpoint, Endpoint) else "unknown"
+        logger.debug(f" adding tag: {tag} to " + msg + f"{finding_or_endpoint.id}")
+
+        try:
+            finding_or_endpoint.tags.add(tag)
+        except IntegrityError as e:
+            # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
+            logger.warning("Error adding tag: %s", e)
+            logger.debug("Error adding tag, finding marked as duplicate and deleted ?")
 
     def construct_imported_message(
         self,
@@ -443,15 +509,15 @@ class BaseImporter(ImporterOptions):
             message += "."
         else:
             # Set the message to convey that all findings processed are identical to the last time an import/reimport occurred
-            message = "No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report."
+            message = "No findings were added/updated/closed/reactivated as the report is empty or the findings in Defect Dojo are identical to those in the uploaded report."
 
         return message
 
     def chunk_findings(
         self,
-        finding_list: List[Finding],
+        finding_list: list[Finding],
         chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> List[List[Finding]]:
+    ) -> list[list[Finding]]:
         """
         Split a single large list into a list of lists of size `chunk_size`.
         For Example
@@ -491,7 +557,23 @@ class BaseImporter(ImporterOptions):
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+            test_type.dynamically_generated = True
+            test_type.save()
         return test_type
+
+    def update_test_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (description := getattr(internal_test, "description", None)) is not None:
+            self.test.description = description
+        if (version := getattr(internal_test, "version", None)) is not None:
+            self.test.version = version
+        self.test.save()
+
+    def update_test_type_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (static_tool := getattr(internal_test, "static_tool", None)) is not None:
+            self.test.test_type.static_tool = static_tool
+        if (dynamic_tool := getattr(internal_test, "dynamic_tool", None)) is not None:
+            self.test.test_type.dynamic_tool = dynamic_tool
+        self.test.test_type.save()
 
     def verify_tool_configuration_from_test(self):
         """
@@ -508,7 +590,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the test has a value
-        elif self.test is not None:
+        if self.test is not None:
             # Make sure the Tool_Configuration is connected to the product that the test is
             if self.api_scan_configuration.product != self.test.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Test"
@@ -534,7 +616,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the engagement has a value
-        elif self.engagement is not None:
+        if self.engagement is not None:
             # Make sure the Tool_Configuration is connected to the engagement that the test is
             if self.api_scan_configuration.product != self.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Engagement"
@@ -627,7 +709,7 @@ class BaseImporter(ImporterOptions):
     def process_endpoints(
         self,
         finding: Finding,
-        endpoints_to_add: List[Endpoint],
+        endpoints_to_add: list[Endpoint],
     ) -> None:
         """
         Process any endpoints to add to the finding. Endpoints could come from two places
@@ -695,6 +777,7 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         note_message: str,
+        *,
         finding_groups_enabled: bool,
     ) -> None:
         """
@@ -705,7 +788,8 @@ class BaseImporter(ImporterOptions):
         """
         finding.active = False
         finding.is_mitigated = True
-        finding.mitigated = self.scan_date
+        if not finding.mitigated:
+            finding.mitigated = self.scan_date
         finding.mitigated_by = self.user
         finding.notes.create(
             author=self.user,
@@ -719,3 +803,46 @@ class BaseImporter(ImporterOptions):
             finding.save(dedupe_option=False)
         else:
             finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+
+    def notify_scan_added(
+        self,
+        test,
+        updated_count,
+        new_findings=None,
+        findings_mitigated=None,
+        findings_reactivated=None,
+        findings_untouched=None,
+    ):
+        if findings_untouched is None:
+            findings_untouched = []
+        if findings_reactivated is None:
+            findings_reactivated = []
+        if findings_mitigated is None:
+            findings_mitigated = []
+        if new_findings is None:
+            new_findings = []
+        logger.debug("Scan added notifications")
+
+        new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
+        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
+        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
+        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+
+        title = (
+            f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
+        )
+
+        create_notification(
+            event="scan_added_empty" if updated_count == 0 else "scan_added",
+            title=title,
+            findings_new=new_findings,
+            findings_mitigated=findings_mitigated,
+            findings_reactivated=findings_reactivated,
+            finding_count=updated_count,
+            test=test,
+            engagement=test.engagement,
+            product=test.engagement.product,
+            findings_untouched=findings_untouched,
+            url=reverse("view_test", args=(test.id,)),
+            url_api=reverse("test-detail", args=(test.id,)),
+        )

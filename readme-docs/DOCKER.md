@@ -2,13 +2,19 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://documentation.defectdojo.com/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation.
+
+[Running in Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+
+[Configuration](https://docs.defectdojo.com/en/open_source/installation/configuration/) explains the different ways to adjust settings and environment variables.
+
+Docker images for `linux/amd64` are published to https://hub.docker.com/u/defectdojo. Expiremental builds for `linux/arm64` are available since 2.45.0.
 
 
 # Prerequisites
 
 *  Docker version
-    *  Installing with docker-compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker-compose.
+    *  Installing with docker compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
@@ -32,16 +38,22 @@ When running the application without building images, the application will run b
 
 # Setup via Docker Compose
 
+## Commands
+
+Short summary of useful commands:
+
+- `docker compose build` - Build the docker images, it can take additional parameters to be used in the build process, e.g. `docker compose build --no-cache`.
+- `docker compose up` - Start the docker containers in the foreground.
+- `docker compose up -d` - Start the docker containers in the background.
+- `docker compose stop` - Stop the docker containers, it can take additional parameters to be used in the stop process.
+- `docker compose down` - Stop and remove the docker containers, it can take additional parameters to be used in the stop and remove process.
+
 ## Scripts
 
-6 shell scripts make life easier and avoid typing long commands:
+2 shell scripts make life easier:
 
-- `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
-- `./dc-up.sh` - Start the docker containers in the foreground.
-- `./dc-up-d.sh` - Start the docker containers in the background.
-- `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
-- `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
-- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.
+- `./run-unittest.sh` - Utility script to aid in running a specific unit test class.
+- `./run-integration-tests.sh` - Utility script to aid in running a specific integration test.
 
 
 # Setup via Docker Compose - Building and running the application
@@ -51,18 +63,18 @@ When running the application without building images, the application will run b
 To build images and put them in your local docker cache, run:
 
 ```zsh
-./dc-build.sh
+docker compose build
 ```
 
 To build a single image, run:
 
 ```zsh
-./dc-build.sh uwsgi
+docker compose build uwsgi
 ```
 or
 
 ```
-./dc-build.sh nginx
+docker compose build nginx
 ```
 
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
@@ -72,7 +84,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh
+docker compose up
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -86,8 +98,8 @@ For development, use:
 
 ```zsh
 docker/setEnv.sh dev
-./dc-build.sh
-./dc-up.sh
+docker compose build
+docker compose up
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
@@ -100,7 +112,7 @@ This will run the application based on merged configurations from docker-compose
 * Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
 
 ```
-docker-compose restart celeryworker
+docker compose restart celeryworker
 ```
 
 *  The postgres port is forwarded to the host so that you can access your database from outside the container.
@@ -118,56 +130,7 @@ id -u
 
 ## Run with Docker Compose in development mode with debugpy (remote debug)
 
-The debug mode, offers out of the box a debugging server listening on port 3000
-
-```zsh
-# switch to debug configuration
-docker/setEnv.sh debug
-# then use docker-compose as usual
-./dc-up.sh
-```
-
-This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
-
-Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
-```
-cp docker-compose.override.debug.yml docker-compose.override.yml
-./dc-down.sh
-./dc-up.sh
-```
-
-The default configuration assumes port 3000 by default for debug.
-
-But you can pass additional environment variables:
-- `DD_DEBUG_PORT` to define a different port
-- `DD_DEBUG_WAIT_FOR_CLIENT` - That's if you want to debugger to wait, right before calling `django.core.wsgi.get_wsgi_application()`
-
-
-### VS code
-Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
-
-```
-  {
-      "name": "Remote DefectDojo",
-      "type": "python",
-      "request": "attach",
-      "pathMappings": [
-          {
-              "localRoot": "${workspaceFolder}",
-              "remoteRoot": "/app"
-          }
-      ],
-      "port": 3000,
-      "host": "localhost"
-  }
-```
-
-You can now launch the remote debug from VS Code, place your breakpoints and step through the code.
-
-> At present, 2 caveats:
-> - Static will not be present. You would have to `docker cp` them over from the nginx container
-> - For some reason, the page loading may hang. You can stop the loading and reload, the page will ultimately appear.
-
+Some users have found value in using debugpy. A short guide to setting this up can be found [here](https://testdriven.io/blog/django-debugging-vs-code/)
 
 ## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
@@ -175,7 +138,7 @@ To find out the admin password, check the very beginning of the console
 output of the initializer container by running:
 
 ```zsh
-docker-compose logs initializer | grep "Admin password:"
+docker compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
@@ -183,14 +146,13 @@ Make sure you write down the first password generated as you'll need it when re-
 ## Option to change the password
 * If you dont have admin password use the below command to change the password.
 * After starting the container and open another tab in the same folder.
-* django-defectdojo-uwsgi-1 -- name obtained from running containers using ```zsh docker ps ``` command
 
 ```zsh
-docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
+docker compose exec -it uwsgi ./manage.py changepassword admin
 ```
 
 # Logging
-For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](../dojo/settings/template-local_settings)). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
 
 ```
@@ -212,7 +174,7 @@ In the `dojo/settings/template-local_settings.py` you'll find instructions on ho
 This toolbar allows you to debug SQL queries, and shows some other interesting information.
 
 
-# Exploitation, versioning
+# Explicit Versioning
 ## Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 
@@ -228,32 +190,47 @@ Building will tag the images with "x.y.z", then you can run the application base
 *  Tagged images can be seen with:
 
 ```
+$ docker compose images
+CONTAINER               REPOSITORY                     TAG                 IMAGE ID            SIZE
+dd-nginx-1              defectdojo/defectdojo-nginx    latest              b0a5f30ab01a        193MB
+...
+
+or
+
 $ docker images
 REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
 defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
+...
 ```
 
 *  This will show on which tagged images the containers are running:
 
 ```
+$ docker compose ps
+NAME                    IMAGE                                 COMMAND                  SERVICE            CREATED              STATUS              PORTS
+dd-nginx-1              defectdojo/defectdojo-nginx:latest    "/entrypoint-nginx.sh"   nginx              About a minute ago   Up About a minute   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp,
+...
+
+or
+
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
+...
 ```
-
 
 ## Clean up Docker Compose
 
 Removes all containers
 
 ```zsh
-./dc-down.sh
+docker compose down
 ```
 
 Removes all containers, networks and the database volume
 
 ```zsh
-./dc-down.sh --volumes
+docker compose down --volumes
 ```
 
 # Run with Docker Compose using https
@@ -270,7 +247,7 @@ To secure the application by https, follow those steps
         ssl_certificate             /etc/nginx/ssl/nginx.crt
         ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
-*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml 
+*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
 * Protect your private key from other users:
 ```
 chmod 400 nginx/*.key
@@ -280,7 +257,7 @@ chmod 400 nginx/*.key
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-./dc-up.sh
+docker compose up
 ```
 
 ## Create credentials on the fly
@@ -290,7 +267,7 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-./dc-up.sh
+docker compose up
 ```
 
 The default https port is 8443.
@@ -300,7 +277,7 @@ To change the port:
 - update `docker-compose.override.https.yml` or set DD_TLS_PORT in the environment)
 - restart the application
 
-NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
+NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker compose declarations to discover which ports to map when publishing the application.
 
 
 # Run the tests with Docker Compose
@@ -316,21 +293,20 @@ This will run all unit-tests and leave the uwsgi container up:
 
 ```
 docker/setEnv.sh unit_tests
-./dc-up.sh
+docker compose up
 ```
 
 ### Limited tests
 If you want to enter the container to run more tests or a single test case, leave setEnv in normal or dev mode:
 ```
 docker/setEnv.sh dev
-./dc-up.sh
+docker compose up
 ```
-Then 
+Then
 ```
-docker ps
-#find the name of the uwsgi container from the above command
-docker exec -ti [container-name] bash
+docker exec -it uwsgi /bin/bash
 ```
+You're now inside the container.
 Rerun all the tests:
 
 ```
@@ -349,11 +325,11 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
+For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class.
 You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests
@@ -361,19 +337,19 @@ This will run all integration-tests and leave the containers up:
 
 ```
 docker/setEnv.sh integration_tests
-./dc-up.sh
+docker compose up
 ```
 
-NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `./dc-up.sh`
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker compose up`
 
 Check the logs with:
 ```
-docker logs -f django-defectdojo_integration-tests_1
+docker compose logs -f integration-tests
 ```
 
 # Checking Docker versions
 
-Run the following to determine the versions for docker and docker-compose:
+Run the following to determine the versions for docker and docker compose:
 
 ```zsh
 $ docker version
@@ -394,58 +370,14 @@ Server:
  OS/Arch:      linux/amd64
  Experimental: false
 
-$ docker-compose version
-docker-compose version 1.18.0, build 8dd22a9
+$ docker compose version
+Docker Compose version 1.18.0, build 8dd22a9
 docker-py version: 2.6.1
 CPython version: 2.7.13
 OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 ```
 
-In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
+In this case, both docker (version 17.09.0-ce) and docker compose (1.18.0) need to be updated.
 
 Follow [Docker's documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
-Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
-
-```zsh
-#!/bin/bash
-
-# Set location of docker-compose binary - shouldn't need to modify this
-DESTINATION=/usr/local/bin/docker-compose
-
-# Get latest docker-compose version
-VERSION=$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq .name -r)
-
-# Output some info on what this is going to do
-echo "Note: docker-compose version $VERSION will be downloaded from:"
-echo "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-echo "Enter sudo password to install docker-compose"
-
-# Download and install latest docker compose
-sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
-sudo chmod +x $DESTINATION
-
-# Output new docker-compose version info
-echo ""
-docker-compose version
-```
-
-Running the script above will look like:
-
-```zsh
-$ vi update-docker-compose
-$ chmod u+x update-docker-compose
-$ ./update-docker-compose
-Note: docker-compose version 1.24.0 will be downloaded from:
-https://github.com/docker/compose/releases/download/1.24.0/docker-compose-Linux-x86_64
-Enter sudo password to install docker-compose
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   617    0   617    0     0   1778      0 --:--:-- --:--:-- --:--:--  1778
-100 15.4M  100 15.4M    0     0  2478k      0  0:00:06  0:00:06 --:--:-- 2910k
-
-docker-compose version 1.24.0, build 0aa59064
-docker-py version: 3.7.2
-CPython version: 3.6.8
-OpenSSL version: OpenSSL 1.1.0j  20 Nov 2018
-```

@@ -110,15 +110,17 @@
                             <div class="panel panel-info endpoints table-responsive">
                                 {% colgroup endpoints into 2 cols as grouped_items %}
                                 <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                    {% for row in grouped_items %}
-                                        <tr>
-                                            {% for item in row %}
-                                                <td>{% if item %}<i class="fa-solid fa-circle"></i>
-                                                    {{ item }}{% endif %}
-                                                </td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
+                                    {% if grouped_items|length > 0 %}
+                                        {% for row in grouped_items %}
+                                            <tr>
+                                                {% for item in row %}
+                                                    <td>{% if item %}<i class="fa-solid fa-circle"></i>
+                                                        {{ item }}{% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
                                 </table>
                             </div>
                         </div>
@@ -158,7 +160,7 @@
         {% if include_disclaimer%}
             <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
                 <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
-                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
+                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer | safe }}</p>
             </div>
 		{% endif %}
         <div class="row">
@@ -271,7 +273,7 @@
                                         {% endif %}
                                     </span>
                                     </td>
-                                    <td>
+                                    <td class="text-right">
                                         {{ finding.epss_score|format_epss }}
                                         /
                                         {{ finding.epss_percentile|format_epss }}

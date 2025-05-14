@@ -43,8 +43,7 @@ def dojo_async_task(func):
         countdown = kwargs.pop("countdown", 0)
         if we_want_async(*args, func=func, **kwargs):
             return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
-        else:
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return __wrapper__
 
@@ -67,9 +66,8 @@ def dojo_model_to_id(_func=None, *, parameter=0):
             if model_or_id:
                 if isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
                     logger.debug("converting model_or_id to id: %s", model_or_id)
-                    id = model_or_id.id
                     args = list(args)
-                    args[parameter] = id
+                    args[parameter] = model_or_id.id
 
             return func(*args, **kwargs)
 
@@ -78,8 +76,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_to_id_internal
-    else:
-        return dojo_model_to_id_internal(_func)
+    return dojo_model_to_id_internal(_func)
 
 
 # decorator with parameters needs another wrapper layer
@@ -123,8 +120,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_from_id_internal
-    else:
-        return dojo_model_from_id_internal(_func)
+    return dojo_model_from_id_internal(_func)
 
 
 def get_parameter_froms_args_kwargs(args, kwargs, parameter):
@@ -147,36 +143,20 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
     return model_or_id
 
 
-def on_exception_log_kwarg(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception:
-            logger.info(f"exception occured at url: {self.driver.current_url}")
-            logger.info(f"page source: {self.driver.page_source}")
-            f = open("/tmp/selenium_page_source.html", "w", encoding="utf-8")
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise
-
-    return wrapper
-
-
-def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, block=False):
+def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
-            _block = getattr(settings, "RATE_LIMITER_BLOCK", block)
-            _rate = getattr(settings, "RATE_LIMITER_RATE", rate)
-            _lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT", False)
+            limiter_block = getattr(settings, "RATE_LIMITER_BLOCK", block)
+            limiter_rate = getattr(settings, "RATE_LIMITER_RATE", rate)
+            limiter_lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT", False)
             old_limited = getattr(request, "limited", False)
             ratelimited = is_ratelimited(request=request, fn=fn,
-                                         key=key, rate=_rate, method=method,
+                                         key=key, rate=limiter_rate, method=method,
                                          increment=True)
             request.limited = ratelimited or old_limited
-            if ratelimited and _block:
-                if _lockout:
+            if ratelimited and limiter_block:
+                if limiter_lockout:
                     username = request.POST.get("username", None)
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()

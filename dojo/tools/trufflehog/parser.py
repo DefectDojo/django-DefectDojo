@@ -26,10 +26,9 @@ class TruffleHogParser:
 
         if "SourceMetadata" in json_data:
             return self.get_findings_v3(dict_strs, test)
-        elif "path" in json_data:
+        if "path" in json_data:
             return self.get_findings_v2(dict_strs, test)
-        else:
-            return []
+        return []
 
     def get_findings_v2(self, data, test):
         dupes = {}
@@ -66,14 +65,14 @@ class TruffleHogParser:
             strings_found = "".join(
                 string + "\n" for string in json_data.get("stringsFound")
             )
-            dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5((file + reason).encode("utf-8"), usedforsecurity=False).hexdigest()
             description += (
                 "\n**Strings Found:**\n```" + strings_found + "```\n"
             )
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                finding.description = finding.description + description
+                finding.description += description
                 finding.nb_occurences += 1
                 dupes[dupe_key] = finding
             else:
@@ -168,12 +167,12 @@ class TruffleHogParser:
                     severity = "Medium"
 
             dupe_key = hashlib.md5(
-                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"),
+                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                finding.description = finding.description + description
+                finding.description += description
                 finding.nb_occurences += 1
                 dupes[dupe_key] = finding
             else:
@@ -210,6 +209,5 @@ class TruffleHogParser:
                             value, tab_count=(tab_count + 1),
                         )
                         continue
-                    else:
-                        return_string += f"{tab_string}{key}: {value}\n"
+                    return_string += f"{tab_string}{key}: {value}\n"
         return return_string

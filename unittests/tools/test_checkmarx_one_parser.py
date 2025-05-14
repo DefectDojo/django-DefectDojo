@@ -3,7 +3,7 @@ import logging
 
 from dojo.models import Test
 from dojo.tools.checkmarx_one.parser import CheckmarxOneParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class TestCheckmarxOneParser(DojoTestCase):
 
     def test_checkmarx_one_many_vulns(self):
-        with open("unittests/scans/checkmarx_one/checkmarx_one.json") as testfile:
+        with (get_unit_tests_scans_path("checkmarx_one") / "checkmarx_one.json").open(encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -28,8 +28,14 @@ class TestCheckmarxOneParser(DojoTestCase):
                 self.assertEqual("Medium", finding_test.severity)
                 self.assertEqual("/src/helpers/Constants.ts", finding_test.file_path)
 
+    def test_checkmarx_one_no_findings(self):
+        with (get_unit_tests_scans_path("checkmarx_one") / "no_findings.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(0, len(findings))
+
     def test_checkmarx_one_many_findings(self):
-        with open("unittests/scans/checkmarx_one/many_findings.json") as testfile:
+        with (get_unit_tests_scans_path("checkmarx_one") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(6, len(findings))
@@ -45,14 +51,8 @@ class TestCheckmarxOneParser(DojoTestCase):
                 self.assertEqual("High", finding_test.severity)
                 self.assertEqual("/qe/testharness/Dockerfile", finding_test.file_path)
 
-    def test_checkmarx_one_no_findings(self):
-        with open("unittests/scans/checkmarx_one/no_findings.json") as testfile:
-            parser = CheckmarxOneParser()
-            findings = parser.get_findings(testfile, Test())
-            self.assertEqual(0, len(findings))
-
-    def test_checkmarx_one_new_format(self):
-        with open("unittests/scans/checkmarx_one/api_export.json") as testfile:
+    def test_checkmarx_one_sca_10770(self):
+        with (get_unit_tests_scans_path("checkmarx_one") / "checkmarx_one_sca_10770.json").open(encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(8, len(findings))
@@ -65,8 +65,20 @@ class TestCheckmarxOneParser(DojoTestCase):
                     self.assertIsNotNone(finding.severity)
                     self.assertIsNotNone(finding.description)
                 finding_test = findings[0]
-                self.assertEqual("Medium", finding_test.severity)
-                self.assertEqual("/.github/workflows/checkmarx.yaml", finding_test.file_path)
+                self.assertEqual("High", finding_test.severity)
+                self.assertEqual(89, finding_test.cwe)
+
+    def test_checkmarx_one_no_description(self):
+        with (get_unit_tests_scans_path("checkmarx_one") / "checkmarx_one_format_two.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                for finding in findings:
+                    self.assertIsNotNone(finding.title)
+                    self.assertIsNotNone(finding.description)
+                finding_test = findings[0]
+                self.assertEqual("Low", finding_test.severity)
 
     def test_checkmarx_vulnerabilities_from_scan_results(self):
         def test_iac_finding(finding):
@@ -123,7 +135,7 @@ class TestCheckmarxOneParser(DojoTestCase):
             # Not implemented yet
             pass
 
-        with open("unittests/scans/checkmarx_one/vulnerabilities_from_scan_results.json") as testfile:
+        with (get_unit_tests_scans_path("checkmarx_one") / "vulnerabilities_from_scan_results.json").open(encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(146, len(findings))
@@ -141,3 +153,15 @@ class TestCheckmarxOneParser(DojoTestCase):
             sast_finding = findings[124]
             self.maxDiff = None
             test_sast_finding(sast_finding)
+
+    def test_checkmarx_one_false_positive_status(self):
+        with (get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            # check the first finding is false positive
+            self.assertEqual(True, findings[0].false_p)
+            self.assertEqual(False, findings[0].active)
+            # check the second finding is not false positive
+            self.assertEqual(False, findings[1].false_p)
+            self.assertEqual(True, findings[1].active)

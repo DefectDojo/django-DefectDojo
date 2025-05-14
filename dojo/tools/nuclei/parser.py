@@ -11,9 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class NucleiParser:
-    """
-    A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """
+
+    """A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file"""
 
     DEFAULT_SEVERITY = "Low"
 
@@ -33,7 +32,7 @@ class NucleiParser:
         data = []
         if filecontent == "" or len(filecontent) == 0:
             return []
-        elif filecontent[0] == "[":
+        if filecontent[0] == "[":
             content = json.loads(filecontent)
             for template in content:
                 data.append(template)
@@ -60,10 +59,7 @@ class NucleiParser:
             if item_type is None:
                 item_type = ""
             matched = item.get("matched", item.get("matched-at", ""))
-            if "://" in matched:
-                endpoint = Endpoint.from_uri(matched)
-            else:
-                endpoint = Endpoint.from_uri("//" + matched)
+            endpoint = Endpoint.from_uri(matched) if "://" in matched else Endpoint.from_uri("//" + matched)
 
             finding = Finding(
                 title=f"{name}",
@@ -93,29 +89,27 @@ class NucleiParser:
 
             classification = info.get("classification")
             if classification:
-                if "cve-id" in classification and classification["cve-id"]:
+                if classification.get("cve-id"):
                     cve_ids = classification["cve-id"]
                     finding.unsaved_vulnerability_ids = [x.upper() for x in cve_ids]
                 if (
-                    "cwe-id" in classification
-                    and classification["cwe-id"]
-                    and len(classification["cwe-id"]) > 0
+                    classification.get("cwe-id")
                 ):
                     cwe = classification["cwe-id"][0]
-                    finding.cwe = int(cwe[4:])
-                if (
-                    "cvss-metrics" in classification
-                    and classification["cvss-metrics"]
-                ):
+                    try:
+                        finding.cwe = int(cwe[4:])
+                    except ValueError:
+                        """
+                        ignore CWE if non-int
+                        several older templates such as https://github.com/projectdiscovery/nuclei-templates/blob/6636c0d2dd540645cc3472822beb4b3819ff8322/http/cves/2004/CVE-2004-0519.yaml#L21
+                        """
+                if classification.get("cvss-metrics"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
                         classification["cvss-metrics"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
-                if (
-                    "cvss-score" in classification
-                    and classification["cvss-score"]
-                ):
+                if classification.get("cvss-score"):
                     finding.cvssv3_score = classification["cvss-score"]
 
             matcher = item.get("matcher-name", item.get("matcher_name"))

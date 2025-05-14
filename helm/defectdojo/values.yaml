@@ -16,6 +16,9 @@ createPostgresqlHaPgpoolSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+# extraLabels: {}
+# Add extra labels for k8s
+
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
@@ -26,6 +29,19 @@ networkPolicy:
   #  - podSelector:
   #      matchLabels:
   #      app.kubernetes.io/instance: defectdojo-prometheus
+  # For more detailed configuration with ports and peers. It will ignore ingressExtend
+  ingress: []
+  # ingress:
+  #  - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo-prometheus
+  #    ports:
+  #    - protocol: TCP
+  #      port: 8443
   egress: []
   # egress:
   # - to:
@@ -34,6 +50,7 @@ networkPolicy:
   #   ports:
   #   - protocol: TCP
   #     port: 443
+  annotations: {}
 
 # Configuration value to select database type
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
@@ -42,7 +59,7 @@ database: postgresql
 host: defectdojo.default.minikube.local
 
 # The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
-# site_url: 'https://<yourdomain>'
+# siteUrl: 'https://<yourdomain>'
 
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
@@ -76,6 +93,13 @@ securityContext:
 
 dbMigrationChecker:
   enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
 
 tests:
   unitTests:
@@ -102,10 +126,14 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.3.0
+    image: nginx/nginx-prometheus-exporter:1.4.2
     imagePullPolicy: IfNotPresent
 
 annotations: {}
+
+secrets:
+  # Add annotations for secret resources
+  annotations: {}
 
 # Components
 celery:
@@ -113,6 +141,7 @@ celery:
   # To use an external celery broker, set the hostname here
   brokerHost: ""
   logLevel: INFO
+  annotations: {}
   beat:
     annotations: {}
     affinity: {}
@@ -139,15 +168,15 @@ celery:
         cpu: 2000m
         memory: 512Mi
     tolerations: []
-    app_settings:
-      pool_type: solo
+    appSettings:
+      poolType: solo
       # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
       # Comment out the "solo" line, and uncomment the following lines.
-      # pool_type: prefork
-      # autoscale_min: 2
-      # autoscale_max: 8
+      # poolType: prefork
+      # autoscaleMin: 2
+      # autoscaleMax: 8
       # concurrency: 8
-      # prefetch_multiplier: 128
+      # prefetchMultiplier: 128
 
   # A list of extra volumes to mount. This
   # is useful for bringing in extra data that can be referenced by other configurations
@@ -186,6 +215,7 @@ django:
   annotations: {}
   service:
     annotations: {}
+    type: ""
   affinity: {}
   ingress:
     enabled: true
@@ -211,16 +241,33 @@ django:
         memory: 256Mi
   nodeSelector: {}
   replicas: 1
+  strategy: {}
   tolerations: []
   uwsgi:
     livenessProbe:
-      # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
+      # Enable liveness checks on uwsgi container.
       enabled: true
       failureThreshold: 6
-      initialDelaySeconds: 3
+      initialDelaySeconds: 0
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
+    readinessProbe:
+      # Enable readiness checks on uwsgi container.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    startupProbe:
+      # Enable startup checks on uwsgi container.
+      enabled: true
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 1
     resources:
       requests:
         cpu: 100m
@@ -228,11 +275,11 @@ django:
       limits:
         cpu: 2000m
         memory: 512Mi
-    app_settings:
+    appSettings:
       processes: 2
       threads: 2
-      # max_fd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
-    enable_debug: false  # this also requires DD_DEBUG to be set to True
+      # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
+    enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
@@ -298,12 +345,10 @@ django:
 
 initializer:
   run: true
-  jobAnnotations: {
-    helm.sh/hook: "post-install,post-upgrade"
-  }
+  jobAnnotations: {}
   annotations: {}
   labels: {}
-  keepSeconds: 60
+  keepSeconds: 60  # A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.
   affinity: {}
   nodeSelector: {}
   resources:
@@ -346,6 +391,11 @@ initializer:
   # - `hostPath` - only for hostPath, file or directory from local host
   # @type: array<map>
   extraVolumes: []
+
+  # staticName defines whether name of the job will be the same (e.g., "defectdojo-initializer")
+  # or different every time - generated based on current time (e.g., "defectdojo-initializer-2024-11-11-18-57")
+  # This might be handy for ArgoCD deployments
+  staticName: false
 
 postgresql:
   enabled: true
@@ -436,7 +486,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.36.0
+    tag: 1.37.7
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -498,3 +548,15 @@ extraConfigs: {}
 #     configMapKeyRef:
 #       name: my-other-postgres-configmap
 #       key: cluster_endpoint
+
+# To add code snippet which would extend setting functionality, you might add it here
+# It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
+# For more see: https://documentation.defectdojo.com/getting_started/configuration/
+# For example:
+# localsettingspy: |
+#   INSTALLED_APPS += (
+#     'debug_toolbar',
+#   )
+#   MIDDLEWARE = [
+#       'debug_toolbar.middleware.DebugToolbarMiddleware',
+#   ] + MIDDLEWARE

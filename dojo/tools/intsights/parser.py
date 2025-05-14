@@ -6,9 +6,8 @@ from dojo.tools.intsights.json_handler import IntSightsJSONParser
 
 
 class IntSightsParser:
-    """
-    IntSights Threat Intelligence Report
-    """
+
+    """IntSights Threat Intelligence Report"""
 
     _LOGGER = logging.getLogger(__name__)
 
@@ -24,12 +23,13 @@ class IntSightsParser:
     def _build_finding_description(self, alert: dict) -> str:
         """
         Builds an IntSights Finding description from various pieces of information.
+
         Args:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
-        """
 
-        description = "\n".join(
+        """
+        return "\n".join(
             [
                 alert["description"],
                 f'**Date Found**: `{alert.get("report_date", "None provided")} `',
@@ -41,7 +41,6 @@ class IntSightsParser:
                 f'**Alert Link**: {alert.get("alert_link", "None provided")}',
             ],
         )
-        return description
 
     def get_findings(self, file, test):
         duplicates = {}
@@ -56,10 +55,10 @@ class IntSightsParser:
             raise ValueError(msg)
         for alert in alerts:
             dupe_key = alert["alert_id"]
-            alert = Finding(
+            uniq_alert = Finding(
                 title=alert["title"],
                 test=test,
-                active=False if alert["status"] == "Closed" else True,
+                active=alert["status"] != "Closed",
                 verified=True,
                 description=self._build_finding_description(alert),
                 severity=alert["severity"],
@@ -68,7 +67,7 @@ class IntSightsParser:
                 dynamic_finding=True,
                 unique_id_from_tool=alert["alert_id"],
             )
-            duplicates[dupe_key] = alert
+            duplicates[dupe_key] = uniq_alert
             if dupe_key not in duplicates:
                 duplicates[dupe_key] = True
-        return duplicates.values()
+        return list(duplicates.values())

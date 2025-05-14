@@ -1,8 +1,8 @@
 import csv
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckBinaryAnalysisFinding
 
@@ -22,12 +22,10 @@ class BlackduckBinaryAnalysisImporter(Importer):
 
         return self._process_csvfile(report, orig_report_name)
 
-    def _process_csvfile(self, report, orig_report_name):
-        """
-        If passed a CSV file, process.
-        """
+    def _process_csvfile(self, report: Path, orig_report_name):
+        """If passed a CSV file, process."""
         vulnerabilities = {}
-        with open(str(report)) as f:
+        with report.open(encoding="utf-8") as f:
             vulnerabilities = self.__partition_by_key(f)
 
         sha1_hash_keys = set(vulnerabilities.keys())
@@ -38,9 +36,7 @@ class BlackduckBinaryAnalysisImporter(Importer):
     def _process_vuln_results(
         self, sha1_hash_keys, report, orig_report_name, vulnerabilities,
     ):
-        """
-        Process findings for each project.
-        """
+        """Process findings for each project."""
         for sha1_hash_key in sha1_hash_keys:
             for vuln in vulnerabilities[sha1_hash_key]:
                 vuln_dict = dict(vuln)

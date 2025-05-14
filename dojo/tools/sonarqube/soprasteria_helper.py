@@ -14,16 +14,15 @@ class SonarQubeSoprasteriaHelper:
         sev = sonar_severity.lower()
         if sev == "blocker":
             return "Critical"
-        elif sev == "critical":
+        if sev == "critical":
             return "High"
-        elif sev == "major":
+        if sev == "major":
             return "Medium"
-        elif sev == "minor":
+        if sev == "minor":
             return "Low"
-        elif sev in ["high", "medium", "low"]:
+        if sev in {"high", "medium", "low"}:
             return sev.capitalize()
-        else:
-            return "Info"
+        return "Info"
 
     def get_description(self, vuln_details):
         rule_description = etree.tostring(
@@ -32,8 +31,7 @@ class SonarQubeSoprasteriaHelper:
         rule_description = rule_description.split("<h2>See", 1)[0]
         rule_description = (str(rule_description)).replace("<h2>", "**")
         rule_description = (str(rule_description)).replace("</h2>", "**")
-        rule_description = strip_tags(rule_description).strip()
-        return rule_description
+        return strip_tags(rule_description).strip()
 
     def get_references(self, rule_name, vuln_details):
         rule_references = rule_name
@@ -43,11 +41,10 @@ class SonarQubeSoprasteriaHelper:
 
     def get_cwe(self, vuln_references):
         # Match only the first CWE!
-        cweSearch = re.search("CWE-([0-9]*)", vuln_references, re.IGNORECASE)
+        cweSearch = re.search(r"CWE-([0-9]*)", vuln_references, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
-        else:
-            return 0
+        return 0
 
     # Process one vuln from the report for "SonarQube Scan"
     # Create the finding and add it into the dupes list
@@ -100,7 +97,7 @@ class SonarQubeSoprasteriaHelper:
             find = dupes[aggregateKeys]
             find.description = f"{find.description}\n{descriptionOneOccurence}"
             find.mitigation = f"{find.mitigation}\n______\n{vuln_mitigation}"
-            find.nb_occurences = find.nb_occurences + 1
+            find.nb_occurences += 1
 
     # Process one vuln from the report for "SonarQube Scan detailed"
     # Create the finding and add it into the dupes list

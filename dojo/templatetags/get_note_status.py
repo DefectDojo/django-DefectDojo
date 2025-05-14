@@ -7,3 +7,4 @@ register = template.Library()
 def get_public_notes(notes):
     if notes:
         return notes.filter(private=False)
+    return None

@@ -23,11 +23,10 @@ class AWSProwlerParser:
     def get_findings(self, file, test):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
-        elif file.name.lower().endswith(".json"):
+        if file.name.lower().endswith(".json"):
             return self.process_json(file, test)
-        else:
-            msg = "Unknown file format"
-            raise ValueError(msg)
+        msg = "Unknown file format"
+        raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()
@@ -66,16 +65,10 @@ class AWSProwlerParser:
             # title = re.sub(r"\[.*\]\s", "", result_extended)
             control = re.sub(r"\[.*\]\s", "", title_text)
             sev = self.getCriticalityRating(result, level, severity)
-            if result == "INFO" or result == "PASS":
-                active = False
-            else:
-                active = True
+            active = not (result == "INFO" or result == "PASS")
 
             # creating description early will help with duplication control
-            if not level:
-                level = ""
-            else:
-                level = ", " + level
+            level = "" if not level else ", " + level
             description = (
                 "**Issue:** "
                 + str(result_extended)
@@ -161,10 +154,7 @@ class AWSProwlerParser:
             sev = self.getCriticalityRating("FAIL", level, severity)
 
             # creating description early will help with duplication control
-            if not level:
-                level = ""
-            else:
-                level = ", " + level
+            level = "" if not level else ", " + level
             description = (
                 "**Issue:** "
                 + str(result_extended)
@@ -218,25 +208,19 @@ class AWSProwlerParser:
     def formatview(self, depth):
         if depth > 1:
             return "* "
-        else:
-            return ""
+        return ""
 
     # Criticality rating
     def getCriticalityRating(self, result, level, severity):
-        criticality = "Info"
         if result == "INFO" or result == "PASS":
-            criticality = "Info"
-        elif result == "FAIL":
+            return "Info"
+        if result == "FAIL":
             if severity:
                 # control is failing but marked as Info so we want to mark as
                 # Low to appear in the Dojo
                 if severity == "Informational":
                     return "Low"
                 return severity
-            else:
-                if level == "Level 1":
-                    criticality = "Critical"
-                else:
-                    criticality = "High"
+            return "Critical" if level == "Level 1" else "High"
 
-        return criticality
+        return "Info"

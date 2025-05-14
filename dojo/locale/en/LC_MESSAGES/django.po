@@ -3193,17 +3193,17 @@ msgstr ""
 
 #: dojo/templates/dojo/forgot_username.html
 msgid ""
-"Forgotten your username? Enter your email address below, and we’ll email it "
+"Forgotten your username? Enter your email address below, and we'll email it "
 "to you."
 msgstr ""
 
 #: dojo/templates/dojo/forgot_username.html
-msgid "Retreive my username"
+msgid "Retrieve my username"
 msgstr ""
 
 #: dojo/templates/dojo/forgot_username_done.html
 msgid ""
-"We’ve emailed you information about your user account, if an account exists "
+"We've emailed you information about your user account, if an account exists "
 "with the email you entered. You should receive the requested information "
 "shortly."
 msgstr ""
@@ -3211,7 +3211,7 @@ msgstr ""
 #: dojo/templates/dojo/forgot_username_done.html
 #: dojo/templates/dojo/password_reset_done.html
 msgid ""
-"If you don’t receive an email, please make sure you’ve entered the address "
+"If you don't receive an email, please make sure you've entered the address "
 "you registered with, and check your spam folder."
 msgstr ""
 
@@ -3548,7 +3548,7 @@ msgstr ""
 
 #: dojo/templates/dojo/password_reset.html
 msgid ""
-"Forgotten your password? Enter your email address below, and we’ll email "
+"Forgotten your password? Enter your email address below, and we'll email "
 "instructions for setting a new one."
 msgstr ""
 
@@ -3586,7 +3586,7 @@ msgstr ""
 
 #: dojo/templates/dojo/password_reset_done.html
 msgid ""
-"We’ve emailed you instructions for setting your password, if an account "
+"We've emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
 msgstr ""
 
@@ -4963,4 +4963,24 @@ msgstr ""
 
 #: dojo/utils.py
 msgid "Home"
+msgstr ""
+
+#: dojo/templates/dojo/calendar.html
+msgid "Previous month"
+msgstr ""
+
+#: dojo/templates/dojo/calendar.html
+msgid "Next month"
+msgstr ""
+
+#: dojo/templates/dojo/calendar.html
+msgid "Month preview"
+msgstr ""
+
+#: dojo/templates/dojo/calendar.html
+msgid "Week preview"
+msgstr ""
+
+#: dojo/templates/dojo/calendar.html
+msgid "Day preview"
 msgstr ""

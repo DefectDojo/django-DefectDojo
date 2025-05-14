@@ -88,7 +88,7 @@ class BurpGraphQLParser:
                     finding["Description"] += description + "\n\n"
 
         if issue.get("evidence"):
-            finding["Evidence"] = finding["Evidence"] + self.parse_evidence(
+            finding["Evidence"] += self.parse_evidence(
                 issue.get("evidence"),
             )
 
@@ -219,8 +219,7 @@ class BurpGraphQLParser:
 
     def get_cwe(self, cwe_html):
         # Match only the first CWE!
-        cweSearch = re.search("CWE-([0-9]*)", cwe_html, re.IGNORECASE)
+        cweSearch = re.search(r"CWE-([0-9]*)", cwe_html, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
-        else:
-            return 0
+        return 0

@@ -115,9 +115,9 @@ def requires_tool_type(scan_type):
 
 # iterate through the modules in the current package
 package_dir = str(Path(__file__).resolve().parent)
-for module_name in os.listdir(package_dir):
+for module_name in os.listdir(package_dir):  # noqa: PTH208
     # check if it's dir
-    if os.path.isdir(os.path.join(package_dir, module_name)):
+    if (Path(package_dir) / module_name).is_dir():
         try:
             # check if it's a Python module
             if find_spec(f"dojo.tools.{module_name}.parser"):

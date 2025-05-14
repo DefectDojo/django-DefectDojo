@@ -2,7 +2,7 @@ __author__ = "jankuehl"
 
 import re
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Finding
 
@@ -24,12 +24,11 @@ class XanitizerParser:
         root = self.parse_xml(filename)
         if root is not None:
             return self.get_findings_internal(root, test)
-        else:
-            return []
+        return []
 
     def parse_xml(self, filename):
         try:
-            tree = ET.parse(filename)
+            tree = ElementTree.parse(filename)
         except SyntaxError as se:
             raise ValueError(se)
 
@@ -86,15 +85,9 @@ class XanitizerParser:
         cl = finding.find("class")
         file = finding.find("file")
         if pckg is not None and cl is not None:
-            if line:
-                title = f"{title} ({pckg.text}.{cl.text}:{line})"
-            else:
-                title = f"{title} ({pckg.text}.{cl.text})"
+            title = f"{title} ({pckg.text}.{cl.text}:{line})" if line else f"{title} ({pckg.text}.{cl.text})"
         else:
-            if line:
-                title = f"{title} ({file.text}:{line})"
-            else:
-                title = f"{title} ({file.text})"
+            title = f"{title} ({file.text}:{line})" if line else f"{title} ({file.text})"
 
         return title
 
@@ -110,11 +103,11 @@ class XanitizerParser:
             description = "{}\n**Starting at:** {} - **Line** {}".format(
                 description, startnode.get("classFQN"), startnode.get("lineNo"),
             )
-            description = self.add_code(startnode, False, description)
+            description = self.add_code(startnode, showline=False, description=description)
             description = "{}\n\n**Ending at:** {} - **Line** {}".format(
                 description, endnode.get("classFQN"), endnode.get("lineNo"),
             )
-            description = self.add_code(endnode, True, description)
+            description = self.add_code(endnode, showline=True, description=description)
         elif finding.find("node") is not None:
             node = finding.find("node")
             description = f"{description}\n-----\n"
@@ -126,7 +119,7 @@ class XanitizerParser:
                 description = f"{description}\n**Finding at:** {location} - **Line** {line}"
             else:
                 description = f"{description}\n**Finding at:** {location}"
-            description = self.add_code(node, True, description)
+            description = self.add_code(node, showline=True, description=description)
 
         return description
 
@@ -161,7 +154,7 @@ class XanitizerParser:
             "relativePath",
         ):
             return finding.find("endNode").get("relativePath")
-        elif finding.find("node") is not None and finding.find("node").get(
+        if finding.find("node") is not None and finding.find("node").get(
             "relativePath",
         ):
             return finding.find("node").get("relativePath")

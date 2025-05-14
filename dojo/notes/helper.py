@@ -7,5 +7,5 @@ def delete_related_notes(obj):
     if not hasattr(obj, "notes"):
         logger.warning(f"Attempted to delete notes from object type {type(obj)} without 'notes' attribute.")
         return
-    logging.debug(f"Deleting {obj.notes.count()} notes for {type(obj).__name__} {obj.id}")
+    logger.debug(f"Deleting {obj.notes.count()} notes for {type(obj).__name__} {obj.id}")
     obj.notes.all().delete()

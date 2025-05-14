@@ -123,13 +123,13 @@ class VeracodeScaParser:
             )
             status = issue.get("issue_status")
             if (
-                issue.get("Ignored")
-                and issue.get("Ignored").capitalize() == "True"
-                or status
+                (issue.get("Ignored")
+                and issue.get("Ignored").capitalize() == "True")
+                or (status
                 and (
                     status.capitalize() == "Resolved"
                     or status.capitalize() == "Fixed"
-                )
+                ))
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
@@ -212,10 +212,10 @@ class VeracodeScaParser:
                 finding.cvssv3_score = cvss_score
 
             if (
-                row.get("Ignored")
-                and row.get("Ignored").capitalize() == "True"
-                or row.get("Status")
-                and row.get("Status").capitalize() == "Resolved"
+                (row.get("Ignored")
+                and row.get("Ignored").capitalize() == "True")
+                or (row.get("Status")
+                and row.get("Status").capitalize() == "Resolved")
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
@@ -229,7 +229,7 @@ class VeracodeScaParser:
         severity = severity.capitalize()
         if severity is None:
             severity = "Medium"
-        elif "Unknown" == severity or "None" == severity:
+        elif severity == "Unknown" or severity == "None":
             severity = "Info"
         return severity
 
@@ -237,11 +237,10 @@ class VeracodeScaParser:
     def __cvss_to_severity(cls, cvss):
         if cvss >= 9:
             return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
+        if cvss >= 7:
             return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
+        if cvss >= 4:
             return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
+        if cvss > 0:
             return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
+        return cls.vc_severity_mapping.get(1)

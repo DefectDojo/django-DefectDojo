@@ -3,7 +3,7 @@ name: "release-X: Release docker containers"
 env:
   GIT_USERNAME: "DefectDojo release bot"
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
-  workflow_name: 'release docker containers' # needed in cache key, which doesn't support comma's
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,6 +13,9 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
+      platform:
+        type: string
+        default: "linux/amd64"
   workflow_call:
     inputs:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
@@ -21,74 +24,71 @@ on:
         type: string
         description: 'Release version (x.y.z format)'
         required: true
+      platform:
+        type: string
+        default: "linux/amd64"
 
 jobs:
   job-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
           docker-image: [django, nginx]
           os: [alpine, debian]
-          platform: [amd64]
     steps:
+      # Replace slashes so we can use this in filenames
+      - name: Set-platform
+        run: |
+          platform=${{ inputs.platform }}
+          echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
+
+        # deduce docker org name from git repo to make the build also work in forks
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Checkout tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.release_number }}
-
-      - id: set-repo-org
-        run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          ref: ${{ inputs.release_number }}
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
+        # we cannot set any tags here, those are set on the merged digest in release-x-manual-merge-container-digests.yml
+      - name: Build and push images
+        id: build
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
         env:
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name}}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-
-
-      - name: Build and push images with debian
-        if: ${{ matrix.os  == 'debian' }}
-        uses: docker/build-push-action@v6
-        env:
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
         with:
           push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+          outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
+          cache-from: type=gha,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
 
-      - name: Build and push images with alpine
-        if: ${{ matrix.os  == 'alpine' }}
-        uses: docker/build-push-action@v6
-        env:
-          REPO_ORG: ${{ env.repoorg }}
-          docker-image: ${{ matrix.docker-image }}
+        # export the digest to a file
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+        # upload the digest file as artifact
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
         with:
-          push: true
-          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
-          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
-          context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
-#           platforms: ${{ matrix.platform }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+          name: digests-${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1

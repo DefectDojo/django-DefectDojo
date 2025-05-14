@@ -28,13 +28,10 @@ def issue_r(raw_row, vuln, scan_date):
     if issue_row["fqdn"] == "No registered hostname":
         issue_row["fqdn"] = None
     # port
-    _port = raw_row.get("port")
+    port = raw_row.get("port")
 
     # Create Endpoint
-    if issue_row["fqdn"]:
-        ep = Endpoint(host=issue_row["fqdn"])
-    else:
-        ep = Endpoint(host=issue_row["ip_address"])
+    ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
 
     # OS NAME
     issue_row["os"] = raw_row.findtext("OS")
@@ -42,66 +39,66 @@ def issue_r(raw_row, vuln, scan_date):
     # Scan details - VULNS//VULN indicates we only care about confirmed
     # vulnerabilities
     for vuln_cat in raw_row.findall("VULNS/CAT"):
-        _category = str(vuln_cat.get("value"))
+        category = str(vuln_cat.get("value"))
         for vuln_details in vuln_cat.findall("VULN"):
-            _temp = issue_row
+            temp = issue_row
 
-            _gid = vuln_details.get("number")
+            gid = vuln_details.get("number")
 
-            _temp["port_status"] = _port
+            temp["port_status"] = port
 
-            _result = str(vuln_details.findtext("RESULT"))
+            result = str(vuln_details.findtext("RESULT"))
 
             # Vuln name
-            _temp["vuln_name"] = vuln_details.findtext("TITLE")
+            temp["vuln_name"] = vuln_details.findtext("TITLE")
 
             # Vuln Description
-            _description = str(vuln_details.findtext("DIAGNOSIS"))
+            description = str(vuln_details.findtext("DIAGNOSIS"))
             # Solution Strips Heading Workaround(s)
-            _temp["solution"] = htmltext(
+            temp["solution"] = htmltext(
                 str(vuln_details.findtext("SOLUTION")),
             )
 
             # Vuln_description
-            _temp["vuln_description"] = "\n".join(
+            temp["vuln_description"] = "\n".join(
                 [
-                    htmltext(_description),
-                    htmltext("**Category:** " + _category),
-                    htmltext("**QID:** " + str(_gid)),
-                    htmltext("**Port:** " + str(_port)),
-                    htmltext("**Result Evidence:** " + _result),
+                    htmltext(description),
+                    htmltext("**Category:** " + category),
+                    htmltext("**QID:** " + str(gid)),
+                    htmltext("**Port:** " + str(port)),
+                    htmltext("**Result Evidence:** " + result),
                 ],
             )
             # Impact description
-            _temp["IMPACT"] = htmltext(
+            temp["IMPACT"] = htmltext(
                 str(vuln_details.findtext("CONSEQUENCE")),
             )
 
             # CVE and LINKS
-            _cl = []
-            _temp_cve_details = vuln_details.iterfind("CVE_ID_LIST/CVE_ID")
-            if _temp_cve_details:
-                _cl = {
+            cl = []
+            temp_cve_details = vuln_details.iterfind("CVE_ID_LIST/CVE_ID")
+            if temp_cve_details:
+                cl = {
                     cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in _temp_cve_details
+                    for cve_detail in temp_cve_details
                 }
-                _temp["cve"] = "\n".join(list(_cl.keys()))
-                _temp["links"] = "\n".join(list(_cl.values()))
+                temp["cve"] = "\n".join(list(cl.keys()))
+                temp["links"] = "\n".join(list(cl.values()))
 
             # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
             # unless we can find map to a Severity OR a CVSS score from the
             # findings detail.
             sev = qualys_convert_severity(vuln_details.get("severity"))
 
-            refs = "\n".join(list(_cl.values()))
+            refs = "\n".join(list(cl.values()))
             finding = Finding(
-                title=_temp["vuln_name"],
-                mitigation=_temp["solution"],
-                description=_temp["vuln_description"],
+                title=temp["vuln_name"],
+                mitigation=temp["solution"],
+                description=temp["vuln_description"],
                 severity=sev,
                 references=refs,
-                impact=_temp["IMPACT"],
-                vuln_id_from_tool=_gid,
+                impact=temp["IMPACT"],
+                vuln_id_from_tool=gid,
                 date=scan_date,
             )
             finding.unsaved_endpoints = []
@@ -112,21 +109,59 @@ def issue_r(raw_row, vuln, scan_date):
 
 def qualys_convert_severity(raw_val):
     val = str(raw_val).strip()
-    if "1" == val:
+    if val == "1":
         return "Info"
-    elif "2" == val:
+    if val == "2":
         return "Low"
-    elif "3" == val:
+    if val == "3":
         return "Medium"
-    elif "4" == val:
+    if val == "4":
         return "High"
-    elif "5" == val:
+    if val == "5":
         return "Critical"
-    else:
-        return "Info"
+    return "Info"
 
 
 class QualysInfrascanWebguiParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Infrastructure Webgui Parser.
+
+        Fields:
+        - title: Set to title from Qualys Infrastructure Webgui Scanner.
+        - mitigation: Set to solution from Qualys Infrastructure Webgui Scanner.
+        - description: Custom description made from: description, category, QID, port, and result evidence.
+        - severity: Set to severity from Qualys Infrastructure Webgui Scanner translated into DefectDojo formant.
+        - impact: Set to consequence from Qualys Infrastructure Webgui Scanner.
+        - vuln_id_from_tool: Set to gid from Qualys Infrastructure Webgui Scanner.
+        - date: Set to datetime from Qualys Infrastructure Webgui Scanner.
+        """
+        return [
+            "title",
+            "mitigation",
+            "description",
+            "severity",
+            "impact",
+            "vuln_id_from_tool",
+            "date",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Infrastructure Webgui Parser.
+
+        Fields:
+        - title: Set to title from Qualys Infrastructure Webgui Scanner.
+        - severity: Set to severity from Qualys Infrastructure Webgui Scanner translated into DefectDojo formant.
+
+        NOTE: endpoints is not provided by parser
+        """
+        return [
+            "title",
+            "severity",
+        ]
+
     def get_scan_types(self):
         return ["Qualys Infrastructure Scan (WebGUI XML)"]
 

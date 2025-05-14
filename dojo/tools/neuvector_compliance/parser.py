@@ -36,10 +36,7 @@ def get_items(tree, test):
     # /v1/host/{id}/compliance or similar. thus, we need to support items in a
     # bit different leafs.
     testsTree = None
-    if "report" in tree:
-        testsTree = tree.get("report").get("checks", [])
-    else:
-        testsTree = tree.get("items", [])
+    testsTree = tree.get("report").get("checks", []) if "report" in tree else tree.get("items", [])
 
     for node in testsTree:
         item = get_item(node, test)
@@ -49,7 +46,7 @@ def get_items(tree, test):
             + node.get("test_number")
             + node.get("description")
         )
-        unique_key = hashlib.md5(unique_key.encode("utf-8")).hexdigest()
+        unique_key = hashlib.md5(unique_key.encode("utf-8"), usedforsecurity=False).hexdigest()
         items[unique_key] = item
     return list(items.values())
 
@@ -101,7 +98,7 @@ def get_item(node, test):
         for m in messages:
             full_description += f"{str(m).rstrip()}\n"
 
-    finding = Finding(
+    return Finding(
         title=title,
         test=test,
         description=full_description,
@@ -112,25 +109,18 @@ def get_item(node, test):
         dynamic_finding=False,
     )
 
-    return finding
-
 
 # see neuvector/share/clus_apis.go
 def convert_severity(severity):
     if severity.lower() == "high":
         return "High"
-    elif severity.lower() == "warn":
+    if severity.lower() == "warn":
         return "Medium"
-    elif severity.lower() == "info":
+    if severity.lower() == "info":
         return "Low"
-    elif severity.lower() == "pass":
+    if severity.lower() in {"pass", "note", "error"}:
         return "Info"
-    elif severity.lower() == "note":
-        return "Info"
-    elif severity.lower() == "error":
-        return "Info"
-    else:
-        return severity.title()
+    return severity.title()
 
 
 class NeuVectorComplianceParser:
@@ -149,6 +139,5 @@ class NeuVectorComplianceParser:
 
         if filename.name.lower().endswith(".json"):
             return parse(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

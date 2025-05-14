@@ -27,9 +27,9 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: release-drafter/release-drafter@v6.0.0
+        uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         with:
-          version: ${{ github.event.inputs.version }}  
+          version: ${{ inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # Generate the OAS schemas in another workflow
@@ -37,21 +37,23 @@ jobs:
     needs: update_release_draft
     uses: ./.github/workflows/fetch-oas.yml
     with:
-      version: ${{ github.event.inputs.version }} 
+      version: ${{ inputs.version }}
     secrets: inherit
   # Upload the OAS schemas to the release object
   add-oas-to-release:
-    needs: 
+    needs:
       - update_release_draft
       - oas-fetch
     runs-on: ubuntu-latest
     steps:
       - name: Load OAS files from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: oas-*
 
       - name: Upload Release Asset - OpenAPI Specification - YAML
         id: upload-release-asset-yaml
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -62,7 +64,7 @@ jobs:
 
       - name: Upload Release Asset - OpenAPI Specification - JSON
         id: upload-release-asset-json
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -71,4 +73,4 @@ jobs:
           asset_name: oas.json
           asset_content_type: application/json
 
-    
+

@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiUpdater:
+
     """
     This class updates in SonarQube, a SonarQube issue previously imported as a DefectDojo Findings.
      This class maps the finding status to a SQ issue status and later on it transitions the issue
@@ -61,10 +62,7 @@ class SonarQubeApiUpdater:
         elif finding.risk_accepted:
             target_status = "RESOLVED / WONTFIX"
         elif finding.active:
-            if finding.verified:
-                target_status = "CONFIRMED"
-            else:
-                target_status = "REOPENED"
+            target_status = "CONFIRMED" if finding.verified else "REOPENED"
         return target_status
 
     def get_sonarqube_required_transitions_for(
@@ -72,7 +70,7 @@ class SonarQubeApiUpdater:
     ):
         # If current and target is the same... do nothing
         if current_status == target_status:
-            return
+            return None
 
         # Check if there is at least one transition from current_status...
         if not [
@@ -80,7 +78,7 @@ class SonarQubeApiUpdater:
             for x in self.MAPPING_SONARQUBE_STATUS_TRANSITION
             if current_status in x.get("from")
         ]:
-            return
+            return None
 
         # Starting from target_status... find out possible origin statuses that
         # can transition to target_status
@@ -113,6 +111,8 @@ class SonarQubeApiUpdater:
                     if possible_transition:
                         transitions_result.extendleft(possible_transition)
                         return list(transitions_result)
+            return None
+        return None
 
     def update_sonarqube_finding(self, finding):
         sonarqube_issue = finding.sonarqube_issue

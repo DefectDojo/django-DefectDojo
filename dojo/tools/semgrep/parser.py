@@ -4,6 +4,61 @@ from dojo.models import Finding
 
 
 class SemgrepParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the check_id value outputted by the Semgrep Scanner.
+        - severity: Set to severity from Semgrep Scanner that has been converted to DefectDojo format.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - line: Set to line from Semgrep Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - vuln_id_from_tool: Set to Vuln Id from Semgrep Scanner.
+        - nb_occurences: Initially set to 1 then updated.
+        - unique_id_from_tool: Set to corresponding field from scanner if it is present in the output.
+        - cwe: Set to cwe from scanner output if present.
+        - mitigation: Set to "fix" from scanner output or "fix_regex" if "fix" isn't present.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "file_path",
+            "line",
+            "static_finding",
+            "dynamic_finding",
+            "vuln_id_from_tool",
+            "nb_occurences",
+            "unique_id_from_tool",
+            "cwe",
+            "mitigation",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the title outputted by the Semgrep Scanner.
+        - cwe: Set to cwe from scanner output if present.
+        - line: Set to line from Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "line",
+            "file_path",
+            "description",
+        ]
+
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
 
@@ -35,6 +90,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -99,6 +158,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -130,17 +193,17 @@ class SemgrepParser:
         return list(dupes.values())
 
     def convert_severity(self, val):
-        if "CRITICAL" == val.upper():
+        upper_value = val.upper()
+        if upper_value == "CRITICAL":
             return "Critical"
-        elif "WARNING" == val.upper():
+        if upper_value in {"WARNING", "MEDIUM"}:
             return "Medium"
-        elif "ERROR" == val.upper() or "HIGH" == val.upper():
+        if upper_value in {"ERROR", "HIGH"}:
             return "High"
-        elif "INFO" == val.upper():
-            return "Info"
-        else:
-            msg = f"Unknown value for severity: {val}"
-            raise ValueError(msg)
+        if upper_value in {"LOW", "INFO"}:
+            return "Low"
+        msg = f"Unknown value for severity: {val}"
+        raise ValueError(msg)
 
     def get_description(self, item):
         description = ""
@@ -149,6 +212,9 @@ class SemgrepParser:
         description += f"**Result message:** {message}\n"
 
         snippet = item["extra"].get("lines")
+        if snippet == "requires login":
+            snippet = None  # Treat "requires login" as no snippet
+
         if snippet is not None:
             if "<![" in snippet:
                 snippet = snippet.replace("<![", "<! [")

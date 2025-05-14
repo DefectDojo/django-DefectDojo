@@ -11,6 +11,49 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TenableXMLParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Tenable XML Parser
+
+        Fields:
+        - title: Set to plugin name from Tenable scanner.
+        - description: Made by combining synopsis element text and plugin output from Tenable Scanner.
+        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
+        - mitigation: Set to solution from Tenable Scanner.
+        - impact: Made by combining description element text, cvss score, cvssv3 score, cvss vector, cvss base score, and cvss temporal score from Tenable Scanner.
+        - cwe: If present, set to cwe from Tenable scanner.
+        - cvssv3: If present, set to cvssv3 from Tenable scanner.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "mitigation",
+            "impact",
+            "cwe",
+            "cvssv3",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of dedupe fields used in the Tenable XML Parser
+
+        Fields:
+        - title: Made using the name, plugin name, and asset name from Tenable scanner.
+        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
+        - cwe: If present, set to cwe from Tenable scanner.
+        - description: Made by combining synopsis and plugin output from Tenable Scanner.
+
+        NOTE: vulnerability_ids are not provided by parser
+        """
+        return [
+            "title",
+            "severity",
+            "cwe",
+            "description",
+        ]
+
     def get_text_severity(self, severity_id):
         """Convert data of the report into severity"""
         severity = "Info"
@@ -23,7 +66,7 @@ class TenableXMLParser:
         elif severity_id == 1:
             severity = "Low"
         # Ensure the severity is a valid choice. Fall back to info otherwise
-        if severity not in Finding.SEVERITIES.keys():
+        if severity not in Finding.SEVERITIES:
             severity = "Info"
         return severity
 
@@ -46,12 +89,12 @@ class TenableXMLParser:
         if element is None:
             return None
         if hasattr(element, "text"):
-            element_text = getattr(element, "text")
+            element_text = element.text
             if element_text is None:
                 return None
             if isinstance(element_text, str):
                 return element_text if len(element_text) > 0 else None
-            if isinstance(element_text, (int, float)):
+            if isinstance(element_text, int | float):
                 return element_text or None
         return None
 
@@ -112,8 +155,8 @@ class TenableXMLParser:
                         item.find("plugin_output"),
                     )
                     if plugin_output_element_text is not None:
-                        plugin_output = f"Plugin Output: {ip}{str(f':{port}' if port is not None else '')}"
-                        plugin_output += f"\n```\n{str(plugin_output_element_text)}\n```\n\n"
+                        plugin_output = f"Plugin Output: {ip}{f':{port}' if port is not None else ''}"
+                        plugin_output += f"\n```\n{plugin_output_element_text}\n```\n\n"
                         description += plugin_output
 
                     # Determine the severity
@@ -199,6 +242,15 @@ class TenableXMLParser:
                     if cwe_element_text is not None:
                         cwe = cwe_element_text
 
+                    # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
+                    # if not cwe:
+                    #     for ref in item.iter("xref"):
+                    #         ref_text = self.safely_get_element_text(ref)
+                    #         if ref_text is not None:
+                    #             cwe = parse_cwe_from_ref(ref_text)
+                    #             if cwe > 0:
+                    #                 break
+
                     cvssv3 = None
                     cvssv3_element_text = self.safely_get_element_text(
                         item.find("cvss3_vector"),
@@ -254,11 +306,11 @@ class TenableXMLParser:
                     if fqdn is not None and "://" in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)
                     elif protocol == "general":
-                        endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        endpoint = Endpoint(host=fqdn or ip)
                     else:
                         endpoint = Endpoint(
                             protocol=protocol,
-                            host=fqdn if fqdn else ip,
+                            host=fqdn or ip,
                             port=port,
                         )
                     find.unsaved_endpoints.append(endpoint)

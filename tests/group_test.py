@@ -4,7 +4,7 @@ import unittest
 from base_test_class import BaseTestCase
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
@@ -43,7 +43,7 @@ class GroupTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Group Name")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed group is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuGroup").click()
         driver.find_element(By.ID, "editGroup").click()
@@ -71,7 +71,7 @@ class GroupTest(BaseTestCase):
         driver.find_element(By.ID, "addGroupMember").click()
         # Select the user 'propersahm'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "id_users")))
+            WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.ID, "id_users")))
         except TimeoutException:
             self.fail("Timed out waiting for products dropdown to initialize ")
         driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")
@@ -139,7 +139,7 @@ class GroupTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Another Name")
         # click on 'apply filter' button
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.ID, "apply").click()
         # only the needed group is now available, proceed with clicking 'Delete' button
         driver.find_element(By.ID, "dropdownMenuGroup").click()
         driver.find_element(By.ID, "deleteGroup").click()

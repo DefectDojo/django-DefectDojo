@@ -1,13 +1,14 @@
 import os
 import sys
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class IBMAppScanTest(BaseTestCase):
@@ -30,8 +31,8 @@ class IBMAppScanTest(BaseTestCase):
         # Select `Default` as the Environment
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
         # Upload Scan result file
-        scanner_file = os.path.join(dir_path, "ibm_appscan_xml_file.xml")
-        driver.find_element(By.NAME, "file").send_keys(scanner_file)
+        scanner_file = dir_path / "ibm_appscan_xml_file.xml"
+        driver.find_element(By.NAME, "file").send_keys(str(scanner_file))
         # click on upload button
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added

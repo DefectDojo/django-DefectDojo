@@ -1,8 +1,9 @@
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from pprint import pformat as pp
-from typing import Any, Callable, List
+from typing import Any
 
 from django.contrib.auth.models import User
 from django.db.models import Model
@@ -25,11 +26,13 @@ logger = logging.getLogger(__name__)
 
 
 class ImporterOptions:
+
     """
     Converts the supplied kwargs into a class for global mutability
     as well as making it more clear which fields are used in each
     function.
     """
+
     def __init__(
         self,
         *args: list,
@@ -55,19 +58,19 @@ class ImporterOptions:
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
         self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
-        self.endpoints_to_add: List[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
+        self.endpoints_to_add: list[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
         self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
         self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
         self.group_by: str = self.validate_group_by(*args, **kwargs)
         self.import_type: str = self.validate_import_type(*args, **kwargs)
         self.lead: Dojo_User | None = self.validate_lead(*args, **kwargs)
         self.minimum_severity: str = self.validate_minimum_severity(*args, **kwargs)
-        self.parsed_findings: List[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
+        self.parsed_findings: list[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
         self.push_to_jira: bool = self.validate_push_to_jira(*args, **kwargs)
         self.scan_date: datetime = self.validate_scan_date(*args, **kwargs)
         self.scan_type: str = self.validate_scan_type(*args, **kwargs)
         self.service: str = self.validate_service(*args, **kwargs)
-        self.tags: List[str] = self.validate_tags(*args, **kwargs)
+        self.tags: list[str] = self.validate_tags(*args, **kwargs)
         self.test: Test | None = self.validate_test(*args, **kwargs)
         self.user: Dojo_User | None = self.validate_user(*args, **kwargs)
         self.test_title: str = self.validate_test_title(*args, **kwargs)
@@ -86,7 +89,7 @@ class ImporterOptions:
 
     def log_translation(
         self,
-        header_message: str = None,
+        header_message: str | None = None,
     ):
         if header_message is not None:
             logger.debug(header_message)
@@ -179,7 +182,8 @@ class ImporterOptions:
     def validate(
         self,
         field_name: str,
-        expected_types: List[Callable] = [],
+        expected_types: list[Callable] | None = None,
+        *,
         required: bool = False,
         default: Any = None,
         **kwargs: dict,
@@ -189,7 +193,9 @@ class ImporterOptions:
         and ensures it is the correct type before returning it
         """
         # Get the value from the kwargs
-        value = kwargs.get(field_name, None)
+        if expected_types is None:
+            expected_types = []
+        value = kwargs.get(field_name)
         # Make sure we have something if we need it
         if required is True:
             if value is None:
@@ -526,13 +532,15 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ) -> list:
-        return self.validate(
+        tags = self.validate(
             "tags",
             expected_types=[list],
             required=False,
             default=[],
             **kwargs,
         )
+        # Force all tags to be lowercase
+        return [tag.lower() for tag in tags]
 
     def validate_test(
         self,

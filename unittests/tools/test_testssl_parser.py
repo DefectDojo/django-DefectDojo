@@ -1,18 +1,18 @@
 from dojo.models import Test
 from dojo.tools.testssl.parser import TestsslParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestTestsslParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_finding(self):
-        with open("unittests/scans/testssl/defectdojo_no_vuln.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "defectdojo_no_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        with open("unittests/scans/testssl/defectdojo_one_vuln.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "defectdojo_one_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -21,7 +21,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(1, len(findings))
 
     def test_parse_file_with_many_vuln_has_many_findings(self):
-        with open("unittests/scans/testssl/defectdojo_many_vuln.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "defectdojo_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -45,7 +45,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(310, finding.cwe)
 
     def test_parse_file_with_many_cves(self):
-        with open("unittests/scans/testssl/many_cves.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "many_cves.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -66,7 +66,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(310, finding.cwe)
 
     def test_parse_file_with_31_version(self):
-        with open("unittests/scans/testssl/demo.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "demo.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -75,7 +75,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(12, len(findings))
 
     def test_parse_file_with_31_version2(self):
-        with open("unittests/scans/testssl/demo2.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "demo2.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -84,7 +84,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(3, len(findings))
 
     def test_parse_file_with_one_vuln_has_overall_medium(self):
-        with open("unittests/scans/testssl/overall_medium.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "overall_medium.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -93,7 +93,7 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(2, len(findings))
 
     def test_parse_file_with_one_vuln_has_overall_critical(self):
-        with open("unittests/scans/testssl/overall_critical.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "overall_critical.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -102,10 +102,23 @@ class TestTestsslParser(DojoTestCase):
             self.assertEqual(145, len(findings))
 
     def test_parse_file_with_one_vuln_has_failed_target(self):
-        with open("unittests/scans/testssl/failed_target.csv") as testfile:
+        with (get_unit_tests_scans_path("testssl") / "failed_target.csv").open(encoding="utf-8") as testfile:
             parser = TestsslParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
             self.assertEqual(1, len(findings))
+
+    def test_parse_file_references(self):
+        with (get_unit_tests_scans_path("testssl") / "references.csv").open(encoding="utf-8") as testfile:
+            parser = TestsslParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(43, len(findings))
+            finding = findings[10]
+            self.assertEqual(finding.references, "[https://ciphersuite.info/cs/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA](https://ciphersuite.info/cs/TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA)")
+            finding = findings[15]
+            self.assertEqual(finding.references, "[https://ciphersuite.info/cs/TLS_RSA_WITH_AES_128_CBC_SHA](https://ciphersuite.info/cs/TLS_RSA_WITH_AES_128_CBC_SHA)")

@@ -1,6 +1,5 @@
 from collections import defaultdict
 from datetime import timedelta
-from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Q
@@ -31,9 +30,9 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
     today = timezone.now().date()
 
-    date_range = [today - timedelta(days=6), today]  # 7 days (6 days plus today)
+    date_range = [today - timedelta(days=7), today]  # 7 days plus today, identical to last 7 days filter in other places
     finding_count = findings\
-        .filter(created__date__range=date_range)\
+        .filter(date__range=date_range)\
         .count()
     mitigated_count = findings\
         .filter(mitigated__date__range=date_range)\
@@ -75,7 +74,7 @@ def support(request: HttpRequest) -> HttpResponse:
     return render(request, "dojo/support.html", {})
 
 
-def get_severities_all(findings) -> Dict[str, int]:
+def get_severities_all(findings) -> dict[str, int]:
     severities_all = findings.values("severity").annotate(count=Count("severity")).order_by()
     return defaultdict(lambda: 0, {s["severity"]: s["count"] for s in severities_all})
 
@@ -90,10 +89,10 @@ def get_severities_by_month(findings, today):
     # The chart expects a, b, c, d, e instead of Critical, High, ...
     SEVERITY_MAP = {
         "Critical": "a",
-        "High":     "b",  # noqa: E241
-        "Medium":   "c",  # noqa: E241
-        "Low":      "d",  # noqa: E241
-        "Info":     "e",  # noqa: E241
+        "High":     "b",
+        "Medium":   "c",
+        "Low":      "d",
+        "Info":     "e",
     }
 
     results = {}

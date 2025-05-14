@@ -2,17 +2,16 @@ import logging
 import os
 import sys
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class CloseOldTest(BaseTestCase):
@@ -22,7 +21,7 @@ class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
-        self.relative_path = os.path.dirname(os.path.realpath(__file__))
+        self.relative_path = Path(os.path.realpath(__file__)).parent
 
     @on_exception_html_source_logger
     def test_delete_findings(self):
@@ -38,9 +37,8 @@ class CloseOldTest(BaseTestCase):
         driver.find_element(By.ID, "select_all").click()
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
         try:
-            WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                        "Timed out waiting for finding delete "
-                                        + "confirmation popup to appear.")
+            WebDriverWait(driver, 1).until(expected_conditions.alert_is_present(),
+                "Timed out waiting for finding delete confirmation popup to appear.")
             driver.switch_to.alert.accept()
         except TimeoutException:
             self.fail("Confirmation dialogue not shown, cannot delete previous findings")
@@ -50,9 +48,9 @@ class CloseOldTest(BaseTestCase):
         text = driver.find_element(By.ID, "no_findings").text
 
         self.assertIsNotNone(text)
-        self.assertTrue("No findings found." in text)
+        self.assertIn("No findings found.", text)
         # check that user was redirect back to url where it came from based on return_url
-        self.assertTrue(driver.current_url.endswith("page=1"))
+        self.assertTrue(driver.current_url.endswith("page=1"), driver.current_url)
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner import - Close Old Findings on engagement
@@ -95,7 +93,7 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "close_old_scans" / "closeold_nodedupe_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -112,7 +110,7 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_2.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "close_old_scans" / "closeold_nodedupe_2.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 3 findings"))
@@ -134,7 +132,7 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_and_close_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(self.relative_path / "dedupe_scans/dedupe_and_close_1.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="1 findings and closed 3 findings"))
@@ -198,7 +196,7 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "close_old_scans" / "closeold_nodedupe_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 0 findings"))
@@ -215,7 +213,7 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_2.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "close_old_scans" / "closeold_nodedupe_2.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="3 findings and closed 3 findings"))
@@ -237,13 +235,13 @@ class CloseOldTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_and_close_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "dedupe_and_close_1.xml"))
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="1 findings and closed 3 findings"))
 
 
-def add_close_old_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+def add_close_old_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase("test_login"))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 

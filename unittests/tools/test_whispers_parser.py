@@ -1,34 +1,33 @@
-from django.test import TestCase
-
 from dojo.models import Test
 from dojo.tools.whispers.parser import WhispersParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
-class TestWhispersParser(TestCase):
+class TestWhispersParser(DojoTestCase):
 
     def test_whispers_parser_severity_map(self):
         fixtures = [
-            "unittests/scans/whispers/whispers_one_vul.json",  # v2.1 format
-            "unittests/scans/whispers/whispers_one_vul_v2.2.json",  # v2.2 format
+            get_unit_tests_scans_path("whispers") / "whispers_one_vul.json",  # v2.1 format
+            get_unit_tests_scans_path("whispers") / "whispers_one_vul_v2.2.json",  # v2.2 format
         ]
         expected_severity = "High"
 
         for fixture in fixtures:
-            testfile = open(fixture)
+            testfile = fixture.open(encoding="utf-8")
             parser = WhispersParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
             self.assertEqual(expected_severity, findings[0].severity)
 
     def test_whispers_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("unittests/scans/whispers/whispers_zero_vul.json")
+        testfile = (get_unit_tests_scans_path("whispers") / "whispers_zero_vul.json").open(encoding="utf-8")
         parser = WhispersParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_whispers_parser_with_one_critical_vuln_has_one_findings(self):
-        testfile = open("unittests/scans/whispers/whispers_one_vul.json")
+        testfile = (get_unit_tests_scans_path("whispers") / "whispers_one_vul.json").open(encoding="utf-8")
         parser = WhispersParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -41,7 +40,7 @@ class TestWhispersParser(TestCase):
         self.assertEqual("pip.conf Password", findings[0].vuln_id_from_tool)
 
     def test_whispers_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("unittests/scans/whispers/whispers_many_vul.json")
+        testfile = (get_unit_tests_scans_path("whispers") / "whispers_many_vul.json").open(encoding="utf-8")
         parser = WhispersParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

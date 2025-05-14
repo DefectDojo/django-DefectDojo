@@ -41,24 +41,28 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       # load docker images from build jobs
       - name: Load images from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: built-docker-image
+          pattern: built-docker-image-*
+          merge-multiple: true
 
       - name: Load docker images
         timeout-minutes: 10
         run: |-
-             docker load -i nginx/nginx-${{ matrix.os }}_img
-             docker load -i django/django-${{ matrix.os }}_img
-             docker load -i integration-tests/integration-tests-debian_img
+             docker load -i built-docker-image/nginx-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/django-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/integration-tests-debian-linux-amd64_img
              docker images
 
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      - name: Start Dojo 
+      - name: Start Dojo
         run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
         env:
           DJANGO_VERSION: ${{ matrix.os }}

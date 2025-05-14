@@ -45,10 +45,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
         user = get_current_user()
     if user is None:
         return Finding.objects.none()
-    if queryset is None:
-        findings = Finding.objects.all().order_by("id")
-    else:
-        findings = queryset
+    findings = Finding.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return findings
@@ -68,13 +65,11 @@ def get_authorized_findings(permission, queryset=None, user=None):
         test__engagement__product__member=Exists(authorized_product_roles),
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         test__engagement__product__authorized_group=Exists(authorized_product_groups))
-    findings = findings.filter(
+    return findings.filter(
         Q(test__engagement__product__prod_type__member=True)
         | Q(test__engagement__product__member=True)
         | Q(test__engagement__product__prod_type__authorized_group=True)
         | Q(test__engagement__product__authorized_group=True))
-
-    return findings
 
 
 def get_authorized_stub_findings(permission):
@@ -101,13 +96,11 @@ def get_authorized_stub_findings(permission):
         test__engagement__product__member=Exists(authorized_product_roles),
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         test__engagement__product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    findings = findings.filter(
+    return findings.filter(
         Q(test__engagement__product__prod_type__member=True)
         | Q(test__engagement__product__member=True)
         | Q(test__engagement__product__prod_type__authorized_group=True)
         | Q(test__engagement__product__authorized_group=True))
-
-    return findings
 
 
 def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
@@ -118,10 +111,7 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
     if user is None:
         return Vulnerability_Id.objects.none()
 
-    if queryset is None:
-        vulnerability_ids = Vulnerability_Id.objects.all()
-    else:
-        vulnerability_ids = queryset
+    vulnerability_ids = Vulnerability_Id.objects.all() if queryset is None else queryset
 
     if user.is_superuser:
         return vulnerability_ids
@@ -151,10 +141,8 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
         finding__test__engagement__product__member=Exists(authorized_product_roles),
         finding__test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(authorized_product_groups))
-    vulnerability_ids = vulnerability_ids.filter(
+    return vulnerability_ids.filter(
         Q(finding__test__engagement__product__prod_type__member=True)
         | Q(finding__test__engagement__product__member=True)
         | Q(finding__test__engagement__product__prod_type__authorized_group=True)
         | Q(finding__test__engagement__product__authorized_group=True))
-
-    return vulnerability_ids

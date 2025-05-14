@@ -38,7 +38,7 @@ def new_cred(request):
     return render(request, "dojo/new_cred.html", {"tform": tform})
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by("cred_id__name")
@@ -583,12 +583,8 @@ def new_cred_finding(request, fid):
 
 
 @user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
-def delete_cred_controller(request, destination_url, id, ttid):
-    cred = None
-    try:
-        cred = Cred_Mapping.objects.get(pk=ttid)
-    except:
-        pass
+def delete_cred_controller(request, destination_url, elem_id, ttid):
+    cred = Cred_Mapping.objects.filter(pk=ttid).first()
     if request.method == "POST":
         tform = CredMappingForm(request.POST, instance=cred)
         message = ""
@@ -641,25 +637,23 @@ def delete_cred_controller(request, destination_url, id, ttid):
 
         if destination_url == "cred":
             return HttpResponseRedirect(reverse(destination_url))
-        else:
-            return HttpResponseRedirect(reverse(destination_url, args=(id, )))
-    else:
-        tform = CredMappingForm(instance=cred)
+        return HttpResponseRedirect(reverse(destination_url, args=(elem_id, )))
+    tform = CredMappingForm(instance=cred)
 
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None
-    if id:
+    if elem_id:
         product = None
         if destination_url == "all_cred_product":
-            product = get_object_or_404(Product, id=id)
+            product = get_object_or_404(Product, id=elem_id)
         elif destination_url == "view_engagement":
-            engagement = get_object_or_404(Engagement, id=id)
+            engagement = get_object_or_404(Engagement, id=elem_id)
             product = engagement.product
         elif destination_url == "view_test":
-            test = get_object_or_404(Test, id=id)
+            test = get_object_or_404(Test, id=elem_id)
             product = test.engagement.product
         elif destination_url == "view_finding":
-            finding = get_object_or_404(Finding, id=id)
+            finding = get_object_or_404(Finding, id=elem_id)
             product = finding.test.engagement.product
         product_tab = Product_Tab(product, title="Delete Credential Mapping", tab="settings")
     return render(request, "dojo/delete_cred_all.html", {

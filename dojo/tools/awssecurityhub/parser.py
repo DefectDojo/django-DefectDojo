@@ -28,10 +28,10 @@ class AwsSecurityHubParser:
         aws_acc = []
         for finding in findings:
             prod.append(finding.get("ProductName", "AWS Security Hub Ruleset"))
-            aws_acc.append(finding.get("AwsAccountId"))
+            aws_acc.append(finding.get("AwsAccountId", "No Account Found"))
         report_date = data.get("createdAt")
         test = ParserTest(
-            name=self.ID, type=self.ID, version="",
+            name=self.ID, parser_type=self.ID, version="",
         )
         test.description = "**AWS Accounts:** " + ", ".join(set(aws_acc)) + "\n"
         test.description += "**Finding Origins:** " + ", ".join(set(prod)) + "\n"
@@ -47,7 +47,7 @@ class AwsSecurityHubParser:
 
     def get_items(self, tree: dict, test):
         items = {}
-        findings = tree.get("Findings", tree.get("findings", None))
+        findings = tree.get("Findings", tree.get("findings"))
         if not isinstance(findings, list):
             msg = "Incorrect Security Hub report format"
             raise TypeError(msg)

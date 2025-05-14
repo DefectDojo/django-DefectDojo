@@ -10,9 +10,8 @@ SCAN_COBALTIO_API = "Cobalt.io API Import"
 
 
 class ApiCobaltParser:
-    """
-    Import from Cobalt.io API /findings
-    """
+
+    """Import from Cobalt.io API /findings"""
 
     def get_scan_types(self):
         return [SCAN_COBALTIO_API]
@@ -39,10 +38,7 @@ class ApiCobaltParser:
         )
 
     def get_findings(self, file, test):
-        if file is None:
-            data = CobaltApiImporter().get_findings(test)
-        else:
-            data = json.load(file)
+        data = CobaltApiImporter().get_findings(test) if file is None else json.load(file)
 
         findings = []
         for entry in data["data"]:
@@ -130,10 +126,7 @@ class ApiCobaltParser:
             "wont_fix",  # Risk of finding has been accepted
         ]
 
-        if resource["state"] in allowed_states:
-            return True
-        else:
-            return False
+        return resource["state"] in allowed_states
 
     def convert_endpoints(self, affected_targets):
         """Convert Cobalt affected_targets into DefectDojo endpoints"""
@@ -152,16 +145,15 @@ class ApiCobaltParser:
         """Convert severity value"""
         if cobalt_severity == "informational":
             return "Info"
-        elif cobalt_severity == "low":
+        if cobalt_severity == "low":
             return "Low"
-        elif cobalt_severity == "medium":
+        if cobalt_severity == "medium":
             return "Medium"
-        elif cobalt_severity == "high":
+        if cobalt_severity == "high":
             return "High"
-        elif cobalt_severity == "critical":
+        if cobalt_severity == "critical":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     def is_active(self, cobalt_state):
         return (

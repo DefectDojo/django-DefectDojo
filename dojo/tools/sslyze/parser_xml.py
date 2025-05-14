@@ -1,13 +1,13 @@
 import hashlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
 __author__ = "dr3dd589"
 
-# FIXME discuss this list as maintenance subject
+# TODO: discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
@@ -51,7 +51,7 @@ PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 class SSLyzeXMLParser:
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
@@ -77,8 +77,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**heartbleed** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if element.tag == "openssl_ccs":
@@ -91,8 +91,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**openssl_ccs** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if element.tag == "reneg":
@@ -102,8 +102,8 @@ class SSLyzeXMLParser:
                             title = element.attrib["title"] + " | " + host
                             description = (
                                 "**Session Renegotiation** : Vulnerable"
-                                + "\n\n"
-                                + "**title** : "
+                                "\n\n"
+                                "**title** : "
                                 + element.attrib["title"]
                             )
                 if (
@@ -135,7 +135,7 @@ class SSLyzeXMLParser:
                         )
                 if title and description is not None:
                     dupe_key = hashlib.md5(
-                        str(description + title).encode("utf-8"),
+                        str(description + title).encode("utf-8"), usedforsecurity=False,
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
@@ -161,4 +161,4 @@ class SSLyzeXMLParser:
                                     host=host, port=port, protocol=protocol,
                                 ),
                             )
-        return dupes.values()
+        return list(dupes.values())

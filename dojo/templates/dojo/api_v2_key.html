@@ -15,9 +15,11 @@
         <input class="btn btn-primary" type="submit" value="{% trans "Generate New Key" %}"/>
     </form>
     <hr/>
+    {% if API_TOKEN_AUTH_ENDPOINT_ENABLED %}
     <p>{% trans "Alternatively, you can use /api/v2/api-token-auth/ to get your token. Example:" %}</p>
     <pre>
 curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/api-token-auth/ -d '{"username": "&lt;YOURUSERNAME&gt;", "password": "&lt;YOURPASSWORD&gt;"}'</pre>
+    {% endif %}
     <p>{% trans "To use your API Key you need to specify an Authorization header. Example:" %}</p>
     <pre>
 # As a header

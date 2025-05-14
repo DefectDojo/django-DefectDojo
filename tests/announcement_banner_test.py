@@ -10,9 +10,9 @@ from user_test import UserTest
 
 class AnnouncementBannerTest(BaseTestCase):
 
-    def __init__(self, method_name, type):
+    def __init__(self, method_name, anno_type):
         super().__init__(method_name)
-        self.type = type
+        self.type = anno_type
 
     def test_setup(self):
         driver = self.driver
@@ -44,7 +44,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "Big important announcement, definitely pay attention!"
-        self.enable_announcement(text, False, self.type)
+        self.enable_announcement(text, dismissable=False, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
@@ -59,13 +59,13 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "Big important announcement, definitely pay don't dismiss this one."
-        self.enable_announcement(text, True, self.type)
+        self.enable_announcement(text, dismissable=True, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
         driver.get(self.base_url)
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
-        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")
+        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")  # noqa: RUF001
         close_button.click()
         dismiss_announcement_button = driver.find_element(By.XPATH, "//button[contains(@class, 'btn-danger') and contains(text(), 'Dismiss Announcement')]")
         dismiss_announcement_button.click()
@@ -80,11 +80,11 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "Everyone sees this, right?"
-        self.enable_announcement(text, True, self.type)
+        self.enable_announcement(text, dismissable=True, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
-        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")
+        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")  # noqa: RUF001
         close_button.click()
         dismiss_announcement_button = driver.find_element(By.XPATH, "//button[contains(@class, 'btn-danger') and contains(text(), 'Dismiss Announcement')]")
         dismiss_announcement_button.click()
@@ -106,7 +106,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "The most important announcement of the year."
-        self.enable_announcement(text, False, self.type)
+        self.enable_announcement(text, dismissable=False, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
@@ -124,7 +124,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "Surely no-one would delete this announcement quickly"
-        self.enable_announcement(text, False, self.type)
+        self.enable_announcement(text, dismissable=False, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
@@ -142,7 +142,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
         text = "Links in announcements? <a href='https://github.com/DefectDojo/django-DefectDojo' style='color: #224477;' target='_blank'>you bet!</a>"
-        self.enable_announcement(text, False, self.type)
+        self.enable_announcement(text, dismissable=False, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a[@href='https://github.com/DefectDojo/django-DefectDojo' and @style='color: #224477;' and @target='_blank']")

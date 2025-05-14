@@ -1,5 +1,10 @@
+import base64
+import contextlib
 import datetime
 import logging
+import mimetypes
+import re
+from ast import literal_eval
 from itertools import chain
 
 import bleach
@@ -67,10 +72,10 @@ finding_related_action_title_dict = {
     "mark_finding_duplicate": "Mark as duplicate",
 }
 
-supported_file_formats = [
+supported_thumbnail_file_formats = [
     "apng", "avif", "gif", "jpg",
     "jpeg", "jfif", "pjpeg", "pjp",
-    "png", "svg", "webp", "pdf",
+    "png", "svg", "webp",
 ]
 
 
@@ -85,6 +90,7 @@ def markdown_render(value):
                                                       "markdown.extensions.toc",
                                                       "markdown.extensions.tables"])
         return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
+    return None
 
 
 def text_shortener(value, length):
@@ -138,6 +144,11 @@ def display_date():
     return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
 
 
+@register.filter
+def display_date_with_secs(obj):
+    return obj.strftime("%c")
+
+
 @register.simple_tag
 def dojo_docs_url():
     from dojo import __docs__
@@ -167,10 +178,8 @@ def remove_string(string, value):
 def percentage(fraction, value):
     return_value = ""
     if int(value) > 0:
-        try:
+        with contextlib.suppress(ValueError):
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
-        except ValueError:
-            pass
     return return_value
 
 
@@ -253,32 +262,34 @@ def finding_sla(finding):
     if not get_system_setting("enable_finding_sla"):
         return ""
 
-    sla_age, enforce_sla = finding.get_sla_period()
+    sla_period, enforce_sla = finding.get_sla_period()
     if not enforce_sla:
         return ""
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla_days_remaining()
+    days_remaining = finding.sla_days_remaining()
     if finding.mitigated:
         status = "blue"
-        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
-        if find_sla and find_sla < 0:
+        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+        if days_remaining and days_remaining < 0:
             status = "orange"
-            find_sla = abs(find_sla)
+            days_remaining = abs(days_remaining)
             status_text = "Out of SLA: Remediated " + str(
-                find_sla) + " days past SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+                days_remaining) + " days past SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
     else:
         status = "green"
-        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
-        if find_sla and find_sla < 0:
+        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+        if days_remaining and days_remaining < 0:
             status = "red"
             status_text = "Overdue: Remediation for " + severity.lower() + " findings in " + str(
-                sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+                sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
 
-    if find_sla is not None:
-        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
-                                                                                                                           '<span class="label severity age-' + status + '">' + str(find_sla) + "</span></a>"
+    if days_remaining is not None:
+        title = (
+            f'<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="{status_text}">'
+            f'<span class="label severity age-{status}">{days_remaining}</span></a>'
+        )
 
     return mark_safe(title)
 
@@ -316,11 +327,13 @@ def display_index(data, index):
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
-    import json
-    history = json.loads(value)
+    history = literal_eval(value)
     text = ""
-    for k in history.keys():
-        text += k.capitalize() + ' changed from "' + \
+    for k in history:
+        if isinstance(history[k], dict):
+            text += k.capitalize() + " operation: " + history[k].get("operation", "unknown") + ": " + str(history[k].get("objects", "unknown"))
+        else:
+            text += k.capitalize() + ' changed from "' + \
                 history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
@@ -336,7 +349,7 @@ def datediff_time(date1, date2):
     date_str = ""
     diff = dateutil.relativedelta.relativedelta(date2, date1)
     attrs = ["years", "months", "days"]
-    human_date = ["%d %s" % (getattr(diff, attr), getattr(diff, attr) > 1 and attr or attr[:-1])
+    human_date = [f"{getattr(diff, attr)} {(getattr(diff, attr) > 1 and attr) or attr[:-1]}"
                                     for attr in attrs if getattr(diff, attr)]
     for date_part in human_date:
         date_str = date_str + date_part + " "
@@ -361,8 +374,7 @@ def overdue(date1):
 def notspecified(text):
     if text:
         return text
-    else:
-        return mark_safe('<em class="text-muted">Not Specified</em>')
+    return mark_safe('<em class="text-muted">Not Specified</em>')
 
 
 @register.tag
@@ -399,7 +411,7 @@ def colgroup(parser, token):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=False)
             return ""
 
     try:
@@ -418,6 +430,17 @@ def pic_token(context, image, size):
     token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse("download_finding_pic", args=[token.token])
+
+
+@register.filter
+def inline_image(image_file):
+    # TODO: This code might need better exception handling or data processing
+    if img_types := mimetypes.guess_type(image_file.file.name):
+        img_type = img_types[0]
+        if img_type.startswith("image/"):
+            img_data = base64.b64encode(image_file.file.read())
+            return f"data:{img_type};base64, {img_data.decode('utf-8')}"
+    return ""
 
 
 @register.filter
@@ -491,32 +514,29 @@ def business_criticality_icon(value):
         return mark_safe(stars(1, 5, "Very Low"))
     if value == Product.NONE_CRITICALITY:
         return mark_safe(stars(0, 5, "None"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
 
 
 @register.filter
 def last_value(value):
     if "/" in value:
         return value.rsplit("/")[-1:][0]
-    else:
-        return value
+    return value
 
 
 @register.filter
 def platform_icon(value):
     if value == Product.WEB_PLATFORM:
         return mark_safe(icon("list-alt", "Web"))
-    elif value == Product.DESKTOP_PLATFORM:
+    if value == Product.DESKTOP_PLATFORM:
         return mark_safe(icon("desktop", "Desktop"))
-    elif value == Product.MOBILE_PLATFORM:
+    if value == Product.MOBILE_PLATFORM:
         return mark_safe(icon("mobile", "Mobile"))
-    elif value == Product.WEB_SERVICE_PLATFORM:
+    if value == Product.WEB_SERVICE_PLATFORM:
         return mark_safe(icon("plug", "Web Service"))
-    elif value == Product.IOT:
+    if value == Product.IOT:
         return mark_safe(icon("random", "Internet of Things"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
 
 
 @register.filter
@@ -527,8 +547,7 @@ def lifecycle_icon(value):
         return mark_safe(icon("ship", "Sustain"))
     if value == Product.RETIREMENT:
         return mark_safe(icon("moon-o", "Retire"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
 
 
 @register.filter
@@ -545,30 +564,27 @@ def origin_icon(value):
         return mark_safe(icon("code", "Open Source"))
     if value == Product.OUTSOURCED_ORIGIN:
         return mark_safe(icon("globe", "Outsourced"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
 
 
 @register.filter
 def external_audience_icon(value):
     if value:
         return mark_safe(icon("users", "External Audience"))
-    else:
-        return ""
+    return ""
 
 
 @register.filter
 def internet_accessible_icon(value):
     if value:
         return mark_safe(icon("cloud", "Internet Accessible"))
-    else:
-        return ""
+    return ""
 
 
 @register.filter
-def get_severity_count(id, table):
-    if table == "test":
-        counts = Finding.objects.filter(test=id). \
+def get_severity_count(elem_id, table_type):
+    if table_type == "test":
+        counts = Finding.objects.filter(test=elem_id). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -595,8 +611,8 @@ def get_severity_count(id, table):
                           then=Value(1)),
                      output_field=IntegerField())),
         )
-    elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
+    elif table_type == "engagement":
+        counts = Finding.objects.filter(test__engagement=elem_id, active=True, duplicate=False). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -623,8 +639,8 @@ def get_severity_count(id, table):
                           then=Value(1)),
                      output_field=IntegerField())),
         )
-    elif table == "product":
-        counts = Finding.objects.filter(test__engagement__product=id). \
+    elif table_type == "product":
+        counts = Finding.objects.filter(test__engagement__product=elem_id). \
             prefetch_related("test__engagement__product").aggregate(
             total=Sum(
                 Case(When(severity__in=("Critical", "High", "Medium", "Low"),
@@ -674,22 +690,20 @@ def get_severity_count(id, table):
     total = critical + high + medium + low + info
     display_counts = []
 
-    display_counts.append("Critical: " + str(critical))
-    display_counts.append("High: " + str(high))
-    display_counts.append("Medium: " + str(medium))
-    display_counts.append("Low: " + str(low))
-    display_counts.append("Info: " + str(info))
+    display_counts.extend((
+        "Critical: " + str(critical),
+        "High: " + str(high),
+        "Medium: " + str(medium),
+        "Low: " + str(low),
+        "Info: " + str(info),
+    ))
 
-    if table == "test":
+    if table_type == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table == "engagement":
-        display_counts.append("Total: " + str(total) + " Active Findings")
-    elif table == "product":
+    elif table_type == "engagement" or table_type == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
-    display_counts = ", ".join([str(item) for item in display_counts])
-
-    return display_counts
+    return ", ".join([str(item) for item in display_counts])
 
 
 @register.filter
@@ -755,10 +769,7 @@ def has_vulnerability_url(vulnerability_id):
     if not vulnerability_id:
         return False
 
-    for key in settings.VULNERABILITY_URLS:
-        if vulnerability_id.upper().startswith(key):
-            return True
-    return False
+    return any(vulnerability_id.upper().startswith(key) for key in settings.VULNERABILITY_URLS)
 
 
 @register.filter
@@ -768,6 +779,25 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "ALINUX2-SA-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
+            if key == "GLSA":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
+            if key == "SSA:":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
+            if key == "SSA-" and not re.findall(r"SSA-\d{4}-", vulnerability_id):
+                return "https://cert-portal.siemens.com/productcert/html/" + str(vulnerability_id.lower()) + ".html"
+            if key in {"AVD", "KHV", "C-"}:
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
+            if key == "SUSE-SU-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
+            if "&&" in settings.VULNERABILITY_URLS[key]:
+                # Process specific keys specially if need
+                if key in {"CAPEC", "CWE"}:
+                    vuln_id = str(vulnerability_id).replace(f"{key}-", "")
+                else:
+                    vuln_id = str(vulnerability_id)
+                return f'{settings.VULNERABILITY_URLS[key].split("&&")[0]}{vuln_id}{settings.VULNERABILITY_URLS[key].split("&&")[1]}'
             return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
     return ""
 
@@ -777,8 +807,7 @@ def first_vulnerability_id(finding):
     vulnerability_ids = finding.vulnerability_ids
     if vulnerability_ids:
         return vulnerability_ids[0]
-    else:
-        return None
+    return None
 
 
 @register.filter
@@ -789,8 +818,7 @@ def additional_vulnerability_ids(finding):
         for vulnerability_id in vulnerability_ids[1:]:
             references.append(vulnerability_id)
         return references
-    else:
-        return None
+    return None
 
 
 @register.filter
@@ -811,8 +839,8 @@ def jiraencode_component(value):
 
 
 @register.filter
-def jira_project(obj, use_inheritance=True):
-    return jira_helper.get_jira_project(obj, use_inheritance)
+def jira_project(obj, *, use_inheritance=True):
+    return jira_helper.get_jira_project(obj, use_inheritance=use_inheritance)
 
 
 @register.filter
@@ -844,7 +872,7 @@ def jira_change(obj):
 def get_thumbnail(file):
     from pathlib import Path
     file_format = Path(file.file.url).suffix[1:]
-    return file_format in supported_file_formats
+    return file_format in supported_thumbnail_file_formats
 
 
 @register.filter
@@ -889,7 +917,7 @@ def class_name(value):
 
 
 @register.filter(needs_autoescape=True)
-def jira_project_tag(product_or_engagement, autoescape=True):
+def jira_project_tag(product_or_engagement, *, autoescape=True):
     if autoescape:
         esc = conditional_escape
     else:
@@ -913,7 +941,7 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     </i>
     """
     jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
-    inherited = True if not jira_project_no_inheritance else False
+    inherited = bool(not jira_project_no_inheritance)
 
     icon = "fa-bug"
     color = ""
@@ -944,7 +972,7 @@ def full_name(user):
 
 
 @register.filter(needs_autoescape=True)
-def import_settings_tag(test_import, autoescape=True):
+def import_settings_tag(test_import, *, autoescape=True):
     if not test_import or not test_import.import_settings:
         return ""
 
@@ -986,14 +1014,9 @@ def import_settings_tag(test_import, autoescape=True):
 
 
 @register.filter(needs_autoescape=True)
-def import_history(finding, autoescape=True):
+def import_history(finding, *, autoescape=True):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
-
-    if autoescape:
-        conditional_escape
-    else:
-        lambda x: x
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()

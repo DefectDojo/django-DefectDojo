@@ -5,7 +5,8 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
+      PYTHONWARNINGS: error  # We are strict about Warnings during development
+      DD_DEBUG: 'True'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
@@ -13,18 +14,21 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
+      PYTHONWARNINGS: error  # We are strict about Warnings during development
+      DD_DEBUG: 'True'
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     volumes:
       - '.:/app:z'
     environment:
-      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
+      PYTHONWARNINGS: error  # We are strict about Warnings during development
+      DD_DEBUG: 'True'
   initializer:
     volumes:
       - '.:/app:z'
     environment:
-      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
+      PYTHONWARNINGS: error  # We are strict about Warnings during development
+      DD_DEBUG: 'True'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
   nginx:
@@ -49,3 +53,5 @@ services:
         published: 8025
         protocol: tcp
         mode: host
+  "webhook.endpoint":
+    image: mccutchen/go-httpbin:2.18.1@sha256:ff73c96c144506048b1357ada7015b3473adc1d5bebc7088bc389bf5e64e114f

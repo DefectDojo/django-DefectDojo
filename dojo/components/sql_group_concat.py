@@ -6,7 +6,7 @@ class Sql_GroupConcat(Aggregate):
     allow_distinct = True
 
     def __init__(
-        self, expression, separator, distinct=False, ordering=None, **extra,
+        self, expression, separator, *, distinct=False, ordering=None, **extra,
     ):
         self.separator = separator
         super().__init__(
@@ -16,14 +16,6 @@ class Sql_GroupConcat(Aggregate):
             separator=f' SEPARATOR "{separator}"',
             output_field=CharField(),
             **extra,
-        )
-
-    def as_mysql(self, compiler, connection):
-        return super().as_sql(
-            compiler,
-            connection,
-            template="%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)",
-            separator=f" SEPARATOR '{self.separator}'",
         )
 
     def as_sql(self, compiler, connection, **extra):

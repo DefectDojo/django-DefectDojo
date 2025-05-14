@@ -2,13 +2,13 @@ import datetime
 
 from dojo.models import Test
 from dojo.tools.arachni.parser import ArachniParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestArachniParser(DojoTestCase):
 
     def test_parser_has_one_finding(self):
-        with open("unittests/scans/arachni/arachni.afr.json") as testfile:
+        with (get_unit_tests_scans_path("arachni") / "arachni.afr.json").open(encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -20,10 +20,10 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
             self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.timezone.utc), finding.date)
+            self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.UTC), finding.date)
 
     def test_parser_has_many_finding(self):
-        with open("unittests/scans/arachni/dd.com.afr.json") as testfile:
+        with (get_unit_tests_scans_path("arachni") / "dd.com.afr.json").open(encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -54,7 +54,7 @@ class TestArachniParser(DojoTestCase):
             self.assertIn("server", finding.unsaved_tags)
 
     def test_parser_has_many_finding2(self):
-        with open("unittests/scans/arachni/js.com.afr.json") as testfile:
+        with (get_unit_tests_scans_path("arachni") / "js.com.afr.json").open(encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

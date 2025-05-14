@@ -11,9 +11,8 @@ SCANTYPE_EDGESCAN = "Edgescan Scan"
 
 
 class ApiEdgescanParser:
-    """
-    Import from Edgescan API or JSON file
-    """
+
+    """Import from Edgescan API or JSON file"""
 
     def get_scan_types(self):
         return [SCANTYPE_EDGESCAN]
@@ -34,10 +33,7 @@ class ApiEdgescanParser:
         return "In the field <b>Service key 1</b>, provide the Edgescan asset ID(s). Leaving it blank will import all assets' findings."
 
     def get_findings(self, file, test):
-        if file:
-            data = json.load(file)
-        else:
-            data = EdgescanImporter().get_findings(test)
+        data = json.load(file) if file else EdgescanImporter().get_findings(test)
 
         return self.process_vulnerabilities(test, data)
 
@@ -68,7 +64,7 @@ class ApiEdgescanParser:
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
         finding.mitigation = vulnerability["remediation"]
-        finding.active = True if vulnerability["status"] == "open" else False
+        finding.active = vulnerability["status"] == "open"
         if vulnerability["asset_tags"]:
             finding.tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]

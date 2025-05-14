@@ -11,10 +11,7 @@ def get_authorized_cred_mappings(permission, queryset=None):
     if user is None:
         return Cred_Mapping.objects.none()
 
-    if queryset is None:
-        cred_mappings = Cred_Mapping.objects.all().order_by("id")
-    else:
-        cred_mappings = queryset
+    cred_mappings = Cred_Mapping.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return cred_mappings
@@ -44,8 +41,6 @@ def get_authorized_cred_mappings(permission, queryset=None):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
-    cred_mappings = cred_mappings.filter(
+    return cred_mappings.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return cred_mappings

@@ -332,8 +332,8 @@ class TestFindingSLAExpiration(DojoTestCase):
 
     def test_sla_expiration_date(self):
         """
-            tests if the SLA expiration date and SLA days remaining are calculated correctly
-            after a finding's severity is updated
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a finding's severity is updated
         """
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("test_product_type")
@@ -357,8 +357,8 @@ class TestFindingSLAExpiration(DojoTestCase):
 
     def test_sla_expiration_date_after_finding_severity_updated(self):
         """
-            tests if the SLA expiration date and SLA days remaining are calculated correctly
-            after a finding's severity is updated
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a finding's severity is updated
         """
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("test_product_type")
@@ -389,8 +389,8 @@ class TestFindingSLAExpiration(DojoTestCase):
 
     def test_sla_expiration_date_after_product_updated(self):
         """
-            tests if the SLA expiration date and SLA days remaining are calculated correctly
-            after a product changed from one SLA configuration to another
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a product changed from one SLA configuration to another
         """
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("test_product_type")
@@ -428,8 +428,8 @@ class TestFindingSLAExpiration(DojoTestCase):
 
     def test_sla_expiration_date_after_sla_configuration_updated(self):
         """
-            tests if the SLA expiration date and SLA days remaining are calculated correctly
-            after the SLA configuration on a product was updated to a different number of SLA days
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after the SLA configuration on a product was updated to a different number of SLA days
         """
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("test_product_type")
@@ -461,8 +461,8 @@ class TestFindingSLAExpiration(DojoTestCase):
 
     def test_sla_expiration_date_after_sla_not_enforced(self):
         """
-            tests if the SLA expiration date is none after the after the SLA configuration on a
-            product was updated to not enforce all SLA remediation days
+        Tests if the SLA expiration date is none after the after the SLA configuration on a
+        product was updated to not enforce all SLA remediation days
         """
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type("test_product_type")

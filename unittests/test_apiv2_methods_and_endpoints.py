@@ -9,7 +9,6 @@ from dojo.models import (
     Benchmark_Product_Summary,
     Benchmark_Requirement,
     Benchmark_Type,
-    BurpRawRequestResponse,
     Choice,
     Contact,
     FileAccessToken,
@@ -92,7 +91,6 @@ class ApiEndpoints(DojoTestCase):
             Product_Line,
             Report_Type,
             CWE,
-            BurpRawRequestResponse,
             FileAccessToken,
             UserAnnouncement,
             BannerConf,
@@ -119,7 +117,7 @@ class ApiEndpoints(DojoTestCase):
             if subclass.__module__ == "dojo.models":
                 if (subclass.__name__[:9] == "Tagulous_") and (subclass.__name__[-5:] == "_tags"):
                     continue
-                if subclass.__name__ in ["Alerts"]:
+                if subclass.__name__ == "Alerts":
                     continue
                 with self.subTest(subclass=subclass):
                     if subclass in self.used_models:

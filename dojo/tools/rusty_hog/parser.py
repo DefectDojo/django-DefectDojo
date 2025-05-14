@@ -6,7 +6,7 @@ from dojo.tools.parser_test import ParserTest
 
 class RustyhogParser:
     def get_scan_types(self):
-        return ["Rusty Hog Scan"]
+        return ["Rusty Hog Scan", "Choctaw Hog Scan", "Duroc Hog Scan", "Gottingen Hog Scan", "Essex Hog Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
@@ -14,61 +14,58 @@ class RustyhogParser:
     def get_description_for_scan_types(self, scan_type):
         return "Rusty Hog Scan - JSON Report"
 
-    def get_findings(self, json_output, test):
-        tree = json.load(json_output)
-        return self.get_items(tree, test)
-
-    def parse_json(self, json_output):
-        tree = json.load(json_output)
-        return tree
-
-    def get_items(self, json_output, scanner, test):
+    def get_findings(self, filename, test):
+        if filename:
+            tree = filename.read()
+            try:
+                json_output = json.loads(str(tree, "utf-8"))
+            except Exception:
+                json_output = json.loads(tree)
+            if not json_output:
+                json_output = []
         items = {}
-        findings = self.__getitem(
-            vulnerabilities=self.parse_json(json_output), scanner=scanner,
-        )
+        findings = self.__getitem(vulnerabilities=json_output, scanner=test)
         for finding in findings:
             unique_key = f"Finding {finding}"
             items[unique_key] = finding
         return list(items.values())
 
     def get_tests(self, scan_type, handle):
-        tree = self.parse_json(handle)
+        tree = json.load(handle)
         tests = []
-        parsername = "Rusty Hog"
-        for node in tree:
-            if (
-                "commit" in node
-                or "commitHash" in node
-                or "parent_commit_hash" in node
-                or "old_file_id" in node
-                or "new_file_id" in node
-            ):
-                parsername = "Choctaw Hog"
-                break
-            if "linenum" in node or "diff" in node:
-                parsername = "Duroc Hog"
-                break
-            if "issue_id" in node or "location" in node:
-                parsername = "Gottingen Hog"
-                break
-            if "page_id" in node:
-                parsername = "Essex Hog"
-                break
+        if scan_type == "Rusty Hog Scan":
+            parsername = "Rusty Hog"
+            for node in tree:
+                if (
+                    "commit" in node
+                    or "commitHash" in node
+                    or "parent_commit_hash" in node
+                    or "old_file_id" in node
+                    or "new_file_id" in node
+                ):
+                    parsername = "Choctaw Hog"
+                    break
+                if "linenum" in node or "diff" in node:
+                    parsername = "Duroc Hog"
+                    break
+                if "issue_id" in node or "location" in node:
+                    parsername = "Gottingen Hog"
+                    break
+                if "page_id" in node:
+                    parsername = "Essex Hog"
+                    break
+        else:
+            parsername = scan_type.replace(" Scan", "")
         test = ParserTest(
             name=parsername,
-            type=parsername,
+            parser_type=parsername,
             version="",
         )
-        if (
-            parsername == "Rusty Hog"
-        ):  # The outputfile is empty. A subscanner can't be classified
+        if parsername == "Rusty Hog":  # The outputfile is empty. A subscanner can't be classified
             test.description = "The exact scanner within Rusty Hog could not be determined due to missing information within the scan result."
         else:
             test.description = parsername
-        test.findings = self.__getitem(
-            vulnerabilities=tree, scanner=parsername,
-        )
+        test.findings = self.__getitem(vulnerabilities=tree, scanner=parsername)
         tests.append(test)
         return tests
 
@@ -77,17 +74,24 @@ class RustyhogParser:
         found_secret_string = ""
         cwe = 200
         for vulnerability in vulnerabilities:
+            description = ""
+            if vulnerability.get("reason") is not None:
+                description += "\n**Reason:** {}".format(
+                    vulnerability.get("reason"),
+                )
             if scanner == "Rusty Hog":
                 break
-            elif scanner == "Choctaw Hog":
+            if scanner == "Choctaw Hog":
                 """Choctaw Hog"""
-                found_secret_string = vulnerability.get("stringsFound")
-                description = f"**This string was found:** {found_secret_string}"
+                if vulnerability.get("commitHash") is None:
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A commitHash is expected.")
+                found_secret_string = str(vulnerability.get("stringsFound") or "")
+                description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("commit") is not None:
                     description += "\n**Commit message:** {}".format(
                         vulnerability.get("commit"),
                     )
-                if vulnerability.get("commitHash") is not None:
+                if vulnerability.get("commitHash"):
                     description += "\n**Commit hash:** {}".format(
                         vulnerability.get("commitHash"),
                     )
@@ -117,13 +121,15 @@ class RustyhogParser:
                     )
             elif scanner == "Duroc Hog":
                 """Duroc Hog"""
-                found_secret_string = vulnerability.get("stringsFound")
-                description = f"**This string was found:** {found_secret_string}"
+                if vulnerability.get("linenum") is None:
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A linenum is expected.")
+                found_secret_string = str(vulnerability.get("stringsFound") or "")
+                description += f"\n**This string was found:** {found_secret_string}"
                 if vulnerability.get("path") is not None:
                     description += "\n**Path of Issue:** {}".format(
                         vulnerability.get("path"),
                     )
-                if vulnerability.get("linenum") is not None:
+                if vulnerability.get("linenum"):
                     description += "\n**Linenum of Issue:** {}".format(
                         vulnerability.get("linenum"),
                     )
@@ -133,9 +139,11 @@ class RustyhogParser:
                     )
             elif scanner == "Gottingen Hog":
                 """Gottingen Hog"""
-                found_secret_string = vulnerability.get("stringsFound")
-                description = f"**This string was found:** {found_secret_string}"
-                if vulnerability.get("issue_id") is not None:
+                if vulnerability.get("issue_id") is None:
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". An issue_id is expected.")
+                found_secret_string = str(vulnerability.get("stringsFound") or "")
+                description += f"\n**This string was found:** {found_secret_string}"
+                if vulnerability.get("issue_id"):
                     description += "\n**JIRA Issue ID:** {}".format(
                         vulnerability.get("issue_id"),
                     )
@@ -148,9 +156,11 @@ class RustyhogParser:
                         vulnerability.get("url"), vulnerability.get("url"),
                     )
             elif scanner == "Essex Hog":
-                found_secret_string = vulnerability.get("stringsFound")
-                description = f"**This string was found:** {found_secret_string}"
-                if vulnerability.get("page_id") is not None:
+                if vulnerability.get("page_id") is None:
+                    raise ValueError("You chose the wrong scan type: " + scanner + ". A page_id is expected.")
+                found_secret_string = str(vulnerability.get("stringsFound") or "")
+                description += f"\n**This string was found:** {found_secret_string}"
+                if vulnerability.get("page_id"):
                     description += "\n**Confluence URL:** [{}]({})".format(
                         vulnerability.get("url"), vulnerability.get("url"),
                     )
@@ -180,10 +190,15 @@ class RustyhogParser:
                     vulnerability.get("issue_id"),
                     vulnerability.get("location"),
                 )
+                if not file_path:
+                    file_path = vulnerability.get("url")
             elif scanner == "Essex Hog":
                 title = "{} found in Confluence Page ID {}".format(
                     vulnerability.get("reason"), vulnerability.get("page_id"),
                 )
+                if not file_path:
+                    file_path = vulnerability.get("url")
+
             # create the finding object
             finding = Finding(
                 title=title,

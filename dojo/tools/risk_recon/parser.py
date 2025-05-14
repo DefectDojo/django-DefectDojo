@@ -36,6 +36,7 @@ class RiskReconParser:
                 findings = data.get("findings")
 
             return self._get_findings_internal(findings, test)
+        return None
 
     def _get_findings_internal(self, findings, test):
         dupes = {}
@@ -82,7 +83,7 @@ class RiskReconParser:
             date = dateutil.parser.parse(item.get("first_seen"))
 
             sev = item.get("severity", "").capitalize()
-            sev = "Info" if not sev else sev
+            sev = sev or "Info"
 
             tags = (
                 item.get("security_domain")[:20]
@@ -109,7 +110,7 @@ class RiskReconParser:
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
-                find.nb_occurences
+                find.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding
 

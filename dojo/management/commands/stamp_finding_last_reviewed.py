@@ -24,12 +24,14 @@ If mitigated it will update the mitigated_by with last_reviewed_by or current re
 
 
 class Command(BaseCommand):
-    help = "A new field last_reviewed has been added to the Finding model \n" \
-           "This script will update all findings with a last_reviewed date of the most current date from: \n" \
-           "1.  Finding Date if no other evidence of activity is found \n" \
-           "2.  Last note added date if a note is found \n" \
-           "3.  Mitigation Date if finding is mitigated \n" \
-           "4.  Last action_log entry date if Finding has been updated \n"
+    help = (
+        "A new field last_reviewed has been added to the Finding model \n"
+        "This script will update all findings with a last_reviewed date of the most current date from: \n"
+        "1.  Finding Date if no other evidence of activity is found \n"
+        "2.  Last note added date if a note is found \n"
+        "3.  Mitigation Date if finding is mitigated \n"
+        "4.  Last action_log entry date if Finding has been updated \n"
+    )
 
     def handle(self, *args, **options):
         findings = Finding.objects.all().order_by("id")
@@ -73,7 +75,7 @@ class Command(BaseCommand):
 
             if finding.mitigated:
                 if not finding.mitigated_by:
-                    finding.mitigated_by = finding.last_reviewed_by if finding.last_reviewed_by else finding.reporter
+                    finding.mitigated_by = finding.last_reviewed_by or finding.reporter
                     save = True
             if save:
                 finding.save()

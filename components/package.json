@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.38.0-dev",
+  "version": "2.47.0-dev",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -19,14 +19,14 @@
     "datatables.net-dt": "^1.13.4",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.18.0",
+    "easymde": "^2.20.0",
     "flot": "flot/flot#~0.8.3",
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
     "google-code-prettify": "^1.0.0",
     "jquery": "^3.7.1",
     "jquery-highlight": "3.5.0",
-    "jquery-ui": "1.13.3",
+    "jquery-ui": "1.14.1",
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
@@ -35,7 +35,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.10",
+    "pdfmake": "^0.2.19",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {

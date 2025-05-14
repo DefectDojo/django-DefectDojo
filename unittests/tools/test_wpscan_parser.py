@@ -2,20 +2,20 @@ import datetime
 
 from dojo.models import Test
 from dojo.tools.wpscan.parser import WpscanParser
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestWpscanParser(DojoTestCase):
 
     def test_parse_file_empty(self):
         """Report from the tool wich have no data"""
-        with open("unittests/scans/wpscan/empty.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "empty.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_exemple(self):
-        with open("unittests/scans/wpscan/sample.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "sample.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -26,10 +26,10 @@ class TestWpscanParser(DojoTestCase):
             self.assertIsNone(finding.unique_id_from_tool)  # interesting findings are not vlunerability
             self.assertEqual("Info", finding.severity)  # it is not a vulnerability so severity should be 'Info'
             self.assertEqual("Interesting finding: Headers", finding.title)
-            self.assertEqual(datetime.datetime(2021, 3, 26, 11, 50, 50), finding.date)
+            self.assertEqual(datetime.datetime(2021, 3, 26, 11, 50, 50, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/wpscan/wordpress_no_vuln.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "wordpress_no_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -38,7 +38,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual(7, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
-        with open("unittests/scans/wpscan/wordpress_one_vuln.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "wordpress_one_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -49,10 +49,10 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("8873", finding.unique_id_from_tool)
             self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
             self.assertEqual("YouTube Embed <= 11.8.1 - Cross-Site Request Forgery (CSRF)", finding.title)
-            self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16), finding.date)
+            self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open("unittests/scans/wpscan/wordpress_many_vuln.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "wordpress_many_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -63,10 +63,10 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("8873", finding.unique_id_from_tool)
             self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
             self.assertEqual("YouTube Embed <= 11.8.1 - Cross-Site Request Forgery (CSRF)", finding.title)
-            self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16), finding.date)
+            self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16, tzinfo=datetime.UTC), finding.date)
 
     def test_parse_file_with_multiple_vuln(self):
-        with open("unittests/scans/wpscan/wpscan.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "wpscan.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -81,7 +81,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertEqual("Contact Form 7 < 5.3.2 - Unrestricted File Upload", finding.title)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2020-35489", finding.unsaved_vulnerability_ids[0])
-                self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
+                self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6, tzinfo=datetime.UTC), finding.date)
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
             with self.subTest(i=4):
@@ -89,11 +89,11 @@ class TestWpscanParser(DojoTestCase):
                 self.assertIsNone(finding.unique_id_from_tool)  # interesting findings are not vlunerability
                 self.assertEqual("Info", finding.severity)  # it is not a vulnerability so severity should be 'Info'
                 self.assertEqual("Interesting finding: WordPress readme found: http://example/readme.html", finding.title)
-                self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
+                self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6, tzinfo=datetime.UTC), finding.date)
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => "confidence": 100,
 
     def test_parse_file_with_multiple_vuln_in_version(self):
-        with open("unittests/scans/wpscan/wordpress_vuln_version.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "wordpress_vuln_version.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -110,7 +110,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
     def test_parse_file_issue5774(self):
-        with open("unittests/scans/wpscan/issue5774.json") as testfile:
+        with (get_unit_tests_scans_path("wpscan") / "issue5774.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

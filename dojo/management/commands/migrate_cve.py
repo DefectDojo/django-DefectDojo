@@ -26,9 +26,8 @@ def create_vulnerability_id_template(finding_template):
 
 
 class Command(BaseCommand):
-    """
-    This management command creates vulnerability ids for all findings / findings_templates with cve's.
-    """
+
+    """This management command creates vulnerability ids for all findings / findings_templates with cve's."""
 
     help = "Usage: manage.py migrate_cve"
 
@@ -39,7 +38,7 @@ class Command(BaseCommand):
         mass_model_updater(
             Finding,
             findings,
-            lambda f: create_vulnerability_id(f),
+            create_vulnerability_id,
             fields=None,
             page_size=100,
             log_prefix="creating vulnerability ids: ",
@@ -50,7 +49,7 @@ class Command(BaseCommand):
         mass_model_updater(
             Finding_Template,
             finding_templates,
-            lambda f: create_vulnerability_id_template(f),
+            create_vulnerability_id_template,
             fields=None,
             page_size=100,
             log_prefix="creating vulnerability ids: ",
