@@ -1493,6 +1493,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli Img Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Wizcli Dir Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Wizcli IAC Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
