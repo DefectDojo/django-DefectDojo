@@ -1,5 +1,6 @@
 import json
 from io import StringIO
+
 from dojo.models import Test
 from dojo.tools.prowler.parser import ProwlerParser
 from unittests.dojo_test_case import DojoTestCase
@@ -9,7 +10,7 @@ class TestProwlerStringIOParser(DojoTestCase):
     def test_empty_csv_parser_stringio(self):
         """Tests that an empty CSV file doesn't generate any findings."""
         file_content = StringIO(
-            "ASSESSMENT_START_TIME;ASSESSMENT_END_TIME;ACCOUNT_UID;ACCOUNT_NAME;ACCOUNT_SUBSCRIPTION;ACCOUNT_ORGANIZATION_UID;ACCOUNT_ORGANIZATION_NAME;ACCOUNT_TAGS;FINDING_UID;PROVIDER;CHECK_ID;CHECK_TITLE;CHECK_TYPE;STATUS;STATUS_EXTENDED;MUTED;SERVICE_NAME;SUBSERVICE_NAME;SEVERITY;RESOURCE_TYPE;RESOURCE_UID;RESOURCE_NAME;RESOURCE_DETAILS;RESOURCE_TAGS;PARTITION;REGION;DESCRIPTION;RISK;RELATED_URL;REMEDIATION_RECOMMENDATION_TEXT;REMEDIATION_RECOMMENDATION_URL;REMEDIATION_CODE_NATIVEIAC;REMEDIATION_CODE_TERRAFORM;REMEDIATION_CODE_CLI;REMEDIATION_CODE_OTHER;COMPLIANCE;CATEGORIES;DEPENDS_ON;RELATED_TO;NOTES;PROWLER_VERSION"
+            "ASSESSMENT_START_TIME;ASSESSMENT_END_TIME;ACCOUNT_UID;ACCOUNT_NAME;ACCOUNT_SUBSCRIPTION;ACCOUNT_ORGANIZATION_UID;ACCOUNT_ORGANIZATION_NAME;ACCOUNT_TAGS;FINDING_UID;PROVIDER;CHECK_ID;CHECK_TITLE;CHECK_TYPE;STATUS;STATUS_EXTENDED;MUTED;SERVICE_NAME;SUBSERVICE_NAME;SEVERITY;RESOURCE_TYPE;RESOURCE_UID;RESOURCE_NAME;RESOURCE_DETAILS;RESOURCE_TAGS;PARTITION;REGION;DESCRIPTION;RISK;RELATED_URL;REMEDIATION_RECOMMENDATION_TEXT;REMEDIATION_RECOMMENDATION_URL;REMEDIATION_CODE_NATIVEIAC;REMEDIATION_CODE_TERRAFORM;REMEDIATION_CODE_CLI;REMEDIATION_CODE_OTHER;COMPLIANCE;CATEGORIES;DEPENDS_ON;RELATED_TO;NOTES;PROWLER_VERSION",
         )
         parser = ProwlerParser(test_mode=True)
         findings = parser.get_findings(file_content, Test())
@@ -25,7 +26,7 @@ class TestProwlerStringIOParser(DojoTestCase):
 
         finding = findings[0]
         self.assertEqual(
-            "iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account", finding.title
+            "iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account", finding.title,
         )
         self.assertEqual("iam_root_hardware_mfa_enabled", finding.vuln_id_from_tool)
         self.assertEqual("High", finding.severity)
@@ -113,7 +114,7 @@ class TestProwlerStringIOParser(DojoTestCase):
                     "name": "testserver",
                     "type": "Microsoft.Sql/servers",
                     "details": {},
-                }
+                },
             ],
             "finding_info": {
                 "title": "Ensure Azure Active Directory Administrator Is Configured",
@@ -179,7 +180,7 @@ class TestProwlerStringIOParser(DojoTestCase):
                     "name": "default-allow-rdp",
                     "type": "firewall",
                     "details": {},
-                }
+                },
             ],
             "finding_info": {
                 "title": "Ensure that Firewall Rules do not allow access from 0.0.0.0/0 to Remote Desktop Protocol (RDP)",
@@ -221,7 +222,7 @@ class TestProwlerStringIOParser(DojoTestCase):
 
         finding = findings[0]
         self.assertEqual(
-            "bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set", finding.title
+            "bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set", finding.title,
         )
         self.assertEqual("bc_k8s_pod_security_1", finding.vuln_id_from_tool)
         self.assertEqual("Medium", finding.severity)
