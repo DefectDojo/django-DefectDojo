@@ -75,7 +75,7 @@ def get_item(vulnerability, test):
             vulnerability_id = worstCve["cve"]
         if "cvss_v3_vector" in worstCve:
             cvss_v3 = worstCve["cvss_v3_vector"]
-            cvssv3 = cvss_v3
+            cvssv3 = cvss_v3  # TODO: VECTOR
         if "cvss_v2_vector" in worstCve:
             cvss_v2 = worstCve["cvss_v2_vector"]
 

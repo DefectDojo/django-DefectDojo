@@ -165,7 +165,7 @@ def get_item(item_node, tree, test):
         cwe = int(cwe.split("-")[1])
         dojo_finding.cwe = cwe
 
-    if (cvssv3 is not None) and (len(cvssv3) > 0):
+    if (cvssv3 is not None) and (len(cvssv3) > 0):  # TODO: VECTOR
         dojo_finding.cvssv3 = cvssv3
 
     return dojo_finding

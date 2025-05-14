@@ -352,7 +352,7 @@ def parse_finding(host, tree):
         finding.is_mitigated = temp["mitigated"]
         finding.active = temp["active"]
         if temp.get("CVSS_vector") is not None:
-            finding.cvssv3 = temp.get("CVSS_vector")
+            finding.cvssv3 = temp.get("CVSS_vector")  # TODO: VECTOR
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True

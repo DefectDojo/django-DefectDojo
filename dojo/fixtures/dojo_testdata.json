@@ -1146,6 +1146,7 @@
     "pk": 2,
     "model": "dojo.finding",
     "fields": {
+      "cvssv3": "happy little vector",
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,

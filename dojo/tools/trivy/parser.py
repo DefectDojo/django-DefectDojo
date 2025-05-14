@@ -171,7 +171,7 @@ class TrivyParser:
                         if cvssclass is not None:
                             if cvssclass.get("V3Score") is not None:
                                 severity = self.convert_cvss_score(cvssclass.get("V3Score"))
-                                cvssv3 = dict(cvssclass).get("V3Vector")
+                                cvssv3 = dict(cvssclass).get("V3Vector")  # TODO: VECTOR
                             elif cvssclass.get("V2Score") is not None:
                                 severity = self.convert_cvss_score(cvssclass.get("V2Score"))
                             else:
