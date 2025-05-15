@@ -32,7 +32,7 @@ class ProwlerParser:
         """Parses the Prowler scan results file (CSV or JSON) and returns a list of findings."""
         content = file.read()
         if isinstance(content, bytes):
-            content = content.decode('utf-8')
+            content = content.decode("utf-8")
 
         # For unit tests - specially handle each test file based on content
         if not self.test_mode and isinstance(test, Test) and not hasattr(test, "engagement"):
