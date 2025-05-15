@@ -1154,8 +1154,8 @@ def enable_like_status(finding):
         if "data" in finding.ia_recommendation:
             if "like_status" in finding.ia_recommendation["data"]:
                 like_status = finding.ia_recommendation["data"]["like_status"]
-                if like_status is None:
-                    return True
+                if like_status is not None:
+                    return like_status
     return False
 
 

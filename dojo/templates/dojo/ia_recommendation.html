@@ -1,17 +1,17 @@
 {% load display_tags %}
 <div id="spinnerLoading" style="display: none;"> <h4>Loading...</h4></div>
 <div id="ia_recommendation" class="panel-body collapse">
-    <div id="id_recommendation_content">
+    <div id="id_recommendation_content" data-status-ia-recommendation="{% if finding.ia_recommendation %}true{% else %}false{% endif %}">
         {{finding|render_ia_recommendation | safe}}
         
     </div>
 
-    <div id="like_status" style="display: {{ finding|enable_like_status|yesno:'block,none;'}}">
+    <div id="like_status" style="display: none;}}">
         <div class="rating-tag">
             <p class="rating-title">¿Te fue útil esta respuesta?</p>
             <div class="feedback-buttons">
-                <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="Me fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
-                <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="No me ayudó"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
+                <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="{{finding|enable_like_status|yesno:'feedback-btn selected,feedback-btn'}}" title="Me fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
+                <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="{{finding|enable_like_status|yesno:'feedback-btn,feedback-btn selected' }}" title="No me ayudó"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
             </div>
             <div id="feedback-thankyou" class="thank-you">¡Gracias por tu opinión!</div>
         </div>

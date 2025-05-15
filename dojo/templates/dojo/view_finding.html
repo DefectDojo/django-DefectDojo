@@ -1563,6 +1563,7 @@
     <script type="application/javascript">
        
         // DataTables Setup
+        
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
@@ -1672,6 +1673,7 @@
 
     <script type="module">
         import {FormaterHtmlRecommendation} from '{% static "dojo/js/finding/ia_recomendation.js" %}'
+        let enableRating = "null";
         const apiUrl = "{{ HOST_IA_RECOMMENDATION }}"
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -1744,9 +1746,22 @@
         }
        
         $(document).ready(function() {
+            $('#ia_recommendation').on('show.bs.collapse', function () {
+                let status_ia_recommendation = $('#id_recommendation_content').data("status-ia-recommendation");
+                if(enableRating == "hide"){
+                    return;
+                }
+                if(status_ia_recommendation == false){
+                    $('#like_status').css('display', 'none');
+                    return;
+                }else{
+                    $('#like_status').css('display', 'block');
+                }
+            });
             $('#id_button_ia_recommendation').click(async function(event)
             {
                 let finding_id = $(this).data('fid-recommendation')
+                enableRating = "hide";
                 $('#like_status').css('display', 'none');
                 $('#id_recommendation_content').empty();
                 $('#id_mitigations_contect').empty();
@@ -1757,28 +1772,51 @@
             });
             // ia recommendation
             $(document).on('click', '#thumbs-up', function(event) {
-                $(this).addClass('feedback-btn disabled');
+                if ($(this).hasClass('selected')) {
+                    return;
+                }
+                $(this).addClass('feedback-btn selected');
+                $('#thumbs-down').removeClass('feedback-btn selected')
+                $('#thumbs-down').removeClass('feedback-btn.disabled')
                 $(this).removeClass('hover');
+                $(this).removeClass('click');
                 $(this).off('mouseenter mouseleave');
                 vote(true, $(this));
             });
             
             $(document).on('click', '#thumbs-down', function(event) {
-                $(this).addClass('feedback-btn disabled');
+                if ($(this).hasClass('selected')) {
+                    return;
+                }
+                $(this).addClass('feedback-btn selected');
+                $('#thumbs-up').removeClass('feedback-btn selected')
+                $('#thumbs-up').removeClass('feedback-btn.disabled')
                 $(this).removeClass('hover');
                 $(this).off('mouseenter mouseleave');
                 vote(false, $(this));
             });
         
         $('#thumbs-up').on('mouseenter', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).addClass('feedback-btn hover');
         }).on('mouseleave', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).removeClass('feedback-btn hover');
         });
 
         $('#thumbs-down').on('mouseenter', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).addClass('feedback-btn hover');
         }).on('mouseleave', function() {
+            if ($(this).hasClass('selected')) {
+                return;
+            }
             $(this).removeClass('feedback-btn hover');
         });
     });
