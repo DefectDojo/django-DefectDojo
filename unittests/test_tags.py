@@ -163,10 +163,6 @@ class TagTests(DojoAPITestCase):
     def test_finding_patch_remove_tags_non_existent(self):
         return self.test_finding_put_remove_tags_non_existent()
 
-    def test_finding_create_tags_with_commas(self):
-        tags = ["one,two"]
-        self.create_finding_with_tags(tags, expected_status_code=400)
-
     def test_finding_create_tags_with_spaces(self):
         tags = ["one two"]
         self.create_finding_with_tags(tags, expected_status_code=400)
@@ -211,6 +207,25 @@ class TagTests(DojoAPITestCase):
         self.assertEqual(len(tags), len(response.get("tags")))
         for tag in tags:
             self.assertIn(tag, response["tags"])
+
+    def test_import_multipart_tags(self):
+        with (self.zap_sample5_filename).open(encoding="utf-8") as testfile:
+            data = {
+                "engagement": [1],
+                "file": [testfile],
+                "scan_type": ["ZAP Scan"],
+                "tags": ["bug,security", "urgent"],  # Attempting to mimic the two "tag" fields (-F 'tags=tag1' -F 'tags=tag2')
+            }
+            response = self.import_scan(data, 201)
+            # Make sure the serializer returns the correct tags
+            success_tags = ["bug", "security", "urgent"]
+            self.assertEqual(response["tags"], success_tags)
+            # Check that the test has the same issue
+            test_id = response["test"]
+            response = self.get_test_api(test_id)
+            self.assertEqual(len(success_tags), len(response.get("tags")))
+            for tag in success_tags:
+                self.assertIn(tag, response["tags"])
 
 
 class InheritedTagsTests(DojoAPITestCase):
