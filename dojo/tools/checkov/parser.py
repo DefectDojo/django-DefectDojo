@@ -141,8 +141,6 @@ def get_item(vuln, test, check_type):
     if "severity" in vuln and vuln["severity"] is not None:
         severity = vuln["severity"].capitalize()
 
-    mitigation = ""
-
     references = vuln.get("guideline", "")
     return Finding(
         title=title,
