@@ -65,7 +65,7 @@ This option is especially relevant when using the API to import data. If uploadi
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
 
-### Triage-less scanners: "Do Not Reactivate"
+### Triage-less scanners: Do Not Reactivate field
 
 Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything, regardless of whether a vulnerability has already been triaged or not.
 
