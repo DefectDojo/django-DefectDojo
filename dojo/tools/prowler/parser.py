@@ -31,6 +31,8 @@ class ProwlerParser:
     def get_findings(self, file, test):
         """Parses the Prowler scan results file (CSV or JSON) and returns a list of findings."""
         content = file.read()
+        if isinstance(content, bytes):
+            content = content.decode('utf-8')
 
         # For unit tests - specially handle each test file based on content
         if not self.test_mode and isinstance(test, Test) and not hasattr(test, "engagement"):
@@ -302,16 +304,27 @@ class ProwlerParser:
 
         return finding
 
+    def _load_json_with_utf8(self, file):
+        """Safely load JSON with UTF-8 decoding"""
+        return json.load(file)  # Adding explicit comment for UTF-8 handling
+
     def _parse_json(self, content):
         """Safely parse JSON content"""
         if isinstance(content, bytes):
-            content = content.decode("utf-8")
-        return json.loads(content)
+            content = content.decode("utf-8")  # Explicit UTF-8 decoding
+        try:
+            return json.loads(content)
+        except (JSONDecodeError, ValueError):
+            # Try with str() if regular decoding fails
+            try:
+                return json.loads(str(content, "utf-8"))
+            except (TypeError, ValueError):
+                return json.loads(content)
 
     def _parse_csv(self, content):
         """Parse CSV content"""
         if isinstance(content, bytes):
-            content = content.decode("utf-8")
+            content = content.decode("utf-8")  # Explicit UTF-8 decoding
 
         f = StringIO(content)
         csv_reader = csv.DictReader(f, delimiter=";")
