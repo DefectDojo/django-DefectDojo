@@ -287,10 +287,8 @@ def product_type_counts(request):
             oip = opened_in_period(start_date, end_date, test__engagement__product__prod_type=pt)
 
             # trending data - 12 months
-            for x in range(12, 0, -1):
-                opened_in_period_list.append(
-                    opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
-                                     test__engagement__product__prod_type=pt))
+            opened_in_period_list.extend(opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
+                                     test__engagement__product__prod_type=pt) for x in range(12, 0, -1))
 
             opened_in_period_list.append(oip)
 
@@ -486,10 +484,8 @@ def product_tag_counts(request):
                 test__engagement__product__in=prods)
 
             # trending data - 12 months
-            for x in range(12, 0, -1):
-                opened_in_period_list.append(
-                    opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
-                                     test__engagement__product__tags__name=pt, test__engagement__product__in=prods))
+            opened_in_period_list.extend(opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
+                                     test__engagement__product__tags__name=pt, test__engagement__product__in=prods) for x in range(12, 0, -1))
 
             opened_in_period_list.append(oip)
 
@@ -704,10 +700,8 @@ def view_engineer(request, eid):
                                  tzinfo=timezone.get_current_timezone())],
         owner=user)
                       for finding in ra.accepted_findings.all()]
-    closed_month = []
-    for f in closed_findings:
-        if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
-            closed_month.append(f)
+    closed_month = [f for f in closed_findings
+                        if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month]
 
     o_dict, open_count = count_findings(open_month)
     c_dict, closed_count = count_findings(closed_month)
@@ -721,7 +715,6 @@ def view_engineer(request, eid):
     day_list.append(now)
 
     q_objects = (Q(date=d) for d in day_list)
-    closed_week = []
     open_week = findings.filter(reduce(operator.or_, q_objects))
 
     accepted_week = [finding for ra in Risk_Acceptance.objects.filter(
@@ -730,9 +723,7 @@ def view_engineer(request, eid):
 
     q_objects = (Q(mitigated=d) for d in day_list)
     # closed_week= findings.filter(reduce(operator.or_, q_objects))
-    for f in closed_findings:
-        if f.mitigated and f.mitigated >= day_list[0]:
-            closed_week.append(f)
+    closed_week = [f for f in closed_findings if f.mitigated and f.mitigated >= day_list[0]]
 
     o_week_dict, open_week_count = count_findings(open_week)
     c_week_dict, closed_week_count = count_findings(closed_week)
