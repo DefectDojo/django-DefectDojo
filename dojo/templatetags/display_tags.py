@@ -1176,7 +1176,7 @@ def render_risk_acceptance_accepted_by(finding: Finding):
                         for x in accepted_by_recommendation_ra)):
                     status = "✅"
             if len(name_parts) > 2:
-                accepted_by_user += f"👤 {name_parts[0]} {name_parts[3]} {status}"
+                accepted_by_user += f"👤 {name_parts[0]} {name_parts[2]} {status}"
             elif len(name_parts) == 2:
                 accepted_by_user += f"👤 {name_parts[0]} {name_parts[1]} {status}"
             else:
