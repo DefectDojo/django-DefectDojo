@@ -697,8 +697,8 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
 
 
 def rule_tags_enable_ia_recommendation(*args, **kwargs):
-    if GeneralSettings.objects.get(
-        name_key="TAGS_IA_RECOMMENDATION").status is False:
+    if GeneralSettings.get_status(
+        name_key="TAGS_IA_RECOMMENDATION") is False:
         return True
     finding = kwargs["finding"]
     tags = list(finding.tags.all().values_list("name", flat=True))
@@ -713,8 +713,8 @@ def rule_tags_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_repository_enable_ia_recommendation(*args, **kwargs):
-    if GeneralSettings.objects.get(
-        name_key="REPOSITORY_IA_RECOMMENDATION").status is False:
+    if GeneralSettings.get_status(
+        name_key="REPOSITORY_IA_RECOMMENDATION") is False:
         return True
     finding = kwargs["finding"]
     engagement = finding.test.engagement
@@ -728,8 +728,8 @@ def rule_repository_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_cve_enable_ia_recommendation(*args, **kwargs):
-    if GeneralSettings.objects.get(
-        name_key="CVE_IA_RECOMMENDATION").status is False:
+    if GeneralSettings.get_status(
+        name_key="CVE_IA_RECOMMENDATION") is False:
         return True
     finding = kwargs["finding"]
     expression = GeneralSettings.get_value("CVE_IA_RECOMMENDATION", [])
@@ -746,8 +746,8 @@ def rule_cve_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
-    if GeneralSettings.objects.get(
-        name_key="PRODUCT_TYPES_IA_RECOMMENDATION").status is False:
+    if GeneralSettings.get_status(
+        name_key="PRODUCT_TYPES_IA_RECOMMENDATION") is False:
         return True
     finding = kwargs["finding"]
     product = get_product(finding)

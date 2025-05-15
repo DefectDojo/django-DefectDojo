@@ -5066,6 +5066,10 @@ class GeneralSettings(models.Model):
         return cls.status if cls.status else False
 
     @classmethod
+    def get_status(cls, name_key: str):
+        return GeneralSettings.objects.get(name_key=name_key).status
+
+    @classmethod
     def get_value(cls, name_key: str, default=None):
         variable_object = None
         rule_data_type = {
