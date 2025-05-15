@@ -697,6 +697,9 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
 
 
 def rule_tags_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.objects.get(
+        name_key="TAGS_IA_RECOMMENDATION").status is False:
+        return True
     finding = kwargs["finding"]
     tags = list(finding.tags.all().values_list("name", flat=True))
     tags_enabled = GeneralSettings.get_value(
@@ -710,6 +713,9 @@ def rule_tags_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_repository_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.objects.get(
+        name_key="REPOSITORY_IA_RECOMMENDATION").status is False:
+        return True
     finding = kwargs["finding"]
     engagement = finding.test.engagement
     repositories = GeneralSettings.get_value(
@@ -717,12 +723,14 @@ def rule_repository_enable_ia_recommendation(*args, **kwargs):
     if engagement.source_code_management_server is not None:
         if engagement.source_code_management_server.name in repositories:
             return True
-    logger.debug("Repository IA_RECOMMENDATION not pass rule: %s",
-                 engagement.source_code_management_server.name)
+    logger.debug("Repository IA_RECOMMENDATION not pass rule server name no match o is null")
     return False
 
 
 def rule_cve_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.objects.get(
+        name_key="CVE_IA_RECOMMENDATION").status is False:
+        return True
     finding = kwargs["finding"]
     expression = GeneralSettings.get_value("CVE_IA_RECOMMENDATION", [])
     expression = r"" + expression
@@ -738,6 +746,9 @@ def rule_cve_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.objects.get(
+        name_key="PRODUCT_TYPES_IA_RECOMMENDATION").status is False:
+        return True
     finding = kwargs["finding"]
     product = get_product(finding)
     # Product Enabled
