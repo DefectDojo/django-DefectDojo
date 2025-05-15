@@ -269,9 +269,11 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_tags_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_tags_enable_ia_recommendation(self, mock_get_status, mock_get_value):
 
         # Return GeneralSettings Value
+        mock_get_status.return_value = True
         mock_get_value.return_value = ["tag1", "tag2"]
 
         mock_tags = MagicMock()
@@ -290,8 +292,10 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         assert result is False
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_repository_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_repository_enable_ia_recommendation(self, mock_get_status, mock_get_value):
         # Mock data
+        mock_get_status.return_value = True
         mock_finding = MagicMock()
         mock_finding.test.engagement.source_code_management_server.name = "repo1"
 
@@ -308,7 +312,10 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         self.assertFalse(result)
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_cve_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_cve_enable_ia_recommendation(self,mock_get_status, mock_get_value):
+
+        mock_get_status.return_value = True
         # Mock data
         mock_finding = MagicMock()
         mock_finding.cve = "CVE-1234"
@@ -328,14 +335,17 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
     @patch("dojo.finding.helper.get_product")
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
     def test_rule_product_type_or_product_enable_ia_recommendation(
             self,
+            mock_get_status,
             mock_get_product,
             mock_get_value):
 
         mock_finding = MagicMock()
         mock_product = MagicMock()
 
+        mock_get_status.return_value = True
         mock_product.name = "Product1"
         mock_product.prod_type.name = "Product Type1"
 
