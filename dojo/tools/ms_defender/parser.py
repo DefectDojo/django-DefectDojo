@@ -34,9 +34,8 @@ class MSDefenderParser:
                 input_zip = zipfile.ZipFile(file.name, "r")
             else:
                 input_zip = zipfile.ZipFile(file, "r")
+
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-            if zipdata.get("vulnerabilities/") is None:
-                return []
             vulnerabilityfiles = []
             machinefiles = []
             for content in list(zipdata):
@@ -44,6 +43,11 @@ class MSDefenderParser:
                     vulnerabilityfiles.append(content)
                 if "machines/" in content and content != "machines/":
                     machinefiles.append(content)
+
+            if len(vulnerabilityfiles) == 0:
+                logger.debug("No vulnerabilities.json files found in the vulnerabilities/ folder")
+                return []
+
             vulnerabilities = []
             machines = {}
             for vulnerabilityfile in vulnerabilityfiles:
