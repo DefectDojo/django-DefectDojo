@@ -119,6 +119,9 @@ def get_item(vuln, test, check_type):
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
+    if "description" in vuln:
+        description += f"\n{vuln['description']}\n"
+
     if "benchmarks" in vuln:
         bms = vuln['benchmarks'].keys()
         if len(bms) > 0:
