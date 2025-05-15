@@ -515,6 +515,59 @@ GET parameter starts with `http://` instead of
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 
+## OIDC (OpenID Connect)
+
+Adding OIDC gives you the option to authenticate users using a generic OIDC provider.
+
+### Pro Configuration
+
+In DefectDojo Pro, OIDC can be configured from the OIDC settings page:
+
+![image](images/oidc_pro.png)
+
+Fill out the form as follows
+
+1. Enter your OIDC endpoint in the Endpoint field.  This is the base URL of your OIDC instance (you do not need to include `/.well-known/open-id-configuration/`)
+
+2. Enter your OIDC Client ID in the Client ID field.
+
+3. Enter the OIDC Client Secret in the Client Secret field.
+
+4. Check the box for Enable OIDC.
+
+Once the form has been submitted, Log In With OIDC should be added as an option to the DefectDojo login page.
+
+
+### Open-Source
+
+The minimum configuration requires you to set the following environment variables:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=True,
+    DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, 'https://example.com'),
+    DD_SOCIAL_AUTH_OIDC_KEY=(str, 'YOUR_CLIENT_ID'),
+    DD_SOCIAL_AUTH_OIDC_SECRET=(str, 'YOUR_CLIENT_SECRET')
+    {{< /highlight >}}
+
+The rest of the OIDC configuration will be auto-detected by fetching data from:
+ - <DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT>/.well-known/open-id-configuration/
+
+You can also optionally set the following variables:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ''),                           #the key associated with the OIDC user IDs
+    DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ''),                     #the key associated with the OIDC usernames
+    DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, ['']),           #list of domains allowed for login
+    DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256","HS256"]),
+    DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ''),
+    {{< /highlight >}}
+
+Once these variables have been set, restart DefectDojo. Log In With OIDC should now be added to the DefectDojo login page.
+
 ## SAML Configuration
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users can follow this guide to set up a SAML configuration using the DefectDojo UI. Open-Source users can set up SAML via environment variables, using the following [guide](./#open-source-saml).
