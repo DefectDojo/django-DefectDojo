@@ -236,10 +236,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 
 def get_endpoints_as_url(finding):
-    list1 = []
-    for e in finding.endpoints.all():
-        list1.append(hyperlink.parse(str(e)))
-    return list1
+    return [hyperlink.parse(str(e)) for e in finding.endpoints.all()]
 
 
 def are_urls_equal(url1, url2, fields):
@@ -894,9 +891,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
 
 def get_week_data(week_start_date, tick, day_counts):
-    data = []
-    for i in range(len(day_counts)):
-        data.append([tick, i, day_counts[i]])
+    data = [[tick, i, day_counts[i]] for i in range(len(day_counts))]
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
 
@@ -2299,9 +2294,7 @@ def get_file_images(obj, *, return_objects=False):
 def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ["alert"]
-    for choice in NOTIFICATION_CHOICES:
-        if get_system_setting(f"enable_{choice[0]}_notifications"):
-            enabled.append(choice[0])
+    enabled.extend(choice[0] for choice in NOTIFICATION_CHOICES if get_system_setting(f"enable_{choice[0]}_notifications"))
     return enabled
 
 
@@ -2629,9 +2622,11 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    # Clean the title by removing some problematic characters
+    cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
 
     return generate_file_response_from_file_path(
-        file_path, file_name=file_object.title, file_size=file_object.file.size,
+        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
     )
 
 
@@ -2667,9 +2662,7 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
     error_messages = []
 
     if isinstance(value, list):
-        for tag in value:
-            if TAG_PATTERN.search(tag):
-                error_messages.append(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes.")
+        error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
     elif isinstance(value, str):
         if TAG_PATTERN.search(value):
             error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")

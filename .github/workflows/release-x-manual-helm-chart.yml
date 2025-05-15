@@ -56,7 +56,7 @@ jobs:
              helm dependency update ./helm/defectdojo
 
       - name: Add yq
-        uses: mikefarah/yq@734e2cd25402f10f51351c4034625043f07e7b06 # v4.45.3
+        uses: mikefarah/yq@b534aa9ee5d38001fba3cd8fe254a037e4847b37 # v4.45.4
 
       - name: Pin version docker version
         id: pin_image

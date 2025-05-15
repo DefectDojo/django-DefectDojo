@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 import pathlib
+import re
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
@@ -1140,6 +1141,31 @@ class FilesTest(DojoAPITestCase):
         for level in self.url_levels:
             response = self.client.get(f"/api/v2/{level}/files/")
             self.assertEqual(200, response.status_code)
+
+    def test_file_with_quoted_name(self):
+        level = "findings/7"
+        with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as testfile:
+            # Create a new file first
+            payload = {
+                "title": 'A file "title" with Quotes & other bad chars #broken',
+                "file": testfile,
+            }
+            response = self.client.post(f"/api/v2/{level}/files/", payload)
+            self.assertEqual(201, response.status_code, response.data)
+            file_id = response.data.get("id")
+
+        # Download the file and ensure the content is accurate
+        response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
+        downloaded_file = b"".join(response.streaming_content).decode().replace("\\n", "\n")
+        file_data = (get_unit_tests_scans_path("acunetix") / "one_finding.xml").read_text(encoding="utf-8")
+        self.assertEqual(file_data, downloaded_file)
+        # Check the name of the file is correct
+        if (match := re.search(r'filename="?(?P<filename>[^";]+)"?', response.get("Content-Disposition"))):
+            filename = match.group("filename")
+            self.assertEqual(filename, "A file -title- with Quotes - other bad chars -broken.xml")
+        else:
+            msg = "Content-Disposition header must contain the filename parameter"
+            raise NotImplementedError(msg)
 
 
 class FindingsTest(BaseClass.BaseClassTest):
