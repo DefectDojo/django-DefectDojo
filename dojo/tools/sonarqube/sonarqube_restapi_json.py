@@ -30,9 +30,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**project:** " + project + "\n"
                     description += "**line:** " + line + "\n"
                     if bool(textRange):
-                        res = []
-                        for item in textRange:
-                            res.append(item + ": " + str(textRange[item]))
+                        res = [item + ": " + str(textRange[item]) for item in textRange]
                         description += "**textRange:** " + ", ".join(res) + "\n"
                     if flows != []:
                         description += "**flows:** " + str(flows) + "\n"
@@ -122,23 +120,19 @@ class SonarQubeRESTAPIJSON:
                     if "Reference: CVE" in message:
                         cve_pattern = r"Reference: CVE-\d{4}-\d{4,7}"
                         cves = re.findall(cve_pattern, message)
-                        for cve in cves:
-                            vulnids.append(cve.split("Reference: ")[1])
+                        vulnids.extend(cve.split("Reference: ")[1] for cve in cves)
                     if "References: CVE" in message:
                         cve_pattern = r"References: CVE-\d{4}-\d{4,7}"
                         cves = re.findall(cve_pattern, message)
-                        for cve in cves:
-                            vulnids.append(cve.split("References: ")[1])
+                        vulnids.extend(cve.split("References: ")[1] for cve in cves)
                     if "Reference: GHSA" in message:
                         cve_pattern = r"Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}"
                         cves = re.findall(cve_pattern, message)
-                        for cve in cves:
-                            vulnids.append(cve.split("Reference: ")[1])
+                        vulnids.extend(cve.split("Reference: ")[1] for cve in cves)
                     if "References: GHSA" in message:
                         cve_pattern = r"References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}"
                         cves = re.findall(cve_pattern, message)
-                        for cve in cves:
-                            vulnids.append(cve.split("References: ")[1])
+                        vulnids.extend(cve.split("References: ")[1] for cve in cves)
                     item.unsaved_vulnerability_ids = []
                     for vulnid in vulnids:
                         item.unsaved_vulnerability_ids.append(vulnid)

@@ -169,13 +169,9 @@ class CycloneDXXMLParser:
         return finding
 
     def get_cwes(self, node, prefix, namespaces):
-        cwes = []
-        for cwe in node.findall(
+        return [int(cwe.text) for cwe in node.findall(
             prefix + ":cwes/" + prefix + ":cwe", namespaces,
-        ):
-            if cwe.text.isdigit():
-                cwes.append(int(cwe.text))
-        return cwes
+        ) if cwe.text.isdigit()]
 
     def _manage_vulnerability_xml(
         self,

@@ -8,10 +8,8 @@ class Compliance:
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
         severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
-        resource_arns = []
-        for resource in finding.get("Resources", []):
-            if arn := resource.get("Id"):
-                resource_arns.append(arn)
+        resource_arns = [arn for resource in finding.get("Resources", [])
+                                if (arn := resource.get("Id"))]
         mitigation = ""
         impact = []
         references = []
