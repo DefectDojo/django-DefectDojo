@@ -87,3 +87,6 @@ You can execute the following command to see the configuration:
 
 `docker compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
+
+### Asynchronous Import: Deprecated
+This feature has been removed in 2.47.0
