@@ -43,7 +43,7 @@ class BlackduckBinaryAnalysisParser:
             cwe = 1357
             title = self.format_title(i)
             description = self.format_description(i)
-            cvss_v3 = True  # TODO: VECTOR
+            cvss_v3 = True
             if str(i.cvss_vector_v3) != "":
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
