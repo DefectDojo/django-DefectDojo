@@ -2562,7 +2562,7 @@ class Finding(models.Model):
                                            blank=True,
                                            max_length=500,
                                            verbose_name=_("Unique ID from tool"),
-                                           help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities."))
+                                           help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities over time across subsequent scans."))
     vuln_id_from_tool = models.CharField(null=True,
                                          blank=True,
                                          max_length=500,
