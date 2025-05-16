@@ -8,7 +8,7 @@ from cvss import CVSS2, CVSS3, CVSS4, CVSSError
 from dojo.models import Finding
 
 
-# TEMPORARY: Local implementation until the upstream PR is merged
+# TEMPORARY: Local implementation until the upstream PR is merged & release: https://github.com/RedHatProductSecurity/cvss/pull/75
 def parse_cvss_from_text(text):
     """
     Parses CVSS2, CVSS3, and CVSS4 vectors from arbitrary text and returns a list of CVSS objects.
