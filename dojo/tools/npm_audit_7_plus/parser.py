@@ -165,8 +165,12 @@ def get_item(item_node, tree, test):
         cwe = int(cwe.split("-")[1])
         dojo_finding.cwe = cwe
 
-    if (cvssv3 is not None) and (len(cvssv3) > 0):  # TODO: VECTOR
-        dojo_finding.cvssv3 = cvssv3
+    if (cvssv3 is not None) and (len(cvssv3) > 0):
+        from dojo.utils import parse_cvss_data
+        cvss_data = parse_cvss_data(cvssv3)
+        if cvss_data:
+            dojo_finding.cvss3 = cvss_data.get("vector")
+            dojo_finding.cvssv3_score = cvss_data.get("score")
 
     return dojo_finding
 

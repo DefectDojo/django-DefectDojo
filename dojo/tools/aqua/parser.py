@@ -1,6 +1,7 @@
 import json
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 
 class AquaParser:
@@ -170,7 +171,7 @@ class AquaParser:
             severity_justification += "\nAqua severity classification: {}".format(vuln.get("aqua_severity_classification"))
             severity_justification += "\nAqua scoring system: {}".format(vuln.get("aqua_scoring_system"))
             if "nvd_score_v3" in vuln:
-                cvssv3 = vuln.get("nvd_vectors_v3")  # TODO: VECTOR
+                cvssv3 = vuln.get("nvd_vectors_v3")
         if "aqua_score" in vuln:
             if score is None:
                 score = vuln.get("aqua_score")
@@ -193,7 +194,7 @@ class AquaParser:
                 )
             severity_justification += "\nNVD v3 vectors: {}".format(vuln.get("nvd_vectors_v3"))
             # Add the CVSS3 to Finding
-            cvssv3 = vuln.get("nvd_vectors_v3")  # TODO: VECTOR
+            cvssv3 = vuln.get("nvd_vectors_v3")
         if "nvd_score" in vuln:
             if score is None:
                 score = vuln.get("nvd_score")
@@ -201,6 +202,7 @@ class AquaParser:
                     f"NVD score v2 ({score}) used for classification.\n"
                 )
             severity_justification += "\nNVD v2 vectors: {}".format(vuln.get("nvd_vectors"))
+
         severity_justification += f"\n{used_for_classification}"
         severity = self.severity_of(score)
         finding = Finding(
@@ -214,7 +216,6 @@ class AquaParser:
             severity=severity,
             severity_justification=severity_justification,
             cwe=0,
-            cvssv3=cvssv3,
             description=description.strip(),
             mitigation=fix_version,
             references=url,
@@ -222,6 +223,12 @@ class AquaParser:
             component_version=resource.get("version"),
             impact=severity,
         )
+
+        cvss_data = parse_cvss_data(cvssv3)
+        if cvss_data:
+            finding.cvss3 = cvss_data.get("vector")
+            finding.cvssv3_score = cvss_data.get("score")
+
         if vulnerability_id != "No CVE":
             finding.unsaved_vulnerability_ids = [vulnerability_id]
         if vuln.get("epss_score"):

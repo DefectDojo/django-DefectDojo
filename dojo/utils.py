@@ -15,11 +15,13 @@ from pathlib import Path
 
 import bleach
 import crum
+import cvss.parser
 import hyperlink
 import vobject
 from asteval import Interpreter
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cvss.cvss3 import CVSS3
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
@@ -2654,3 +2656,18 @@ def generate_file_response_from_file_path(
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
     response["Content-Length"] = file_size
     return response
+
+
+def parse_cvss_data(cvss_vector_string: str) -> dict:
+    if not cvss_vector_string:
+        return {}
+
+    vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
+    if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+        return {
+            "vector": vectors[0].clean_vector(),
+            "severity":  vectors[0].severities()[0],
+            "base_score": vectors[0].base_score(),
+        }
+    logger.debug("No valid CVSS3 vector found in %s", cvss_vector_string)
+    return {}
