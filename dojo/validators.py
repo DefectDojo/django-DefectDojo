@@ -1,4 +1,5 @@
 import logging
+import re
 from collections.abc import Callable
 
 import cvss.parser
@@ -6,6 +7,23 @@ from cvss import CVSS2, CVSS3, CVSS4
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
+    TAG_PATTERN = re.compile(r'[ ,\'"]')
+    error_messages = []
+
+    if isinstance(value, list):
+        error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
+    elif isinstance(value, str):
+        if TAG_PATTERN.search(value):
+            error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")
+    else:
+        error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
+
+    if error_messages:
+        logger.debug(f"Tag validation failed: {error_messages}")
+        raise exception_class(error_messages)
 
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
@@ -31,5 +49,5 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
 
     # Explicitly raise an error if no CVSS vectors are found,
     # to avoid 'NoneType' errors during severity processing later.
-    msg = "No CVSS vectors found by cvss.parse_cvss_from_text()"
+    msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
     raise exception_class(msg)
