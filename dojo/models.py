@@ -2702,7 +2702,7 @@ class Finding(models.Model):
 
                 cvss_data = parse_cvss_data(self.cvssv3)
                 if cvss_data:
-                    self.cvss3 = cvss_data.get("vector")
+                    self.cvssv3 = cvss_data.get("vector")
                     self.cvssv3_score = cvss_data.get("score")
 
             except Exception as ex:
