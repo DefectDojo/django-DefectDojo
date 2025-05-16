@@ -356,7 +356,7 @@ def parse_finding(host, tree):
             cvss_data = parse_cvss_data(temp.get("CVSS_vector"))
             if cvss_data:
                 finding.cvss3 = cvss_data.get("vector")
-                finding.cvss3_score = cvss_data.get("base_score")
+                finding.cvss3_score = cvss_data.get("score")
 
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
