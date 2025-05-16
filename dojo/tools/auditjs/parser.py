@@ -18,8 +18,10 @@ def parse_cvss_from_text(text):
 
     Args:
         text (str): arbitrary text
+
     Returns:
         A list of CVSS objects.
+
     """
     # Looks for substrings that resemble CVSS2, CVSS3, or CVSS4 vectors.
     # CVSS3 and CVSS4 vectors start with a 'CVSS:x.x/' prefix and are matched by the optional non-capturing group.
