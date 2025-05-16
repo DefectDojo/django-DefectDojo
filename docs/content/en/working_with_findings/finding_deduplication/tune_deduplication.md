@@ -1,7 +1,7 @@
 ---
 title: "Deduplication Tuning (Pro)"
 description: "Configure how DefectDojo identifies and manages duplicate findings"
-weight: 5
+weight: 4
 ---
 
 Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained control over how findings are deduplicated, allowing you to optimize duplicate detection for your specific security testing workflow.
@@ -22,7 +22,7 @@ The Deduplication Settings page offers three key configuration areas:
 
 Same Tool Deduplication is enabled by default for all security tool parsers. This ensures findings from consecutive scans using the same tool are properly deduplicated.
 
-To configure Same Tool Deduplication:
+To adjust Same Tool Deduplication:
 
 1. Select a specific **Security Tool** from the dropdown
 2. Choose a **Deduplication Algorithm** from the available options
@@ -77,8 +77,9 @@ The same three algorithm options are available for Reimport Deduplication as for
 For optimal results with Deduplication Tuning:
 
 - **Start with defaults**: The preconfigured deduplication settings work well for most scenarios
-- **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior
-- **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity)
+- **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
+- **Adjustments to deduplication will only affect new imports, and **do not retroactively adjust the hash values for findings already imported**.  Pro subscribers may contact DefectDojo support to assess if deduplcation tunings can be re-executed for findings already imported prior to the deduplcation adjustments.  
+- **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 
-By tuning these settings, you can significantly reduce duplicate noise and create a more streamlined workflow for your security teams.
+By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
