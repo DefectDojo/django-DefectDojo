@@ -37,8 +37,8 @@ $ docker compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
-    
+|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained
+
 
 ## Factory contract
 
@@ -145,7 +145,7 @@ Very bad example:
 Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
 
 #### defusedXML in favour of lxml
-As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library.
 
 ### Not all attributes are mandatory
 
@@ -168,14 +168,22 @@ Good example:
 ### Do not parse CVSS by hand (vector, score or severity)
 
 Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
-For parser, we rely on module `cvss`.
+For parser, we rely on module `cvss`. But we also have a helper method to validate the vector and extract the base score and severity from it.
 
-It's easy to use and will make the parser aligned with the rest of the code.
+```python
+cvss_data = parse_cvss_data("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
+if cvss_data:
+    finding.cvssv3 = cvss_data.get("vector")
+    finding.cvssv3_score = cvss_data.get("score")
+    finding.severity = cvss_data.get("severity")  # if your tool does generate severity
+```
+
+If you need more manual processing, you can parse the `CVSS` vector directly.
 
 Example of use:
 
 ```python
-from cvss.cvss3 import CVSS3
+from dojo.utils import cvss.cvss3 import CVSS3
 import cvss.parser
 vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
 if len(vectors) > 0 and type(vectors[0]) is CVSS3:
@@ -185,17 +193,8 @@ if len(vectors) > 0 and type(vectors[0]) is CVSS3:
     severity = vectors[0].severities()[0]
     vectors[0].compute_base_score()
     cvssv3_score = vectors[0].scores()[0]
-    print(severity)
-    print(cvssv3_score)
-```
-
-Good example:
-
-```python
-vectors = cvss.parser.parse_cvss_from_text(item['cvss_vect'])
-if len(vectors) > 0 and type(vectors[0]) is CVSS3:
-    finding.cvss = vectors[0].clean_vector()
-    finding.severity = vectors[0].severities()[0]  # if your tool does generate severity
+    finding.severity = severity
+    finding.cvssv3_score = cvssv3_score
 ```
 
 Bad example (DIY):
@@ -311,7 +310,7 @@ or like this:
 $ ./run-unittest.sh --test-case unittests.tools.test_aqua_parser.TestAquaParser
 {{< /highlight >}}
 
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
+If you want to run all parser unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test -p "test_*_parser.py" -v2'`
 
 ### Endpoint validation
 
@@ -366,4 +365,3 @@ Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] w
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
 Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md)
-
