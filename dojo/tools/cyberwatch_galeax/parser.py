@@ -197,7 +197,7 @@ class CyberwatchGaleaxParser:
         description = c_data["description"]
         impact = c_data["impact"]
         references = c_data["references"]
-        cvssv3 = c_data["cvssv3"]  # TODO: VECTOR
+        cvssv3 = c_data["cvssv3"]
         cvssv3_score = c_data["cvssv3_score"]
         products = c_data["products"]
 
@@ -515,7 +515,7 @@ class CyberwatchGaleaxParser:
         if cvss_v3_vector:
             vectors = cvss.parser.parse_cvss_from_text(cvss_v3_vector)
             if vectors and isinstance(vectors[0], CVSS3):
-                cvssv3 = vectors[0].clean_vector()  # TODO: VECTOR
+                cvssv3 = vectors[0].clean_vector()
                 cvssv3_score = vectors[0].scores()[0]
                 severity = vectors[0].severities()[0]
                 return cvssv3, cvssv3_score, severity
