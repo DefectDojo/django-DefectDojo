@@ -25,7 +25,6 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
@@ -2655,20 +2654,3 @@ def generate_file_response_from_file_path(
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
     response["Content-Length"] = file_size
     return response
-
-
-def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
-    TAG_PATTERN = re.compile(r'[ ,\'"]')
-    error_messages = []
-
-    if isinstance(value, list):
-        error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
-    elif isinstance(value, str):
-        if TAG_PATTERN.search(value):
-            error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")
-    else:
-        error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
-
-    if error_messages:
-        logger.debug(f"Tag validation failed: {error_messages}")
-        raise exception_class(error_messages)
