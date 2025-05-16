@@ -25,6 +25,11 @@ Build custom workflows and bulk actions to handle Findings and other objects.  S
 ### Pro Dashboards and Reporting
 Generate [instant reports and metrics](../ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos.  Evaluate your security tools and your team's performance in addressing security issues.
 
+### Deduplication Tuning
+Fine-tune how DefectDojo identifies and manages duplicate findings with advanced deduplication settings. Configure same-tool deduplication, cross-tool deduplication, and reimport deduplication to match your organization's specific needs. See our [Deduplication Tuning Guide](/en/working_with_findings/finding_deduplication/tune_deduplication/) for more information.
+
+![image](images/deduplication_tuning.png)
+
 ## Streamlined import
 
 ### Background Imports
