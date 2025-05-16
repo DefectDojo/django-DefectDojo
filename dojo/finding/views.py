@@ -3595,34 +3595,38 @@ def calculate_possible_related_actions_for_similar_finding(
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def generate_token_generative_ia(request, fid):
     error_response = {
-   "ia_recommendations": (
-        "At the moment, you can't generate a recommendation for this finding.\n"
-        "Please try again later or with a different finding.🫣"
-    )}
+    "status": "Ok",
+    "ia_recommendations": (
+            "At the moment, you can't generate a recommendation for this finding.\n"
+            "Please try again later or with a different finding.🫣"
+        )}
     url = GeneralSettings.get_value("HOST_LOGIN_IA_RECOMMENDATION", "")
     payload = f"grant_type=client_credentials&client_id={settings.CLIENT_ID_IA}&client_secret={settings.CLIENT_SECRET_IA}"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
+    logger.debug("IA RECOMMENDATION:get token by finding: %s", fid)
     response = requests.request("POST",
                                 url=f"{url}/auth/login",
                                 headers=headers,
                                 data=payload,
                                 )
     if response.status_code != 200:
-        logger.error("Error generating token for IA recommendation: %s", response.text)
+        logger.error(" IA RECOMMENDATION: Error generating token %s", response.text)
+        error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
 
     # get Recommendation
     access_token = response.json()["data"]["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
-    
+    logger.debug("IA RECOMMENDATION: get recomendation by finding: %s", fid)
     response = requests.request("GET",
                                 url=f"{url}/devsecops/recommendation-process/{fid}",
                                 headers=headers,
                                 )
     if response.status_code != 200:
-        logger.error("Error getting IA recommendation: %s", response.text)
+        logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
+        error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
 
     finding = get_object_or_404(Finding, id=fid)

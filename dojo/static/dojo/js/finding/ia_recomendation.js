@@ -9,7 +9,12 @@ export function FormaterHtmlRecommendation(data, elementId){
         cursor: false,
         afterComplete: function () {
             $('#id_button_ia_recommendation').prop('disabled', false); 
+            if(data["status"] == "Error"){
+                $('#like_status').css('display', 'none');
+            }
+            else{
             $('#like_status').css('display', 'block');
+            }
         }
     }).go();
 }

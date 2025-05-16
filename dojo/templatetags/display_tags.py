@@ -1150,13 +1150,16 @@ def render_ia_recommendation(finding):
 
 @register.filter()
 def enable_like_status(finding):
+    response = "Undefined"
     if finding.ia_recommendation:
         if "data" in finding.ia_recommendation:
             if "like_status" in finding.ia_recommendation["data"]:
                 like_status = finding.ia_recommendation["data"]["like_status"]
-                if like_status is not None:
-                    return like_status
-    return False
+                if like_status is True:
+                    response = "Like"
+                if like_status is False:
+                    response = "Dislike"
+    return response
 
 
 @register.filter()
