@@ -142,7 +142,7 @@ def get_item(vulnerability, test):
 
     cvss_data = parse_cvss_data(cvssv3)
     if cvss_data:
-        finding.cvss3 = cvss_data.get("vector")
+        finding.cvssv3 = cvss_data.get("vector")
         finding.cvssv3_score = cvss_data.get("score")
 
     if vulnerability_id:
