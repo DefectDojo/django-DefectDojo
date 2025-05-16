@@ -172,12 +172,12 @@ class NmapParser:
                 description = "### Vulnerability\n\n"
                 description += "**ID**: `" + str(vuln_id) + "`\n"
                 description += "**CPE**: " + str(component_cpe) + "\n"
-                for attribute in vuln_attributes:
+                for attribute, value in vuln_attributes.items():
                     description += (
                         "**"
                         + attribute
                         + "**: `"
-                        + vuln_attributes[attribute]
+                        + value
                         + "`\n"
                     )
                 severity = self.convert_cvss_score(vuln_attributes["cvss"])
