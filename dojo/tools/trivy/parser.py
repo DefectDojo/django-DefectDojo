@@ -4,6 +4,7 @@ import json
 import logging
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +172,13 @@ class TrivyParser:
                         if cvssclass is not None:
                             if cvssclass.get("V3Score") is not None:
                                 severity = self.convert_cvss_score(cvssclass.get("V3Score"))
-                                cvssv3 = dict(cvssclass).get("V3Vector")  # TODO: VECTOR
+                                cvssv3_string = dict(cvssclass).get("V3Vector")
+                                cvss_data = parse_cvss_data(cvssv3_string)
+                                if cvss_data:
+                                    cvssv3 = cvss_data.get("vector")
+                                    cvssv3_score = cvss_data.get("score")
+                            elif cvssclass.get("V3Score") is not None:
+                                cvssv3_score = cvssclass.get("V3Score")
                             elif cvssclass.get("V2Score") is not None:
                                 severity = self.convert_cvss_score(cvssclass.get("V2Score"))
                             else:
@@ -216,6 +223,7 @@ class TrivyParser:
                     component_name=package_name,
                     component_version=package_version,
                     cvssv3=cvssv3,
+                    cvssv3_score=cvssv3_score,
                     static_finding=True,
                     dynamic_finding=False,
                     tags=[vul_type, target_class],
