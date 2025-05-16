@@ -1723,12 +1723,11 @@
                 },
                 success: function(response) {
                     $('#spinnerLoading').css('display', 'none');
-                    if (response.status === 'ERROR') return;
                     FormaterHtmlRecommendation(response, "#id_recommendation_content")
                     $('#id_button_ia_recommendation').prop('disabled', false);
                 },
                 error: function(error) {
-                    console.log(error)
+                    logger.error(error);
                 }
             });  
         }
