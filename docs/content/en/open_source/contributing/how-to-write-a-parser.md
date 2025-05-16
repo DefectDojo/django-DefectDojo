@@ -174,7 +174,7 @@ For parser, we rely on module `cvss`. But we also have a helper method to valida
 ```python
 cvss_data = parse_cvss_data("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
 if cvss_data:
-    finding.cvss3 = cvss_data.get("vector")
+    finding.cvssv3 = cvss_data.get("vector")
     finding.cvssv3_score = cvss_data.get("score")
     finding.severity = cvss_data.get("severity")  # if your tool does generate severity
 ```
@@ -312,7 +312,7 @@ or like this:
 $ ./run-unittest.sh --test-case unittests.tools.test_aqua_parser.TestAquaParser
 {{< /highlight >}}
 
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
+If you want to run all parser unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test -p "test_*_parser.py" -v2'`
 
 ### Endpoint validation
 

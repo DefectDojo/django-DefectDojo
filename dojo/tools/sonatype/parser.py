@@ -66,7 +66,7 @@ def get_finding(security_issue, component, test):
     if "cvssVector" in security_issue:
         cvss_data = parse_cvss_data(security_issue["cvssVector"])
         if cvss_data:
-            finding.cvss3 = cvss_data.get("vector")
+            finding.cvssv3 = cvss_data.get("vector")
             finding.cvssv3_score = cvss_data.get("score")
 
     if "pathnames" in component:
