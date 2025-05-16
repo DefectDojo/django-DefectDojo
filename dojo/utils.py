@@ -2667,7 +2667,7 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         return {
             "vector": vectors[0].clean_vector(),
             "severity":  vectors[0].severities()[0],
-            "base_score": vectors[0].base_score(),
+            "base_score": vectors[0].scores()[0],
         }
     logger.debug("No valid CVSS3 vector found in %s", cvss_vector_string)
     return {}
