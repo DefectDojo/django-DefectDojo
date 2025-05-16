@@ -167,6 +167,7 @@ class TrivyParser:
                     severity_source = vuln.get("SeveritySource", None)
                     cvss = vuln.get("CVSS", None)
                     cvssv3 = None
+                    cvssv3_score = None
                     if severity_source is not None and cvss is not None:
                         cvssclass = cvss.get(severity_source, None)
                         if cvssclass is not None:
