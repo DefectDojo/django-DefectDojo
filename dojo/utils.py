@@ -2666,8 +2666,8 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
     if len(vectors) > 0 and type(vectors[0]) is CVSS3:
         return {
             "vector": vectors[0].clean_vector(),
+            "score": vectors[0].scores()[0],
             "severity":  vectors[0].severities()[0],
-            "base_score": vectors[0].scores()[0],
         }
     logger.debug("No valid CVSS3 vector found in %s", cvss_vector_string)
     return {}
