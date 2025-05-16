@@ -352,11 +352,14 @@ def parse_finding(host, tree):
         finding.mitigated = temp["mitigation_date"]
         finding.is_mitigated = temp["mitigated"]
         finding.active = temp["active"]
+        logger.debug("CVSS_Vector: %s", temp.get("CVSS_vector"))
         if temp.get("CVSS_vector") is not None:
+            logger.debug("CVSS_Vector: %s", temp.get("CVSS_vector"))
             cvss_data = parse_cvss_data(temp.get("CVSS_vector"))
+            logger.debug("cvss_data: %s", cvss_data)
             if cvss_data:
-                finding.cvss3 = cvss_data.get("vector")
-                finding.cvss3_score = cvss_data.get("score")
+                finding.cvssv3 = cvss_data.get("vector")
+                finding.cvssv3_score = cvss_data.get("score")
 
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
