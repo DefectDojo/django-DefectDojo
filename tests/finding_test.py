@@ -112,11 +112,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Edit Finding`
         driver.find_element(By.LINK_TEXT, "Edit Finding").click()
-        # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
-        # cvssv3
-        driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
@@ -130,6 +127,123 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="REF-3"))
         self.assertTrue(self.is_text_present_on_page(text="REF-4"))
         self.assertTrue(self.is_text_present_on_page(text="Additional Vulnerability Ids"))
+
+    def _edit_finding_cvssv3_and_assert(
+        self,
+        cvssv3_value,
+        cvssv3_score,
+        expected_cvssv3_value,
+        expected_cvssv3_score,
+        expect_success=True,  # noqa: FBT002
+        success_message="Finding saved successfully",
+        error_message=None,
+    ):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        # Click on `Edit Finding`
+        driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+        # Set cvssv3 value and score
+        driver.find_element(By.ID, "id_cvssv3").clear()
+        driver.find_element(By.ID, "id_cvssv3").send_keys(cvssv3_value)
+        driver.find_element(By.ID, "id_cvssv3_score").clear()
+        driver.find_element(By.ID, "id_cvssv3_score").send_keys(str(cvssv3_score))
+        # Submit the form
+        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+
+        if expect_success:
+            self.assertTrue(self.is_success_message_present(text=success_message))
+            # Go into edit mode again to check stored values
+            driver.find_element(By.ID, "dropdownMenu1").click()
+            driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+            self.assertEqual(expected_cvssv3_value, driver.find_element(By.ID, "id_cvssv3").get_attribute("value"))
+            self.assertEqual(str(expected_cvssv3_score), driver.find_element(By.ID, "id_cvssv3_score").get_attribute("value"))
+        else:
+            self.assertTrue(self.is_error_message_present(text=error_message))
+            self.assertEqual(expected_cvssv3_value, driver.find_element(By.ID, "id_cvssv3").get_attribute("value"))
+            self.assertEqual(str(expected_cvssv3_score), driver.find_element(By.ID, "id_cvssv3_score").get_attribute("value"))
+
+    # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
+    # Capturing current behavior which might not be the desired one yet
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="1",
+            expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="8.8",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector_no_prefix(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="2",
+            expected_cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="2",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector_with_trailing_slash(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
+            cvssv3_score="3",
+            expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
+            expected_cvssv3_score="3",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v2_vector_invalid_due_to_prefix(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            cvssv3_score="4",
+            expected_cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            expected_cvssv3_score="4",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v2_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            cvssv3_score="4",
+            expected_cvssv3_value="AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            expected_cvssv3_score="4",
+            expect_success=False,
+            error_message="Unsupported CVSS(2) version detected.",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v4_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="5",
+            expected_cvssv3_value="CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="5",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_rubbish(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="happy little vector",
+            cvssv3_score="5",
+            expected_cvssv3_value="happy little vector",
+            expected_cvssv3_score="5",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
 
     def test_add_image(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -519,6 +633,13 @@ def add_finding_tests_to_suite(suite, *, jira=False, github=False, block_executi
     suite.addTest(FindingTest("test_excel_export"))
     suite.addTest(FindingTest("test_list_components"))
     suite.addTest(FindingTest("test_edit_finding"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_no_prefix"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_with_trailing_slash"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v2_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v2_vector_invalid_due_to_prefix"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v4_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_rubbish"))
     suite.addTest(FindingTest("test_add_note_to_finding"))
     suite.addTest(FindingTest("test_add_image"))
     suite.addTest(FindingTest("test_delete_image"))
