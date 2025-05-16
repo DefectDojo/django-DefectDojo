@@ -10,7 +10,6 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
-import cvss.parser
 import dateutil
 import hyperlink
 import tagulous.admin
@@ -2700,9 +2699,12 @@ class Finding(models.Model):
         # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
             try:
-                cvss_vector = cvss.parser.parse_cvss_from_text(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_vector.scores()[2]
+
+                cvss_data = parse_cvss_data(self.cvssv3)
+                if cvss_data:
+                    self.cvss3 = cvss_data.get("vector")
+                    self.cvssv3_score = cvss_data.get("score")
+
             except Exception as ex:
                 logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
                 # should we set self.cvssv3 to None here to avoid storing invalid vectors? it would also remove invalid vectors on existing findings...
@@ -4635,7 +4637,11 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 
-from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
+from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
+    calculate_grade,
+    parse_cvss_data,
+    to_str_typed,
+)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
