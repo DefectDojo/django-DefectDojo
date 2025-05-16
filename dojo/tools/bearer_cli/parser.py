@@ -46,6 +46,7 @@ class BearerCLIParser:
                     sast_source_line=bearerfinding["source"]["start"],
                     sast_source_file_path=bearerfinding["filename"],
                     vuln_id_from_tool=bearerfinding["id"],
+                    # the fingerprint is not constant over time, but because it's not used for dedupe it's safe and useful to set it
                     unique_id_from_tool=bearerfinding["fingerprint"],
                 )
 
