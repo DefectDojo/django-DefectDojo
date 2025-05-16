@@ -1,8 +1,8 @@
-{{- $fullName := include "defectdojo.fullname" . -}}
+{{- if .Values.serviceAccount.create -}}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: {{ $fullName }}
+  name: {{ include "defectdojo.serviceAccountName" . }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -11,6 +11,9 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- with .Values.serviceAccount.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     helm.sh/resource-policy: keep
     helm.sh/hook: "pre-install"
@@ -18,6 +21,10 @@ metadata:
     {{- with .Values.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
+    {{- with .Values.serviceAccount.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
     {{- if ne .Values.gke.workloadIdentityEmail "" }}
     iam.gke.io/gcp-service-account: {{ .Values.gke.workloadIdentityEmail }}
     {{- end }}
+{{- end }}

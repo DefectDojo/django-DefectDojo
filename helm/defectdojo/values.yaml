@@ -84,6 +84,20 @@ securityContext:
     # nginx dockerfile sets USER=1001
     runAsUser: 1001
 
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  # name: ""
+
+  # Optional additional annotations to add to the DefectDojo's Service Account.
+  annotations: {}
+
+  # Optional additional labels to add to the DefectDojo's Service Account.
+  labels: {}
+
 dbMigrationChecker:
   enabled: true
   resources:
@@ -461,6 +475,7 @@ gke:
   # When using this option, be sure to set django.ingress.activateTLS to false
   useManagedCertificate: false
   # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
+  # Only works with serviceAccount.create = true
   workloadIdentityEmail: ""
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis

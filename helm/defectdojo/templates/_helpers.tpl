@@ -31,6 +31,16 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "defectdojo.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "defectdojo.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "defectdojo" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
 
 {{/*
   Determine the hostname to use for PostgreSQL/Redis.

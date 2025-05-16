@@ -60,7 +60,7 @@ spec:
         checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
       {{- end }}
     spec:
-      serviceAccountName: {{ $fullName }}
+      serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
