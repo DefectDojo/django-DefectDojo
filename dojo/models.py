@@ -43,7 +43,7 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
-from dojo.validators import cvss3_validator  # to avoid circular import
+from dojo.validators import cvss3_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
