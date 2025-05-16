@@ -134,3 +134,40 @@ class TestNmapParser(DojoTestCase):
             with self.subTest(i=55):
                 finding = findings[55]
                 self.assertEqual("### Host\n\n**IP Address:** 10.250.195.71\n**FQDN:** ip-10-250-195-71.eu-west-1.compute.internal\n\n\n**Port/Protocol:** 30150/tcp\n\n\n**Script ID:** fingerprint-strings\n**Script Output:** \n  GenericLines: \n    E_BAD_PROTOCOL\n\n\n", finding.description)
+
+    def test_parse_issue12411(self):
+        with (get_unit_tests_scans_path("nmap") / "issue12411.xml").open(encoding="utf-8") as testfile:
+            parser = NmapParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                description = """### Host
+
+**IP Address:** 172.217.18.238
+**FQDN:** par10s10-in-f238.1e100.net
+**URL:** google.com
+
+
+**Port/Protocol:** 80/tcp
+
+
+
+
+### Host
+
+**IP Address:** 54.239.28.85
+**URL:** amazon.com
+
+
+**Port/Protocol:** 80/tcp
+
+
+
+
+"""
+                self.assertEqual(description, finding.description)
+                self.assertEqual("Info", finding.severity)
