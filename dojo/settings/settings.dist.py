@@ -83,6 +83,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
+    DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -1146,6 +1147,7 @@ CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
+CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1702,7 +1704,7 @@ LOGGING = {
         },
         "celery": {
             "handlers": [rf"{LOGGING_HANDLER}"],
-            "level": str(LOG_LEVEL),
+            "level": str(CELERY_LOG_LEVEL),
             "propagate": False,
             # workaround some celery logging known issue
             "worker_hijack_root_logger": False,
