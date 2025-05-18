@@ -109,12 +109,12 @@ def is_push_all_issues(instance):
     return None
 
 
-def _safely_get_finding_group_status(finding_group: Finding_Group) -> str:
-    # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
+def _safely_get_obj_status(obj: Finding | Finding_Group) -> str:
+    # Accommodating a strange behavior where a obj sometimes prefers `obj.status` rather than `obj.status()`
     try:
-        return finding_group.status()
+        return obj.status()
     except TypeError:  # TypeError: 'str' object is not callable
-        return finding_group.status
+        return obj.status
 
 
 # checks if a finding can be pushed to JIRA
@@ -170,7 +170,7 @@ def can_be_pushed_to_jira(obj, form=None):
         if not obj.findings.all():
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
         # Determine if the finding group is not active
-        if "Active" not in _safely_get_finding_group_status(obj):
+        if "Active" not in _safely_get_obj_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
     else:
@@ -1106,10 +1106,10 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status_list = _safely_get_finding_group_status(obj)
+    status = _safely_get_obj_status(obj)
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
-    if any(item in status_list for item in RESOLVED_STATUS):
+    if status in RESOLVED_STATUS:
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
             updated = jira_transition(jira, issue, jira_instance.close_status_key)
@@ -1118,7 +1118,7 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
             updated = False
         issue_closed = True
 
-    if not issue_closed and any(item in status_list for item in OPEN_STATUS):
+    if not issue_closed and status in OPEN_STATUS:
         if not issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Active (Reopen)")
             updated = jira_transition(jira, issue, jira_instance.open_status_key)
