@@ -16,6 +16,7 @@ from .dojo_test_case import (
     get_unit_tests_path,
     get_unit_tests_scans_path,
     toggle_system_setting_boolean,
+    with_system_setting,
 )
 
 logger = logging.getLogger(__name__)
@@ -49,12 +50,12 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if True:  # set to True when committing. set to False when recording new test cassettes
+        if False:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
         my_vcr = super()._get_vcr(**kwargs)
-        my_vcr.record_mode = "once"
+        my_vcr.record_mode = "all"
         my_vcr.path_transformer = VCR.ensure_suffix(".yaml")
         my_vcr.filter_headers = ["Authorization", "X-Atlassian-Token"]
         my_vcr.cassette_library_dir = str(get_unit_tests_path() / "vcr" / "jira")
@@ -69,6 +70,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.testuser = User.objects.get(username="admin")
         self.testuser.usercontactinfo.block_execution = True
         self.testuser.usercontactinfo.save()
+
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
@@ -103,6 +105,29 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # all findings should be in a group, so no JIRA issues for individual findings
         self.assert_jira_issue_count_in_test(test_id, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 3)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    @with_system_setting("jira_minimum_severity", "Critical")
+    def test_import_with_groups_push_to_jira_minimum_critical(self):
+        # No Critical findings in report, so expect no groups to be pushed
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        # all findings should be in a group, so no JIRA issues for individual findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    @with_system_setting("jira_minimum_severity", "High")
+    def test_import_with_groups_push_to_jira_minimum_high(self):
+        # 7 findings, 5 unique component_name+component_version
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        # all findings should be in a group, so no JIRA issues for individual findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # fresh library has only medium findings, so only 2 instead of 3 groups expected
+        self.assert_jira_group_issue_count_in_test(test_id, 2)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
 
@@ -456,7 +481,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         del finding_details["push_to_jira"]
 
         # push a finding should result in pushing the group instead
-        self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True})
+        self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True, "verified": True})
 
         self.assert_jira_issue_count_in_test(test_id, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 1)
@@ -628,7 +653,12 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
-        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 2)
+
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
@@ -639,7 +669,12 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
         self.assert_jira_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
+
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
@@ -649,6 +684,11 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
         self.assert_jira_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 2)
+
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
@@ -659,6 +699,61 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push both of them
         self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_false(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_false(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
