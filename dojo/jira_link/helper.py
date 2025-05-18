@@ -141,6 +141,12 @@ def can_be_pushed_to_jira(obj, form=None):
         # findings or groups already having an existing jira issue can always be pushed
         return True, None, None
 
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
+
     if isinstance(obj, Finding):
         if form:
             active = form["active"].value()
@@ -153,22 +159,24 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
-
         if not active or (not verified and isenforced):
             logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
             return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
 
-        jira_minimum_threshold = None
-        if System_Settings.objects.get().jira_minimum_severity:
-            jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
-
-            if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-                logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
-                return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "below_minimum_threshold"
+        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
+            logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
+            return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
-        if not obj.findings.all():
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
+        # there must be at least one active (and verified) finding in the group
+        # currently this code is used in away that prefetching is not done or hard to do
+        # so we do a quick exists() query
+        pushable_findings_in_group = obj.findings.all().filter(active=True)
+        if isenforced:
+            pushable_findings_in_group = pushable_findings_in_group.filter(verified=True)
+
+        if not pushable_findings_in_group.exists():
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty or contains no active (and verified) findings.", "error_empty"
+
         # Determine if the finding group is not active
         if "Active" not in _safely_get_obj_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
