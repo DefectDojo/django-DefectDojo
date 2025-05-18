@@ -243,7 +243,7 @@ class OpenVASCSVParser:
         ip_column_strategy = IpColumnMappingStrategy()
         hostname_column_strategy = HostnameColumnMappingStrategy()
         severity_column_strategy = SeverityColumnMappingStrategy()
-        cvss_column_strategy = CvssColumnMappingStrategy()
+        cvss_score_column_strategy = CvssColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
         impact_column_strategy = ImpactColumnMappingStrategy()
@@ -266,8 +266,8 @@ class OpenVASCSVParser:
         mitigation_column_strategy.successor = impact_column_strategy
         description_column_strategy.successor = mitigation_column_strategy
         severity_column_strategy.successor = description_column_strategy
-        cvss_column_strategy.successor = severity_column_strategy
-        ip_column_strategy.successor = cvss_column_strategy
+        cvss_score_column_strategy.successor = severity_column_strategy
+        ip_column_strategy.successor = cvss_score_column_strategy
         hostname_column_strategy.successor = ip_column_strategy
         cwe_column_strategy.successor = hostname_column_strategy
         title_column_strategy.successor = cwe_column_strategy
