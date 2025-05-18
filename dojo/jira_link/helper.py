@@ -1101,10 +1101,10 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status = _safely_get_obj_status(obj)
+    status_list = _safely_get_obj_status(obj)
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
-    if status in RESOLVED_STATUS:
+    if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
             updated = jira_transition(jira, issue, jira_instance.close_status_key)
@@ -1113,7 +1113,7 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
             updated = False
         issue_closed = True
 
-    if not issue_closed and status in OPEN_STATUS:
+    if not issue_closed and any(item in status_list for item in OPEN_STATUS):
         if not issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Active (Reopen)")
             updated = jira_transition(jira, issue, jira_instance.open_status_key)
