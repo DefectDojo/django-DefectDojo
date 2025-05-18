@@ -10,12 +10,14 @@ A group of Findings has been pushed to JIRA to be investigated and fixed:
 h2. Group
 *Group*: [{{ finding_group.name|jiraencode}}|{{ finding_group_url|full_url }}] in [{{ finding_group.test.engagement.product.name|jiraencode }}|{{ product_url|full_url }}] / [{{ finding_group.test.engagement.name|jiraencode }}|{{ engagement_url|full_url }}] / [{{ finding_group.test|stringformat:'s'|jiraencode }}|{{ test_url|full_url }}]
 
-
+# TODO: JIRA only include active/verified findings above threshold
 || Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group.findings.all %}
 | {{finding.severity}} | {% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %} | [{{finding.cwe}}|{{finding.cwe|cwe_url}}] | {{finding.component_name|jiraencode_component}} | {{finding.component_version}} | {% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}] | {{ finding.status }} |{% endfor %}
 
+# TODO: JIRA only include active/verified findings above threshold
 *Severity:* {{ finding_group.severity }}
 
+# TODO: JIRA only include active/verified findings above threshold
 {% if finding_group.sla_deadline %} *Due Date:* {{ finding_group.sla_deadline }} {% endif %}
 
 {% if finding_group.test.engagement.branch_tag %}

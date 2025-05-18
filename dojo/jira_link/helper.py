@@ -119,27 +119,25 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
             return obj.status
 
     if isinstance(obj, Finding_Group):
-        jira_minimum_threshold = 0
-        if System_Settings.objects.get().jira_minimum_severity:
-            jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
-
-        findings = obj.findings.all().filter(numerical_severity__gte=jira_minimum_threshold)
+        findings = get_finding_group_findings_above_threshold(obj)
         if not findings:
             return ["Empty"]
 
+        for find in findings:
+            logger.error(f"Finding {find.id} status {find.active} {find.verified} {find.is_mitigated}")
+
         # This iterates 3 times over the list of findings, but any code doing 1 iteration would looke it's from 1990
-        has_active = any(find.active for find in findings)
-        has_verified = any(find.verified for find in findings)
-        all_mitigated = all(find.is_mitigated for find in findings) if findings else False
+        if any(find.active for find in findings):
+            status += ["Active"]
 
-        if has_active:
-            status.append("Active")
-        if has_verified:
-            status.append("Verified")
-        if all_mitigated:
-            status.append("Mitigated")
+        if any((find.active and find.verified) for find in findings):
+            status += ["Verified"]
 
-    return status
+        if all(find.is_mitigated for find in findings):
+            status += ["Mitigated", "Inactive"]
+
+    # if no active findings are found, we must assume the status is inactive
+    return status or ["Inactive"]
 
 
 # checks if a finding can be pushed to JIRA
@@ -193,6 +191,7 @@ def can_be_pushed_to_jira(obj, form=None):
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
         finding_group_status = _safely_get_obj_status_for_jira(obj)
+        logger.error(f"Finding group status: {finding_group_status}")
         if "Empty" in finding_group_status:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
@@ -673,7 +672,17 @@ def jira_description(obj):
 
 
 def jira_priority(obj):
-    return get_jira_instance(obj).get_priority(obj.severity)
+    if isinstance(obj, Finding):
+        return get_jira_instance(obj).get_priority(obj.severity)
+    if isinstance(obj, Finding_Group):
+        finding_group_severity_for_jira = get_finding_group_findings_above_threshold(obj)
+
+        max_number_severity = max(Finding.get_number_severity(find.severity) for find in finding_group_severity_for_jira)
+        return Finding.get_severity(max_number_severity)
+
+    logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
+    msg = f"Unsupported object passed to push_to_jira: {type(obj)}"
+    raise RuntimeError(msg)
 
 
 def jira_environment(obj):
@@ -1125,8 +1134,7 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
     updated = False
-    logger.debug("item check: %s", "Active" in "Active")  # noqa: PLR0133
-    logger.debug("any item resolved: %s", any(item in status_list for item in RESOLVED_STATUS))
+    logger.debug("pushing status to JIRA for %d:%s status:%s", obj.id, to_str_typed(obj), status_list)
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if not updated and any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
@@ -1785,3 +1793,16 @@ def save_and_push_to_jira(finding):
     # the updated data of the finding is pushed as part of the group
     if push_to_jira_decision and finding_in_group:
         push_to_jira(finding.finding_group)
+
+
+def get_finding_group_findings_above_threshold(finding_group):
+    """Get the findings that are above the minimum threshold"""
+    jira_minimum_threshold = 0
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    findings = finding_group.findings.filter(numerical_severity__lte=jira_minimum_threshold)
+    # TODO: JIRA REMOVE
+    logger.error(findings.query)
+    logger.error(f"count: {findings.count()}")
+    return findings
