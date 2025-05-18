@@ -109,18 +109,37 @@ def is_push_all_issues(instance):
     return None
 
 
-def _safely_get_obj_status(obj: Finding | Finding_Group, *, isenforced: bool = False) -> str:
+def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced: bool = False) -> str:
     # Accommodating a strange behavior where a obj sometimes prefers `obj.status` rather than `obj.status()`
-    try:
-        if isinstance(obj, Finding):
+    status = []
+    if isinstance(obj, Finding):
+        try:
             return obj.status()
-        if isinstance(obj, Finding_Group):
-            return obj.status_verified if isenforced else obj.status()
-    except TypeError:  # TypeError: 'str' object is not callable
-        if isinstance(obj, Finding):
+        except TypeError:  # TypeError: 'str' object is not callable
             return obj.status
-        if isinstance(obj, Finding_Group):
-            return obj.status_verified if isenforced else obj.status
+
+    if isinstance(obj, Finding_Group):
+        jira_minimum_threshold = 0
+        if System_Settings.objects.get().jira_minimum_severity:
+            jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
+
+        findings = obj.findings.all().filter(numerical_severity__gte=jira_minimum_threshold)
+        if not findings:
+            return ["Empty"]
+
+        # This iterates 3 times over the list of findings, but any code doing 1 iteration would looke it's from 1990
+        has_active = any(find.active for find in findings)
+        has_verified = any(find.verified for find in findings)
+        all_mitigated = all(find.is_mitigated for find in findings) if findings else False
+
+        if has_active:
+            status.append("Active")
+        if has_verified:
+            status.append("Verified")
+        if all_mitigated:
+            status.append("Mitigated")
+
+    return status
 
 
 # checks if a finding can be pushed to JIRA
@@ -167,18 +186,21 @@ def can_be_pushed_to_jira(obj, form=None):
 
         if not active or (not verified and isenforced):
             logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
-            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
+            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "error_not_active_or_verified"
 
         if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
             logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
-            return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "below_minimum_threshold"
+            return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
-        finding_group_status = _safely_get_obj_status(obj)
-        if isenforced and "Verified" not in finding_group_status:
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is contains no active and verified findings.", "not_active_or_verified"
+        finding_group_status = _safely_get_obj_status_for_jira(obj)
+        if "Empty" in finding_group_status:
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
-        if "Active" not in _safely_get_obj_status(obj):
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
+        if isenforced and "Verified" not in finding_group_status:
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no active and verified findings above minimum treshold.", "error_not_active_or_verified"
+
+        if "Active" not in _safely_get_obj_status_for_jira(obj):
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no active findings above minimum treshold.", "error_inactive"
 
     else:
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is of unsupported type.", "error_unsupported"
@@ -1100,7 +1122,7 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status_list = _safely_get_obj_status(obj)
+    status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
     updated = False
     logger.debug("item check: %s", "Active" in "Active")  # noqa: PLR0133
