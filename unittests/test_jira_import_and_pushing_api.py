@@ -50,12 +50,12 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if False:  # set to True when committing. set to False when recording new test cassettes
+        if True:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
         my_vcr = super()._get_vcr(**kwargs)
-        my_vcr.record_mode = "all"
+        my_vcr.record_mode = "once"
         my_vcr.path_transformer = VCR.ensure_suffix(".yaml")
         my_vcr.filter_headers = ["Authorization", "X-Atlassian-Token"]
         my_vcr.cassette_library_dir = str(get_unit_tests_path() / "vcr" / "jira")
