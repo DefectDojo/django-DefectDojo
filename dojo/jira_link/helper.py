@@ -109,12 +109,18 @@ def is_push_all_issues(instance):
     return None
 
 
-def _safely_get_obj_status(obj: Finding | Finding_Group) -> str:
+def _safely_get_obj_status(obj: Finding | Finding_Group, *, isenforced: bool = False) -> str:
     # Accommodating a strange behavior where a obj sometimes prefers `obj.status` rather than `obj.status()`
     try:
-        return obj.status()
+        if isinstance(obj, Finding):
+            return obj.status()
+        if isinstance(obj, Finding_Group):
+            return obj.status_verified if isenforced else obj.status()
     except TypeError:  # TypeError: 'str' object is not callable
-        return obj.status
+        if isinstance(obj, Finding):
+            return obj.status
+        if isinstance(obj, Finding_Group):
+            return obj.status_verified if isenforced else obj.status
 
 
 # checks if a finding can be pushed to JIRA
@@ -167,17 +173,10 @@ def can_be_pushed_to_jira(obj, form=None):
             logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
-        # there must be at least one active (and verified) finding in the group
-        # currently this code is used in away that prefetching is not done or hard to do
-        # so we do a quick exists() query
-        pushable_findings_in_group = obj.findings.all().filter(active=True)
-        if isenforced:
-            pushable_findings_in_group = pushable_findings_in_group.filter(verified=True)
+        finding_group_status = _safely_get_obj_status(obj)
+        if isenforced and "Verified" not in finding_group_status:
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is contains no active and verified findings.", "not_active_or_verified"
 
-        if not pushable_findings_in_group.exists():
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty or contains no active (and verified) findings.", "error_empty"
-
-        # Determine if the finding group is not active
         if "Active" not in _safely_get_obj_status(obj):
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
@@ -1103,8 +1102,11 @@ def issue_from_jira_is_active(issue_from_jira):
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     status_list = _safely_get_obj_status(obj)
     issue_closed = False
+    updated = False
+    logger.debug("item check: %s", "Active" in "Active")  # noqa: PLR0133
+    logger.debug("any item resolved: %s", any(item in status_list for item in RESOLVED_STATUS))
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
-    if any(item in status_list for item in RESOLVED_STATUS):
+    if not updated and any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
             updated = jira_transition(jira, issue, jira_instance.close_status_key)
