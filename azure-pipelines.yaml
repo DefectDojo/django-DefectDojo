@@ -5,136 +5,133 @@ trigger:
     include:
       - trunk
 
-jobs:
-  - job: build
-    displayName: 'CI-CD DefectDojo'
-    pool:
-      name: Azure Pipelines
-      demands: java
+pool:
+  name: Azure Pipelines
+  demands: java
 
-    steps:
-      - task: connect-agent@2
-        displayName: "Hosted agent"
-        inputs:
-          hostedAgentService: $(hostedAgentService)
+steps:
+  - task: connect-agent@2
+    displayName: "Hosted agent"
+    inputs:
+      hostedAgentService: $(hostedAgentService)
 
-      - bash: |
-          echo "docker volume"
-          docker volume create defectdojo_data_unit_tests
+  - bash: |
+      echo "docker volume"
+      docker volume create defectdojo_data_unit_tests
 
-          echo "docker run"
-          docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=$(user_pg) -e POSTGRES_PASSWORD=$(password_pg) -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
-          docker ps
-        displayName: "Start DB"
+      echo "docker run"
+      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=$(user_pg) -e POSTGRES_PASSWORD=$(password_pg) -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
+      docker ps
+    displayName: "Start DB"
 
-      - bash: |
-          set -e
+  - bash: |
+      set -e
 
-          echo -e "\033[94m--------python virutalenv-----------\033[0m"
-          sudo apt-get update
-          sudo apt update
-          sudo apt install software-properties-common
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt update
-          sudo apt install python3.12 python3.12-venv
-          python3.12 -m venv dojodev
-          source dojodev/bin/activate
+      echo -e "\033[94m--------python virutalenv-----------\033[0m"
+      sudo apt-get update
+      sudo apt update
+      sudo apt install software-properties-common
+      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo apt update
+      sudo apt install python3.12 python3.12-venv
+      python3.12 -m venv dojodev
+      source dojodev/bin/activate
 
-          echo -e "\033[94m--------python install-----------\033[0m"
-          python -m pip install --upgrade pip
-          sudo apt-get install libmysqlclient-dev
-          sudo apt-get install libmariadb-dev-compat
-          sudo apt-get install libcurl4-gnutls-dev
-          sudo apt-get install python3.12-dev
-          sudo apt-get install libgnutls28-dev
-          sudo apt-get install libgnutls28-dev
-          pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
-          pip install coverage
+      echo -e "\033[94m--------python install-----------\033[0m"
+      python -m pip install --upgrade pip
+      sudo apt-get install libmysqlclient-dev
+      sudo apt-get install libmariadb-dev-compat
+      sudo apt-get install libcurl4-gnutls-dev
+      sudo apt-get install python3.12-dev
+      sudo apt-get install libgnutls28-dev
+      sudo apt-get install libgnutls28-dev
+      pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
+      pip install coverage
 
-          echo -e "\033[94m--------defectdojo unit test--------\033[0m"
-          unset DD_DATABASE_URL
-          unset DD_CELERY_BROKER_URL
-          export DD_DATABASE_ENGINE=django.db.backends.postgresql
-          export DD_DATABASE_HOST=127.0.0.1
-          export DD_DATABASE_PORT=5432
-          export DD_DATABASE_NAME=test_defectdojo
-          export DD_DATABASE_USER=$(user_pg)
-          export DD_DATABASE_PASSWORD=$(password_pg)
-          export DD_SECRET_KEY='.'
-          export DD_PROVIDER_TOKEN='.'
-          export DD_CUSTOM_TAG_PARSER="asff_regex=."
+      echo -e "\033[94m--------defectdojo unit test--------\033[0m"
+      unset DD_DATABASE_URL
+      unset DD_CELERY_BROKER_URL
+      export DD_DATABASE_ENGINE=django.db.backends.postgresql
+      export DD_DATABASE_HOST=127.0.0.1
+      export DD_DATABASE_PORT=5432
+      export DD_DATABASE_NAME=test_defectdojo
+      export DD_DATABASE_USER=$(user_pg)
+      export DD_DATABASE_PASSWORD=$(password_pg)
+      export DD_SECRET_KEY='.'
+      export DD_PROVIDER_TOKEN='.'
+      export DD_CUSTOM_TAG_PARSER="asff_regex=."
 
-          python manage.py makemigrations dojo
-          python manage.py migrate
+      python manage.py makemigrations dojo
+      python manage.py migrate
 
-          coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-            exit 1;
-          }
-          coverage report
-          coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-            exit 1;
-          }
-          coverage report
-          coverage xml
-        displayName: "Unit test"
+      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
+        exit 1;
+      }
+      coverage report
+      coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
+        exit 1;
+      }
+      coverage report
+      coverage xml
+    displayName: "Unit test"
 
-      - task: SonarQubePrepare@7
-        displayName: "Prepare analysis on SonarQube"
-        inputs:
-          SonarQube: SonarQube
-          scannerMode: CLI
-          jdkversion: 'JAVA_HOME_17_X64'
-          configMode: manual
-          cliProjectKey: "$(DefinitionName)"
-          cliProjectName: "$(DefinitionName)"
-          cliProjectVersion: "$(Build.BuildNumber)"
-          extraProperties: |
-            sonar.sourceEncoding=UTF-8
-            sonar.sources=dojo
-            sonar.tests=unittests
-            sonar.python.coverage.reportPaths=*coverage.xml
-            sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**,**/unittests/**
-            sonar.language=py
-            sonar.python.version=3.10
+  - task: SonarQubePrepare@7
+    displayName: "Prepare analysis on SonarQube"
+    inputs:
+      SonarQube: SonarQube
+      scannerMode: CLI
+      jdkversion: 'JAVA_HOME_17_X64'
+      configMode: manual
+      cliProjectKey: "$(DefinitionName)"
+      cliProjectName: "$(DefinitionName)"
+      cliProjectVersion: "$(Build.BuildNumber)"
+      extraProperties: |
+        sonar.sourceEncoding=UTF-8
+        sonar.sources=dojo
+        sonar.tests=unittests
+        sonar.python.coverage.reportPaths=*coverage.xml
+        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**,**/unittests/**
+        sonar.language=py
+        sonar.python.version=3.10
 
-      - task: SonarQubeAnalyze@7
-        displayName: "Run Code Analysis"
+  - task: SonarQubeAnalyze@7
+    displayName: "Run Code Analysis"
 
-      - task: sonar-buildbreaker@8
-        displayName: "Break build on quality gate failure"
-        inputs:
-          SonarQube: SonarQube
+  - task: sonar-buildbreaker@8
+    displayName: "Break build on quality gate failure"
+    inputs:
+      SonarQube: SonarQube
 
-      - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
-        displayName: "Copy Files"
-        # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+  - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
+    displayName: "Copy Files"
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
-      - task: ArchiveFiles@2
-        displayName: "Archive Artifact"
-        inputs:
-          rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
-          includeRootFolder: false
-          archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-        # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+  - task: ArchiveFiles@2
+    displayName: "Archive Artifact"
+    inputs:
+      rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
+      includeRootFolder: false
+      archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
-      - task: PublishBuildArtifacts@1
-        displayName: "Publish Artifact: $(DefinitionName)_artifact"
-        inputs:
-          PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-          ArtifactName: "$(DefinitionName)_artifact"
-        # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Artifact: $(DefinitionName)_artifact"
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
+      ArtifactName: "$(DefinitionName)_artifact"
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
-      - task: ArtifactoryGenericUpload@2
-        displayName: "Artifactory Generic Upload"
-        inputs:
-          artifactoryService: Artifactory
-          fileSpec: |
+  - task: ArtifactoryGenericUpload@2
+    displayName: "Artifactory Generic Upload"
+    inputs:
+      artifactoryService: Artifactory
+      fileSpec: |
+        {
+          "files": [
             {
-              "files": [
-                {
-                  "pattern": "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip",
-                  "target": "$(artifactory.RepositoryPath)/$(DefinitionName)/$(Build.BuildNumber)/"
-                }
-              ]
+              "pattern": "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip",
+              "target": "$(artifactory.RepositoryPath)/$(DefinitionName)/$(Build.BuildNumber)/"
             }
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+          ]
+        }
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
