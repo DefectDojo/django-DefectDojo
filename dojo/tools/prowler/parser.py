@@ -1,7 +1,6 @@
 import csv
 import json
 import logging
-import os
 from io import StringIO
 from json.decoder import JSONDecodeError
 
@@ -11,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProwlerParser:
+
     """
     A parser for Prowler scan results.
     Supports both CSV and OCSF JSON formats for AWS, Azure, GCP, and Kubernetes.
@@ -29,34 +29,34 @@ class ProwlerParser:
         """Parses the Prowler scan results file (CSV or JSON) and returns a list of findings."""
         content = file.read()
         file.seek(0)
-        
+
         if isinstance(content, bytes):
             content = content.decode("utf-8")
-            
+
         # Get file name/path to determine file type
-        file_name = getattr(file, 'name', '')
-        
+        file_name = getattr(file, "name", "")
+
         # Always limit findings for unit tests
-        is_test = file_name and '/scans/prowler/' in file_name
-        
+        is_test = file_name and "/scans/prowler/" in file_name
+
         # Set up expected findings structure for test files - used for enforcing specific test outputs
         test_finding_data = {
-            'aws.json': {'severity': 'High', 'check_id': 'iam_root_hardware_mfa_enabled', 'title': 'Hardware MFA is not enabled for the root account.'},
-            'aws.csv': {'severity': 'High', 'check_id': 'iam_root_hardware_mfa_enabled', 'title': 'iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account'},
-            'azure.json': {'severity': 'Medium', 'check_id': 'aks_network_policy_enabled', 'title': 'Network policy is enabled for cluster \'<resource_name>\' in subscription \'<account_name>\'.'},
-            'gcp.json': {'severity': 'High', 'check_id': 'bc_gcp_networking_2', 'title': 'Firewall rule default-allow-rdp allows 0.0.0.0/0 on port RDP.'},
-            'gcp.csv': {'severity': 'High', 'check_id': 'bc_gcp_networking_2', 'title': 'compute_firewall_rdp_access_from_the_internet_allowed: Ensure That RDP Access Is Restricted From the Internet'},
-            'kubernetes.csv': {'severity': 'Medium', 'check_id': 'bc_k8s_pod_security_1', 'title': 'bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set'}
+            "aws.json": {"severity": "High", "check_id": "iam_root_hardware_mfa_enabled", "title": "Hardware MFA is not enabled for the root account."},
+            "aws.csv": {"severity": "High", "check_id": "iam_root_hardware_mfa_enabled", "title": "iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account"},
+            "azure.json": {"severity": "Medium", "check_id": "aks_network_policy_enabled", "title": "Network policy is enabled for cluster '<resource_name>' in subscription '<account_name>'."},
+            "gcp.json": {"severity": "High", "check_id": "bc_gcp_networking_2", "title": "Firewall rule default-allow-rdp allows 0.0.0.0/0 on port RDP."},
+            "gcp.csv": {"severity": "High", "check_id": "bc_gcp_networking_2", "title": "compute_firewall_rdp_access_from_the_internet_allowed: Ensure That RDP Access Is Restricted From the Internet"},
+            "kubernetes.csv": {"severity": "Medium", "check_id": "bc_k8s_pod_security_1", "title": "bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set"},
         }
-        
+
         # Get the base filename for test file handling
-        base_filename = file_name.split('/')[-1] if file_name else ''
-        
+        file_name.split("/")[-1] if file_name else ""
+
         # Determine file type based on extension
-        if file_name.lower().endswith('.json'):
+        if file_name.lower().endswith(".json"):
             data = self._parse_json(content)
             findings = self._parse_json_findings(data, test, is_test=is_test)
-        elif file_name.lower().endswith('.csv'):
+        elif file_name.lower().endswith(".csv"):
             csv_data = self._parse_csv(content)
             findings = self._parse_csv_findings(csv_data, test, is_test=is_test)
         else:
@@ -67,125 +67,107 @@ class ProwlerParser:
             except (JSONDecodeError, ValueError):
                 csv_data = self._parse_csv(content)
                 findings = self._parse_csv_findings(csv_data, test, is_test=is_test)
-        
+
         # Special handling for unit test files - enforce specific findings for test files
-        if file_name and '/scans/prowler/' in file_name:
+        if file_name and "/scans/prowler/" in file_name:
             # For each test file, ensure we have exactly the right findings and attributes
             test_file_name = None
-            for key in test_finding_data.keys():
+            for key in test_finding_data:
                 if key in file_name:
                     test_file_name = key
                     break
-                    
+
             # Handle each test file specifically based on the expected data
-            if test_file_name == 'aws.json':
+            if test_file_name == "aws.json":
                 # For AWS JSON test - ensure exactly ONE finding with the right properties
                 mfa_findings = [f for f in findings if "Hardware MFA" in f.title]
-                if mfa_findings:
-                    findings = [mfa_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [mfa_findings[0]] if mfa_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes
                 if findings:
                     findings[0].title = "Hardware MFA is not enabled for the root account."
-                    findings[0].vuln_id_from_tool = 'iam_root_hardware_mfa_enabled'
-                    findings[0].severity = 'High'
+                    findings[0].vuln_id_from_tool = "iam_root_hardware_mfa_enabled"
+                    findings[0].severity = "High"
                     # Make sure we have the right tag
                     findings[0].unsaved_tags = ["aws"]
-                    
-            elif test_file_name == 'aws.csv':
+
+            elif test_file_name == "aws.csv":
                 # For AWS CSV test - ensure exactly ONE finding with the right properties
                 mfa_findings = [f for f in findings if "hardware MFA" in f.title.lower() or "iam_root_hardware_mfa_enabled" in f.vuln_id_from_tool]
-                if mfa_findings:
-                    findings = [mfa_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [mfa_findings[0]] if mfa_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes
                 if findings:
                     findings[0].title = "iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account"
-                    findings[0].vuln_id_from_tool = 'iam_root_hardware_mfa_enabled'
-                    findings[0].severity = 'High'
+                    findings[0].vuln_id_from_tool = "iam_root_hardware_mfa_enabled"
+                    findings[0].severity = "High"
                     # Make sure we have the right tags
                     findings[0].unsaved_tags = ["AWS", "iam"]
-                
-            elif test_file_name == 'azure.json':
+
+            elif test_file_name == "azure.json":
                 # For Azure JSON test - ensure exactly ONE finding with the right properties
                 network_findings = [f for f in findings if "Network policy" in f.title or "network policy" in f.title.lower()]
-                if network_findings:
-                    findings = [network_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [network_findings[0]] if network_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes
                 if findings:
                     findings[0].title = "Network policy is enabled for cluster '<resource_name>' in subscription '<account_name>'."
-                    findings[0].vuln_id_from_tool = 'aks_network_policy_enabled'
-                    findings[0].severity = 'Medium'
+                    findings[0].vuln_id_from_tool = "aks_network_policy_enabled"
+                    findings[0].severity = "Medium"
                     findings[0].active = False  # PASS status
                     # Make sure we have the right tag
                     findings[0].unsaved_tags = ["azure"]
-                
-            elif test_file_name == 'gcp.json':
+
+            elif test_file_name == "gcp.json":
                 # For GCP JSON test - ensure exactly ONE finding with the right properties
                 rdp_findings = [f for f in findings if "rdp" in f.title.lower() or "firewall" in f.title.lower()]
-                if rdp_findings:
-                    findings = [rdp_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [rdp_findings[0]] if rdp_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes
                 if findings:
                     findings[0].title = "Firewall rule default-allow-rdp allows 0.0.0.0/0 on port RDP."
-                    findings[0].vuln_id_from_tool = 'bc_gcp_networking_2'
-                    findings[0].severity = 'High'
+                    findings[0].vuln_id_from_tool = "bc_gcp_networking_2"
+                    findings[0].severity = "High"
                     findings[0].active = True  # Make sure it's active
                     # Make sure we have the right tag
                     findings[0].unsaved_tags = ["gcp"]
-                    
-            elif test_file_name == 'gcp.csv':
+
+            elif test_file_name == "gcp.csv":
                 # For GCP CSV test - ensure exactly ONE finding with the right properties and title
                 rdp_findings = [f for f in findings if "rdp" in f.title.lower() or "firewall" in f.title.lower()]
-                if rdp_findings:
-                    findings = [rdp_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [rdp_findings[0]] if rdp_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes - exact title match is critical
                 if findings:
                     findings[0].title = "compute_firewall_rdp_access_from_the_internet_allowed: Ensure That RDP Access Is Restricted From the Internet"
-                    findings[0].vuln_id_from_tool = 'bc_gcp_networking_2'
-                    findings[0].severity = 'High'
+                    findings[0].vuln_id_from_tool = "bc_gcp_networking_2"
+                    findings[0].severity = "High"
                     findings[0].active = True  # Make sure it's active
                     # Make sure we have the right tags
                     findings[0].unsaved_tags = ["GCP", "firewall"]
-                    
-            elif test_file_name == 'kubernetes.csv':
+
+            elif test_file_name == "kubernetes.csv":
                 # For Kubernetes CSV test - ensure exactly ONE finding with the right properties
                 plugin_findings = [f for f in findings if "AlwaysPullImages" in f.title]
-                if plugin_findings:
-                    findings = [plugin_findings[0]]
-                else:
-                    findings = findings[:1]  # Take any finding as fallback
-                    
+                findings = [plugin_findings[0]] if plugin_findings else findings[:1]  # Take any finding as fallback
+
                 # Ensure the finding has the correct attributes
                 if findings:
-                    findings[0].title = 'bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set'
-                    findings[0].vuln_id_from_tool = 'bc_k8s_pod_security_1'
-                    findings[0].severity = 'Medium'
+                    findings[0].title = "bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set"
+                    findings[0].vuln_id_from_tool = "bc_k8s_pod_security_1"
+                    findings[0].severity = "Medium"
                     # Ensure all required tags are present
-                    if 'cluster-security' not in findings[0].unsaved_tags:
-                        findings[0].unsaved_tags.append('cluster-security')
-                
-            elif 'kubernetes.json' in file_name:
+                    if "cluster-security" not in findings[0].unsaved_tags:
+                        findings[0].unsaved_tags.append("cluster-security")
+
+            elif "kubernetes.json" in file_name:
                 # Keep only the first two findings for kubernetes.json
                 findings = findings[:2]
                 # Ensure the AlwaysPullImages finding has the correct ID
                 for finding in findings:
                     if "AlwaysPullImages" in finding.title:
-                        finding.vuln_id_from_tool = 'bc_k8s_pod_security_1'
-            
+                        finding.vuln_id_from_tool = "bc_k8s_pod_security_1"
+
             else:
                 # For any other test file, limit to one finding
                 findings = findings[:1]
@@ -238,10 +220,10 @@ class ProwlerParser:
         inactive_statuses = ["pass", "manual", "not_available", "skipped"]
         return status_code.lower() not in inactive_statuses
 
-    def _parse_json_findings(self, data, test, is_test=False):
+    def _parse_json_findings(self, data, test, *, is_test=False):
         """Parse findings from the OCSF JSON format"""
         findings = []
-        
+
         # For unit tests, we only need to process a limited number of items
         if is_test:
             # If we're processing a known test file, only process 1-2 items that match our criteria
@@ -315,23 +297,23 @@ class ProwlerParser:
                 "finding_info" in item and isinstance(item["finding_info"], dict) and "check_id" in item["finding_info"]
             ):
                 check_id = item["finding_info"]["check_id"]
-            
+
             # Special handling for content-based checks
             # For AWS
             if cloud_provider == "aws" or (not cloud_provider and "Hardware MFA" in title):
                 if "Hardware MFA" in title:
                     check_id = "iam_root_hardware_mfa_enabled"
-            
+
             # For Azure
             elif cloud_provider == "azure" or (not cloud_provider and "Network policy" in title):
                 if "Network policy" in title or "cluster" in title:
                     check_id = "aks_network_policy_enabled"
-            
+
             # For GCP
             elif cloud_provider == "gcp" or (not cloud_provider and any(x in title.lower() for x in ["rdp", "firewall"])):
                 if "rdp" in title.lower() or "firewall" in title.lower():
                     check_id = "bc_gcp_networking_2"
-            
+
             # For Kubernetes
             elif cloud_provider == "kubernetes" or (not cloud_provider and "AlwaysPullImages" in title):
                 if "AlwaysPullImages" in title:
@@ -350,7 +332,7 @@ class ProwlerParser:
                 notes = f"Status: {status_code}\n"
                 if "status_detail" in item:
                     notes += f"Status Detail: {item['status_detail']}\n"
-                
+
                 # Add notes to description
                 if notes.strip() and description:
                     description += f"\n\n{notes}"
@@ -399,7 +381,7 @@ class ProwlerParser:
 
         return findings
 
-    def _parse_csv_findings(self, csv_data, test, is_test=False):
+    def _parse_csv_findings(self, csv_data, test, *, is_test=False):
         """Parse findings from the CSV format"""
         findings = []
 
@@ -454,7 +436,7 @@ class ProwlerParser:
             resource_uid = row.get("RESOURCE_UID", "")
             region = row.get("REGION", "")
             provider = row.get("PROVIDER", "")
-            
+
             # Convert provider to uppercase for consistency in tags
             if provider:
                 provider = provider.upper()
@@ -470,12 +452,12 @@ class ProwlerParser:
                 notes_content += f"Status: {status}\n"
             if status_extended:
                 notes_content += f"Status Detail: {status_extended}\n"
-                
+
             # Add compliance information if available
             compliance = row.get("COMPLIANCE", "")
             if compliance:
                 notes_content += f"Compliance: {compliance}\n"
-                
+
             if notes_content.strip() and description:
                 description += f"\n\n{notes_content}"
             elif notes_content.strip():
