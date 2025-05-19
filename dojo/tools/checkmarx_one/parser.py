@@ -138,14 +138,12 @@ class CheckmarxOneParser:
             return value
 
         def get_node_snippet(nodes: list) -> str:
-            formatted_nodes = []
-            for node in nodes:
-                formatted_nodes.append(
-                    f"**File Name**: {node.get('fileName')}\n"
-                    f"**Method**: {node.get('method')}\n"
-                    f"**Line**: {node.get('line')}\n"
-                    f"**Code Snippet**: {node.get('code')}\n",
-                )
+            formatted_nodes = [
+                f"**File Name**: {node.get('fileName')}\n"
+                f"**Method**: {node.get('method')}\n"
+                f"**Line**: {node.get('line')}\n"
+                f"**Code Snippet**: {node.get('code')}\n"
+                    for node in nodes]
             return "\n---\n".join(formatted_nodes)
 
         findings = []

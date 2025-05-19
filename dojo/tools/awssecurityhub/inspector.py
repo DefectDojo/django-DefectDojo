@@ -22,9 +22,7 @@ class Inspector:
             # Save the CVE if it is present
             if cve := vulnerability.get("Id"):
                 unsaved_vulnerability_ids.append(cve)
-            for alias in vulnerability.get("RelatedVulnerabilities", []):
-                if alias != cve:
-                    unsaved_vulnerability_ids.append(alias)
+            unsaved_vulnerability_ids.extend(alias for alias in vulnerability.get("RelatedVulnerabilities", []) if alias != cve)
             # Add information about the vulnerable packages to the description and mitigation
             vulnerable_packages = vulnerability.get("VulnerablePackages", [])
             for package in vulnerable_packages:

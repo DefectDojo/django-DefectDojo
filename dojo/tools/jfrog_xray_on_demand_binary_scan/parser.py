@@ -151,9 +151,7 @@ def get_item_set(vulnerability):
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = get_cve(vulnerability)
     if len(cves) > 0:
-        for item in cves:
-            if item.get("cve"):
-                vulnerability_ids.append(item.get("cve"))
+        vulnerability_ids.extend(item.get("cve") for item in cves if item.get("cve"))
         if "cvss_v3_vector" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3_vector"]
             cvssv3 = CVSS3(cvss_v3).clean_vector()

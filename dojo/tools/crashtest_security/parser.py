@@ -45,10 +45,7 @@ class CrashtestSecurityJsonParser:
 
                 # Iterate all connected CVE findings if any
                 if "cve_findings" in finding:
-                    for cve_finding in finding["cve_findings"]:
-                        items.append(
-                            self.generate_cve_finding(cve_finding, test),
-                        )
+                    items.extend(self.generate_cve_finding(cve_finding, test) for cve_finding in finding["cve_findings"])
         return items
 
     def create_descriptions_dict(self, data):

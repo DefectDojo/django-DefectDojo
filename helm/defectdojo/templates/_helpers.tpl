@@ -36,7 +36,6 @@ Create chart name and version as used by the chart label.
   Determine the hostname to use for PostgreSQL/Redis.
 */}}
 {{- define "postgresql.hostname" -}}
-{{- if eq .Values.database "postgresql" -}}
 {{- if .Values.postgresql.enabled -}}
 {{- if eq .Values.postgresql.architecture "replication" -}}
 {{- printf "%s-%s-%s" .Release.Name "postgresql" .Values.postgresql.primary.name | trunc 63 | trimSuffix "-" -}}
@@ -45,16 +44,6 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- else -}}
 {{- printf "%s" .Values.postgresql.postgresServer -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-{{- define "postgresqlha.hostname" -}}
-{{- if eq .Values.database "postgresqlha" -}}
-{{- if .Values.postgresqlha.enabled -}}
-{{- printf "%s-%s" .Release.Name "postgresqlha-pgpool" | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s" .Values.postgresqlha.postgresServer -}}
-{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- define "redis.hostname" -}}
@@ -161,13 +150,8 @@ Create chart name and version as used by the chart label.
   - name: DD_DATABASE_PASSWORD
     valueFrom:
       secretKeyRef:
-        {{- if eq .Values.database "postgresql" }}
-          name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
-          key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
-        {{- else if eq .Values.database "postgresqlha" }}
-          name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
-          key: postgresql-postgres-password
-        {{- end }}
+        name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+        key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
   {{- if .Values.extraEnv }}
   {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
