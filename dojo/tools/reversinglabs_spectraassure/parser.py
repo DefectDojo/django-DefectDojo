@@ -1,6 +1,6 @@
-from typing import Any
 import hashlib
 import logging
+from typing import Any
 from dojo.models import Finding
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
