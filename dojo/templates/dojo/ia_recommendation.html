@@ -8,20 +8,20 @@
 
     <div id="like_status" style="display: none;}}">
         <div class="rating-tag">
-            <p class="rating-title">¿Was this answer helpful to you?</p>
+            <p class="rating-title">¿Te fue útil esta respuesta?</p>
             <div class="feedback-buttons">
                 {% if finding|enable_like_status == "Like" %} 
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn selected" title="It was helpful"><i class="fa-solid fa-thumbs-up"></i></span>
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="No me ayudó"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn selected" title="Fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="No fue útil"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
                 {% elif finding|enable_like_status == "Dislike" %}
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="It was helpful"><i class="fa-solid fa-thumbs-up"></i></span>
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn selected" title="It didn't help me"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="Fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn selected" title="No fue útil"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
                 {% else %}
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="It was helpful"><i class="fa-solid fa-thumbs-up"></i></span>
-                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="It didn't help me"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-up" class="feedback-btn" title="Fue útil"><i class="fa-solid fa-thumbs-up"></i></span>
+                    <span data-fid-recommendation="{{finding.id}}" id="thumbs-down" class="feedback-btn" title="No fue útil"><i class="fa-solid fa-thumbs-up rotated-icon"></i></span>
                 {% endif %}
             </div>
-            <div id="feedback-thankyou" class="thank-you">¡Thank you for your opinion!</div>
+            <div id="feedback-thankyou" class="thank-you">¡Gracias por tu opinión!</div>
         </div>
     </div>
 </div>
