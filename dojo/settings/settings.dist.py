@@ -28,6 +28,7 @@ from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
 from dojo import __version__
+from dojo.version_inner import version as version_inner
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
-    DD_FOOTER_VERSION=(str, ""),
+    DD_FOOTER_VERSION=(str, version_inner),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
@@ -526,6 +527,13 @@ env = environ.FileAwareEnv(
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
     # Redis
     DD_USE_CACHE_REDIS=(bool, False),
+
+    # Cors
+    DD_CORS_ENABLED=(bool, False),
+    DD_CORS_ALLOWED_ORIGINS=(list, []),
+    DD_CORS_ALLOW_METHODS=(list, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]),
+    DD_CORS_ALLOW_HEADERS=(list, ["Authorization", "Content-Type", "Accept", "session-cookie"]),
+    DD_CORS_ALLOW_CREDENTIALS=(bool, True),
 )
 
 
@@ -1280,6 +1288,30 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.request_cache.middleware.RequestCacheMiddleware",
 ]
 
+# CORS
+
+if env("DD_CORS_ENABLED"):
+
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "corsheaders",
+    ]
+
+    DJANGO_MIDDLEWARE_CLASSES = [
+        *DJANGO_MIDDLEWARE_CLASSES,
+        "corsheaders.middleware.CorsMiddleware",
+    ]
+
+    if env("DD_CORS_ALLOWED_ORIGINS") != ["[]"]:
+        CORS_ALLOWED_ORIGINS = env("DD_CORS_ALLOWED_ORIGINS")
+
+    if env("DD_CORS_ALLOW_METHODS") != ["[]"]:
+        CORS_ALLOW_METHODS = env("DD_CORS_ALLOW_METHODS")
+
+    if env("DD_CORS_ALLOW_HEADERS") != ["[]"]:
+        CORS_ALLOW_HEADERS = env("DD_CORS_ALLOW_HEADERS")
+
+    CORS_ALLOW_CREDENTIALS = env("DD_CORS_ALLOW_CREDENTIALS")
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 
