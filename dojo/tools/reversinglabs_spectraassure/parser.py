@@ -10,57 +10,6 @@ logger = logging.getLogger(__name__)
 
 WHAT = "ReversingLabs Spectra Assure"
 
-"""
-dedup on title:
-
-if a finding is a Dependency:
-    title:
-        "<cve>, 'dep': <purl | name+version>"
-
-    description:
-        "<title>\n<number> component: <purl | name+version>, <sha256>, 'id in report.rl.json': <dep-uuid>\n"
-
-    for each duplicate title: (so the same Dependency):
-        increment occurrences and append to description of the first detected:
-
-        "<number+1> component: <purl | name+version>, <sha256>, 'id in report.rl.json': <dep-uuid>\n"
-
-if a finding is a Component it is already unique.
-    title:
-        "<cve>, 'comp': <purl | name+version>, <sha256>"
-        occurrences = 1
-
-    description:
-        <title>\n
-
-Note:
-    We have components with the same name and version but different hash value.
-    This is typical for windows installers with multi language support.
-    A good example is: HxDSetup_2.5.0.exe
-
-    Parser for Spectra Assure rl-json files
-
-    This class MUST implement 3 methods:
-
-    - def get_scan_types(self)
-        This function return a list of all the scan_type supported by your parser.
-        These identifiers are used internally.
-        Your parser can support more than one scan_type.
-        e.g. some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc…)
-
-    - def get_label_for_scan_types(self, scan_type)
-        This function return a string used to provide some text in the UI (short label)
-
-    - def get_description_for_scan_types(self, scan_type)
-        This function return a string used to provide some text in the UI (long description)
-
-    - def get_findings(self, file, test)
-        This function return a list of findings
-
-    If your parser has more than 1 scan_type (for detailed mode) you MUST implement:
-    - def set_mode(self, mode) method
-"""
-
 
 class ReversinglabsSpectraassureParser:
 

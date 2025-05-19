@@ -522,7 +522,7 @@ class RlJsonInfo:
 
         for compo in self._results.values():
             for component in compo.values():
-                for cin in component.values():  # ruff: noqa:  UP028
+                for cin in component.values():
                     rr.append(cin)
         return rr
 
