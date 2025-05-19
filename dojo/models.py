@@ -2861,6 +2861,23 @@ class Finding(models.Model):
         from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
+    def add_note(self,
+                note_text,
+                author,
+                note_type=None,
+                private=False):
+
+        note = Notes.objects.create(
+            entry=note_text,
+            author=author,
+            note_type=note_type,
+            private=private,
+        )
+
+        self.notes.add(note)
+        self.save()
+        return note
+
     def copy(self, test=None):
         copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
@@ -4000,6 +4017,25 @@ class Risk_Acceptance(models.Model):
             new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
             copy.accepted_findings.set(new_accepted_findings)
         return copy
+
+    
+    def add_note(
+        self,
+        note_text,
+        author,
+        note_type=None,
+        private=False):
+
+        note = Notes.objects.create(
+            entry=note_text,
+            author=author,
+            note_type=note_type,
+            private=private,
+        )
+
+        self.notes.add(note)
+        self.save()
+        return note
 
 
 class FileAccessToken(models.Model):

@@ -2,6 +2,7 @@ import logging
 import crum
 from dateutil.relativedelta import relativedelta
 from dojo.celery import app
+from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
 from dojo.utils import Response
@@ -21,7 +22,7 @@ from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_prefix_key
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
 from dojo.risk_acceptance.notification import Notification
-from dojo.user.queries import get_role_members
+from dojo.user.queries import get_role_members, get_user
 from dojo.risk_acceptance.queries import (
     abuse_control_min_vulnerability_closed,
     abuse_control_max_vulnerability_accepted)
@@ -398,19 +399,6 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     post_jira_comments(risk_acceptance, [finding], ra_helper.unaccepted_message_creator)
 
 
-def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
-    for finding in findings:
-        ra_helper.add_severity_to_risk_acceptance(risk_pending, finding.severity)
-        if not finding.duplicate:
-            finding.risk_status = "Risk Pending"
-            finding.save(dedupe_option=False)
-            risk_pending.accepted_findings.add(finding)
-    risk_pending.save()
-    Notification.risk_acceptance_request(risk_pending=risk_pending,
-                                         enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
-    post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
-
-
 def risk_unaccept(finding):
     logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
     if finding.risk_accepted:
@@ -461,6 +449,7 @@ def validate_list_findings(type, finding):
             None,
         )
 
+
 @app.task
 def expiration_handler(*args, **kwargs):
     if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
@@ -474,3 +463,50 @@ def expiration_handler(*args, **kwargs):
         for permission_key in permission_keys:
             permission_key.expire()
             permission_key.save()
+
+
+def is_correlated(finding_select: Finding,
+                  finding_to_correlated: Finding) -> bool:
+    """Check if two findings are correlated
+    Args:
+        finding (Finding): Finding select for user 
+        finding_to_correlated (Finding): Finding to check for correlation
+    Returns:
+        bool: True if the findings are correlated, False otherwise
+    """
+    result = any([
+        finding_select.vuln_id_from_tool == finding_to_correlated.vuln_id_from_tool,
+        finding_select.vulnerability_ids == finding_to_correlated.vulnerability_ids
+        ])
+    if result is True:
+        system_user = get_user(settings.SYSTEM_USER)
+        finding_to_correlated.add_note(
+            note_text=(f"This finding :{finding_to_correlated.id} "
+                       f"is correlated the finding: {finding_select.id}"),
+            author=system_user)
+        logger.debug(
+            f"CORRELATED_FINDING: finding {finding_select.id}",
+            f"is Correlated to finding {finding_to_correlated.id}: {result}")
+    return result
+
+
+def get_correlated_findings(findings_selected: list[Finding],
+                            findings_authorized) -> list[Finding]:
+    """Get correlated findings
+    Args:
+        findings_selected (list[Finding]): List of findings to check for correlation
+        finding_authorized (Finding): Finding to check for correlation
+    Returns:
+        list[Finding]: List of correlated findings
+    """
+    list_findings_correlated = []
+    finding_different_authorized = [
+        finding
+        for finding in findings_authorized
+        if finding not in findings_selected
+        ]
+    for finding_select in findings_selected:
+        for finding_authorized in finding_different_authorized:
+            if is_correlated(finding_select, finding_authorized):
+                list_findings_correlated.append(finding_authorized)
+    return list_findings_correlated

@@ -93,6 +93,7 @@ from dojo.models import (
     TransferFindingFinding,
     Test,
     Test_Import,
+    GeneralSettings,
 )
 from dojo.notifications.helper import create_notification
 from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
@@ -101,7 +102,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
-from dojo.user.queries import get_authorized_users, get_role_members
+from dojo.user.queries import get_authorized_users, get_role_members, get_user
 from dojo.utils import (
     FileIterWrapper,
     Product_Tab,
@@ -1243,6 +1244,7 @@ def get_risk_acceptance_pending(request,
 
 
 def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
+    finding_correlated = []
     form = RiskPendingForm(request.POST,
                            request.FILES,
                            severity=finding.severity,
@@ -1300,9 +1302,40 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                     return render(
                         request, "dojo/add_risk_acceptance.html", {"form": form}
                     )
+                    
+        if (
+            enable_correlated :=
+            GeneralSettings.get_value(
+                name_key="ENABLE_CORRELATED_FINDING",
+                default=False) is True
+        ):
+            "Validate if finding is correlated with other findings"
+            finding_correlated = rp_helper.get_correlated_findings(
+                findings_selected=list(findings),
+                findings_authorized=list(form.fields["accepted_findings"].queryset)
+                )
+            logger.debug(f"CORRELATED_FINDING: findings correlated is : {finding_correlated}")
+            findings = list(findings) + finding_correlated
 
         try:
             risk_acceptance = form.save()
+            if (
+                enable_correlated is True and
+                finding_correlated
+            ):
+                risk_acceptance.accepted_findings.add(*finding_correlated)
+                system_user = get_user(settings.SYSTEM_USER)
+                finding_correlated_ids = [
+                    finding.id for finding in finding_correlated]
+                risk_acceptance.add_note(
+                    note_text=f"Finding Correlated: {finding_correlated_ids}",
+                    author=system_user)
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    'Automatically added finding correlated whit the same (CVE) to risk acceptance.',
+                    extra_tags='alert-warning')
+                logger.debug(f"CORRELATED_FINDING: add findings correlated: {finding_correlated}")
             id_risk_acceptance = risk_acceptance.id
         except Exception as e:
             logger.debug(vars(request.POST))
