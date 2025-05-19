@@ -790,17 +790,17 @@ def parser_ia_recommendation(ia_recommendation: dict = {}):
     markdown_code = ""
     context = {}
     if recomendations := ia_recommendation["data"].get("recommendations", None):
-        markdown_code = "\n###✅ Recommendations\n<br>"
+        markdown_code = "\n###✅ Recomendaciones \n<br>"
         for recomendation in recomendations:
             markdown_code += "- " + recomendation + "<br>"
 
     if mitigations := ia_recommendation["data"].get("mitigations", None):
-        markdown_code += "\n###🛠️ Mitigations\n<br>"
+        markdown_code += "\n###🛠️ Mitigación\n<br>"
         for mitigation in mitigations:
             markdown_code += mitigation + "<br>"
 
     if files_to_fix := ia_recommendation["data"].get("files_to_fix", None):
-        markdown_code += "\n###📌 Files_to_fix\n<br>"
+        markdown_code += "\n###📌 Archivos a corregir\n<br>"
         for file_to_fix in files_to_fix:
             markdown_code += "```" + file_to_fix + "```"
 
