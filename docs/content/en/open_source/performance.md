@@ -1,5 +1,5 @@
 ---
-title: "Performance Enhancements"
+title: "Performance Enhancements (Open Source)"
 description: "Settings to configure to enhance performance in DefectDojo"
 draft: false
 weight: 4
