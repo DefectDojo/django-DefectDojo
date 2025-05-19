@@ -6,10 +6,6 @@ createSecret: false
 createRedisSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
-# create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
-createPostgresqlHaSecret: false
-# create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
-createPostgresqlHaPgpoolSecret: false
 # Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
 # can be:
 # - disabled, default
@@ -52,9 +48,6 @@ networkPolicy:
   #     port: 443
   annotations: {}
 
-# Configuration value to select database type
-# Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
-database: postgresql
 # Primary hostname of instance
 host: defectdojo.default.minikube.local
 
@@ -440,42 +433,6 @@ postgresql:
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   # postgresServer: "127.0.0.1"
-
-postgresqlha:
-  enabled: false
-  global:
-    pgpool:
-      existingSecret: defectdojo-postgresql-ha-pgpool
-  serviceAccount:
-    create: true
-  postgresql:
-    replicaCount: 3
-    username: defectdojo
-    password: ""
-    repmgrPassword: ""
-    database: defectdojo
-    existingSecret: defectdojo-postgresql-ha-specific
-    securityContext:
-      enabled: true
-      fsGroup: 1001
-    containerSecurityContext:
-      enabled: true
-      runAsUser: 1001
-  pgpool:
-    replicaCount: 3
-    adminPassword: ""
-    securityContext:
-      enabled: true
-      fsGroup: 1001
-  volumePermissions:
-    enabled: true
-    securityContext:
-      runAsUser: 1001
-  persistence:
-    enabled: true
-  service:
-    ports:
-      postgresql: 5432
 
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:

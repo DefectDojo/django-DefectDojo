@@ -88,12 +88,7 @@ def get_report_findings(csv_reader) -> [dict]:
         csv_reader:
 
     """
-    report_findings = []
-
-    for row in csv_reader:
-        if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE"):
-            report_findings.append(row)
-    return report_findings
+    return [row for row in csv_reader if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE")]
 
 
 def _extract_cvss_vectors(cvss_base, cvss_temporal):
