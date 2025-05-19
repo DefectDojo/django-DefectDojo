@@ -1,29 +1,18 @@
-# import datetime
+from dojo.models import Finding, Test
+from dojo.tools.reversinglabs_spectraassure.parser import ReversinglabsSpectraassureParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 """
 run with:
-- ./run-unittest.sh --test-case unittests.tools.test_reversinglabs_spectraassure_parser.TestReversingLabsSpectraAssureParser
+
+./run-unittest.sh --test-case
+    unittests.tools.test_reversinglabs_spectraassure_parser.TestReversingLabsSpectraAssureParser
 
 FD13-FullUSb.zip: finds no vulnerabilities
 putty_win_x64-0.80.exe: finds only one vulnerability
 HxDSetup_2.5.0.exe: has multiple components with the same name but different sha256 (different languages)
 
 """
-
-from dojo.models import (
-    # Engagement,
-    Finding,
-    # Product,
-    Test,
-)
-from unittests.dojo_test_case import (
-    DojoTestCase,
-    get_unit_tests_scans_path,
-)
-
-from dojo.tools.reversinglabs_spectraassure.parser import (
-    ReversinglabsSpectraassureParser,
-)
 
 _WHERE = "reversinglabs_spectraassure"
 
