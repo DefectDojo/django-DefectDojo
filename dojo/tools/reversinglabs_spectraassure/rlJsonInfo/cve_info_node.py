@@ -1,33 +1,26 @@
 import datetime
 import logging
 
-from typing import (
-    List,
-)
-
 logger = logging.getLogger(__name__)
+
+"""
+Here we collect info that can be easily mapped to a DefectDojo Finding
+"""
 
 
 class CveInfoNode:
-    """
-    Here we collect info that can be easily mapped to a DefectDojo Finding
-
-    """
 
     cve: str
     comp_uuid: str
     dep_uuid: str | None
-    #
     scan_date: datetime.date
     scan_tool: str
     scan_tool_version: str
-    #
     original_file: str
     original_file_sha256: str
 
     title: str
     description: str
-    #
     cvss_version: int
     score: float
     score_severity: str  # score mapped to severity
@@ -45,12 +38,10 @@ class CveInfoNode:
     component_version: str
     component_purl: str
     str | None
-    #
     unique_id_from_tool: str | None
     vuln_id_from_tool: str | None
-    #
     active: bool
-    tags: List[str]
+    tags: list[str]
     impact: str | None
 
     def __init__(self) -> None:
@@ -60,12 +51,12 @@ class CveInfoNode:
     def __str__(self) -> str:
         return f"{self.__dict__}"
 
-    def _make_title_cin(
+    def make_title_cin(
         self,
         cve: str,
-        with_sha256: bool = False,
     ) -> str:
         logger.debug("")
+        with_sha256: bool = False
 
         purl = self.component_purl
         if self.component_type == "component":
@@ -94,7 +85,7 @@ class CveInfoNode:
 
         return self.title
 
-    def _make_description_cin(
+    def make_description_cin(
         self,
         cve: str,
         purl: str,

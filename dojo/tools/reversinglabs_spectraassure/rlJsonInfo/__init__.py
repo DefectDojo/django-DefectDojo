@@ -1,46 +1,40 @@
-from typing import (
-    Dict,
-    List,
-    Any,
-    Iterator,
-)
-import sys
-import os
-import datetime
-import logging
 import copy
+import datetime
 import gc
 import json
+import logging
+import os
+import sys
+from typing import Any
 
 from .cve_info_node import CveInfoNode
 
 logger = logging.getLogger(__name__)
 
+"""
+The info of the rl.json reports but cut up in usable parts
+"""
+
 
 class RlJsonInfo:
-    """
-    The info of the rl.json reports but cut up in usable parts
-    """
 
     SCAN_TOOL_NAME: str = "ReversingLabs SpectraAssure"
 
-    info: Dict[str, Any]
-    #
-    assessments: Dict[str, Any]
-    components: Dict[str, Any]
-    cryptography: Dict[str, Any]
-    dependencies: Dict[str, Any]
-    indicators: Dict[str, Any]
-    licenses: Dict[str, Any]
-    ml_models: Dict[str, Any]
-    services: Dict[str, Any]
-    secrets: Dict[str, Any]
-    violations: Dict[str, Any]
-    vulnerabilities: Dict[str, Any]
-    #
-    _rest: Dict[str, Any]
+    info: dict[str, Any]
+    assessments: dict[str, Any]
+    components: dict[str, Any]
+    cryptography: dict[str, Any]
+    dependencies: dict[str, Any]
+    indicators: dict[str, Any]
+    licenses: dict[str, Any]
+    ml_models: dict[str, Any]
+    services: dict[str, Any]
+    secrets: dict[str, Any]
+    violations: dict[str, Any]
+    vulnerabilities: dict[str, Any]
+    _rest: dict[str, Any]
 
-    _metadata: List[str] = [
+    _metadata: list[str] = [
         "assessments",
         "components",
         "cryptography",
@@ -54,7 +48,7 @@ class RlJsonInfo:
         "vulnerabilities",
     ]
 
-    sMap: Dict[int, str] = {
+    sMap: dict[int, str] = {
         1: "Info",
         2: "Low",
         3: "Medium",
@@ -62,7 +56,7 @@ class RlJsonInfo:
         5: "Critical",
     }
 
-    tags: Dict[str, str] = {
+    tags: dict[str, str] = {
         "FIXABLE": "Fix Available",
         "EXISTS": "Exploit Exists",
         "MALWARE": "Exploited by Malware",
@@ -76,7 +70,7 @@ class RlJsonInfo:
     # 3: Exploited my malware
     # 4: Patch mandated
 
-    impact_sort_order: List[str] = [
+    impact_sort_order: list[str] = [
         "Fix Available",
         "Exploit Exists",
         "Exploited by Malware",
@@ -85,7 +79,7 @@ class RlJsonInfo:
     ]
 
     # cve, comp_uuid, dep_uuid | None -> CveInfoNode
-    _results: Dict[str, Dict[str, Dict[str | None, CveInfoNode]]]
+    _results: dict[str, dict[str, dict[str | None, CveInfoNode]]]
 
     def __init__(
         self,
@@ -94,11 +88,11 @@ class RlJsonInfo:
         self.file_name: str = file_handle.name
         logger.debug("file: %s", self.file_name)
 
-        self.data: Dict[str, Any] = json.load(file_handle)
+        self.data: dict[str, Any] = json.load(file_handle)
         self._results = {}
 
         self.RL_JSON_WITH_CG_COLLECT: bool = False
-        if os.getenv("RL_JSON_WITH_CG_COLLECT", False):
+        if os.getenv("RL_JSON_WITH_CG_COLLECT"):
             self.RL_JSON_WITH_CG_COLLECT = True
 
         self._get_info()
@@ -154,7 +148,7 @@ class RlJsonInfo:
     ) -> bool:
         logger.debug("")
 
-        for comp_uuid, component in self.components.items():
+        for component in self.components.values():
             comp_sha256 = self._get_sha256(data=component)
             if comp_sha256 == sha256:
                 return True
@@ -180,12 +174,12 @@ class RlJsonInfo:
         if comp_uuid not in rr[cve]:
             rr[cve][comp_uuid] = {}
 
-        assert dep_uuid not in rr[cve][comp_uuid]
-        rr[cve][comp_uuid][dep_uuid] = cin
+        if dep_uuid not in rr[cve][comp_uuid]:
+            rr[cve][comp_uuid][dep_uuid] = cin
 
     def _get_sha256(
         self,
-        data: Dict[str, Any],
+        data: dict[str, Any],
     ) -> str:
         logger.debug("")
         k = "sha256"
@@ -206,7 +200,7 @@ class RlJsonInfo:
 
         rr: bool = False
 
-        f_info: Dict[str, Any] = self.info.get("file", {})
+        f_info: dict[str, Any] = self.info.get("file", {})
         file_sha256 = self._get_sha256(f_info)
 
         rr = self._find_sha256_in_components(file_sha256)
@@ -238,7 +232,7 @@ class RlJsonInfo:
     def _use_path_or_name(
         self,
         *,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         purl: str,
         name_first: bool = False,
         prefer_path: bool = True,
@@ -284,8 +278,8 @@ class RlJsonInfo:
 
         return k
 
-    def _get_tags_from_cve(self, this_cve: Dict[str, Any]) -> List[str]:
-        tags: List[str] = []
+    def _get_tags_from_cve(self, this_cve: dict[str, Any]) -> list[str]:
+        tags: list[str] = []
         exploit = this_cve.get("exploit", [])
         if len(exploit) == 0:
             return tags
@@ -302,7 +296,7 @@ class RlJsonInfo:
 
     def _make_impact_from_tags(
         self,
-        tags: List[str],
+        tags: list[str],
         impact: str | None,
     ) -> str:
         if impact is None:
@@ -319,9 +313,9 @@ class RlJsonInfo:
         cve: str,
         comp_uuid: str,
         dep_uuid: str | None,
-        active: bool,
+        active: Any,
     ) -> CveInfoNode | None:
-        """collect all info we can extract from the cve"""
+        """Collect all info we can extract from the cve"""
         logger.debug("")
 
         this_cve = self.vulnerabilities.get(cve)
@@ -330,13 +324,11 @@ class RlJsonInfo:
             return None
 
         cin = CveInfoNode()
-        #
         cin.cve = cve
         cin.comp_uuid = comp_uuid
         cin.dep_uuid = dep_uuid
-        cin.active = active
-        #
-        f_info: Dict[str, Any] = self.info.get("file", {})
+        cin.active = bool(active)
+        f_info: dict[str, Any] = self.info.get("file", {})
         cin.original_file = str(f_info.get("name", ""))
         cin.original_file_sha256 = self._get_sha256(f_info)
 
@@ -344,7 +336,6 @@ class RlJsonInfo:
         cin.scan_tool = self.SCAN_TOOL_NAME
         cin.scan_tool_version = self._rest.get("version", "no_scan_tool_version_specified")
         cin.cvss_version = int(this_cve.get("cvss", {}).get("version", "0"))
-        #
         score = float(this_cve.get("cvss", {}).get("baseScore", "0.0"))
         cin.score = score
         cin.score_severity = self._score_to_severity(score=score)
@@ -357,26 +348,24 @@ class RlJsonInfo:
 
     def _get_component_purl(
         self,
-        component: Dict[str, Any],
+        component: dict[str, Any],
     ) -> str:
-        c_purl = str(component.get("identity", {}).get("purl", ""))
-        return c_purl
+        return str(component.get("identity", {}).get("purl", ""))
 
     def _get_dependency_purl(
         self,
-        dependency: Dict[str, Any],
+        dependency: dict[str, Any],
     ) -> str:
-        d_purl = str(dependency.get("purl", ""))
-        return d_purl
+        return str(dependency.get("purl", ""))
 
     def _do_one_cve_component_dependency(
         self,
         comp_uuid: str,
-        component: Dict[str, Any],
+        component: dict[str, Any],
         dep_uuid: str,
-        dependency: Dict[str, Any],
+        dependency: dict[str, Any],
         cve: str,
-        active: bool,
+        active: Any,
     ) -> CveInfoNode | None:
         logger.debug("comp: %s; dep: %s; cve: %s", comp_uuid, dep_uuid, cve)
 
@@ -397,19 +386,15 @@ class RlJsonInfo:
         cin.component_file_purl = c_purl
         cin.component_file_version = ident.get("version", "")
         cin.component_file_name = component.get("name", "")
-        #
         cin.component_type = "dependency"
         cin.component_name = dependency.get("product", f"no_{cin.component_type}_product_provided")
         cin.component_version = dependency.get("version", f"no_{cin.component_type}_version_provided")
-        #
         d_purl = self._get_dependency_purl(dependency=dependency)
         cin.component_purl = d_purl
-        #
         cin.unique_id_from_tool = "dependency: " + dep_uuid
         cin.vuln_id_from_tool = cve
-        #
-        cin._make_title_cin(cve=cve)
-        cin._make_description_cin(cve=cve, purl=d_purl)
+        cin.make_title_cin(cve=cve)
+        cin.make_description_cin(cve=cve, purl=d_purl)
 
         logger.debug("%s", cin)
 
@@ -418,9 +403,9 @@ class RlJsonInfo:
     def _do_one_cve_component_without_dependencies(
         self,
         comp_uuid: str,
-        component: Dict[str, Any],
+        component: dict[str, Any],
         cve: str,
-        active: bool,
+        active: Any,
     ) -> CveInfoNode | None:
         logger.debug("comp: %s; cve: %s", comp_uuid, cve)
 
@@ -431,24 +416,21 @@ class RlJsonInfo:
         ident = component.get("identity", {})
 
         c_purl = self._get_component_purl(component=component)
-        #
         cin.component_file_path = self._use_path_or_name(data=component, purl=c_purl)
         cin.component_file_sha256 = self._get_sha256(data=component)
         cin.component_file_purl = c_purl
         cin.component_file_version = ident.get("version", "")
         cin.component_file_name = component.get("name", "")
-        #
         cin.component_type = "component"
         cin.component_name = self._use_path_or_name(data=component, purl=c_purl, name_first=True)
         cin.component_version = ident.get("version", "")
         cin.component_purl = c_purl
-        #
         cin.unique_id_from_tool = "component: " + comp_uuid
         cin.vuln_id_from_tool = cve
-        cin.active = active
+        cin.active = bool(active)
 
-        cin._make_title_cin(cve=cve)
-        cin._make_description_cin(cve=cve, purl=c_purl)
+        cin.make_title_cin(cve=cve)
+        cin.make_description_cin(cve=cve, purl=c_purl)
 
         logger.debug("%s", cin)
 
@@ -457,14 +439,14 @@ class RlJsonInfo:
     def _get_one_active_cve_component_dependency(
         self,
         comp_uuid: str,
-        component: Dict[str, Any],
+        component: dict[str, Any],
         dep_uuid: str,
     ) -> None:
         logger.debug("")
 
         dependency = self.dependencies.get(dep_uuid)
         if dependency is None:
-            logger.error("missing dependency", dep_uuid)
+            logger.error("missing dependency: %s", dep_uuid)
             return
 
         # -------------------------------
@@ -535,11 +517,14 @@ class RlJsonInfo:
                 )
 
     # ==== PUBLIC ======
-    def iter_results(self) -> Iterator[CveInfoNode]:
-        for cve, compo in self._results.items():
-            for comp_uuid, component in compo.items():
-                for dep_uuid, cin in component.items():
-                    yield cin
+    def get_results_list(self) -> list[CveInfoNode]:
+        rr: list[CveInfoNode] = []
+
+        for compo in self._results.values():
+            for component in compo.values():
+                for cin in component.values():  # ruff: noqa:  UP028
+                    rr.append(cin)
+        return rr
 
     def print_results_to_file_or_stdout(
         self,
@@ -555,11 +540,11 @@ class RlJsonInfo:
             if type(o) is datetime.datetime:
                 return o.isoformat()  # YYYY-MM-DD T hh:mm:ss <tz info>
 
-            raise Exception(f"unsupported type: {type(o)}")
+            msg: str = f"unsupported type: {type(o)}"
+            raise Exception(msg)
 
-        rr: List[Any] = []
-        for cin in self.iter_results():
-            rr.append(cin)
+        rr: list[Any] = self.get_results_list()
+
         print(
             json.dumps(
                 rr,
@@ -571,7 +556,8 @@ class RlJsonInfo:
         )
 
     def get_cve_active_all(self) -> None:
-        """find get all cve's and add componenet path, sha and version like in `report.cve.csv`
+        """
+        Find get all cve's and add componenet path, sha and version like in `report.cve.csv`
 
         0:
             verify that the info -> file sha256 comes back as a component

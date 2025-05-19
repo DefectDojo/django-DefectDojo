@@ -1,21 +1,18 @@
-from typing import (
-    List,
-    Dict,
-    Any,
-)
-import logging
 import hashlib
+import logging
+from typing import Any
 
 # any line after FIX_START and before FIX_END
 # will be rewritten when copy to the dev machine
 # commented lines will be uncommented
 # and uncommented lines will be commented
-
+# //
 # FIX_START
 from dojo.models import Finding
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
 # from finding import Finding
+# 
 # from .rlJsonInfo import RlJsonInfo
 # from .rlJsonInfo.cve_info_node import CveInfoNode
 # 
@@ -52,11 +49,7 @@ Note:
     We have components with the same name and version but different hash value.
     This is typical for windows installers with multi language support.
     A good example is: HxDSetup_2.5.0.exe
-"""
 
-
-class ReversinglabsSpectraassureParser(object):
-    """
     Parser for Spectra Assure rl-json files
 
     This class MUST implement 3 methods:
@@ -78,7 +71,10 @@ class ReversinglabsSpectraassureParser(object):
 
     If your parser has more than 1 scan_type (for detailed mode) you MUST implement:
     - def set_mode(self, mode) method
-    """
+"""
+
+
+class ReversinglabsSpectraassureParser:
 
     # --------------------------------------------
     # This class MUST have an empty constructor or no constructor
@@ -113,23 +109,17 @@ class ReversinglabsSpectraassureParser(object):
             date=node.scan_date,
             title=node.title,
             description=node.title + " " + node.description + "\n",
-            #
             cve=cve,
             cvssv3_score=node.score,
             severity=node.score_severity,
-            #
             vuln_id_from_tool=node.vuln_id_from_tool,
             unique_id_from_tool=node.unique_id_from_tool,  # purl if we have one ?
-            #
             file_path=node.component_file_path,
             component_name=node.component_name,
             component_version=node.component_version,
-            #
             nb_occurences=1,
             hash_code=key,  # sha256 on title
-            #
             references=None,  # future urls
-            #
             active=True,  # this is the DefectDojo active field, nothing to do with node.active field
             test=test,
             static_finding=True,
@@ -143,7 +133,7 @@ class ReversinglabsSpectraassureParser(object):
 
     # --------------------------------------------
     # PUBLIC
-    def get_scan_types(self) -> List[str]:
+    def get_scan_types(self) -> list[str]:
         return [WHAT]
 
     def get_label_for_scan_types(self, scan_type: str) -> str:
@@ -158,15 +148,15 @@ class ReversinglabsSpectraassureParser(object):
         self,
         file: Any,
         test: Any,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         # ------------------------------------
         rji = RlJsonInfo(file_handle=file)
         rji.get_cve_active_all()
 
-        self._findings: List[Finding] = []
-        self._duplicates: Dict[str, Finding] = {}
+        self._findings: list[Finding] = []
+        self._duplicates: dict[str, Finding] = {}
 
-        for cin in rji.iter_results():
+        for cin in rji.get_results_list():
             finding = self._one_finding(
                 node=cin,
                 test=test,
@@ -181,9 +171,9 @@ class ReversinglabsSpectraassureParser(object):
                 continue
 
             dup = self._duplicates[key]  # but that may be on a different component file, name, version
-            assert dup is not None
-            dup.description += finding.description
-            dup.nb_occurences += 1
+            if dup:
+                dup.description += finding.description
+                dup.nb_occurences += 1
 
         # ------------------------------------
         return self._findings
