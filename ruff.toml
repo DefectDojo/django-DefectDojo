@@ -114,9 +114,6 @@ preview = true
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
 ]
-".github/pr-reminder.py" = [
-    "INP001", # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-]
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
