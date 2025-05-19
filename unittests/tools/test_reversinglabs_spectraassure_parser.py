@@ -16,12 +16,13 @@ from dojo.models import (
     # Product,
     Test,
 )
-from dojo.tools.reversinglabs_spectraassure.parser import (
-    ReversinglabsSpectraassureParser,
-)
 from unittests.dojo_test_case import (
     DojoTestCase,
     get_unit_tests_scans_path,
+)
+
+from dojo.tools.reversinglabs_spectraassure.parser import (
+    ReversinglabsSpectraassureParser,
 )
 
 _WHERE = "reversinglabs_spectraassure"
@@ -33,7 +34,8 @@ _FILES = [
 ]
 
 
-class TestReversingLabsSpectraAssureParser(DojoTestCase): # type: ignore
+# mypy gives:  error: Class cannot subclass "DojoTestCase" (has type "Any")  [misc]
+class TestReversingLabsSpectraAssureParser(DojoTestCase):  # type: ignore[misc]
     def common_checks(self, finding: Finding) -> None:
         self.assertLessEqual(len(finding.title), 250)
         self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -56,7 +58,7 @@ class TestReversingLabsSpectraAssureParser(DojoTestCase): # type: ignore
 
     def test_parse_file_with_one_vuln(self) -> None:
         with (get_unit_tests_scans_path(_WHERE) / "putty_win_x64-0.80.exe-report.rl.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = ReversinglabsSpectraassureParser()
             findings = parser.get_findings(
@@ -70,7 +72,7 @@ class TestReversingLabsSpectraAssureParser(DojoTestCase): # type: ignore
 
     def test_parse_file_with_many_vulns(self) -> None:
         with (get_unit_tests_scans_path(_WHERE) / "HxDSetup_2.5.0.exe-report.rl.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = ReversinglabsSpectraassureParser()
             findings = parser.get_findings(

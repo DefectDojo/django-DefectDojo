@@ -1,22 +1,9 @@
+from typing import Any
 import hashlib
 import logging
-from typing import Any
-
-# any line after FIX_START and before FIX_END
-# will be rewritten when copy to the dev machine
-# commented lines will be uncommented
-# and uncommented lines will be commented
-# //
-# FIX_START
 from dojo.models import Finding
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
-# from finding import Finding
-# 
-# from .rlJsonInfo import RlJsonInfo
-# from .rlJsonInfo.cve_info_node import CveInfoNode
-# 
-# FIX_END
 
 logger = logging.getLogger(__name__)
 
