@@ -1801,8 +1801,4 @@ def get_finding_group_findings_above_threshold(finding_group):
     if System_Settings.objects.get().jira_minimum_severity:
         jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
 
-    findings = finding_group.findings.filter(numerical_severity__lte=jira_minimum_threshold)
-    # TODO: JIRA REMOVE
-    logger.error(findings.query)
-    logger.error(f"count: {findings.count()}")
-    return findings
+    return finding_group.findings.filter(numerical_severity__lte=jira_minimum_threshold)
