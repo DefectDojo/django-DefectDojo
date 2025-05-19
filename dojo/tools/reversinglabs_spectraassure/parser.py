@@ -1,3 +1,4 @@
+# noqa: RUF100
 import hashlib
 import logging
 from typing import Any
