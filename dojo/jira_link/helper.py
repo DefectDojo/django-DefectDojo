@@ -119,12 +119,13 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
             return obj.status
 
     if isinstance(obj, Finding_Group):
+        # only consider findings that are above the minimum threshold, but includ inactive and non-verified findings
         findings = get_finding_group_findings_above_threshold(obj)
         if not findings:
-            return ["Empty"]
+            return ["Empty", "Inactive"]
 
         for find in findings:
-            logger.error(f"Finding {find.id} status {find.active} {find.verified} {find.is_mitigated}")
+            logger.debug(f"Finding {find.id} status {find.active} {find.verified} {find.is_mitigated}")
 
         # This iterates 3 times over the list of findings, but any code doing 1 iteration would looke it's from 1990
         if any(find.active for find in findings):
@@ -829,7 +830,7 @@ def prepare_jira_issue_fields(
 def add_jira_issue(obj, *args, **kwargs):
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
         if exception:
-            logger.error(exception)
+            logger.error("Exception occurred", exc_info=exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -873,7 +874,7 @@ def add_jira_issue(obj, *args, **kwargs):
     duedate = None
 
     if System_Settings.objects.get().enable_finding_sla:
-        duedate = obj.sla_deadline()
+        duedate = get_sla_deadline(obj)
     # Set the fields that will compose the jira issue
     try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
@@ -1801,4 +1802,51 @@ def get_finding_group_findings_above_threshold(finding_group):
     if System_Settings.objects.get().jira_minimum_severity:
         jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
 
-    return finding_group.findings.filter(numerical_severity__lte=jira_minimum_threshold)
+    return [finding for finding in finding_group.findings.all() if finding.numerical_severity <= jira_minimum_threshold]
+
+
+def is_qualified(finding):
+    """Check if the finding is qualified to be pushed to JIRA, i.e. active, verified (unless not enforced) and severity is above the threshold"""
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
+
+    return finding.active and (finding.verified or not isenforced) and (finding.numerical_severity <= jira_minimum_threshold)
+
+
+def get_qualified_findings(findings):
+    """Filters findings to return only findings qualified to be pushed to JIRA, i.e. active, verified (unless not enforced) and severity is above the threshold"""
+    if not findings:
+        return None
+
+    return [find for find in findings if is_qualified(find)]
+
+
+def get_non_qualified_findings(findings):
+    """Filters findings to return only findings not qualified to be pushed to JIRA, i.e. inactive, not-verified (unless not enforced) and severity is below the threshold"""
+    if not findings:
+        return None
+
+    return [find for find in findings if not is_qualified(find)]
+
+
+def get_sla_deadline(obj):
+    """Get the earliest SLA deadline from a finding or a list of findings, this typically includes all qualified findings in the group"""
+    if not obj:
+        return None
+
+    if isinstance(obj, Finding):
+        return obj.sla_deadline()
+
+    if isinstance(obj, Finding_Group):
+        return min([find.sla_deadline() for find in get_qualified_findings(obj.findings.all()) if find.sla_deadline()], default=None)
+
+    logger.warning("get_sla_deadline: obj passed that is not a Finding or Finding_Group")
+    return None
+
+
+def get_severity(findings):
+    max_number_severity = max(Finding.get_number_severity(find.severity) for find in findings)
+    return Finding.get_severity(max_number_severity)

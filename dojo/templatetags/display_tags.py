@@ -871,6 +871,26 @@ def jira_change(obj):
 
 
 @register.filter
+def jira_qualified_findings(findings):
+    return jira_helper.get_qualified_findings(findings)
+
+
+@register.filter
+def jira_non_qualified_findings(findings):
+    return jira_helper.get_non_qualified_findings(findings)
+
+
+@register.filter
+def jira_sla_deadline(findings):
+    return jira_helper.get_sla_deadline(findings)
+
+
+@register.filter
+def jira_severity(findings):
+    return jira_helper.get_severity(findings)
+
+
+@register.filter
 def get_thumbnail(file):
     from pathlib import Path
     file_format = Path(file.file.url).suffix[1:]

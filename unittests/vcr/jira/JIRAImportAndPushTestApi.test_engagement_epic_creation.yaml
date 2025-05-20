@@ -18,12 +18,12 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-05-19T14:58:42.000+0200","serverTime":"2025-05-20T10:26:33.471+0200","scmInfo":"f8932c93bd159910951acd497204161705f6d7b8","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100283,"buildDate":"2025-05-19T14:58:42.000+0200","serverTime":"2025-05-20T21:49:49.030+0200","scmInfo":"f8932c93bd159910951acd497204161705f6d7b8","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 128bfa57-98f8-4d78-b315-f791b031fd6a
+      - 86fbab4d-800b-4737-b512-9d2e4bf7de13
       Atl-Traceid:
-      - 128bfa5798f84d78b315f791b031fd6a
+      - 86fbab4d800b4737b5129d2e4bf7de13
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -33,7 +33,7 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Tue, 20 May 2025 08:26:33 GMT
+      - Tue, 20 May 2025 19:49:49 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -43,7 +43,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="kPK1dosX0_IjJRzZVdZvOYAqoBYReRNKlDjJym8YohoHRmwrXJH4Mg==",cdn-downstream-fbl;dur=139,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=21,cdn-upstream-fbl;dur=137,atl-edge;dur=108,atl-edge-internal;dur=17,atl-edge-upstream;dur=90,atl-edge-pop;desc="aws-eu-central-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=113,atl-edge;dur=105,atl-edge-internal;dur=15,atl-edge-upstream;dur=90,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="8aDG6zRbXgM2DjZwvgD3jsyTHHhARo3c2TqzClyL2zctrIDwKA0grQ==",cdn-downstream-fbl;dur=124
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -53,15 +53,15 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 a4583a5b47f0a64ec35be32f95ac1b46.cloudfront.net (CloudFront)
+      - 1.1 29d6db1b5ecb170f22487453430df556.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
       X-Amz-Cf-Id:
-      - kPK1dosX0_IjJRzZVdZvOYAqoBYReRNKlDjJym8YohoHRmwrXJH4Mg==
+      - 8aDG6zRbXgM2DjZwvgD3jsyTHHhARo3c2TqzClyL2zctrIDwKA0grQ==
       X-Amz-Cf-Pop:
       - AMS1-P1
       X-Arequestid:
-      - 750a91c134015bf6e37ef8bf1f4531fb
+      - 24dfeb9b7d5380dcf2fc4ceeed36cdc7
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
@@ -102,9 +102,9 @@ interactions:
         Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - 3bd36bdc-edda-4822-982b-62bc8afb961a
+      - 2151f390-72ea-4869-ad26-9ec261d9cb77
       Atl-Traceid:
-      - 3bd36bdcedda4822982b62bc8afb961a
+      - 2151f39072ea4869ad269ec261d9cb77
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -114,7 +114,7 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Tue, 20 May 2025 08:26:33 GMT
+      - Tue, 20 May 2025 19:49:49 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -124,7 +124,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="ZAxA5OFNVY_mJxEImm2V_VTV93rEqzjDN5cPzHMPMw8njfM0VsayMw==",cdn-downstream-fbl;dur=258,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=21,cdn-upstream-fbl;dur=256,atl-edge;dur=226,atl-edge-internal;dur=23,atl-edge-upstream;dur=202,atl-edge-pop;desc="aws-eu-central-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=285,atl-edge;dur=278,atl-edge-internal;dur=16,atl-edge-upstream;dur=263,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="ujvhkDPTrmh3XwJ5okncr0S06YOIMGzqjBi1qm97zUDWetOtGTrhCQ==",cdn-downstream-fbl;dur=289
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -134,18 +134,18 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 ca1ae3b3ff3d7a9e41b26e307972401e.cloudfront.net (CloudFront)
+      - 1.1 490623df85c571a18ba7da1511cc969e.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
       - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
       X-Amz-Cf-Id:
-      - ZAxA5OFNVY_mJxEImm2V_VTV93rEqzjDN5cPzHMPMw8njfM0VsayMw==
+      - ujvhkDPTrmh3XwJ5okncr0S06YOIMGzqjBi1qm97zUDWetOtGTrhCQ==
       X-Amz-Cf-Pop:
       - AMS1-P1
       X-Arequestid:
-      - 518fc2f8113c04e1590df396c1fa8e91
+      - f8f249b5de34b7af08c972394819202f
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
@@ -178,12 +178,12 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"18849","key":"NTEST-2276","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18849"}'
+      string: '{"id":"19157","key":"NTEST-2579","self":"https://defectdojo.atlassian.net/rest/api/2/issue/19157"}'
     headers:
       Atl-Request-Id:
-      - b433e695-a765-4616-91f0-f5f1df0dd284
+      - c7f70edf-c4c5-4f3d-8624-f23dd0729cd1
       Atl-Traceid:
-      - b433e695a765461691f0f5f1df0dd284
+      - c7f70edfc4c54f3d8624f23dd0729cd1
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -191,7 +191,7 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Tue, 20 May 2025 08:26:34 GMT
+      - Tue, 20 May 2025 19:49:50 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -201,7 +201,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="9hFfqa6q_Xd5rPWcUvrC_H_Pt6EFjF233KG8tnPyHtO9MueZA4vTog==",cdn-downstream-fbl;dur=897,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=21,cdn-upstream-fbl;dur=896,atl-edge;dur=865,atl-edge-internal;dur=20,atl-edge-upstream;dur=846,atl-edge-pop;desc="aws-eu-central-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=763,atl-edge;dur=756,atl-edge-internal;dur=17,atl-edge-upstream;dur=739,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="NszdUtVJEQ7INkTU1NqRltQ5SJMbXwbcT8sLODZymi4nMj2zMWMc3A==",cdn-downstream-fbl;dur=768
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -211,15 +211,15 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 74511018c757716e70d811d8214e45e0.cloudfront.net (CloudFront)
+      - 1.1 6750d77433312fa1bf305e9ae7af80ae.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
       X-Amz-Cf-Id:
-      - 9hFfqa6q_Xd5rPWcUvrC_H_Pt6EFjF233KG8tnPyHtO9MueZA4vTog==
+      - NszdUtVJEQ7INkTU1NqRltQ5SJMbXwbcT8sLODZymi4nMj2zMWMc3A==
       X-Amz-Cf-Pop:
       - AMS1-P1
       X-Arequestid:
-      - d1f832a0808ece5ded6f5ff4d4d5a960
+      - 22d2218248f78f2c65e2775c1d9b51dd
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
@@ -245,26 +245,26 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2276
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2579
   response:
     body:
-      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"18849","self":"https://defectdojo.atlassian.net/rest/api/2/issue/18849","key":"NTEST-2276","fields":{"statuscategorychangedate":"2025-05-20T10:26:34.638+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10000","id":"10000","description":"A
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"19157","self":"https://defectdojo.atlassian.net/rest/api/2/issue/19157","key":"NTEST-2579","fields":{"statuscategorychangedate":"2025-05-20T21:49:50.139+0200","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10000","id":"10000","description":"A
         big user story that needs to be broken down. Created by Jira Software - do
         not edit or delete.","iconUrl":"https://defectdojo.atlassian.net/images/icons/issuetypes/epic.svg","name":"Epic","subtask":false,"hierarchyLevel":1},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"fixVersions":[],"customfield_10033":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
-        Do"},"aggregatetimespent":null,"resolution":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"lastViewed":null,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2276/watchers","watchCount":1,"isWatching":true},"created":"2025-05-20T10:26:34.226+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},"customfield_10023":null,"labels":[],"customfield_10026":null,"customfield_10016":null,"customfield_10017":"dark_teal","customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
-        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00vrb:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-05-20T10:26:34.335+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"aggregatetimespent":null,"resolution":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"lastViewed":null,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2579/watchers","watchCount":1,"isWatching":true},"created":"2025-05-20T21:49:49.794+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium.svg","name":"Medium","id":"3"},"customfield_10023":null,"labels":[],"customfield_10026":null,"customfield_10016":null,"customfield_10017":"teal","customfield_10018":{"hasEpicLinkFieldDependency":false,"showField":false,"nonEditableReason":{"reason":"PLUGIN_LICENSE_ERROR","message":"The
+        Parent Link is only available to Jira Premium users."}},"customfield_10019":"0|i00xnr:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"updated":"2025-05-20T21:49:49.884+0200","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
         Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"timeoriginalestimate":null,"customfield_10053":null,"description":"weekly
         engagement","customfield_10010":null,"customfield_10055":null,"customfield_10011":"weekly
         engagement","customfield_10056":null,"customfield_10012":{"self":"https://defectdojo.atlassian.net/rest/api/2/customFieldOption/10016","value":"To
-        Do","id":"10016"},"customfield_10013":"ghx-label-5","customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10049":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"aggregatetimeestimate":null,"attachment":[],"customfield_10009":null,"summary":"weekly
+        Do","id":"10016"},"customfield_10013":"ghx-label-11","customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10049":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"aggregatetimeestimate":null,"attachment":[],"customfield_10009":null,"summary":"weekly
         engagement","creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
         Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10047":null,"customfield_10003":null,"customfield_10048":null,"customfield_10004":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2276/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/18849/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
+        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10001":null,"customfield_10046":null,"customfield_10002":[],"customfield_10047":null,"customfield_10003":null,"customfield_10048":null,"customfield_10004":null,"customfield_10038":null,"customfield_10039":null,"environment":null,"duedate":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-2579/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/19157/comment","maxResults":0,"total":0,"startAt":0},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]}}}'
     headers:
       Atl-Request-Id:
-      - 277b7f5e-2473-4012-8d3d-665aaa9ede4b
+      - 4d52ab3c-b884-4ec2-97a7-c21451e1a2ac
       Atl-Traceid:
-      - 277b7f5e247340128d3d665aaa9ede4b
+      - 4d52ab3cb8844ec297a7c21451e1a2ac
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -274,7 +274,7 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Tue, 20 May 2025 08:26:35 GMT
+      - Tue, 20 May 2025 19:49:50 GMT
       Nel:
       - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
@@ -284,7 +284,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="PLdJ2t6guZhUgB8Qrr2YdhcoYgEHwxQqYotqehLUfO9c60u_ukCYVA==",cdn-downstream-fbl;dur=282,cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=21,cdn-upstream-fbl;dur=280,atl-edge;dur=251,atl-edge-internal;dur=25,atl-edge-upstream;dur=226,atl-edge-pop;desc="aws-eu-central-1"
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=7,cdn-upstream-fbl;dur=250,atl-edge;dur=221,atl-edge-internal;dur=14,atl-edge-upstream;dur=208,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="AMS1-P1",cdn-rid;desc="MAeebylx1aE4_duRVbAjyAn4sWKHXQDqDv7QdSEMjKfAOpbxcFnMDQ==",cdn-downstream-fbl;dur=255
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -294,15 +294,15 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 9500c58b11c15528d15f2ca9add5bc00.cloudfront.net (CloudFront)
+      - 1.1 ef674a9df28e4fc8d944ae07304fa954.cloudfront.net (CloudFront)
       X-Aaccountid:
       - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
       X-Amz-Cf-Id:
-      - PLdJ2t6guZhUgB8Qrr2YdhcoYgEHwxQqYotqehLUfO9c60u_ukCYVA==
+      - MAeebylx1aE4_duRVbAjyAn4sWKHXQDqDv7QdSEMjKfAOpbxcFnMDQ==
       X-Amz-Cf-Pop:
       - AMS1-P1
       X-Arequestid:
-      - 184f3cb6912396a546a139736f2dc253
+      - 8bd9c018bde68f3790bb3043f6065ad5
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
