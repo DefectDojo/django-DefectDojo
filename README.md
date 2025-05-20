@@ -129,7 +129,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 
 Moderators can help you with pull requests or feedback on dev ideas:
 * Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
-* Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
