@@ -1,9 +1,9 @@
 name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 
 trigger:
-  branches:
+  tags:
     include:
-      - trunk
+      - '*'
 
 pool:
   name: Azure Pipelines

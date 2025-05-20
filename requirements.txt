@@ -149,7 +149,7 @@ pyOpenSSL==25.0.0
 oauthlib==3.2.2
 rpds-py==0.24.0
 s3transfer==0.11.4
-setuptools==78.1.0
+setuptools==78.1.1
 referencing==0.36.2
 tzdata==2025.2
 jsonschema-specifications==2024.10.1
