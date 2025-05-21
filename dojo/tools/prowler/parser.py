@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProwlerParser:
-
     """
     A parser for Prowler scan results.
     Supports both CSV and OCSF JSON formats for AWS, Azure, GCP, and Kubernetes.
@@ -36,9 +35,6 @@ class ProwlerParser:
         # Get file name/path to determine file type
         file_name = getattr(file, "name", "")
 
-        # Special handling for test files
-        is_test = file_name and "/scans/prowler/" in file_name
-
         # Determine file type based on extension
         if file_name.lower().endswith(".json"):
             data = self._parse_json(content)
@@ -54,109 +50,6 @@ class ProwlerParser:
             except (JSONDecodeError, ValueError):
                 csv_data = self._parse_csv(content)
                 findings = self._parse_csv_findings(csv_data, test, file_name=file_name)
-
-        # Special handling for test files to ensure consistent test results
-        if is_test:
-            # Test files need specific output values
-            if "aws.json" in file_name:
-                # AWS JSON - get MFA finding or first finding
-                mfa_findings = [f for f in findings if "Hardware MFA" in f.title]
-                if mfa_findings:
-                    findings = [mfa_findings[0]]
-                    findings[0].title = "Hardware MFA is not enabled for the root account."
-                    findings[0].vuln_id_from_tool = "iam_root_hardware_mfa_enabled"
-                    findings[0].severity = "High"
-                    findings[0].unsaved_tags = ["aws"]
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "aws.csv" in file_name:
-                # AWS CSV - get MFA finding or first finding
-                mfa_findings = [
-                    f
-                    for f in findings
-                    if "hardware MFA" in f.title.lower()
-                    or "iam_root_hardware_mfa_enabled" in (f.vuln_id_from_tool or "").lower()
-                ]
-                if mfa_findings:
-                    findings = [mfa_findings[0]]
-                    findings[
-                        0
-                    ].title = "iam_root_hardware_mfa_enabled: Ensure hardware MFA is enabled for the root account"
-                    findings[0].vuln_id_from_tool = "iam_root_hardware_mfa_enabled"
-                    findings[0].severity = "High"
-                    findings[0].unsaved_tags = ["AWS", "iam"]
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "azure.json" in file_name:
-                # Azure JSON - ensure exactly ONE finding
-                network_findings = [f for f in findings if "Network policy" in f.title]
-                if network_findings:
-                    findings = [network_findings[0]]
-                    findings[
-                        0
-                    ].title = (
-                        "Network policy is enabled for cluster '<resource_name>' in subscription '<account_name>'."
-                    )
-                    findings[0].vuln_id_from_tool = "aks_network_policy_enabled"
-                    findings[0].severity = "Medium"
-                    findings[0].active = False
-                    findings[0].unsaved_tags = ["azure"]
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "gcp.json" in file_name:
-                # GCP JSON - ensure RDP finding
-                rdp_findings = [f for f in findings if "rdp" in f.title.lower() or "firewall" in f.title.lower()]
-                if rdp_findings:
-                    findings = [rdp_findings[0]]
-                    findings[0].title = "Firewall rule default-allow-rdp allows 0.0.0.0/0 on port RDP."
-                    findings[0].vuln_id_from_tool = "bc_gcp_networking_2"
-                    findings[0].severity = "High"
-                    findings[0].active = True
-                    findings[0].unsaved_tags = ["gcp"]
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "gcp.csv" in file_name:
-                # GCP CSV - ensure RDP finding
-                rdp_findings = [f for f in findings if "rdp" in f.title.lower() or "firewall" in f.title.lower()]
-                if rdp_findings:
-                    findings = [rdp_findings[0]]
-                    findings[0].title = "bc_gcp_networking_2: Ensure That RDP Access Is Restricted From the Internet"
-                    findings[0].vuln_id_from_tool = "bc_gcp_networking_2"
-                    findings[0].severity = "High"
-                    findings[0].active = True
-                    findings[0].unsaved_tags = ["GCP", "firewall"]
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "kubernetes.csv" in file_name:
-                # Kubernetes CSV - ensure AlwaysPullImages finding
-                plugin_findings = [f for f in findings if "AlwaysPullImages" in f.title]
-                if plugin_findings:
-                    findings = [plugin_findings[0]]
-                    findings[
-                        0
-                    ].title = "bc_k8s_pod_security_1: Ensure that admission control plugin AlwaysPullImages is set"
-                    findings[0].vuln_id_from_tool = "bc_k8s_pod_security_1"
-                    findings[0].severity = "Medium"
-                    if "cluster-security" not in findings[0].unsaved_tags:
-                        findings[0].unsaved_tags.append("cluster-security")
-                elif findings:
-                    findings = [findings[0]]
-
-            elif "kubernetes.json" in file_name:
-                # Keep only the first two findings for kubernetes.json
-                findings = findings[:2]
-                # Update AlwaysPullImages finding ID
-                for finding in findings:
-                    if "AlwaysPullImages" in finding.title:
-                        finding.vuln_id_from_tool = "bc_k8s_pod_security_1"
-            elif findings:
-                # Default - limit to one finding for any other test file
-                findings = findings[:1]
 
         return findings
 

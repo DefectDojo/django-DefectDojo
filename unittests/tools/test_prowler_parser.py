@@ -149,23 +149,24 @@ class TestProwlerParser(DojoTestCase):
             parser = ProwlerParser()
             findings = parser.get_findings(test_file, Test())
 
-            # Check that we have at least one finding
-            self.assertTrue(len(findings) > 0)
+            # Check that we have exactly 2 findings for kubernetes.json
+            self.assertEqual(2, len(findings))
 
-            # Check active and inactive findings if multiple findings exist
-            if len(findings) > 1:
-                # Check that we have at least one active finding
-                active_findings = [f for f in findings if f.active]
+            # Verify first finding (should be AlwaysPullImages)
+            always_pull_findings = [f for f in findings if "AlwaysPullImages" in f.title]
+            self.assertTrue(len(always_pull_findings) > 0, "No AlwaysPullImages finding detected")
 
-                # Verify we have active findings
-                self.assertTrue(len(active_findings) > 0, "No active findings detected")
+            always_pull_finding = always_pull_findings[0]
+            self.assertEqual("bc_k8s_pod_security_1", always_pull_finding.vuln_id_from_tool)
+            self.assertEqual("Medium", always_pull_finding.severity)
+            self.assertIn("kubernetes", [tag.lower() for tag in always_pull_finding.unsaved_tags])
 
-                # Verify basic properties for active findings
-                finding = active_findings[0]
-                self.assertIsNotNone(finding.title)
-                self.assertIsNotNone(finding.severity)
-            else:
-                # Just verify the basic properties if only one finding
-                finding = findings[0]
-                self.assertIsNotNone(finding.title)
-                self.assertIsNotNone(finding.severity)
+            # Verify second finding
+            other_findings = [f for f in findings if "AlwaysPullImages" not in f.title]
+            self.assertTrue(len(other_findings) > 0, "Only AlwaysPullImages finding detected")
+
+            other_finding = other_findings[0]
+            self.assertIsNotNone(other_finding.title)
+            self.assertIsNotNone(other_finding.severity)
+            self.assertEqual("High", other_finding.severity)
+            self.assertIn("kubernetes", [tag.lower() for tag in other_finding.unsaved_tags])
