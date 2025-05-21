@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProwlerParser:
+
     """
     A parser for Prowler scan results.
     Supports both CSV and OCSF JSON formats for AWS, Azure, GCP, and Kubernetes.
