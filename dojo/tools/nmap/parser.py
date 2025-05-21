@@ -53,6 +53,9 @@ class NmapParser:
             )
             if url is not None:
                 host_info += f"**URL:** {url}\n"
+            for hosts in host.find("hostnames"):
+                if hosts.attrib["type"] not in {"user", "PTR"}:
+                    host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
 
             host_info += "\n\n"
             for os in host.iter("os"):

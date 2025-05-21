@@ -150,6 +150,7 @@ class TestNmapParser(DojoTestCase):
 **IP Address:** 172.217.18.238
 **FQDN:** par10s10-in-f238.1e100.net
 **URL:** google.com
+**custom:** lalala
 
 
 **Port/Protocol:** 80/tcp
