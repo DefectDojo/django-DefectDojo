@@ -1003,6 +1003,9 @@ class ExcelExportView(View):
                 cell = worksheet.cell(row=row_num, column=col_num, value="tags")
                 cell.font = font_bold
                 col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value="risk_acceptance_expiration_date")
+                cell.font = font_bold
+                col_num += 1
                 self.row_num = row_num
                 self.col_num = col_num
                 self.add_extra_headers()
@@ -1069,6 +1072,10 @@ class ExcelExportView(View):
                 tags_value = tags_value.removesuffix("; \n")
                 worksheet.cell(row=row_num, column=col_num, value=tags_value)
                 col_num += 1
+                if finding.risk_acceptance:
+                    value = finding.risk_acceptance.expiration_date.strftime("%Y-%m-%d")
+                    worksheet.cell(row=row_num, column=col_num, value=value)
+                    col_num += 1
                 self.col_num = col_num
                 self.row_num = row_num
                 self.finding = finding
