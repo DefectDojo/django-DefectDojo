@@ -760,7 +760,7 @@ class Notes(models.Model):
 
 
 class FileUpload(models.Model):
-    title = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100)
     file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
 
     def copy(self):
