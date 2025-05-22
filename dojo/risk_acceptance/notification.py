@@ -114,6 +114,7 @@ class Notification:
             title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
             reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
+            recipients=eval(risk_acceptance.accepted_by) + [risk_acceptance.owner.get_username()],
             url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
     
     @staticmethod
