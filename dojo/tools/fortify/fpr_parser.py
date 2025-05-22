@@ -11,7 +11,7 @@ from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetDa
 logger = logging.getLogger(__name__)
 
 
-class FortifyFPRParser:
+class FortifyRelatedData:
     def __init__(self):
         self.descriptions: dict[str, DescriptionData] = {}
         self.snippets: dict[str, SnippetData] = {}
@@ -19,6 +19,11 @@ class FortifyFPRParser:
         self.vulnerabilities: list[VulnerabilityData] = []
         self.suppressed: dict[str, bool] = {}
         self.threaded_comments: dict[str, list[str]] = {}
+
+
+class FortifyFPRParser:
+    def __init__(self):
+        pass
 
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
@@ -60,28 +65,30 @@ class FortifyFPRParser:
 
     def parse_related_data(self, root: Element, test: Test) -> None:
         """Parse the XML and generate a list of findings."""
+        related_data = FortifyRelatedData()
         for description in root.findall("Description", self.namespaces):
             class_id = description.attrib.get("classID")
             logger.debug(f"Description: {class_id}")
             if class_id:
-                self.descriptions[class_id] = self.parse_description_information(description)
+                related_data.descriptions[class_id] = self.parse_description_information(description)
 
         for snippet in root.find("Snippets", self.namespaces):
             snippet_id = snippet.attrib.get("id")
             logger.debug(f"Snippet: {snippet_id}")
             if snippet_id:
-                self.snippets[snippet_id] = self.parse_snippet_information(snippet)
+                related_data.snippets[snippet_id] = self.parse_snippet_information(snippet)
 
         for rule in root.find("EngineData", self.namespaces).find("RuleInfo", self.namespaces):
             rule_id = rule.attrib.get("id")
             logger.debug(f"Rule: {rule_id}")
             if rule_id:
-                self.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
+                related_data.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
+        return related_data
 
-    def parse_audit_log(self, audit_log: Element) -> None:
+    def add_audit_log(self, related_data, audit_log: Element) -> None:
         logger.debug("Parse audit log")
         if audit_log is None:
-            return
+            return related_data
 
         for issue in audit_log.find("IssueList", self.namespaces_audit_log).findall("Issue", self.namespaces_audit_log):
             instance_id = issue.attrib.get("instanceId")
@@ -89,12 +96,13 @@ class FortifyFPRParser:
                 suppressed_string = issue.attrib.get("suppressed")
                 suppressed = suppressed_string.lower() == "true" if suppressed_string else False
                 logger.debug(f"Issue: {instance_id} - Suppressed: {suppressed}")
-                self.suppressed[instance_id] = suppressed
+                related_data.suppressed[instance_id] = suppressed
 
                 threaded_comments = issue.find("ThreadedComments", self.namespaces_audit_log)
                 logger.debug(f"ThreadedComments: {threaded_comments}")
                 if threaded_comments is not None:
-                    self.threaded_comments[instance_id] = [self.get_comment_text(comment) for comment in threaded_comments.findall("Comment", self.namespaces_audit_log)]
+                    related_data.threaded_comments[instance_id] = [self.get_comment_text(comment) for comment in threaded_comments.findall("Comment", self.namespaces_audit_log)]
+        return related_data
 
     def get_comment_text(self, comment: Element) -> str:
         content = comment.findtext("Content", "", self.namespaces_audit_log)
@@ -107,8 +115,9 @@ class FortifyFPRParser:
         """Convert the list of vulnerabilities to a list of findings."""
         """Try to mimic the logic from the xml parser"""
         """Future Improvement: share code between xml and fpr parser (it was split up earlier)"""
-        self.parse_related_data(root, test)
-        self.parse_audit_log(audit_log)
+        related_data = self.parse_related_data(root, test)
+        # add audit log information to related data
+        related_data = self.add_audit_log(related_data, audit_log)
 
         findings = []
         for vuln in root.find("Vulnerabilities", self.namespaces):
@@ -117,18 +126,18 @@ class FortifyFPRParser:
             self.parse_class_information(vuln, vuln_data)
             self.parse_analysis_information(vuln, vuln_data)
 
-            snippet = self.snippets.get(vuln_data.snippet_id)
-            description = self.descriptions.get(vuln_data.class_id)
-            rule = self.rules.get(vuln_data.class_id)
+            snippet = related_data.snippets.get(vuln_data.snippet_id)
+            description = related_data.descriptions.get(vuln_data.class_id)
+            rule = related_data.rules.get(vuln_data.class_id)
 
             finding = Finding(test=test, static_finding=True)
 
-            finding.active, finding.false_p = self.compute_status(vuln_data)
+            finding.active, finding.false_p = self.compute_status(related_data, vuln_data)
             finding.title = self.format_title(vuln_data, snippet, description, rule)
             finding.description = self.format_description(vuln_data, snippet, description, rule)
             finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
             finding.severity = self.compute_severity(vuln_data, snippet, description, rule)
-            finding.impact = self.format_impact(vuln_data)
+            finding.impact = self.format_impact(related_data, vuln_data)
 
             finding.file_path = vuln_data.source_location_path
             finding.line = int(self.compute_line(vuln_data, snippet, description, rule))
@@ -302,22 +311,22 @@ class FortifyFPRParser:
 
         return "Informational"
 
-    def format_impact(self, vuln_data) -> str:
+    def format_impact(self, related_data, vuln_data) -> str:
         """Format the impact of the vulnerability based on the threaded comments."""
-        logger.debug(f"Threaded comments: {self.threaded_comments}")
-        threaded_comments = self.threaded_comments.get(vuln_data.instance_id)
+        logger.debug(f"Threaded comments: {related_data.threaded_comments}")
+        threaded_comments = related_data.threaded_comments.get(vuln_data.instance_id)
         if not threaded_comments:
             return ""
 
         impact = "Threaded Comments:\n"
-        for comment in self.threaded_comments[vuln_data.instance_id]:
+        for comment in related_data.threaded_comments[vuln_data.instance_id]:
             impact += f"{comment}\n"
 
         return impact
 
-    def compute_status(self, vulnerability) -> tuple[bool, bool]:
+    def compute_status(self, related_data, vulnerability) -> tuple[bool, bool]:
         """Compute the status of the vulnerability based on the instance ID. Return active, false_p"""
-        if vulnerability.instance_id in self.suppressed:
+        if vulnerability.instance_id in related_data.suppressed:
             return False, True
         return True, False
 
