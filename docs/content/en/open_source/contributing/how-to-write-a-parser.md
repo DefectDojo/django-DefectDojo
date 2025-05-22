@@ -37,8 +37,8 @@ $ docker compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
-    
+|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained
+
 
 ## Factory contract
 
@@ -57,6 +57,7 @@ Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded
    3. `def get_description_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (long description)
    4. `def get_findings(self, file, test)` This function return a list of findings
 6. If your parser have more than 1 scan_type (for detailled mode) you **MUST** implement `def set_mode(self, mode)` method
+7. The parser instance is re-used over all imports performed for this scan_type, so do not store any data at class level
 
 Example:
 
@@ -145,7 +146,7 @@ Very bad example:
 Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
 
 #### defusedXML in favour of lxml
-As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library.
 
 ### Not all attributes are mandatory
 
@@ -366,4 +367,3 @@ Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] w
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
 Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md)
-
