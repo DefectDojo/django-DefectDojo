@@ -194,6 +194,14 @@
                                             </a>
                                         </li>
                                     {% endif %}
+                                    {% if CREATE_CLOUD_BANNER %}
+                                        <li>
+                                            <a href="https://cloud.defectdojo.com/accounts/onboarding/plg_step_1">
+                                                <i class="fa-solid fa-level-up fa-fw"></i>
+                                                {% trans "Upgrade to Pro for Free!" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                     <li>
                                         <a href="{% url 'logout' %}">
                                             <i class="fa-solid fa-right-from-bracket fa-fw"></i>
