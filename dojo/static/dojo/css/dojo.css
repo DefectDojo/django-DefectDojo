@@ -723,12 +723,12 @@ input#simple_search {
     display: flex;
     flex-flow: column;
     align-items: center;
-    margin-bottom: 150px;
 }
 
 .support-container {
     display: flex;
     width: 75%;
+    margin-bottom: 150px;
 }
 
 .support-box {
