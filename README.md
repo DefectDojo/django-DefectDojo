@@ -1,4 +1,5 @@
 # DefectDojo
+## Dell Technologies Fork Under [BSD 3-Clause License](LICENSE.md)
 
 <table>
     <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
