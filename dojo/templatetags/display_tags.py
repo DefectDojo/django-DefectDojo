@@ -1167,7 +1167,7 @@ def render_risk_acceptance_accepted_by(finding: Finding):
     accepted_by = finding.accepted_by
     accepted_by_user = ""
     if finding.risk_acceptance.accepted_by:
-        accepted_by_recommendation_ra = eval(finding.risk_acceptance.accepted_by)
+        accepted_by_recommendation_ra = finding.risk_acceptance.accepted_by_user
         for user in accepted_by_recommendation_ra:
             status = "⏳"
             name_parts = re.findall(r'[A-Z][a-z]*', user)
@@ -1188,9 +1188,3 @@ def render_risk_acceptance_accepted_by(finding: Finding):
             accepted_by_user += "</br>"
         logger.debug(f"render_accepted_by_context is {accepted_by_user}")
     return accepted_by_user
-
-
-@register.filter()
-def literal_eval_recommended_acceptors(accepted_by):
-    users = eval(accepted_by)
-    return users

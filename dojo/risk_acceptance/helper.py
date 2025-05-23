@@ -241,15 +241,20 @@ def expiration_handler(*args, **kwargs):
     heads_up_days = system_settings.risk_acceptance_notify_before_expiration
     if heads_up_days > 0:
         risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
-
-        logger.info("notifying for %i risk acceptances that are expiring within %i days", len(risk_acceptances), heads_up_days)
+        logger.info("notifying for %i risk acceptances that are expiring within %i days",
+                    len(risk_acceptances), heads_up_days)
         for risk_acceptance in risk_acceptances:
-            logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
-
+            logger.debug("EXPIRATION RISK ACCEPTANCE TASK: "
+                         "notifying for risk acceptance %i:%s with %i findings",
+                         risk_acceptance.id, risk_acceptance,
+                         len(risk_acceptance.accepted_findings.all()))
             notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
-
+            logger.debug(
+                "EXPIRATION RISK ACCEPTANCE TASK: %s "
+                "sending risk acceptance expiration"
+                "warning notification", risk_acceptance.id)
             Notification.risk_acceptance_expiration(risk_acceptance, notification_title)
             post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
@@ -351,8 +356,14 @@ def get_expired_risk_acceptances_to_handle():
 
 
 def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_date__isnull=False, expiration_date_handled__isnull=True, expiration_date_warned__isnull=True,
-            expiration_date__date__lte=timezone.now().date() + relativedelta(days=heads_up_days), expiration_date__date__gte=timezone.now().date())
+    risk_acceptances = Risk_Acceptance.objects.filter(
+        expiration_date__isnull=False,
+        expiration_date_handled__isnull=True, 
+        expiration_date_warned__isnull=True,
+        expiration_date__date__lte=timezone.now().date() + relativedelta(days=heads_up_days),
+        expiration_date__date__gte=timezone.now().date(),
+        engagement__isnull=False,
+        )
     return prefetch_for_expiration(risk_acceptances)
 
 
@@ -507,7 +518,7 @@ def update_expiration_date_permission_key(risk_pending: Risk_Acceptance):
 def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
     permission_keys = []
     permission_keys_query = risk_pending.permissionkey_set.all()
-    for user_name in eval(risk_pending.accepted_by):
+    for user_name in risk_pending.accepted_by_user:
         user = Dojo_User.objects.get(username=user_name)
         token = generate_permision_key(
             permission_keys=permission_keys_query,
