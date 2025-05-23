@@ -1,3 +1,4 @@
+import ast
 import base64
 import copy
 import hashlib
@@ -4000,6 +4001,19 @@ class Risk_Acceptance(models.Model):
             new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
             copy.accepted_findings.set(new_accepted_findings)
         return copy
+    
+    @property
+    def accepted_by_user(self):
+        usernames = []
+        if self.accepted_by:
+            pattern = r"^\[\s*'(?:[^']*)'(?:\s*,\s*'(?:[^']*)')*\s*\]$"
+            try:
+                if re.match(pattern, self.accepted_by):
+                    usernames = ast.literal_eval(self.accepted_by)
+            except Exception as e:
+                logger.error(f"Error evaluating accepted_by: {e}")
+        return usernames
+
 
 
 class FileAccessToken(models.Model):

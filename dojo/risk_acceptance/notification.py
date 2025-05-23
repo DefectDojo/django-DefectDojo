@@ -93,7 +93,7 @@ class Notification:
                         description=description,
                         permission_keys=permission_keys,
                         enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
-                        recipients=eval(risk_pending.accepted_by),
+                        recipients=risk_pending.accepted_by_user,
                         icon="bell",
                         owner=risk_pending.owner,
                         color_icon="#1B30DE",
@@ -114,7 +114,7 @@ class Notification:
             title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
             reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
-            recipients=eval(risk_acceptance.accepted_by) + [risk_acceptance.owner.get_username()],
+            recipients=risk_acceptance.accepted_by_user + [risk_acceptance.owner.get_username()],
             url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
     
     @staticmethod

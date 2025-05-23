@@ -518,7 +518,7 @@ def update_expiration_date_permission_key(risk_pending: Risk_Acceptance):
 def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
     permission_keys = []
     permission_keys_query = risk_pending.permissionkey_set.all()
-    for user_name in eval(risk_pending.accepted_by):
+    for user_name in risk_pending.accepted_by_user:
         user = Dojo_User.objects.get(username=user_name)
         token = generate_permision_key(
             permission_keys=permission_keys_query,
