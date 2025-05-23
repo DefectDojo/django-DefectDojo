@@ -1811,6 +1811,7 @@ SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 VULNERABILITY_URLS = {
     "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html
     "ALBA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALBA-2019:3411
+    "ALEA-": "https://errata.almalinux.org/8/&&.html",  # e.g. https://errata.almalinux.org/8/ALEA-2022-1998.html
     "ALINUX2-SA-": "https://mirrors.aliyun.com/alinux/cve/",  # e.g. https://mirrors.aliyun.com/alinux/cve/alinux2-sa-20250007.xml
     "ALINUX3-SA-": "https://mirrors.aliyun.com/alinux/3/cve/",  # e.g. https://mirrors.aliyun.com/alinux/3/cve/alinux3-sa-20250059.xml
     "ALSA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
