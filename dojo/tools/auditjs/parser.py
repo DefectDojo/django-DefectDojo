@@ -2,10 +2,48 @@ import json
 import re
 from json.decoder import JSONDecodeError
 
-import cvss.parser
-from cvss import CVSS2, CVSS3
+# import cvss.parser
+from cvss import CVSS2, CVSS3, CVSS4, CVSSError
 
 from dojo.models import Finding
+
+
+# TEMPORARY: Local implementation until the upstream PR is merged & released: https://github.com/RedHatProductSecurity/cvss/pull/75
+def parse_cvss_from_text(text):
+    """
+    Parses CVSS2, CVSS3, and CVSS4 vectors from arbitrary text and returns a list of CVSS objects.
+
+    Parses text for substrings that look similar to CVSS vector
+    and feeds these matches to CVSS constructor.
+
+    Args:
+        text (str): arbitrary text
+
+    Returns:
+        A list of CVSS objects.
+
+    """
+    # Looks for substrings that resemble CVSS2, CVSS3, or CVSS4 vectors.
+    # CVSS3 and CVSS4 vectors start with a 'CVSS:x.x/' prefix and are matched by the optional non-capturing group.
+    # CVSS2 vectors do not include a prefix and are matched by raw vector pattern only.
+    # Minimum total match length is 26 characters to reduce false positives.
+    matches = re.compile(r"(?:CVSS:[3-4]\.\d/)?[A-Za-z:/]{26,}").findall(text)
+
+    cvsss = set()
+    for match in matches:
+        try:
+            if match.startswith("CVSS:4."):
+                cvss = CVSS4(match)
+            elif match.startswith("CVSS:3."):
+                cvss = CVSS3(match)
+            else:
+                cvss = CVSS2(match)
+
+            cvsss.add(cvss)
+        except (CVSSError, KeyError):
+            pass
+
+    return list(cvsss)
 
 
 class AuditJSParser:
@@ -85,33 +123,38 @@ class AuditJSParser:
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        msg = (
-                            "Missing mandatory attributes (id, title, description). Please check your report or ask "
-                            "community."
-                        )
+                        msg = "Missing mandatory attributes (id, title, description). Please check your report or ask community."
                         raise ValueError(msg)
                     if "cvssScore" in vulnerability:
                         cvss_score = vulnerability["cvssScore"]
                     if "cvssVector" in vulnerability:
-                        cvss_vectors = cvss.parser.parse_cvss_from_text(
+                        cvss_vectors = parse_cvss_from_text(
                             vulnerability["cvssVector"],
                         )
-                        if len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS3,
-                        ):
-                            # Only set finding vector if it's version 3
-                            cvss_vector = cvss_vectors[0].clean_vector()
-                            severity = cvss_vectors[0].severities()[0]
-                        elif len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS2,
-                        ):
-                            # Otherwise add it to description
-                            description = (
-                                description
-                                + "\nCVSS V2 Vector:"
-                                + cvss_vectors[0].clean_vector()
-                            )
-                            severity = cvss_vectors[0].severities()[0]
+
+                        if len(cvss_vectors) > 0:
+                            vector_obj = cvss_vectors[0]
+
+                            if isinstance(vector_obj, CVSS4):
+                                description += "\nCVSS V4 Vector:" + vector_obj.clean_vector()
+                                severity = vector_obj.severities()[0]
+
+                            elif isinstance(vector_obj, CVSS3):
+                                cvss_vector = vector_obj.clean_vector()
+                                severity = vector_obj.severities()[0]
+
+                            elif isinstance(vector_obj, CVSS2):
+                                description += "\nCVSS V2 Vector:" + vector_obj.clean_vector()
+                                severity = vector_obj.severities()[0]
+
+                            else:
+                                msg = "Unsupported CVSS version detected in parser."
+                                raise ValueError(msg)
+                        else:
+                            # Explicitly raise an error if no CVSS vectors are found,
+                            # to avoid 'NoneType' errors during severity processing later.
+                            msg = "No CVSS vectors found. Please check that parse_cvss_from_text() correctly parses the provided cvssVector."
+                            raise ValueError(msg)
                     else:
                         # If there is no vector, calculate severity based on
                         # score and CVSS V3 (AuditJS does not always include
