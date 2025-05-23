@@ -64,6 +64,7 @@ class TestOpenVASParser(DojoTestCase):
             finding = findings[4]
             self.assertEqual("CVE-2014-0117", finding.title)
             self.assertEqual("Medium", finding.severity)
+            self.assertEqual(4.3, finding.cvssv3_score)
             self.assertEqual(finding.unsaved_vulnerability_ids[0], "CVE-2014-0117")
 
     def test_openvas_csv_report_usingOpenVAS(self):
