@@ -151,6 +151,18 @@ class SeverityColumnMappingStrategy(ColumnMappingStrategy):
             finding.severity = "Info"
 
 
+class CvssColumnMappingStrategy(ColumnMappingStrategy):
+    def __init__(self):
+        self.mapped_column = "cvss"
+        super().__init__()
+
+    def map_column_value(self, finding, column_value):
+        # skip empty values
+        if not column_value:
+            return
+        finding.cvssv3_score = float(column_value)
+
+
 class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "summary"
@@ -231,6 +243,7 @@ class OpenVASCSVParser:
         ip_column_strategy = IpColumnMappingStrategy()
         hostname_column_strategy = HostnameColumnMappingStrategy()
         severity_column_strategy = SeverityColumnMappingStrategy()
+        cvss_score_column_strategy = CvssColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
         impact_column_strategy = ImpactColumnMappingStrategy()
@@ -252,7 +265,8 @@ class OpenVASCSVParser:
         impact_column_strategy.successor = references_column_strategy
         mitigation_column_strategy.successor = impact_column_strategy
         description_column_strategy.successor = mitigation_column_strategy
-        severity_column_strategy.successor = description_column_strategy
+        cvss_score_column_strategy.successor = description_column_strategy
+        severity_column_strategy.successor = cvss_score_column_strategy
         ip_column_strategy.successor = severity_column_strategy
         hostname_column_strategy.successor = ip_column_strategy
         cwe_column_strategy.successor = hostname_column_strategy
