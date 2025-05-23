@@ -29,6 +29,7 @@ def globalize_vars(request):
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
+        "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
     }
 
 

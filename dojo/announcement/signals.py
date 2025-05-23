@@ -12,7 +12,7 @@ def add_announcement_to_new_user(sender, instance, **kwargs):
         dojo_user = Dojo_User.objects.get(id=instance.id)
         announcement = announcements.first()
         cloud_announcement = (
-            "Cloud and On-Premise Subscriptions Now Available!"
+            "DefectDojo Pro Cloud and On-Premise Subscriptions Now Available!"
             in announcement.message
         )
         if not cloud_announcement or settings.CREATE_CLOUD_BANNER:

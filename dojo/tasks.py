@@ -204,7 +204,7 @@ def evaluate_pro_proposition(*args, **kwargs):
         entry in announcement.message
         for entry in [
             "",
-            "Cloud and On-Premise Subscriptions Now Available!",
+            "DefectDojo Pro Cloud and On-Premise Subscriptions Now Available!",
             "Findings/Endpoints in their systems",
         ]
     ):
