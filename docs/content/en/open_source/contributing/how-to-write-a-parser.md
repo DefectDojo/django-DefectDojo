@@ -233,7 +233,8 @@ Bad example (DIY):
 
 By default a new parser uses the 'legacy' deduplication algorithm documented at https://documentation.defectdojo.com/usage/features/#deduplication-algorithms
 
-Please use a pre-defined deduplication algorithm where applicable.
+Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are uqniue for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
+The values must be coming from the report directly and must not be something that is calculated by the parser internally.
 
 ## Unit tests
 
