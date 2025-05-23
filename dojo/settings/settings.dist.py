@@ -1435,6 +1435,8 @@ HASH_CODE_FIELDS_ALWAYS = ["service"]
 # legacy one with multiple conditions (default mode)
 DEDUPE_ALGO_LEGACY = "legacy"
 # based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
+# When using the `unique_id_from_tool` or `vuln_id_from_tool` fields for dedupication, it's important that these are uqniue for the finding and constant over time across subsequent scans.
+# If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = "unique_id_from_tool"
 # based on dojo_finding.hash_code only
 DEDUPE_ALGO_HASH_CODE = "hash_code"
