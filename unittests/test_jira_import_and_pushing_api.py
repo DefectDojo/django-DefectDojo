@@ -409,43 +409,61 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         finding_id = findings["results"][0]["id"]
 
-        # logger.debug('finding_id: %s', finding_id)
-
         # use existing finding as template, but change some fields to make it not a duplicate
         finding_details = self.get_finding_api(finding_id)
         del finding_details["id"]
         del finding_details["push_to_jira"]
 
-        finding_details["title"] = "jira api test 1"
-        self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, no push to jira should not create a new issue"):
+            finding_details["title"] = "jira api test 1"
+            self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details["title"] = "jira api test 2"
-        self.post_new_finding_api(finding_details, push_to_jira=True)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, push to jira should create a new issue"):
+            finding_details["title"] = "jira api test 2"
+            self.post_new_finding_api(finding_details, push_to_jira=True)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details["title"] = "jira api test 3"
-        new_finding_json = self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, no push to jira should not create a new issue"):
+            finding_details["title"] = "jira api test 3"
+            new_finding_json = self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": False})
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
-        self.assert_jira_issue_count_in_test(test_id, 2)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        pre_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+        with self.subTest("Updating this new finding without push to jira should not create a new issue"):
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": False})
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True,
-                                                        "is_mitigated": True,
-                                                        "active": False})
-        self.assert_jira_issue_count_in_test(test_id, 2)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        post_jira_status = self.get_jira_issue_status(new_finding_json["id"])
-        self.assertNotEqual(pre_jira_status, post_jira_status)
+        with self.subTest("Updating this new finding with push to jira should create a new issue"):
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Only Finding Groups will have their priority synced on updates.
+        # For Findings we resepect any priority change made in JIRA
+        # https://github.com/DefectDojo/django-DefectDojo/pull/9571 and https://github.com/DefectDojo/django-DefectDojo/pull/12475
+        with self.subTest("Changing priority of a finding should NOT be reflected in JIRA"):
+            pre_jira_priority = self.get_jira_issue_priority(new_finding_json["id"])
+            self.patch_finding_api(new_finding_json["id"], {"severity": "Medium"})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+            post_jira_priority = self.get_jira_issue_priority(new_finding_json["id"])
+            self.assertEqual(pre_jira_priority, post_jira_priority)
+
+        with self.subTest("Mitigating this finding should result in a status change in JIRA"):
+            pre_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+            self.assertEqual("Backlog", pre_jira_status.name)
+
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True,
+                                                            "is_mitigated": True,
+                                                            "active": False})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+            post_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+            self.assertEqual("Done", post_jira_status.name)
 
         finding_details["title"] = "jira api test 4"
         new_finding_json = self.post_new_finding_api(finding_details)
@@ -476,78 +494,127 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         self.assertEqual(len(findings["results"]), 2)
 
-        finding_details = self.get_finding_api(findings["results"][0]["id"])
-        finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+        with self.subTest("Pushing a finding with in a group should result in the group issue being pushed"):
+            finding_details = self.get_finding_api(findings["results"][0]["id"])
+            finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
 
-        del finding_details["id"]
-        del finding_details["push_to_jira"]
+            del finding_details["id"]
+            del finding_details["push_to_jira"]
 
-        # push a finding should result in pushing the group instead
-        self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True, "verified": True})
+            # push a finding should result in pushing the group instead
+            self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True, "verified": True})
 
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        # push second finding from the same group should not result in a new jira issue
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        self.patch_finding_api(findings["results"][1]["id"], {"push_to_jira": True})
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        with self.subTest("Pushing a different finding with in a group should result in the group issue being pushed and not a new issue being created"):
+            # push second finding from the same group should not result in a new jira issue
+            self.patch_finding_api(findings["results"][1]["id"], {"push_to_jira": True})
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        pre_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
-        # close both findings
-        self.patch_finding_api(findings["results"][0]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
-        self.patch_finding_api(findings["results"][1]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
-        # both findings inactive -> should update status in JIRA
-        self.assertNotEqual(pre_jira_status, post_jira_status)
+        with self.subTest("Changing severity of findings in the group to Medium should result in the group issue priority being updated"):
+            pre_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", pre_jira_priority.name)
 
-        # new finding, not pushed to JIRA
+            # change only 1 to medium, the other one remains high
+            self.patch_finding_api(findings["results"][0]["id"], {"severity": "Medium", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", post_jira_priority.name)
 
-        # use existing finding as template, but change some fields to make it not a duplicate
-        self.get_finding_api(findings["results"][0]["id"])
+            # both are Medium now
+            self.patch_finding_api(findings["results"][1]["id"], {"severity": "Medium", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("Medium", post_jira_priority.name)
 
-        finding_details["title"] = "jira api test 1"
-        self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            # revert to not mess up the following tests
+            self.patch_finding_api(findings["results"][0]["id"], {"severity": "High", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("High", post_jira_priority.name)
 
-        # another new finding, pushed to JIRA
-        # same component_name, but not yet in a group, so finding pushed to JIRA
+        with self.subTest("Closing all findings in the group should result in the group issue being closed and priority being updated"):
+            pre_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            pre_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", pre_jira_priority.name)
+            self.assertEqual("Backlog", pre_jira_status.name)
 
-        finding_details["title"] = "jira api test 2"
-        new_finding_json = self.post_new_finding_api(finding_details, push_to_jira=True)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            # close both findings
+            self.patch_finding_api(findings["results"][0]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
+            self.patch_finding_api(findings["results"][1]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
-        # no way to set finding group easily via API yet
-        Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("Lowest", post_jira_priority.name)
+            self.assertEqual("Done", post_jira_status.name)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+        with self.subTest("Updating group findings to have no active findings above threshold should result in the group issue being set to the lowest priority and remain inactive"):
+            # reopen 1 finding, but make it below the threshold
+            self.patch_finding_api(findings["results"][0]["id"], {"active": True, "is_mitigated": False, "severity": "Info", "push_to_jira": True})
 
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("Lowest", post_jira_priority.name)
+            self.assertEqual("Done", post_jira_status.name)
 
-        # another new finding, pushed to JIRA, different component_name / different group
+            # reopen the other finding
+            self.patch_finding_api(findings["results"][1]["id"], {"active": True, "is_mitigated": False, "severity": "Medium", "push_to_jira": True})
+            post_jira_status = self.get_jira_issue_status(findings["results"][1]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("Medium", post_jira_priority.name)
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        finding_details["title"] = "jira api test 3"
-        finding_details["component_name"] = "pg"
-        new_finding_json = self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        with self.subTest("Opening a finding without push_to_jira should not result in a new issue being created"):
+            # new finding, not pushed to JIRA
+            # use existing finding as template, but change some fields to make it not a duplicate
+            self.get_finding_api(findings["results"][0]["id"])
 
-        findings = self.get_test_findings_api(test_id, component_name="pg")
+            finding_details["title"] = "jira api test 1"
+            self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+        with self.subTest("Opening a finding in the same group without push_to_jira should not result in a new issue being created"):
+            # another new finding, pushed to JIRA
+            # same component_name, but not yet in a group, so finding pushed to JIRA
 
-        # no way to set finding group easily via API yet
-        Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+            finding_details["title"] = "jira api test 2"
+            new_finding_json = self.post_new_finding_api(finding_details, push_to_jira=True)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+            # no way to set finding group easily via API yet
+            Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
 
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 2)
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        with self.subTest("Opening a finding with different fields resulting in a diffrent group should result in a new group issue being created"):
+            # another new finding, pushed to JIRA, different component_name / different group
+            finding_details["title"] = "jira api test 3"
+            finding_details["component_name"] = "pg"
+            new_finding_json = self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+            findings = self.get_test_findings_api(test_id, component_name="pg")
+
+            finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+
+            # no way to set finding group easily via API yet
+            Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 2)
 
         self.assert_cassette_played()
 

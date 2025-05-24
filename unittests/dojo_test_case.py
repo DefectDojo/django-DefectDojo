@@ -406,6 +406,10 @@ class DojoTestUtilsMixin:
         finding = Finding.objects.get(id=finding_id)
         return jira_helper.get_jira_status(finding)
 
+    def get_jira_issue_priority(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        return jira_helper.get_jira_priortiy(finding)
+
     def get_jira_issue_updated(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
         return jira_helper.get_jira_updated(finding)
