@@ -70,7 +70,7 @@ jobs:
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
+          echo "chart_version=$(ls build | cut -d '-' -f 2,3 | sed 's|\.tgz||')" >> $GITHUB_ENV
 
       - name: Create release ${{ github.event.inputs.release_number }}
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
