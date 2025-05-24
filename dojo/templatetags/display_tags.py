@@ -871,18 +871,18 @@ def jira_change(obj):
 
 
 @register.filter
-def jira_qualified_findings(findings):
-    return jira_helper.get_qualified_findings(findings)
+def jira_qualified_findings(finding_group):
+    return jira_helper.get_qualified_findings(finding_group)
 
 
 @register.filter
-def jira_non_qualified_findings(findings):
-    return jira_helper.get_non_qualified_findings(findings)
+def jira_non_qualified_findings(finding_group):
+    return jira_helper.get_non_qualified_findings(finding_group)
 
 
 @register.filter
-def jira_sla_deadline(findings):
-    return jira_helper.get_sla_deadline(findings)
+def jira_sla_deadline(obj):
+    return jira_helper.get_sla_deadline(obj)
 
 
 @register.filter

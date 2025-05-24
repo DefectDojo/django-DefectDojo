@@ -2164,7 +2164,7 @@
       "epic_name_id": 10011,
       "open_status_key": 11,
       "close_status_key": 41,
-      "info_mapping_severity": "Trivial",
+      "info_mapping_severity": "Lowest",
       "low_mapping_severity": "Low",
       "medium_mapping_severity": "Medium",
       "high_mapping_severity": "High",
