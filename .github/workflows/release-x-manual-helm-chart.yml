@@ -22,6 +22,21 @@ on:
         description: 'Release number'
         required: true
 
+      make_draft:
+        type: boolean
+        description: 'Mark as draft release?'
+        default: true
+
+      make_prerelease:
+        type: boolean
+        description: 'Mark as pre-release?'
+        default: false
+
+      make_latest:
+        type: boolean
+        description: 'Mark as latest?'
+        default: false
+
 jobs:
   release-chart:
     runs-on: ubuntu-latest
@@ -78,8 +93,9 @@ jobs:
           name: '${{ inputs.release_number }} 🌈'
           tag_name: ${{ inputs.release_number }}
           body: Run the release drafter to populate the release notes.
-          draft: true
-          prerelease: false
+          draft: ${{ inputs.make_draft }}
+          prerelease: ${{ inputs.make_prerelease }}
+          make_latest: ${{ inputs.make_latest }}
           files: ./build/defectdojo-${{ env.chart_version }}.tgz
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
