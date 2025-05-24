@@ -77,5 +77,6 @@ jobs:
     uses: ./.github/workflows/release-x-manual-helm-chart.yml
     with:
       release_number: ${{ inputs.tag-to-apply }}
+      make_draft: false
+      make_prerelease: true
     secrets: inherit
-
