@@ -668,25 +668,46 @@ def push_to_jira(obj, *args, **kwargs):
         raise ValueError(msg)
 
     if isinstance(obj, Finding):
-        finding = obj
-        if finding.has_jira_issue:
-            return update_jira_issue_for_finding(finding, *args, **kwargs)
-        return add_jira_issue_for_finding(finding, *args, **kwargs)
-
-    if isinstance(obj, Engagement):
-        engagement = obj
-        if engagement.has_jira_issue:
-            return update_epic(engagement, *args, **kwargs)
-        return add_epic(engagement, *args, **kwargs)
+        return push_finding_to_jira(obj, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
-        group = obj
-        if group.has_jira_issue:
-            return update_jira_issue_for_finding_group(group, *args, **kwargs)
-        return add_jira_issue_for_finding_group(group, *args, **kwargs)
+        return push_finding_group_to_jira(obj, *args, **kwargs)
 
+    if isinstance(obj, Engagement):
+        return push_engagement_to_jira(obj, *args, **kwargs)
     logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
     return None
+
+
+# we need thre separate celery tasks due to the decorators we're using to map to/from ids
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id
+def push_finding_to_jira(finding, *args, **kwargs):
+    if finding.has_jira_issue:
+        return update_jira_issue(finding, *args, **kwargs)
+    return add_jira_issue(finding, *args, **kwargs)
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Finding_Group)
+def push_finding_group_to_jira(finding_group, *args, **kwargs):
+    if finding_group.has_jira_issue:
+        return update_jira_issue(finding_group, *args, **kwargs)
+    return add_jira_issue(finding_group, *args, **kwargs)
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Engagement)
+def push_engagement_to_jira(engagement, *args, **kwargs):
+    if engagement.has_jira_issue:
+        return update_epic(engagement, *args, **kwargs)
+    return add_epic(engagement, *args, **kwargs)
 
 
 def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
@@ -712,24 +733,6 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
             logger.exception("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
             log_jira_alert(e.text, obj)
             return False
-
-
-# we need two separate celery tasks due to the decorators we're using to map to/from ids
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
-def add_jira_issue_for_finding(finding, *args, **kwargs):
-    return add_jira_issue(finding, *args, **kwargs)
-
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id(model=Finding_Group)
-def add_jira_issue_for_finding_group(finding_group, *args, **kwargs):
-    return add_jira_issue(finding_group, *args, **kwargs)
 
 
 def prepare_jira_issue_fields(
@@ -925,24 +928,6 @@ def add_jira_issue(obj, *args, **kwargs):
         return failure_to_add_message(message, e, obj)
 
     return True
-
-
-# we need two separate celery tasks due to the decorators we're using to map to/from ids
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
-def update_jira_issue_for_finding(finding, *args, **kwargs):
-    return update_jira_issue(finding, *args, **kwargs)
-
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id(model=Finding_Group)
-def update_jira_issue_for_finding_group(finding_group, *args, **kwargs):
-    return update_jira_issue(finding_group, *args, **kwargs)
 
 
 def update_jira_issue(obj, *args, **kwargs):
