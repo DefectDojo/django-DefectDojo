@@ -1030,6 +1030,11 @@ def update_jira_issue(obj, *args, **kwargs):
     if isinstance(obj, Finding_Group):
         jira_priority_name = jira_priority(obj)
 
+    # Determine what due date to set on the jira issue
+    duedate = None
+    if System_Settings.objects.get().enable_finding_sla:
+        duedate = get_sla_deadline(obj)
+
     # Set the fields that will compose the jira issue
     try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
@@ -1042,6 +1047,7 @@ def update_jira_issue(obj, *args, **kwargs):
             labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
             priority_name=jira_priority_name,
+            duedate=duedate,
             issuetype_fields=issuetype_fields)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
