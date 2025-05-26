@@ -3552,10 +3552,16 @@ class Finding(models.Model):
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding")
+                hash_code = self.compute_hash_code()
+                if self.hash_code != hash_code:
+                    self.hash_code = hash_code
+                    logger.debug("HASH_CODE: changed from %s to %s", self.hash_code, hash_code)
+                    deduplicationLogger.debug("HASH_CODE: already computed for finding")
+                else:
+                    deduplicationLogger.warning("HASH_CODE: could not be computed for finding: %s", self.title)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+                deduplicationLogger.debug("HASH_CODE: computed for finding: %s", self.hash_code)
 
 
 class TransferFinding(models.Model):
