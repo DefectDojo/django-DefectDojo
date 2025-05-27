@@ -8,12 +8,66 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+
+## May 2025: v2.46
+
+### ⚠️ Tag Format Change 
+
+As of version 2.46.0, Tags can no longer contain the following characters:
+- Commas (,)
+- Quotations (both single ' and double ")
+- Spaces
+
+To ensure a smooth transition, an automatic migration will be applied to existing tags as follows:
+- Commas → Replaced with hyphens (-)
+- Quotations (single and double) → Removed
+- Spaces → Replaced with underscores (_)
+Examples
+- example,tag → example-tag
+- 'SingleQuoted' → SingleQuoted
+- "DoubleQuoted" → DoubleQuoted
+- space separated tag → space_separated_tag
+
+This update improves consistency, enhances DefectDojo's search capabilities, and aligns with best practices for tag formatting.
+
+We recommend reviewing your current tags to ensure they align with the new format.  Following the deployment of these new behaviors, requests sent to the API or through the UI with any of the violations listed above will result in an error, with the details of the error raised in the response.
+
+### May 19, 2025: v2.46.3
+
+- **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
+- **(Dashboard)** Added Finding Status filter for Dashboard tiles.
+- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/en/working_with_findings/organizing_engagements_tests/source-code-repositories/) for more details.
+- **(Findings)** Added "Jira Issue URL" column to the CSV export of Finding tables.
+- **(Metrics)** Priority Dashboard has been added to Metrics, to display your organization's risk profile at a glance.
+![image](images/pro_dashboard_priority.png)
+- **(Universal Parser)** Added a 'SOC Alerts' flag to Universal Parser, to indicate whether the Findings from the parser originate from a Security Operations Center.
+
+### May 12, 2025: v2.46.2
+
+- **(Findings)** Component Name and Version have been added to the metadata table on a Finding View.
+- **(Metrics)** Pro Insights Dashboards can now be filtered by Tag.
+- **(Users)** The Users table can now be exported as a .csv file.
+
+### May 7, 2025: v2.46.1
+
+Hotfix release - no significant feature changes.
+
+### May 5, 2025: v2.46.0
+
+
+- **(Import)** Mitigated timestamp in reports are no longer ignored/overwritten on Reimport.
+- **(Tools)** Fortify Webinspect has been added as a supported tool.
+- **(Tools)** Added JSON as a supported tool for Immuniweb.
+- **(Tools)** Nessus (Tenable) parser now handles additional fields.
+- **(Tools)** Wiz parser now handles additional fields and unique_id_from_tool.
+
+
 ## Apr 2025: v2.45
 
 ### Apr 28, 2025: v2.45.3
 
-- **(Tools)** Fortify parser can now assign False Positive status to Findings according to the audit.xml file.
 - **(Import)** Reimporting a scan can now handle special statuses assigned by a tool.  Now, if a Finding was initially imported as Active, but the status was changed to False Positive, Out Of Scope or Risk Accepted by a subsequent report, that status will now be respected and applied to the Finding by Reimport.
+- **(Tools)** Fortify parser can now assign False Positive status to Findings according to the audit.xml file.
 
 ### Apr 22, 2025: v2.45.2
 
@@ -35,21 +89,21 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Mar 2025: v2.44
 
-### Mar 31, 2025: v2.44.4
+#### Mar 31, 2025: v2.44.4
 
 - **(Pro UI)** Group and Configuration permissions can now be assigned quickly from a User page.  For more information, see [DefectDojo Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/).
 
-### Mar 24, 2025: v2.44.3
+#### Mar 24, 2025: v2.44.3
 
 - **(Import)** Generic Findings Import will now parse tags in the JSON payload when Async Import is enabled.
 
-### Mar 17, 2025: v2.44.2
+#### Mar 17, 2025: v2.44.2
 
 - **(Pro UI)** Added a new method to quickly assign permissions to Products or Product Types.  See our [Pro Permissions](/en/customize_dojo/user_management/pro_permissions_overhaul/) for more details.
 
 ![image](images/pro_permissions_2.png)
 
-### Mar 10, 2025: v2.44.1
+#### Mar 10, 2025: v2.44.1
 
 - **(Pro UI)** Added a field in the View Engagement page which allows a user to navigate to the linked Jira Epic, if one exists.
 - **(Universal Parser)** XML is now a supported file type for Universal Parser.
@@ -57,13 +111,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ![image](images/oidc.png)
 
-### Mar 3, 2025: v2.44.0
-
-- **(Pro UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
-
-## Mar 2025: v2.44
-
-### Mar 3, 2025: v2.44.0
+#### Mar 3, 2025: v2.44.0
 
 - **(Pro UI)** Breadcrumbs have been overhauled to better represent the context each page exists in.  Breadcrumbs will now include filtering and query parameters.  The titles of tables now better represent their context, for example when looking at the Engagements list for a particular Product, the view will be titled {Product Name} Engagements, rather than All Engagements as before.
 

@@ -10,7 +10,8 @@ Certain tools (particularly SAST tools) will include the associated file name an
 ## Setting the repository in the Engagement and Test
 
 ### Engagement
-While editing the Engagement, users can set the URL of the specific SCM repo. 
+
+While editing the Engagement, users can set the URL of the specific Source Code Management repo.  **(In the Pro UI, this field can be set under Edit Engagement > Optional Fields > Repo)**.
 
 For an Interactive Engagement, it needs to be a URL that specifies the branch:
 - for GitHub - like https://github.com/DefectDojo/django-DefectDojo/tree/dev
