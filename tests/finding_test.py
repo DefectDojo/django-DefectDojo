@@ -543,7 +543,7 @@ class FindingTest(BaseTestCase):
         self.assertNoConsoleErrors()
         driver.find_element(By.ID, "id_title").clear()
         # Backslash causes error
-        driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from \Template")  # noqa: W605
+        driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from \\Template")  # noqa: W605
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
         driver.find_element(By.ID, "id_finished").click()
@@ -551,16 +551,16 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
         # Assert to the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Finding from template added successfully."))
-        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From Template"))
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template"))   # noqa: W605
 
         # Navigate back to the finding list
         driver.find_element(By.LINK_TEXT, "Findings").click()
         self.assertNoConsoleErrors()
-        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \Template").click()  # noqa: W605
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \\Template").click()  # noqa: W605
         self.assertNoConsoleErrors()
 
         # Assert that the finding is present
-        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS from \Template"))  # noqa: W605
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS from \\Template"))  # noqa: W605
 
     @on_exception_html_source_logger
     def test_delete_finding_template(self):
