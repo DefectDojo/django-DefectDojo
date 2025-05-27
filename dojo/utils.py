@@ -220,7 +220,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         return (
             Finding.objects.filter(
                 **custom_filter,
-                title=finding.title,
+                title__iexact=finding.title,
                 severity=finding.severity,
                 numerical_severity=Finding.get_numerical_severity(finding.severity),
             ).order_by("id")

@@ -38,6 +38,7 @@ class HCLAppScanParser:
             for finding in report:
                 title = ""
                 description = ""
+                cwe = 0
                 for item in finding:
                     match item.tag:
                         case "severity":

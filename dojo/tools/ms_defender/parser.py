@@ -11,9 +11,6 @@ class MSDefenderParser:
 
     """Import from MSDefender findings"""
 
-    def __init__(self):
-        self.findings = []
-
     def get_scan_types(self):
         return ["MSDefender Parser"]
 
@@ -24,11 +21,12 @@ class MSDefenderParser:
         return ("MSDefender findings can be retrieved using the REST API")
 
     def get_findings(self, file, test):
+        findings = []
         if str(file.name).endswith(".json"):
             vulnerabilityfile = json.load(file)
             vulnerabilitydata = vulnerabilityfile["value"]
             for vulnerability in vulnerabilitydata:
-                self.process_json(vulnerability)
+                findings.append(self.process_json(vulnerability))
         elif str(file.name).endswith(".zip"):
             if str(file.__class__) == "<class '_io.TextIOWrapper'>":
                 input_zip = zipfile.ZipFile(file.name, "r")
@@ -51,10 +49,12 @@ class MSDefenderParser:
             vulnerabilities = []
             machines = {}
             for vulnerabilityfile in vulnerabilityfiles:
+                logger.debug("Loading vulnerabilitiy file: %s", vulnerabilityfile)
                 output = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
                 for data in output:
                     vulnerabilities.append(data)
             for machinefile in machinefiles:
+                logger.debug("Loading machine file: %s", vulnerabilityfile)
                 output = json.loads(zipdata[machinefile].decode("ascii"))["value"]
                 for data in output:
                     machines[data.get("id")] = data
@@ -62,16 +62,16 @@ class MSDefenderParser:
                 try:
                     machine = machines.get(vulnerability["machineId"], None)
                     if machine is not None:
-                        self.process_zip(vulnerability, machine)
+                        findings.append(self.process_json_with_machine_info(vulnerability, machine))
                     else:
                         logger.debug("fallback to process without machine: no machine id")
-                        self.process_json(vulnerability)
+                        findings.append(self.process_json(vulnerability))
                 except (IndexError, KeyError):
                     logger.exception("fallback to process without machine: exception")
                     self.process_json(vulnerability)
         else:
             return []
-        return self.findings
+        return findings
 
     def process_json(self, vulnerability):
         description = ""
@@ -95,10 +95,10 @@ class MSDefenderParser:
         if vulnerability["cveId"] is not None:
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
-        self.findings.append(finding)
         finding.unsaved_endpoints = []
+        return finding
 
-    def process_zip(self, vulnerability, machine):
+    def process_json_with_machine_info(self, vulnerability, machine):
         description = ""
         description += "cveId: " + str(vulnerability.get("cveId", "")) + "\n"
         description += "machineId: " + str(vulnerability.get("machineId", "")) + "\n"
@@ -142,7 +142,6 @@ class MSDefenderParser:
         if "cveId" in vulnerability:
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
-        self.findings.append(finding)
         finding.unsaved_endpoints = []
         if "computerDnsName" in machine and machine["computerDnsName"] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")))
@@ -150,6 +149,7 @@ class MSDefenderParser:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"])))
         if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastExternalIpAddress"])))
+        return finding
 
     def severity_check(self, severity_input):
         if severity_input in {"Informational", "Low", "Medium", "High", "Critical"}:
