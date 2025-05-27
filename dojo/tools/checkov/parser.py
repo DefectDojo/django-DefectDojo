@@ -121,7 +121,6 @@ def get_item(vuln, test, check_type):
 
     if "description" in vuln:
         description += f"\n{vuln['description']}\n"
-    
     mitigation = ""
     if "benchmarks" in vuln:
         bms = vuln["benchmarks"].keys()
