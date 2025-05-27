@@ -43,6 +43,7 @@ env = environ.FileAwareEnv(
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_EXPIRE_WARNING=(int, 300),  # warning 5 mins before expiration
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
@@ -757,6 +758,7 @@ if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS")
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
+SESSION_EXPIRE_WARNING = env("DD_SESSION_EXPIRE_WARNING")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 
 # ------------------------------------------------------------------------------
@@ -859,6 +861,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_system_settings",
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
+                "dojo.context_processors.session_expiry_notification",
             ],
         },
     },
@@ -1585,6 +1588,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "MobSF Scorecard Scan": DEDUPE_ALGO_HASH_CODE,
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    # The bearer fingerprint is not unique across multiple scans, so it shouldn't be used for deduplication (https://github.com/DefectDojo/django-DefectDojo/pull/12346#issuecomment-2841561634)
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
     "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,

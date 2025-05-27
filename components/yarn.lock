@@ -503,15 +503,15 @@ pako@~1.0.2:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-pdfmake@^0.2.19:
-  version "0.2.19"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.19.tgz#23d6862b395de95e41089263936f0ff806193ea7"
-  integrity sha512-jVUILxOqAgcquxbGCz3Bo1/sGEuVLcReGYvo61oJ2EkkyfrlREd7TfLRF6jdF85aEQjxOj/6BD9uj0p+UfXNkw==
+pdfmake@^0.2.20:
+  version "0.2.20"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.20.tgz#a2e37114e46247c9a295df2fc1c7184942de567e"
+  integrity sha512-bGbxbGFP5p8PWNT3Phsu1ZcRLnRfF6jmnuKTkgmt6i5PZzSdX6JaB+NeTz9q+aocfW8SE9GUjL3o/5GroBqGcQ==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.2"
     "@foliojs-fork/pdfkit" "^0.15.3"
     iconv-lite "^0.6.3"
-    xmldoc "^2.0.0"
+    xmldoc "^2.0.1"
 
 png-js@^1.0.0:
   version "1.0.0"
@@ -625,9 +625,9 @@ util-deprecate@~1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-xmldoc@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-2.0.0.tgz#948b97c38f0cbc07b878985d14f9e2212127d42a"
-  integrity sha512-6ZsqsqEkIKzWLqGyTN+j+ZRc/vxQHtnlHzSvj3JvM4XZPoZVJxj6fyz0XvwKAf1vh+kSN/HibO1/iJLf3F3LRw==
+xmldoc@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-2.0.1.tgz#a901f6a6341e4d8cba3dbc5fc61017249f2adf24"
+  integrity sha512-sOOqgsjl3PU6iBw+fBUGAkTCE+JFK+sBaOL3pnZgzqk2/yvOD7RlFmZtDRJAEBzdpOYxSXyOQH4mjubdfs3MSg==
   dependencies:
     sax "^1.2.4"
