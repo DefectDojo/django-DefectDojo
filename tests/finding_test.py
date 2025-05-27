@@ -518,7 +518,7 @@ class FindingTest(BaseTestCase):
         # Assert to the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Finding from template added successfully."))
         self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From Template"))
-   
+
     @on_exception_html_source_logger
     def test_create_finding_with_unqiue_characters(self):
         driver = self.driver
@@ -534,7 +534,6 @@ class FindingTest(BaseTestCase):
         # logger.info("\nClicking on dropdown menu \n")
         driver.find_element(By.ID, "dropdownMenu_test_add").click()
         self.assertNoConsoleErrors()
-
         # Click on `Apply Template to Finding`
         driver.find_element(By.LINK_TEXT, "Finding From Template").click()
         self.assertNoConsoleErrors()
@@ -542,16 +541,14 @@ class FindingTest(BaseTestCase):
         logger.info("\nClicking on the template \n")
         driver.find_element(By.LINK_TEXT, "Use This Template").click()
         self.assertNoConsoleErrors()
-
         driver.find_element(By.ID, "id_title").clear()
-        # Backslash causes error 
-        driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from \Template")
+        # Backslash causes error
+        driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from \Template")  # noqa: W605
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
         driver.find_element(By.ID, "id_finished").click()
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
-
         # Assert to the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Finding from template added successfully."))
         self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From Template"))
@@ -559,11 +556,11 @@ class FindingTest(BaseTestCase):
         # Navigate back to the finding list
         driver.find_element(By.LINK_TEXT, "Findings").click()
         self.assertNoConsoleErrors()
-        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \Template").click()
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \Template").click()  # noqa: W605
         self.assertNoConsoleErrors()
-        
+
         # Assert that the finding is present
-        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS from \Template"))
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS from \Template"))  # noqa: W605
 
     @on_exception_html_source_logger
     def test_delete_finding_template(self):
