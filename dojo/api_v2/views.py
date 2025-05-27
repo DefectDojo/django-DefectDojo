@@ -1054,7 +1054,7 @@ class FindingViewSet(
     )
     @action(detail=False, methods=["POST"])
     def bulk_close(self, request):
-        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data["findings"])}")
+        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data['findings'])}")
         errors = []
         success = []
         if request.method == "POST":
@@ -1066,11 +1066,11 @@ class FindingViewSet(
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
-                        logger.debug(f"BULK_CLOSE: finding_close {finding_close["id"]}")
+                        logger.debug(f"BULK_CLOSE: finding_close {finding_close['id']}")
                         try:
                             finding = Finding.objects.get(id=finding_close["id"])
                         except Finding.DoesNotExist:
-                            logger.debug(f"BULK_CLOSE: Finding {finding_close["id"]} not found")
+                            logger.debug(f"BULK_CLOSE: Finding {finding_close['id']} not found")
                             continue
                         finding.is_mitigated = finding_close["is_mitigated"]
                         finding.mitigated = finding_close.get("mitigated", timezone.now())
