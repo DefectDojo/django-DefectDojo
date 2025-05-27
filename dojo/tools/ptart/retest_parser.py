@@ -20,6 +20,7 @@ class PTARTRetestParser:
         self.cvss_type = None
 
     def get_test_data(self, tree):
+        self.cvss_type = None
         if "retests" in tree:
             self.cvss_type = tree.get("cvss_type", None)
             retests = tree["retests"]

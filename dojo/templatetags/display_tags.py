@@ -781,6 +781,8 @@ def vulnerability_url(vulnerability_id):
         if vulnerability_id.upper().startswith(key):
             if key == "ALINUX2-SA-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
+            if key == "ALINUX3-SA-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
             if key == "GLSA":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key == "SSA:":
