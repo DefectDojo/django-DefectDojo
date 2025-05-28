@@ -22,7 +22,7 @@ class ProductAnnouncementManager:
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict | None,
+        response_data: dict | None = None,
         **kwargs: dict,
     ):
         """Skip all this if the CREATE_CLOUD_BANNER is not set"""
@@ -73,7 +73,7 @@ class ErrorPageProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict | None,
+        response_data: dict | None = None,
         **kwargs: dict,
     ):
         self.base_message = "Pro comes with support."
@@ -92,7 +92,7 @@ class LargeScanSizeProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict | None,
+        response_data: dict | None = None,
         duration: float = 0.0,  # seconds
         **kwargs: dict,
     ):
@@ -115,7 +115,7 @@ class LongRunningRequestProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict | None,
+        response_data: dict | None = None,
         duration: float = 0.0,  # seconds
         **kwargs: dict,
     ):
@@ -150,8 +150,8 @@ class ScanTypeProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict | None,
-        scan_type: str | None,
+        response_data: dict | None = None,
+        scan_type: str | None = None,
         **kwargs: dict,
     ):
         self.base_message = (
