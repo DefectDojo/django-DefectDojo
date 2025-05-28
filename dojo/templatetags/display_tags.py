@@ -157,7 +157,7 @@ def dojo_version():
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
-    return f"v. {version}"
+    return f"v. {version.replace('v', '')}"
 
 
 @register.simple_tag
