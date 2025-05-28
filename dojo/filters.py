@@ -1365,8 +1365,8 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
 
 
 class ApiDojoMetaFilter(DojoFilter):
-    name_exact = CharFilter(field_name="name", lookup_expr="iexact")
-    value_exact = CharFilter(field_name="value", lookup_expr="iexact")
+    name_case_insensitive = CharFilter(field_name="name", lookup_expr="iexact")
+    value_case_insensitive = CharFilter(field_name="value", lookup_expr="iexact")
 
     class Meta:
         model = DojoMeta
