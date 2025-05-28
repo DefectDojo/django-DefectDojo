@@ -113,6 +113,10 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.product_announcements import (
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -120,10 +124,6 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large, tag_validator
-from dojo.product_announcements import (
-    LargeScanSizeProductAnnouncement,
-    ScanTypeProductAnnouncement,
-)
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ProductAnnouncementManager:
+
     """Base class for centralized helper methods"""
 
     base_try_free = "Try today for free"
@@ -21,9 +22,9 @@ class ProductAnnouncementManager:
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict = {},
+        response_data: dict | None,
         **kwargs: dict,
-    ) -> None:
+    ):
         """Skip all this if the CREATE_CLOUD_BANNER is not set"""
         if not settings.CREATE_CLOUD_BANNER:
             return
@@ -35,17 +36,17 @@ class ProductAnnouncementManager:
             )
         elif response is not None and isinstance(response, HttpResponse):
             response.data = self._add_api_response_key(
-                message=f"{self.base_message} {self.api_outreach}", data=response.data
+                message=f"{self.base_message} {self.api_outreach}", data=response.data,
             )
-        elif response_data != {} and isinstance(response_data, dict):
+        elif response_data is not None and isinstance(response_data, dict):
             response_data = self._add_api_response_key(
-                message=f"{self.base_message} {self.api_outreach}", data=response_data
+                message=f"{self.base_message} {self.api_outreach}", data=response_data,
             )
         else:
             msg = "At least one of request, response, or response_data must be supplied"
             raise ValueError(msg)
 
-    def _add_django_message(self, request: HttpRequest, message: str) -> None:
+    def _add_django_message(self, request: HttpRequest, message: str):
         """Add a message to the UI"""
         messages.add_message(
             request=request,
@@ -72,9 +73,9 @@ class ErrorPageProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict = {},
+        response_data: dict | None,
         **kwargs: dict,
-    ) -> None:
+    ):
         self.base_message = "Pro comes with support."
         super().__init__(
             *args,
@@ -91,10 +92,10 @@ class LargeScanSizeProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict = {},
+        response_data: dict | None,
         duration: float = 0.0,  # seconds
         **kwargs: dict,
-    ) -> None:
+    ):
         self.trigger_threshold = 60.0
         minute_duration = round(duration / 60.0)
         self.base_message = f"Your import took about {minute_duration} minute(s). Did you know Pro has async imports?"
@@ -114,10 +115,10 @@ class LongRunningRequestProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict = {},
+        response_data: dict | None,
         duration: float = 0.0,  # seconds
         **kwargs: dict,
-    ) -> None:
+    ):
         self.trigger_threshold = 15.0
         self.base_message = "Did you know, Pro has a new UI and is performance tested up to 22M findings?"
         if duration > self.trigger_threshold:
@@ -149,10 +150,10 @@ class ScanTypeProductAnnouncement(ProductAnnouncementManager):
         *args: list,
         request: HttpRequest = None,
         response: HttpResponse = None,
-        response_data: dict = {},
-        scan_type: str = None,
+        response_data: dict | None,
+        scan_type: str | None,
         **kwargs: dict,
-    ) -> None:
+    ):
         self.base_message = (
             f"Did you know, Pro has an automated no-code connector for {scan_type}?"
         )
