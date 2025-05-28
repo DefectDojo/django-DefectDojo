@@ -3,6 +3,7 @@ import collections
 import json
 import logging
 import re
+import time
 from datetime import datetime
 
 import six
@@ -119,6 +120,10 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large, tag_validator
+from dojo.product_announcements import (
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2193,6 +2198,7 @@ class CommonImportScanSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
@@ -2224,6 +2230,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
+            start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
                 context.pop("scan", None),
@@ -2236,6 +2243,9 @@ class CommonImportScanSerializer(serializers.Serializer):
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
                 data["statistics"] = {"after": test.statistics}
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2491,6 +2501,7 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
+            start_time = time.perf_counter()
             if test := context.get("test"):
                 statistics_before = test.statistics
                 context["test"], _, _, _, _, _, test_import = self.get_reimporter(
@@ -2525,6 +2536,9 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
                 if statistics_delta:
                     data["statistics"]["delta"] = statistics_delta
                 data["statistics"]["after"] = test.statistics
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:

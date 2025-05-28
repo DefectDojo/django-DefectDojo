@@ -12,6 +12,7 @@ from rest_framework.status import (
 from rest_framework.views import exception_handler
 
 from dojo.models import System_Settings
+from dojo.product_announcements import ErrorPageProductAnnouncement
 
 logger = logging.getLogger(__name__)
 
@@ -65,4 +66,5 @@ def custom_exception_handler(exc, context):
         # They get logged and we don't change the response.
         logger.error(exc)
 
+    ErrorPageProductAnnouncement(response=response)
     return response

@@ -919,6 +919,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
+    "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
