@@ -551,7 +551,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
         # Assert to the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Finding from template added successfully."))
-        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template")) 
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template"))
 
         # Navigate back to the finding list
         driver.find_element(By.LINK_TEXT, "Findings").click()
