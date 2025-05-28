@@ -28,7 +28,6 @@ from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
 from dojo import __version__
-from dojo.version_inner import version as version_inner
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +99,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
-    DD_FOOTER_VERSION=(str, version_inner),
+    DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
