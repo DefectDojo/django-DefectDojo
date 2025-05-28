@@ -37,6 +37,7 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
         response.data["message"] = str(exc)
+        ErrorPageProductAnnouncement(response=response)
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])
@@ -52,6 +53,7 @@ def custom_exception_handler(exc, context):
         response.data[
             "message"
         ] = exception_message
+        ErrorPageProductAnnouncement(response=response)
     elif response.status_code < 500:
         # HTTP status codes lower than 500 are no technical errors.
         # They need not to be logged and we provide the exception
@@ -61,10 +63,10 @@ def custom_exception_handler(exc, context):
             exc,
         ) != response.data.get("detail", ""):
             response.data["message"] = str(exc)
+            ErrorPageProductAnnouncement(response=response)
     else:
         # HTTP status code 500 or higher are technical errors.
         # They get logged and we don't change the response.
         logger.error(exc)
 
-    ErrorPageProductAnnouncement(response=response)
     return response
