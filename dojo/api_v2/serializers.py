@@ -2487,8 +2487,10 @@ class ImportScanSerializer(CommonImportScanSerializer):
         # Import the scan with all of the supplied data
         self.process_scan(data, context)
         # If the test is provided, search for correlated findings
-        if GeneralSettings.get_value("ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
-                                     False):
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
             test = context.get("test")
             engagement = context.get("engagement")
             search_finding_correlated(
@@ -2640,12 +2642,16 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)
         # If the test iss provided, search for correlated findings
-        test = context.get("test")
-        engagement = context.get("engagement")
-        search_finding_correlated(
-            test.finding_set.all(),
-            engagement
-        )
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
+            test = context.get("test")
+            engagement = context.get("engagement")
+            search_finding_correlated(
+                test.finding_set.all(),
+                engagement
+            )
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):

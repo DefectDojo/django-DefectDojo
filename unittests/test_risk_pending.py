@@ -1,4 +1,5 @@
 import copy
+from unittest.mock import patch
 from django.test import TestCase
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
@@ -8,6 +9,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.urls import reverse
 from django.db.models import Q
+from dojo.api_v2.api_error import ApiError
 from dojo.models import (
     Risk_Acceptance,
     Finding,
@@ -17,7 +19,9 @@ from dojo.models import (
     User)
 from dojo.utils import get_system_setting
 from .dojo_test_case import DojoTestCase
-from dojo.risk_acceptance import queries
+from dojo.risk_acceptance import helper as ra_helper
+from dojo.user.queries import get_role_members, get_user
+from dojo.risk_acceptance import queries, risk_pending
 
 
 class RiskAcceptancePendingTestUI(DojoTestCase):
@@ -313,3 +317,111 @@ class RiskPendingQuerys(TestCase):
         self.assertEqual(result["total_finding_active"], 4)
         self.assertTrue(result["status"])
         self.assertEqual(len(result["message"]), 118)
+
+
+class SearchFindingCorrelatedTests(TestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="admin")
+        self.risk_acceptance = Risk_Acceptance.objects.all().first()
+        self.engagement = self.risk_acceptance.engagement
+        self.test = self.engagement.test_set.first()
+        self.finding1 = Finding.objects.create(test=self.test, reporter=self.user)
+        self.risk_acceptance.accepted_findings.add(self.finding1)
+
+    def test_correlated_findings_not_cve(self):
+        self.finding1.cve = ""
+        self.finding1.vuln_id_from_tool = ""
+        entry_findings = [self.finding1]
+        queryset = risk_pending.search_finding_correlated(
+            entry_findings, self.engagement)
+        self.assertQuerySetEqual(Risk_Acceptance.objects.none(), queryset)
+
+    def test_correlated_finding_success(self):
+        """finding1 added in risk-acceptance"""
+        self.finding1.cve = "CVE-2025-4802"
+        self.finding1.vuln_id_from_tool = "CVE-2025-4802"
+        self.finding1.save()
+        """ceate new finding2 not in risk-acceptance"""
+        self.finding2 = Finding.objects.create(test=self.test, reporter=self.user)
+        self.finding2.cve = "CVE-2025-4802"
+        self.finding2.vuln_id_from_tool = "CVE-2025-4802"
+        self.finding2.save()
+        entry_findings = [self.finding2]
+        queryset = risk_pending.search_finding_correlated(
+            entry_findings, self.engagement)
+        risk_acceptance_queryset = queryset.filter(id=self.risk_acceptance.id, accepted_findings__cve="CVE-2025-4802")
+        findings = risk_acceptance_queryset.first().accepted_findings.all()
+        self.assertIn(self.finding2.cve, [finding.cve for finding in findings])
+
+    def test_empty_entry_findings(self):
+        entry_findings = []
+        queryset = risk_pending.search_finding_correlated(
+            entry_findings, self.engagement)
+        self.assertQuerySetEqual(Risk_Acceptance.objects.none(), queryset)
+
+    @patch('dojo.risk_acceptance.helper.add_findings_to_risk_acceptance')
+    @patch('dojo.user.queries.get_user')
+    def test_add_finding_correlated_success(
+            self,
+            get_user_mock,
+            add_finding_to_risk_acceptance_mock
+        ):
+        self.user.username = "admin"
+        self.user.save()
+        get_user_mock.return_value = self.user
+        add_finding_to_risk_acceptance_mock.return_value = True
+        """Test successful addition of correlated findings"""
+        self.finding2 = Finding.objects.create(
+            test=self.test, reporter=self.user, severity="High"
+        )
+        self.finding2.cve = "CVE-2025-4802"
+        self.finding2.vuln_id_from_tool = "CVE-2025-4802"
+        self.finding2.save()
+
+        self.risk_acceptance.accepted_findings.add(self.finding2)
+        self.risk_acceptance.save()
+        queryset = Risk_Acceptance.objects.filter(id=self.risk_acceptance.id)
+        entry_findings = [self.finding2]
+        correlated_ids = risk_pending.add_finding_correlated(entry_findings, queryset)
+
+        self.assertIn(self.finding2.id, correlated_ids)
+
+
+class GetAttrValuesTests(TestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.finding = Finding.objects.all()
+
+    def test_get_attr_values_single_field(self):
+        """Test extracting a single field from objects"""
+        objs = [self.finding[0], self.finding[1]]
+        fields = ["severity"]
+        result = risk_pending.get_attr_values(objs, fields)
+        self.assertEqual(result["severity"], ["High", "Low"])
+
+    def test_get_attr_values_multiple_fields(self):
+        """Test extracting multiple fields from objects"""
+        objs = [self.finding[0], self.finding[1]]
+        fields = ["severity", "cve", "vuln_id_from_tool"]
+        result = risk_pending.get_attr_values(objs, fields)
+        self.assertEqual(result["severity"], ["High", "Low"])
+        self.assertEqual(result["cve"], [None, None])
+        self.assertEqual(result["vuln_id_from_tool"], [None, None])
+
+    def test_get_attr_values_empty_objects(self):
+        """Test with an empty list of objects"""
+        objs = []
+        fields = ["severity", "cve"]
+        result = risk_pending.get_attr_values(objs, fields)
+        self.assertEqual(result["severity"], [])
+        self.assertEqual(result["cve"], [])
+
+    def test_get_attr_values_field_not_present(self):
+        """Test when a field is not present in the objects"""
+        objs = [self.finding[0], self.finding[1]]
+        fields = ["non_existent_field"]
+        result = risk_pending.get_attr_values(objs, fields)
+        self.assertEqual(result["non_existent_field"], [])
