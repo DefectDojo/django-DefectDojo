@@ -78,7 +78,7 @@ For optimal results with Deduplication Tuning:
 
 - **Start with defaults**: The preconfigured deduplication settings work well for most scenarios
 - **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
-- **Adjustments to deduplication will only affect new imports, and **do not retroactively adjust the hash values for findings already imported**.  Pro subscribers may contact DefectDojo support to assess if deduplcation tunings can be re-executed for findings already imported prior to the deduplcation adjustments.  
+- **Adjustments to deduplication will retroactively adjust the hash values for findings already imported for the given test type that was changed**.  The recalculation is applied in the background to all findings in the database associated with the given test type that was changed. Please note that since the process is occurring in the background, immediate changes may not be observed.
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 
