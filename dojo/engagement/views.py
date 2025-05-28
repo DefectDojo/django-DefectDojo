@@ -1328,7 +1328,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 finding_correlated_ids = [
                     finding.id for finding in finding_correlated]
                 risk_acceptance.add_note(
-                    note_text=f"Finding Correlated: {finding_correlated_ids}",
+                    note_text=f"Added finding Correlated: {finding_correlated_ids}",
                     author=system_user)
                 messages.add_message(
                     request,

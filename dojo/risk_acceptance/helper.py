@@ -181,7 +181,8 @@ def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: 
 
 
 def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, findings: list[Finding]) -> None:
-    user = crum.get_current_user()
+    if user is None:
+        user = crum.get_current_user()
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
             add_severity_to_risk_acceptance(risk_acceptance, finding.severity)

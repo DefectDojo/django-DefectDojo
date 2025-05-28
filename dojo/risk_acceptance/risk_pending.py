@@ -3,6 +3,8 @@ import crum
 from dateutil.relativedelta import relativedelta
 from dojo.celery import app
 from django.shortcuts import render
+from django.db.models import Q
+from django.db.models.query import QuerySet as queryset
 from django.utils import timezone
 from django.conf import settings
 from dojo.utils import Response
@@ -476,7 +478,8 @@ def is_correlated(finding_select: Finding,
     """
     result = any([
         finding_select.vuln_id_from_tool == finding_to_correlated.vuln_id_from_tool,
-        finding_select.vulnerability_ids == finding_to_correlated.vulnerability_ids
+        finding_select.vulnerability_ids == finding_to_correlated.vulnerability_ids,
+        finding_select.severity == finding_to_correlated.severity,
         ])
     if result is True:
         system_user = get_user(settings.SYSTEM_USER)
@@ -510,3 +513,78 @@ def get_correlated_findings(findings_selected: list[Finding],
             if is_correlated(finding_select, finding_authorized):
                 list_findings_correlated.append(finding_authorized)
     return list_findings_correlated
+
+
+def get_attr_values(objs: list[object] | queryset, fields: list[str]):
+    """Get a list of attributes from a list of objects
+    Args:
+        objs (list[object]): List of objects to get attributes from
+        fields (list[str]): List of attributes to get from the objects
+    Returns:
+        dict: Dictionary with attributes as keys and lists of values as values
+    """
+    result = {}
+    for field in fields:
+        for obj in objs:
+            if hasattr(obj, field):
+                if field in result.keys():
+                    result[field].append(getattr(obj, field))
+                else:
+                    result[field] = [getattr(obj, field)]
+    return result
+
+
+def search_finding_correlated(entry_findings: queryset[Finding] | list[Finding],
+                              engagement: Engagement | int):
+    """Search for correlated findings in the engagement
+    Args:
+        entry_findigs (list[Finding]): List of findings to check for correlation
+        engagement (Engagement): Engagement container of correlated findings
+    Returns:
+        list[Finding]: List of correlated findings
+    """
+    attrs = get_attr_values(entry_findings, fields=["vuln_id_from_tool", "vulnerability_ids", "id"])
+    ids_from_tool = attrs["vuln_id_from_tool"]
+    ids_vult = attrs["vulnerability_ids"]
+    ids = attrs["id"]
+    try:
+        if isinstance(engagement, int) or isinstance(engagement, Engagement):
+            queryset = (
+                Risk_Acceptance.objects.filter(
+                    engagement=engagement,
+                    expiration_date_handled__isnull=True)
+                .prefetch_related("accepted_findings")
+                .filter(
+                    Q(accepted_findings__cve__in=ids_vult) |
+                    Q(accepted_findings__vuln_id_from_tool__in=ids_from_tool) &
+                    ~Q(accepted_findings__id__in=ids)
+                )
+            )
+    except Exception as e:
+        raise ApiError.internal_server_error(
+            detail=f"Error searching for risk acceptance: {e}"
+        )
+    for finding in entry_findings:
+        risk_acceptance_query = None
+        if finding.vulnerability_ids:
+            risk_acceptance_query = queryset.filter(
+                accepted_findings__cve__in=finding.vulnerability_ids,
+                accepted_findings__severity=finding.severity
+                ).order_by("-created")
+        elif finding.vuln_id_from_tool:
+            risk_acceptance_query = queryset.filter(
+                accepted_findings__vuln_id_from_tool=finding.vuln_id_from_tool,
+                accepted_findings__severity=finding.severity
+                ).order_by("-created")
+        # add finding a risk-acceptance
+        if risk_acceptance_query:
+            logger.debug("CORRELATED_FINDING: adding %i finding to risk acceptance %i",
+                         finding.id, risk_acceptance_query.first().id)
+            finding.add_note(
+                note_text=f"This finding :{finding.id} is correlated whit cve {finding.vulnerability_ids} or vuln_id_from_tool {finding.vuln_id_from_tool}",
+                author=get_user(settings.SYSTEM_USER))
+            ra_helper.add_findings_to_risk_acceptance(
+                user=None,
+                risk_acceptance=risk_acceptance_query.first(),
+                findings=[finding])
+    return True
