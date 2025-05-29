@@ -1505,10 +1505,6 @@ class Engagement(models.Model):
                                 default="threat_model", editable=False)
     tmodel_path = models.CharField(max_length=1000, default="none",
                                    editable=False, blank=True, null=True)
-    risk_acceptance = models.ManyToManyField("Risk_Acceptance",
-                                             default=None,
-                                             editable=False,
-                                             blank=True)
     done_testing = models.BooleanField(default=False, editable=False)
     engagement_type = models.CharField(editable=True, max_length=30, default="Interactive",
                                        null=True,
@@ -3663,6 +3659,8 @@ class Risk_Acceptance(models.Model):
 
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
+    engagement = models.ForeignKey(Engagement, editable=False, blank=False, null=False, on_delete=models.CASCADE)
+
     accepted_findings = models.ManyToManyField(Finding)
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text=_("Recommendation from the security team."), verbose_name=_("Security Recommendation"))
@@ -3713,15 +3711,6 @@ class Risk_Acceptance(models.Model):
     @property
     def is_expired(self):
         return self.expiration_date_handled is not None
-
-    # relationship is many to many, but we use it as one-to-many
-    @property
-    def engagement(self):
-        engs = self.engagement_set.all()
-        if engs:
-            return engs[0]
-
-        return None
 
     def copy(self, engagement=None):
         copy = _copy_model_util(self)
