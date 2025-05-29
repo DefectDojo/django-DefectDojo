@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 unset TEST_CASE
 
 bash ./docker/docker-compose-check.sh
@@ -51,7 +50,7 @@ then
 fi
 
 echo "Running docker compose unit tests with test case $TEST_CASE ..."
-# Compose V2 integrates compose functions into the Docker platform, continuing to support 
-# most of the  previous docker-compose features and flags. You can run Compose V2 by 
+# Compose V2 integrates compose functions into the Docker platform, continuing to support
+# most of the  previous docker-compose features and flags. You can run Compose V2 by
 # replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
 docker compose exec uwsgi bash -c "python manage.py test $TEST_CASE -v2 --keepdb"
