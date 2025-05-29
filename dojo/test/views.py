@@ -2,6 +2,7 @@
 import base64
 import logging
 import operator
+import time
 from datetime import datetime
 from functools import reduce
 
@@ -58,6 +59,11 @@ from dojo.models import (
     Test_Import_Finding_Action,
 )
 from dojo.notifications.helper import create_notification
+from dojo.product_announcements import (
+    ErrorPageProductAnnouncement,
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
 from dojo.test.queries import get_authorized_tests
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
@@ -1009,16 +1015,22 @@ class ReImportScanResultsView(View):
 
     def success_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a successful import"""
+        duration = time.perf_counter() - request._start_time
+        LargeScanSizeProductAnnouncement(request=request, duration=duration)
+        ScanTypeProductAnnouncement(request=request, scan_type=context.get("scan_type"))
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
+        ErrorPageProductAnnouncement(request=request)
         return HttpResponseRedirect(reverse(
             "re_import_scan_results",
             args=(context.get("test").id, ),
@@ -1049,20 +1061,21 @@ class ReImportScanResultsView(View):
             request,
             test_id=test_id,
         )
+        request._start_time = time.perf_counter()
         # ensure all three forms are valid first before moving forward
         if not self.validate_forms(context):
             return self.failure_redirect(context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the import form
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Kick off the import process
         if import_error := self.reimport_findings(context):
             add_error_message_to_response(import_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Otherwise return the user back to the engagement (if present) or the product
-        return self.success_redirect(context)
+        return self.success_redirect(request, context)

@@ -114,6 +114,7 @@ admin.autodiscover()
 
 # custom handlers
 handler500 = "dojo.views.custom_error_view"
+handler403 = "dojo.views.custom_unauthorized_view"
 handler400 = "dojo.views.custom_bad_request_view"
 
 # v2 api written in django-rest-framework
