@@ -1135,7 +1135,7 @@ class FindingViewSet(
                         else:
                             errors.append({finding.id: "Not closed"})
                     except Finding.DoesNotExist:
-                        logger.error(f"BULK_CLOSE: Finding error {finding_close["id"]} not found")
+                        logger.error(f"BULK_CLOSE: Finding error {finding_close['id']} not found")
                         errors.append({finding_close['id']: "not found"})
             logger.debug(f"BULK_CLOSE: finish process Success {success}")
             logger.debug(f"BULK_CLOSE: finish process Error {errors}")
@@ -1736,7 +1736,7 @@ class FindingViewSet(
             return self._remove_metadata(request, finding)
 
         return Response(
-            {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
+            {"error": "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
 
 
