@@ -2707,7 +2707,9 @@ class Finding(models.Model):
 
             except Exception as ex:
                 logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
-                # should we set self.cvssv3 to None here to avoid storing invalid vectors? it would also remove invalid vectors on existing findings...
+                # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
+                if self.pk is None:
+                    self.cvssv3 = None
 
         self.set_hash_code(dedupe_option)
 
