@@ -476,20 +476,21 @@ def is_correlated(finding_select: Finding,
     Returns:
         bool: True if the findings are correlated, False otherwise
     """
-    result = any([
-        finding_select.vuln_id_from_tool == finding_to_correlated.vuln_id_from_tool,
-        finding_select.vulnerability_ids == finding_to_correlated.vulnerability_ids,
-        finding_select.severity == finding_to_correlated.severity,
-        ])
-    if result is True:
-        system_user = get_user(settings.SYSTEM_USER)
-        finding_to_correlated.add_note(
-            note_text=(f"This finding :{finding_to_correlated.id} "
-                       f"is correlated the finding: {finding_select.id}"),
-            author=system_user)
-        logger.debug(
-            f"CORRELATED_FINDING: finding {finding_select.id}",
-            f"is Correlated to finding {finding_to_correlated.id}: {result}")
+    result = False
+    if finding_select.severity == finding_to_correlated.severity:
+        result = any([
+            finding_select.vuln_id_from_tool == finding_to_correlated.vuln_id_from_tool,
+            finding_select.vulnerability_ids == finding_to_correlated.vulnerability_ids,
+            ])
+        if result is True:
+            system_user = get_user(settings.SYSTEM_USER)
+            finding_to_correlated.add_note(
+                note_text=(f"This finding :{finding_to_correlated.id} "
+                        f"is correlated the finding: {finding_select.id}"),
+                author=system_user)
+            logger.debug(
+                f"CORRELATED_FINDING: finding {finding_select.id}",
+                f"is Correlated to finding {finding_to_correlated.id}: {result}")
     return result
 
 
