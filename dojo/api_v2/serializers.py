@@ -24,7 +24,7 @@ from rest_framework.fields import DictField, MultipleChoiceField
 import dojo.jira_link.helper as jira_helper
 from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.risk_acceptance.risk_pending import search_finding_correlated
+from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -2493,9 +2493,10 @@ class ImportScanSerializer(CommonImportScanSerializer):
         ):
             test = context.get("test")
             engagement = context.get("engagement")
-            search_finding_correlated(
+            queryset = search_finding_correlated(
                 test.finding_set.all(),
                 engagement)
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
@@ -2648,10 +2649,11 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         ):
             test = context.get("test")
             engagement = context.get("engagement")
-            search_finding_correlated(
+            queryset = search_finding_correlated(
                 test.finding_set.all(),
                 engagement
             )
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):
