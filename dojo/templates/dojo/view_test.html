@@ -160,7 +160,7 @@
                         </td>
                     {% endif %}
                     <td>{{ test.version }}</td>
-                    {% if sla %}
+                    {% if SLA_CONFIG_ON_NON_PRODUCT_LEVELS and sla %}
                         <td>
                             {{ sla.name }}
                             <i class="fa fa-info-circle has-popover"

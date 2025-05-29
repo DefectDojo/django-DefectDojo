@@ -1052,6 +1052,8 @@ class EngForm(forms.ModelForm):
         exclude = ("first_contacted", "real_start", "engagement_type", "inherited_tags",
                    "real_end", "requester", "reason", "updated", "report_type",
                    "product", "threat_model", "api_test", "pen_test", "check_list")
+        if not settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            exclude += ("sla_configuration",)
 
 
 class DeleteEngagementForm(forms.ModelForm):
@@ -1109,6 +1111,8 @@ class TestForm(forms.ModelForm):
         fields = ["title", "test_type", "target_start", "target_end", "description",
                   "environment", "percent_complete", "tags", "lead", "version", "branch_tag", "build_id", "commit_hash",
                   "api_scan_configuration", "sla_configuration"]
+        if not settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            exclude = ["sla_configuration"]
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))

@@ -922,7 +922,7 @@
                 </div>
             {% endif %}
             <!-- SLA -->
-                {% if system_settings.enable_finding_sla and sla %}
+                {% if system_settings.enable_finding_sla and SLA_CONFIG_ON_NON_PRODUCT_LEVELS and sla %}
                 <div class="panel panel-default panel-default-secondary">
                 <div class="panel-heading">
                 <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
