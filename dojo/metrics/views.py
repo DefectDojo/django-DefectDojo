@@ -248,65 +248,13 @@ def simple_metrics(request):
 # @vary_on_cookie
 def metrics_panel(request):
     page_name = _('Metrics Panel')
-    now = timezone.now()
-    role = Role.objects.get(id=Roles.Maintainer)
-    user = request.user.id
-    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
-    cookie_sessionid = request.COOKIES.get('sessionid', '')
-    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_panel.html', {
-       'name': page_name,
-       'grafana_url': settings.GRAFANA_URL,
-       'grafana_path': settings.GRAFANA_PATH.get("metrics_panel"),
-       'grafana_params': grafana_params,
-       'role': role,
-       'user': user,
-    })
-
-@user_has_role_permission(Permissions.Metrics_DevSecOps)
-def metrics_devsecops(request):
-    page_name = _('Metrics DevSecOps')
-    role = Role.objects.get(id=Roles.Maintainer)
-    user = request.user.id
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_devsecops.html', {
-       'name': page_name,
-       'grafana_url': settings.GRAFANA_URL,
-       'grafana_path': settings.GRAFANA_PATH.get("metrics_devsecops"),
-       'grafana_params': settings.GRAFANA_PARAMS,
-       'role': role,
-       'user': user,
-    })
-
-@user_has_role_permission(Permissions.Metrics_Panel_Admin)
-def metrics_panel_admin(request):
-    page_name = _('Metrics Panel Admin')
-    role = Role.objects.get(id=Roles.Maintainer)
-    user = request.user.id
-    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
-    cookie_sessionid = request.COOKIES.get('sessionid', '')
-    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_panel_admin.html', {
-       'name': page_name,
-       'grafana_url': settings.GRAFANA_URL,
-       'grafana_path': settings.GRAFANA_PATH.get("metrics_panel_admin"),
-       'grafana_params': grafana_params,
-       'role': role,
-       'user': user,
-    })
-    
-@user_has_role_permission(Permissions.Metrics_Scan_Cycle)    
-def metrics_scan_cycle(request):
-    page_name = _('Metrics Scan Cycle')
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
     cookie_csrftoken = request.COOKIES.get('csrftoken', '')
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_scan_cycle.html', {
+    return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
        'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_scan_cycle"),
