@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 
 class JFrogXrayUnifiedParser:
@@ -134,11 +135,15 @@ def get_item(vulnerability, test):
         dynamic_finding=False,
         references=references,
         impact=severity,
-        cvssv3=cvssv3,
         date=scan_time,
         unique_id_from_tool=vulnerability["issue_id"],
         tags=tags,
     )
+
+    cvss_data = parse_cvss_data(cvssv3)
+    if cvss_data:
+        finding.cvssv3 = cvss_data.get("vector")
+        finding.cvssv3_score = cvss_data.get("score")
 
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
