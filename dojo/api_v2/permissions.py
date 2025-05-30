@@ -1127,3 +1127,16 @@ class UserHasPermissionManagerCache(permissions.BasePermission):
                     request.user,
                     Permissions.General_Settings_Add,)
         return False
+
+
+class UserHasPermissionMetrics(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                return user_has_global_permission(
+                    request.user,
+                    Permissions.Metrics_DevSecOps,)
+        return False

@@ -3633,6 +3633,8 @@ def generate_token_generative_ia(request, fid):
     
     finding.ia_recommendation = response.json()
     finding.ia_recommendation["data"]["like_status"] = None
+    finding.ia_recommendation["data"]["user"] = request.user.username
+    finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
     finding.save()
     contex = finding_helper.parser_ia_recommendation(
         response.json())
