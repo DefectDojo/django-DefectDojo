@@ -3103,3 +3103,22 @@ class NotificationWebhooksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification_Webhooks
         fields = "__all__"
+
+
+class SimpleMetricsSerializer(serializers.Serializer):
+
+    """Serializer for simple metrics data grouped by product type."""
+
+    product_type_id = serializers.IntegerField(read_only=True)
+    product_type_name = serializers.CharField(read_only=True)
+    Total = serializers.IntegerField(read_only=True)
+
+    # Severity labels
+    critical = serializers.IntegerField(read_only=True)
+    high = serializers.IntegerField(read_only=True)
+    medium = serializers.IntegerField(read_only=True)
+    low = serializers.IntegerField(read_only=True)
+    info = serializers.IntegerField(read_only=True)
+
+    Opened = serializers.IntegerField(read_only=True)
+    Closed = serializers.IntegerField(read_only=True)

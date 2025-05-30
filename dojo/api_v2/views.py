@@ -3174,6 +3174,123 @@ class QuestionnaireAnsweredSurveyViewSet(
         return Answered_Survey.objects.all().order_by("id")
 
 
+# Authorization: authenticated
+class SimpleMetricsViewSet(
+    viewsets.ReadOnlyModelViewSet,
+):
+
+    """
+    Simple metrics API endpoint that provides finding counts by product type
+    broken down by severity and month status.
+    """
+
+    serializer_class = serializers.SimpleMetricsSerializer
+    queryset = Product_Type.objects.none()
+    permission_classes = (IsAuthenticated,)
+    pagination_class = None
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "date",
+                OpenApiTypes.DATE,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Date to generate metrics for (YYYY-MM-DD format). Defaults to current month.",
+            ),
+            OpenApiParameter(
+                "product_type_id",
+                OpenApiTypes.INT,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Optional product type ID to filter metrics. If not provided, returns all accessible product types.",
+            ),
+        ],
+        responses={status.HTTP_200_OK: serializers.SimpleMetricsSerializer(many=True)},
+    )
+    def list(self, request):
+        """Retrieve simple metrics data for the requested month grouped by product type."""
+        from dojo.metrics.views import get_simple_metrics_data
+
+        # Parse the date parameter, default to current month
+        now = timezone.now()
+        date_param = request.query_params.get("date")
+        product_type_id = request.query_params.get("product_type_id")
+
+        if date_param:
+            # Input validation
+            if len(date_param) > 20:
+                return Response(
+                    {"error": "Invalid date parameter length."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Sanitize input - only allow alphanumeric characters and hyphens
+            import re
+            if not re.match(r"^[0-9\-]+$", date_param):
+                return Response(
+                    {"error": "Invalid date format. Only numbers and hyphens allowed."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                # Parse date string with validation
+                parsed_date = datetime.strptime(date_param, "%Y-%m-%d")
+
+                # Date range validation
+                min_date = datetime(2000, 1, 1)
+                max_date = datetime.now() + relativedelta(years=1)
+
+                if parsed_date < min_date or parsed_date > max_date:
+                    return Response(
+                        {"error": "Date must be between 2000-01-01 and one year from now."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Make it timezone aware
+                now = timezone.make_aware(parsed_date) if timezone.is_naive(parsed_date) else parsed_date
+
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Optional filtering by specific product type with validation
+        parsed_product_type_id = None
+        if product_type_id:
+            try:
+                parsed_product_type_id = int(product_type_id)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid product_type_id format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Get metrics data
+        try:
+            metrics_data = get_simple_metrics_data(
+                now,
+                parsed_product_type_id,
+            )
+        except Exception as e:
+            logger.error(f"Error retrieving metrics: {e}")
+            return Response(
+                {"error": "Unable to retrieve metrics data."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Check if product type was requested but not found
+        if parsed_product_type_id and not metrics_data:
+            return Response(
+                {"error": "Product type not found or access denied."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = self.serializer_class(metrics_data, many=True)
+        return Response(serializer.data)
+
+
 # Authorization: configuration
 class AnnouncementViewSet(
     DojoModelViewSet,
