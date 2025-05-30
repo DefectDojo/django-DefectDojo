@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from crum import impersonate
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -538,6 +539,7 @@ class TestFindingSLAExpiration(DojoTestCase):
         self.assertEqual(finding.sla_days_remaining(), None)
         self.assertEqual(finding.sla_deadline(), None)
 
+    @override_settings(SLA_CONFIG_ON_NON_PRODUCT_LEVELS=True)
     def test_sla_expiration_date_after_eng_override_added(self):
         """
         Tests if the SLA expiration date and SLA days remaining are calculated correctly
@@ -577,6 +579,7 @@ class TestFindingSLAExpiration(DojoTestCase):
         self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
         self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
 
+    @override_settings(SLA_CONFIG_ON_NON_PRODUCT_LEVELS=True)
     def test_sla_expiration_date_after_test_override_added(self):
         """
         Tests if the SLA expiration date and SLA days remaining are calculated correctly
