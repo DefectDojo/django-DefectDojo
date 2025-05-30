@@ -47,7 +47,7 @@ def forward_merge_parser(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0228_alter_jira_username_password'),
+        ('dojo', '0229_alter_finding_unique_id_from_tool'),
     ]
 
     operations = [
