@@ -12,7 +12,7 @@ DefectDojo Pro comes with many additional features.  Here is list of those featu
 ## Improved UX
 
 ### Pro UI
-DefectDojo's UI has been reworked in DefectDojo Pro to be faster, more functional and to be better at navigating through enterprise-level data volume.  It also includes a dark mode.  
+DefectDojo's UI has been reworked in DefectDojo Pro to be faster, more functional, and to be better at navigating through enterprise-level data volume.  It also includes a dark mode.  
 See our [Pro UI Guide](../ui_pro_vs_os) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
@@ -39,7 +39,7 @@ See our [Deduplication Tuning Guide](/en/working_with_findings/finding_deduplica
 For enterprise-level reports, DefectDojo Pro offers an optimized upload method which processes Findings in the background.
 
 ### CLI Tools
-Quickly build a command-line pipeline to import, reimport and export data to your DefectDojo Pro instance using our Universal Importer and DefectDojo CLI apps.  These tools are maintained by the DefectDojo Pro team and can be run in Windows, Macintosh or Linux environments.  
+Quickly build a command-line pipeline to import, reimport, and export data to your DefectDojo Pro instance using our Universal Importer and DefectDojo CLI apps.  These tools are maintained by the DefectDojo Pro team and can be run in Windows, Macintosh, or Linux environments.  
 See our [External Tools Guide](/en/connecting_your_tools/external_tools/) for more information.
 
 ### Connectors
