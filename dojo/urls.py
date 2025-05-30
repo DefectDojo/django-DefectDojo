@@ -58,6 +58,7 @@ from dojo.api_v2.views import (
     ReImportScanView,
     RiskAcceptanceViewSet,
     RoleViewSet,
+    SimpleMetricsViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
@@ -143,6 +144,7 @@ v2_api.register(r"jira_projects", JiraProjectViewSet, basename="jira_project")
 v2_api.register(r"languages", LanguageViewSet, basename="languages")
 v2_api.register(r"language_types", LanguageTypeViewSet, basename="language_type")
 v2_api.register(r"metadata", DojoMetaViewSet, basename="metadata")
+v2_api.register(r"metrics/simple", SimpleMetricsViewSet, basename="simple_metrics")
 v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network_locations")
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")

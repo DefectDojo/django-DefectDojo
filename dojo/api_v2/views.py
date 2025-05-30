@@ -3180,6 +3180,128 @@ class QuestionnaireAnsweredSurveyViewSet(
         return Answered_Survey.objects.all().order_by("id")
 
 
+# Authorization: object-based
+class SimpleMetricsViewSet(
+    viewsets.GenericViewSet,
+):
+    """
+    Simple metrics API endpoint that provides finding counts by product type
+    broken down by severity and month status.
+    """
+    serializer_class = serializers.SimpleMetricsSerializer
+    permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
+    pagination_class = None
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "date",
+                OpenApiTypes.DATE,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Date to generate metrics for (YYYY-MM-DD format). Defaults to current month.",
+            ),
+        ],
+        responses={status.HTTP_200_OK: serializers.SimpleMetricsSerializer(many=True)},
+    )
+    def list(self, request):
+        """
+        Retrieve simple metrics data for the requested month grouped by product type.
+
+        This endpoint replicates the logic from the UI's /metrics/simple endpoint.
+        """
+        # Parse the date parameter, default to current month
+        now = timezone.now()
+        date_param = request.query_params.get('date')
+
+        if date_param:
+            try:
+                # Parse date string into datetime object
+                parsed_date = datetime.strptime(date_param, '%Y-%m-%d')
+                # Make it timezone aware
+                now = timezone.make_aware(parsed_date) if timezone.is_naive(parsed_date) else parsed_date
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD format."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        findings_by_product_type = {}
+
+        # Get authorized product types (same as UI implementation)
+        product_types = get_authorized_product_types(Permissions.Product_Type_View)
+        product_types = product_types.prefetch_related("prod_type")
+
+        for pt in product_types:
+            total_critical = []
+            total_high = []
+            total_medium = []
+            total_low = []
+            total_info = []
+            total_closed = []
+            total_opened = []
+
+            # Filter findings by product type and date (same logic as UI)
+            total = Finding.objects.filter(
+                test__engagement__product__prod_type=pt,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                date__month=now.month,
+                date__year=now.year,
+            )
+
+            # Apply verification status filtering if enabled
+            if (get_system_setting("enforce_verified_status", True) or
+                    get_system_setting("enforce_verified_status_metrics", True)):
+                total = total.filter(verified=True)
+
+            total = total.distinct()
+
+            # Count findings by severity
+            for f in total:
+                if f.severity == "Critical":
+                    total_critical.append(f)
+                elif f.severity == "High":
+                    total_high.append(f)
+                elif f.severity == "Medium":
+                    total_medium.append(f)
+                elif f.severity == "Low":
+                    total_low.append(f)
+                else:
+                    total_info.append(f)
+
+                # Count closed findings in the current month
+                if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
+                    total_closed.append(f)
+
+                # Count opened findings in the current month
+                if f.date.year == now.year and f.date.month == now.month:
+                    total_opened.append(f)
+
+            # Build the findings summary
+            findings_broken_out = {
+                "product_type_id": pt.id,
+                "product_type_name": pt.name,
+                "Total": len(total),
+                "S0": len(total_critical),  # Critical
+                "S1": len(total_high),     # High
+                "S2": len(total_medium),   # Medium
+                "S3": len(total_low),      # Low
+                "S4": len(total_info),     # Info
+                "Opened": len(total_opened),
+                "Closed": len(total_closed),
+            }
+
+            findings_by_product_type[pt] = findings_broken_out
+
+        # Convert to list for serializer (same pattern as UI converting for template)
+        metrics_data = list(findings_by_product_type.values())
+        
+        serializer = self.serializer_class(metrics_data, many=True)
+        return Response(serializer.data)
+
+
 # Authorization: configuration
 class AnnouncementViewSet(
     DojoModelViewSet,
