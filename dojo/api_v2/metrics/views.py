@@ -31,6 +31,7 @@ class MetricIARecommendationApiView(
         responses={status.HTTP_201_CREATED: MetricsIARecommendationSerializers},
     )
     def get(self, request):
+        #TODO: add pagination and filter(group by, order_by, date range, etc.)
         serializer = MetricsIARecommendationSerializers(
             data=request.query_params)
         if serializer.is_valid():
@@ -38,6 +39,7 @@ class MetricIARecommendationApiView(
                 "iteration_counter": 0,
                 "like_counter": 0,
                 "dislike_counter": 0,
+                "last_modified": None,
                 "users": {}
             }
             findings_queyset = Finding.objects.filter(
