@@ -112,6 +112,7 @@ preview = true
 [lint.per-file-ignores]
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
+    "S106",  # hardcoded password assigned to argument in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
 ]
 
