@@ -52,6 +52,7 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
     ApiAppAnalysisFilter,
     ApiCredentialsFilter,
+    ApiDojoMetaFilter,
     ApiEndpointFilter,
     ApiEngagementFilter,
     ApiFindingFilter,
@@ -1643,14 +1644,7 @@ class DojoMetaViewSet(
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "product",
-        "endpoint",
-        "finding",
-        "name",
-        "value",
-    ]
+    filterset_class = ApiDojoMetaFilter
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasDojoMetaPermission,

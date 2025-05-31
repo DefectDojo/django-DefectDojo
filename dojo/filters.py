@@ -66,6 +66,7 @@ from dojo.models import (
     Development_Environment,
     Dojo_Group,
     Dojo_User,
+    DojoMeta,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -1360,6 +1361,22 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
         fields = [
             "name", "name_exact", "business_criticality", "platform",
             "lifecycle", "origin", "external_audience", "internet_accessible",
+        ]
+
+
+class ApiDojoMetaFilter(DojoFilter):
+    name_case_insensitive = CharFilter(field_name="name", lookup_expr="iexact")
+    value_case_insensitive = CharFilter(field_name="value", lookup_expr="iexact")
+
+    class Meta:
+        model = DojoMeta
+        fields = [
+            "id",
+            "product",
+            "endpoint",
+            "finding",
+            "name",
+            "value",
         ]
 
 
