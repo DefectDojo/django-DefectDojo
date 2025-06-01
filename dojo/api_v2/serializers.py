@@ -225,9 +225,11 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
-            # Validate the tag to ensure it doesn't contain invalid characters
-            tag_validator(s, exception_class=RestFrameworkValidationError)
+            # Split the tags up in any way we need to
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            # Validate the tag to ensure it doesn't contain invalid characters
+            for sub in substrings:
+                tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
         return tagulous.utils.render_tags(data_safe)

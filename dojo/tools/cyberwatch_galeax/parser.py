@@ -11,7 +11,7 @@ from dojo.models import Endpoint, Endpoint_Status, Finding
 logger = logging.getLogger(__name__)
 
 
-class CyberwatchParser:
+class CyberwatchGaleaxParser:
     def get_scan_types(self):
         return ["Cyberwatch scan (Galeax)"]
 

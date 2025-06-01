@@ -46,6 +46,22 @@ class TestMSDefenderParser(DojoTestCase):
             endpoint.clean()
         self.assertEqual("1.1.1.1", finding.unsaved_endpoints[0].host)
 
+    def test_parser_defender_zip_repeated(self):
+        """
+        It was found that the defender parser was caching findings across different runs of the parser.
+        This test might be a good default test for any parser to make sure nothing is cached.
+        """
+        testfile = (get_unit_tests_scans_path("ms_defender") / "defender.zip").open(encoding="utf-8")
+        parser = MSDefenderParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(4, len(findings))
+
+        testfile_repeated = (get_unit_tests_scans_path("ms_defender") / "defender.zip").open(encoding="utf-8")
+        findings_repeated = parser.get_findings(testfile, Test())
+        testfile_repeated.close()
+        self.assertEqual(4, len(findings_repeated))
+
     def test_parser_defender_wrong_machines_zip(self):
         testfile = (get_unit_tests_scans_path("ms_defender") / "defender_wrong_machines.zip").open(encoding="utf-8")
         parser = MSDefenderParser()

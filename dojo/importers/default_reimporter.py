@@ -404,7 +404,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
             logger.warning("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
             return Finding.objects.filter(
-                    title=unsaved_finding.title,
+                    title__iexact=unsaved_finding.title,
                     test=self.test,
                     severity=unsaved_finding.severity,
                     numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")

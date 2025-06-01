@@ -2,13 +2,13 @@ import unittest
 from pathlib import Path
 
 from dojo.models import Test
-from dojo.tools.cyberwatch_galeax.parser import CyberwatchParser
+from dojo.tools.cyberwatch_galeax.parser import CyberwatchGaleaxParser
 
 
-class TestCyberwatchParser(unittest.TestCase):
+class TestCyberwatchGaleaxParser(unittest.TestCase):
 
     def setUp(self):
-        self.parser = CyberwatchParser()
+        self.parser = CyberwatchGaleaxParser()
         self.test = Test()
 
     def test_no_findings(self):

@@ -41,6 +41,7 @@ pip-delete-this-directory.txt
 .ruff_cache
 nosetests.xml
 coverage.xml
+selenium_page_source.html
 
 # Translations
 *.mo
