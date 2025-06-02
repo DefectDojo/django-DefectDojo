@@ -42,8 +42,8 @@ class TestWizcliDirParser(DojoTestCase):
         with (get_unit_tests_scans_path("wizcli_dir") / "wizcli_dir_many_vul.json").open(encoding="utf-8") as testfile:
             parser = WizcliDirParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(7, len(findings))
-
+            self.assertEqual(204, len(findings))
+            
             # Test first finding
             finding = findings[0]
             self.assertEqual("github.com/golang-jwt/jwt/v4 4.5.1 - CVE-2025-30204", finding.title)

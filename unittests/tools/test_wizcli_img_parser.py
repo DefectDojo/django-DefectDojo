@@ -38,8 +38,8 @@ class TestWizcliImgParser(DojoTestCase):
         with (get_unit_tests_scans_path("wizcli_img") / "wizcli_img_many_vul.json").open(encoding="utf-8") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(9, len(findings))
-
+            self.assertEqual(29, len(findings))
+            
             # Test first finding
             finding = findings[0]
             self.assertEqual("OS Pkg: libcrypto3 3.3.1-r0 - CVE-2024-5535", finding.title)

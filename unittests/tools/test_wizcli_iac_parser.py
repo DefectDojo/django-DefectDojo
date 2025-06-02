@@ -1,18 +1,18 @@
 from dojo.models import Test
-from dojo.tools.wizcli_iac.parser import WizcliIaCParser
+from dojo.tools.wizcli_iac.parser import WizcliIacParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
-class TestWizcliIaCParser(DojoTestCase):
+class TestWizcliIacParser(DojoTestCase):
     def test_no_findings(self):
         with (get_unit_tests_scans_path("wizcli_iac") / "wizcli_iac_zero_vul.json").open(encoding="utf-8") as testfile:
-            parser = WizcliIaCParser()
+            parser = WizcliIacParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(len(findings), 0)
 
     def test_one_findings(self):
         with (get_unit_tests_scans_path("wizcli_iac") / "wizcli_iac_one_vul.json").open(encoding="utf-8") as testfile:
-            parser = WizcliIaCParser()
+            parser = WizcliIacParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
@@ -43,7 +43,7 @@ class TestWizcliIaCParser(DojoTestCase):
 
     def test_multiple_findings(self):
         with (get_unit_tests_scans_path("wizcli_iac") / "wizcli_iac_many_vul.json").open(encoding="utf-8") as testfile:
-            parser = WizcliIaCParser()
+            parser = WizcliIacParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(25, len(findings))
 
