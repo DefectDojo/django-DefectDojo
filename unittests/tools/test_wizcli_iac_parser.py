@@ -77,22 +77,22 @@ class TestWizcliIacParser(DojoTestCase):
             # Test second finding
             finding = findings[1]
             self.assertEqual(
-                "Healthcheck Instruction Missing - FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}",
+                "Bucket usage logs should be enabled - google_storage_bucket[vault-store]",
                 finding.title,
             )
             self.assertEqual("Low", finding.severity)
-            self.assertEqual("Dockerfile", finding.file_path)
-            self.assertEqual(58, finding.line)
+            self.assertEqual("states/dev/storage.tf", finding.file_path)
+            self.assertEqual(17, finding.line)
             self.assertIn(
-                "**Rule**: Healthcheck Instruction Missing (ID: `ab1043e3-1eeb-4e38-9ca9-7ec0e99fe2ba`)\n"
+                "**Rule**: Bucket usage logs should be enabled (ID: `bd9e69dd-93a1-4122-900a-992135c62572`)\n"
                 "**Severity**: Low\n"
-                "**Resource**: `FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}`\n"
-                "**File**: `Dockerfile`\n"
-                "**Line**: 58\n"
-                "**Code Snippet**: ```\nFROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest\n```\n"
+                "**Resource**: `google_storage_bucket[vault-store]`\n"
+                "**File**: `states/dev/storage.tf`\n"
+                "**Line**: 17\n"
+                '**Code Snippet**: ```\nresource "google_storage_bucket" "vault-store" {\n```\n'
                 "\n**Finding Details**:\n"
-                "- **Expected**: Dockerfile should contain instruction 'HEALTHCHECK'\n"
-                "- **Found**: Dockerfile doesn't contain instruction 'HEALTHCHECK'\n"
-                "- **File Type**: DOCKERFILE",
+                "- **Expected**: 'logging' should be set\n"
+                "- **Found**: 'logging' is undefined\n"
+                "- **File Type**: TERRAFORM",
                 finding.description,
             )

@@ -68,19 +68,25 @@ class TestWizcliImgParser(DojoTestCase):
 
             # Test second finding
             finding = findings[1]
-            self.assertEqual("OS Pkg: libssl3 3.3.1-r0 - CVE-2024-5535", finding.title)
-            self.assertEqual("Low", finding.severity)
+            self.assertEqual("OS Pkg: curl 7.64.0-r5 - CVE-2023-38039", finding.title)
+            self.assertEqual("Medium", finding.severity)
             self.assertIsNone(finding.file_path)
             self.assertIn(
-                "**Vulnerability**: `CVE-2024-5535`\n"
-                "**Severity**: Low\n"
-                "**OS Package**: `libssl3`\n"
-                "**Version**: `3.3.1-r0`\n"
-                "**Fixed Version**: 3.3.1-r1\n"
-                "**Source**: https://security.alpinelinux.org/vuln/CVE-2024-5535",
+                "**Vulnerability**: `CVE-2023-38039`\n"
+                "**Severity**: Medium\n"
+                "**OS Package**: `curl`\n"
+                "**Version**: `7.64.0-r5`\n"
+                "**Fixed Version**: N/A\n"
+                "**Source**: https://security.alpinelinux.org/vuln/CVE-2023-38039\n"
+                "**CVSS Score (from Wiz)**: 7.5\n"
+                "**Has Exploit (Known)**: True\n"
+                "**In CISA KEV**: False\n\n"
+                "**Ignored Policies**:\n"
+                "- test Default vulnerabilities policy (ID: 9c6726d0-1ada-4541-b6d6-3da5ca1124f9)\n"
+                "- test Default vulnerabilities policy ( Updated ) (ID: 9bf73b16-99e7-4a54-af1e-dcfa1436a8f2)",
                 finding.description,
             )
-            self.assertEqual("CVE-2024-5535", finding.cve)
+            self.assertEqual("CVE-2023-38039", finding.cve)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
             self.assertTrue(finding.active)
