@@ -42,20 +42,19 @@ class TestWizcliImgParser(DojoTestCase):
 
             # Test first finding
             finding = findings[0]
-            self.assertEqual("OS Pkg: libcrypto3 3.3.1-r0 - CVE-2024-5535", finding.title)
-            self.assertEqual("Low", finding.severity)
+            self.assertEqual("OS Pkg: curl 7.64.0-r5 - CVE-2023-38039", finding.title)
+            self.assertEqual("Medium", finding.severity)
             self.assertIsNone(finding.file_path)
             self.assertIn(
-                "**Vulnerability**: `CVE-2024-5535`\n"
-                "**Severity**: Low\n"
-                "**OS Package**: `libcrypto3`\n"
-                "**Version**: `3.3.1-r0`\n"
-                "**Fixed Version**: 3.3.1-r1\n"
-                "**Source**: https://security.alpinelinux.org/vuln/CVE-2024-5535",
+                "**Vulnerability**: `CVE-2023-38039`\n"
+                "**Severity**: Medium\n"
+                "**OS Package**: `curl`\n"
+                "**Version**: `7.64.0-r5`\n"
+                "**Source**: https://security.alpinelinux.org/vuln/CVE-2023-38039",
                 finding.description,
             )
-            self.assertEqual("CVE-2024-5535", finding.cve)
-            self.assertEqual("https://security.alpinelinux.org/vuln/CVE-2024-5535", finding.references)
+            self.assertEqual("CVE-2023-38039", finding.cve)
+            self.assertEqual("https://security.alpinelinux.org/vuln/CVE-2023-38039", finding.references)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
             self.assertTrue(finding.active)

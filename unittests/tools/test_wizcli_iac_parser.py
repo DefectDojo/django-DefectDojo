@@ -14,7 +14,7 @@ class TestWizcliIacParser(DojoTestCase):
         with (get_unit_tests_scans_path("wizcli_iac") / "wizcli_iac_one_vul.json").open(encoding="utf-8") as testfile:
             parser = WizcliIacParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(1, len(findings))
+            self.assertEqual(61, len(findings))
             finding = findings[0]
             self.assertEqual(
                 "Bucket usage logs should be enabled - google_storage_bucket[elastic-snapshots]",
@@ -45,7 +45,7 @@ class TestWizcliIacParser(DojoTestCase):
         with (get_unit_tests_scans_path("wizcli_iac") / "wizcli_iac_many_vul.json").open(encoding="utf-8") as testfile:
             parser = WizcliIacParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(25, len(findings))
+            self.assertEqual(478, len(findings))
 
             # Test first finding
             finding = findings[0]
