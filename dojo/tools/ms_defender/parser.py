@@ -25,8 +25,7 @@ class MSDefenderParser:
         if str(file.name).endswith(".json"):
             vulnerabilityfile = json.load(file)
             vulnerabilitydata = vulnerabilityfile["value"]
-            for vulnerability in vulnerabilitydata:
-                findings.append(self.process_json(vulnerability))
+            findings.extend(self.process_json(vulnerability) for vulnerability in vulnerabilitydata)
         elif str(file.name).endswith(".zip"):
             if str(file.__class__) == "<class '_io.TextIOWrapper'>":
                 input_zip = zipfile.ZipFile(file.name, "r")

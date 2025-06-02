@@ -269,10 +269,7 @@ def validate_endpoints_to_add(endpoints_to_add):
                 endpoint_ins.fragment,
             ])
         except ValidationError as ves:
-            for ve in ves:
-                errors.append(
-                    ValidationError(f"Invalid endpoint {endpoint}: {ve}"),
-                )
+            errors.extend(ValidationError(f"Invalid endpoint {endpoint}: {ve}") for ve in ves)
     return endpoint_list, errors
 
 
@@ -316,7 +313,6 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
     keys = [key for key in reader.fieldnames if key != "hostname"]
 
     for row in reader:
-        meta = []
         endpoint = None
         host = row.get("hostname", None)
 
@@ -326,8 +322,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
         endpoints = Endpoint.objects.filter(host=host, product=product)
         if not endpoints.count() and create_endpoints:
             endpoints = [Endpoint.objects.create(host=host, product=product)]
-        for key in keys:
-            meta.append((key, row.get(key)))
+        meta = [(key, row.get(key)) for key in keys]
 
         for endpoint in endpoints:
             existing_tags = [tag.name for tag in endpoint.tags.all()]

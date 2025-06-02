@@ -605,8 +605,7 @@ def get_tags(obj):
     if isinstance(obj, Finding | Engagement):
         obj_tags = obj.tags.all()
         if obj_tags:
-            for tag in obj_tags:
-                tags.append(str(tag.name.replace(" ", "-")))
+            tags.extend(str(tag.name.replace(" ", "-")) for tag in obj_tags)
     if isinstance(obj, Finding_Group):
         for finding in obj.findings.all():
             obj_tags = finding.tags.all()
