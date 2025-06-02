@@ -20,16 +20,24 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
 
 
 def custom_error_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
     return render(request, "500.html", {}, status=500)
 
 
+def custom_unauthorized_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
+    return render(request, "403.html", {}, status=400)
+
+
 def custom_bad_request_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
     return render(request, "400.html", {}, status=400)
 
 
