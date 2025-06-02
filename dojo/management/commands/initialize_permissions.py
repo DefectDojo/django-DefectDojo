@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
@@ -15,16 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            content_type_system_settings = ContentType.objects.get(app_label="dojo", model="system_settings")
-            google_permission = Permission.objects.filter(content_type=content_type_system_settings,
-                codename="change_google_sheet").count()
-            if google_permission == 0:
-                Permission.objects.create(
-                    name="Can change Google Sheet",
-                    content_type=content_type_system_settings,
-                    codename="change_google_sheet",
-                )
-
+            # nothing left here after google sheets removal
             logger.info("Non-standard permissions have been created")
         except ContentType.DoesNotExist:
             logger.warning("No content type found for dojo.system_settings")

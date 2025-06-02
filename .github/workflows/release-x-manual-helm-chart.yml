@@ -22,6 +22,21 @@ on:
         description: 'Release number'
         required: true
 
+      make_draft:
+        type: boolean
+        description: 'Mark as draft release?'
+        default: true
+
+      make_prerelease:
+        type: boolean
+        description: 'Mark as pre-release?'
+        default: false
+
+      make_latest:
+        type: boolean
+        description: 'Mark as latest?'
+        default: false
+
 jobs:
   release-chart:
     runs-on: ubuntu-latest
@@ -38,7 +53,7 @@ jobs:
       #   id: get-upload-url
       #   uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
       #   with:
-      #     tag: ${{ github.event.inputs.release_number }}
+      #     tag: ${{ inputs.release_number }}
       #     token: ${{ github.token }}
 
       - name: Configure git
@@ -56,13 +71,13 @@ jobs:
              helm dependency update ./helm/defectdojo
 
       - name: Add yq
-        uses: mikefarah/yq@8bf425b4d1344db7cd469a8d10a390876e0c77fd # v4.45.1
+        uses: mikefarah/yq@b534aa9ee5d38001fba3cd8fe254a037e4847b37 # v4.45.4
 
       - name: Pin version docker version
         id: pin_image
         run: |-
           yq --version
-          yq -i '.tag="${{ github.event.inputs.release_number }}"'  helm/defectdojo/values.yaml
+          yq -i '.tag="${{ inputs.release_number }}"'  helm/defectdojo/values.yaml
           echo "Current image tag:`yq -r '.tag' helm/defectdojo/values.yaml`"
 
       - name: Package Helm chart
@@ -70,16 +85,17 @@ jobs:
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
+          echo "chart_version=$(ls build | cut -d '-' -f 2,3 | sed 's|\.tgz||')" >> $GITHUB_ENV
 
-      - name: Create release ${{ github.event.inputs.release_number }}
+      - name: Create release ${{ inputs.release_number }}
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
-          name: '${{ github.event.inputs.release_number }} 🌈'
-          tag_name: ${{ github.event.inputs.release_number }}
+          name: '${{ inputs.release_number }} 🌈'
+          tag_name: ${{ inputs.release_number }}
           body: Run the release drafter to populate the release notes.
-          draft: true
-          prerelease: false
+          draft: ${{ inputs.make_draft }}
+          prerelease: ${{ inputs.make_prerelease }}
+          make_latest: ${{ inputs.make_latest }}
           files: ./build/defectdojo-${{ env.chart_version }}.tgz
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
@@ -96,9 +112,9 @@ jobs:
           git checkout helm-charts
           git pull
           if [ ! -f ./index.yaml ]; then
-            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/"
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ inputs.release_number }}/"
           else
-            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ inputs.release_number }}/" --merge ./index.yaml
           fi
           cp -f ./build/index.yaml ./index.yaml
           git add ./index.yaml

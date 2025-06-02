@@ -3,6 +3,7 @@ import logging
 import mimetypes
 import operator
 import re
+import time
 from datetime import datetime
 from functools import reduce
 from pathlib import Path
@@ -88,6 +89,11 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
+from dojo.product_announcements import (
+    ErrorPageProductAnnouncement,
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
@@ -1027,16 +1033,22 @@ class ImportScanResultsView(View):
 
     def success_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a successful import"""
+        duration = time.perf_counter() - request._start_time
+        LargeScanSizeProductAnnouncement(request=request, duration=duration)
+        ScanTypeProductAnnouncement(request=request, scan_type=context.get("scan_type"))
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
+        ErrorPageProductAnnouncement(request=request)
         return HttpResponseRedirect(reverse(
             "import_scan_results",
             args=(context.get("engagement", context.get("product")).id, ),
@@ -1071,27 +1083,28 @@ class ImportScanResultsView(View):
             engagement_id=engagement_id,
             product_id=product_id,
         )
+        request._start_time = time.perf_counter()
         # ensure all three forms are valid first before moving forward
         if not self.validate_forms(context):
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the import form
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Kick off the import process
         if import_error := self.import_findings(context):
             add_error_message_to_response(import_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the credential form
         if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Otherwise return the user back to the engagement (if present) or the product
-        return self.success_redirect(context)
+        return self.success_redirect(request, context)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -1597,10 +1610,8 @@ def csv_export(request):
     first_row = True
     for engagement in engagements:
         if first_row:
-            fields = []
-            for key in dir(engagement):
-                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_"):
-                    fields.append(key)
+            fields = [key for key in dir(engagement)
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_")]
             fields.append("tests")
 
             writer.writerow(fields)
