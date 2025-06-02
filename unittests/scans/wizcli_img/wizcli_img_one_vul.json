@@ -1,214 +1,387 @@
 {
-    "id": "800177c8-2478-4371-87a3-484da1acce1c",
-    "projects": null,
-    "createdAt": "2024-07-22T14:50:26.600849032Z",
-    "startedAt": "0001-01-01T00:00:00Z",
-    "createdBy": {
-      "serviceAccount": {
-        "id": "12312312312312312"
+  "id": "8001d6bd-2b30-419d-8819-a3e962c90d42",
+  "projects": null,
+  "createdAt": "2025-05-07T13:46:45.864014091Z",
+  "startedAt": "2025-05-07T13:46:31.95780963Z",
+  "createdBy": {
+    "serviceAccount": {
+      "id": "hycyzczp25cxpbmp67mtt2cg4mcadi4doz2fey4y4bgrqmk5b2ugs"
+    }
+  },
+  "status": {
+    "state": "SUCCESS",
+    "verdict": "FAILED_BY_POLICY"
+  },
+  "policies": [
+    {
+      "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+      "name": "test Default vulnerabilities policy ( Updated )",
+      "description": "Default built-in policy",
+      "type": "VULNERABILITIES",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsvulnerabilities",
+        "severity": "HIGH",
+        "packageCountThreshold": 1,
+        "ignoreUnfixed": true,
+        "packageAllowList": [],
+        "detectionMethods": [
+          "PACKAGE",
+          "LIBRARY",
+          "FILE_PATH"
+        ],
+        "vulnerabilities": [],
+        "fixGracePeriodHours": 0,
+        "publishGracePeriodHours": 0,
+        "ignoreTransitiveVulnerabilities": true
       }
     },
-    "status": {
-      "state": "SUCCESS",
-      "verdict": "WARN_BY_POLICY"
+    {
+      "id": "f3393997-29e9-4d15-b490-b91f575aebef",
+      "name": "Default malware policy",
+      "description": "Default built-in policy for malware scanning",
+      "type": "MALWARE",
+      "builtin": true,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "AUDIT",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsmalware",
+        "malwareFindingSeverityThreshold": "HIGH",
+        "malwareFindingConfidenceLevelThreshold": "HIGH",
+        "countThreshold": 1
+      }
     },
-    "policies": [
-      {
-        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
-        "name": "Default vulnerabilities policy",
-        "description": "Default built-in policy",
-        "type": "VULNERABILITIES",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
-          {
-            "enforcementMethod": "BLOCK",
-            "deploymentLifecycle": "CLI"
-          }
-        ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamsvulnerabilities",
-          "severity": "CRITICAL",
-          "packageCountThreshold": 1,
-          "ignoreUnfixed": true,
-          "packageAllowList": [],
-          "detectionMethods": null,
-          "fixGracePeriodHours": 0,
-          "publishGracePeriodHours": 0
+    {
+      "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+      "name": "test Default vulnerabilities policy",
+      "description": "Default built-in policy",
+      "type": "VULNERABILITIES",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
         }
-      },
-      {
-        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
-        "name": "Default sensitive data policy",
-        "description": "Default built-in policy for sensitive data scanning",
-        "type": "SENSITIVE_DATA",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
-          {
-            "enforcementMethod": "AUDIT",
-            "deploymentLifecycle": "CLI"
-          }
-        ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamssensitivedata",
-          "dataFindingSeverityThreshold": "",
-          "countThreshold": 0
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsvulnerabilities",
+        "severity": "HIGH",
+        "packageCountThreshold": 1,
+        "ignoreUnfixed": true,
+        "packageAllowList": [],
+        "detectionMethods": [],
+        "vulnerabilities": [],
+        "fixGracePeriodHours": 0,
+        "publishGracePeriodHours": 0,
+        "ignoreTransitiveVulnerabilities": true
+      }
+    },
+    {
+      "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+      "name": "test Default secrets policy",
+      "description": "Default built-in policy for secret scanning",
+      "type": "SECRETS",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
         }
-      },
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamssecrets",
+        "countThreshold": 1,
+        "pathAllowList": [
+          "/.git/config",
+          ".git/config"
+        ],
+        "secretFindingSeverityThreshold": "INFORMATIONAL"
+      }
+    },
+    {
+      "id": "978a1803-2e29-42c1-832a-ddfbb836c051",
+      "name": "test Default sensitive data policy",
+      "description": "Default built-in policy for sensitive data scanning",
+      "type": "SENSITIVE_DATA",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "AUDIT",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamssensitivedata",
+        "dataFindingSeverityThreshold": "",
+        "countThreshold": 0
+      }
+    }
+  ],
+  "extraInfo": null,
+  "tags": null,
+  "outdatedPolicies": [],
+  "taggedResource": null,
+  "scanOriginResource": {
+    "__typename": "CICDScanOriginContainerImage",
+    "name": "registry.sss.com/test.ai/services/api/release-3-967-0:latest",
+    "id": null,
+    "digest": null,
+    "imageLabels": null
+  },
+  "result": {
+    "__typename": "CICDDiskScanResult",
+    "osPackages": null,
+    "libraries": null,
+    "applications": null,
+    "cpes": null,
+    "secrets": [
       {
-        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-        "name": "Default secrets policy",
-        "description": "Default built-in policy for secret scanning",
-        "type": "SECRETS",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
+        "id": "fcc00ecc-249b-5723-84fc-729aca5a5a67",
+        "externalId": null,
+        "description": "GCP Service Account Key (ServiceAccount=test-dev-api-sa@testdev.iam.gserviceaccount.com)",
+        "path": "/app/keys/gcp.json",
+        "lineNumber": 5,
+        "offset": 141,
+        "type": "CLOUD_KEY",
+        "contains": [
           {
-            "enforcementMethod": "AUDIT",
-            "deploymentLifecycle": "CLI"
+            "name": "GCP Service Account Key (ServiceAccount=test-dev-api-sa@testdev.iam.gserviceaccount.com)",
+            "type": "CLOUD_KEY"
           }
         ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamssecrets",
-          "countThreshold": 1,
-          "pathAllowList": []
+        "snippet": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+              "name": "test Default secrets policy",
+              "description": "Default built-in policy for secret scanning",
+              "type": "SECRETS",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamssecrets",
+                "countThreshold": 1,
+                "pathAllowList": [
+                  "/.git/config",
+                  ".git/config"
+                ],
+                "secretFindingSeverityThreshold": "INFORMATIONAL"
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ],
+        "hasAdminPrivileges": null,
+        "hasHighPrivileges": null,
+        "severity": "HIGH",
+        "relatedEntities": null,
+        "ignoredPolicyMatches": null,
+        "details": {
+          "__typename": "DiskScanSecretDetailsCloudKey",
+          "providerUniqueID": "test-dev-api-sa@testdev.iam.gserviceaccount.com",
+          "keyType": 3,
+          "isLongTerm": true
         }
       }
     ],
-    "extraInfo": null,
-    "tags": null,
-    "outdatedPolicies": [],
-    "taggedResource": null,
-    "scanOriginResource": {
-      "__typename": "CICDScanOriginContainerImage",
-      "name": "wizcli-imagescan",
-      "id": null,
-      "digest": null
+    "dataFindings": null,
+    "vulnerableSBOMArtifactsByNameVersion": null,
+    "hostConfiguration": {
+      "hostConfigurationFrameworks": null,
+      "hostConfigurationFindings": null,
+      "analytics": null
     },
-    "result": {
-      "__typename": "CICDDiskScanResult",
-      "osPackages": null,
-      "libraries": null,
-      "applications": null,
-      "cpes": null,
-      "secrets": [
-        {
-          "id": null,
-          "externalId": null,
-          "description": "Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)",
-          "path": "/app/testing.go",
-          "lineNumber": 35,
-          "offset": 521,
-          "type": "PASSWORD",
-          "contains": [
+    "failedPolicyMatches": [
+      {
+        "policy": {
+          "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+          "name": "test Default vulnerabilities policy ( Updated )",
+          "description": "Default built-in policy",
+          "type": "VULNERABILITIES",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
             {
-              "name": "Password",
-              "type": "PASSWORD"
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
             }
           ],
-          "snippet": null,
-          "failedPolicyMatches": [
-            {
-              "policy": {
-                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-                "name": "Default secrets policy",
-                "description": "Default built-in policy for secret scanning",
-                "type": "SECRETS",
-                "builtin": true,
-                "projects": null,
-                "policyLifecycleEnforcements": [
-                  {
-                    "enforcementMethod": "AUDIT",
-                    "deploymentLifecycle": "CLI",
-                    "enforcementConfig": null
-                  }
-                ],
-                "ignoreRules": null,
-                "lifecycleTargets": null,
-                "Default": false,
-                "params": {
-                  "__typename": "cicdscanpolicyparamssecrets",
-                  "countThreshold": 1,
-                  "pathAllowList": []
-                }
-              }
-            }
-          ],
-          "details": {
-            "__typename": "DiskScanSecretDetailsPassword",
-            "length": 8,
-            "isComplex": false
-          }
-        }
-      ],
-      "dataFindings": null,
-      "vulnerableSBOMArtifactsByNameVersion": null,
-      "hostConfiguration": null,
-      "failedPolicyMatches": [
-        {
-          "policy": {
-            "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-            "name": "Default secrets policy",
-            "description": "Default built-in policy for secret scanning",
-            "type": "SECRETS",
-            "builtin": true,
-            "projects": null,
-            "policyLifecycleEnforcements": [
-              {
-                "enforcementMethod": "AUDIT",
-                "deploymentLifecycle": "CLI",
-                "enforcementConfig": null
-              }
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamsvulnerabilities",
+            "severity": "HIGH",
+            "packageCountThreshold": 1,
+            "ignoreUnfixed": true,
+            "packageAllowList": [],
+            "detectionMethods": [
+              "PACKAGE",
+              "LIBRARY",
+              "FILE_PATH"
             ],
-            "ignoreRules": null,
-            "lifecycleTargets": null,
-            "Default": false,
-            "params": {
-              "__typename": "cicdscanpolicyparamssecrets",
-              "countThreshold": 1,
-              "pathAllowList": []
-            }
+            "vulnerabilities": [],
+            "fixGracePeriodHours": 0,
+            "publishGracePeriodHours": 0,
+            "ignoreTransitiveVulnerabilities": true
           }
-        }
-      ],
-      "analytics": {
-        "vulnerabilities": {
-          "infoCount": 0,
-          "lowCount": 0,
-          "mediumCount": 0,
-          "highCount": 0,
-          "criticalCount": 0,
-          "unfixedCount": 0,
-          "totalCount": 0
         },
-        "secrets": {
-          "privateKeyCount": 0,
-          "publicKeyCount": 0,
-          "passwordCount": 1,
-          "certificateCount": 0,
-          "cloudKeyCount": 0,
-          "sshAuthorizedKeyCount": 0,
-          "dbConnectionStringCount": 0,
-          "gitCredentialCount": 0,
-          "presignedURLCount": 0,
-          "saasAPIKeyCount": 0,
-          "totalCount": 1
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
+      },
+      {
+        "policy": {
+          "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+          "name": "test Default vulnerabilities policy",
+          "description": "Default built-in policy",
+          "type": "VULNERABILITIES",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
+            {
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
+            }
+          ],
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamsvulnerabilities",
+            "severity": "HIGH",
+            "packageCountThreshold": 1,
+            "ignoreUnfixed": true,
+            "packageAllowList": [],
+            "detectionMethods": [],
+            "vulnerabilities": [],
+            "fixGracePeriodHours": 0,
+            "publishGracePeriodHours": 0,
+            "ignoreTransitiveVulnerabilities": true
+          }
         },
-        "hostConfiguration": null,
-        "filesScannedCount": 122,
-        "directoriesScannedCount": 116
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
+      },
+      {
+        "policy": {
+          "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+          "name": "test Default secrets policy",
+          "description": "Default built-in policy for secret scanning",
+          "type": "SECRETS",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
+            {
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
+            }
+          ],
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamssecrets",
+            "countThreshold": 1,
+            "pathAllowList": [
+              "/.git/config",
+              ".git/config"
+            ],
+            "secretFindingSeverityThreshold": "INFORMATIONAL"
+          }
+        },
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
       }
+    ],
+    "analytics": {
+      "vulnerabilities": {
+        "infoCount": 0,
+        "lowCount": 2,
+        "mediumCount": 14,
+        "highCount": 9,
+        "criticalCount": 3,
+        "unfixedCount": 2,
+        "totalCount": 28
+      },
+      "secrets": {
+        "privateKeyCount": 0,
+        "publicKeyCount": 0,
+        "passwordCount": 0,
+        "certificateCount": 0,
+        "cloudKeyCount": 1,
+        "sshAuthorizedKeyCount": 0,
+        "dbConnectionStringCount": 0,
+        "gitCredentialCount": 0,
+        "presignedURLCount": 0,
+        "saasAPIKeyCount": 0,
+        "infoCount": 0,
+        "lowCount": 0,
+        "mediumCount": 0,
+        "highCount": 0,
+        "criticalCount": 0,
+        "totalCount": 1
+      },
+      "hostConfiguration": null,
+      "malware": {
+        "infoCount": 0,
+        "lowCount": 0,
+        "mediumCount": 0,
+        "highCount": 0,
+        "criticalCount": 0,
+        "totalCount": 0
+      },
+      "softwareSupplyChain": null,
+      "filesScannedCount": 2666,
+      "directoriesScannedCount": 161
     },
-    "reportUrl": "https://app.wiz.io/findings/cicd-scans#"
-  }
-  
+    "sbomOutput": "",
+    "malwares": null,
+    "softwareSupplyChain": null
+  },
+  "reportUrl": "https://app.wiz.io/findings/cicd-scans#~%2528cicd_scan~%25278001d6bd-2b30-419d-8819-a3e962c90d42%252A2c2025-05-07T13%2525%25252A3a46%2525%25252A3a31.95780963Z%2527%2529"
+}
