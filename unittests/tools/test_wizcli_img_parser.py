@@ -39,7 +39,7 @@ class TestWizcliImgParser(DojoTestCase):
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(9, len(findings))
-            
+
             # Test first finding
             finding = findings[0]
             self.assertEqual("OS Pkg: libcrypto3 3.3.1-r0 - CVE-2024-5535", finding.title)
@@ -59,7 +59,7 @@ class TestWizcliImgParser(DojoTestCase):
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
             self.assertTrue(finding.active)
-            
+
             # Test second finding
             finding = findings[1]
             self.assertEqual("OS Pkg: libssl3 3.3.1-r0 - CVE-2024-5535", finding.title)

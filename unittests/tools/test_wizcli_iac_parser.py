@@ -29,7 +29,7 @@ class TestWizcliIaCParser(DojoTestCase):
                 "**Resource**: `google_storage_bucket[elastic-snapshots]`\n"
                 "**File**: `states/dev/storage.tf`\n"
                 "**Line**: 1\n"
-                "**Code Snippet**: ```\nresource \"google_storage_bucket\" \"elastic-snapshots\" {\n```\n"
+                '**Code Snippet**: ```\nresource "google_storage_bucket" "elastic-snapshots" {\n```\n'
                 "\n**Finding Details**:\n"
                 "- **Expected**: 'logging' should be set\n"
                 "- **Found**: 'logging' is undefined\n"
@@ -46,7 +46,7 @@ class TestWizcliIaCParser(DojoTestCase):
             parser = WizcliIaCParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(25, len(findings))
-            
+
             # Test first finding
             finding = findings[0]
             self.assertEqual(
