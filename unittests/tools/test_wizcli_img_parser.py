@@ -50,7 +50,14 @@ class TestWizcliImgParser(DojoTestCase):
                 "**Severity**: Medium\n"
                 "**OS Package**: `curl`\n"
                 "**Version**: `7.64.0-r5`\n"
-                "**Source**: https://security.alpinelinux.org/vuln/CVE-2023-38039",
+                "**Fixed Version**: N/A\n"
+                "**Source**: https://security.alpinelinux.org/vuln/CVE-2023-38039\n"
+                "**CVSS Score (from Wiz)**: 7.5\n"
+                "**Has Exploit (Known)**: True\n"
+                "**In CISA KEV**: False\n\n"
+                "**Ignored Policies**:\n"
+                "- test Default vulnerabilities policy (ID: 9c6726d0-1ada-4541-b6d6-3da5ca1124f9)\n"
+                "- test Default vulnerabilities policy ( Updated ) (ID: 9bf73b16-99e7-4a54-af1e-dcfa1436a8f2)",
                 finding.description,
             )
             self.assertEqual("CVE-2023-38039", finding.cve)
