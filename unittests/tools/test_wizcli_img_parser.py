@@ -55,7 +55,7 @@ class TestWizcliImgParser(DojoTestCase):
                 "**CVSS Score (from Wiz)**: 7.5\n"
                 "**Has Exploit (Known)**: True\n"
                 "**In CISA KEV**: False\n\n"
-                "**Failed Policies**:\n"
+                "**Ignored Policies**:\n"
                 "- test Default vulnerabilities policy (ID: 9c6726d0-1ada-4541-b6d6-3da5ca1124f9)\n"
                 "- test Default vulnerabilities policy ( Updated ) (ID: 9bf73b16-99e7-4a54-af1e-dcfa1436a8f2)",
                 finding.description,
