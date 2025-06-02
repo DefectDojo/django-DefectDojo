@@ -44,9 +44,7 @@ class DrHeaderParser:
         if data != {} and data[0].get("url") is not None:
             for item in data:
                 url = item["url"]
-                for finding in item["report"]:
-                    items.append(self.return_finding(test=test, finding=finding, url=url))
+                items.extend(self.return_finding(test=test, finding=finding, url=url) for finding in item["report"])
             return items
-        for finding in data:
-            items.append(self.return_finding(test=test, finding=finding))
+        items.extend(self.return_finding(test=test, finding=finding) for finding in data)
         return items

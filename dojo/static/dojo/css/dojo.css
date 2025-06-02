@@ -1884,3 +1884,27 @@ input[type=number]::-webkit-outer-spin-button {
 .table th:last-child, .table td:last-child {
     border-right: none; 
 }
+
+/* Keep the color of the legend in forced color mode */
+.legend td {
+    forced-color-adjust: none;
+}
+    
+.legend .legendLabel {
+    padding-left: 4px;   
+    forced-color-adjust: auto;
+}
+    
+.fa-caret-down,
+.caret {
+        forced-color-adjust: none;
+}    
+    
+/* Keep arrows icons in forced color mode  */
+@media (forced-colors: active) {
+    .fa-caret-down,
+    .caret {
+        color: ButtonText;
+    }
+ }
+    
