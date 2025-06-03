@@ -2,7 +2,6 @@ import csv
 import json
 import logging
 from io import StringIO
-from json.decoder import JSONDecodeError
 
 from dojo.models import Finding
 
@@ -44,27 +43,20 @@ class ProwlerParser:
             csv_data = self._parse_csv(content)
             findings = self._parse_csv_findings(csv_data, test, file_name=file_name)
         else:
-            # Try to detect format from content if extension not recognized
-            try:
-                data = self._parse_json(content)
-                findings = self._parse_json_findings(data, test, file_name=file_name)
-            except (JSONDecodeError, ValueError):
-                csv_data = self._parse_csv(content)
-                findings = self._parse_csv_findings(csv_data, test, file_name=file_name)
+            # If file type can't be determined from extension, throw an error
+            error_message = f"Unsupported file format. Prowler parser only supports JSON and CSV files. File name: {file_name}"
+            raise ValueError(error_message)
 
         return findings
 
     def _parse_json(self, content):
         """Safely parse JSON content"""
-        if isinstance(content, bytes):
-            content = content.decode("utf-8")
+        # Content is already decoded in get_findings method
         return json.loads(content)
 
     def _parse_csv(self, content):
         """Parse CSV content"""
-        if isinstance(content, bytes):
-            content = content.decode("utf-8")
-
+        # Content is already decoded in get_findings method
         f = StringIO(content)
         csv_reader = csv.DictReader(f, delimiter=";")
         results = list(csv_reader)
@@ -107,6 +99,7 @@ class ProwlerParser:
         for item in data:
             # Skip items without required fields
             if not isinstance(item, dict) or "message" not in item:
+                logger.debug(f"Skipping Prowler finding because it's not a dict or missing 'message' field: {item}")
                 continue
 
             # Get basic information
