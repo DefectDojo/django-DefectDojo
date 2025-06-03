@@ -47,16 +47,16 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
                          status.HTTP_200_OK,
                          response.data)
         self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("iteration_counter", response.data["data"])
+        self.assertIn("interaction_counter", response.data["data"])
         self.assertIn("like_counter", response.data["data"])
         self.assertIn("dislike_counter", response.data["data"])
         self.assertIn("users", response.data["data"])
         # like general
-        self.assertEqual(1, response.data["data"]["iteration_counter"])
+        self.assertEqual(1, response.data["data"]["interaction_counter"])
         self.assertEqual(1, response.data["data"]["like_counter"])
         self.assertEqual(0, response.data["data"]["dislike_counter"])
         # like for user
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["iteration_counter"])
+        self.assertEqual(1, response.data["data"]["users"]["admin"]["interaction_counter"])
         self.assertEqual(1, response.data["data"]["users"]["admin"]["like_counter"])
         self.assertEqual(0, response.data["data"]["users"]["admin"]["dislike_counter"])
     
@@ -71,16 +71,16 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
                          status.HTTP_200_OK,
                          response.data)
         self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("iteration_counter", response.data["data"])
+        self.assertIn("interaction_counter", response.data["data"])
         self.assertIn("like_counter", response.data["data"])
         self.assertIn("dislike_counter", response.data["data"])
         self.assertIn("users", response.data["data"])
         # like general
-        self.assertEqual(1, response.data["data"]["iteration_counter"])
+        self.assertEqual(1, response.data["data"]["interaction_counter"])
         self.assertEqual(0, response.data["data"]["like_counter"])
         self.assertEqual(1, response.data["data"]["dislike_counter"])
         # like for user
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["iteration_counter"])
+        self.assertEqual(1, response.data["data"]["users"]["admin"]["interaction_counter"])
         self.assertEqual(1, response.data["data"]["users"]["admin"]["dislike_counter"])
         self.assertEqual(0, response.data["data"]["users"]["admin"]["like_counter"])
     
@@ -98,16 +98,16 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
                          status.HTTP_200_OK,
                          response.data)
         self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("iteration_counter", response.data["data"])
+        self.assertIn("interaction_counter", response.data["data"])
         self.assertIn("like_counter", response.data["data"])
         self.assertIn("dislike_counter", response.data["data"])
         self.assertIn("users", response.data["data"])
         # like general
-        self.assertEqual(2, response.data["data"]["iteration_counter"])
+        self.assertEqual(2, response.data["data"]["interaction_counter"])
         self.assertEqual(1, response.data["data"]["like_counter"])
         self.assertEqual(1, response.data["data"]["dislike_counter"])
         # like for user
-        self.assertEqual(2, response.data["data"]["users"]["admin"]["iteration_counter"])
+        self.assertEqual(2, response.data["data"]["users"]["admin"]["interaction_counter"])
         self.assertEqual(1, response.data["data"]["users"]["admin"]["like_counter"])
         self.assertEqual(1, response.data["data"]["users"]["admin"]["dislike_counter"])
 
