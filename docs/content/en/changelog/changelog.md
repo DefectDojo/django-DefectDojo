@@ -9,7 +9,36 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
 
+## June 2025: v2.47
+
+### June 2, 2025: v2.47.0
+
+- **(Pro UI)** Finding review can now be set through the Pro UI.  You can now Request Review or clear a Finding review from Finding tables, or from the Finding View.
+
+![image](images/pro_request_review.png)
+
+- **(Pro UI)** Artifact files can now be uploaded through the Pro UI to Findings.  These files can be viewed or deleted on the **Finding Overview > Files** tab of a Finding page.
+
+![image](images/pro_upload_file.png)
+
+
 ## May 2025: v2.46
+
+### May 26, 2025: v2.46.4
+
+- **(Pro Metrics)** Rework of filter menu within insights dashboards to remove cross Product Type and Product filtering capabilities.
+- **(Pro UI)** Clickable links within insights dashboards.
+- **(Pro UI)** You can now differentiate between **AppSec** and **SOC** Test Types, to specify whether Findings in DefectDojo were created by an AppSec or SOC process.  You can assign the SOC label by editing a Test Type in the Pro UI:
+
+![image](images/pro_test_types.png)
+
+Whether a Finding is "AppSec" or "SOC" depends on the parent Test Type.  If a Test Type does not have SOC set, all of the Findings associated with this Test Type will be considered "AppSec".
+
+The Priority Insights dashboard can quickly render a list of all SOC or AppSec Findings, ordered by Priority.
+
+![image](images/pro_soc_filter.png)
+
+- **(Pro UI)** More detailed messages in Bulk Edit provide a better explanation of why some Findings may have been skipped.
 
 ### ⚠️ Tag Format Change 
 
