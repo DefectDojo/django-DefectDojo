@@ -1,1 +1,1 @@
-Certificates added to this directory will automatically be added to django docker image.
+Certificates added to this directory will automatically be copied into django docker image and merged into existing certificate store of that which.
