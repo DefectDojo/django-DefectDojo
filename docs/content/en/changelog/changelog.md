@@ -24,22 +24,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## May 2025: v2.46
 
-### May 26, 2025: v2.46.4
-
-- **(Pro Metrics)** Rework of filter menu within insights dashboards to remove cross Product Type and Product filtering capabilities.
-- **(Pro UI)** Clickable links within insights dashboards.
-- **(Pro UI)** You can now differentiate between **AppSec** and **SOC** Test Types, to specify whether Findings in DefectDojo were created by an AppSec or SOC process.  You can assign the SOC label by editing a Test Type in the Pro UI:
-
-![image](images/pro_test_types.png)
-
-Whether a Finding is "AppSec" or "SOC" depends on the parent Test Type.  If a Test Type does not have SOC set, all of the Findings associated with this Test Type will be considered "AppSec".
-
-The Priority Insights dashboard can quickly render a list of all SOC or AppSec Findings, ordered by Priority.
-
-![image](images/pro_soc_filter.png)
-
-- **(Pro UI)** More detailed messages in Bulk Edit provide a better explanation of why some Findings may have been skipped.
-
 ### ⚠️ Tag Format Change 
 
 As of version 2.46.0, Tags can no longer contain the following characters:
@@ -60,6 +44,22 @@ Examples
 This update improves consistency, enhances DefectDojo's search capabilities, and aligns with best practices for tag formatting.
 
 We recommend reviewing your current tags to ensure they align with the new format.  Following the deployment of these new behaviors, requests sent to the API or through the UI with any of the violations listed above will result in an error, with the details of the error raised in the response.
+
+### May 26, 2025: v2.46.4
+
+- **(Pro Metrics)** Rework of filter menu within insights dashboards to remove cross Product Type and Product filtering capabilities.
+- **(Pro UI)** Clickable links within insights dashboards.
+- **(Pro UI)** You can now differentiate between **AppSec** and **SOC** Test Types, to specify whether Findings in DefectDojo were created by an AppSec or SOC process.  You can assign the SOC label by editing a Test Type in the Pro UI:
+
+![image](images/pro_test_types.png)
+
+Whether a Finding is "AppSec" or "SOC" depends on the parent Test Type.  If a Test Type does not have SOC set, all of the Findings associated with this Test Type will be considered "AppSec".
+
+The Priority Insights dashboard can quickly render a list of all SOC or AppSec Findings, ordered by Priority.
+
+![image](images/pro_soc_filter.png)
+
+- **(Pro UI)** More detailed messages in Bulk Edit provide a better explanation of why some Findings may have been skipped.
 
 ### May 19, 2025: v2.46.3
 
@@ -93,12 +93,12 @@ Hotfix release - no significant feature changes.
 
 ## Apr 2025: v2.45
 
-### Apr 28, 2025: v2.45.3
+#### Apr 28, 2025: v2.45.3
 
 - **(Import)** Reimporting a scan can now handle special statuses assigned by a tool.  Now, if a Finding was initially imported as Active, but the status was changed to False Positive, Out Of Scope or Risk Accepted by a subsequent report, that status will now be respected and applied to the Finding by Reimport.
 - **(Tools)** Fortify parser can now assign False Positive status to Findings according to the audit.xml file.
 
-### Apr 22, 2025: v2.45.2
+#### Apr 22, 2025: v2.45.2
 
 ![image](images/risk_table.png)
 
@@ -106,11 +106,11 @@ Hotfix release - no significant feature changes.
 - **(Pro UI)** Added smart Prioritization and Risk fields to DefectDojo Pro, which can be used to more easily triage Findings based on the impact of the Product they affect.  See [Priority](/en/working_with_findings/finding_priority/) documentation for more information.
 - **(Tools)** Updated Fortify Webinspect parser to handle Fortify's new XML report format.
 
-### Apr 14, 2025: v2.45.1
+#### Apr 14, 2025: v2.45.1
 
 - **(Connectors)** Added a Connector for Wiz: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
 
-### Apr 7, 2025: v2.45.0
+#### Apr 7, 2025: v2.45.0
 
 - **(Pro UI)** Added Calendar view to Pro UI: Calendar view now displays Tests and Engagements, and can be filtered.  Clicking on a Calendar entry now displays a more detailed description of the object.
 ![image](images/pro_calendar_view.png)
