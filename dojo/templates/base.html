@@ -1120,7 +1120,7 @@
 
                         setTimeout(() => {
                             $('#sessionTimeoutModal').modal('show');
-                        }, timeout * 1000);
+                        }, Math.min(timeout, 2147483) * 1000); // Do not allow a buffer overflow here
 
                     }  
                     session_notifcation();
