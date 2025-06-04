@@ -1,5 +1,5 @@
 ---
-title: "Branching model"
+title: "Open-Source Branching & Releases"
 description: "How we create releases"
 draft: false
 weight: 3
