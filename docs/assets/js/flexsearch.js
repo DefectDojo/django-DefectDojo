@@ -32,7 +32,7 @@ import Index from 'flexsearch';
           field: 'tags'
         },
         {
-          field: {{ if site.Params.doks.indexSummary }}'summary'{{ else }}'content'{{ end }}
+          field: 'test' 
         },
         {
           field:  'date',
