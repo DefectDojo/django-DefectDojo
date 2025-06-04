@@ -1165,6 +1165,8 @@ def enable_like_status(finding):
 @register.filter()
 def render_risk_acceptance_accepted_by(finding: Finding):
     accepted_by = finding.accepted_by
+    if accepted_by is None:
+        accepted_by = ''
     accepted_by_user = ""
     if finding.risk_acceptance.accepted_by:
         accepted_by_recommendation_ra = finding.risk_acceptance.accepted_by_user
