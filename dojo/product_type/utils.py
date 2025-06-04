@@ -6,7 +6,6 @@ from dojo.models import (
     Dojo_User,
 )
 from django.db.models import Q
-import ast
 
 
 def add_technical_contact_whit_member(product_type: Product_Type, pt_form):
@@ -38,7 +37,7 @@ def add_technical_contact_whit_member(product_type: Product_Type, pt_form):
                     else []
                 )
                 for risk in risk_acceptances:
-                    current_accepted_by = ast.literal_eval(risk.accepted_by)
+                    current_accepted_by = risk.accepted_by_user
                     updated_accepted_by = list(
                         map(
                             lambda x: x.replace(

@@ -526,6 +526,13 @@ env = environ.FileAwareEnv(
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
     # Redis
     DD_USE_CACHE_REDIS=(bool, False),
+
+    # Cors
+    DD_CORS_ENABLED=(bool, False),
+    DD_CORS_ALLOWED_ORIGINS=(list, []),
+    DD_CORS_ALLOW_METHODS=(list, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]),
+    DD_CORS_ALLOW_HEADERS=(list, ["Authorization", "Content-Type", "Accept", "session-cookie"]),
+    DD_CORS_ALLOW_CREDENTIALS=(bool, True),
 )
 
 
@@ -1280,6 +1287,30 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.request_cache.middleware.RequestCacheMiddleware",
 ]
 
+# CORS
+
+if env("DD_CORS_ENABLED"):
+
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "corsheaders",
+    ]
+
+    DJANGO_MIDDLEWARE_CLASSES = [
+        *DJANGO_MIDDLEWARE_CLASSES,
+        "corsheaders.middleware.CorsMiddleware",
+    ]
+
+    if env("DD_CORS_ALLOWED_ORIGINS") != ["[]"]:
+        CORS_ALLOWED_ORIGINS = env("DD_CORS_ALLOWED_ORIGINS")
+
+    if env("DD_CORS_ALLOW_METHODS") != ["[]"]:
+        CORS_ALLOW_METHODS = env("DD_CORS_ALLOW_METHODS")
+
+    if env("DD_CORS_ALLOW_HEADERS") != ["[]"]:
+        CORS_ALLOW_HEADERS = env("DD_CORS_ALLOW_HEADERS")
+
+    CORS_ALLOW_CREDENTIALS = env("DD_CORS_ALLOW_CREDENTIALS")
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 

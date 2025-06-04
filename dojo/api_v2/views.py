@@ -1056,7 +1056,7 @@ class FindingViewSet(
     )
     @action(detail=False, methods=["POST"])
     def bulk_close(self, request):
-        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data["findings"])}")
+        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data['findings'])}")
         errors = []
         success = []
         if request.method == "POST":
@@ -1068,11 +1068,11 @@ class FindingViewSet(
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
-                        logger.debug(f"BULK_CLOSE: finding_close {finding_close["id"]}")
+                        logger.debug(f"BULK_CLOSE: finding_close {finding_close['id']}")
                         try:
                             finding = Finding.objects.get(id=finding_close["id"])
                         except Finding.DoesNotExist:
-                            logger.debug(f"BULK_CLOSE: Finding {finding_close["id"]} not found")
+                            logger.debug(f"BULK_CLOSE: Finding {finding_close['id']} not found")
                             continue
                         finding.is_mitigated = finding_close["is_mitigated"]
                         finding.mitigated = finding_close.get("mitigated", timezone.now())
@@ -1137,7 +1137,7 @@ class FindingViewSet(
                         else:
                             errors.append({finding.id: "Not closed"})
                     except Finding.DoesNotExist:
-                        logger.error(f"BULK_CLOSE: Finding error {finding_close["id"]} not found")
+                        logger.error(f"BULK_CLOSE: Finding error {finding_close['id']} not found")
                         errors.append({finding_close['id']: "not found"})
             logger.debug(f"BULK_CLOSE: finish process Success {success}")
             logger.debug(f"BULK_CLOSE: finish process Error {errors}")
@@ -1738,7 +1738,7 @@ class FindingViewSet(
             return self._remove_metadata(request, finding)
 
         return Response(
-            {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
+            {"error": "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
 
 

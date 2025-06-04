@@ -137,7 +137,7 @@
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
                         <td>
-                            {% for accepted_by in risk_acceptance.accepted_by|literal_eval_recommended_acceptors%}
+                            {% for accepted_by in risk_acceptance.accepted_by_user%}
                             👤 {{accepted_by}}</br>
                             {% endfor %}
                         </td>

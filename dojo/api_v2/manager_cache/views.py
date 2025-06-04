@@ -21,6 +21,7 @@ class ManagerCacheApiView(
         ):
     permission_classes = (IsAuthenticated,
                           permissions.UserHasPermissionManagerCache,)
+    serializer_class = ManagerCacheSerializers
 
     @extend_schema(
         request=ManagerCacheSerializers,

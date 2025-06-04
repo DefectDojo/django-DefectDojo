@@ -1,9 +1,9 @@
 name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 
 trigger:
-  branches:
+  tags:
     include:
-      - trunk
+      - '*'
 
 pool:
   name: Azure Pipelines
@@ -134,4 +134,4 @@ steps:
             }
           ]
         }
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
