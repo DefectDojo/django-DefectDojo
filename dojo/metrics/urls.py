@@ -30,6 +30,4 @@ urlpatterns = [
         name="metrics_devsecops"),
     re_path(r'^metrics/panel_admin$', views.metrics_panel_admin,
         name="metrics_panel_admin"),
-    re_path(r'^metrics/scan_cycle$', views.metrics_scan_cycle,
-        name="metrics_scan_cycle"),
 ]
