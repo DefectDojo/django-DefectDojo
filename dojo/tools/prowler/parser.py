@@ -12,7 +12,15 @@ class ProwlerParser:
 
     """
     A parser for Prowler scan results.
-    Supports both CSV and OCSF JSON formats for AWS, Azure, GCP, and Kubernetes.
+    Supports both CSV and OCSF JSON for            # Construct title
+            if original_check_id and check_title:
+                title = f"{original_check_id}: {check_title}"
+            elif original_check_id:
+                title = original_check_id
+            elif check_title:
+                title = check_title
+            else:
+                title = "Prowler Finding"AWS, Azure, GCP, and Kubernetes.
     """
 
     def get_scan_types(self):
@@ -43,20 +51,19 @@ class ProwlerParser:
             csv_data = self._parse_csv(content)
             findings = self._parse_csv_findings(csv_data, test, file_name=file_name)
         else:
-            # If file type can't be determined from extension, throw an error
-            error_message = f"Unsupported file format. Prowler parser only supports JSON and CSV files. File name: {file_name}"
-            raise ValueError(error_message)
+            # If file type can't be determined from extension
+            error_msg = f"Unsupported file format. Prowler parser only supports JSON and CSV files. File name: {file_name}"
+            logger.error(f"Unsupported file format for Prowler parser: {file_name}")
+            raise ValueError(error_msg)
 
         return findings
 
     def _parse_json(self, content):
         """Safely parse JSON content"""
-        # Content is already decoded in get_findings method
         return json.loads(content)
 
     def _parse_csv(self, content):
         """Parse CSV content"""
-        # Content is already decoded in get_findings method
         f = StringIO(content)
         csv_reader = csv.DictReader(f, delimiter=";")
         results = list(csv_reader)
@@ -89,7 +96,8 @@ class ProwlerParser:
         if not status_code:
             return True
 
-        inactive_statuses = ["pass", "manual", "not_available", "skipped"]
+        # Using a set for O(1) lookup performance
+        inactive_statuses = {"pass", "manual", "not_available", "skipped"}
         return status_code.lower() not in inactive_statuses
 
     def _parse_json_findings(self, data, test, *, file_name=""):
@@ -98,8 +106,11 @@ class ProwlerParser:
 
         for item in data:
             # Skip items without required fields
-            if not isinstance(item, dict) or "message" not in item:
-                logger.debug(f"Skipping Prowler finding because it's not a dict or missing 'message' field: {item}")
+            if not isinstance(item, dict):
+                logger.debug(f"Skipping Prowler finding because it's not a dict: {item}")
+                continue
+            if "message" not in item:
+                logger.debug(f"Skipping Prowler finding because it's missing 'message' field: {item}")
                 continue
 
             # Get basic information
@@ -157,47 +168,19 @@ class ProwlerParser:
             if "finding_info" in item and isinstance(item["finding_info"], dict):
                 unique_id = item["finding_info"].get("uid", "")
 
-            # Extract check ID from various places
+            # Get check ID - simplify extraction logic
             check_id = None
-            if "check_id" in item:
+            if "finding_info" in item and isinstance(item["finding_info"], dict):
+                check_id = item["finding_info"].get("check_id")
+            # Fall back to top-level check_id if not found in finding_info
+            if not check_id and "check_id" in item:
                 check_id = item.get("check_id")
-            elif (
-                "finding_info" in item and isinstance(item["finding_info"], dict) and "check_id" in item["finding_info"]
-            ):
-                check_id = item["finding_info"]["check_id"]
-
-            # Map certain titles or contents to standardized check IDs
-            # This helps with consistency across different formats
-
-            # For AWS
-            if cloud_provider == "aws" or (not cloud_provider and "Hardware MFA" in title):
-                if "Hardware MFA" in title or "hardware_mfa" in title.lower():
-                    check_id = "iam_root_hardware_mfa_enabled"
-
-            # For Azure
-            elif cloud_provider == "azure" or (not cloud_provider and "Network policy" in title):
-                if "Network policy" in title or "network policy" in title.lower() or "cluster" in title:
-                    check_id = "aks_network_policy_enabled"
-
-            # For GCP
-            elif cloud_provider == "gcp" or (
-                not cloud_provider and any(x in title.lower() for x in ["rdp", "firewall"])
-            ):
-                if "rdp" in title.lower() or "firewall" in title.lower():
-                    check_id = "bc_gcp_networking_2"
-
-            # For Kubernetes
-            elif cloud_provider == "kubernetes" or (not cloud_provider and "AlwaysPullImages" in title):
-                if "AlwaysPullImages" in title:
-                    check_id = "bc_k8s_pod_security_1"
 
             # Get remediation information
             remediation = ""
             if "remediation" in item and isinstance(item["remediation"], dict):
-                if "text" in item["remediation"]:
-                    remediation = item["remediation"]["text"]
-                elif "desc" in item["remediation"]:
-                    remediation = item["remediation"]["desc"]
+                # Try to get remediation - prefer "text" field but fall back to "desc" if needed
+                remediation = item["remediation"].get("text", item["remediation"].get("desc", ""))
 
             # Add notes to description
             if status_code:
@@ -226,6 +209,10 @@ class ProwlerParser:
 
             # Add additional metadata
             finding.unsaved_tags = []
+
+            # Extract date if available
+            if "finding_info" in item and isinstance(item["finding_info"], dict) and "created_time_dt" in item["finding_info"]:
+                finding.date = item["finding_info"]["created_time_dt"]
 
             # Add cloud provider as tag if available
             if cloud_provider:
@@ -287,7 +274,6 @@ class ProwlerParser:
             check_id = row.get("CHECK_ID", "")
             check_title = row.get("CHECK_TITLE", "")
             provider = row.get("PROVIDER", "").lower()
-            service_name = row.get("SERVICE_NAME", "")
 
             # Original check ID before any standardization (for titles)
             original_check_id = check_id
@@ -306,9 +292,9 @@ class ProwlerParser:
 
             # Construct title
             if original_check_id and check_title:
-                title = f"{original_check_id}: {check_title}"
-            elif original_check_id:
-                title = original_check_id
+                title = f"{check_id}: {check_title}"
+            elif check_id:
+                title = check_id
             elif check_title:
                 title = check_title
             else:
@@ -382,6 +368,13 @@ class ProwlerParser:
 
             # Add provider as tag if available
             finding.unsaved_tags = []
+
+            # Extract date if available
+            if row.get("TIMESTAMP", ""):
+                finding.date = row.get("TIMESTAMP")
+            elif row.get("ASSESSMENT_START_TIME", ""):
+                finding.date = row.get("ASSESSMENT_START_TIME")
+
             if provider:
                 finding.unsaved_tags.append(provider)
             # If no provider in the CSV but we can infer it from check_id or title
