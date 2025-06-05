@@ -296,17 +296,16 @@ def metrics_panel_admin(request):
        'role': role,
        'user': user,
     })
-    
-@user_has_role_permission(Permissions.Metrics_Scan_Cycle)    
-def metrics_scan_cycle(request):
-    page_name = _('Metrics Scan Cycle')
+
+def metrics_panel_v2(request):
+    page_name = _('Metrics Panel V2')
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
     cookie_csrftoken = request.COOKIES.get('csrftoken', '')
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/metrics_scan_cycle.html', {
+    return render(request, 'dojo/metrics_panel_v2.html', {
        'name': page_name,
        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
        'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_scan_cycle"),
