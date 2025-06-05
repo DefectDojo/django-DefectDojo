@@ -24,7 +24,7 @@
         </title>
         {% block add_css_before %}
         {% endblock %}
-        
+
         <!-- jQuery -->
         <script src="{% static "jquery/dist/jquery.js" %}"></script>
         <!--  jQuery UI -->
@@ -164,7 +164,7 @@
                                     {% if request.user.is_authenticated %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'view_profile' %}">
-                                                <i class="fa-solid fa-user fa-fw"></i> 
+                                                <i class="fa-solid fa-user fa-fw"></i>
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
@@ -405,7 +405,7 @@
                                                     <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard">
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
-                                                </li> --> 
+                                                </li> -->
                                                 <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
@@ -435,12 +435,26 @@
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
-                                                </li> -->                            
+                                                </li> -->
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
                                                         {% trans "Metrics Panel" %}
                                                     </a>
                                                 </li>
+                                                {% if "Metrics_Panel_Admin"|has_role_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
+                                                            {% trans "Metrics Panel Administrative" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if "Metrics_DevSecOps"|has_global_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_devsecops' %}">
+                                                            {% trans "Metrics DevSecOps" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -453,7 +467,7 @@
                                                 </a>
                                                 <ul class="nav nav-second-level">
                                                     {% if "auth.view_user"|has_configuration_permission:request %}
-                                                        <li>    
+                                                        <li>
                                                             <a rel="noopener noreferrer" href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
@@ -512,7 +526,7 @@
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                
+
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'finding_exclusions' %}">
                                                         {% trans "Vulnerability Black & White Lists" %}
@@ -521,7 +535,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
-                                        
+
                                         <li id="menu_configuration">
                                             <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>
