@@ -1,4 +1,3 @@
-from datetime import date
 
 from dojo.models import Test
 from dojo.tools.cycognito.parser import CycognitoParser

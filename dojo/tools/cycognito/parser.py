@@ -33,7 +33,7 @@ class CycognitoParser:
             attacker_interest = vulnerability.get("attacker_interest", None)
             tags = vulnerability.get("tags", None)
             base_severity_score = vulnerability.get("base_severity_score", None)
-            id = vulnerability.get("id", None)
+            vulnid = vulnerability.get("id", None)
             remediation_method = vulnerability.get("remediation_method", None)
             issue_id = vulnerability.get("issue_id", None)
             first_detected = vulnerability.get("first_detected", None)
@@ -77,7 +77,7 @@ class CycognitoParser:
             if tools and tools is not None:
                 description += "**tools:** " + str(tools) + "\n"
             if continent and continent is not None:
-                description += "**continent:** " + str(', '.join(continent)) + "\n"
+                description += "**continent:** " + str(", ".join(continent)) + "\n"
             if tech_owners and tech_owners is not None:
                 description += "**tech_owners:** " + str(tech_owners) + "\n"
             if teams and teams is not None:
@@ -90,8 +90,8 @@ class CycognitoParser:
                 description += "**tags:** " + str(tags) + "\n"
             if base_severity_score is not None:
                 description += "**base_severity_score:** " + str(base_severity_score) + "\n"
-            if id is not None:
-                description += "**id:** " + str(id) + "\n"
+            if vulnid is not None:
+                description += "**id:** " + str(vulnid) + "\n"
             if remediation_method is not None:
                 mitigation += "**remediation_method:** " + str(remediation_method) + "\n"
             if issue_id is not None:
@@ -109,17 +109,17 @@ class CycognitoParser:
             if attractiveness_label is not None:
                 description += "**attractiveness_label:** " + str(attractiveness_label) + "\n"
             if affected_ptr_domains and affected_ptr_domains is not None:
-                description += "**affected_ptr_domains:** " + str(', '.join(affected_ptr_domains)) + "\n"
+                description += "**affected_ptr_domains:** " + str(", ".join(affected_ptr_domains)) + "\n"
             if affected_asset_tags and affected_asset_tags is not None:
-                description += "**affected_asset_tags:** " + str() + "\n"
+                description += "**affected_asset_tags:** " + "" + "\n"
             if advisories and advisories is not None:
                 description += "**advisories:** " + str(advisories) + "\n"
             if environments and environments is not None:
-                description += "**environments:** " + str(', '.join(environments)) + "\n"
+                description += "**environments:** " + str(", ".join(environments)) + "\n"
             if locations and locations is not None:
-                description += "**locations:** " + str(', '.join(locations)) + "\n"
+                description += "**locations:** " + str(", ".join(locations)) + "\n"
             if region and region is not None:
-                description += "**region:** " + str(', '.join(region)) + "\n"
+                description += "**region:** " + str(", ".join(region)) + "\n"
             if detection_complexity is not None:
                 description += "**detection_complexity:** " + str(detection_complexity) + "\n"
             if port is not None:
@@ -131,32 +131,32 @@ class CycognitoParser:
             if attractiveness is not None:
                 description += "**attractiveness:** " + str(attractiveness) + "\n"
             if platforms is not None:
-                description += "**platforms:** " + str(', '.join(platforms)) + "\n"
+                description += "**platforms:** " + str(", ".join(platforms)) + "\n"
             if exploitation_score is not None:
                 description += "**exploitation_score:** " + str(exploitation_score) + "\n"
             if issue_type is not None:
                 description += "**issue_type:** " + str(issue_type) + "\n"
             if organizations is not None:
-                description += "**organizations:** " + str(', '.join(organizations)) + "\n"
+                description += "**organizations:** " + str(", ".join(organizations)) + "\n"
             if business_units is not None:
-                description += "**business_units:** " + str(', '.join(business_units)) + "\n"
+                description += "**business_units:** " + str(", ".join(business_units)) + "\n"
             if comment is not None:
                 description += "**comment:** " + str(comment) + "\n"
             if evidence is not None:
                 description += "**evidence:** " + str(evidence) + "\n"
             if remediation_steps is not None:
-                mitigation += "**remediation_steps:** " + str('\n '.join(remediation_steps)) + "\n"
+                mitigation += "**remediation_steps:** " + str("\n ".join(remediation_steps)) + "\n"
             if potential_impact and potential_impact is not None:
-                description += "**potential_impact:** " + str(', '.join(potential_impact)) + "\n"
+                description += "**potential_impact:** " + str(", ".join(potential_impact)) + "\n"
             finding = Finding(
                 title=title,
                 test=test,
                 description=description,
                 severity=base_severity.capitalize(),
-                references=str('\n'.join(references)),
+                references=str("\n".join(references)),
                 date=datetime.strptime(first_detected, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d"),
                 dynamic_finding=True,
-                mitigation=mitigation
+                mitigation=mitigation,
             )
             if cve_ids and cve_ids is not None:
                 finding.unsaved_vulnerability_ids = []
