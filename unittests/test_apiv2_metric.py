@@ -46,19 +46,18 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK,
                          response.data)
-        self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("interaction_counter", response.data["data"])
-        self.assertIn("like_counter", response.data["data"])
-        self.assertIn("dislike_counter", response.data["data"])
-        self.assertIn("users", response.data["data"])
+        self.assertIn("interaction_counter", response.data["results"])
+        self.assertIn("like_counter", response.data["results"])
+        self.assertIn("dislike_counter", response.data["results"])
+        self.assertIn("users", response.data["results"])
         # like general
-        self.assertEqual(1, response.data["data"]["interaction_counter"])
-        self.assertEqual(1, response.data["data"]["like_counter"])
-        self.assertEqual(0, response.data["data"]["dislike_counter"])
+        self.assertEqual(1, response.data["results"]["interaction_counter"])
+        self.assertEqual(1, response.data["results"]["like_counter"])
+        self.assertEqual(0, response.data["results"]["dislike_counter"])
         # like for user
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["interaction_counter"])
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["like_counter"])
-        self.assertEqual(0, response.data["data"]["users"]["admin"]["dislike_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["interaction_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["like_counter"])
+        self.assertEqual(0, response.data["results"]["users"][0]["dislike_counter"])
     
     def test_get_metrics_ia_recommendation_dislikes(self):
         self.finding1.ia_recommendation = self.data_ia_recommendation
@@ -70,19 +69,18 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK,
                          response.data)
-        self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("interaction_counter", response.data["data"])
-        self.assertIn("like_counter", response.data["data"])
-        self.assertIn("dislike_counter", response.data["data"])
-        self.assertIn("users", response.data["data"])
+        self.assertIn("interaction_counter", response.data["results"])
+        self.assertIn("like_counter", response.data["results"])
+        self.assertIn("dislike_counter", response.data["results"])
+        self.assertIn("users", response.data["results"])
         # like general
-        self.assertEqual(1, response.data["data"]["interaction_counter"])
-        self.assertEqual(0, response.data["data"]["like_counter"])
-        self.assertEqual(1, response.data["data"]["dislike_counter"])
+        self.assertEqual(1, response.data["results"]["interaction_counter"])
+        self.assertEqual(0, response.data["results"]["like_counter"])
+        self.assertEqual(1, response.data["results"]["dislike_counter"])
         # like for user
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["interaction_counter"])
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["dislike_counter"])
-        self.assertEqual(0, response.data["data"]["users"]["admin"]["like_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["interaction_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["dislike_counter"])
+        self.assertEqual(0, response.data["results"]["users"][0]["like_counter"])
     
     def test_get_metrics_ia_recommendation_like_and_dislike(self):
         self.finding1.ia_recommendation = self.data_ia_recommendation
@@ -97,17 +95,16 @@ class MetricIARecommendationApiViewTestCase(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_200_OK,
                          response.data)
-        self.assertIn("Metrics IA Recommendation", response.data["message"])
-        self.assertIn("interaction_counter", response.data["data"])
-        self.assertIn("like_counter", response.data["data"])
-        self.assertIn("dislike_counter", response.data["data"])
-        self.assertIn("users", response.data["data"])
+        self.assertIn("interaction_counter", response.data["results"])
+        self.assertIn("like_counter", response.data["results"])
+        self.assertIn("dislike_counter", response.data["results"])
+        self.assertIn("users", response.data["results"])
         # like general
-        self.assertEqual(2, response.data["data"]["interaction_counter"])
-        self.assertEqual(1, response.data["data"]["like_counter"])
-        self.assertEqual(1, response.data["data"]["dislike_counter"])
+        self.assertEqual(2, response.data["results"]["interaction_counter"])
+        self.assertEqual(1, response.data["results"]["like_counter"])
+        self.assertEqual(1, response.data["results"]["dislike_counter"])
         # like for user
-        self.assertEqual(2, response.data["data"]["users"]["admin"]["interaction_counter"])
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["like_counter"])
-        self.assertEqual(1, response.data["data"]["users"]["admin"]["dislike_counter"])
+        self.assertEqual(2, response.data["results"]["users"][0]["interaction_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["like_counter"])
+        self.assertEqual(1, response.data["results"]["users"][0]["dislike_counter"])
 

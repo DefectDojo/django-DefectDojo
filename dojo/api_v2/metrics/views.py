@@ -27,7 +27,7 @@ class MetricIARecommendationApiView(
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasPermissionMetrics,)
-    serializer_class = MetricsIARecommendationSerializers 
+    serializer_class = MetricsIARecommendationSerializers
     pagination_class = LimitOffsetPagination
 
     @extend_schema(
@@ -45,13 +45,37 @@ class MetricIARecommendationApiView(
                 "users": {}
             }
             findings_queyset = Finding.objects.filter(
-                ia_recommendation__isnull=False)
+                ia_recommendation__isnull=False, )
             for finding in findings_queyset:
-                data = get_metrics_ia_recommendation(data,
-                                   finding,
-                                   exclude_field=serializer.validated_data.get("exclude_field", []))
+                data = get_metrics_ia_recommendation(
+                    data,
+                    finding,
+                    exclude_field=serializer.validated_data.get("exclude_field", []))
 
-            users_data = [{"username":user, **user_data} for user, user_data in data["users"].items()]
+            # filter by date if provided
+
+
+            # filter by username if provided
+            if user := serializer.validated_data.get("username"):
+                user_data = data["users"].get(user, {})
+                user_data["username"] = user
+                return http_response.ok(
+                    message="IA Recommendation Metrics",
+                    data=user_data,
+                )
+            # parse the objects user and finding to list
+            users_data = [
+                {
+                    "username": user,
+                    "interaction_counter": user_data["interaction_counter"],
+                    "like_counter": user_data["like_counter"],
+                    "dislike_counter": user_data["dislike_counter"],
+                    "findings": [{
+                        "finding_id": finding_id, **finding_data}
+                        for finding_id, finding_data in user_data["findings"].items()]
+                }
+                for user, user_data in data["users"].items()
+            ]
             # Apply pagination
             paginator = self.pagination_class()
             paginated_data = paginator.paginate_queryset(users_data, request)
@@ -65,9 +89,6 @@ class MetricIARecommendationApiView(
             })
 
             return paginator.get_paginated_response(paginated_response)
-            # return http_response.ok(
-            #     message="Metrics IA Recommendation",
-            #     data=data)
         else:
             return http_response.bad_request(
                 message="Invalid serializer", data=serializer.errors)
