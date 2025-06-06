@@ -52,7 +52,6 @@ class TestProwlerParser(DojoTestCase):
             # Verify basic properties that should be present in any finding
             self.assertIsNotNone(finding.title)
             self.assertIsNotNone(finding.severity)
-            self.assertIn("aws", [tag.lower() for tag in finding.unsaved_tags])
 
             # Verify cloud provider data
             self.assertIn("aws", [tag.lower() for tag in finding.unsaved_tags])
@@ -156,9 +155,12 @@ class TestProwlerParser(DojoTestCase):
             # Verify cloud provider data
             self.assertIn("gcp", [tag.lower() for tag in finding.unsaved_tags])
 
-            # Skip resource assertion as GCP JSON test data doesn't include resource information
-            # Skip remediation check too since GCP JSON test data doesn't include remediation text
-            # The GCP JSON test data contains empty remediation objects
+            # Verify remediation data exists in mitigation
+            self.assertIsNotNone(finding.mitigation, "Mitigation should not be None")
+            self.assertTrue(
+                "Remediation:" in finding.mitigation,
+                "No remediation information found in mitigation",
+            )
 
     def test_kubernetes_csv_parser(self):
         """Test parsing Kubernetes CSV report with findings"""
