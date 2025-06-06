@@ -133,7 +133,7 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("tcp", endpoint.protocol)
             with self.subTest(i=55):
                 finding = findings[55]
-                self.assertEqual("### Host\n\n**IP Address:** 10.250.195.71\n**FQDN:** ip-10-250-195-71.eu-west-1.compute.internal\n\n\n**Port/Protocol:** 30150/tcp\n\n\n**Script ID:** fingerprint-strings\n**Script Output:** \n  GenericLines: \n    E_BAD_PROTOCOL\n\n\n", finding.description)
+                self.assertEqual("### Host\n\n**IP Address:** 10.250.195.71\n**PTR:** ip-10-250-195-71.eu-west-1.compute.internal\n\n\n**Port/Protocol:** 30150/tcp\n\n\n**Script ID:** fingerprint-strings\n**Script Output:** \n  GenericLines: \n    E_BAD_PROTOCOL\n\n\n", finding.description)
 
     def test_parse_issue12411(self):
         with (get_unit_tests_scans_path("nmap") / "issue12411.xml").open(encoding="utf-8") as testfile:
@@ -148,8 +148,8 @@ class TestNmapParser(DojoTestCase):
                 description = """### Host
 
 **IP Address:** 172.217.18.238
-**FQDN:** par10s10-in-f238.1e100.net
-**URL:** google.com
+**user:** google.com
+**PTR:** par10s10-in-f238.1e100.net
 **custom:** lalala
 
 
@@ -161,7 +161,7 @@ class TestNmapParser(DojoTestCase):
 ### Host
 
 **IP Address:** 54.239.28.85
-**URL:** amazon.com
+**user:** amazon.com
 
 
 **Port/Protocol:** 80/tcp
