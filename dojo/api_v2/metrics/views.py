@@ -10,7 +10,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from django.core.cache import cache
 from dojo.api_v2.metrics.serializers import MetricsIARecommendationSerializers
 from dojo.api_v2.api_error import ApiError
-from dojo.api_v2.metrics.helper import get_metrics_ia_recommendation
+from dojo.api_v2.metrics.helper import (get_metrics_ia_recommendation,
+                                        apply_filter)
 from dojo.models import Finding
 from drf_spectacular.utils import (
     extend_schema,
@@ -47,12 +48,17 @@ class MetricIARecommendationApiView(
             findings_queyset = Finding.objects.filter(
                 ia_recommendation__isnull=False, )
             for finding in findings_queyset:
-                data = get_metrics_ia_recommendation(
-                    data,
-                    finding,
-                    exclude_field=serializer.validated_data.get("exclude_field", []))
-
-            # filter by date if provided
+                if (
+                    apply_filter(
+                        finding,
+                        start_date=serializer.validated_data.get("start_date"),
+                        end_date=serializer.validated_data.get("end_date"))
+                ):
+                    data = get_metrics_ia_recommendation(
+                        data,
+                        finding,
+                        exclude_field=serializer.validated_data.get(
+                            "exclude_field", []))
 
 
             # filter by username if provided
