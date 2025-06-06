@@ -27,6 +27,11 @@
       "region": "global"
     },
     "remediation": {
+      "desc": "To avoid the security risk in using API keys, it is recommended to use standard authentication flow instead.",
+      "references": [
+        "gcloud alpha services api-keys delete",
+        "https://cloud.google.com/docs/authentication/api-keys"
+      ]
     },
     "risk_details": "Security risks involved in using API-Keys appear below: API keys are simple encrypted strings, API keys do not identify the user or the application making the API request, API keys are typically accessible to clients, making it easy to discover and steal an API key.",
     "time": 1739539640,
@@ -62,6 +67,11 @@
       "region": "global"
     },
     "remediation": {
+      "desc": "Enable vulnerability scanning for images stored in Artifact Registry using AR Container Analysis or a third-party provider.",
+      "references": [
+        "gcloud services enable containeranalysis.googleapis.com",
+        "https://cloud.google.com/artifact-analysis/docs/container-scanning-overview"
+      ]
     },
     "risk_details": "Without image vulnerability scanning, container images stored in Artifact Registry may contain known vulnerabilities, increasing the risk of exploitation by malicious actors.",
     "time": 1739539640,
