@@ -123,7 +123,8 @@ from dojo.tools.factory import (
     requires_tool_type,
 )
 from dojo.user.utils import get_configuration_permissions_codenames
-from dojo.utils import is_scan_file_too_large, tag_validator
+from dojo.utils import is_scan_file_too_large
+from dojo.validators import tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2000,6 +2001,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
+
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # Save vulnerability ids and pop them
@@ -2023,6 +2025,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             new_finding_template.save()
 
         self._save_tags(new_finding_template, to_be_tagged)
+
         return new_finding_template
 
     def update(self, instance, validated_data):
