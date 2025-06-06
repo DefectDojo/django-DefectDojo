@@ -9,7 +9,7 @@
         ],
         "confidence": 30,
         "mitre_attack_next_technique_name": "Credential Access: Network Sniffing",
-        "affected_asset": "ip/1.2.3.4",
+        "affected_asset": "domain/asdf.com",
         "package": "ASM",
         "cis_controls": [
             "7.6",
@@ -155,7 +155,7 @@
         ],
         "confidence": 30,
         "mitre_attack_next_technique_name": "Credential Access: Network Sniffing",
-        "affected_asset": "ip/1.2.3.4",
+        "affected_asset": "cert/fjwfjewiofjweofijewoifj0oi",
         "package": "ASM",
         "cis_controls": [
             "7.6",
@@ -311,7 +311,7 @@
         ],
         "confidence": 30,
         "mitre_attack_next_technique_name": "Credential Access: Network Sniffing",
-        "affected_asset": "ip/2.3.4.5",
+        "affected_asset": "webapp/afe.com",
         "package": "ASM",
         "cis_controls": [
             "7.6",

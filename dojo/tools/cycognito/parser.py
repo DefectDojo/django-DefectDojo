@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from dojo.models import Finding
+from dojo.models import Endpoint, Finding
 
 
 class CycognitoParser:
@@ -164,5 +164,7 @@ class CycognitoParser:
                 finding.unsaved_vulnerability_ids = []
                 for cve_id in cve_ids:
                     finding.unsaved_vulnerability_ids.append(cve_id)
+            finding.unsaved_endpoints = []
+            finding.unsaved_endpoints.append(Endpoint(host=affected_asset.replace("ip/", "").replace("webapp/", "").replace("cert/", "").replace("domain/", "")))
             findings.append(finding)
         return findings
