@@ -38,24 +38,8 @@ class NmapParser:
             if ip is not None:
                 host_info += f"**IP Address:** {ip}\n"
 
-            fqdn = (
-                host.find("hostnames/hostname[@type='PTR']").attrib["name"]
-                if host.find("hostnames/hostname[@type='PTR']") is not None
-                else None
-            )
-            if fqdn is not None:
-                host_info += f"**FQDN:** {fqdn}\n"
-
-            url = (
-                host.find("hostnames/hostname[@type='user']").attrib["name"]
-                if host.find("hostnames/hostname[@type='user']") is not None
-                else None
-            )
-            if url is not None:
-                host_info += f"**URL:** {url}\n"
             for hosts in host.find("hostnames"):
-                if hosts.attrib["type"] not in {"user", "PTR"}:
-                    host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
+                host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
 
             host_info += "\n\n"
             for os in host.iter("os"):
