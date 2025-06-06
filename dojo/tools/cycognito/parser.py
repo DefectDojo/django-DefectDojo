@@ -20,6 +20,7 @@ class CycognitoParser:
         for vulnerability in data:
             description = ""
             mitigation = ""
+            impact = ""
             confidence = vulnerability.get("confidence", None)
             affected_asset = vulnerability.get("affected_asset", None)
             package = vulnerability.get("package", None)
@@ -82,7 +83,7 @@ class CycognitoParser:
                 description += "**tech_owners:** " + str(tech_owners) + "\n"
             if teams and teams is not None:
                 description += "**teams:** " + str(teams) + "\n"
-            if potential_threat and potential_impact is not None:
+            if potential_threat and potential_threat is not None:
                 description += "**potential_threat:** " + str(potential_threat) + "\n"
             if attacker_interest is not None and not "None":
                 description += "**attacker_interest:** " + str(attacker_interest) + "\n"
@@ -147,7 +148,7 @@ class CycognitoParser:
             if remediation_steps is not None:
                 mitigation += "**remediation_steps:** " + str("\n ".join(remediation_steps)) + "\n"
             if potential_impact and potential_impact is not None:
-                description += "**potential_impact:** " + str(", ".join(potential_impact)) + "\n"
+                impact = "**potential_impact:** " + str(", ".join(potential_impact)) + "\n"
             finding = Finding(
                 title=title,
                 test=test,
@@ -157,6 +158,7 @@ class CycognitoParser:
                 date=datetime.strptime(first_detected, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d"),
                 dynamic_finding=True,
                 mitigation=mitigation,
+                impact=impact,
             )
             if cve_ids and cve_ids is not None:
                 finding.unsaved_vulnerability_ids = []
