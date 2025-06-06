@@ -10,8 +10,9 @@ from rest_framework.pagination import LimitOffsetPagination
 from django.core.cache import cache
 from dojo.api_v2.metrics.serializers import MetricsIARecommendationSerializers
 from dojo.api_v2.api_error import ApiError
-from dojo.api_v2.metrics.helper import (get_metrics_ia_recommendation,
-                                        apply_filter)
+from dojo.api_v2.metrics.helper import (
+    get_metrics_ia_recommendation,
+    apply_filter)
 from dojo.models import Finding
 from drf_spectacular.utils import (
     extend_schema,

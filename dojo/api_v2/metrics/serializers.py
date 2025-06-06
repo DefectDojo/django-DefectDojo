@@ -10,4 +10,7 @@ class MetricsIARecommendationSerializers(serializers.Serializer):
             choices=CHOICES_FIELD_EXCLUDE,
             required=False,
             allow_null=True,
+            error_messages={
+                    "invalid_choice": "Invalid choice.Available options are: [findings]."
+            }
     )
