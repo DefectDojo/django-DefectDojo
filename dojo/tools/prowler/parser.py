@@ -12,15 +12,7 @@ class ProwlerParser:
 
     """
     A parser for Prowler scan results.
-    Supports both CSV and OCSF JSON for            # Construct title
-            if original_check_id and check_title:
-                title = f"{original_check_id}: {check_title}"
-            elif original_check_id:
-                title = original_check_id
-            elif check_title:
-                title = check_title
-            else:
-                title = "Prowler Finding"AWS, Azure, GCP, and Kubernetes.
+    Supports both CSV and OCSF JSON for AWS, Azure, GCP, and Kubernetes.
     """
 
     def get_scan_types(self):
@@ -108,9 +100,6 @@ class ProwlerParser:
             # Skip items without required fields
             if not isinstance(item, dict):
                 logger.debug(f"Skipping Prowler finding because it's not a dict: {item}")
-                continue
-            if "message" not in item:
-                logger.debug(f"Skipping Prowler finding because it's missing 'message' field: {item}")
                 continue
 
             # Get basic information
