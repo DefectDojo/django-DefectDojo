@@ -159,11 +159,15 @@ class ProwlerParser:
 
             # Get check ID - simplify extraction logic
             check_id = None
+            # Try to get check_id from finding_info first (some formats)
             if "finding_info" in item and isinstance(item["finding_info"], dict):
                 check_id = item["finding_info"].get("check_id")
             # Fall back to top-level check_id if not found in finding_info
             if not check_id and "check_id" in item:
                 check_id = item.get("check_id")
+            # For official Prowler OCSF JSON format, check_id is in metadata.event_code
+            if not check_id and "metadata" in item and isinstance(item["metadata"], dict):
+                check_id = item["metadata"].get("event_code")
 
             # Get remediation information
             remediation = ""
