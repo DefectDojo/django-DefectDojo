@@ -1,3 +1,8 @@
+---
+title: "ReversingLabs Spectra Assure"
+toc_hide: true
+---
+
 # ReversingLabs SpectraAssure Parser
 
 ## File Types
