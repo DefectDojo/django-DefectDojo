@@ -351,7 +351,11 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
 
 
 def get_expired_risk_acceptances_to_handle():
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_date__isnull=False, expiration_date_handled__isnull=True, expiration_date__date__lte=timezone.now().date())
+    risk_acceptances = Risk_Acceptance.objects.filter(
+        expiration_date__isnull=False,
+        expiration_date_handled__isnull=True,
+        expiration_date__date__lte=timezone.now().date(),
+        engagement__isnull=False)
     return prefetch_for_expiration(risk_acceptances)
 
 
@@ -362,7 +366,7 @@ def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
         expiration_date_warned__isnull=True,
         expiration_date__date__lte=timezone.now().date() + relativedelta(days=heads_up_days),
         expiration_date__date__gte=timezone.now().date(),
-        engagement__isnull=False,
+        engagement__isnull=False
         )
     return prefetch_for_expiration(risk_acceptances)
 
