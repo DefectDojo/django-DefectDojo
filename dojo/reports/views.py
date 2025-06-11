@@ -5,6 +5,7 @@ from datetime import datetime
 from tempfile import NamedTemporaryFile
 
 from dateutil.relativedelta import relativedelta
+from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
@@ -13,6 +14,8 @@ from django.utils import timezone
 from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from django.contrib import messages
+
 
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -28,7 +31,16 @@ from dojo.filters import (
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
-from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Test,
+    GeneralSettings)
+from dojo.reports import report_manager
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -42,6 +54,7 @@ from dojo.reports.widgets import (
     report_widget_factory,
 )
 from dojo.utils import (
+    redirect_to_return_url_or_else,
     Product_Tab,
     add_breadcrumb,
     get_page_items,
@@ -664,8 +677,9 @@ def get_list_index(full_list, index):
     return element
 
 
-def get_findings(request):
-    url = request.META.get("QUERY_STRING")
+def get_findings(request=None, url=None):
+    if url is None:
+        url = request.META.get("QUERY_STRING")
     if not url:
         msg = "Please use the report button when viewing findings"
         raise Http404(msg)
@@ -824,6 +838,27 @@ class CSVExportView(View):
                                                         product=None,
                                                         user=request.user)
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            report_manager.async_generate_report(
+                url=request.META.get("QUERY_STRING"),
+                user=request.user.id)
+            messages.add_message(
+                request,
+                messages.WARNING,
+                message=(
+                    "Hold on a moment! We're generating your report and will "
+                    f"send it to your email ({request.user.email}) as soon as it's ready."
+                ),
+                extra_tags="alert-warning"
+            )
+            return redirect_to_return_url_or_else(request, reverse('open_findings')) # TODO: Validar reverse en ulr del product open finding
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
