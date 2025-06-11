@@ -211,18 +211,16 @@ class ProwlerParser:
             if cloud_provider:
                 finding.unsaved_tags.append(cloud_provider)
             # If no cloud provider but we can infer it from check_id or title
-            elif check_id and any(prefix in check_id.lower() for prefix in ["iam_", "elb_", "ec2_", "s3_"]):
+            elif check_id and any(prefix in check_id.lower() for prefix in ["accessanalyzer_", "account_"]):
                 finding.unsaved_tags.append("aws")
             elif "azure" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["aks_", "aad_"])
+                check_id and any(prefix in check_id.lower() for prefix in ["aks_"])
             ):
                 finding.unsaved_tags.append("azure")
-            elif "gcp" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["gcp_", "gke_"])
-            ):
+            elif "gcp" in title.lower():
                 finding.unsaved_tags.append("gcp")
             elif "kubernetes" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["k8s_", "bc_k8s_"])
+                check_id and any(prefix in check_id.lower() for prefix in ["apiserver_"])
             ):
                 finding.unsaved_tags.append("kubernetes")
             # If still no provider tag, try to detect from the file name
@@ -371,18 +369,16 @@ class ProwlerParser:
             if provider:
                 finding.unsaved_tags.append(provider)
             # If no provider in the CSV but we can infer it from check_id or title
-            elif check_id and any(prefix in check_id.lower() for prefix in ["iam_", "elb_", "ec2_", "s3_"]):
+            elif check_id and any(prefix in check_id.lower() for prefix in ["accessanalyzer_", "account_"]):
                 finding.unsaved_tags.append("AWS")
             elif "azure" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["aks_", "aad_"])
+                check_id and any(prefix in check_id.lower() for prefix in ["aks_"])
             ):
                 finding.unsaved_tags.append("AZURE")
-            elif "gcp" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["gcp_", "gke_"])
-            ):
+            elif "gcp" in title.lower():
                 finding.unsaved_tags.append("GCP")
             elif "kubernetes" in title.lower() or (
-                check_id and any(prefix in check_id.lower() for prefix in ["k8s_", "bc_k8s_"])
+                check_id and any(prefix in check_id.lower() for prefix in ["apiserver_"])
             ):
                 finding.unsaved_tags.append("KUBERNETES")
 
