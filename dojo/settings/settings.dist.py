@@ -1345,9 +1345,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
-    "Wizcli Img Scan": ["title", "description", "file_path", "line", "component_name", "component_version"]
-    "Wizcli Dir Scan": ["title", "description", "file_path", "line", "component_name", "component_version"]
-    "Wizcli IAC Scan": ["title", "description", "file_path", "line", "component_name"]
+    "Wizcli Img Scan": ["title", "description", "file_path", "line", "component_name", "component_version"],
+    "Wizcli Dir Scan": ["title", "description", "file_path", "line", "component_name", "component_version"],
+    "Wizcli IAC Scan": ["title", "description", "file_path", "line", "component_name"],
+}
 
 # Override the hardcoded settings here via the env var
 if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
