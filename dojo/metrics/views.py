@@ -185,7 +185,6 @@ def simple_metrics(request):
         total_medium = []
         total_low = []
         total_info = []
-        total_closed = []
         total_opened = []
         findings_broken_out = {}
 
@@ -197,10 +196,20 @@ def simple_metrics(request):
                                        date__year=now.year,
                                        )
 
+        closed = Finding.objects.filter(test__engagement__product__prod_type=pt,
+                                       false_p=False,
+                                       duplicate=False,
+                                       out_of_scope=False,
+                                       mitigated__month=now.month,
+                                       mitigated__year=now.year,
+                                       )
+
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             total = total.filter(verified=True)
+            closed = closed.filter(verified=True)
 
         total = total.distinct()
+        closed = closed.distinct()
 
         for f in total:
             if f.severity == "Critical":
@@ -214,9 +223,6 @@ def simple_metrics(request):
             else:
                 total_info.append(f)
 
-            if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
-                total_closed.append(f)
-
             if f.date.year == now.year and f.date.month == now.month:
                 total_opened.append(f)
 
@@ -228,7 +234,7 @@ def simple_metrics(request):
         findings_broken_out["S4"] = len(total_info)
 
         findings_broken_out["Opened"] = len(total_opened)
-        findings_broken_out["Closed"] = len(total_closed)
+        findings_broken_out["Closed"] = len(closed)
 
         findings_by_product_type[pt] = findings_broken_out
 
