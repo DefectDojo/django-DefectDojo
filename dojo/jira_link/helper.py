@@ -1674,19 +1674,24 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     jira_instance = get_jira_instance(finding)
 
     if resolved:
-        if jira_instance and resolution_name in jira_instance.accepted_resolutions:
+        if jira_instance and resolution_name in jira_instance.accepted_resolutions and (finding.test.engagement.product.enable_simple_risk_acceptance or finding.test.engagement.enable_full_risk_acceptance):
             if not finding.risk_accepted:
-                logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted. Creating risk acceptance.")
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted.")
+                finding.risk_accepted = True
                 finding.active = False
                 finding.mitigated = None
                 finding.is_mitigated = False
                 finding.false_p = False
-                ra = Risk_Acceptance.objects.create(
-                    accepted_by=assignee_name,
-                    owner=finding.reporter,
-                )
-                finding.test.engagement.risk_acceptance.add(ra)
-                ra_helper.add_findings_to_risk_acceptance(User.objects.get_or_create(username="JIRA")[0], ra, [finding])
+
+                if finding.test.engagement.product.enable_full_risk_acceptance:
+                    logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
+                    ra = Risk_Acceptance.objects.create(
+                        accepted_by=assignee_name,
+                        owner=finding.reporter,
+                        decision_details=f"Risk Acceptance automatically created from JIRA issue {jira_issue.jira_key} with resolution {resolution_name}",
+                    )
+                    finding.test.engagement.risk_acceptance.add(ra)
+                    ra_helper.add_findings_to_risk_acceptance(User.objects.get_or_create(username="JIRA")[0], ra, [finding])
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
             if not finding.false_p:
