@@ -1,4 +1,3 @@
-import hashlib
 import logging
 import re
 
@@ -37,30 +36,8 @@ class WizcliParsers:
         return match.group(1) if match else None
 
     @staticmethod
-    def _generate_unique_id(components: list) -> str:
-        """
-        Generates a stable unique ID for findings.
-
-        Args:
-            components: List of components to use for ID generation
-
-        """
-        # Filter out None and empty values
-        filtered_components = [str(c).strip() for c in components if c is not None and str(c).strip()]
-
-        # Sort components for consistent order regardless of input order
-        filtered_components = sorted(filtered_components)
-
-        id_string = "|".join(filtered_components)
-        hash_object = hashlib.sha256(id_string.encode("utf-8"))
-        return hash_object.hexdigest()
-
-    @staticmethod
     def parse_libraries(libraries_data, test):
-        """
-        Parses library vulnerability data into granular DefectDojo findings.
-        Creates one finding per unique vulnerability (CVE/ID) per library instance (name/version/path).
-        """
+        """Parses library vulnerability data into granular DefectDojo findings."""
         findings_list = []
         if not libraries_data:
             return findings_list
@@ -132,11 +109,6 @@ class WizcliParsers:
                 full_description = "\n".join(description_parts)
                 references = source_url if source_url != "N/A" else None
 
-                # Generate unique ID using stable components including file path
-                unique_id = WizcliParsers._generate_unique_id(
-                    [lib_name, lib_version, vuln_name, lib_path],
-                )
-
                 finding = Finding(
                     test=test,
                     title=title,
@@ -149,7 +121,6 @@ class WizcliParsers:
                     component_version=lib_version,
                     static_finding=True,
                     dynamic_finding=False,
-                    unique_id_from_tool=unique_id,
                     vuln_id_from_tool=vuln_name,
                     references=references,
                     active=True,  # Always set as active since we don't have status from Wiz
@@ -212,11 +183,6 @@ class WizcliParsers:
             full_description = "\n".join(description_parts)
             mitigation = "Rotate the exposed secret immediately. Remove the secret from the specified file path and line. Store secrets securely using a secrets management solution. Review commit history."
 
-            # Generate unique ID using stable components
-            unique_id = WizcliParsers._generate_unique_id(
-                [secret_type, file_path, str(line_number) if line_number is not None else "0"],
-            )
-
             finding = Finding(
                 test=test,
                 title=title,
@@ -227,7 +193,6 @@ class WizcliParsers:
                 line=line_number if line_number is not None else 0,
                 static_finding=True,
                 dynamic_finding=False,
-                unique_id_from_tool=unique_id,
                 active=True,  # Always set as active since we don't have status from Wiz
             )
             findings_list.append(finding)
@@ -293,11 +258,6 @@ class WizcliParsers:
                 full_description = "\n".join(description_parts)
                 references = source_url if source_url != "N/A" else None
 
-                # Generate unique ID using stable components
-                unique_id = WizcliParsers._generate_unique_id(
-                    [pkg_name, pkg_version, vuln_name],
-                )
-
                 finding = Finding(
                     test=test,
                     title=title,
@@ -306,7 +266,8 @@ class WizcliParsers:
                     mitigation=mitigation,
                     static_finding=True,
                     dynamic_finding=False,
-                    unique_id_from_tool=unique_id,
+                    component_name=pkg_name,
+                    component_version=pkg_version,
                     vuln_id_from_tool=vuln_name,
                     references=references,
                     active=True,  # Always set as active since we don't have status from Wiz
@@ -408,11 +369,6 @@ class WizcliParsers:
 
                 full_description = "\n".join(description_parts)
 
-                # Generate unique ID using stable components for IAC
-                unique_id = WizcliParsers._generate_unique_id(
-                    [rule_id, resource_name, file_name, str(line_number) if line_number is not None else "0"],  # Only use rule ID and resource name for deduplication
-                )
-
                 finding = Finding(
                     test=test,
                     title=title,
@@ -424,7 +380,6 @@ class WizcliParsers:
                     component_name=resource_name,  # Use resource name as component
                     static_finding=True,
                     dynamic_finding=False,
-                    unique_id_from_tool=unique_id,
                     vuln_id_from_tool=rule_id,  # Use rule ID as the identifier
                     references=references,
                     active=True,  # Always set as active since we don't have status from Wiz
