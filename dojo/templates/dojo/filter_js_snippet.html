@@ -37,7 +37,7 @@
     {% if title_words %}
         var title_words = [
                 {% for word in title_words %}
-                    "{{word}}",
+                    "{{word|escapejs}}",
                 {% endfor %}
             ];
             {% comment %}ideally we use the form.prefix but then we have the trailing dash... django templates are hard{% endcomment %}
@@ -49,7 +49,7 @@
     {% if component_words %}
             var component_words = [
                 {% for word in component_words %}
-                    "{{word}}",
+                    "{{word|escapejs}}",
                 {% endfor %}
             ];
 

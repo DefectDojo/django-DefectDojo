@@ -20,6 +20,7 @@ class TestBearerParser(TestCase):
         self.assertEqual("https://docs.bearer.com/reference/rules/javascript_lang_dangerous_insert_html", findings[0].references)
         self.assertEqual("js/adminer/editing.js", findings[0].file_path)
         self.assertEqual(581, findings[0].line)
+        self.assertEqual("804174abc284c6bc747d886b3e9ba757_0", findings[0].unique_id_from_tool)
 
     def test_bearer_parser_with_many_vuln_has_many_findings(self):
         testfile = (get_unit_tests_scans_path("bearer_cli") / "bearer_cli_many_vul.json").open(encoding="utf-8")
