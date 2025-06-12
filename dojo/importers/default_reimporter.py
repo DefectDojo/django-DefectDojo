@@ -484,7 +484,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             return existing_finding, True
         
         if existing_finding.risk_accepted and existing_finding.is_mitigated and not unsaved_finding.is_mitigated:
-            # If the existing finding is risk accepted, but the new finding is not mitigated,
+            # If the existing finding is risk accepted and mitigated, but the new finding is not mitigated,
             # we need to update the existing finding to match the new finding
             logger.debug(
                 f"Updating existing risk accepted finding: {existing_finding.id}: {existing_finding.title} "
