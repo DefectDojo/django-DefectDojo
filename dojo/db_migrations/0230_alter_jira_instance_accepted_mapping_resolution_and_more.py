@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jira_instance',
             name='accepted_mapping_resolution',
-            field=models.CharField(blank=True, verbose_name="Risk Accepted resolution mapping", help_text='JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding become Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings is closed in JIRA and JIRA sets the default resolution.', max_length=300, null=True),
+            field=models.CharField(blank=True, verbose_name="Risk Accepted resolution mapping", help_text='JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution.', max_length=300, null=True),
         ),
         migrations.AlterField(
             model_name='jira_instance',
