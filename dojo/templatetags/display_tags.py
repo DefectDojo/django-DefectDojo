@@ -159,6 +159,10 @@ def dojo_version():
         version = settings.FOOTER_VERSION
     return f"v. {version.replace('v', '')}"
 
+@register.simple_tag
+def team_name():
+    return System_Settings.objects.get().team_name
+
 
 @register.simple_tag
 def dojo_current_hash():
