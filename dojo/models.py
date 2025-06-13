@@ -14,7 +14,6 @@ import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
-from cvss import CVSS3
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -43,6 +42,8 @@ from polymorphic.models import PolymorphicModel
 from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+
+from dojo.validators import cvss3_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2331,12 +2332,11 @@ class Finding(models.Model):
                               verbose_name=_("EPSS percentile"),
                               help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
                               validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex],
+    cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw."))
+                              verbose_name=_("CVSS v3 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
                                         verbose_name=_("CVSSv3 score"),
@@ -2699,11 +2699,17 @@ class Finding(models.Model):
         # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
             try:
-                cvss_object = CVSS3(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_object.scores()[2]
+
+                cvss_data = parse_cvss_data(self.cvssv3)
+                if cvss_data:
+                    self.cvssv3 = cvss_data.get("vector")
+                    self.cvssv3_score = cvss_data.get("score")
+
             except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+                logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
+                # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
+                if self.pk is None:
+                    self.cvssv3 = None
 
         self.set_hash_code(dedupe_option)
 
@@ -3516,8 +3522,8 @@ class Finding_Template(models.Model):
                            blank=False,
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
+    cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
@@ -4633,7 +4639,11 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 
-from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
+from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
+    calculate_grade,
+    parse_cvss_data,
+    to_str_typed,
+)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)

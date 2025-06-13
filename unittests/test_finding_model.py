@@ -318,6 +318,7 @@ class TestFindingModel(DojoTestCase):
 
     # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
     # Capturing current behavior which might not be the desired one yet
+    # This test saves vectors without any validation. This is capturing current behavior.
     def test_cvssv3(self):
         """Tests if the CVSSv3 score is calculated correctly"""
         user, _ = User.objects.get_or_create(username="admin")
