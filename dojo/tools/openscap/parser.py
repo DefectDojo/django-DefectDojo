@@ -1,7 +1,8 @@
 import hashlib
 import re
+import html2text
+import defusedxml.ElementTree as ElementTree
 
-from defusedxml.ElementTree import parse
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 
@@ -19,7 +20,7 @@ class OpenscapParser:
         return "Import Openscap Vulnerability Scan in XML formats."
 
     def get_findings(self, file, test):
-        tree = parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
         namespace = self.get_namespace(root)
@@ -35,8 +36,22 @@ class OpenscapParser:
         # read rules
         rules = {}
         for rule in root.findall(f".//{namespace}Rule"):
+            # get description and rationale (contains html codes)
+            desc_elem = rule.find(f"./{namespace}description")
+            rationale_elem = rule.find(f"./{namespace}rationale")
+            description_html = ElementTree.tostring(desc_elem, encoding="unicode", method="xml") if desc_elem is not None else "none"
+            rationale_html = ElementTree.tostring(rationale_elem, encoding="unicode", method="xml") if rationale_elem is not None else "none"
+            # remove xml-html namespace
+            description_html = re.sub(r"</?html:(\w+)", r"<\1", description_html)
+            rationale_html = re.sub(r"</?html:(\w+)", r"<\1", rationale_html)
+            # remove newlines (DefectDojo already breaks lines)
+            description_html = re.sub(r"[\r\n]+", " ", description_html)
+            rationale_html = re.sub(r"[\r\n]+", " ", rationale_html)
+
             rules[rule.attrib["id"]] = {
                 "title": rule.findtext(f"./{namespace}title"),
+                "description": html2text.html2text(description_html),
+                "rationale": html2text.html2text(rationale_html),
             }
         # go to test result
         test_result = tree.find(f"./{namespace}TestResult")
@@ -54,12 +69,19 @@ class OpenscapParser:
             # find only failed report.
             if "fail" in result:
                 # get rule corresponding to rule-result
-                rule = rules[rule_result.attrib["idref"]]
+                ruleid = rule_result.attrib["idref"]
+                rule = rules[ruleid]
                 title = rule["title"]
+                desc = rule["description"]
+                rat = rule["rationale"]
                 description = "\n".join(
                     [
-                        "**IdRef:** `" + rule_result.attrib["idref"] + "`",
+                        "**IdRef:** `" + ruleid + "`",
                         "**Title:** `" + title + "`",
+                        "**Description:** ",
+                        desc,
+                        "**Rationale:** ",
+                        rat,
                     ],
                 )
                 vulnerability_ids = [vulnerability_id.text for vulnerability_id in rule_result.findall(
@@ -74,16 +96,15 @@ class OpenscapParser:
                 # according to the spec 'unknown' is a possible value
                 if severity == "Unknown":
                     severity = "Info"
-                references = ""
                 # get references.
                 for check_content in rule_result.findall(
                     f"./{namespace}check/{namespace}check-content-ref",
                 ):
-                    references += (
-                        "**name:** : " + check_content.attrib["name"] + "\n"
-                    )
-                    references += (
-                        "**href** : " + check_content.attrib["href"] + "\n"
+                    references = "\n".join(
+                        [
+                            "**name:** : " + check_content.attrib["name"],
+                            "**href** : " + check_content.attrib["href"],
+                        ],
                     )
 
                 finding = Finding(
@@ -93,7 +114,7 @@ class OpenscapParser:
                     references=references,
                     dynamic_finding=True,
                     static_finding=False,
-                    unique_id_from_tool=rule_result.attrib["idref"],
+                    unique_id_from_tool=ruleid,
                 )
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
