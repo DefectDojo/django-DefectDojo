@@ -2387,8 +2387,10 @@ def log_user_login(sender, request, user, **kwargs):
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
-
-    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    if user:
+        logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    else:
+        logger.info("logout attempt for anonymous user via ip: %s", request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)

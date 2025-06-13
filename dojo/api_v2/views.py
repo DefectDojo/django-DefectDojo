@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import Count, Q
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -3172,6 +3173,178 @@ class QuestionnaireAnsweredSurveyViewSet(
 
     def get_queryset(self):
         return Answered_Survey.objects.all().order_by("id")
+
+
+# Authorization: object-based (consistent with UI)
+class SimpleMetricsViewSet(
+    viewsets.ReadOnlyModelViewSet,
+):
+
+    """
+    Simple metrics API endpoint that provides finding counts by product type
+    broken down by severity and month status.
+
+    This endpoint replicates the logic from the UI's /metrics/simple endpoint
+    and uses the same authorization model for consistency.
+    """
+
+    serializer_class = serializers.SimpleMetricsSerializer
+    queryset = Product_Type.objects.none()  # Required for consistent auth behavior
+    permission_classes = (IsAuthenticated,)  # Match pattern used by RoleViewSet
+    pagination_class = None
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "date",
+                OpenApiTypes.DATE,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Date to generate metrics for (YYYY-MM-DD format). Defaults to current month.",
+            ),
+            OpenApiParameter(
+                "product_type_id",
+                OpenApiTypes.INT,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Optional product type ID to filter metrics. If not provided, returns all accessible product types.",
+            ),
+        ],
+        responses={status.HTTP_200_OK: serializers.SimpleMetricsSerializer(many=True)},
+    )
+    def list(self, request):
+        """
+        Retrieve simple metrics data for the requested month grouped by product type.
+
+        This endpoint replicates the logic from the UI's /metrics/simple endpoint
+        and uses the same authorization model for consistency.
+
+        Performance optimized with database aggregation instead of Python loops.
+        """
+        # Parse the date parameter, default to current month (same as UI)
+        now = timezone.now()
+        date_param = request.query_params.get("date")
+        product_type_id = request.query_params.get("product_type_id")
+
+        if date_param:
+            # Enhanced input validation while maintaining consistency with UI behavior
+            if len(date_param) > 20:
+                return Response(
+                    {"error": "Invalid date parameter length."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Sanitize input - only allow alphanumeric characters and hyphens
+            import re
+            if not re.match(r"^[0-9\-]+$", date_param):
+                return Response(
+                    {"error": "Invalid date format. Only numbers and hyphens allowed."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                # Parse date string with validation
+                parsed_date = datetime.strptime(date_param, "%Y-%m-%d")
+
+                # Reasonable date range validation
+                min_date = datetime(2000, 1, 1)
+                max_date = datetime.now() + relativedelta(years=1)
+
+                if parsed_date < min_date or parsed_date > max_date:
+                    return Response(
+                        {"error": "Date must be between 2000-01-01 and one year from now."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Make it timezone aware
+                now = timezone.make_aware(parsed_date) if timezone.is_naive(parsed_date) else parsed_date
+
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Get authorized product types (same as UI implementation)
+        product_types = get_authorized_product_types(Permissions.Product_Type_View)
+
+        # Optional filtering by specific product type
+        if product_type_id:
+            try:
+                product_type_id = int(product_type_id)
+                product_types = product_types.filter(id=product_type_id)
+                if not product_types.exists():
+                    return Response(
+                        {"error": "Product type not found or access denied."},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+            except ValueError:
+                return Response(
+                    {"error": "Invalid product_type_id format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Build base filter conditions (same logic as UI)
+        base_filter = Q(
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            date__month=now.month,
+            date__year=now.year,
+        )
+
+        # Apply verification status filtering if enabled (same as UI)
+        if (get_system_setting("enforce_verified_status", True) or
+                get_system_setting("enforce_verified_status_metrics", True)):
+            base_filter &= Q(verified=True)
+
+        # Optimize with single aggregated query per product type
+        metrics_data = []
+
+        for pt in product_types:
+            # Single aggregated query replacing the Python loop
+            metrics = Finding.objects.filter(
+                test__engagement__product__prod_type=pt,
+            ).filter(base_filter).aggregate(
+                # Total count
+                total=Count("id"),
+
+                # Count by severity using conditional aggregation
+                critical=Count("id", filter=Q(severity="Critical")),
+                high=Count("id", filter=Q(severity="High")),
+                medium=Count("id", filter=Q(severity="Medium")),
+                low=Count("id", filter=Q(severity="Low")),
+                info=Count("id", filter=~Q(severity__in=["Critical", "High", "Medium", "Low"])),
+
+                # Count opened in current month
+                opened=Count("id", filter=Q(date__year=now.year, date__month=now.month)),
+
+                # Count closed in current month
+                closed=Count("id", filter=Q(
+                    mitigated__isnull=False,
+                    mitigated__year=now.year,
+                    mitigated__month=now.month,
+                )),
+            )
+
+            # Build the findings summary (same structure as UI)
+            findings_broken_out = {
+                "product_type_id": pt.id,
+                "product_type_name": pt.name,  # Always show real name like UI
+                "Total": metrics["total"] or 0,
+                "S0": metrics["critical"] or 0,  # Critical
+                "S1": metrics["high"] or 0,      # High
+                "S2": metrics["medium"] or 0,    # Medium
+                "S3": metrics["low"] or 0,       # Low
+                "S4": metrics["info"] or 0,      # Info
+                "Opened": metrics["opened"] or 0,
+                "Closed": metrics["closed"] or 0,
+            }
+
+            metrics_data.append(findings_broken_out)
+
+        serializer = self.serializer_class(metrics_data, many=True)
+        return Response(serializer.data)
 
 
 # Authorization: configuration
