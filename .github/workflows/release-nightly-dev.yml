@@ -14,6 +14,7 @@ on:
 jobs:
   nightly-build-dev:
     uses: ./.github/workflows/release-x-nightly.yml
+    if: github.repository == 'DefectDojo/django-DefectDojo' # Build (and try to push) fails in forks
     with:
         branch-to-build: 'dev'
         tag-to-apply: 'nightly-dev'

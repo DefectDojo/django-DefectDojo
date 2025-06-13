@@ -65,9 +65,27 @@ This option is especially relevant when using the API to import data. If uploadi
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
 
-### Next Steps
+### Triage-less scanners: Do Not Reactivate field
 
-Once your upload has completed, you should be redirected to the Test Page which contains the Findings found in the scan file. You can start working with those results right away, but feel free to consult the following articles:
+Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything, regardless of whether a vulnerability has already been triaged or not.
 
-* Learn how to organize your Product Hierarchy to manage different contexts for your Findings and Tests: [Product Hierarchy Overview](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/).
-* Learn how to extend a Test with additional Findings and reports: [Reimport Guide](../using_reimport/)
+To handle this case, DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can use DefectDojo as the source of truth for triage, instead of reactivating your triaged Findings on each import / reimport.
+
+### Using the Scan Completion Date (API: `scan_date`) field
+
+DefectDojo offers a plethora of supported scanner reports, but not all of them contain the
+information most important to a user. The `scan_date` field is a flexible smart feature that
+allows users to set the completion date of the a given scan report, and have it propagate
+down to all the findings imported. This field is **not** mandatory, but the default value for
+this field is the date of import (whenever the request is processed and a successful response is returned).
+
+Here are the following use cases for using this field:
+
+1. The report **does not** set the date, and `scan_date` is **not** set at import
+    - Finding date will be the default value of `scan_date`
+2. The report **sets** the date, and the `scan_date` is **not** set at import
+    - Finding date will be whatever the report sets
+3. The report **does not** set the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`
+4. The report **sets** the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`

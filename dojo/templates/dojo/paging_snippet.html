@@ -39,10 +39,9 @@
                             <li role="presentation"><a href="?{% url_replace request page_size_param 75 %}" aria-label="{% trans '75 items per page' %}" role="menuitem" >75</a></li>
                             <li role="presentation"><a href="?{% url_replace request page_size_param 100 %}" aria-label="{% trans '100 items per page' %}" role="menuitem">100</a></li>
                             <li role="presentation"><a href="?{% url_replace request page_size_param 150 %}" aria-label="{% trans '150 items per page' %}" role="menuitem">150</a></li>
-                            {% if page.paginator.count > 500 %}
-                                <li role="presentation"><a href="?{% url_replace request page_size_param 500 %}" aria-label="{% trans '500 items per page' %}" role="menuitem" >500</a></li>
+                            {% if page.paginator.count > 250 %}
+                                <li role="presentation"><a href="?{% url_replace request page_size_param 250 %}" aria-label="{% trans '250 items per page' %}" role="menuitem" >250</a></li>
                             {% endif %}
-                            <li role="presentation"><a href="?{% url_replace request page_size_param page.paginator.count %}" aria-label="{% trans 'All items on one page' %}" role="menuitem">{% trans "All" %}</a></li>
                         </ul>
                     </div>
                 </li>

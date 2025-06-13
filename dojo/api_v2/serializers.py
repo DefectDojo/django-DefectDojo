@@ -3,6 +3,7 @@ import collections
 import json
 import logging
 import re
+import time
 from datetime import datetime
 
 import six
@@ -111,6 +112,10 @@ from dojo.models import (
     Vulnerability_Id,
     Vulnerability_Id_Template,
     get_current_date,
+)
+from dojo.product_announcements import (
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
 )
 from dojo.tools.factory import (
     get_choices_sorted,
@@ -225,9 +230,11 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
-            # Validate the tag to ensure it doesn't contain invalid characters
-            tag_validator(s, exception_class=RestFrameworkValidationError)
+            # Split the tags up in any way we need to
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            # Validate the tag to ensure it doesn't contain invalid characters
+            for sub in substrings:
+                tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
         return tagulous.utils.render_tags(data_safe)
@@ -1125,20 +1132,16 @@ class EngagementToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         engagement = data.get("engagement_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            engagement, engagement.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        engagement, engagement.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"engagement_id": engagement.id, "files": new_files}
 
 
@@ -1497,15 +1500,11 @@ class TestToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         test = data.get("test_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
-                    "title": file.title,
-                },
-            )
+        new_files = [{
+                "id": file.id,
+                "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
+                "title": file.title,
+            } for file in files]
         return {"test_id": test.id, "files": new_files}
 
 
@@ -1787,10 +1786,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             vulnerability_id_set = validated_data.pop("vulnerability_id_set")
             vulnerability_ids = []
             if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
+                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids(instance, vulnerability_ids)
 
         instance = super(TaggitSerializer, self).update(
@@ -1921,8 +1917,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Process the vulnerability IDs specially
         parsed_vulnerability_ids = []
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
-            for vulnerability_id in vulnerability_ids:
-                parsed_vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
             validated_data["cve"] = parsed_vulnerability_ids[0]
         # Create a findings in memory so that we have access to unsaved_vulnerability_ids
         new_finding = Finding(**validated_data)
@@ -2020,9 +2015,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         if vulnerability_id_set:
-            vulnerability_ids = []
-            for vulnerability_id in vulnerability_id_set:
-                vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            vulnerability_ids = [vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set]
             validated_data["cve"] = vulnerability_ids[0]
             save_vulnerability_ids_template(
                 new_finding_template, vulnerability_ids,
@@ -2040,10 +2033,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             vulnerability_ids = []
             if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
+                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
         return super(TaggitSerializer, self).update(instance, validated_data)
@@ -2208,6 +2198,7 @@ class CommonImportScanSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
@@ -2239,6 +2230,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
+            start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
                 context.pop("scan", None),
@@ -2251,6 +2243,9 @@ class CommonImportScanSerializer(serializers.Serializer):
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
                 data["statistics"] = {"after": test.statistics}
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2506,6 +2501,7 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
+            start_time = time.perf_counter()
             if test := context.get("test"):
                 statistics_before = test.statistics
                 context["test"], _, _, _, _, _, test_import = self.get_reimporter(
@@ -2540,6 +2536,9 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
                 if statistics_delta:
                     data["statistics"]["delta"] = statistics_delta
                 data["statistics"]["after"] = test.statistics
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2710,20 +2709,16 @@ class FindingToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         finding = data.get("finding_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            finding, finding.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        finding, finding.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"finding_id": finding.id, "files": new_files}
 
 

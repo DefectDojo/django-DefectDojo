@@ -220,7 +220,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         return (
             Finding.objects.filter(
                 **custom_filter,
-                title=finding.title,
+                title__iexact=finding.title,
                 severity=finding.severity,
                 numerical_severity=Finding.get_numerical_severity(finding.severity),
             ).order_by("id")
@@ -236,10 +236,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 
 def get_endpoints_as_url(finding):
-    list1 = []
-    for e in finding.endpoints.all():
-        list1.append(hyperlink.parse(str(e)))
-    return list1
+    return [hyperlink.parse(str(e)) for e in finding.endpoints.all()]
 
 
 def are_urls_equal(url1, url2, fields):
@@ -894,9 +891,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
 
 def get_week_data(week_start_date, tick, day_counts):
-    data = []
-    for i in range(len(day_counts)):
-        data.append([tick, i, day_counts[i]])
+    data = [[tick, i, day_counts[i]] for i in range(len(day_counts))]
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
 
@@ -1909,9 +1904,9 @@ def sla_compute_and_notify(*args, **kwargs):
         return title
 
     def _create_notifications():
-        for pt in combined_notifications:
-            for p in combined_notifications[pt]:
-                for kind in combined_notifications[pt][p]:
+        for prodtype, comb_notif_prodtype in combined_notifications.items():
+            for prod, comb_notif_prod in comb_notif_prodtype.items():
+                for kind, comb_notif_kind in comb_notif_prod.items():
                     # creating notifications on per-finding basis
 
                     # we need this list for combined notification feature as we
@@ -1919,7 +1914,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     # create_notification() arguments
                     findings_list = []
 
-                    for n in combined_notifications[pt][p][kind]:
+                    for n in comb_notif_kind:
                         title = _notification_title_for_finding(n.finding, kind, n.finding.sla_days_remaining())
 
                         create_notification(
@@ -1936,8 +1931,8 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): product type '{pt}', product '{p}'"
-                    product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
+                    title_combined = f"SLA alert ({kind}): product type '{prodtype}', product '{prod}'"
+                    product = comb_notif_kind[0].finding.test.engagement.product
                     create_notification(
                         event="sla_breach_combined",
                         title=title_combined,
@@ -2299,9 +2294,7 @@ def get_file_images(obj, *, return_objects=False):
 def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ["alert"]
-    for choice in NOTIFICATION_CHOICES:
-        if get_system_setting(f"enable_{choice[0]}_notifications"):
-            enabled.append(choice[0])
+    enabled.extend(choice[0] for choice in NOTIFICATION_CHOICES if get_system_setting(f"enable_{choice[0]}_notifications"))
     return enabled
 
 
@@ -2629,9 +2622,11 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    # Clean the title by removing some problematic characters
+    cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
 
     return generate_file_response_from_file_path(
-        file_path, file_name=file_object.title, file_size=file_object.file.size,
+        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
     )
 
 
@@ -2667,9 +2662,7 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
     error_messages = []
 
     if isinstance(value, list):
-        for tag in value:
-            if TAG_PATTERN.search(tag):
-                error_messages.append(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes.")
+        error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
     elif isinstance(value, str):
         if TAG_PATTERN.search(value):
             error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")

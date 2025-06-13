@@ -8,6 +8,7 @@ from .dojo_test_case import DojoTestCase
 
 
 class TestFindingModel(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
 
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()
@@ -314,6 +315,47 @@ class TestFindingModel(DojoTestCase):
         finding = Finding()
         finding.references = "URL: [https://www.example.com](https://www.example.com)"
         self.assertEqual("URL: [https://www.example.com](https://www.example.com)", finding.get_references_with_links())
+
+    # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
+    # Capturing current behavior which might not be the desired one yet
+    def test_cvssv3(self):
+        """Tests if the CVSSv3 score is calculated correctly"""
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+        finding.cvssv3 = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+        self.assertEqual(finding.cvssv3_score, 9.8)
+        finding_id = finding.id
+
+        finding = Finding.objects.get(id=finding_id)
+        finding.cvssv3 = "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
+        # invalid vector, so score still 9.8 from previous save (and not 8.8)
+        self.assertEqual(finding.cvssv3_score, 9.8)
+
+        finding = Finding.objects.get(id=finding_id)
+        finding.cvssv3 = "happy little vector"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "happy little vector")
+        # invalid vector, so score still 9.8 from previous save
+        self.assertEqual(finding.cvssv3_score, 9.8)
+
+        # we already have more cvssv3 test in test_rest_framework.py and finding_test.py
+        # the above here only shows that invalid vectors can be saved
 
 
 class TestFindingSLAExpiration(DojoTestCase):

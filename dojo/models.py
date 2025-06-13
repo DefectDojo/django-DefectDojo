@@ -1306,10 +1306,7 @@ class Product(models.Model):
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
                                           active=True)
-        findings_list = []
-        for i in findings:
-            findings_list.append(i.id)
-        return findings_list
+        return [i.id for i in findings]
 
     @property
     def has_jira_configured(self):
@@ -2562,7 +2559,7 @@ class Finding(models.Model):
                                            blank=True,
                                            max_length=500,
                                            verbose_name=_("Unique ID from tool"),
-                                           help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities."))
+                                           help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities over time across subsequent scans."))
     vuln_id_from_tool = models.CharField(null=True,
                                          blank=True,
                                          max_length=500,
@@ -3347,9 +3344,7 @@ class Finding(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = []
-        for vulnerability_id in vulnerability_ids_model:
-            vulnerability_ids.append(vulnerability_id.vulnerability_id)
+        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -3556,9 +3551,7 @@ class Finding_Template(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = []
-        for vulnerability_id in vulnerability_ids_model:
-            vulnerability_ids.append(vulnerability_id.vulnerability_id)
+        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -3880,8 +3873,8 @@ class JIRA_Instance(models.Model):
     high_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: High"))
     critical_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Critical"))
     finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_("JIRA resolution names (comma-separated values) that maps to an Accepted Finding"))
-    false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_("JIRA resolution names (comma-separated values) that maps to a False Positive Finding"))
+    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution."))
+    false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 

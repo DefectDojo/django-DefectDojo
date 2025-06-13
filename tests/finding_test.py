@@ -115,8 +115,6 @@ class FindingTest(BaseTestCase):
         # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
-        # cvssv3
-        driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
@@ -130,6 +128,96 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="REF-3"))
         self.assertTrue(self.is_text_present_on_page(text="REF-4"))
         self.assertTrue(self.is_text_present_on_page(text="Additional Vulnerability Ids"))
+
+    def _edit_finding_cvssv3_and_assert(
+        self,
+        cvssv3_value,
+        cvssv3_score,
+        expected_cvssv3_value,
+        expected_cvssv3_score,
+        expect_success=True,  # noqa: FBT002
+        success_message="Finding saved successfully",
+        error_message=None,
+    ):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        # Click on `Edit Finding`
+        driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+        # Set cvssv3 value and score
+        driver.find_element(By.ID, "id_cvssv3").clear()
+        driver.find_element(By.ID, "id_cvssv3").send_keys(cvssv3_value)
+        driver.find_element(By.ID, "id_cvssv3_score").clear()
+        driver.find_element(By.ID, "id_cvssv3_score").send_keys(str(cvssv3_score))
+        # Submit the form
+        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+
+        if expect_success:
+            self.assertTrue(self.is_success_message_present(text=success_message))
+            # Go into edit mode again to check stored values
+            driver.find_element(By.ID, "dropdownMenu1").click()
+            driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+            self.assertEqual(expected_cvssv3_value, driver.find_element(By.ID, "id_cvssv3").get_attribute("value"))
+            self.assertEqual(str(expected_cvssv3_score), driver.find_element(By.ID, "id_cvssv3_score").get_attribute("value"))
+        else:
+            self.assertTrue(self.is_error_message_present(text=error_message))
+
+    # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
+    # Capturing current behavior which might not be the desired one yet
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="1",
+            expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="8.8",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector_no_prefix(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="2",
+            expected_cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="2.0",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector_with_trailing_slash(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
+            cvssv3_score="3",
+            expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
+            expected_cvssv3_score="3.0",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v2_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            cvssv3_score="4",
+            expected_cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            expected_cvssv3_score="4.0",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_rubbish(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="happy little vector",
+            cvssv3_score="4",
+            expected_cvssv3_value=None,
+            expected_cvssv3_score=None,
+            expect_success=False,
+            error_message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'",
+        )
 
     def test_add_image(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -432,6 +520,49 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From Template"))
 
     @on_exception_html_source_logger
+    def test_create_finding_with_unqiue_characters(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        # goto engagemnent list (and wait for javascript to load)
+        self.goto_all_engagements_overview(driver)
+
+        # Select a previously created engagement title
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Ad Hoc Engagement").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Pen Test").click()
+
+        # Click on the 'dropdownMenu1 button'
+        # logger.info("\nClicking on dropdown menu \n")
+        driver.find_element(By.ID, "dropdownMenu_test_add").click()
+        self.assertNoConsoleErrors()
+        # Click on `Apply Template to Finding`
+        driver.find_element(By.LINK_TEXT, "Finding From Template").click()
+        self.assertNoConsoleErrors()
+        # click on the template of 'App Vulnerable to XSS'
+        logger.info("\nClicking on the template \n")
+        driver.find_element(By.LINK_TEXT, "Use This Template").click()
+        self.assertNoConsoleErrors()
+        driver.find_element(By.ID, "id_title").clear()
+        # Backslash causes error
+        driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from \\Template")
+        self.assertNoConsoleErrors()
+        # Click the 'finished' button to submit
+        driver.find_element(By.ID, "id_finished").click()
+        self.assertNoConsoleErrors()
+        # Query the site to determine if the finding has been added
+        # Assert to the query to determine status of failure
+        self.assertTrue(self.is_success_message_present(text="Finding from template added successfully."))
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template"))
+
+        # Navigate back to the finding list
+        driver.find_element(By.LINK_TEXT, "Findings").click()
+        self.assertNoConsoleErrors()
+        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \\Template").click()
+        self.assertNoConsoleErrors()
+
+        # Assert that the finding is present
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS from \\Template"))
+
+    @on_exception_html_source_logger
     def test_delete_finding_template(self):
         driver = self.driver
         # Navigate to All Finding page
@@ -519,6 +650,11 @@ def add_finding_tests_to_suite(suite, *, jira=False, github=False, block_executi
     suite.addTest(FindingTest("test_excel_export"))
     suite.addTest(FindingTest("test_list_components"))
     suite.addTest(FindingTest("test_edit_finding"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_no_prefix"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_with_trailing_slash"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v2_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_rubbish"))
     suite.addTest(FindingTest("test_add_note_to_finding"))
     suite.addTest(FindingTest("test_add_image"))
     suite.addTest(FindingTest("test_delete_image"))

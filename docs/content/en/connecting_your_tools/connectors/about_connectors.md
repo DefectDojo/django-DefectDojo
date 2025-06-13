@@ -66,6 +66,6 @@ Fortunately, DefectDojo can still handle manual import for a wide range of secur
 
 # **Next Steps**
 
-* Check out the Connectors page by switching to DefectDojo's **Beta UI**.
+* Check out the Connectors page by switching to DefectDojo's **Pro UI**.
 * Follow our guide to [create your first Connector](../add_edit_connectors/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
