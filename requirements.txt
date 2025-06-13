@@ -26,7 +26,7 @@ djangorestframework==3.16.0
 html2text==2025.4.15
 humanize==4.12.3
 jira==3.8.0
-PyGithub==1.58.2
+PyGithub==2.6.1
 lxml==5.4.0
 Markdown==3.8
 openpyxl==3.1.5
