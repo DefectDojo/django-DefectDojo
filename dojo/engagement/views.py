@@ -425,7 +425,7 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        return eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
+        return eng.risk_acceptance_set.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
 
     def get_filtered_tests(
         self,
@@ -1226,8 +1226,6 @@ def add_risk_acceptance(request, eid, fid=None):
             if notes:
                 risk_acceptance.notes.add(notes)
 
-            eng.risk_acceptance.add(risk_acceptance)
-
             findings = form.cleaned_data["accepted_findings"]
 
             risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
@@ -1241,13 +1239,16 @@ def add_risk_acceptance(request, eid, fid=None):
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
     else:
         risk_acceptance_title_suggestion = f"Accept: {finding}"
-        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion, "engagement": eng.id})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by("title")
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
         form.fields["accepted_findings"].initial = {fid}
+    field = form.fields["engagement"]
+    field.widget = field.hidden_widget()
+
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
@@ -1385,6 +1386,10 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
     elif edit_mode:
         risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+
+    if risk_acceptance_form:
+        field = risk_acceptance_form.fields["engagement"]
+        field.widget = field.hidden_widget()
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)

@@ -54,7 +54,7 @@ def finding_queries(
         "test__engagement__product__prod_type",
     ).prefetch_related(
         "risk_acceptance_set",
-        "test__engagement__risk_acceptance",
+        "test__engagement__risk_acceptance_set",
         "test__test_type",
     )
 
@@ -148,7 +148,7 @@ def endpoint_queries(
     ).prefetch_related(
         "finding__test__engagement__product",
         "finding__test__engagement__product__prod_type",
-        "finding__test__engagement__risk_acceptance",
+        "finding__test__engagement__risk_acceptance_set",
         "finding__risk_acceptance_set",
         "finding__reporter",
     )

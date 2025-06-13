@@ -420,7 +420,7 @@ class EngagementViewSet(
     def get_queryset(self):
         return (
             get_authorized_engagements(Permissions.Engagement_View)
-            .prefetch_related("notes", "risk_acceptance", "files")
+            .prefetch_related("notes", "risk_acceptance_set", "files")
             .distinct()
         )
 
@@ -704,7 +704,7 @@ class RiskAcceptanceViewSet(
         return (
             get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
             .prefetch_related(
-                "notes", "engagement_set", "owner", "accepted_findings",
+                "notes", "engagement", "owner", "accepted_findings",
             )
             .distinct()
         )
