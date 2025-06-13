@@ -9,7 +9,7 @@ from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveI
 
 logger = logging.getLogger(__name__)
 
-WHAT = "ReversingLabs Spectra Assure"
+SCAN_TYPE = "ReversingLabs Spectra Assure"
 
 
 class ReversinglabsSpectraassureParser:
@@ -72,13 +72,13 @@ class ReversinglabsSpectraassureParser:
     # --------------------------------------------
     # PUBLIC
     def get_scan_types(self) -> list[str]:
-        return [WHAT]
+        return [SCAN_TYPE]
 
     def get_label_for_scan_types(self, scan_type: str) -> str:
         return scan_type
 
     def get_description_for_scan_types(self, scan_type: str) -> str:
-        if scan_type == WHAT:
+        if scan_type == SCAN_TYPE:
             return "Import the SpectraAssure report.rl.json file."
         return f"Unknown Scan Type; {scan_type}"
 

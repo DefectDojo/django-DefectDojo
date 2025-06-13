@@ -340,7 +340,6 @@ class RlJsonInfo:
         cin.score = score
         cin.score_severity = self._score_to_severity(score=score)
 
-        # TODO: tags
         cin.tags = self._get_tags_from_cve(this_cve)
         cin.impact = self._make_impact_from_tags(cin.tags, cin.impact)
 
@@ -397,7 +396,7 @@ class RlJsonInfo:
 
         # should be constant over multiple re-scans (repeatable)
         # see: https://github.com/DefectDojo/django-DefectDojo/pull/12463
-        # TODO: use component sha256 + dep.name, dep version + cve
+        # use component sha256 + dep.name, dep version + cve
 
         dep_purl = dependency.get("purl", "")
         dep_name = dependency.get("product", "")
