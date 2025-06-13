@@ -64,7 +64,7 @@ def get_scan_types_sorted():
 
 def get_choices_sorted():
     inactive_test_types = get_inactive_test_types()
-    res = [(key, get_parser(key).get_label_for_scan_types(key)) for key in PARSERS if key not in inactive_test_types]
+    res = [(key, PARSERS[key].get_label_for_scan_types(key)) for key in PARSERS if key not in inactive_test_types]
     return sorted(res, key=lambda x: x[1].lower())
 
 
