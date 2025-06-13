@@ -36,6 +36,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         "owner": 1,
         "expiration_date": "2021-07-15",
         "reactivate_expired": True,
+        "engagement": 2,
     }
 
     data_remove_finding_from_ra = {
