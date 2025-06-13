@@ -5,7 +5,7 @@ import operator
 import re
 import time
 from datetime import datetime
-from functools import reduce
+from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
@@ -16,7 +16,8 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -104,6 +105,7 @@ from dojo.utils import (
     add_error_message_to_response,
     add_success_message_to_response,
     async_delete,
+    build_count_subquery,
     calculate_grade,
     generate_file_response_from_file_path,
     get_cal_event,
@@ -592,23 +594,27 @@ class ViewEngagement(View):
 
 
 def prefetch_for_view_tests(tests):
-    prefetched = tests
-    if isinstance(tests,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-
-        prefetched = prefetched.select_related("lead")
-        prefetched = prefetched.prefetch_related("tags", "test_type", "notes")
-        prefetched = prefetched.annotate(count_findings_test_all=Count("finding__id", distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active=Count("finding__id", filter=Q(finding__active=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active_verified=Count("finding__id", filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count("finding__id", filter=Q(finding__is_mitigated=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_dups=Count("finding__id", filter=Q(finding__duplicate=True), distinct=True))
-        prefetched = prefetched.annotate(total_reimport_count=Count("test_import__id", filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
-
-    else:
+    # old code can arrive here with prods being a list because the query was already executed
+    if not isinstance(tests, QuerySet):
         logger.warning("unable to prefetch because query was already executed")
+        return tests
 
-    return prefetched
+    prefetched = tests.select_related("lead", "test_type").prefetch_related("tags", "notes")
+    base_findings = Finding.objects.filter(test_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="test_id")
+    return prefetched.annotate(
+        count_findings_test_all=Coalesce(count_subquery(base_findings), Value(0)),
+        count_findings_test_active=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
+        count_findings_test_active_verified=Coalesce(
+            count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
+        ),
+        count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
+        count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
+        total_reimport_count=Coalesce(
+            count_subquery(Test_Import.objects.filter(test_id=OuterRef("pk"), type=Test_Import.REIMPORT_TYPE)),
+            Value(0),
+        ),
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Test_Add, "eid")
