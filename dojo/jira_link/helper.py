@@ -109,12 +109,36 @@ def is_push_all_issues(instance):
     return None
 
 
-def _safely_get_finding_group_status(finding_group: Finding_Group) -> str:
-    # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
-    try:
-        return finding_group.status()
-    except TypeError:  # TypeError: 'str' object is not callable
-        return finding_group.status
+def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced: bool = False) -> str:
+    # Accommodating a strange behavior where a obj sometimes prefers `obj.status` rather than `obj.status()`
+    status = []
+    if isinstance(obj, Finding):
+        try:
+            return obj.status()
+        except TypeError:  # TypeError: 'str' object is not callable
+            return obj.status
+
+    if isinstance(obj, Finding_Group):
+        # only consider findings that are above the minimum threshold, but includ inactive and non-verified findings
+        findings = get_finding_group_findings_above_threshold(obj)
+        if not findings:
+            return ["Empty", "Inactive"]
+
+        for find in findings:
+            logger.debug(f"Finding {find.id} status {find.active} {find.verified} {find.is_mitigated}")
+
+        # This iterates 3 times over the list of findings, but any code doing 1 iteration would looke it's from 1990
+        if any(find.active for find in findings):
+            status += ["Active"]
+
+        if any((find.active and find.verified) for find in findings):
+            status += ["Verified"]
+
+        if all(find.is_mitigated for find in findings):
+            status += ["Mitigated", "Inactive"]
+
+    # if no active findings are found, we must assume the status is inactive
+    return status or ["Inactive"]
 
 
 # checks if a finding can be pushed to JIRA
@@ -141,6 +165,12 @@ def can_be_pushed_to_jira(obj, form=None):
         # findings or groups already having an existing jira issue can always be pushed
         return True, None, None
 
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
+
     if isinstance(obj, Finding):
         if form:
             active = form["active"].value()
@@ -153,25 +183,24 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
-
         if not active or (not verified and isenforced):
             logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
-            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
+            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "error_not_active_or_verified"
 
-        jira_minimum_threshold = None
-        if System_Settings.objects.get().jira_minimum_severity:
-            jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
-
-            if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-                logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
-                return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "below_minimum_threshold"
+        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
+            logger.debug(f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).")
+            return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
-        if not obj.findings.all():
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
-        # Determine if the finding group is not active
-        if "Active" not in _safely_get_finding_group_status(obj):
-            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
+        finding_group_status = _safely_get_obj_status_for_jira(obj)
+        logger.error(f"Finding group status: {finding_group_status}")
+        if "Empty" in finding_group_status:
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
+
+        if isenforced and "Verified" not in finding_group_status:
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no active and verified findings above minimum treshold.", "error_not_active_or_verified"
+
+        if "Active" not in _safely_get_obj_status_for_jira(obj):
+            return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no active findings above minimum treshold.", "error_inactive"
 
     else:
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is of unsupported type.", "error_unsupported"
@@ -504,6 +533,20 @@ def get_jira_status(finding):
 
 
 # Used for unit testing so geting all the connections is manadatory
+def get_jira_priortiy(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.priority
+    return None
+
+
+# Used for unit testing so geting all the connections is manadatory
 def get_jira_comments(finding):
     if finding.has_jira_issue:
         j_issue = finding.jira_issue.jira_id
@@ -644,7 +687,22 @@ def jira_description(obj):
 
 
 def jira_priority(obj):
-    return get_jira_instance(obj).get_priority(obj.severity)
+    if isinstance(obj, Finding):
+        return get_jira_instance(obj).get_priority(obj.severity)
+
+    if isinstance(obj, Finding_Group):
+        # priority based on qualified findings, so if alls criticals get closed, the priority will gets lowered etc
+        active_findings = get_qualified_findings(obj)
+
+        if not active_findings:
+            # using a string literal "Info" as we don't really have a "enum" for this anywhere
+            max_number_severity = Finding.get_number_severity("Info")
+        else:
+            max_number_severity = max(Finding.get_number_severity(find.severity) for find in active_findings)
+        return get_jira_instance(obj).get_priority(Finding.get_severity(max_number_severity))
+
+    msg = f"Unsupported object type for jira_priority: {obj.__class__.__name__}"
+    raise ValueError(msg)
 
 
 def jira_environment(obj):
@@ -788,7 +846,7 @@ def prepare_jira_issue_fields(
 def add_jira_issue(obj, *args, **kwargs):
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
         if exception:
-            logger.error(exception)
+            logger.error("Exception occurred", exc_info=exception)
         logger.error(message)
         log_jira_alert(message, obj)
         return False
@@ -832,7 +890,7 @@ def add_jira_issue(obj, *args, **kwargs):
     duedate = None
 
     if System_Settings.objects.get().enable_finding_sla:
-        duedate = obj.sla_deadline()
+        duedate = get_sla_deadline(obj)
     # Set the fields that will compose the jira issue
     try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
@@ -858,7 +916,7 @@ def add_jira_issue(obj, *args, **kwargs):
         return failure_to_add_message(message, e, obj)
     # Create a new issue in Jira with the fields set in the last step
     try:
-        logger.debug("sending fields to JIRA: %s", fields)
+        logger.debug("Creating new JIRA issue with fields: %s", json.dumps(fields, indent=4))
         new_issue = jira.create_issue(fields)
         logger.debug("saving JIRA_Issue for %s finding %s", new_issue.key, obj.id)
         j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
@@ -961,6 +1019,19 @@ def update_jira_issue(obj, *args, **kwargs):
     labels = get_labels(obj) + get_tags(obj)
     if labels:
         labels = list(dict.fromkeys(labels))  # de-dup
+
+    # Only Finding Groups will have their priority synced on updates.
+    # For Findings we resepect any priority change made in JIRA
+    # https://github.com/DefectDojo/django-DefectDojo/pull/9571 and https://github.com/DefectDojo/django-DefectDojo/pull/12475
+    jira_priority_name = None
+    if isinstance(obj, Finding_Group):
+        jira_priority_name = jira_priority(obj)
+
+    # Determine what due date to set on the jira issue
+    duedate = None
+    if System_Settings.objects.get().enable_finding_sla:
+        duedate = get_sla_deadline(obj)
+
     # Set the fields that will compose the jira issue
     try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
@@ -972,20 +1043,19 @@ def update_jira_issue(obj, *args, **kwargs):
             component_name=jira_project.component if not issue.fields.components else None,
             labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
-            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
-            # priority_name=jira_priority(obj),
+            priority_name=jira_priority_name,
+            duedate=duedate,
             issuetype_fields=issuetype_fields)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
         return failure_to_update_message(message, e, obj)
+
     # Update the issue in jira
     try:
-        logger.debug("sending fields to JIRA: %s", fields)
+        logger.debug("Updating JIRA issue with fields: %s", json.dumps(fields, indent=4))
         issue.update(
             summary=fields["summary"],
             description=fields["description"],
-            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
-            # priority=fields['priority'],
             fields=fields)
         j_issue.jira_change = timezone.now()
         j_issue.save()
@@ -1090,10 +1160,12 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
-    status_list = _safely_get_finding_group_status(obj)
+    status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
+    updated = False
+    logger.debug("pushing status to JIRA for %d:%s status:%s", obj.id, to_str_typed(obj), status_list)
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
-    if any(item in status_list for item in RESOLVED_STATUS):
+    if not updated and any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
             updated = jira_transition(jira, issue, jira_instance.close_status_key)
@@ -1138,12 +1210,14 @@ def get_issuetype_fields(
             try:
                 project = meta["projects"][0]
             except Exception:
+                logger.debug("JIRA meta: %s", json.dumps(meta, indent=4))  # this is None safe
                 msg = "Project misconfigured or no permissions in Jira ?"
                 raise JIRAError(msg)
 
             try:
                 issuetype_fields = project["issuetypes"][0]["fields"].keys()
             except Exception:
+                logger.debug("JIRA meta: %s", json.dumps(meta, indent=4))  # this is None safe
                 msg = "Misconfigured default issue type ?"
                 raise JIRAError(msg)
 
@@ -1745,3 +1819,59 @@ def save_and_push_to_jira(finding):
     # the updated data of the finding is pushed as part of the group
     if push_to_jira_decision and finding_in_group:
         push_to_jira(finding.finding_group)
+
+
+def get_finding_group_findings_above_threshold(finding_group):
+    """Get the findings that are above the minimum threshold"""
+    jira_minimum_threshold = 0
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    return [finding for finding in finding_group.findings.all() if finding.numerical_severity <= jira_minimum_threshold]
+
+
+def is_qualified(finding):
+    """Check if the finding is qualified to be pushed to JIRA, i.e. active, verified (unless not enforced) and severity is above the threshold"""
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_numerical_severity(System_Settings.objects.get().jira_minimum_severity)
+
+    isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
+
+    return finding.active and (finding.verified or not isenforced) and (finding.numerical_severity <= jira_minimum_threshold)
+
+
+def get_qualified_findings(finding_group):
+    """Filters findings to return only findings qualified to be pushed to JIRA, i.e. active, verified (unless not enforced) and severity is above the threshold"""
+    if not finding_group.findings.all():
+        return None
+
+    return [find for find in finding_group.findings.all() if is_qualified(find)]
+
+
+def get_non_qualified_findings(finding_group):
+    """Filters findings to return only findings not qualified to be pushed to JIRA, i.e. inactive, not-verified (unless not enforced) and severity is below the threshold"""
+    if not finding_group.findings.all():
+        return None
+
+    return [find for find in finding_group.findings.all() if not is_qualified(find)]
+
+
+def get_sla_deadline(obj):
+    """Get the earliest SLA deadline from a finding or a list of findings, this typically includes all qualified findings in the group"""
+    if not obj:
+        return None
+
+    if isinstance(obj, Finding):
+        return obj.sla_deadline()
+
+    if isinstance(obj, Finding_Group):
+        return min([find.sla_deadline() for find in get_qualified_findings(obj) if find.sla_deadline()], default=None)
+
+    msg = f"get_sla_deadline: obj passed that is not a Finding or Finding_Group: {type(obj)}"
+    raise ValueError(msg)
+
+
+def get_severity(findings):
+    max_number_severity = max(Finding.get_number_severity(find.severity) for find in findings)
+    return Finding.get_severity(max_number_severity)
