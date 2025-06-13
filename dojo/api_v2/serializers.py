@@ -1578,10 +1578,10 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
+        def validate_findings_have_same_engagement(finding_objects: list[Finding]):  # TODO: check
             engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
-                msg = "You are not permitted to add findings from multiple engagements"
+                msg = "You are not permitted to add findings from multiple engagements"  # TODO: same is missing for UI
                 raise PermissionDenied(msg)
 
         findings = data.get("accepted_findings", [])
