@@ -1048,7 +1048,14 @@ class SLA_Configuration(models.Model):
                 self.async_updating = True
                 super().save(*args, **kwargs)
                 # set the async updating flag to true for all products using this sla config
-                products = Product.objects.filter(sla_configuration=self)
+                if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+                    products = Product.objects.filter(
+                        Q(sla_configuration=self) |
+                        Q(engagement__sla_configuration=self) |
+                        Q(engagement__test__sla_configuration=self),
+                    ).distinct()
+                else:
+                    products = Product.objects.filter(sla_configuration=self).distinct()
                 for product in products:
                     product.async_updating = True
                     super(Product, product).save()
@@ -1525,6 +1532,12 @@ class Engagement(models.Model):
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name=_("Repo"), help_text=_("Resource link to source code"))
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name=_("Orchestration Engine"), help_text=_("Orchestration service responsible for CI/CD test"), null=True, blank=True, related_name="orchestration", on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_("Deduplication within this engagement only"), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          null=True,
+                                          blank=True,
+                                          default=None,
+                                          on_delete=models.RESTRICT,
+                                          help_text=_("If no configuration will be configured, inherited (from product) will be applied."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
@@ -1539,6 +1552,37 @@ class Engagement(models.Model):
         return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
+
+    def save(self, *args, **kwargs):
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            # get the engagement's sla config before saving (if this is an existing product)
+            initial_sla_config = None
+            if self.pk is not None:
+                initial_sla_config = getattr(Engagement.objects.get(pk=self.pk), "sla_configuration", None)
+                # if initial sla config exists and async finding update is already running, revert sla config before saving
+                if initial_sla_config and self.product.async_updating:
+                    self.sla_configuration = initial_sla_config
+
+        super().save(*args, **kwargs)
+
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            # if the initial sla config exists and async finding update is not running
+            if initial_sla_config is not None and not self.product.async_updating:
+                # get the new sla config from the saved engagement
+                new_sla_config = getattr(self, "sla_configuration", None)
+                # if the sla config has changed, update finding sla expiration dates within this engagement's product
+                if new_sla_config and (initial_sla_config != new_sla_config):
+                    # set the async updating flag to true for this engagement's product
+                    self.product.async_updating = True
+                    super(Product, self.product).save(*args, **kwargs)
+                    # set the async updating flag to true for the sla config assigned to this product
+                    sla_config = getattr(self, "sla_configuration", None)
+                    if sla_config:
+                        sla_config.async_updating = True
+                        super(SLA_Configuration, sla_config).save()
+                    # launch the async task to update all finding sla expiration dates
+                    from dojo.product.helpers import update_sla_expiration_dates_product_async
+                    update_sla_expiration_dates_product_async(self.product, sla_config)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2104,6 +2148,12 @@ class Test(models.Model):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
     api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name=_("API Scan Configuration"))
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          null=True,
+                                          blank=True,
+                                          default=None,
+                                          on_delete=models.RESTRICT,
+                                          help_text=_("If no configuration will be configured, inherited (from engagement) will be applied."))
 
     class Meta:
         indexes = [
@@ -2114,6 +2164,37 @@ class Test(models.Model):
         if self.title:
             return f"{self.title} ({self.test_type})"
         return str(self.test_type)
+
+    def save(self, *args, **kwargs):
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            # get the test's sla config before saving (if this is an existing product)
+            initial_sla_config = None
+            if self.pk is not None:
+                initial_sla_config = getattr(Test.objects.get(pk=self.pk), "sla_configuration", None)
+                # if initial sla config exists and async finding update is already running, revert sla config before saving
+                if initial_sla_config and self.engagement.product.async_updating:
+                    self.sla_configuration = initial_sla_config
+
+        super().save(*args, **kwargs)
+
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            # if the initial sla config exists and async finding update is not running
+            if initial_sla_config is not None and not self.engagement.product.async_updating:
+                # get the new sla config from the saved test
+                new_sla_config = getattr(self, "sla_configuration", None)
+                # if the sla config has changed, update finding sla expiration dates within this test's product
+                if new_sla_config and (initial_sla_config != new_sla_config):
+                    # set the async updating flag to true for this test's product
+                    self.product.async_updating = True
+                    super(Product, self.engagement.product).save(*args, **kwargs)
+                    # set the async updating flag to true for the sla config assigned to this test's product
+                    sla_config = getattr(self, "sla_configuration", None)
+                    if sla_config:
+                        sla_config.async_updating = True
+                        super(SLA_Configuration, sla_config).save()
+                    # launch the async task to update all finding sla expiration dates
+                    from dojo.product.helpers import update_sla_expiration_dates_product_async
+                    update_sla_expiration_dates_product_async(self.engagement.product, sla_config)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3035,7 +3116,14 @@ class Finding(models.Model):
         return self.date
 
     def get_sla_period(self):
-        sla_configuration = self.test.engagement.product.sla_configuration
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            sla_configuration = self.test.sla_configuration
+            if not sla_configuration:
+                sla_configuration = self.test.engagement.sla_configuration
+                if not sla_configuration:
+                    sla_configuration = self.test.engagement.product.sla_configuration
+        else:
+            sla_configuration = self.test.engagement.product.sla_configuration
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period

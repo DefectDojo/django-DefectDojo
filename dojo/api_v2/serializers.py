@@ -1106,6 +1106,14 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            async_updating = getattr(getattr(self.instance, "product", None), "async_updating", None)
+            if async_updating:
+                new_sla_config = data.get("sla_configuration", None)
+                old_sla_config = getattr(self.instance, "sla_configuration", None)
+                if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
+                    msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
+                    raise serializers.ValidationError(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -1450,6 +1458,17 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Test
         exclude = ("inherited_tags",)
+
+    def validate(self, data):
+        if settings.SLA_CONFIG_ON_NON_PRODUCT_LEVELS:
+            async_updating = getattr(getattr(getattr(self.instance, "engagement", None), "product", None), "async_updating", None)
+            if async_updating:
+                new_sla_config = data.get("sla_configuration", None)
+                old_sla_config = getattr(self.instance, "sla_configuration", None)
+                if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
+                    msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
+                    raise serializers.ValidationError(msg)
+        return data
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == "notes":
