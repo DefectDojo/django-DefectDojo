@@ -1193,6 +1193,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "restart_sla_expired": True,
             "created": "2020-11-09T23:13:08.520000Z",
             "updated": "2023-09-15T17:17:39.462854Z",
+            "engagement": 2,
             "owner": 1,
             "accepted_findings": [
                 226,
@@ -1205,7 +1206,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
         self.permission_create = Permissions.Risk_Acceptance
         self.permission_update = Permissions.Risk_Acceptance
         self.permission_delete = Permissions.Risk_Acceptance
-        self.deleted_objects = 3
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_object_not_authorized(self):
@@ -1230,6 +1231,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "restart_sla_expired": True,
             "created": "2020-11-09T23:13:08.520000Z",
             "updated": "2023-09-15T17:17:39.462854Z",
+            "engagement": 1,
             "owner": 1,
             "accepted_findings": [
                 4,

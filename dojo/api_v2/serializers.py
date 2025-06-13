@@ -1517,53 +1517,47 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # Determine findings to risk accept, and findings to unaccept risk
-        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
-        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
-        new_findings = Finding.objects.filter(id__in=new_findings_ids)
-        findings_to_add = set(new_findings) - set(existing_findings)
-        findings_to_remove = set(existing_findings) - set(new_findings)
-        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
-        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        if "accepted_findings" in validated_data:
+            # Determine findings to risk accept, and findings to unaccept risk
+            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
+            new_findings = Finding.objects.filter(id__in=new_findings_ids)
+            findings_to_add = set(new_findings) - set(existing_findings)
+            findings_to_remove = set(existing_findings) - set(new_findings)
+            findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
+            findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        else:
+            findings_to_remove = findings_to_add = []
+
         # Make the update in the database
         instance = super().update(instance, validated_data)
-        user = getattr(self.context.get("request", None), "user", None)
-        # Add the new findings
-        ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
-        # Remove the ones that were not present in the payload
-        for finding in findings_to_remove:
-            ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
+
+        if findings_to_add or findings_to_remove:
+            user = getattr(self.context.get("request", None), "user", None)
+            # Add the new findings
+            ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
+            # Remove the ones that were not present in the payload
+            for finding in findings_to_remove:
+                ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
 
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
         path = "No proof has been supplied"
-        if engagement and obj.filename() is not None:
+        if obj.filename() is not None:
             path = reverse(
-                "download_risk_acceptance", args=(engagement.id, obj.id),
+                "download_risk_acceptance", args=(obj.engagement.id, obj.id),
             )
             request = self.context.get("request")
             if request:
                 path = request.build_absolute_uri(path)
         return path
 
-    @extend_schema_field(serializers.IntegerField())
-    def get_engagement(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
-        return EngagementSerializer(read_only=True).to_representation(
-            engagement,
-        )
-
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
+        def validate_findings_have_same_engagement(finding_objects: list[Finding]):  # TODO: check
             engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
-                msg = "You are not permitted to add findings from multiple engagements"
+                msg = "You are not permitted to add findings from multiple engagements"  # TODO: same is missing for UI
                 raise PermissionDenied(msg)
 
         findings = data.get("accepted_findings", [])

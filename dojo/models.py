@@ -1542,10 +1542,6 @@ class Engagement(models.Model):
                                 default="threat_model", editable=False)
     tmodel_path = models.CharField(max_length=1000, default="none",
                                    editable=False, blank=True, null=True)
-    risk_acceptance = models.ManyToManyField("Risk_Acceptance",
-                                             default=None,
-                                             editable=False,
-                                             blank=True)
     done_testing = models.BooleanField(default=False, editable=False)
     engagement_type = models.CharField(editable=True, max_length=30, default="Interactive",
                                        null=True,
@@ -1586,7 +1582,7 @@ class Engagement(models.Model):
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
         old_tags = list(self.tags.all())
-        old_risk_acceptances = list(self.risk_acceptance.all())
+        old_risk_acceptances = list(self.risk_acceptance_set.all())
         old_tests = list(Test.objects.filter(engagement=self))
         # Save the object before setting any ManyToMany relationships
         copy.save()
@@ -1601,7 +1597,7 @@ class Engagement(models.Model):
             test.copy(engagement=copy)
         # Copy the risk_acceptances
         for risk_acceptance in old_risk_acceptances:
-            copy.risk_acceptance.add(risk_acceptance.copy(engagement=copy))
+            risk_acceptance.copy(engagement=copy)
         # Assign any tags
         copy.tags.set(old_tags)
 
@@ -1630,9 +1626,6 @@ class Engagement(models.Model):
             findings = findings.filter(verified=True)
 
         return findings
-
-    def accept_risks(self, accepted_risks):
-        self.risk_acceptance.add(*accepted_risks)
 
     @property
     def has_jira_issue(self):
@@ -2211,9 +2204,6 @@ class Test(models.Model):
             findings = findings.filter(verified=True)
 
         return findings
-
-    def accept_risks(self, accepted_risks):
-        self.engagement.risk_acceptance.add(*accepted_risks)
 
     @property
     def deduplication_algorithm(self):
@@ -3791,6 +3781,8 @@ class Risk_Acceptance(models.Model):
 
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
+    engagement = models.ForeignKey(Engagement, blank=False, null=False, on_delete=models.CASCADE)
+
     accepted_findings = models.ManyToManyField(Finding)
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text=_("Recommendation from the security team."), verbose_name=_("Security Recommendation"))
@@ -3821,6 +3813,16 @@ class Risk_Acceptance(models.Model):
     def __str__(self):
         return str(self.name)
 
+    def clean(self):
+        super().clean()
+        if self.pk:
+            # Get all findings that do NOT belong to this engagement
+            problematic_findings = self.accepted_findings.exclude(test__engagement=self.engagement)
+            if problematic_findings.exists():
+                problematic_ids = list(problematic_findings.values_list("id", flat=True))
+                msg = f"Findings with IDs {problematic_ids} do not belong to engagement {self.engagement_id}."
+                raise ValidationError(msg)
+
     def filename(self):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
@@ -3832,39 +3834,30 @@ class Risk_Acceptance(models.Model):
         return str(self.name) + (" (expired " if self.is_expired else " (expires ") + (timezone.localtime(self.expiration_date).strftime("%b %d, %Y") if self.expiration_date else "Never") + ")"
 
     def get_breadcrumbs(self):
-        bc = self.engagement_set.first().get_breadcrumbs()
+        bc = self.engagement.get_breadcrumbs()
         bc += [{"title": str(self),
                 "url": reverse("view_risk_acceptance", args=(
-                    self.engagement_set.first().product.id, self.id))}]
+                    self.engagement.product.id, self.id))}]
         return bc
 
     @property
     def is_expired(self):
         return self.expiration_date_handled is not None
 
-    # relationship is many to many, but we use it as one-to-many
-    @property
-    def engagement(self):
-        engs = self.engagement_set.all()
-        if engs:
-            return engs[0]
-
-        return None
-
-    def copy(self, engagement=None):
+    def copy(self, engagement):
         copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
+        copy.engagement = engagement
         # Save the object before setting any ManyToMany relationships
         copy.save()
+        # Assign any accepted findings
+        new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
+        copy.accepted_findings.set(new_accepted_findings)
         # Copy the notes
         for notes in old_notes:
             copy.notes.add(notes.copy())
-        # Assign any accepted findings
-        if engagement:
-            new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
-            copy.accepted_findings.set(new_accepted_findings)
         return copy
 
 

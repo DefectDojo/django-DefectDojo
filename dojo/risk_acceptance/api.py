@@ -52,7 +52,6 @@ class AcceptedRisksMixin(ABC):
         base_findings = model.unaccepted_open_findings
         owner = request.user
         accepted = _accept_risks(accepted_risks, base_findings, owner)
-        model.accept_risks(accepted)
         result = RiskAcceptanceSerializer(instance=accepted, many=True)
         return Response(status=status.HTTP_201_CREATED, data=result.data)
 
@@ -75,7 +74,6 @@ class AcceptedFindingsMixin(ABC):
         for engagement in get_authorized_engagements(Permissions.Engagement_View):
             base_findings = engagement.unaccepted_open_findings
             accepted = _accept_risks(accepted_risks, base_findings, owner)
-            engagement.accept_risks(accepted)
             accepted_result.extend(accepted)
         result = RiskAcceptanceSerializer(instance=accepted_result, many=True)
         return Response(status=201, data=result.data)
@@ -95,7 +93,8 @@ def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, o
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         decision=Risk_Acceptance.TREATMENT_ACCEPT,
                                                         decision_details=risk.justification,
-                                                        accepted_by=risk.accepted_by[:200])
+                                                        accepted_by=risk.accepted_by[:200],
+                                                        engagement=findings[0].test.engagement)  # TODO: Add validator that all findings are from this Eng to Model
             acceptance.accepted_findings.set(findings)
             findings.update(risk_accepted=True, active=False)
             acceptance.save()

@@ -100,6 +100,7 @@ class SonarQubeApiUpdaterFromSource:
             finding.is_mitigated = False
             Risk_Acceptance.objects.create(
                 owner=finding.reporter,
+                engagement=finding.test.engagement,
             ).accepted_findings.set([finding])
 
         elif sonarqube_status == "FALSE-POSITIVE":

@@ -104,7 +104,6 @@ def delete(eng, risk_acceptance):
     post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
 
     risk_acceptance.accepted_findings.clear()
-    eng.risk_acceptance.remove(risk_acceptance)
     eng.save()
 
     risk_acceptance.path.delete()
@@ -311,7 +310,7 @@ def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
 
 def prefetch_for_expiration(risk_acceptances):
     return risk_acceptances.prefetch_related("accepted_findings", "accepted_findings__jira_issue",
-                                                "engagement_set",
+                                                "engagement",
                                                 "engagement__jira_project",
                                                 "engagement__jira_project__jira_instance",
                                              )

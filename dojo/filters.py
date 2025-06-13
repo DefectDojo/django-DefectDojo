@@ -2893,7 +2893,7 @@ class ApiRiskAcceptanceFilter(DojoFilter):
             "name", "accepted_findings", "recommendation", "recommendation_details",
             "decision", "decision_details", "accepted_by", "owner", "expiration_date",
             "expiration_date_warned", "expiration_date_handled", "reactivate_expired",
-            "restart_sla_expired", "notes",
+            "restart_sla_expired", "notes", "engagement",
         ]
 
 

@@ -344,6 +344,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "decision": "A",
             "decision_details": "it has been decided!",
             "accepted_by": "pointy haired boss",
+            "engagement": Finding.objects.get(pk=finding_id).test.engagement.pk,
             "owner": 1,
             "expiration_date": "2024-12-31",
             "reactivate_expired": True,
