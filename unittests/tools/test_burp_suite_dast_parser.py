@@ -1,14 +1,14 @@
 
 from dojo.models import Test
-from dojo.tools.burp_enterprise.parser import BurpEnterpriseParser
+from dojo.tools.burp_suite_dast.parser import BurpSuiteDASTParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
-class TestBurpEnterpriseParser(DojoTestCase):
+class TestBurpSuiteDASTParser(DojoTestCase):
 
-    def test_burp_enterprise_with_multiple_vulns(self):
-        with (get_unit_tests_scans_path("burp_enterprise") / "many_vulns.html").open(encoding="utf-8") as test_file:
-            parser = BurpEnterpriseParser()
+    def test_burp_suite_dast_with_multiple_vulns(self):
+        with (get_unit_tests_scans_path("burp_suite_dast") / "many_vulns.html").open(encoding="utf-8") as test_file:
+            parser = BurpSuiteDASTParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
@@ -35,9 +35,9 @@ class TestBurpEnterpriseParser(DojoTestCase):
                 self.assertEqual("WAF Detected: redacted", finding.title)
                 self.assertIn("**Issue detail**:\nFingerprint Details:\n\nWAF Type : redacted\nWAF tech. details : Cloud-based CDN, WAF & DDoS prevention", finding.description)
 
-    def test_burp_enterprise_with_multiple_vulns_newer_format(self):
-        with (get_unit_tests_scans_path("burp_enterprise") / "many_vulns_updated_format.html").open(encoding="utf-8") as test_file:
-            parser = BurpEnterpriseParser()
+    def test_burp_suite_dast_with_multiple_vulns_newer_format(self):
+        with (get_unit_tests_scans_path("burp_suite_dast") / "many_vulns_updated_format.html").open(encoding="utf-8") as test_file:
+            parser = BurpSuiteDASTParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:

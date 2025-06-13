@@ -14,10 +14,10 @@ class BurpGraphQLParser:
         return ["Burp GraphQL API"]
 
     def get_label_for_scan_types(self, scan_type):
-        return scan_type  # no custom label for now
+        return "Burp Suite DAST GraphQL API"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Burp Enterprise Edition findings from the GraphQL API"
+        return "Import Burp Suite DAST findings from the GraphQL API"
 
     def get_findings(self, filename, test):
         data = json.load(filename)

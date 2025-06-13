@@ -1,8 +1,8 @@
 ---
-title: "Burp GraphQL"
+title: "Burp Suite DAST GraphQL"
 toc_hide: true
 ---
-Import the JSON data returned from the BurpSuite Enterprise GraphQL API. Append all the
+Import the JSON data returned from the BurpSuite DAST GraphQL API. Append all the
 issues returned to a list and save it as the value for the key "Issues". There is no need
 to filter duplicates, the parser will automatically combine issues with the same name.
 
