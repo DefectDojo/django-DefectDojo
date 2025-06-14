@@ -1,464 +1,3901 @@
 {
-    "id": "800155d8-e31f-4a35-850c-a2b15c5c31dc",
-    "projects": null,
-    "createdAt": "2024-07-22T13:41:25.268449757Z",
-    "startedAt": "0001-01-01T00:00:00Z",
-    "createdBy": {
-      "serviceAccount": {
-        "id": "12312312312312312"
+  "id": "8001d6bd-2b30-419d-8819-a3e962c90d42",
+  "projects": null,
+  "createdAt": "2025-05-07T13:46:45.864014091Z",
+  "startedAt": "2025-05-07T13:46:31.95780963Z",
+  "createdBy": {
+    "serviceAccount": {
+      "id": "hycyzczp25cxpbmp67mtt2cg4mcadi4doz2fey4y4bgrqmk5b2ugs"
+    }
+  },
+  "status": {
+    "state": "SUCCESS",
+    "verdict": "FAILED_BY_POLICY"
+  },
+  "policies": [
+    {
+      "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+      "name": "test Default vulnerabilities policy ( Updated )",
+      "description": "Default built-in policy",
+      "type": "VULNERABILITIES",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsvulnerabilities",
+        "severity": "HIGH",
+        "packageCountThreshold": 1,
+        "ignoreUnfixed": true,
+        "packageAllowList": [],
+        "detectionMethods": [
+          "PACKAGE",
+          "LIBRARY",
+          "FILE_PATH"
+        ],
+        "vulnerabilities": [],
+        "fixGracePeriodHours": 0,
+        "publishGracePeriodHours": 0,
+        "ignoreTransitiveVulnerabilities": true
       }
     },
-    "status": {
-      "state": "SUCCESS",
-      "verdict": "WARN_BY_POLICY"
+    {
+      "id": "f3393997-29e9-4d15-b490-b91f575aebef",
+      "name": "Default malware policy",
+      "description": "Default built-in policy for malware scanning",
+      "type": "MALWARE",
+      "builtin": true,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "AUDIT",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsmalware",
+        "malwareFindingSeverityThreshold": "HIGH",
+        "malwareFindingConfidenceLevelThreshold": "HIGH",
+        "countThreshold": 1
+      }
     },
-    "policies": [
+    {
+      "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+      "name": "test Default vulnerabilities policy",
+      "description": "Default built-in policy",
+      "type": "VULNERABILITIES",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamsvulnerabilities",
+        "severity": "HIGH",
+        "packageCountThreshold": 1,
+        "ignoreUnfixed": true,
+        "packageAllowList": [],
+        "detectionMethods": [],
+        "vulnerabilities": [],
+        "fixGracePeriodHours": 0,
+        "publishGracePeriodHours": 0,
+        "ignoreTransitiveVulnerabilities": true
+      }
+    },
+    {
+      "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+      "name": "test Default secrets policy",
+      "description": "Default built-in policy for secret scanning",
+      "type": "SECRETS",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "BLOCK",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamssecrets",
+        "countThreshold": 1,
+        "pathAllowList": [
+          "/.git/config",
+          ".git/config"
+        ],
+        "secretFindingSeverityThreshold": "INFORMATIONAL"
+      }
+    },
+    {
+      "id": "978a1803-2e29-42c1-832a-ddfbb836c051",
+      "name": "test Default sensitive data policy",
+      "description": "Default built-in policy for sensitive data scanning",
+      "type": "SENSITIVE_DATA",
+      "builtin": false,
+      "projects": null,
+      "policyLifecycleEnforcements": [
+        {
+          "enforcementMethod": "AUDIT",
+          "deploymentLifecycle": "CLI"
+        }
+      ],
+      "ignoreRules": null,
+      "lifecycleTargets": null,
+      "Default": false,
+      "params": {
+        "__typename": "cicdscanpolicyparamssensitivedata",
+        "dataFindingSeverityThreshold": "",
+        "countThreshold": 0
+      }
+    }
+  ],
+  "extraInfo": null,
+  "tags": null,
+  "outdatedPolicies": [],
+  "taggedResource": null,
+  "scanOriginResource": {
+    "__typename": "CICDScanOriginContainerImage",
+    "name": "registry.sss.com/test.ai/services/api/release-3-967-0:latest",
+    "id": null,
+    "digest": null,
+    "imageLabels": null
+  },
+  "result": {
+    "__typename": "CICDDiskScanResult",
+    "osPackages": [
       {
-        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
-        "name": "Default vulnerabilities policy",
-        "description": "Default built-in policy",
-        "type": "VULNERABILITIES",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
+        "name": "curl",
+        "version": "7.64.0-r5",
+        "vulnerabilities": [
           {
-            "enforcementMethod": "BLOCK",
-            "deploymentLifecycle": "CLI"
+            "name": "CVE-2023-38039",
+            "severity": "MEDIUM",
+            "fixedVersion": null,
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2023-38039",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": true,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              }
+            ]
+          },
+          {
+            "name": "CVE-2020-8231",
+            "severity": "HIGH",
+            "fixedVersion": "7.66.0-r5",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-8231",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
           }
         ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamsvulnerabilities",
-          "severity": "CRITICAL",
-          "packageCountThreshold": 1,
-          "ignoreUnfixed": true,
-          "packageAllowList": [],
-          "detectionMethods": null,
-          "fixGracePeriodHours": 0,
-          "publishGracePeriodHours": 0
-        }
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ]
       },
       {
-        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
-        "name": "Default sensitive data policy",
-        "description": "Default built-in policy for sensitive data scanning",
-        "type": "SENSITIVE_DATA",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
+        "name": "libcrypto1.1",
+        "version": "1.1.1g-r0",
+        "vulnerabilities": [
           {
-            "enforcementMethod": "AUDIT",
-            "deploymentLifecycle": "CLI"
+            "name": "CVE-2021-23839",
+            "severity": "LOW",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23839",
+            "description": null,
+            "score": 3.7,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2020-1971",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1i-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-1971",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-23841",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23841",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-3449",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1k-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-3449",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-23840",
+            "severity": "HIGH",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23840",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          },
+          {
+            "name": "CVE-2021-3450",
+            "severity": "HIGH",
+            "fixedVersion": "1.1.1k-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-3450",
+            "description": null,
+            "score": 7.4,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
           }
         ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamssensitivedata",
-          "dataFindingSeverityThreshold": "",
-          "countThreshold": 0
-        }
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ]
       },
       {
-        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-        "name": "Default secrets policy",
-        "description": "Default built-in policy for secret scanning",
-        "type": "SECRETS",
-        "builtin": true,
-        "projects": null,
-        "policyLifecycleEnforcements": [
+        "name": "libcurl",
+        "version": "7.64.0-r5",
+        "vulnerabilities": [
           {
-            "enforcementMethod": "AUDIT",
-            "deploymentLifecycle": "CLI"
+            "name": "CVE-2023-38039",
+            "severity": "MEDIUM",
+            "fixedVersion": null,
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2023-38039",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": true,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2020-8231",
+            "severity": "HIGH",
+            "fixedVersion": "7.66.0-r5",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-8231",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
           }
         ],
-        "ignoreRules": null,
-        "lifecycleTargets": null,
-        "Default": false,
-        "params": {
-          "__typename": "cicdscanpolicyparamssecrets",
-          "countThreshold": 1,
-          "pathAllowList": []
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ]
+      },
+      {
+        "name": "libssl1.1",
+        "version": "1.1.1g-r0",
+        "vulnerabilities": [
+          {
+            "name": "CVE-2021-23839",
+            "severity": "LOW",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23839",
+            "description": null,
+            "score": 3.7,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2020-1971",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1i-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-1971",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-23841",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23841",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-3449",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.1k-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-3449",
+            "description": null,
+            "score": 5.9,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2021-23840",
+            "severity": "HIGH",
+            "fixedVersion": "1.1.1j-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-23840",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          },
+          {
+            "name": "CVE-2021-3450",
+            "severity": "HIGH",
+            "fixedVersion": "1.1.1k-r0",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2021-3450",
+            "description": null,
+            "score": 7.4,
+            "exploitabilityScore": 2.2,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          }
+        ],
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ]
+      },
+      {
+        "name": "musl",
+        "version": "1.1.20-r5",
+        "vulnerabilities": [
+          {
+            "name": "CVE-2020-28928",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.20-r6",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-28928",
+            "description": null,
+            "score": 5.5,
+            "exploitabilityScore": 1.8,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          }
+        ],
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": []
+      },
+      {
+        "name": "musl-utils",
+        "version": "1.1.20-r5",
+        "vulnerabilities": [
+          {
+            "name": "CVE-2020-28928",
+            "severity": "MEDIUM",
+            "fixedVersion": "1.1.20-r6",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2020-28928",
+            "description": null,
+            "score": 5.5,
+            "exploitabilityScore": 1.8,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          }
+        ],
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": []
+      },
+      {
+        "name": "zlib",
+        "version": "1.2.11-r1",
+        "vulnerabilities": [
+          {
+            "name": "CVE-2022-37434",
+            "severity": "CRITICAL",
+            "fixedVersion": "1.2.12-r3",
+            "fileRemediation": null,
+            "source": "https://security.alpinelinux.org/vuln/CVE-2022-37434",
+            "description": null,
+            "score": 9.8,
+            "exploitabilityScore": 3.9,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": true,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          }
+        ],
+        "detectionMethod": "PACKAGE",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ]
+      }
+    ],
+    "libraries": [
+      {
+        "name": "golang.org/x/crypto",
+        "version": "0.29.0",
+        "path": "/app/apictl",
+        "startLine": null,
+        "endLine": null,
+        "vulnerabilities": [
+          {
+            "name": "CVE-2025-22869",
+            "severity": "HIGH",
+            "fixedVersion": "0.35.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-hcg3-q754-cr77",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          },
+          {
+            "name": "CVE-2024-45337",
+            "severity": "CRITICAL",
+            "fixedVersion": "0.31.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-v778-237x-gjrc",
+            "description": null,
+            "score": 9.1,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          }
+        ],
+        "detectionMethod": "LIBRARY",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ],
+        "resolvedDependencyTree": null
+      },
+      {
+        "name": "golang.org/x/net",
+        "version": "0.31.0",
+        "path": "/app/apictl",
+        "startLine": null,
+        "endLine": null,
+        "vulnerabilities": [
+          {
+            "name": "CVE-2025-22870",
+            "severity": "MEDIUM",
+            "fixedVersion": "0.36.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-qxp5-gwg8-xv66",
+            "description": null,
+            "score": 4.4,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              }
+            ]
+          },
+          {
+            "name": "CVE-2025-22872",
+            "severity": "MEDIUM",
+            "fixedVersion": "0.38.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-vvgc-356p-c3xw",
+            "description": null,
+            "score": null,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          }
+        ],
+        "detectionMethod": "LIBRARY",
+        "layerMetadata": null,
+        "failedPolicyMatches": [],
+        "resolvedDependencyTree": null
+      },
+      {
+        "name": "github.com/gorilla/schema",
+        "version": "1.1.0",
+        "path": "/app/api",
+        "startLine": null,
+        "endLine": null,
+        "vulnerabilities": [
+          {
+            "name": "CVE-2024-37298",
+            "severity": "HIGH",
+            "fixedVersion": "1.4.1",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-3669-72x9-r9p3",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          }
+        ],
+        "detectionMethod": "LIBRARY",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ],
+        "resolvedDependencyTree": null
+      },
+      {
+        "name": "golang.org/x/crypto",
+        "version": "0.29.0",
+        "path": "/app/api",
+        "startLine": null,
+        "endLine": null,
+        "vulnerabilities": [
+          {
+            "name": "CVE-2025-22869",
+            "severity": "HIGH",
+            "fixedVersion": "0.35.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-hcg3-q754-cr77",
+            "description": null,
+            "score": 7.5,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          },
+          {
+            "name": "CVE-2024-45337",
+            "severity": "CRITICAL",
+            "fixedVersion": "0.31.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-v778-237x-gjrc",
+            "description": null,
+            "score": 9.1,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": null,
+                "matchedIgnoreRules": null
+              }
+            ],
+            "finding": null,
+            "ignoredPolicyMatches": null
+          }
+        ],
+        "detectionMethod": "LIBRARY",
+        "layerMetadata": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+              "name": "test Default vulnerabilities policy ( Updated )",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [
+                  "PACKAGE",
+                  "LIBRARY",
+                  "FILE_PATH"
+                ],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          },
+          {
+            "policy": {
+              "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+              "name": "test Default vulnerabilities policy",
+              "description": "Default built-in policy",
+              "type": "VULNERABILITIES",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamsvulnerabilities",
+                "severity": "HIGH",
+                "packageCountThreshold": 1,
+                "ignoreUnfixed": true,
+                "packageAllowList": [],
+                "detectionMethods": [],
+                "vulnerabilities": [],
+                "fixGracePeriodHours": 0,
+                "publishGracePeriodHours": 0,
+                "ignoreTransitiveVulnerabilities": true
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ],
+        "resolvedDependencyTree": null
+      },
+      {
+        "name": "golang.org/x/net",
+        "version": "0.31.0",
+        "path": "/app/api",
+        "startLine": null,
+        "endLine": null,
+        "vulnerabilities": [
+          {
+            "name": "CVE-2025-22870",
+            "severity": "MEDIUM",
+            "fixedVersion": "0.36.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-qxp5-gwg8-xv66",
+            "description": null,
+            "score": 4.4,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          },
+          {
+            "name": "CVE-2025-22872",
+            "severity": "MEDIUM",
+            "fixedVersion": "0.38.0",
+            "fileRemediation": null,
+            "source": "https://github.com/advisories/GHSA-vvgc-356p-c3xw",
+            "description": null,
+            "score": null,
+            "exploitabilityScore": null,
+            "cvssV3Metrics": null,
+            "cvssV2Metrics": null,
+            "hasExploit": false,
+            "hasCisaKevExploit": false,
+            "cisaKevReleaseDate": null,
+            "cisaKevDueDate": null,
+            "epssProbability": null,
+            "epssPercentile": null,
+            "epssSeverity": null,
+            "weightedSeverity": null,
+            "publishDate": null,
+            "fixPublishDate": null,
+            "gracePeriodEnd": null,
+            "gracePeriodRemainingHours": null,
+            "failedPolicyMatches": null,
+            "finding": null,
+            "ignoredPolicyMatches": [
+              {
+                "policy": {
+                  "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+                  "name": "test Default vulnerabilities policy ( Updated )",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [
+                      "PACKAGE",
+                      "LIBRARY",
+                      "FILE_PATH"
+                    ],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": []
+              },
+              {
+                "policy": {
+                  "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+                  "name": "test Default vulnerabilities policy",
+                  "description": "Default built-in policy",
+                  "type": "VULNERABILITIES",
+                  "builtin": false,
+                  "projects": null,
+                  "policyLifecycleEnforcements": [
+                    {
+                      "enforcementMethod": "BLOCK",
+                      "deploymentLifecycle": "CLI",
+                      "enforcementConfig": null
+                    }
+                  ],
+                  "ignoreRules": null,
+                  "lifecycleTargets": null,
+                  "Default": false,
+                  "params": {
+                    "__typename": "cicdscanpolicyparamsvulnerabilities",
+                    "severity": "HIGH",
+                    "packageCountThreshold": 1,
+                    "ignoreUnfixed": true,
+                    "packageAllowList": [],
+                    "detectionMethods": [],
+                    "vulnerabilities": [],
+                    "fixGracePeriodHours": 0,
+                    "publishGracePeriodHours": 0,
+                    "ignoreTransitiveVulnerabilities": true
+                  }
+                },
+                "ignoreReason": "BELOW_THRESHOLD",
+                "matchedIgnoreRules": null
+              }
+            ]
+          }
+        ],
+        "detectionMethod": "LIBRARY",
+        "layerMetadata": null,
+        "failedPolicyMatches": [],
+        "resolvedDependencyTree": null
+      }
+    ],
+    "applications": null,
+    "cpes": null,
+    "secrets": [
+      {
+        "id": "fcc00ecc-249b-5723-84fc-729aca5a5a67",
+        "externalId": null,
+        "description": "GCP Service Account Key (ServiceAccount=test-dev-api-sa@testdev.iam.gserviceaccount.com)",
+        "path": "/app/keys/gcp.json",
+        "lineNumber": 5,
+        "offset": 141,
+        "type": "CLOUD_KEY",
+        "contains": [
+          {
+            "name": "GCP Service Account Key (ServiceAccount=test-dev-api-sa@testdev.iam.gserviceaccount.com)",
+            "type": "CLOUD_KEY"
+          }
+        ],
+        "snippet": null,
+        "failedPolicyMatches": [
+          {
+            "policy": {
+              "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+              "name": "test Default secrets policy",
+              "description": "Default built-in policy for secret scanning",
+              "type": "SECRETS",
+              "builtin": false,
+              "projects": null,
+              "policyLifecycleEnforcements": [
+                {
+                  "enforcementMethod": "BLOCK",
+                  "deploymentLifecycle": "CLI",
+                  "enforcementConfig": null
+                }
+              ],
+              "ignoreRules": null,
+              "lifecycleTargets": null,
+              "Default": false,
+              "params": {
+                "__typename": "cicdscanpolicyparamssecrets",
+                "countThreshold": 1,
+                "pathAllowList": [
+                  "/.git/config",
+                  ".git/config"
+                ],
+                "secretFindingSeverityThreshold": "INFORMATIONAL"
+              }
+            },
+            "ignoreReason": null,
+            "matchedIgnoreRules": null
+          }
+        ],
+        "hasAdminPrivileges": null,
+        "hasHighPrivileges": null,
+        "severity": "HIGH",
+        "relatedEntities": null,
+        "ignoredPolicyMatches": null,
+        "details": {
+          "__typename": "DiskScanSecretDetailsCloudKey",
+          "providerUniqueID": "test-dev-api-sa@testdev.iam.gserviceaccount.com",
+          "keyType": 3,
+          "isLongTerm": true
         }
       }
     ],
-    "extraInfo": null,
-    "tags": null,
-    "outdatedPolicies": [],
-    "taggedResource": null,
-    "scanOriginResource": {
-      "__typename": "CICDScanOriginContainerImage",
-      "name": "wizcli-imagescan",
-      "id": null,
-      "digest": null
+    "dataFindings": null,
+    "vulnerableSBOMArtifactsByNameVersion": null,
+    "hostConfiguration": {
+      "hostConfigurationFrameworks": null,
+      "hostConfigurationFindings": null,
+      "analytics": null
     },
-    "result": {
-      "__typename": "CICDDiskScanResult",
-      "osPackages": [
-        {
-          "name": "libcrypto3",
-          "version": "3.3.1-r0",
-          "vulnerabilities": [
+    "failedPolicyMatches": [
+      {
+        "policy": {
+          "id": "9bf73b16-99e7-4a54-af1e-dcfa1436a8f2",
+          "name": "test Default vulnerabilities policy ( Updated )",
+          "description": "Default built-in policy",
+          "type": "VULNERABILITIES",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
             {
-              "name": "CVE-2024-5535",
-              "severity": "LOW",
-              "fixedVersion": "3.3.1-r1",
-              "source": "https://security.alpinelinux.org/vuln/CVE-2024-5535",
-              "description": null,
-              "score": null,
-              "exploitabilityScore": null,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
             }
           ],
-          "detectionMethod": "PACKAGE",
-          "layerMetadata": null,
-          "failedPolicyMatches": []
-        },
-        {
-          "name": "libssl3",
-          "version": "3.3.1-r0",
-          "vulnerabilities": [
-            {
-              "name": "CVE-2024-5535",
-              "severity": "LOW",
-              "fixedVersion": "3.3.1-r1",
-              "source": "https://security.alpinelinux.org/vuln/CVE-2024-5535",
-              "description": null,
-              "score": null,
-              "exploitabilityScore": null,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            }
-          ],
-          "detectionMethod": "PACKAGE",
-          "layerMetadata": null,
-          "failedPolicyMatches": []
-        }
-      ],
-      "libraries": [
-        {
-          "name": "golang.org/x/net",
-          "version": "0.14.0",
-          "path": "/app/grpc/proto/go.mod",
-          "vulnerabilities": [
-            {
-              "name": "CVE-2023-44487",
-              "severity": "MEDIUM",
-              "fixedVersion": "0.17.0",
-              "source": "https://github.com/advisories/GHSA-qppj-fm5r-hxr3",
-              "description": null,
-              "score": 7.5,
-              "exploitabilityScore": 3.9,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": true,
-              "hasCisaKevExploit": true,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            },
-            {
-              "name": "CVE-2023-45288",
-              "severity": "MEDIUM",
-              "fixedVersion": "0.23.0",
-              "source": "https://github.com/advisories/GHSA-4v7x-pqxf-cx7m",
-              "description": null,
-              "score": null,
-              "exploitabilityScore": null,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            },
-            {
-              "name": "CVE-2023-39325",
-              "severity": "HIGH",
-              "fixedVersion": "0.17.0",
-              "source": "https://github.com/advisories/GHSA-4374-p667-p6c8",
-              "description": null,
-              "score": 7.5,
-              "exploitabilityScore": 3.9,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            }
-          ],
-          "detectionMethod": "LIBRARY",
-          "layerMetadata": null,
-          "failedPolicyMatches": []
-        },
-        {
-          "name": "google.golang.org/grpc",
-          "version": "1.48.0",
-          "path": "/app/grpc/proto/go.mod",
-          "vulnerabilities": [
-            {
-              "name": "CVE-2023-44487",
-              "severity": "MEDIUM",
-              "fixedVersion": "1.56.3",
-              "source": "https://github.com/advisories/GHSA-qppj-fm5r-hxr3",
-              "description": null,
-              "score": 7.5,
-              "exploitabilityScore": 3.9,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": true,
-              "hasCisaKevExploit": true,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            },
-            {
-              "name": "GHSA-m425-mq94-257g",
-              "severity": "HIGH",
-              "fixedVersion": "1.56.3",
-              "source": "https://github.com/advisories/GHSA-m425-mq94-257g",
-              "description": null,
-              "score": 7.5,
-              "exploitabilityScore": null,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            }
-          ],
-          "detectionMethod": "LIBRARY",
-          "layerMetadata": null,
-          "failedPolicyMatches": []
-        },
-        {
-          "name": "google.golang.org/protobuf",
-          "version": "1.28.1",
-          "path": "/app/grpc/proto/go.mod",
-          "vulnerabilities": [
-            {
-              "name": "CVE-2024-24786",
-              "severity": "MEDIUM",
-              "fixedVersion": "1.33.0",
-              "source": "https://github.com/advisories/GHSA-8r3f-844c-mc37",
-              "description": null,
-              "score": null,
-              "exploitabilityScore": null,
-              "cvssV3Metrics": null,
-              "cvssV2Metrics": null,
-              "hasExploit": false,
-              "hasCisaKevExploit": false,
-              "cisaKevReleaseDate": null,
-              "cisaKevDueDate": null,
-              "epssProbability": null,
-              "epssPercentile": null,
-              "epssSeverity": null,
-              "weightedSeverity": null,
-              "publishDate": null,
-              "fixPublishDate": null,
-              "gracePeriodEnd": null,
-              "gracePeriodRemainingHours": null,
-              "failedPolicyMatches": null,
-              "finding": null
-            }
-          ],
-          "detectionMethod": "LIBRARY",
-          "layerMetadata": null,
-          "failedPolicyMatches": []
-        }
-      ],
-      "applications": null,
-      "cpes": null,
-      "secrets": [
-        {
-          "id": null,
-          "externalId": null,
-          "description": "Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)",
-          "path": "/app/testing.go",
-          "lineNumber": 35,
-          "offset": 521,
-          "type": "PASSWORD",
-          "contains": [
-            {
-              "name": "Password",
-              "type": "PASSWORD"
-            }
-          ],
-          "snippet": null,
-          "failedPolicyMatches": [
-            {
-              "policy": {
-                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-                "name": "Default secrets policy",
-                "description": "Default built-in policy for secret scanning",
-                "type": "SECRETS",
-                "builtin": true,
-                "projects": null,
-                "policyLifecycleEnforcements": [
-                  {
-                    "enforcementMethod": "AUDIT",
-                    "deploymentLifecycle": "CLI",
-                    "enforcementConfig": null
-                  }
-                ],
-                "ignoreRules": null,
-                "lifecycleTargets": null,
-                "Default": false,
-                "params": {
-                  "__typename": "cicdscanpolicyparamssecrets",
-                  "countThreshold": 1,
-                  "pathAllowList": []
-                }
-              }
-            }
-          ],
-          "details": {
-            "__typename": "DiskScanSecretDetailsPassword",
-            "length": 8,
-            "isComplex": false
-          }
-        }
-      ],
-      "dataFindings": null,
-      "vulnerableSBOMArtifactsByNameVersion": null,
-      "hostConfiguration": null,
-      "failedPolicyMatches": [
-        {
-          "policy": {
-            "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
-            "name": "Default secrets policy",
-            "description": "Default built-in policy for secret scanning",
-            "type": "SECRETS",
-            "builtin": true,
-            "projects": null,
-            "policyLifecycleEnforcements": [
-              {
-                "enforcementMethod": "AUDIT",
-                "deploymentLifecycle": "CLI",
-                "enforcementConfig": null
-              }
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamsvulnerabilities",
+            "severity": "HIGH",
+            "packageCountThreshold": 1,
+            "ignoreUnfixed": true,
+            "packageAllowList": [],
+            "detectionMethods": [
+              "PACKAGE",
+              "LIBRARY",
+              "FILE_PATH"
             ],
-            "ignoreRules": null,
-            "lifecycleTargets": null,
-            "Default": false,
-            "params": {
-              "__typename": "cicdscanpolicyparamssecrets",
-              "countThreshold": 1,
-              "pathAllowList": []
-            }
+            "vulnerabilities": [],
+            "fixGracePeriodHours": 0,
+            "publishGracePeriodHours": 0,
+            "ignoreTransitiveVulnerabilities": true
           }
-        }
-      ],
-      "analytics": {
-        "vulnerabilities": {
-          "infoCount": 0,
-          "lowCount": 2,
-          "mediumCount": 4,
-          "highCount": 2,
-          "criticalCount": 0,
-          "unfixedCount": 0,
-          "totalCount": 0
         },
-        "secrets": {
-          "privateKeyCount": 0,
-          "publicKeyCount": 0,
-          "passwordCount": 1,
-          "certificateCount": 0,
-          "cloudKeyCount": 0,
-          "sshAuthorizedKeyCount": 0,
-          "dbConnectionStringCount": 0,
-          "gitCredentialCount": 0,
-          "presignedURLCount": 0,
-          "saasAPIKeyCount": 0,
-          "totalCount": 1
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
+      },
+      {
+        "policy": {
+          "id": "9c6726d0-1ada-4541-b6d6-3da5ca1124f9",
+          "name": "test Default vulnerabilities policy",
+          "description": "Default built-in policy",
+          "type": "VULNERABILITIES",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
+            {
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
+            }
+          ],
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamsvulnerabilities",
+            "severity": "HIGH",
+            "packageCountThreshold": 1,
+            "ignoreUnfixed": true,
+            "packageAllowList": [],
+            "detectionMethods": [],
+            "vulnerabilities": [],
+            "fixGracePeriodHours": 0,
+            "publishGracePeriodHours": 0,
+            "ignoreTransitiveVulnerabilities": true
+          }
         },
-        "hostConfiguration": null,
-        "filesScannedCount": 124,
-        "directoriesScannedCount": 116
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
+      },
+      {
+        "policy": {
+          "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+          "name": "test Default secrets policy",
+          "description": "Default built-in policy for secret scanning",
+          "type": "SECRETS",
+          "builtin": false,
+          "projects": null,
+          "policyLifecycleEnforcements": [
+            {
+              "enforcementMethod": "BLOCK",
+              "deploymentLifecycle": "CLI",
+              "enforcementConfig": null
+            }
+          ],
+          "ignoreRules": null,
+          "lifecycleTargets": null,
+          "Default": false,
+          "params": {
+            "__typename": "cicdscanpolicyparamssecrets",
+            "countThreshold": 1,
+            "pathAllowList": [
+              "/.git/config",
+              ".git/config"
+            ],
+            "secretFindingSeverityThreshold": "INFORMATIONAL"
+          }
+        },
+        "ignoreReason": null,
+        "matchedIgnoreRules": null
       }
+    ],
+    "analytics": {
+      "vulnerabilities": {
+        "infoCount": 0,
+        "lowCount": 2,
+        "mediumCount": 14,
+        "highCount": 9,
+        "criticalCount": 3,
+        "unfixedCount": 2,
+        "totalCount": 28
+      },
+      "secrets": {
+        "privateKeyCount": 0,
+        "publicKeyCount": 0,
+        "passwordCount": 0,
+        "certificateCount": 0,
+        "cloudKeyCount": 1,
+        "sshAuthorizedKeyCount": 0,
+        "dbConnectionStringCount": 0,
+        "gitCredentialCount": 0,
+        "presignedURLCount": 0,
+        "saasAPIKeyCount": 0,
+        "infoCount": 0,
+        "lowCount": 0,
+        "mediumCount": 0,
+        "highCount": 0,
+        "criticalCount": 0,
+        "totalCount": 1
+      },
+      "hostConfiguration": null,
+      "malware": {
+        "infoCount": 0,
+        "lowCount": 0,
+        "mediumCount": 0,
+        "highCount": 0,
+        "criticalCount": 0,
+        "totalCount": 0
+      },
+      "softwareSupplyChain": null,
+      "filesScannedCount": 2666,
+      "directoriesScannedCount": 161
     },
-    "reportUrl": "https://app.wiz.io/findings/cicd-scans#"
-  }
-  
+    "sbomOutput": "",
+    "malwares": null,
+    "softwareSupplyChain": null
+  },
+  "reportUrl": "https://app.wiz.io/findings/cicd-scans#~%2528cicd_scan~%25278001d6bd-2b30-419d-8819-a3e962c90d42%252A2c2025-05-07T13%2525%25252A3a46%2525%25252A3a31.95780963Z%2527%2529"
+}
