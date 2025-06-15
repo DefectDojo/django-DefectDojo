@@ -208,7 +208,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        logger.debug(f"to_internal_value called with data: {data}")
+        # logger.debug(f"to_internal_value called with data: {data}")
         # logger.debug("Stacktrace:\n%s", "".join(traceback.format_stack()))
         if isinstance(data, list) and data == [""] and self.allow_empty:
             return []
@@ -239,15 +239,11 @@ class TagListSerializerField(serializers.ListField):
                 tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
-        logger.debug(f"data_safe after processing: {data_safe}")
-        # result = tagulous.utils.render_tags(data_safe)
         logger.debug(f"result after rendering tags: {data_safe}")
         return data_safe
-        # logger.debug(f"result after rendering tags: {result}")
-        # return result
 
     def to_representation(self, value):
-        logger.debug(f"to_representation called with value: {value}")
+        # logger.debug(f"to_representation called with value: {value}")
         if not isinstance(value, list):
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string
@@ -1741,12 +1737,7 @@ class FindingSerializer(serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
-        # remove tags from validated data and store them seperately
-        # to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        # pop push_to_jira so it won't get send to the model as a field
-        # TODO: JIRA can we remove this is_push_all_issues, already checked in
-        # apiv2 viewset?
+        # push_all_issues already checked in api views.py
         push_to_jira = validated_data.pop("push_to_jira")
 
         # Save vulnerability ids and pop them
@@ -1764,17 +1755,9 @@ class FindingSerializer(serializers.ModelSerializer):
             instance, validated_data,
         )
 
-        # If we need to push to JIRA, an extra save call is needed.
-        # Also if we need to update the mitigation date of the finding.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
         if push_to_jira:
-            logger.debug(f"Pushing updated finding {instance.id} to JIRA")
             jira_helper.push_to_jira(instance)
 
-        # not sure why we are returning a tag_object, but don't want to change
-        # too much now as we're just fixing a bug
-        # return self._save_tags(instance, to_be_tagged)
         return instance
 
     def validate(self, data):
@@ -1878,8 +1861,6 @@ class FindingCreateSerializer(serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        # Pop off of some fields that should not be sent to the model at this time
-        # to_be_tagged, validated_data = self._pop_tags(validated_data)
         logger.debug(f"Creating finding with validated data: {validated_data}")
         push_to_jira = validated_data.pop("push_to_jira", False)
         notes = validated_data.pop("notes", None)
@@ -1894,8 +1875,6 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         new_finding = super().create(
             validated_data)
 
-        # Create a findings in memory so that we have access to unsaved_vulnerability_ids
-        # new_finding = Finding(**validated_data)
         new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids
 
         # Deal with all of the many to many things
@@ -1908,13 +1887,9 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
 
-        # If we need to push to JIRA, an extra save call is needed.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
-        # This final call will save the finding again and return it
-        # return self._save_tags(new_finding, to_be_tagged)
+
         return new_finding
 
     def validate(self, data):

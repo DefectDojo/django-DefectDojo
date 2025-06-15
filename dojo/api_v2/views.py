@@ -986,20 +986,15 @@ class FindingViewSet(
             new_tags = serializers.TagSerializer(data=request.data)
             if new_tags.is_valid():
                 all_tags = finding.tags
-                logger.debug("Current tags: %s", all_tags)
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data[
                     "tags"
                 ]
-                logger.debug("Current tags serialized: %s", all_tags)
-                logger.debug("New tags raw: %s", new_tags.validated_data["tags"])
                 for tag in new_tags.validated_data["tags"]:
                     for sub_tag in tagulous.utils.parse_tags(tag):
                         if sub_tag not in all_tags:
-                            logger.debug("Adding tag: %s", sub_tag)
                             all_tags.append(sub_tag)
-                logger.debug("All tags: %s", all_tags)
+
                 new_tags = tagulous.utils.render_tags(all_tags)
-                logger.debug("All tags rendered: %s", new_tags)
 
                 finding.tags = new_tags
                 finding.save()
@@ -1242,7 +1237,6 @@ class FindingViewSet(
                 "tags"
             ]
 
-            logger.debug("Current tags serialized: %s", all_tags)
             # serializer turns it into a string, but we need a list
             del_tags = delete_tags.validated_data["tags"]
             if len(del_tags) < 1:
@@ -1250,10 +1244,8 @@ class FindingViewSet(
                     {"error": "Empty Tag List Not Allowed"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            logger.debug("Tags to delete: %s", del_tags)
+
             for tag in del_tags:
-                # sub_tag = tagulous.utils.parse_tags(tag)
-                logger.debug("Sub tag: %s", tag)
                 if tag not in all_tags:
                     return Response(
                         {
@@ -2515,7 +2507,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             jira_driver = engagement or (product or None)
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
-        logger.debug(f"push_to_jira: {push_to_jira}")
+        # logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
