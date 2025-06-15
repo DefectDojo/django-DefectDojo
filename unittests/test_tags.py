@@ -1,7 +1,7 @@
 import logging
 import random
 
-from dojo.models import Finding, Test
+from dojo.models import Finding, Product, Test
 from dojo.product.helpers import propagate_tags_on_product_sync
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
@@ -17,6 +17,53 @@ class TagTests(DojoAPITestCase):
         self.login_as_admin()
         self.scans_path = get_unit_tests_scans_path("zap")
         self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
+
+    def test_create_product_with_tags(self, expected_status_code: int = 201):
+        product_id = Product.objects.all().first().id
+        product_details = self.get_product_api(product_id)
+
+        del product_details["id"]
+
+        product_details["name"] = "tags test " + str(random.randint(1, 9999))  # noqa: S311
+        product_details["tags"] = ["tag1", "tag2"]
+        response = self.post_new_product_api(product_details, expected_status_code=expected_status_code)
+
+        self.assertEqual(response["tags"], product_details["tags"])
+
+    def test_put_product_with_tags(self):
+        product_id = Product.objects.all().first().id
+        product_details = self.get_product_api(product_id)
+
+        del product_details["id"]
+
+        product_details["name"] = "tags test " + str(random.randint(1, 9999))  # noqa: S311
+        product_details["tags"] = ["tag4", "tag5"]
+        response = self.put_product_api(product_id, product_details, expected_status_code=200)
+
+        self.assertEqual(response["tags"], product_details["tags"])
+
+    def test_patch_product_with_tags(self):
+        product_id = Product.objects.all().first().id
+        product_details = self.get_product_api(product_id)
+
+        del product_details["id"]
+
+        product_details["tags"] = ["tag9", "tag10"]
+        response = self.patch_product_api(product_id, product_details, expected_status_code=200)
+
+        self.assertEqual(response["tags"], product_details["tags"])
+
+    def test_patch_product_with_invalid_tags(self):
+        product_id = Product.objects.all().first().id
+
+        product_details = {"tags": ["'tag9"]}
+        self.patch_product_api(product_id, product_details, expected_status_code=400)
+        product_details["tags"] = ["tag 10"]
+        self.patch_product_api(product_id, product_details, expected_status_code=400)
+        product_details["tags"] = ["tagA,tagB"]
+        # since https://github.com/DefectDojo/django-DefectDojo/pull/12434 tags are split again by commas
+        response = self.patch_product_api(product_id, product_details, expected_status_code=200)
+        self.assertEqual(response["tags"], ["tagA", "tagB"])
 
     def create_finding_with_tags(self, tags: list[str], expected_status_code: int = 201):
         finding_id = Finding.objects.all().first().id
@@ -78,31 +125,6 @@ class TagTests(DojoAPITestCase):
         for tag in tags_merged:
             # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertIn(tag, response["tags"])
-
-    def test_finding_post_tags_extra(self):
-        # create finding
-        tags = ["tag1", "tag2"]
-        finding_id = self.create_finding_with_tags(tags)
-
-        response = self.get_finding_api(finding_id)
-
-        self.assertEqual(["tag1", "tag2"], response.get("tags", None))
-
-        tags_new = ["tag3", "tag4"]
-        response = self.patch_finding_api(finding_id, {"tags": tags_new})
-        self.assertEqual(["tag3", "tag4"], response.get("tags", None))
-
-        response = self.post_finding_tags_api(finding_id, tags)
-        self.assertEqual(["tag3", "tag4", "tag1", "tag2"], response.get("tags", None))
-
-        # # post tags. POST will ADD tags to existing tags (which is possibly not REST compliant?)
-        # tags_new = ["tag3", "tag4"]
-        # response = self.post_finding_tags_api(finding_id, tags_new)
-        # tags_merged = list(set(tags) | set(tags_new))
-        # self.assertEqual(len(tags_merged), len(response.get("tags")))
-        # for tag in tags_merged:
-        #     # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
-        #     self.assertIn(tag, response["tags"])
 
     def test_finding_post_tags_overlap(self):
         # create finding
@@ -193,6 +215,7 @@ class TagTests(DojoAPITestCase):
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
+        # since https://github.com/DefectDojo/django-DefectDojo/pull/12434 tags are split again by commas
         self.assertEqual(["one", "two"], response.get("tags"))
         self.assertEqual(2, len(response.get("tags")))
         self.assertIn("one", str(response["tags"]))

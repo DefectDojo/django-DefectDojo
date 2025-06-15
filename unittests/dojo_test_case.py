@@ -784,6 +784,29 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         for eps in Endpoint_Status.objects.all():
             logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
 
+    def get_product_api(self, product_id):
+        response = self.client.get(reverse("product-list") + f"{product_id}/", format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
+    def post_new_product_api(self, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.post(reverse("product-list"), payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
+
+    def put_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.put(reverse("product-list") + f"{product_id}/", payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
+
+    def patch_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.patch(reverse("product-list") + f"{product_id}/", payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
+
 
 class DojoVCRTestCase(DojoTestCase, VCRTestCase):
     def __init__(self, *args, **kwargs):
