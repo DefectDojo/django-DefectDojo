@@ -440,9 +440,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
 
     def test_groups_create_edit_update_finding(self):
-        import logging
-        logging.basicConfig()
-        logging.getLogger("vcr").setLevel(logging.DEBUG)
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", verified=True)
         test_id = import0["test"]
         self.assert_jira_issue_count_in_test(test_id, 0)
