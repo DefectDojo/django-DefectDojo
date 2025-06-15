@@ -2811,6 +2811,10 @@ class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
     epic_priority = serializers.CharField(required=False, allow_null=True)
 
 
+class TagSerializer(serializers.Serializer):
+    tags = TagListSerializerField(required=True)
+
+
 class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = System_Settings
