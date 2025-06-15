@@ -2678,7 +2678,7 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-
+        # logger.debug("Stacktrace:\n%s", "".join(traceback.format_stack()))
         from dojo.finding import helper as finding_helper
 
         # if not isinstance(self.date, (datetime, date)):
