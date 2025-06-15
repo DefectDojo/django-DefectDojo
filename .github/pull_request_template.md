@@ -1,7 +1,7 @@
-## :warning: Note on feature completeness :warning:
+## :warning: Pre-Approval check :warning:
 
-We are narrowing the scope of acceptable enhancements to DefectDojo in preparation for v3. Learn more here:
-https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md
+We don't want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria for approval, please file an issue to get pre-approval before beginning work on a PR.
+Learn more here: https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md#submission-pre-approval
 
 **Description**
 
