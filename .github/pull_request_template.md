@@ -6,7 +6,7 @@ Learn more here: https://github.com/DefectDojo/django-DefectDojo/blob/master/rea
 **Description**
 
 Describe the feature / bug fix implemented by this PR.
-If this is a new parser, [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) may be worth (re)reading.
+If this is a new parser, [the parser guide](https://docs.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/) may be worth (re)reading.
 
 **Test results**
 
