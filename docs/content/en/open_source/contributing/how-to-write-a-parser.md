@@ -280,12 +280,7 @@ This ensures the file is closed at the end of the with statement, even if an exc
 
 ### Test database
 
-To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker compose logs, login as root and issue the following commands:
-
-{{< highlight mysql >}}
-MYSQL> grant all privileges on test_defectdojo.* to defectdojo@'%';
-MYSQL> flush privileges;
-{{< /highlight >}}
+Django uses a separate test database for running unit tests called `test_defectdojo`. It's automatically created and initialized with a basic set of test data.
 
 ### Run your tests
 
