@@ -1886,6 +1886,8 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
+            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
+            new_finding.save()
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
