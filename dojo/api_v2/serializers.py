@@ -1797,9 +1797,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO: JIRA can we remove this is_push_all_issues, already checked in
         # apiv2 viewset?
         push_to_jira = validated_data.pop("push_to_jira")
-        logger.debug(f"Push to jira popped: {push_to_jira}")
-        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(instance)
-        logger.debug(f"Push to jira or push all: {push_to_jira}")
 
         # Save vulnerability ids and pop them
         if "vulnerability_id_set" in validated_data:
