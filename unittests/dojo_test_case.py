@@ -106,10 +106,10 @@ class DojoTestUtilsMixin:
         product.save()
         return product
 
-    def patch_product_api(self, product_id, product_details):
+    def patch_product_api(self, product_id, product_details: dict, expected_status_code: int = 200):
         payload = copy.deepcopy(product_details)
         response = self.client.patch(reverse("product-list") + f"{product_id}/", payload, format="json")
-        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def patch_endpoint_api(self, endpoint_id, endpoint_details):
@@ -798,12 +798,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def put_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
         payload = copy.deepcopy(product_details)
         response = self.client.put(reverse("product-list") + f"{product_id}/", payload, format="json")
-        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
-        return response.data
-
-    def patch_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
-        payload = copy.deepcopy(product_details)
-        response = self.client.patch(reverse("product-list") + f"{product_id}/", payload, format="json")
         self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
