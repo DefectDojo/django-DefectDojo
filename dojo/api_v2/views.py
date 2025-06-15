@@ -1253,16 +1253,15 @@ class FindingViewSet(
             logger.debug("Tags to delete: %s", del_tags)
             for tag in del_tags:
                 # sub_tag = tagulous.utils.parse_tags(tag)
-                sub_tag = tag
-                logger.debug("Sub tag: %s", sub_tag)
-                if sub_tag not in all_tags:
+                logger.debug("Sub tag: %s", tag)
+                if tag not in all_tags:
                     return Response(
                         {
-                            "error": f"'{sub_tag}' is not a valid tag in list '{all_tags}'",
+                            "error": f"'{tag}' is not a valid tag in list '{all_tags}'",
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-                all_tags.remove(sub_tag)
+                all_tags.remove(tag)
             new_tags = tagulous.utils.render_tags(all_tags)
             finding.tags = new_tags
             finding.save()
