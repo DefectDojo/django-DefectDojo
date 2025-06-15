@@ -986,16 +986,21 @@ class FindingViewSet(
             new_tags = serializers.TagSerializer(data=request.data)
             if new_tags.is_valid():
                 all_tags = finding.tags
+                logger.debug("Current tags: %s", all_tags)
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data[
                     "tags"
                 ]
-
-                for tag in tagulous.utils.parse_tags(
-                    new_tags.validated_data["tags"],
-                ):
-                    if tag not in all_tags:
-                        all_tags.append(tag)
+                logger.debug("Current tags serialized: %s", all_tags)
+                logger.debug("New tags raw: %s", new_tags.validated_data["tags"])
+                for tag in new_tags.validated_data["tags"]:
+                    for sub_tag in tagulous.utils.parse_tags(tag):
+                        if sub_tag not in all_tags:
+                            logger.debug("Adding tag: %s", sub_tag)
+                            all_tags.append(sub_tag)
+                logger.debug("All tags: %s", all_tags)
                 new_tags = tagulous.utils.render_tags(all_tags)
+                logger.debug("All tags rendered: %s", new_tags)
+
                 finding.tags = new_tags
                 finding.save()
             else:
@@ -1237,24 +1242,27 @@ class FindingViewSet(
                 "tags"
             ]
 
+            logger.debug("Current tags serialized: %s", all_tags)
             # serializer turns it into a string, but we need a list
-            del_tags = tagulous.utils.parse_tags(
-                delete_tags.validated_data["tags"],
-            )
+            del_tags = delete_tags.validated_data["tags"]
             if len(del_tags) < 1:
                 return Response(
                     {"error": "Empty Tag List Not Allowed"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            logger.debug("Tags to delete: %s", del_tags)
             for tag in del_tags:
-                if tag not in all_tags:
+                # sub_tag = tagulous.utils.parse_tags(tag)
+                sub_tag = tag
+                logger.debug("Sub tag: %s", sub_tag)
+                if sub_tag not in all_tags:
                     return Response(
                         {
-                            "error": f"'{tag}' is not a valid tag in list",
+                            "error": f"'{sub_tag}' is not a valid tag in list '{all_tags}'",
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-                all_tags.remove(tag)
+                all_tags.remove(sub_tag)
             new_tags = tagulous.utils.render_tags(all_tags)
             finding.tags = new_tags
             finding.save()

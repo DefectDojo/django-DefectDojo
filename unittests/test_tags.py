@@ -79,6 +79,31 @@ class TagTests(DojoAPITestCase):
             # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertIn(tag, response["tags"])
 
+    def test_finding_post_tags_extra(self):
+        # create finding
+        tags = ["tag1", "tag2"]
+        finding_id = self.create_finding_with_tags(tags)
+
+        response = self.get_finding_api(finding_id)
+
+        self.assertEqual(["tag1", "tag2"], response.get("tags", None))
+
+        tags_new = ["tag3", "tag4"]
+        response = self.patch_finding_api(finding_id, {"tags": tags_new})
+        self.assertEqual(["tag3", "tag4"], response.get("tags", None))
+
+        response = self.post_finding_tags_api(finding_id, tags)
+        self.assertEqual(["tag3", "tag4", "tag1", "tag2"], response.get("tags", None))
+
+        # # post tags. POST will ADD tags to existing tags (which is possibly not REST compliant?)
+        # tags_new = ["tag3", "tag4"]
+        # response = self.post_finding_tags_api(finding_id, tags_new)
+        # tags_merged = list(set(tags) | set(tags_new))
+        # self.assertEqual(len(tags_merged), len(response.get("tags")))
+        # for tag in tags_merged:
+        #     # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+        #     self.assertIn(tag, response["tags"])
+
     def test_finding_post_tags_overlap(self):
         # create finding
         tags = ["tag1", "tag2"]
@@ -143,7 +168,7 @@ class TagTests(DojoAPITestCase):
         response = self.put_finding_remove_tags_api(finding_id, tags_remove, expected_response_status_code=400)
 
         # for some reason this method returns just a message, not the remaining tags
-        self.assertEqual(response["error"], "'tag5' is not a valid tag in list")
+        self.assertEqual(response["error"], "'tag5' is not a valid tag in list '['tag1', 'tag2']'")
 
         # retrieve finding and check
         tags_merged = list(set(tags) - set(tags_remove))
@@ -162,6 +187,16 @@ class TagTests(DojoAPITestCase):
 
     def test_finding_patch_remove_tags_non_existent(self):
         return self.test_finding_put_remove_tags_non_existent()
+
+    def test_finding_create_tags_with_commas(self):
+        tags = ["one,two"]
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        self.assertEqual(["one", "two"], response.get("tags"))
+        self.assertEqual(2, len(response.get("tags")))
+        self.assertIn("one", str(response["tags"]))
+        self.assertIn("two", str(response["tags"]))
 
     def test_finding_create_tags_with_spaces(self):
         tags = ["one two"]

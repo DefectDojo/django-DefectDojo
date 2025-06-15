@@ -440,6 +440,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
 
     def test_groups_create_edit_update_finding(self):
+        import logging
+        logging.basicConfig()
+        logging.getLogger("vcr").setLevel(logging.DEBUG)
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", verified=True)
         test_id = import0["test"]
         self.assert_jira_issue_count_in_test(test_id, 0)
@@ -476,7 +479,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # both findings inactive -> should update status in JIRA
         self.assertNotEqual(pre_jira_status, post_jira_status)
 
-        # new finding, not pushed to JIRA
+        # new finding, not pushed to JIRA. no new issue, still 1 group issue
 
         # use existing finding as template, but change some fields to make it not a duplicate
         self.get_finding_api(findings["results"][0]["id"])
@@ -506,6 +509,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         finding_details["title"] = "jira api test 3"
         finding_details["component_name"] = "pg"
+        # post without pushing to JIRA
         new_finding_json = self.post_new_finding_api(finding_details)
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.assert_jira_group_issue_count_in_test(test_id, 1)
@@ -517,6 +521,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # no way to set finding group easily via API yet
         Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
 
+        # now pushing to JIRA should result a new group issue
         self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
 
         self.assert_jira_issue_count_in_test(test_id, 1)
