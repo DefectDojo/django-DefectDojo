@@ -262,55 +262,6 @@ class TagListSerializerField(serializers.ListField):
         return value
 
 
-class TaggitSerializer(serializers.Serializer):
-    def create(self, validated_data):
-        # # popping the values is needed to trigger validation/to_internal_value on TagListSerializerField
-        # to_be_tagged, validated_data = self._pop_tags(validated_data)
-        # # the popping will have converted tags if they contain comma's, so re-add them to the validated data
-        # to_be_tagged, validated_data = self._set_tags(validated_data, to_be_tagged)
-
-        return super().create(
-            validated_data,
-        )
-
-    def update(self, instance, validated_data):
-        # to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        # tag_object = super().update(
-        #     instance, validated_data,
-        # )
-
-        # return self._save_tags(tag_object, to_be_tagged)
-
-        return super().update(instance, validated_data)
-
-    def _save_tags(self, tag_object, tags):
-        for key in list(tags.keys()):
-            tag_values = tags.get(key)
-            # tag_object.tags = ", ".join(tag_values)
-            tag_object.tags = tag_values
-        tag_object.save()
-
-        return tag_object
-
-    def _pop_tags(self, validated_data):
-        to_be_tagged = {}
-
-        for key in list(self.fields.keys()):
-            field = self.fields[key]
-            if isinstance(field, TagListSerializerField):
-                if key in validated_data:
-                    to_be_tagged[key] = validated_data.pop(key)
-
-        return (to_be_tagged, validated_data)
-
-    def _set_tags(self, validated_data, to_be_tagged):
-        for key in list(to_be_tagged.keys()):
-            tag_values = to_be_tagged.get(key)
-            validated_data[key] = tag_values
-        return (to_be_tagged, validated_data)
-
-
 class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
@@ -1113,7 +1064,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1170,7 +1121,7 @@ class EngagementCheckListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
+class AppAnalysisSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1265,7 +1216,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             raise
 
 
-class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1459,7 +1410,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "test", "jira_issue")
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
     finding_groups = FindingGroupSerializer(
@@ -1478,7 +1429,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
 
-class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestCreateSerializer(serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(),
     )
@@ -1495,7 +1446,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
 
-class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestTypeSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1721,7 +1672,7 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
-class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1895,7 +1846,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return serialized_burps.data
 
 
-class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingCreateSerializer(serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -2010,7 +1961,7 @@ class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
-class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingTemplateSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     vulnerability_ids = VulnerabilityIdTemplateSerializer(
         source="vulnerability_id_template_set", many=True, required=False,
@@ -2031,7 +1982,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             vulnerability_id_set = None
 
-        new_finding_template = super(TaggitSerializer, self).create(
+        new_finding_template = super().create(
             validated_data,
         )
 
@@ -2057,7 +2008,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
                 vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
-        return super(TaggitSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class CredentialSerializer(serializers.ModelSerializer):
@@ -2101,7 +2052,7 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
@@ -2432,7 +2383,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
         self.process_scan(data, context)
 
 
-class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
+class ReImportScanSerializer(CommonImportScanSerializer):
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = serializers.BooleanField(
@@ -2812,7 +2763,7 @@ class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
 
 
-class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
+class SystemSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = System_Settings
         fields = "__all__"
