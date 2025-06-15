@@ -1872,10 +1872,10 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
             validated_data["cve"] = parsed_vulnerability_ids[0]
 
+        validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
+
         new_finding = super().create(
             validated_data)
-
-        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids
 
         # Deal with all of the many to many things
         if notes:
