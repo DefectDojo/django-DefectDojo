@@ -1741,12 +1741,13 @@ class FindingSerializer(serializers.ModelSerializer):
         push_to_jira = validated_data.pop("push_to_jira")
 
         # Save vulnerability ids and pop them
-        if "vulnerability_id_set" in validated_data:
-            vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-            vulnerability_ids = []
-            if vulnerability_id_set:
-                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
-            save_vulnerability_ids(instance, vulnerability_ids)
+        parsed_vulnerability_ids = []
+        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
+            validated_data["cve"] = parsed_vulnerability_ids[0]
+
         # Save the reporter on the finding
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
@@ -1754,6 +1755,9 @@ class FindingSerializer(serializers.ModelSerializer):
         instance = super().update(
             instance, validated_data,
         )
+
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
         if push_to_jira:
             jira_helper.push_to_jira(instance)
@@ -1869,11 +1873,15 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         # Process the vulnerability IDs specially
         parsed_vulnerability_ids = []
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
 
         new_finding = super().create(
             validated_data)
+
+        logger.debug(f"New finding CVE: {new_finding.cve}")
 
         # Deal with all of the many to many things
         if notes:
@@ -1886,7 +1894,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
             # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
             # on finding update nothing is done # with vulnerability_ids?
-            new_finding.save()
+            # new_finding.save()
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
