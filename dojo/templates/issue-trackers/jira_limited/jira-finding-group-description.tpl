@@ -25,3 +25,8 @@ Findings:
 {% if finding_group.test.engagement.commit_hash %}
 *Commit hash:* {{ finding_group.test.engagement.commit_hash }}
 {% endif %}
+
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe}}
+{% endif %}

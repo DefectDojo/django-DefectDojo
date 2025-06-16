@@ -635,8 +635,16 @@ def jira_description(obj):
     kwargs = {}
     if isinstance(obj, Finding):
         kwargs["finding"] = obj
+        jira_instance = get_jira_instance(obj)
+        if jira_instance:
+            loggin.debug("Adding findind_text to the jira description")
+            kwargs["finding_text"] = getattr(jira_instance, "finding_text", None)
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
+        jira_instance = get_jira_instance(obj)
+        if jira_instance:
+            loggin.debug("Adding findind_text to the jira description")
+            kwargs["finding_text"] = getattr(jira_instance, "finding_text", None)
 
     description = render_to_string(template, kwargs)
     logger.debug("rendered description: %s", description)
