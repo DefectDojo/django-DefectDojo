@@ -43,11 +43,10 @@ class NmapParser:
                 if host.find("hostnames/hostname[@type='PTR']") is not None
                 else None
             )
-            if fqdn is not None:
-                host_info += f"**FQDN:** {fqdn}\n"
+            for hosts in host.find("hostnames"):
+                host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
 
             host_info += "\n\n"
-
             for os in host.iter("os"):
                 for os_match in os.iter("osmatch"):
                     if "name" in os_match.attrib:
