@@ -208,8 +208,6 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        # logger.debug(f"to_internal_value called with data: {data}")
-        # logger.debug("Stacktrace:\n%s", "".join(traceback.format_stack()))
         if isinstance(data, list) and data == [""] and self.allow_empty:
             return []
         if isinstance(data, six.string_types):
@@ -243,7 +241,6 @@ class TagListSerializerField(serializers.ListField):
         return data_safe
 
     def to_representation(self, value):
-        # logger.debug(f"to_representation called with value: {value}")
         if not isinstance(value, list):
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string
