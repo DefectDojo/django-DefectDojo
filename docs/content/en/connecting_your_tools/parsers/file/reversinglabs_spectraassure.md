@@ -91,9 +91,7 @@ If no mapping is matched, the default severity is `Info`.
 ##### Notes
 
 - Currently, no endpoints are created.
-- Deduplication is done with the `unique-id-from-tool` field.
-    - for components: `<component sha256>:<cve>`
-    - for dependencies: `<component sha256>:<cve>:<dependency purl>`
+- Deduplication is done with sha256 if the title.
 - On detecting a duplicate dependency, we increment the number of occurrences. Components have no duplicates, so the number of occurrences is always 1.
 - We extract the scan date, the Spectra Assure scanner version, and set a static scanner name.
 
