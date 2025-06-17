@@ -40,7 +40,8 @@ from dojo.models import (
     Product_Type,
     Test,
     GeneralSettings)
-from dojo.reports import report_manager
+from dojo.reports import helper as helper_reports
+from dojo.reports.helper import get_findings
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -668,101 +669,6 @@ def prefetch_related_endpoints_for_report(endpoints):
                                       "tags",
                                      )
 
-
-def get_list_index(full_list, index):
-    try:
-        element = full_list[index]
-    except Exception:
-        element = None
-    return element
-
-
-def get_findings(request=None, url=None):
-    if url is None:
-        url = request.META.get("QUERY_STRING")
-    if not url:
-        msg = "Please use the report button when viewing findings"
-        raise Http404(msg)
-    url = url.removeprefix("url=")
-
-    views = ["all", "open", "inactive", "verified",
-             "closed", "accepted", "out_of_scope",
-             "false_positive", "inactive"]
-    # request.path = url
-    obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split(r"/|\?", url)))
-
-    try:
-        finding_index = path_items.index("finding")
-    except ValueError:
-        finding_index = -1
-    # There is a engagement or product here
-    if finding_index > 0:
-        # path_items ['product', '1', 'finding', 'closed', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        view = get_list_index(path_items, 3)
-        query = get_list_index(path_items, 4)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is findings only. Accomodate view and query
-    elif finding_index == 0:
-        # path_items ['finding', 'closed', 'title=blah']
-        obj_name = get_list_index(path_items, 0)
-        view = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is a test or engagement only
-    elif finding_index == -1:
-        # path_items ['test', '1', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-
-    filter_name = None
-    if view:
-        if view == "open":
-            filter_name = "Open"
-        elif view == "inactive":
-            filter_name = "Inactive"
-        elif view == "verified":
-            filter_name = "Verified"
-        elif view == "closed":
-            filter_name = "Closed"
-        elif view == "accepted":
-            filter_name = "Accepted"
-        elif view == "out_of_scope":
-            filter_name = "Out of Scope"
-        elif view == "false_positive":
-            filter_name = "False Positive"
-
-    obj = pid = eid = tid = None
-    if obj_id:
-        if "product" in obj_name:
-            pid = obj_id
-            obj = get_object_or_404(Product, id=pid)
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        elif "engagement" in obj_name:
-            eid = obj_id
-            obj = get_object_or_404(Engagement, id=eid)
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif "test" in obj_name:
-            tid = obj_id
-            obj = get_object_or_404(Test, id=tid)
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-
-    request.GET = QueryDict(query)
-    list_findings = BaseListFindings(
-        filter_name=filter_name,
-        product_id=pid,
-        engagement_id=eid,
-        test_id=tid)
-    findings = list_findings.get_fully_filtered_findings(request).qs
-
-    return findings, obj
-
-
 class QuickReportView(View):
     def add_findings_data(self):
         return self.findings
@@ -846,9 +752,20 @@ class CSVExportView(View):
                 "MAXIMUM_FINDINGS_IN_REPORT",
                 1000)
         ):
-            report_manager.async_generate_report(
-                url=request.META.get("QUERY_STRING"),
-                user=request.user.id)
+            logger.debug(
+                f"REPORT FINDING: Asynchronous report generation "
+                "enabled and findings count exceeds the limit. "
+                f"{self.findings.count()} >= {
+                    GeneralSettings.get_value(
+                        'MAXIMUM_FINDINGS_IN_REPORT', 1000)}")
+            request_data = {
+                "query_dict_get": request.GET.dict(),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "user_id": request.user.id
+            }
+            helper_reports.async_generate_report.apply_async(
+                args=(request_data,))
             messages.add_message(
                 request,
                 messages.WARNING,

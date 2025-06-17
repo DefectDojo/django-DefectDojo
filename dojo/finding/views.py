@@ -370,13 +370,15 @@ class BaseListFindings:
             else finding_filter_class(*args, **kwargs)
         )
 
-    def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View).order_by(self.get_order_by())
+    def get_filtered_findings(self, request=None):
+        findings = get_authorized_findings(
+            permission=Permissions.Finding_View,
+            user=request.user).order_by(self.get_order_by())
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
     def get_fully_filtered_findings(self, request: HttpRequest):
-        findings = self.get_filtered_findings()
+        findings = self.get_filtered_findings(request)
         return self.filter_findings_by_form(request, findings)
  
 class ListFindings(View, BaseListFindings):
