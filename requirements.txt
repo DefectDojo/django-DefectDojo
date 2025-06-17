@@ -96,7 +96,7 @@ opentelemetry-instrumentation==0.41b0
 django-redis==5.4.0
 # Pinning Dependencies
 azure-core==1.32.0
-protobuf==4.25.6
+protobuf==4.25.8
 billiard==4.2.1
 botocore==1.37.33
 et_xmlfile==2.0.0
