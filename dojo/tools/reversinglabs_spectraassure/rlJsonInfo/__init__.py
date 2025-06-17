@@ -1,9 +1,7 @@
 import copy
 import datetime
-import gc
 import json
 import logging
-import os
 import sys
 from typing import Any
 
@@ -90,17 +88,9 @@ class RlJsonInfo:
 
         self.data: dict[str, Any] = json.load(file_handle)
         self._results = {}
-
-        self.RL_JSON_WITH_CG_COLLECT: bool = False
-        if os.getenv("RL_JSON_WITH_CG_COLLECT"):
-            self.RL_JSON_WITH_CG_COLLECT = True
-
         self._get_info()
         self._get_meta()
         self._get_rest()
-
-        if self.RL_JSON_WITH_CG_COLLECT is True:
-            gc.collect()
 
     def _get_info(
         self,
@@ -407,7 +397,10 @@ class RlJsonInfo:
         if len(tail) == 0:
             tail = f"{dep_name}@{dep_version}"
 
-        cin.unique_id_from_tool = f"{cin.component_file_sha256}:{cve}:{tail}"
+        # should be constant over multiple re-scans (repeatable)
+        # see: https://github.com/DefectDojo/django-DefectDojo/pull/12463
+        # cin.unique_id_from_tool = f"{cin.component_file_sha256}:{cve}:{tail}"
+        # downvoted as not originally from the tool itself.
 
         logger.debug("%s", cin)
         return cin
@@ -448,7 +441,8 @@ class RlJsonInfo:
 
         # should be constant over multiple re-scans (repeatable)
         # see: https://github.com/DefectDojo/django-DefectDojo/pull/12463
-        cin.unique_id_from_tool = f"{cin.component_file_sha256}:{cve}"
+        # cin.unique_id_from_tool = f"{cin.component_file_sha256}:{cve}"
+        # downvoted as not originally from the tool itself.
 
         logger.debug("%s", cin)
 

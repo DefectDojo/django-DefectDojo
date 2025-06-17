@@ -51,13 +51,12 @@ class ReversinglabsSpectraassureParser:
             cvssv3_score=node.score,
             severity=node.score_severity,
             vuln_id_from_tool=node.vuln_id_from_tool,
-            unique_id_from_tool=node.unique_id_from_tool,  # purl if we have one ?
             file_path=node.component_file_path,
             component_name=node.component_name,
             component_version=node.component_version,
             nb_occurences=1,
             hash_code=key,  # sha256 on title
-            references=None,  # future urls
+            references=None,  # future: urls
             active=True,  # this is the DefectDojo active field, nothing to do with node.active field
             test=test,
             static_finding=True,
@@ -108,7 +107,7 @@ class ReversinglabsSpectraassureParser:
                 self._duplicates[key] = finding
                 continue
 
-            dup = self._duplicates[key]  # but that may be on a different component file, name, version
+            dup = self._duplicates[key]
             if dup:
                 dup.description += finding.description
                 dup.nb_occurences += 1
