@@ -239,8 +239,6 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """
-    if content_type not in {"text", "markdown"}:
-        raise ValueError("Unexpected message content; expected 'text' or 'markdown'.")
     if content_type == "markdown" and "markdown" in data:
         # handle markdown content
         markdown = data.get("markdown")
@@ -263,8 +261,7 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
                 if substitution_str in text and i < len(arguments):
                     text = text.replace(substitution_str, arguments[i])
         return text
-    else:
-        return ""
+    return ""
 
 
 def cve_try(val):
@@ -405,13 +402,13 @@ def get_description(result, rule, location):
             if (fullDescription != message) and (fullDescription != shortDescription):
                 description += f"**{_('Rule full description')}:** {fullDescription}\n"
     if "markdown" in result["message"]:
-            markdown = get_message_from_multiformatMessageString(
-                result["message"], rule, content_type="markdown",
-            )
-            # Replace "Details" with "Link" in the markdown
-            markdown = markdown.replace("Details", "Link")
-            description += f"**{_('Additional Details')}:**\n{markdown}\n"
-            description += "_(Unprintable characters are replaced with '?'; please see Mayhem for full reproducer.)_"
+        markdown = get_message_from_multiformatMessageString(
+            result["message"], rule, content_type="markdown",
+        )
+        # Replace "Details" with "Link" in the markdown
+        markdown = markdown.replace("Details", "Link")
+        description += f"**{_('Additional Details')}:**\n{markdown}\n"
+        description += "_(Unprintable characters are replaced with '?'; please see Mayhem for full reproducer.)_"
     if len(result.get("codeFlows", [])) > 0:
         description += get_codeFlowsDescription(result["codeFlows"])
 
