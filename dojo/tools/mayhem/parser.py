@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-import textwrap
 
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -9,94 +8,44 @@ from django.utils.translation import gettext as _
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
+from dojo.tools.sarif.parser import SarifParser
+from dojo.tools.sarif.parser import (
+    get_codeFlowsDescription,
+    get_snippet,
+    get_title,
+    get_severity,
+    get_references,
+    cve_try,
+    get_rule_cwes,
+    get_result_cwes_properties,
+    cvss_to_severity,
+    get_properties_tags,
+    get_fingerprints_hashes,
+    get_rules
+    )
+
+
 logger = logging.getLogger(__name__)
 
 CWE_REGEX = r"cwe-\d+"
 
 
-class MayhemParser:
-
+class MayhemParser(SarifParser):
     """
     Mayhem SARIF Parser
-    This is largely lifted from the existing SARIF parser, but with some minor
+    This class extends the existing SARIF parser, but with some minor
     modifications to better support the structure of Mayhem SARIF reports.
     """
-
-    def get_fields(self) -> list[str]:
-        """
-        Return the list of fields used in the Sarif Parser
-
-        Fields:
-        - title: Made using rule and id from Sarif scanner.
-        - severity: Set to severity from Sarif Scanner converted to Defect Dojo format.
-        - description: Made by combining message, location, and rule from Sarif Scanner.
-        - static_finding: Set to true.
-        - dynamic_finding: Set to false.
-        - false_p: Set to true or false based on suppression status from Sarif scanner.
-        - active: Set to true or false based on suppression status from Sarif scanner.
-        - file_path: Set to physical location from Sarif scanner.
-        - line: Set to start line from Sarif scanner.
-        - vuln_id_from_tool: Set to rule id from Sarif scanner.
-        - cwe: Set to the cwe values outputted from Sarif Scanner.
-        - cvssv3: Set to properties and securitiy-severity from Sarif scanner if available.
-        - cvssv3_score: Set to properties and securitiy-severity from Sarif scanner if available.
-        - mitigation: Set to altered version of finding's description.
-        - date: Set to the date outputted from Sarif Scanner converted to datetime.
-        - tags: Set to tags from Sarif scanner.
-        - unique_id_from_tool: Set to the hash fingerpring value outputted from Sarif Scanner.
-
-        NOTE: This parser supports tags.
-        """
-        return [
-            "title",
-            "severity",
-            "description",
-            "static_finding",
-            "dynamic_finding",
-            "false_p",
-            "active",
-            "file_path",
-            "line",
-            "vuln_id_from_tool",
-            "cwe",
-            "cvssv3",
-            "cvssv3_score",
-            "mitigation",
-            "date",
-            "tags",
-            "unique_id_from_tool",
-        ]
-
-    def get_dedupe_fields(self) -> list[str]:
-        """
-        Return the list of dedupe fields used in the Sarif Parser
-
-        Fields:
-        - title: Made using rule and id from Sarif scanner.
-        - cwe: Set to the cwe values outputted from Sarif Scanner.
-        - line: Set to start line from Sarif scanner.
-        - file_path: Set to physical location from Sarif scanner.
-        - description: Made by combining message, location, and rule from Sarif Scanner.
-
-        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
-        """
-        return [
-            "title",
-            "cwe",
-            "line",
-            "file_path",
-            "description",
-        ]
 
     def get_scan_types(self):
         return ["Mayhem SARIF Report"]
 
-    def get_label_for_scan_types(self, scan_type):
-        return scan_type
-
-    def get_description_for_scan_types(self, scan_type):
+    def get_description_for_scan_types(self):
         return "Mayhem SARIF reports from code or API runs."
 
+    # Due to mixing of class methods and package functions, we need to override some of these methods
+    # without changing their behavior. __get_items_from_run is name mangled in the parent class,
+    # so inherited methods cannot access the version here in MayhemParser.
     def get_findings(self, filehandle, test):
         """For simple interface of parser contract we just aggregate everything"""
         tree = json.load(filehandle)
@@ -123,15 +72,16 @@ class MayhemParser:
         items = []
         # load rules
         rules = get_rules(run)
-        artifacts = get_artifacts(run)
+        # Artifacts do not appear to be used anywhere
+        # artifacts = get_artifacts(run)
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
         for result in run.get("results", []):
-            result_items = get_items_from_result(result, rules, artifacts, run_date)
+            result_items = get_items_from_result(result, rules, run_date)
             if result_items:
                 items.extend(result_items)
         return items
-
+    
     def __get_last_invocation_date(self, data):
         invocations = data.get("invocations", [])
         if len(invocations) == 0:
@@ -144,52 +94,6 @@ class MayhemParser:
         return dateutil.parser.isoparse(raw_date)
 
 
-def get_rules(run):
-    rules = {}
-    rules_array = run["tool"]["driver"].get("rules", [])
-    if len(rules_array) == 0 and run["tool"].get("extensions") is not None:
-        rules_array = run["tool"]["extensions"][0].get("rules", [])
-    for item in rules_array:
-        rules[item["id"]] = item
-    return rules
-
-
-# Rules and results have de sames scheme for tags
-def get_properties_tags(value):
-    if not value:
-        return []
-    return value.get("properties", {}).get("tags", [])
-
-
-def search_cwe(value, cwes):
-    matches = re.search(CWE_REGEX, value, re.IGNORECASE)
-    if matches:
-        cwes.append(int(matches[0].split("-")[1]))
-
-
-def get_rule_cwes(rule):
-    cwes = []
-    # data of the specification
-    if "relationships" in rule and isinstance(rule["relationships"], list):
-        for relationship in rule["relationships"]:
-            value = relationship["target"]["id"]
-            search_cwe(value, cwes)
-        return cwes
-
-    for tag in get_properties_tags(rule):
-        search_cwe(tag, cwes)
-    return cwes
-
-
-def get_result_cwes_properties(result):
-    """Some tools like njsscan store the CWE in the properties of the result"""
-    cwes = []
-    if "properties" in result and "cwe" in result["properties"]:
-        value = result["properties"]["cwe"]
-        search_cwe(value, cwes)
-    return cwes
-
-
 def get_result_cwes_mcode(result):
     """Mayhem SARIF reports include CWE property under taxa.toolComponent.name and number under taxa.id"""
     cwes = []
@@ -200,13 +104,6 @@ def get_result_cwes_mcode(result):
                 if value:
                     cwes.append(int(value))
     return cwes
-
-
-def get_artifacts(run):
-    artifacts = {}
-    for custom_index, tree_artifact in enumerate(run.get("artifacts", [])):
-        artifacts[tree_artifact.get("index", custom_index)] = tree_artifact
-    return artifacts
 
 
 def clean_mayhem_title_text(text):
@@ -237,7 +134,7 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
     """
     Get a message from multimessage struct
 
-    See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
+    Differs from Sarif implementation in that it handles markdown, specifies content_type
     """
     if content_type == "markdown" and "markdown" in data:
         # handle markdown content
@@ -264,118 +161,8 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
     return ""
 
 
-def cve_try(val):
-    # Match only the first CVE!
-    cveSearch = re.search(r"(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
-    if cveSearch:
-        return cveSearch.group(1).upper()
-    return None
-
-
-def get_title(result, rule):
-    title = None
-    if "message" in result:
-        title = get_message_from_multiformatMessageString(
-            result["message"], rule,
-        )
-    if title is None and rule is not None:
-        if "shortDescription" in rule:
-            title = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule,
-            )
-        elif "fullDescription" in rule:
-            title = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule,
-            )
-        elif "name" in rule:
-            title = rule["name"]
-        elif "id" in rule:
-            title = rule["id"]
-
-    if title is None:
-        msg = "No information found to create a title"
-        raise ValueError(msg)
-
-    # Clean the title text for Mayhem SARIF reports
-    title = clean_mayhem_title_text(title)
-
-    return textwrap.shorten(title, 150)
-
-
-def get_snippet(location):
-
-    snippet = None
-
-    if location and "physicalLocation" in location:
-        if "region" in location["physicalLocation"]:
-            if "snippet" in location["physicalLocation"]["region"]:
-                if (
-                    "text"
-                    in location["physicalLocation"]["region"]["snippet"]
-                ):
-                    snippet = location["physicalLocation"]["region"][
-                        "snippet"
-                    ]["text"]
-        if (
-            snippet is None
-            and "contextRegion" in location["physicalLocation"]
-        ):
-            if "snippet" in location["physicalLocation"]["contextRegion"]:
-                if (
-                    "text"
-                    in location["physicalLocation"]["contextRegion"][
-                        "snippet"
-                    ]
-                ):
-                    snippet = location["physicalLocation"][
-                        "contextRegion"
-                    ]["snippet"]["text"]
-
-    return snippet
-
-
-def get_codeFlowsDescription(code_flows):
-    description = ""
-    for codeFlow in code_flows:
-        for threadFlow in codeFlow.get("threadFlows", []):
-            if "locations" not in threadFlow:
-                continue
-
-            description = f"**{_('Code flow')}:**\n"
-
-            for line, location in enumerate(threadFlow.get("locations", [])):
-                physicalLocation = location.get("location", {}).get("physicalLocation", {})
-                region = physicalLocation.get("region", {})
-                uri = physicalLocation.get("artifactLocation").get("uri")
-
-                start_line = ""
-                start_column = ""
-                snippet = ""
-
-                if "startLine" in region:
-                    start_line = f":L{region.get('startLine')}"
-
-                if "startColumn" in region:
-                    start_column = f":C{region.get('startColumn')}"
-
-                if "snippet" in region:
-                    snippet = f"\t-\t{region.get('snippet').get('text')}"
-
-                description += f"{line + 1}. {uri}{start_line}{start_column}{snippet}\n"
-
-                if "message" in location.get("location", {}):
-                    message_field = location.get("location", {}).get("message", {})
-                    if "markdown" in message_field:
-                        message = message_field.get("markdown", "")
-                    else:
-                        message = message_field.get("text", "")
-
-                    description += f"\t{message}\n"
-
-    return description
-
-
 def get_description(result, rule, location):
+    """Overwrite the SarifParser get_description to handle markdown"""
     description = ""
     message = ""
     if "message" in result:
@@ -415,58 +202,7 @@ def get_description(result, rule, location):
     return description.removesuffix("\n")
 
 
-def get_references(rule):
-    reference = None
-    if rule is not None:
-        if "helpUri" in rule:
-            reference = rule["helpUri"]
-        elif "help" in rule:
-            helpText = get_message_from_multiformatMessageString(
-                rule["help"], rule,
-            )
-            if helpText.startswith("http"):
-                reference = helpText
-
-    return reference
-
-
-def cvss_to_severity(cvss):
-    severity_mapping = {
-        1: "Info",
-        2: "Low",
-        3: "Medium",
-        4: "High",
-        5: "Critical",
-    }
-
-    if cvss >= 9:
-        return severity_mapping.get(5)
-    if cvss >= 7:
-        return severity_mapping.get(4)
-    if cvss >= 4:
-        return severity_mapping.get(3)
-    if cvss > 0:
-        return severity_mapping.get(2)
-    return severity_mapping.get(1)
-
-
-def get_severity(result, rule):
-    severity = result.get("level")
-    if severity is None and rule is not None:
-        # get the severity from the rule
-        if "defaultConfiguration" in rule:
-            severity = rule["defaultConfiguration"].get("level")
-
-    if severity == "note":
-        return "Info"
-    if severity == "warning":
-        return "Medium"
-    if severity == "error":
-        return "High"
-    return "Medium"
-
-
-def get_items_from_result(result, rules, artifacts, run_date):
+def get_items_from_result(result, rules, run_date):
     # see
     # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
     # / 3.27.9
@@ -516,11 +252,11 @@ def get_items_from_result(result, rules, artifacts, run_date):
         rule = rules.get(result.get("ruleId"))
 
         finding = Finding(
-            title=get_title(result, rule),
+            title=clean_mayhem_title_text(get_title(result, rule)),
             severity=get_severity(result, rule),
             description=get_description(result, rule, location),
-            static_finding=False,  # by definition
-            dynamic_finding=True,  # by definition
+            static_finding=False,
+            dynamic_finding=True,
             false_p=suppressed,
             active=not suppressed,
             file_path=file_path,
@@ -594,31 +330,3 @@ def get_items_from_result(result, rules, artifacts, run_date):
         result_items.append(finding)
 
     return result_items
-
-
-def get_fingerprints_hashes(values):
-    """
-    Method that generate a `unique_id_from_tool` data from the `fingerprints` attribute.
-     - for now, we take the value of the last version of the first hash method.
-    """
-    fingerprints = {}
-    for key in values:
-        if "/" in key:
-            key_method = key.split("/")[-2]
-            key_method_version = int(key.split("/")[-1].replace("v", ""))
-        else:
-            key_method = key
-            key_method_version = 0
-        value = values[key]
-        if fingerprints.get(key_method):
-            if fingerprints[key_method]["version"] < key_method_version:
-                fingerprints[key_method] = {
-                    "version": key_method_version,
-                    "value": value,
-                }
-        else:
-            fingerprints[key_method] = {
-                "version": key_method_version,
-                "value": value,
-            }
-    return fingerprints
