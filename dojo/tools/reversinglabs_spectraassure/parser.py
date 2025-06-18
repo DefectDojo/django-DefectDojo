@@ -11,6 +11,12 @@ logger = logging.getLogger(__name__)
 
 SCAN_TYPE = "ReversingLabs Spectra Assure"
 
+"""
+The actual parsing is done by `RlJsonInfo` and it stores data as a collection of `CveInfoNode`
+A `CveInfoNode` matches a dd.Finding more closely and makes the collection of Findings easy.
+
+"""
+
 
 class ReversinglabsSpectraassureParser:
 
@@ -87,15 +93,15 @@ class ReversinglabsSpectraassureParser:
         test: Any,
     ) -> list[Finding]:
         # ------------------------------------
-        rji = RlJsonInfo(file_handle=file)
-        rji.get_cve_active_all()
+        rl_json_info_instance = RlJsonInfo(file_handle=file)
+        rl_json_info_instance.get_cve_active_all()
 
         self._findings: list[Finding] = []
         self._duplicates: dict[str, Finding] = {}
 
-        for cin in rji.get_results_list():
+        for cve_info_node_instance in rl_json_info_instance.get_results_list():
             finding = self._one_finding(
-                node=cin,
+                node=cve_info_node_instance,
                 test=test,
             )
             if finding is None:
