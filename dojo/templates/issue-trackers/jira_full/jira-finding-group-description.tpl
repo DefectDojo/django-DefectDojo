@@ -13,11 +13,11 @@ h2. Group
 h2. Summary
 *Severity:* {{ finding_group.findings.all | jira_severity }} {% if finding_group.sla_deadline %} *Due Date:* {{ finding_group | jira_sla_deadline }} {% endif %}
 
-Findings matching the Active,{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %} Verified{% endif %} and Severity criteria:
+Findings matching the Active{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %}, Verified{% endif %} and Severity criteria:
 || Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group|jira_qualified_findings %}
 |{{finding.severity}}|{% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %}|[{{finding.cwe}}|{{finding.cwe|cwe_url}}]|{{finding.component_name|jiraencode_component}}|{{finding.component_version}}|{% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]|{{ finding.status }}|{% endfor %}
 
-Findings *not* matching the Active,{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %} Verified{% endif %} and Severity criteria:
+Findings *not* matching the Active{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %}, Verified{% endif %} and Severity criteria:
 || Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group|jira_non_qualified_findings %}
 |{{finding.severity}}|{% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %}|[{{finding.cwe}}|{{finding.cwe|cwe_url}}]|{{finding.component_name|jiraencode_component}}|{{finding.component_version}}|{% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]|{{ finding.status }}|{% endfor %}
 
