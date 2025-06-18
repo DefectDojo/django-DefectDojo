@@ -131,6 +131,7 @@ spec:
             name: {{ $fullName }}
         - secretRef:
             name: {{ $fullName }}
+            optional: true
         env:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
