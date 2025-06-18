@@ -16,6 +16,7 @@ from dojo.models import Dojo_User
 from dojo.models import GeneralSettings
 from dojo.reports.report_manager import CSVReportManager
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 
 BUCKET = 'mybuket-rene'
@@ -23,17 +24,19 @@ KEY = 'reportes/reporte.csv'
 CHUNKSIZE = 1
 
 
-def upload_s3(session_s3, buffer, bucket, key, retries=5, delay=10):
+def upload_s3(session_s3, buffer, bucket, key, retries=3, delay=10):
     for attempt in range(retries):
         try:
-            session_s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
-            return
-        except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == 'ExpiredToken':
-                logger.error(f"AWS token expired on attempt {attempt + 1}. Refreshing credentials.")
-                sleep(delay)  # Wait before retrying
+            response = session_s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
+            logger.info(f"REPORT FINDING: Upload successful: {response}")
+            if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+                return response
             else:
-                raise
+                logger.error(f"REPORT FINDING: Upload failed with status code: {response['ResponseMetadata']['HTTPStatusCode']}")
+                raise Exception(response["ResponseMetadata"]["HTTPStatusCode"], "Failed to upload to S3")
+        except Exception as e:
+            logger.error(f"REPORT FINDING: Attempt {attempt + 1} failed with error: {e}")
+            sleep(delay)
     raise Exception("Failed to upload to S3 after multiple attempts due to expired token.")
 
 
@@ -166,13 +169,22 @@ def async_generate_report(request_data: dict):
     
     try:
         session_s3 = boto3.Session().client('s3')
-        upload_s3(
+        response = upload_s3(
             session_s3,
             report_csv,
             bucket,
             KEY,
-            retries=CHUNKSIZE
         )
+        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+            url = get_url_presigned(
+                session_s3,
+                KEY,
+                bucket
+            )
+            logger.debug(f"REPORT FINDING: URL {url}")
+            create_notification(
+                subject=f"Reporte Finding is ready🔔")
+            return response
     except botocore.exceptions.ClientError as e:
         logger.error(f"Failed to upload report to S3: {e}")
         raise

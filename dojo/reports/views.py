@@ -28,6 +28,7 @@ from dojo.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
+from dojo.notifications.helper import create_notification
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
@@ -738,6 +739,10 @@ class CSVExportView(View):
         pass
 
     def get(self, request):
+        # create_notification(
+        #         event="other",
+        #         recipients=request.user.get_username(),
+        #         subject=f"Reporte Finding is ready🔔")
         findings, _obj = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
