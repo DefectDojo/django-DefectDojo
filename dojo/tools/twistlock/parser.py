@@ -55,8 +55,8 @@ class TwistlockCSVParser:
         data_vulnerability_link = row.get("Vulnerability Link", "")
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
-        data_unique_id = row.get("Custom Id")
-        data_ami_id = row.get("Ami Id")
+        data_unique_id = row.get("Custom Id", "")
+        data_ami_id = row.get("Ami Id", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
