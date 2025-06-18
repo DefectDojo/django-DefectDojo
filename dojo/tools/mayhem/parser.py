@@ -7,23 +7,13 @@ from django.utils.translation import gettext as _
 
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
-
-from dojo.tools.sarif.parser import SarifParser
-from dojo.tools.sarif.parser import (
-    get_codeFlowsDescription,
-    get_snippet,
-    get_title,
-    get_severity,
-    get_references,
-    cve_try,
-    get_rule_cwes,
-    get_result_cwes_properties,
-    cvss_to_severity,
-    get_properties_tags,
-    get_fingerprints_hashes,
-    get_rules
-    )
-
+from dojo.tools.sarif.parser import (SarifParser, cve_try, cvss_to_severity,
+                                     get_codeFlowsDescription,
+                                     get_fingerprints_hashes,
+                                     get_properties_tags, get_references,
+                                     get_result_cwes_properties, get_rule_cwes,
+                                     get_rules, get_severity, get_snippet,
+                                     get_title)
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +21,10 @@ CWE_REGEX = r"cwe-\d+"
 
 
 class MayhemParser(SarifParser):
+
     """
     Mayhem SARIF Parser
+
     This class extends the existing SARIF parser, but with some minor
     modifications to better support the structure of Mayhem SARIF reports.
     """
@@ -81,7 +73,7 @@ class MayhemParser(SarifParser):
             if result_items:
                 items.extend(result_items)
         return items
-    
+
     def __get_last_invocation_date(self, data):
         invocations = data.get("invocations", [])
         if len(invocations) == 0:
