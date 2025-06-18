@@ -21,7 +21,7 @@ class TestMayhemParser(DojoTestCase):
             self.assertEqual(8, len(findings))
             for finding in findings:
                 self.common_checks(finding)
-    
+
     def test_mapi_many_report(self):
         with (
             get_unit_tests_scans_path("mayhem") / "mayhem_api_many_vulns.sarif"

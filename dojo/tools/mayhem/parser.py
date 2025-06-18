@@ -92,7 +92,7 @@ class MayhemParser:
         return ["Mayhem SARIF Report"]
 
     def get_label_for_scan_types(self, scan_type):
-        return scan_type 
+        return scan_type
 
     def get_description_for_scan_types(self, scan_type):
         return "Mayhem SARIF reports from code or API runs."
@@ -189,6 +189,7 @@ def get_result_cwes_properties(result):
         search_cwe(value, cwes)
     return cwes
 
+
 def get_result_cwes_mcode(result):
     """Mayhem SARIF reports include CWE property under taxa.toolComponent.name and number under taxa.id"""
     cwes = []
@@ -207,21 +208,20 @@ def get_artifacts(run):
         artifacts[tree_artifact.get("index", custom_index)] = tree_artifact
     return artifacts
 
+
 def clean_mayhem_title_text(text):
-    """
-    Clean the title text for Mayhem SARIF reports.
-    """
+    """Clean the title text for Mayhem SARIF reports."""
     if not text:
         return ""
-    
+
     # Remove links (and add limit to avoid catastrophic backtracking)
     link_regex = r"\[[^\]]{1,100}?\]\([^)]{1,200}?\)"
     text = re.sub(link_regex, "", text)
-    
+
     # Remove URL encoded characters
     url_encoding_regex = r"&#x\d+;"
     text = re.sub(url_encoding_regex, "", text)
-    
+
     # Remove single or double quotes
     quotes_regex = r"[\"']"
     text = re.sub(quotes_regex, "", text)
@@ -229,7 +229,7 @@ def clean_mayhem_title_text(text):
     # Remove TDID
     tdid_regex = r"TDID-\d+\s*-\s*|TDID-\d+-"
     text = re.sub(tdid_regex, "", text)
-    
+
     return text.strip()
 
 
@@ -239,8 +239,8 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """
-    if content_type not in ["text", "markdown"]:
-        raise ValueError(f"Unexpected content type: {content_type}")
+    if content_type not in {"text", "markdown"}:
+        raise ValueError("Unexpected message content; expected 'text' or 'markdown'.")
     if content_type == "markdown" and "markdown" in data:
         # handle markdown content
         markdown = data.get("markdown")
@@ -248,10 +248,10 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
         heading_regex = r"^#+\s*"
         markdown = re.sub(heading_regex, "", markdown, flags=re.MULTILINE)
         # replace non-unicode characters with "?"
-        non_unicode_regex = r'[^\x09\x0A\x0D\x20-\x7E]'
-        markdown = re.sub(non_unicode_regex, '?', markdown)
+        non_unicode_regex = r"[^\x09\x0A\x0D\x20-\x7E]"
+        markdown = re.sub(non_unicode_regex, "?", markdown)
         return markdown.strip()
-    elif content_type == "text" and "text" in data:
+    if content_type == "text" and "text" in data:
         # handle text content
         text = data.get("text")
         if rule is not None and "id" in data:
@@ -265,6 +265,7 @@ def get_message_from_multiformatMessageString(data, rule, content_type="text"):
         return text
     else:
         return ""
+
 
 def cve_try(val):
     # Match only the first CVE!
@@ -297,7 +298,7 @@ def get_title(result, rule):
     if title is None:
         msg = "No information found to create a title"
         raise ValueError(msg)
-    
+
     # Clean the title text for Mayhem SARIF reports
     title = clean_mayhem_title_text(title)
 
@@ -374,7 +375,8 @@ def get_codeFlowsDescription(code_flows):
 
                     description += f"\t{message}\n"
 
-    return description    
+    return description
+
 
 def get_description(result, rule, location):
     description = ""
@@ -400,10 +402,7 @@ def get_description(result, rule, location):
             fullDescription = get_message_from_multiformatMessageString(
                 rule["fullDescription"], rule,
             )
-            if (
-                fullDescription != message
-                and fullDescription != shortDescription
-            ):
+            if (fullDescription != message) and (fullDescription != shortDescription):
                 description += f"**{_('Rule full description')}:** {fullDescription}\n"
     if "markdown" in result["message"]:
             markdown = get_message_from_multiformatMessageString(
@@ -412,7 +411,7 @@ def get_description(result, rule, location):
             # Replace "Details" with "Link" in the markdown
             markdown = markdown.replace("Details", "Link")
             description += f"**{_('Additional Details')}:**\n{markdown}\n"
-            description += f"_(Unprintable characters are replaced with '?'; please see Mayhem for full reproducer.)_"
+            description += "_(Unprintable characters are replaced with '?'; please see Mayhem for full reproducer.)_"
     if len(result.get("codeFlows", [])) > 0:
         description += get_codeFlowsDescription(result["codeFlows"])
 
