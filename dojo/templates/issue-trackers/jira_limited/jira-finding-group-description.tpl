@@ -13,11 +13,11 @@ h2. Group
 h2. Summary
 *Severity:* {{ finding_group.findings.all | jira_severity }} {% if finding_group.sla_deadline %} *Due Date:* {{ finding_group | jira_sla_deadline }} {% endif %}
 
-Findings matching the Active{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %}, Verified{% endif %} and Severity criteria:
+Findings matching the Active, Verified and Severity criteria:
 {% for finding in finding_group|jira_qualified_findings %}
 - [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]{% endfor %}
 
-Findings *not* matching the Active{% if system_settings.enforce_verified_status or system_settings.enforce_verified_status_jira %}, Verified{% endif %} and Severity criteria:
+Findings *not* matching the Active, Verified and Severity criteria:
 {% for finding in finding_group|jira_non_qualified_findings %}
 - [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]{% endfor %}
 
