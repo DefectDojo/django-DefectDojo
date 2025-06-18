@@ -108,7 +108,7 @@ class SysdigCLIParser:
                         finding.cvssv3_score = vulnCvssScore
                         vectors = cvss.parser.parse_cvss_from_text(vulnCvssVector)
                         if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
-                            finding.cvss = vectors[0].clean_vector()
+                            finding.cvssv3 = vectors[0].clean_vector()
                 except ValueError:
                     continue
 
@@ -164,7 +164,7 @@ class SysdigCLIParser:
                     finding.cvssv3_score = float(row.cvss_score)
                     vectors = cvss.parser.parse_cvss_from_text(row.cvss_vector)
                     if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
-                        finding.cvss = vectors[0].clean_vector()
+                        finding.cvssv3 = vectors[0].clean_vector()
             except ValueError:
                 continue
             finding.risk_accepted = row.risk_accepted
