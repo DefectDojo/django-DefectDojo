@@ -7,13 +7,21 @@ from django.utils.translation import gettext as _
 
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
-from dojo.tools.sarif.parser import (SarifParser, cve_try, cvss_to_severity,
-                                     get_codeFlowsDescription,
-                                     get_fingerprints_hashes,
-                                     get_properties_tags, get_references,
-                                     get_result_cwes_properties, get_rule_cwes,
-                                     get_rules, get_severity, get_snippet,
-                                     get_title)
+from dojo.tools.sarif.parser import (
+    SarifParser,
+    cve_try,
+    cvss_to_severity,
+    get_codeFlowsDescription,
+    get_fingerprints_hashes,
+    get_properties_tags,
+    get_references,
+    get_result_cwes_properties,
+    get_rule_cwes,
+    get_rules,
+    get_severity,
+    get_snippet,
+    get_title,
+)
 
 logger = logging.getLogger(__name__)
 
