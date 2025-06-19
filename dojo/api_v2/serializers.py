@@ -237,7 +237,8 @@ class TagListSerializerField(serializers.ListField):
                 tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
-        return tagulous.utils.render_tags(data_safe)
+        logger.debug(f"result after rendering tags: {data_safe}")
+        return data_safe
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -252,44 +253,6 @@ class TagListSerializerField(serializers.ListField):
                 msg = f"unable to convert {type(value).__name__} into list of tags"
                 raise ValueError(msg)
         return value
-
-
-class TaggitSerializer(serializers.Serializer):
-    def create(self, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        tag_object = super().create(validated_data)
-
-        return self._save_tags(tag_object, to_be_tagged)
-
-    def update(self, instance, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        tag_object = super().update(
-            instance, validated_data,
-        )
-
-        return self._save_tags(tag_object, to_be_tagged)
-
-    def _save_tags(self, tag_object, tags):
-        for key in list(tags.keys()):
-            tag_values = tags.get(key)
-            # tag_object.tags = ", ".join(tag_values)
-            tag_object.tags = tag_values
-        tag_object.save()
-
-        return tag_object
-
-    def _pop_tags(self, validated_data):
-        to_be_tagged = {}
-
-        for key in list(self.fields.keys()):
-            field = self.fields[key]
-            if isinstance(field, TagListSerializerField):
-                if key in validated_data:
-                    to_be_tagged[key] = validated_data.pop(key)
-
-        return (to_be_tagged, validated_data)
 
 
 class RequestResponseDict(collections.UserList):
@@ -1094,7 +1057,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1151,7 +1114,7 @@ class EngagementCheckListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
+class AppAnalysisSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1246,7 +1209,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             raise
 
 
-class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1440,7 +1403,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "test", "jira_issue")
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
     finding_groups = FindingGroupSerializer(
@@ -1459,7 +1422,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
 
-class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestCreateSerializer(serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(),
     )
@@ -1476,7 +1439,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
 
-class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestTypeSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1702,7 +1665,7 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
-class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1771,41 +1734,32 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
-        # remove tags from validated data and store them seperately
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        # pop push_to_jira so it won't get send to the model as a field
-        # TODO: JIRA can we remove this is_push_all_issues, already checked in
-        # apiv2 viewset?
-        push_to_jira = validated_data.pop(
-            "push_to_jira",
-        ) or jira_helper.is_push_all_issues(instance)
+        # push_all_issues already checked in api views.py
+        push_to_jira = validated_data.pop("push_to_jira")
 
         # Save vulnerability ids and pop them
-        if "vulnerability_id_set" in validated_data:
-            vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-            vulnerability_ids = []
-            if vulnerability_id_set:
-                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
-            save_vulnerability_ids(instance, vulnerability_ids)
+        parsed_vulnerability_ids = []
+        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
+            validated_data["cve"] = parsed_vulnerability_ids[0]
 
-        instance = super(TaggitSerializer, self).update(
-            instance, validated_data,
-        )
         # Save the reporter on the finding
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
 
-        # If we need to push to JIRA, an extra save call is needed.
-        # Also if we need to update the mitigation date of the finding.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
-        if push_to_jira:
-            instance.save(push_to_jira=push_to_jira)
+        instance = super().update(
+            instance, validated_data,
+        )
 
-        # not sure why we are returning a tag_object, but don't want to change
-        # too much now as we're just fixing a bug
-        return self._save_tags(instance, to_be_tagged)
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
+        if push_to_jira:
+            jira_helper.push_to_jira(instance)
+
+        return instance
 
     def validate(self, data):
         if self.context["request"].method == "PATCH":
@@ -1876,7 +1830,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return serialized_burps.data
 
 
-class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingCreateSerializer(serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1908,8 +1862,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        # Pop off of some fields that should not be sent to the model at this time
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        logger.debug(f"Creating finding with validated data: {validated_data}")
         push_to_jira = validated_data.pop("push_to_jira", False)
         notes = validated_data.pop("notes", None)
         found_by = validated_data.pop("found_by", None)
@@ -1917,12 +1870,16 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Process the vulnerability IDs specially
         parsed_vulnerability_ids = []
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
-        # Create a findings in memory so that we have access to unsaved_vulnerability_ids
-        new_finding = Finding(**validated_data)
-        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids
-        new_finding.save()
+
+        new_finding = super().create(
+            validated_data)
+
+        logger.debug(f"New finding CVE: {new_finding.cve}")
+
         # Deal with all of the many to many things
         if notes:
             new_finding.notes.set(notes)
@@ -1932,18 +1889,14 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
-        # TODO: JIRA can we remove this is_push_all_issues, already checked in
-        # apiv2 viewset?
-        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(
-            new_finding,
-        )
-        # If we need to push to JIRA, an extra save call is needed.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
-        if push_to_jira or new_finding:
-            new_finding.save(push_to_jira=push_to_jira)
-        # This final call will save the finding again and return it
-        return self._save_tags(new_finding, to_be_tagged)
+            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
+            # on finding update nothing is done # with vulnerability_ids?
+            # new_finding.save()
+
+        if push_to_jira:
+            jira_helper.push_to_jira(new_finding)
+
+        return new_finding
 
     def validate(self, data):
         if "reporter" not in data:
@@ -1989,7 +1942,7 @@ class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
-class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingTemplateSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     vulnerability_ids = VulnerabilityIdTemplateSerializer(
         source="vulnerability_id_template_set", many=True, required=False,
@@ -2000,7 +1953,6 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
@@ -2010,7 +1962,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             vulnerability_id_set = None
 
-        new_finding_template = super(TaggitSerializer, self).create(
+        new_finding_template = super().create(
             validated_data,
         )
 
@@ -2022,7 +1974,6 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             new_finding_template.save()
 
-        self._save_tags(new_finding_template, to_be_tagged)
         return new_finding_template
 
     def update(self, instance, validated_data):
@@ -2036,7 +1987,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
                 vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
-        return super(TaggitSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class CredentialSerializer(serializers.ModelSerializer):
@@ -2080,7 +2031,7 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
@@ -2411,7 +2362,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
         self.process_scan(data, context)
 
 
-class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
+class ReImportScanSerializer(CommonImportScanSerializer):
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = serializers.BooleanField(
@@ -2791,7 +2742,7 @@ class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
 
 
-class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
+class SystemSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = System_Settings
         fields = "__all__"
