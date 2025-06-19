@@ -17,6 +17,10 @@ See our [Pro UI Guide](../ui_pro_vs_os) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
+### Finding Priority
+DefectDojo Pro can pre-triage your Findings by Priority and Risk, allowing your team to identify and fix your most critical issues first.
+See our [Finding Priority Guide](/en/working_with_findings/finding_priority/) for more details.
+
 ### Rules Engine
 DefectDojo Pro's Rules Engine allows you to set up a script of automated bulk actions - no programming experience required.
 Build custom workflows and bulk actions to handle Findings and other objects.  
@@ -28,7 +32,7 @@ See our [Rules Engine Guide](/en/customize_dojo/rules_engine) for more info.
 Generate [instant reports and metrics](../ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos.  Evaluate your security tools and your team's performance in addressing security issues.
 
 ### Deduplication Tuning
-Fine-tune how DefectDojo identifies and manages duplicate findings with advanced deduplication settings. Adjust same-tool, cross-tool, and reimport deduplication for precision matching between all your chosen security tools and vulnerability findings.
+Fine-tune how DefectDojo identifies and manages duplicate findings with advanced deduplication settings. Adjust same-tool, **cross-tool**, and reimport deduplication for precision matching between all your chosen security tools and vulnerability findings.
 See our [Deduplication Tuning Guide](/en/working_with_findings/finding_deduplication/tune_deduplication/) for more information.
 
 ![image](images/deduplication_tuning.png)
