@@ -40,7 +40,7 @@ class MayhemParser(SarifParser):
     def get_scan_types(self):
         return ["Mayhem SARIF Report"]
 
-    def get_description_for_scan_types(self):
+    def get_description_for_scan_types(self, scan_type):
         return "Mayhem SARIF reports from code or API runs."
 
     # Due to mixing of class methods and package functions, we need to override some of these methods
