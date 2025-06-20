@@ -8,7 +8,7 @@ from dojo.tools.mobsf.report import MobSFjsonreport
 class MobSFParser:
 
     def get_scan_types(self):
-        return ["MobSF Scan"]
+        return ["MobSF Scan", "Mobsfscan Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return "MobSF Scan"
