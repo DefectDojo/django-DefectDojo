@@ -64,10 +64,6 @@ def get_description_product(_request, pid):
     Returns a list of products with their contacts.
     """
     product = Product.objects.get(id=pid)
-    engagements = Engagement.objects.filter(product=product)
-    engagement_list = []
-    for engagement in engagements:
-        engagement_list.append({"id": engagement.id, "engagement_name": engagement.name})
     contacts = {
         "contacts": {
             "product_manager": {
@@ -84,7 +80,7 @@ def get_description_product(_request, pid):
             }
         }
     }
-    data = {"message": "Success", "id": product.id, "engagements": engagement_list}
+    data = {"message": "Success", "id": product.id}
     data.update(contacts)
     return JsonResponse(data)
 
