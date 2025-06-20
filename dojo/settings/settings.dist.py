@@ -1272,6 +1272,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
     "Horusec Scan": ["title", "description", "file_path", "line"],
+    "Mobsfscan Scan": ["title", "severity", "cwe", "file_path", "description"],
     "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
     "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -1391,6 +1392,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cloudsploit Scan": True,
     "SonarQube Scan": False,
     "Dependency Check Scan": True,
+    "Mobsfscan Scan": False,
     "Tenable Scan": True,
     "Nexpose Scan": True,
     "NPM Audit Scan": True,
@@ -1500,6 +1502,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
     "Horusec Scan": DEDUPE_ALGO_HASH_CODE,
+    "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "SonarQube Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube API Import": DEDUPE_ALGO_HASH_CODE,
