@@ -30,11 +30,12 @@ class TestProwlerParser(DojoTestCase):
             # Verify cloud provider data
             self.assertIn("AWS", finding.unsaved_tags)
 
-            # Verify resource data exists in mitigation
-            self.assertIsNotNone(finding.mitigation)
-            self.assertTrue(any("Resource" in line for line in finding.mitigation.split("\n")))
+            # Verify resource data exists in impact
+            self.assertIsNotNone(finding.impact)
+            self.assertTrue(any("Resource" in line for line in finding.impact.split("\n")))
 
             # Verify remediation data exists in mitigation
+            self.assertIsNotNone(finding.mitigation)
             self.assertTrue("Remediation:" in finding.mitigation)
 
     def test_aws_json_parser(self):
@@ -136,11 +137,11 @@ class TestProwlerParser(DojoTestCase):
                     break
             self.assertTrue(tag_found, "No GCP-related tag found in finding")
 
-            # Verify resource data exists in mitigation
-            if finding.mitigation:
+            # Verify resource data exists in impact
+            if finding.impact:
                 self.assertTrue(
-                    any("Resource" in line for line in finding.mitigation.split("\n")),
-                    "Resource data not found in mitigation",
+                    any("Resource" in line for line in finding.impact.split("\n")),
+                    "Resource data not found in impact",
                 )
 
             # Verify remediation data exists in mitigation
@@ -149,32 +150,12 @@ class TestProwlerParser(DojoTestCase):
                     "Remediation:" in finding.mitigation,
                     "No remediation information found in mitigation",
                 )
-            parser = ProwlerParser()
-            findings = parser.get_findings(test_file, Test())
 
-            # Check that we have at least one finding
-            self.assertTrue(len(findings) > 0)
-
-            # Take the first finding for validation
-            finding = findings[0]
-
-            # Verify basic properties that should be present in any finding
-            self.assertIsNotNone(finding.title)
-            self.assertIsNotNone(finding.severity)
-
-            # Verify GCP tag in some form (cloud provider data)
-            tag_found = False
-            for tag in finding.unsaved_tags:
-                if "gcp" in tag.lower():
-                    tag_found = True
-                    break
-            self.assertTrue(tag_found, "No GCP-related tag found in finding")
-
-            # Verify resource data exists in mitigation
-            if finding.mitigation:
+            # Verify resource data exists in impact
+            if finding.impact:
                 self.assertTrue(
-                    any("Resource" in line for line in finding.mitigation.split("\n")),
-                    "Resource data not found in mitigation",
+                    any("Resource" in line for line in finding.impact.split("\n")),
+                    "Resource data not found in impact",
                 )
 
             # Verify remediation data exists in mitigation
@@ -260,45 +241,11 @@ class TestProwlerParser(DojoTestCase):
                     break
             self.assertTrue(tag_found, "No Kubernetes-related tag found in finding")
 
-            # Verify resource data exists in mitigation
-            if finding.mitigation:
+            # Verify resource data exists in impact
+            if finding.impact:
                 self.assertTrue(
-                    any("Resource" in line for line in finding.mitigation.split("\n")),
-                    "Resource data not found in mitigation",
-                )
-
-            # Verify remediation data exists in mitigation
-            if finding.mitigation:
-                self.assertTrue(
-                    "Remediation:" in finding.mitigation,
-                    "No remediation information found in mitigation",
-                )
-            parser = ProwlerParser()
-            findings = parser.get_findings(test_file, Test())
-
-            # Check that we have at least one finding
-            self.assertTrue(len(findings) > 0)
-
-            # Take the first finding for validation
-            finding = findings[0]
-
-            # Verify basic properties that should be present in any finding
-            self.assertIsNotNone(finding.title)
-            self.assertIsNotNone(finding.severity)
-
-            # Verify cloud provider data (Kubernetes tag)
-            tag_found = False
-            for tag in finding.unsaved_tags:
-                if "kubernetes" in tag.lower():
-                    tag_found = True
-                    break
-            self.assertTrue(tag_found, "No Kubernetes-related tag found in finding")
-
-            # Verify resource data exists in mitigation
-            if finding.mitigation:
-                self.assertTrue(
-                    any("Resource" in line for line in finding.mitigation.split("\n")),
-                    "Resource data not found in mitigation",
+                    any("Resource" in line for line in finding.impact.split("\n")),
+                    "Resource data not found in impact",
                 )
 
             # Verify remediation data exists in mitigation

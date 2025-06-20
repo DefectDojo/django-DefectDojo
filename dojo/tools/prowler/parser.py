@@ -15,6 +15,19 @@ class ProwlerParser:
     Supports both CSV and OCSF JSON for AWS, Azure, GCP, and Kubernetes.
     """
 
+    # Severity mapping from Prowler to DefectDojo
+    SEVERITY_MAP = {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "informational": "Info",
+        "info": "Info",
+    }
+
+    # Statuses that indicate inactive findings
+    INACTIVE_STATUSES = {"pass", "manual", "not_available", "skipped"}
+
     def get_scan_types(self):
         return ["Prowler Scan"]
 
@@ -70,27 +83,16 @@ class ProwlerParser:
 
     def _determine_severity(self, severity_str):
         """Maps Prowler severity to DefectDojo severity"""
-        severity_map = {
-            "critical": "Critical",
-            "high": "High",
-            "medium": "Medium",
-            "low": "Low",
-            "informational": "Info",
-            "info": "Info",
-        }
-
         # Convert to lowercase for case-insensitive matching
         severity_str = severity_str.lower() if severity_str else ""
-        return severity_map.get(severity_str, "Medium")
+        return self.SEVERITY_MAP.get(severity_str, "Info")
 
     def _determine_active_status(self, status_code):
         """Determine if the finding is active based on its status"""
         if not status_code:
             return True
 
-        # Using a set for O(1) lookup performance
-        inactive_statuses = {"pass", "manual", "not_available", "skipped"}
-        return status_code.lower() not in inactive_statuses
+        return status_code.lower() not in self.INACTIVE_STATUSES
 
     def _parse_json_findings(self, data, test, *, file_name=""):
         """Parse findings from the OCSF JSON format"""
@@ -238,19 +240,21 @@ class ProwlerParser:
             if check_id:
                 finding.vuln_id_from_tool = check_id
 
-            # Add resource information to mitigation if available
-            mitigation_parts = []
+            # Add resource information to impact field
+            impact_parts = []
             if resource_type:
-                mitigation_parts.append(f"Resource Type: {resource_type}")
+                impact_parts.append(f"Resource Type: {resource_type}")
             if resource_name:
-                mitigation_parts.append(f"Resource Name: {resource_name}")
+                impact_parts.append(f"Resource Name: {resource_name}")
             if region:
-                mitigation_parts.append(f"Region: {region}")
-            if remediation:
-                mitigation_parts.append(f"Remediation: {remediation}")
+                impact_parts.append(f"Region: {region}")
 
-            if mitigation_parts:
-                finding.mitigation = "\n".join(mitigation_parts)
+            if impact_parts:
+                finding.impact = "\n".join(impact_parts)
+
+            # Add remediation information to mitigation field
+            if remediation:
+                finding.mitigation = f"Remediation: {remediation}"
 
             findings.append(finding)
 
@@ -266,23 +270,8 @@ class ProwlerParser:
             check_title = row.get("CHECK_TITLE", "")
             provider = row.get("PROVIDER", "").lower()
 
-            # Original check ID before any standardization (for titles)
-            original_check_id = check_id
-
-            # Standardize check IDs for consistent test results
-            if provider == "gcp" and ("compute_firewall" in check_id.lower() or "rdp" in check_title.lower()):
-                check_id = "bc_gcp_networking_2"
-            elif provider == "kubernetes" and "alwayspullimages" in check_id.lower():
-                check_id = "bc_k8s_pod_security_1"
-            # Special handling for AWS Hardware MFA check
-            elif provider == "aws" and "hardware_mfa" in check_id.lower():
-                check_id = "iam_root_hardware_mfa_enabled"
-            # Special handling for Azure AKS network policy
-            elif provider == "azure" and "aks_network_policy" in check_id.lower():
-                check_id = "aks_network_policy_enabled"
-
             # Construct title
-            if original_check_id and check_title:
+            if check_id and check_title:
                 title = f"{check_id}: {check_title}"
             elif check_id:
                 title = check_id
@@ -387,16 +376,22 @@ class ProwlerParser:
             if service_name:
                 finding.unsaved_tags.append(service_name)
 
-            # Build mitigation from resource info and remediation
-            mitigation_parts = []
+            # Build impact from resource info
+            impact_parts = []
             if resource_type:
-                mitigation_parts.append(f"Resource Type: {resource_type}")
+                impact_parts.append(f"Resource Type: {resource_type}")
             if resource_name:
-                mitigation_parts.append(f"Resource Name: {resource_name}")
+                impact_parts.append(f"Resource Name: {resource_name}")
             if resource_uid:
-                mitigation_parts.append(f"Resource ID: {resource_uid}")
+                impact_parts.append(f"Resource ID: {resource_uid}")
             if region:
-                mitigation_parts.append(f"Region: {region}")
+                impact_parts.append(f"Region: {region}")
+
+            if impact_parts:
+                finding.impact = "\n".join(impact_parts)
+
+            # Build mitigation from remediation info
+            mitigation_parts = []
             if remediation_text:
                 mitigation_parts.append(f"Remediation: {remediation_text}")
             if remediation_url:
