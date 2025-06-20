@@ -7,3 +7,10 @@ For more information, check out our [docs on hooking up StackHawk to Defect Dojo
 
 ### Sample Scan Data
 Sample StackHawk HawkScan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/stackhawk).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- vuln id from tool
+- component name
+- component version

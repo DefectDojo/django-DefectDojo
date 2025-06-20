@@ -8,3 +8,12 @@ toc_hide: true
 
 ### Sample Scan Data
 Sample PWN Security Automation Framework scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/pwn_sast).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- cwe
+- line
+- file path
+- description
