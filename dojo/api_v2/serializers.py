@@ -32,7 +32,6 @@ from dojo.finding.helper import (
     save_vulnerability_ids,
     save_vulnerability_ids_template,
 )
-from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
@@ -119,6 +118,7 @@ from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
 )
+from dojo.risk_acceptance.helper import validate_findings_engagement
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -1546,7 +1546,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         path = "No proof has been supplied"
         if obj.filename() is not None:
             path = reverse(
-                "download_risk_acceptance", args=(obj.engagement.id, obj.id),
+                "download_risk_acceptance", args=(obj.id, ),
             )
             request = self.context.get("request")
             if request:
@@ -1554,25 +1554,31 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return path
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: list[Finding]):  # TODO: check
-            engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
-            if engagements > 1:
-                msg = "You are not permitted to add findings from multiple engagements"  # TODO: same is missing for UI
-                raise PermissionDenied(msg)
 
-        findings = data.get("accepted_findings", [])
-        findings_ids = [x.id for x in findings]
-        finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
-        if len(findings) != len(authed_findings):
-            msg = "You are not permitted to add one or more selected findings to this risk acceptance"
-            raise PermissionDenied(msg)
-        if self.context["request"].method == "POST":
-            validate_findings_have_same_engagement(finding_objects)
-        elif self.context["request"].method in {"PATCH", "PUT"}:
-            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
-            existing_and_new_findings = existing_findings | finding_objects
-            validate_findings_have_same_engagement(existing_and_new_findings)
+        findings = data.get("accepted_findings", self.instance.accepted_findings.all() if self.instance else None)
+        engagement = data.get("engagement", self.instance.engagement if self.instance else None)
+        validate_findings_engagement(engagement, findings)
+        return data
+
+        # def validate_findings_have_same_engagement(finding_objects: list[Finding]):  # TODO: check
+        #     engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
+        #     if engagements > 1:
+        #         msg = "You are not permitted to add findings from multiple engagements"  # TODO: same is missing for UI
+        #         raise PermissionDenied(msg)
+
+        # findings = data.get("accepted_findings", [])
+        # findings_ids = [x.id for x in findings]
+        # finding_objects = Finding.objects.filter(id__in=findings_ids)
+        # authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        # if len(findings) != len(authed_findings):
+        #     msg = "You are not permitted to add one or more selected findings to this risk acceptance"
+        #     raise PermissionDenied(msg)
+        # if self.context["request"].method == "POST":
+        #     validate_findings_have_same_engagement(finding_objects)
+        # elif self.context["request"].method in {"PATCH", "PUT"}:
+        #     existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+        #     existing_and_new_findings = existing_findings | finding_objects
+        #     validate_findings_have_same_engagement(existing_and_new_findings)
         return data
 
     class Meta:

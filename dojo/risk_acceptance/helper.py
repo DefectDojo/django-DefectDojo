@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 
 from dateutil.relativedelta import relativedelta
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -56,7 +56,7 @@ def expire_now(risk_acceptance):
     create_notification(event="risk_acceptance_expiration", title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
                          reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
                          product=risk_acceptance.engagement.product,
-                         url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                         url=reverse("view_risk_acceptance", args=(risk_acceptance.id, )))
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -201,7 +201,7 @@ def expiration_handler(*args, **kwargs):
             create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
                                 accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
                                 product=risk_acceptance.engagement.product,
-                                url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                                url=reverse("view_risk_acceptance", args=(risk_acceptance.id, )))
 
             post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
@@ -214,7 +214,7 @@ def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
     # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
     with suppress(AttributeError):
         get_full_url(
-            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
+            reverse("view_risk_acceptance", args=(risk_acceptance.id, )),
         )
     return ""
 
@@ -222,21 +222,21 @@ def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))),
         len(risk_acceptance.accepted_findings.all()))
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id, ))),
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id, ))),
         len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
@@ -244,7 +244,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
             escape_for_jira(risk_acceptance.name),
-            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id, ))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     return "Finding has been risk accepted"
 
@@ -252,7 +252,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "finding was unaccepted/deleted from risk acceptance [({})|{}]".format(escape_for_jira(risk_acceptance.name),
-            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))))
+            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id, ))))
     return "Finding is no longer risk accepted"
 
 
@@ -391,3 +391,10 @@ def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
             status.risk_accepted = False
         status.last_modified = timezone.now()
         status.save()
+
+
+def validate_findings_engagement(engagement, findings):
+    invalid = [f.id for f in findings if f.test.engagement.id != engagement.id]
+    if invalid:
+        msg = f"Findings with IDs {invalid} do not belong to engagement {engagement.id}."
+        raise ValidationError(msg)

@@ -36,7 +36,7 @@
                 </div>
             </div>
             <br/>
-            <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}" method="post">
+            <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' risk_acceptance.id %}" method="post">
                 {% csrf_token %}
                 {% if return_url %}
                     <input type="hidden" name="return_url" value="{{ return_url }}" />
@@ -346,7 +346,7 @@
         // keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.key == 'e') {
-                window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
+                window.location.assign('{% url 'edit_risk_acceptance' risk_acceptance.id %}')
             }
         });
 

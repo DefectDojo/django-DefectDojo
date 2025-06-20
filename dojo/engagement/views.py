@@ -1316,20 +1316,20 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
-def view_risk_acceptance(request, eid, raid):
-    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
+@user_is_authorized(Risk_Acceptance, Permissions.Engagement_View, "raid")
+def view_risk_acceptance(request, raid):
+    return view_edit_risk_acceptance(request, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def edit_risk_acceptance(request, eid, raid):
-    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def edit_risk_acceptance(request, raid):
+    return view_edit_risk_acceptance(request, raid=raid, edit_mode=True)
 
 
 # will only be called by view_risk_acceptance and edit_risk_acceptance
-def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
+def view_edit_risk_acceptance(request, raid, *, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
@@ -1438,7 +1438,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     extra_tags="alert-success")
         if not errors:
             logger.debug("redirecting to return_url")
-            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
         logger.error("errors found")
 
     elif edit_mode:
@@ -1490,34 +1490,32 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def expire_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def expire_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    # Validate the engagement ID exists before moving forward
-    get_object_or_404(Engagement, pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
-    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def reinstate_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def reinstate_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 
-    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def delete_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def delete_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     ra_helper.delete(eng, risk_acceptance)
 
@@ -1529,13 +1527,10 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
-def download_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def download_risk_acceptance(request, raid):
     mimetypes.init()
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    # Ensure the risk acceptance is under the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             (Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb")))

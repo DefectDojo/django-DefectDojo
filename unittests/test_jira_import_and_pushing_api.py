@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from vcr import VCR
@@ -20,6 +19,7 @@ from .dojo_test_case import (
     toggle_system_setting_boolean,
     with_system_setting,
 )
+from .test_risk_acceptance import RiskAcceptanceTestUI
 
 logger = logging.getLogger(__name__)
 
@@ -318,12 +318,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id1, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
-        args = (eid, fid) if fid else (eid,)
-        response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
-        self.assertEqual(302, response.status_code, response.content[:1000])
-        return response
-
     def test_import_grouped_reopen_expired_risk_acceptance(self):
         # steps
         # import scan, make sure they are in grouped JIRA
@@ -355,7 +349,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = self.get_jira_issue_status(finding_id)
 
-        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        response = RiskAcceptanceTestUI.add_risk_acceptance(self, eid=1, data_risk_accceptance=ra_data)
         self.assertEqual("/engagement/1", response.url)
 
         # We do this to update the JIRA
