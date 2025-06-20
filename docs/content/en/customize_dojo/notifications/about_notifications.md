@@ -59,3 +59,19 @@ To remove one or more Alerts from the Alerts Page, check the empty box next to i
 * Using the **Clear All Alerts \>** function in the Alerts Menu will also completely clear the **Alerts Page**, so use this feature with care.
 * Removing an Alert only affects your own Alerts List \- it will not affect any other user’s Alerts.
 * Removing an Alert does not remove any import history or activity logs from DefectDojo.
+
+## Open-Source Considerations
+
+### Specific overrides
+
+System notification settings (scope: system) describe the sending of notifications to superadmins. User notification settings (scope: personal) describe sending notifications to the specific user.
+
+However, there is a specific use-case when the user decides to disable notifications (to decrease noise) but the system setting is used to override this behavior. These overrides apply only to `user_mentioned` and `review_requested` by default.
+
+The scope of this setting is customizable (see environment variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`).
+
+For more information about this behavior see the [related pull request #9699](https://github.com/DefectDojo/django-DefectDojo/pull/9699/)
+
+### Webhooks (experimental)
+
+DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [related page](/en/open_source/notification_webhooks/how_to).
