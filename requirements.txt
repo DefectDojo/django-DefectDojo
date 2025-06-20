@@ -28,7 +28,7 @@ humanize==4.12.3
 jira==3.8.0
 PyGithub==1.58.2
 lxml==5.4.0
-Markdown==3.8
+Markdown==3.8.2
 openpyxl==3.1.5
 Pillow==11.2.1  # required by django-imagekit
 psycopg[c]==3.2.9
