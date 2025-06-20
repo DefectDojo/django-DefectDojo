@@ -15,3 +15,10 @@ Data for SAST, SCA and KICS are supported.
 
 ### Sample Scan Data
 Sample Checkmarx scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkmarx).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- cwe
+- severity
+- file path

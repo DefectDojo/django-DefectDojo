@@ -6,3 +6,12 @@ Kubeaudit is a command line tool and a Go package to audit Kubernetes clusters f
 
 ### Sample Scan Data
 Sample Kubeaudit scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/kubeaudit).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- cwe
+- line
+- file path
+- description

@@ -10,3 +10,12 @@ codeql database analyze db python-security-and-quality.qls --sarif-add-snippets 
 
 The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
 
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- cwe
+- line
+- file path
+- description

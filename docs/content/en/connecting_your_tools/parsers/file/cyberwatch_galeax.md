@@ -12,3 +12,10 @@ For each CVE and security issue found in the JSON input, the parser creates a co
 
 ### Sample Scan Data
 Sample Cybwerwatch Galeax Scan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/cyberwatch).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- description
+- severity

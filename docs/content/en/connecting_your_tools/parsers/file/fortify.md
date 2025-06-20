@@ -26,3 +26,12 @@ required XML:
 ```bash
 ./path/to/ReportGenerator -format xml -f /path/to/output.xml -source /path/to/downloaded/artifact.fpr -template DefaultReportDefinitionAllIssues.xml
 ```
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- cwe
+- line
+- file path
+- description

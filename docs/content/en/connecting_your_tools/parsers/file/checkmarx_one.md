@@ -148,3 +148,9 @@ Sample Checkmarx One scans can be found [here](https://github.com/DefectDojo/dja
 ### Link To Tool
 - [Checkmarx One](https://checkmarx.com/product/application-security-platform/)
 - [Checkmarx One Documentation](https://checkmarx.com/resource/documents/en/34965-68516-checkmarx-one-documentation-portal.html)
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- vulnerability ids
+- component name
