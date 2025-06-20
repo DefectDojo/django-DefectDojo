@@ -24,7 +24,6 @@ function handleProductTypeChange(){
     clearLabel("id_destination_product")
     clearLabel("id_accepted_by")
     getProductOptions(productTypeId, productElement)
-    // traeer los productos relacioneado al producto type # TODO:
 }
 function handleProductChange(){
     let idProduct = $("#id_destination_product").val();
