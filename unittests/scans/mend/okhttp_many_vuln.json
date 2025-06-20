@@ -1,6 +1,6 @@
-{  
-   "vulnerabilities":[  
-      {  
+{
+   "vulnerabilities":[
+      {
          "name":"WS-2009-0001",
          "type":"WS",
          "severity":"low",
@@ -11,7 +11,7 @@
          "description":"Not all \"business\" method implementations of public API in Apache Commons Codec 1.x are thread safe, which might disclose the wrong data or allow an attacker to change non-private fields.\n\nUpdated 2018-10-07 - an additional review by WhiteSource research team could not indicate on a clear security vulnerability",
          "project":"okhttp",
          "product":"okhttp",
-         "library":{  
+         "library":{
             "keyUuid":"9aa14ac7-e415-4ed5-be35-bd2957fd7fd2",
             "filename":"commons-codec-1.3.jar",
             "name":"Codec",
@@ -25,7 +25,7 @@
             "languageVersion":""
          }
       },
-      {  
+      {
          "name":"WS-2010-0001",
          "type":"WS",
          "severity":"medium",
@@ -36,7 +36,7 @@
          "description":"Base64 encode() method is no longer thread-safe in Apache Commons Codec before version 1.7, which might disclose the wrong data or allow an attacker to change non-private fields.",
          "project":"okhttp",
          "product":"okhttp",
-         "library":{  
+         "library":{
             "keyUuid":"9aa14ac7-e415-4ed5-be35-bd2957fd7fd2",
             "filename":"commons-codec-1.3.jar",
             "name":"Codec",
@@ -49,7 +49,7 @@
             "architecture":"",
             "languageVersion":""
          },
-         "topFix":{  
+         "topFix":{
             "vulnerability":"WS-2010-0001",
             "type":"UPGRADE_VERSION",
             "origin":"WHITESOURCE_EXPERT",
@@ -59,7 +59,7 @@
             "message":"Upgrade To Version"
          }
       },
-      {  
+      {
          "name":"CVE-2011-1498",
          "type":"CVE",
          "severity":"medium",
@@ -70,7 +70,7 @@
          "description":"Apache HttpClient 4.x before 4.1.1 in Apache HttpComponents, when used with an authenticating proxy server, sends the Proxy-Authorization header to the origin server, which allows remote web servers to obtain sensitive information by logging this header.",
          "project":"okhttp",
          "product":"okhttp",
-         "library":{  
+         "library":{
             "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
             "filename":"httpclient-4.0.1.jar",
             "name":"HttpClient",
@@ -83,7 +83,7 @@
             "architecture":"",
             "languageVersion":""
          },
-         "topFix":{  
+         "topFix":{
             "vulnerability":"CVE-2011-1498",
             "type":"UPGRADE_VERSION",
             "origin":"WHITESOURCE_EXPERT",
@@ -92,8 +92,8 @@
             "date":"2011-07-07 21:55:02",
             "message":"Upgrade To Version"
          },
-         "allFixes":[  
-            {  
+         "allFixes":[
+            {
                "vulnerability":"CVE-2011-1498",
                "type":"UPGRADE_VERSION",
                "origin":"WHITESOURCE_EXPERT",
@@ -102,7 +102,7 @@
                "date":"2011-07-07 21:55:02",
                "message":"Upgrade To Version"
             },
-            {  
+            {
                "vulnerability":"CVE-2011-1498",
                "type":"UPGRADE_VERSION",
                "origin":"BUGZILLA",
@@ -112,7 +112,7 @@
                "message":"CVE-2011-1498 httpcomponents-client: sends Proxy-Authorization header to host when tunneling requests through authenticated proxy server",
                "extraData":"key\u003d709531\u0026assignee\u003dRed Hat Product Security"
             },
-            {  
+            {
                "vulnerability":"CVE-2011-1498",
                "type":"UPGRADE_VERSION",
                "origin":"JIRA",
@@ -124,7 +124,7 @@
             }
          ]
       },
-      {  
+      {
          "name":"CVE-2012-6153",
          "type":"CVE",
          "severity":"medium",
@@ -135,7 +135,7 @@
          "description":"http/conn/ssl/AbstractVerifier.java in Apache Commons HttpClient before 4.2.3 does not properly verify that the server hostname matches a domain name in the subject\u0027s Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a certificate with a subject that specifies a common name in a field that is not the CN field.  NOTE: this issue exists because of an incomplete fix for CVE-2012-5783.",
          "project":"okhttp",
          "product":"okhttp",
-         "library":{  
+         "library":{
             "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
             "filename":"httpclient-4.0.1.jar",
             "name":"HttpClient",
@@ -148,7 +148,7 @@
             "architecture":"",
             "languageVersion":""
          },
-         "topFix":{  
+         "topFix":{
             "vulnerability":"CVE-2012-6153",
             "type":"UPGRADE_VERSION",
             "origin":"WHITESOURCE_EXPERT",
@@ -157,8 +157,8 @@
             "date":"2014-09-04 17:55:05",
             "message":"Upgrade To Version"
          },
-         "allFixes":[  
-            {  
+         "allFixes":[
+            {
                "vulnerability":"CVE-2012-6153",
                "type":"UPGRADE_VERSION",
                "origin":"WHITESOURCE_EXPERT",
@@ -167,7 +167,7 @@
                "date":"2014-09-04 17:55:05",
                "message":"Upgrade To Version"
             },
-            {  
+            {
                "vulnerability":"CVE-2012-6153",
                "type":"UPGRADE_VERSION",
                "origin":"BUGZILLA",
@@ -177,7 +177,7 @@
                "message":"CVE-2012-6153 Apache HttpComponents client / Apache CXF: SSL hostname verification bypass, incomplete CVE-2012-5783 fix",
                "extraData":"key\u003d1129916\u0026assignee\u003dRed Hat Product Security"
             },
-            {  
+            {
                "vulnerability":"CVE-2012-6153",
                "type":"CHANGE_FILES",
                "origin":"GITHUB_COMMIT",
@@ -189,7 +189,7 @@
             }
          ]
       },
-      {  
+      {
          "name":"CVE-2014-3577",
          "type":"CVE",
          "severity":"medium",
@@ -200,7 +200,7 @@
          "description":"org.apache.http.conn.ssl.AbstractVerifier in Apache HttpComponents HttpClient before 4.3.5 and HttpAsyncClient before 4.0.2 does not properly verify that the server hostname matches a domain name in the subject\u0027s Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a \"CN\u003d\" string in a field in the distinguished name (DN) of a certificate, as demonstrated by the \"foo,CN\u003dwww.apache.org\" string in the O field.",
          "project":"okhttp",
          "product":"okhttp",
-         "library":{  
+         "library":{
             "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
             "filename":"httpclient-4.0.1.jar",
             "name":"HttpClient",
@@ -213,7 +213,7 @@
             "architecture":"",
             "languageVersion":""
          },
-         "topFix":{  
+         "topFix":{
             "vulnerability":"CVE-2014-3577",
             "type":"UPGRADE_VERSION",
             "origin":"WHITESOURCE_EXPERT",
@@ -222,8 +222,8 @@
             "date":"2014-08-21 14:55:05",
             "message":"Upgrade To Version"
          },
-         "allFixes":[  
-            {  
+         "allFixes":[
+            {
                "vulnerability":"CVE-2014-3577",
                "type":"UPGRADE_VERSION",
                "origin":"WHITESOURCE_EXPERT",
@@ -232,7 +232,7 @@
                "date":"2014-08-21 14:55:05",
                "message":"Upgrade To Version"
             },
-            {  
+            {
                "vulnerability":"CVE-2014-3577",
                "type":"UPGRADE_VERSION",
                "origin":"SECURITY_TRACKER",
@@ -241,7 +241,7 @@
                "message":"Red Hat JBoss Certificate Validation Flaw Lets Remote Users Spoof SSL Servers",
                "extraData":"key\u003d1030812"
             },
-            {  
+            {
                "vulnerability":"CVE-2014-3577",
                "type":"CHANGE_FILES",
                "origin":"GITHUB_COMMIT",
@@ -253,7 +253,7 @@
             }
          ]
       },
-      {  
+      {
          "name":"CVE-2019-9658",
          "type":"CVE",
          "severity":"medium",
@@ -267,7 +267,7 @@
          "description":"Checkstyle before 8.18 loads external DTDs by default.",
          "project":"slack",
          "product":"okhttp",
-         "cvss3Attributes":{  
+         "cvss3Attributes":{
             "attackVector":"NETWORK",
             "attackComplexity":"LOW",
             "userInteraction":"NONE",
@@ -277,7 +277,7 @@
             "integrityImpact":"NONE",
             "availabilityImpact":"NONE"
          },
-         "library":{  
+         "library":{
             "keyUuid":"31e26373-8f25-4c7c-9ada-63a688494afb",
             "filename":"checkstyle-8.15.jar",
             "name":"checkstyle",
@@ -290,7 +290,7 @@
             "architecture":"",
             "languageVersion":""
          },
-         "topFix":{  
+         "topFix":{
             "vulnerability":"CVE-2019-9658",
             "type":"UPGRADE_VERSION",
             "origin":"WHITESOURCE_EXPERT",
@@ -299,8 +299,8 @@
             "date":"2019-03-11 05:29:01",
             "message":"Upgrade To Version"
          },
-         "allFixes":[  
-            {  
+         "allFixes":[
+            {
                "vulnerability":"CVE-2019-9658",
                "type":"UPGRADE_VERSION",
                "origin":"WHITESOURCE_EXPERT",
@@ -309,7 +309,7 @@
                "date":"2019-03-11 05:29:01",
                "message":"Upgrade To Version"
             },
-            {  
+            {
                "vulnerability":"CVE-2019-9658",
                "type":"CHANGE_FILES",
                "origin":"GITHUB_COMMIT",

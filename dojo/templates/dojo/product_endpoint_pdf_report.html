@@ -253,7 +253,7 @@
                             <h6>Impact</h6>
                             <pre>{{ finding.impact|markdown_render }}</pre>
                         {% endif %}
-                        
+
                         {% if finding.steps_to_reproduce %}
                             <h6>Steps to Reproduce</h6>
                             <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
@@ -268,11 +268,11 @@
                             <h6>References</h6>
                             <pre>{{ finding.references|markdown_render }}</pre>
                         {% endif %}
-                        
+
                         {% if include_finding_images %}
                             {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
                         {% endif %}
-                        
+
                         {% if include_finding_notes %}
                             {% with notes=finding.notes.all|get_public_notes %}
                                 {% if notes.count > 0 %}

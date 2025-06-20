@@ -78,7 +78,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -201,7 +201,7 @@ Set-Cookie: sessionid=fht4r0uy2lqzerxqapp0sqmp7okgyk1a; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='Ay10VaUDl4X4F2FO0TlD0nh64FE8ZfLzbwZqadm1aYE8zXuqRfSIjEeWMWFwBHjB' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -320,7 +320,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -384,13 +384,13 @@ Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
 SSL provides secure encrypted channel to transfer information from source to user. The information served over SSL is considered sensitive and trusted to be only available to the requestor. However, caching this content on disk in temporary internet files or on an intermediate proxy server can compromise that trust by exposing it to anyone who has access to the temporary storage or proxy cache. Content served over SSL should have cache disabled.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[Send a request to /accounts/login/ and inspect the <font face="courier new">Cache-Control</font> header value.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Set the <font face="courier new">Cache-Control</font> directive to <font face="courier new">private</font> and <font face="courier new">no-store</font>.
 <br /><br /><b><em>private</em></b><br />
-This directive allows the server to prevent a shared cache from caching responses that are intended for a single user. You can use this mechanism to ensure that privileged information is not accidentally leaked to unauthorized users. The directive may still allow caching of responses by non-shared caches. 
+This directive allows the server to prevent a shared cache from caching responses that are intended for a single user. You can use this mechanism to ensure that privileged information is not accidentally leaked to unauthorized users. The directive may still allow caching of responses by non-shared caches.
 <br /><br /><b><em>no-cache</em></b><br />
 For sensitive resources requiring user authentication, servers can send the no-cache directive to prevent caches from serving a cached response without first requiring the user-agent to validate the user identity. This directive can be specified with or without field names. When no field names are included, this directive applies to the entire request or response.<br />
 When one or more field names are specified in the no-cache directive, the response is cached but the specified fields must be excluded. If the response must include the specified field, then the cache must ensure that the request triggers a revalidation with the origin server.
 <br />
 Example: <font face="courier new">Cache-Control: no-cache="Set-Cookie"</font><br />
-This directive can be used to prevent sensitive information leakage by requiring the server to confirm the user identity before serving the protected information. While content is not served using the browser’s history or back button, a user with disk access can retrieve the content. 
+This directive can be used to prevent sensitive information leakage by requiring the server to confirm the user identity before serving the protected information. While content is not served using the browser’s history or back button, a user with disk access can retrieve the content.
 
 <br /><br /><b><em>no-store</em></b><br />
 To completely disable the caching of requests or responses, the server must specify the no-store directive in the <font face="courier new">Cache-Control</font> header. This directive applies to the entire request and response regardless of whether the directive is sent in the request or the response.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>Server Configuration:</b><br /><a href="http://support.microsoft.com/kb/247404">IIS</a><br /><a href="http://httpd.apache.org/docs/2.2/caching.html">Apache</a><br /><br /><b>HTTP 1.1 Specification:</b><br /><a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html">HTTP Header Field Definitions</a><br /><br /><b>OWASP:</b><br /><a href="https://www.owasp.org/index.php/OWASP_Application_Security_FAQ#Browser_Cache">Browser Cache FAQ</a><br /><br /><b>HTTP Caching:</b><br /><a href="http://www.mnot.net/cache_docs/">Tutorial</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
@@ -452,7 +452,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -571,7 +571,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -633,7 +633,7 @@ Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
 ]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11309</VulnerabilityID><Severity>1</Severity><Name>Web Server Misconfiguration: Insecure Content-Type Setting</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Almost all browsers are designed to use a mime sniffing technique to guess the content type of the HTTP response instead of adhering to the <font face="courier new">Content-Type</font> specified by the application in specific cases or ignoring the content when no mime type is specified. Inconsistencies introduced by the mime sniffing techniques could allow attackers to conduct Cross-Site Scripting attacks or steal sensitive user data. WebInspect has determined that the application fails to instruct the browser to strictly enforce the <font face="courier-new">Content-Type</font> specification supplied in the response.<br /><br />
 Web server misconfiguration can cause an application to send HTTP responses with the missing <font face="courier new">Content-Type</font> header or specify a mime type that does not match up accurately with the response content. When a browser receives such a response, it attempts to programmatically determine the mime type based on the content returned in the response. The mime type derived by the browser, however, might not accurately match the one intended by the application developer. Such inconsistencies have historically allowed attackers to conduct Cross-Site Scripting or data theft using Cascading Style Sheets (CSS) by letting them bypass server-side filters using mime type checking and yet have the malicious payload with misleading mime type specification executed on the client-side due to the browser mime sniffing policies.<br /><br />
-Microsoft Internet Explorer (IE) introduced the <font face="courier new">X-Content-Type-Options: nosniff</font> specification that application developers can include in all responses to ensure that mime sniffing does not occur on the client-side. This protection mechanism is limited to Microsoft Internet Explorer versions 9 and above.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[By failing to dictate the suitable browser interpretation of the response content, application developers can expose their users to Cross-Site Scripting or information stealing attacks.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<ul><ol>1. Build a test page that includes a reference to an external JavaScript or CSS resource</ol><ol>2. Configure the server to return the external resource with an incorrect mime type specification</ol><ol>3. Visit the test page using an old version of Microsoft’s Internet Explorer (version  IE 8) browser</ol><ol>4. Interpretation of the external content as JavaScript or CSS by the browser despite the misleading mime type specification indicates a potential for compromise.</ol></ul>]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Configure the web server to always send the <font face="courier new">X-Content-Type-Options: nosniff</font> specification in the response headers. In addition, ensure that following safety precautions are also put in place: 
+Microsoft Internet Explorer (IE) introduced the <font face="courier new">X-Content-Type-Options: nosniff</font> specification that application developers can include in all responses to ensure that mime sniffing does not occur on the client-side. This protection mechanism is limited to Microsoft Internet Explorer versions 9 and above.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[By failing to dictate the suitable browser interpretation of the response content, application developers can expose their users to Cross-Site Scripting or information stealing attacks.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<ul><ol>1. Build a test page that includes a reference to an external JavaScript or CSS resource</ol><ol>2. Configure the server to return the external resource with an incorrect mime type specification</ol><ol>3. Visit the test page using an old version of Microsoft’s Internet Explorer (version  IE 8) browser</ol><ol>4. Interpretation of the external content as JavaScript or CSS by the browser despite the misleading mime type specification indicates a potential for compromise.</ol></ul>]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Configure the web server to always send the <font face="courier new">X-Content-Type-Options: nosniff</font> specification in the response headers. In addition, ensure that following safety precautions are also put in place:
 <ul><ol>1. Verify that the web server configuration will send the accurate mime type information in the <font face="courier new">Content-Type</font> header of each HTTP response</ol><ol>2. Configure the server to send a default <font face="courier new">Content-Type</font> of <font face="courier new">text-plain</font> or <font face="courier-new">application/octet-stream</font> to tackle failure scenarios</ol><ol>3. Ensure that appropriate <font face="courier new"> Character Set </font> is specified in the <font face="courier new"> Content-Type </font>header</ol><ol>4. Configure the server to send <font face="courier new">Content-Disposition: attachment; filename=name; </font>for content without an explicit content type specification.</ol></ul>]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>Microsoft Internet Explorer: </b><br /><a href="http://msdn.microsoft.com/en-us/library/ie/gg622941(v=vs.85).aspx">MIME-Handling Change: X-Content-Type-Options: nosniff</a><br /><a href="http://blogs.msdn.com/b/ie/archive/2010/10/26/mime-handling-changes-in-internet-explorer.aspx">MIME-Handling Changes in Internet Explorer</a><br /><br /><b>OWASP: </b><br /><a href="https://www.owasp.org/index.php/OWASP_Testing_Guide_Appendix_D:_Encoded_Injection">OWASP Testing Guide Appendix D: Encoded Injection</a><br /><a href="https://www.owasp.org/index.php/List_of_useful_HTTP_headers">List of Useful HTTP Headers</a><br /><br /><b>CSS Data Theft: </b><br /><a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2010-0654">CVE-2010-0654</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
 Server: nginx/1.12.1
 Date: Thu, 22 Feb 2024 04:01:39 GMT
@@ -693,7 +693,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -817,7 +817,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -950,7 +950,7 @@ Set-Cookie: sessionid=cb3kk4gt6az3rpbnzcy3wfxtgfq7iobn; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='k5O4bIN7esSiU8ANchzoVwXHGpzgPwC0AvP15FROZwrqkXkvjDEGScuu7oGE8wHn' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1012,7 +1012,7 @@ Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
 ]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11285</VulnerabilityID><Severity>3</Severity><Name>Insecure Transport: Weak SSL Cipher</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[WebInspect has detected support for weak TLS/SSL ciphers on the server <b>https://omnis.deltaww.com:443/</b>. A weak cipher suite is one that uses a cryptographic algorithm that does not provide adequate security. This could be because the algorithm is outdated, or because it has been shown to be vulnerable to certain types of attacks that are not trivial.
 <br /><br />
-The Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols provide a mechanism to help protect authenticity, confidentiality, and integrity of the data transmitted between a client and web server. The strength of this protection mechanism is determined by the authentication, encryption, and hashing algorithms. These are collectively known as a cipher suite - chosen for the transmission of sensitive information over the TLS/SSL channel. Most web servers support a range of such cipher suites of varying strengths. Using a weak cipher or an encryption key of insufficient length, for example, could enable an attacker to defeat the protection mechanism and steal or modify sensitive information. 
+The Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols provide a mechanism to help protect authenticity, confidentiality, and integrity of the data transmitted between a client and web server. The strength of this protection mechanism is determined by the authentication, encryption, and hashing algorithms. These are collectively known as a cipher suite - chosen for the transmission of sensitive information over the TLS/SSL channel. Most web servers support a range of such cipher suites of varying strengths. Using a weak cipher or an encryption key of insufficient length, for example, could enable an attacker to defeat the protection mechanism and steal or modify sensitive information.
 <br /><br />
 If misconfigured, a web server could be manipulated into choosing weak cipher suites. Also, new versions of the TLS protocols are backward compatible and provide support for older cipher suites defined in previous versions of the SSL/TLS protocols. For example, it is possible to configure TLS 1.2 to use older and weak ciphers that use CBC.
 <br /><br />
@@ -1083,7 +1083,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1144,9 +1144,9 @@ X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
 Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
 ]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11395</VulnerabilityID><Severity>3</Severity><Name>Insecure Transport: Weak SSL Protocol</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />
-The Transport Layer Security (TLS) protocol provides a protection mechanism to better protect authenticity, confidentiality and integrity of the data transmitted between a client and a web server.  The TLS protocol has undergone various revisions resulting in periodic version updates. Each revision tries to address security weakness in prior versions and incorporate support for the latest in security measures.  It is strongly recommended to use the latest version of the available protocol, whenever possible. 
+The Transport Layer Security (TLS) protocol provides a protection mechanism to better protect authenticity, confidentiality and integrity of the data transmitted between a client and a web server.  The TLS protocol has undergone various revisions resulting in periodic version updates. Each revision tries to address security weakness in prior versions and incorporate support for the latest in security measures.  It is strongly recommended to use the latest version of the available protocol, whenever possible.
 <br /><br />
-TLS 1.0 is considered insecure as it lacks support for strong ciphersuites and is known to be plagued by several known vulnerabilities.  It either uses RC4 cipher, which is prone to bias attacks or uses Cipher Block Chaining (CBC) mode cipher, which enables condition for POODLE (Padding Oracle On Downgraded Legacy Encryption) attacks. 
+TLS 1.0 is considered insecure as it lacks support for strong ciphersuites and is known to be plagued by several known vulnerabilities.  It either uses RC4 cipher, which is prone to bias attacks or uses Cipher Block Chaining (CBC) mode cipher, which enables condition for POODLE (Padding Oracle On Downgraded Legacy Encryption) attacks.
 <br /><br />
 NIST Special Publication 800-52 Revision 1 no longer considers TLS 1.0 as strong cryptography.  TLS 1.0 is also no longer in compliance with PCI DSS v3.2.1 requirements.  PCI does not consider TLS 1.0 to be adequate to protect cardholder data and has deprecated its use starting June 2016. Use of insecure protocol versions will weaken the strength of the transport protection and could allow an attacker to compromise, steal or modify sensitive information. Configuring the web server to use the most secure protocol, TLS 1.2 and above is highly recommended.
 <br />]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />Use of a weak protocol such as TLS 1.0 leaves the connection vulnerable to man-in-the-middle attacks.  This would allow the attacker to read and modify data on a secure TLS connection, thus compromising user security and privacy.  Its use would also limit the use of strong cipher suites that help protect data integrity and confidentiality.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br />Disable support for the TLS 1.0 protocol on the server.  Both NIST 800-52  and PCI DSS v3.1 strongly recommend upgrade to the latest version of TLS available, TLS 1.2.    Or, at a minimum an upgrade to TLS 1.1.
@@ -1210,7 +1210,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1270,30 +1270,30 @@ X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
 X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
 Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
-]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11516</VulnerabilityID><Severity>2</Severity><Name>Insecure Transport: Weak SSL Protocol</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Fortify WebInspect has detected support for Transport Layer Security Protocol (TLS) 1.1 protocol on the target server. NIST publication 800-52 revision 1 recommends all web applications to prefer Transport Layer Security Protocol version 1.2 (TLS 1.2) and mandates government agencies to develop a migration plan for TLS1.2 by January 2015.  TLS1.1 mandates a combination of MD5 and SHA1 for the hash function, which leads to conclusion that strength of TLS1.1 depends largely on the strength of SHA1. MD5 is generally known to be weak. SHA1 use is being phased out. NIST Special Publication 800-131A deprecated the use of SHA-1 in digital signature starting January 2014.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Weak TLS/SSL protocols may exhibit any or all of the following properties: 
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11516</VulnerabilityID><Severity>2</Severity><Name>Insecure Transport: Weak SSL Protocol</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Fortify WebInspect has detected support for Transport Layer Security Protocol (TLS) 1.1 protocol on the target server. NIST publication 800-52 revision 1 recommends all web applications to prefer Transport Layer Security Protocol version 1.2 (TLS 1.2) and mandates government agencies to develop a migration plan for TLS1.2 by January 2015.  TLS1.1 mandates a combination of MD5 and SHA1 for the hash function, which leads to conclusion that strength of TLS1.1 depends largely on the strength of SHA1. MD5 is generally known to be weak. SHA1 use is being phased out. NIST Special Publication 800-131A deprecated the use of SHA-1 in digital signature starting January 2014.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Weak TLS/SSL protocols may exhibit any or all of the following properties:
 <ul><li>
-No protection against man-in-the-middle (MitM) attacks 
+No protection against man-in-the-middle (MitM) attacks
 </li><li>
-Same key used for authentication and encryption 
+Same key used for authentication and encryption
 </li><li>
-Weak message authentication control 
+Weak message authentication control
 </li><li>
 No protection against TCP connection closing
 </li></ul>
 
-These properties can allow an attacker to intercept, modify and tamper with sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[The list of supported SSL/TLS protocols can be obtained by running the server analyzer tool from Fortify Security Toolkit supplied with Fortify WebInspect against the target server.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Have a migration plan in place for all sites to exclusively use TLS1.2 and above. 
+These properties can allow an attacker to intercept, modify and tamper with sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[The list of supported SSL/TLS protocols can be obtained by running the server analyzer tool from Fortify Security Toolkit supplied with Fortify WebInspect against the target server.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Have a migration plan in place for all sites to exclusively use TLS1.2 and above.
 
-Disable support for the TLS 1.1 protocol on the server. Instead, TLSv1.2 and above should be used. 
+Disable support for the TLS 1.1 protocol on the server. Instead, TLSv1.2 and above should be used.
 <ul><li>
-For Apache, modify the following lines in the server configuration 
+For Apache, modify the following lines in the server configuration
 <ul><li>
 SSL Protocol ALL –SSLv2 -SSLv3 -TLSv1 –TLSv1.1
 </li></ul></li><li>
-For Nginx, modify the following lines in server configuration: 
+For Nginx, modify the following lines in server configuration:
 <ul><li>
 SSL_Protocols TLSv1.2
 </li></ul></li><li>
-For IIS, please refer to Microsoft Knowledge Base Articles: 
+For IIS, please refer to Microsoft Knowledge Base Articles:
 <ul><li>
 https://technet.microsoft.com/library/security/3009008
 </li></ul></li></ul>
@@ -1356,7 +1356,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1425,13 +1425,13 @@ Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 <li>TLS_RSA_WITH_CAMELLIA_256_CBC_SHA (0x84)</li>
 <li>TLS_RSA_WITH_AES_128_CBC_SHA256 (0x3c)</li>
 <li>TLS_RSA_WITH_AES_256_CBC_SHA256 (0x3d)</li>
-</ul></b>]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />A stolen long-term private key can be used by an attacker to decrypt past intercepted communication putting user data at risk where data is still relevant. This shortcoming in SSL/TLS was accentuated in the wake of Heartbleed [4] vulnerability, a vulnerability in Openssl library[4], that allowed attackers to steal server’s private keys among other sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<br />A list of supported ciphers by this server can be obtained by running ServerAnalyzer tool from WebInspect toolkit. Notice the absence of “DHE“ and “ECDHE“ in the list of supported cipher-suite names.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[1. PFS is enabled by turning on Diffie-Hellman Ephemeral (DHE) or Elliptic-Curve-Diffie-Hellman Ephemeral (ECDHE) based cipher suites on the server [2]. 
-e.g. 
+</ul></b>]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />A stolen long-term private key can be used by an attacker to decrypt past intercepted communication putting user data at risk where data is still relevant. This shortcoming in SSL/TLS was accentuated in the wake of Heartbleed [4] vulnerability, a vulnerability in Openssl library[4], that allowed attackers to steal server’s private keys among other sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<br />A list of supported ciphers by this server can be obtained by running ServerAnalyzer tool from WebInspect toolkit. Notice the absence of “DHE“ and “ECDHE“ in the list of supported cipher-suite names.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[1. PFS is enabled by turning on Diffie-Hellman Ephemeral (DHE) or Elliptic-Curve-Diffie-Hellman Ephemeral (ECDHE) based cipher suites on the server [2].
+e.g.
 <ul><li>
-For Apache – Modify SSLCipherSuite parameter in server configuration to add ECDHE or DHE key exchange algorithm. 
+For Apache – Modify SSLCipherSuite parameter in server configuration to add ECDHE or DHE key exchange algorithm.
 </li><li>
 
-For nginx – Modify ssl_ciphers in server configuration to add ECDHE or DHE  key exchange algorithm.  
+For nginx – Modify ssl_ciphers in server configuration to add ECDHE or DHE  key exchange algorithm.
 </li><li>
 For IIS please refer to following knowledge base articles:
 <ul><li>
@@ -1501,7 +1501,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1625,7 +1625,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1756,7 +1756,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
@@ -1816,8 +1816,8 @@ X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
 X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
 Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
 
-]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11365</VulnerabilityID><Severity>1</Severity><Name>Insecure Transport: HSTS not Set</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />Http Strict Transport Security  (HSTS) policy enables web applications to enforce web browsers to restrict communication with the server over an encrypted SSL/TLS connection for a set period. Policy is declared via special Strict Transport Security response header. Encrypted connection protects sensitive user and session data from attackers eavesdropping on network connection. 
-<br /> 
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11365</VulnerabilityID><Severity>1</Severity><Name>Insecure Transport: HSTS not Set</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />Http Strict Transport Security  (HSTS) policy enables web applications to enforce web browsers to restrict communication with the server over an encrypted SSL/TLS connection for a set period. Policy is declared via special Strict Transport Security response header. Encrypted connection protects sensitive user and session data from attackers eavesdropping on network connection.
+<br />
 Consider following attack scenarios:
 <br /><ul><li>Users often omit the URI scheme i.e. https:// when typing a URL in location bar to access a website. Also third party websites can link to the site using the “http” scheme instead of "”https”. This could result in an initial connection to a HTTPS-enabled site over an unencrypted channel. An eavesdropping attacker can hijack this unencrypted connection and replace the intended use of HTTPS protocol with HTTP in an attack known as SSLStrip, granting unauthorized access to all subsequent traffic. </li><li>Websites often transfer non-sensitive resources such as help documents over an unencrypted HTTP connection. Any cookies without a secure flag are sent along with such requests potentially disclosing sensitive user and session data to eavesdropper.</li><li>Man-in-the-Middle attacks that exploit user tendencies to override invalid certification warnings, e.g. SSLSniff. </li></ul><br />
 For web sites configured with an accurate HSTS policy, browsers automatically upgrade any HTTP connections to HTTPS. Furthermore, browsers prevent users from overriding any host certificate warnings. HSTS offers an effective defense against above attack scenarios.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[A successful MiTM attack such as SSLStrip or SSLsniff can lead to the compromise of sensitive user data such as financial information, Social Security Number, personal information etc. as well as grant unauthorized access to user accounts enabling attackers to perform privileged actions on client’s behalf.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[Access location /accounts/login/ and notice the absence of the  Strict Transport Security header in the HTTP response.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Configure the web application under test to include Strict Transport Security header in every response generated by an HTTPS-enabled site. Any HTTP version of site on the same domain should permanently redirect to the secure encrypted site. Header should not be added to HTTP response as browsers will ignore it.
@@ -1881,7 +1881,7 @@ Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024
             <!-- BEGIN LOGIN FORM -->
             <form class="login-form" action="/accounts/login/?next=/" method="POST">
                 <h3 class="form-title font-green">Sign In</h3>
-                
+
                 <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
                 <div class="form-group">
                     <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->

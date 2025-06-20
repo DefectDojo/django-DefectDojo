@@ -7,7 +7,7 @@ Nancy output file (go list -json -deps ./... | nancy sleuth > nancy.json) can be
 
 
 ### File Types
-This parser expects a JSON file.  
+This parser expects a JSON file.
 
 ### Command Used To Generate Output
 - \`go list -json -deps ./... | nancy sleuth > nancy.json\`

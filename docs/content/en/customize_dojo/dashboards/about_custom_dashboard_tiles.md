@@ -93,7 +93,7 @@ Here is a list summarizing each Dashboard Tile you can add, along with filters t
 
 ### Product, Engagement or Test Tiles
 
-These Tiles allow you to quickly select a list of Products, Engagements or Tests based on the filter parameters you set. You can use this tile for ease in navigation. 
+These Tiles allow you to quickly select a list of Products, Engagements or Tests based on the filter parameters you set. You can use this tile for ease in navigation.
 
 ![image](images/About_Custom_Dashboard_Tiles_3.png)
 
@@ -286,9 +286,9 @@ Clicking on the footer will bring you to a list of these Findings for you to add
 
 ### Scan Time Violation Tile
 
-This Tile is used to track specific Products to ensure that new scan data is being added on a regular basis. 
+This Tile is used to track specific Products to ensure that new scan data is being added on a regular basis.
 
-If there are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected. 
+If there are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected.
 
 This Tile will return a count and related list of Products which have **not** had new scan data added in the interval you’ve defined.
 

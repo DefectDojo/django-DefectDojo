@@ -40,7 +40,7 @@
                         "text":"If a variable is not declared as a local variable, it becomes a global variable by default, which may be unintentional and could lead to unexpected behavior."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -86,7 +86,7 @@
                         "text":"An expression that has no effect and is used in a void context is most likely redundant and may indicate a bug."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -110,7 +110,7 @@
                         "text":"Unreachable statements are often indicative of missing code or latent bugs and should be avoided."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -133,7 +133,7 @@
                         "text":"An assignment to a local variable that is not used later on, or whose value is always overwritten, has no effect."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -155,7 +155,7 @@
                         "text":"External links that open in a new tab or window but do not specify link type 'noopener' or 'noreferrer' are a potential security risk."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2169,7 +2169,7 @@
                         "text":"The return value of a procedure (a function that does not return a value) is used. This is confusing to the reader as the value (None) has no meaning."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2215,7 +2215,7 @@
                         "text":"Unnecessary 'pass' statement"
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2285,7 +2285,7 @@
                         "text":"Assignment to a variable occurs multiple times without any intermediate use of that variable"
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2405,7 +2405,7 @@
                         "text":"Code is unreachable"
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2524,7 +2524,7 @@
                         "text":"Duplicate characters in a class have no effect and may indicate an error in the regular expression."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[
@@ -2570,7 +2570,7 @@
                         "text":"When adding new attributes to instances of a class, equality for that class needs to be defined."
                      },
                      "defaultConfiguration":{
-                        
+
                      },
                      "properties":{
                         "tags":[

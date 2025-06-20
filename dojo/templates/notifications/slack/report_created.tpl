@@ -4,7 +4,7 @@
 Your report "{{ name }}" is ready. It can be downloaded here: {{ report_url }}
 {% endblocktranslate %}
 {% if system_settings.disclaimer_notifications and system_settings.disclaimer_notifications.strip %}
-    
+
     {% trans "Disclaimer" %}:
     {{ system_settings.disclaimer_notifications }}
 {% endif %}

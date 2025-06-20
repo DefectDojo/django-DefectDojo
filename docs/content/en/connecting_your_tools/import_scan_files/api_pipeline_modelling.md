@@ -8,7 +8,7 @@ DefectDojo’s API allows for robust pipeline solutions, which automatically ing
 * A daily import which scans your environment on a daily basis, and then imports the results of the scan to DefectDojo (similar to our **Connectors** feature)
 * A CI/CD pipeline which scans new code as it is deployed, and imports the results to DefectDojo as a triggered action
 
-These pipelines can be created by directly calling our API **/reimport** endpoint with an attached scan file in a way that closely resembles our **Import Scan Form**. 
+These pipelines can be created by directly calling our API **/reimport** endpoint with an attached scan file in a way that closely resembles our **Import Scan Form**.
 
 #### Universal Importer: out of the box automation
 

@@ -191,8 +191,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -534,8 +534,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -630,8 +630,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -696,8 +696,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -2196,8 +2196,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -2785,8 +2785,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -2862,8 +2862,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -2928,8 +2928,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -3048,8 +3048,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -3421,8 +3421,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -3783,8 +3783,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4151,8 +4151,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4235,8 +4235,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4479,8 +4479,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4563,8 +4563,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4735,8 +4735,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4819,8 +4819,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4921,8 +4921,8 @@ No vulnerabilities found for current version.]]></issueDetail>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -4995,20 +4995,20 @@ No vulnerabilities found for current version.]]></issueDetail>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5040,20 +5040,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5106,20 +5106,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5172,20 +5172,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5330,8 +5330,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -5436,8 +5436,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -5597,8 +5597,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -5677,20 +5677,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5743,20 +5743,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -5912,20 +5912,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -6027,8 +6027,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -6088,8 +6088,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -6126,20 +6126,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -6192,20 +6192,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -6281,8 +6281,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -6485,8 +6485,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -6677,20 +6677,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -6778,20 +6778,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -6958,8 +6958,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7067,8 +7067,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7179,8 +7179,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7423,8 +7423,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7484,8 +7484,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7602,20 +7602,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -7760,8 +7760,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -7837,8 +7837,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -8029,8 +8029,8 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -8119,20 +8119,20 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
 <p>The attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.</p>
 <p>Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).</p>
 <p>The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting 
+    <remediationBackground><![CDATA[<p>In most situations where user-controllable data is copied into application responses, cross-site scripting
   attacks can be prevented using two layers of defenses:</p>
 <ul>
-  <li>Input should be validated as strictly as possible on arrival, given the kind of content that 
-it is expected to contain. For example, personal names should consist of alphabetical 
-and a small range of typographical characters, and be relatively short; a year of birth 
-should consist of exactly four numerals; email addresses should match a well-defined 
+  <li>Input should be validated as strictly as possible on arrival, given the kind of content that
+it is expected to contain. For example, personal names should consist of alphabetical
+and a small range of typographical characters, and be relatively short; a year of birth
+should consist of exactly four numerals; email addresses should match a well-defined
 regular expression. Input which fails the validation should be rejected, not sanitized.</li>
-<li>User input should be HTML-encoded at any point where it is copied into 
-application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be 
+<li>User input should be HTML-encoded at any point where it is copied into
+application responses. All HTML metacharacters, including &lt; &gt; " ' and =, should be
 replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
-<p>In cases where the application's functionality allows users to author content using 
-  a restricted subset of HTML tags and attributes (for example, blog comments which 
-  allow limited formatting and linking), it is necessary to parse the supplied HTML to 
+<p>In cases where the application's functionality allows users to author content using
+  a restricted subset of HTML tags and attributes (for example, blog comments which
+  allow limited formatting and linking), it is necessary to parse the supplied HTML to
   validate that it does not use any dangerous syntax; this is a non-trivial task.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
 	<li><a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting</a></li>
@@ -8160,19 +8160,19 @@ replaced with the corresponding HTML entities (&amp;lt; &amp;gt; etc).</li></ul>
     <location><![CDATA[/showimage.php [file parameter]]]></location>
     <severity>High</severity>
     <confidence>Certain</confidence>
-    <issueBackground><![CDATA[<p>Out-of-band resource load arises when it is possible to induce an application to fetch content from an arbitrary external location, and incorporate that content into the application's own response(s). The ability to trigger arbitrary out-of-band resource load does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application. 
+    <issueBackground><![CDATA[<p>Out-of-band resource load arises when it is possible to induce an application to fetch content from an arbitrary external location, and incorporate that content into the application's own response(s). The ability to trigger arbitrary out-of-band resource load does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application.
 However, in many cases, it can indicate a vulnerability with serious consequences.</p>
-<p>The ability to request and retrieve web content from other systems can allow the application server to be used as a two-way attack proxy. 
-  By submitting suitable payloads, an attacker can cause the application server to attack, or retrieve content from, other systems that it can interact with. 
-  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself. 
+<p>The ability to request and retrieve web content from other systems can allow the application server to be used as a two-way attack proxy.
+  By submitting suitable payloads, an attacker can cause the application server to attack, or retrieve content from, other systems that it can interact with.
+  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself.
   Depending on the network architecture, this may expose highly vulnerable internal services that are not otherwise accessible to external attackers.</p>
-<p>Additionally, the application's processing of web content that is retrieved from arbitrary URLs exposes some important and non-conventional attack surface. 
-  An attacker can deploy a web server that returns malicious content, and then induce the application to retrieve and process that content. 
-  This processing might give rise to the types of input-based vulnerabilities that are normally found when unexpected input is submitted directly in requests to the application. 
+<p>Additionally, the application's processing of web content that is retrieved from arbitrary URLs exposes some important and non-conventional attack surface.
+  An attacker can deploy a web server that returns malicious content, and then induce the application to retrieve and process that content.
+  This processing might give rise to the types of input-based vulnerabilities that are normally found when unexpected input is submitted directly in requests to the application.
   The out-of-band attack surface that the application exposes should be thoroughly tested for these types of vulnerabilities. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality, and determine whether the ability to trigger arbitrary out-of-band resource load is intended behavior. 
-  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures. 
-  These measures might include blocking network access from the application server to other internal systems, and hardening the application server itself to remove any services available on the local loopback adapter. 
+    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality, and determine whether the ability to trigger arbitrary out-of-band resource load is intended behavior.
+  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures.
+  These measures might include blocking network access from the application server to other internal systems, and hardening the application server itself to remove any services available on the local loopback adapter.
 You should also ensure that content retrieved from other systems is processed in a safe manner, with the usual precautions that are applicable when processing input from direct incoming web requests.</p>
 <p>If the ability to trigger arbitrary out-of-band resource load is not intended behavior, then you should implement a whitelist of permitted URLs, and block requests to URLs that do not appear on this whitelist.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
@@ -8255,8 +8255,8 @@ You should also ensure that content retrieved from other systems is processed in
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -8268,18 +8268,18 @@ You should also ensure that content retrieved from other systems is processed in
     <location><![CDATA[/showimage.php [file parameter]]]></location>
     <severity>High</severity>
     <confidence>Certain</confidence>
-    <issueBackground><![CDATA[<p>External service interaction arises when it is possible to induce an application to interact with an arbitrary external service, such as a web or mail server. The ability to trigger arbitrary external service interactions does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application. 
+    <issueBackground><![CDATA[<p>External service interaction arises when it is possible to induce an application to interact with an arbitrary external service, such as a web or mail server. The ability to trigger arbitrary external service interactions does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application.
 However, in many cases, it can indicate a vulnerability with serious consequences.</p>
-<p>In cases where DNS-based interactions can be triggered, it is normally possible to trigger interactions using other service types, and these are reported as separate issues. 
-  If a payload that specifies a particular service type (e.g. a URL) triggers only a DNS-based interaction, 
-  then this strongly indicates that the application attempted to connect using that other service, 
-  but was prevented from doing so by egress filters in place at the network layer. The ability to send requests to other systems can allow the vulnerable server to be used as an attack proxy. 
-  By submitting suitable payloads, an attacker can cause the application server to attack other systems that it can interact with. 
-  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself. 
+<p>In cases where DNS-based interactions can be triggered, it is normally possible to trigger interactions using other service types, and these are reported as separate issues.
+  If a payload that specifies a particular service type (e.g. a URL) triggers only a DNS-based interaction,
+  then this strongly indicates that the application attempted to connect using that other service,
+  but was prevented from doing so by egress filters in place at the network layer. The ability to send requests to other systems can allow the vulnerable server to be used as an attack proxy.
+  By submitting suitable payloads, an attacker can cause the application server to attack other systems that it can interact with.
+  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself.
   Depending on the network architecture, this may expose highly vulnerable internal services that are not otherwise accessible to external attackers. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality, 
-  and determine whether the ability to trigger arbitrary external service interactions is intended behavior. 
-  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures. 
+    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality,
+  and determine whether the ability to trigger arbitrary external service interactions is intended behavior.
+  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures.
   These measures might include blocking network access from the application server to other internal systems, and hardening the application server itself to remove any services available on the local loopback adapter.</p>
 <p>If the ability to trigger arbitrary external service interactions is not intended behavior, then you should implement a whitelist of permitted services and hosts, and block any interactions that do not appear on this whitelist.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
@@ -8312,15 +8312,15 @@ However, in many cases, it can indicate a vulnerability with serious consequence
     <location><![CDATA[/showimage.php [file parameter]]]></location>
     <severity>High</severity>
     <confidence>Certain</confidence>
-    <issueBackground><![CDATA[<p>External service interaction arises when it is possible to induce an application to interact with an arbitrary external service, such as a web or mail server. The ability to trigger arbitrary external service interactions does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application. 
+    <issueBackground><![CDATA[<p>External service interaction arises when it is possible to induce an application to interact with an arbitrary external service, such as a web or mail server. The ability to trigger arbitrary external service interactions does not constitute a vulnerability in its own right, and in some cases might even be the intended behavior of the application.
 However, in many cases, it can indicate a vulnerability with serious consequences.</p>
-<p>The ability to send requests to other systems can allow the vulnerable server to be used as an attack proxy. 
-  By submitting suitable payloads, an attacker can cause the application server to attack other systems that it can interact with. 
-  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself. 
+<p>The ability to send requests to other systems can allow the vulnerable server to be used as an attack proxy.
+  By submitting suitable payloads, an attacker can cause the application server to attack other systems that it can interact with.
+  This may include public third-party systems, internal systems within the same organization, or services available on the local loopback adapter of the application server itself.
   Depending on the network architecture, this may expose highly vulnerable internal services that are not otherwise accessible to external attackers. </p>]]></issueBackground>
-    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality, 
-  and determine whether the ability to trigger arbitrary external service interactions is intended behavior. 
-  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures. 
+    <remediationBackground><![CDATA[<p>You should review the purpose and intended use of the relevant application functionality,
+  and determine whether the ability to trigger arbitrary external service interactions is intended behavior.
+  If so, you should be aware of the types of attacks that can be performed via this behavior and take appropriate measures.
   These measures might include blocking network access from the application server to other internal systems, and hardening the application server itself to remove any services available on the local loopback adapter.</p>
 <p>If the ability to trigger arbitrary external service interactions is not intended behavior, then you should implement a whitelist of permitted services and hosts, and block any interactions that do not appear on this whitelist.</p>]]></remediationBackground>
     <references><![CDATA[<ul>
@@ -8404,8 +8404,8 @@ However, in many cases, it can indicate a vulnerability with serious consequence
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -8514,8 +8514,8 @@ However, in many cases, it can indicate a vulnerability with serious consequence
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>
@@ -8610,8 +8610,8 @@ However, in many cases, it can indicate a vulnerability with serious consequence
     <severity>Low</severity>
     <confidence>Certain</confidence>
     <issueDetail><![CDATA[<p>The response lacks or includes the following misconfigured security headers.</p>
-                         <p>Please note that some of these issues could be false positives, a manual review 
-                         is recommended</p><br>  
+                         <p>Please note that some of these issues could be false positives, a manual review
+                         is recommended</p><br>
                       <p>Missing headers:</p><ul><li>Header name: <b>x-frame-options</b>.</li><li>Header name: <b>x-content-type-options</b>.</li><li>Header name: <b>strict-transport-security</b>.</li><li>Header name: <b>content-security-policy</b>.</li><li>Header name: <b>x-permitted-cross-domain-policies</b>.</li></ul>]]></issueDetail>
   </issue>
   <issue>

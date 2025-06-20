@@ -83,7 +83,7 @@ The attacker-supplied code can perform a wide variety of actions, such as steali
 
 Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).
 
-The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. 
+The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk.
 
 
 Remediation Detail
@@ -154,7 +154,7 @@ document.getElementById('searchBar').value = searchText;
 
 
 References
-	
+
 - Web Security Academy: Cross-site scripting (https://portswigger.net/web-security/cross-site-scripting)
 
 - Web Security Academy: Reflected cross-site scripting (https://portswigger.net/web-security/cross-site-scripting/reflected)
@@ -278,7 +278,7 @@ The attacker-supplied code can perform a wide variety of actions, such as steali
 
 Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).
 
-The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. 
+The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk.
 
 
 Issue Remediation
@@ -339,7 +339,7 @@ X-Frame-Options: SAMEORIGIN
 
 
 References
-	
+
 - Web Security Academy: Cross-site scripting (https://portswigger.net/web-security/cross-site-scripting)
 
 - Web Security Academy: Reflected cross-site scripting (https://portswigger.net/web-security/cross-site-scripting/reflected)
@@ -402,7 +402,7 @@ The attacker-supplied code can perform a wide variety of actions, such as steali
 
 Users can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site that causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).
 
-The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk. 
+The security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality that it contains, and the other applications that belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain that can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization that owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application and exploiting users' trust in the organization in order to capture credentials for other applications that it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk.
 
 
 Remediation Detail
@@ -475,7 +475,7 @@ document.getElementById('usernameInput').value = username;
 
 
 References
-	
+
 - Web Security Academy: Cross-site scripting (https://portswigger.net/web-security/cross-site-scripting)
 
 - Web Security Academy: Reflected cross-site scripting (https://portswigger.net/web-security/cross-site-scripting/reflected)
@@ -542,56 +542,56 @@ We detected angularjs version 1.7.7, which has the following vulnerabilities:
 
 
 
-- 
+-
 XSS via JQLite DOM manipulation functions in AngularJS
 
 https://github.com/advisories/GHSA-5cp4-xmrw-59wf (https://github.com/advisories/GHSA-5cp4-xmrw-59wf)
 
 
 
-- 
+-
 CVE-2020-7676 (https://nvd.nist.gov/vuln/detail/CVE-2020-7676): XSS may be triggered in AngularJS applications that sanitize user-controlled HTML snippets before passing them to JQLite methods like JQLite.prepend, JQLite.after, JQLite.append, JQLite.replaceWith, JQLite.append, new JQLite and angular.element.
 
 
 
-- 
+-
 CVE-2020-7676 (https://nvd.nist.gov/vuln/detail/CVE-2020-7676): angular.js prior to 1.8.0 allows cross site scripting. The regex-based input HTML replacement may turn sanitized code into unsanitized one.
 
 
 
-- 
+-
 CVE-2019-10768 (https://nvd.nist.gov/vuln/detail/CVE-2019-10768): Prototype pollution
 
 
 
-- 
+-
 CVE-2023-26118 (https://nvd.nist.gov/vuln/detail/CVE-2023-26118): angular vulnerable to regular expression denial of service via the <input> element
 
 
 
-- 
+-
 End-of-Life: Long term support for AngularJS has been discontinued
 
 https://blog.angular.io/discontinued-long-term-support-for-angularjs-cc066b82e65a?gi=9d3103b5445c (https://blog.angular.io/discontinued-long-term-support-for-angularjs-cc066b82e65a?gi=9d3103b5445c)
 
 
 
-- 
+-
 CVE-2022-25869 (https://nvd.nist.gov/vuln/detail/CVE-2022-25869): Angular (deprecated package) Cross-site Scripting
 
 
 
-- 
+-
 CVE-2022-25844 (https://nvd.nist.gov/vuln/detail/CVE-2022-25844): angular vulnerable to regular expression denial of service (ReDoS)
 
 
 
-- 
+-
 CVE-2023-26116 (https://nvd.nist.gov/vuln/detail/CVE-2023-26116): angular vulnerable to regular expression denial of service via the angular.copy() utility
 
 
 
-- 
+-
 CVE-2023-26117 (https://nvd.nist.gov/vuln/detail/CVE-2023-26117): angular vulnerable to regular expression denial of service via the $resource service
 
 

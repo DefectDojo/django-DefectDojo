@@ -8,19 +8,19 @@ If you have difficulty accessing your DefectDojo instance, here are some steps y
 
 ## I can access the site, but I can't log in
 
-1. You can reset the password for your account from the login page: **yourcompanyinstance.cloud.defectdojo.com/login**. Click 'I forgot my password' in order to begin the process.  
+1. You can reset the password for your account from the login page: **yourcompanyinstance.cloud.defectdojo.com/login**. Click 'I forgot my password' in order to begin the process.
 ​
 
 ![image](images/Connectivity_Troubleshooting.png)
 
-2. Enter your email address, and click "Reset my password".  
+2. Enter your email address, and click "Reset my password".
 ​
-3. You should receive an email with the subject header "`Password reset on yourcompanyinstance.cloud.defectdojo.com`". This email contains a link which you can click to set a new password.  
-  
+3. You should receive an email with the subject header "`Password reset on yourcompanyinstance.cloud.defectdojo.com`". This email contains a link which you can click to set a new password.
+
 
 ![image](images/Connectivity_Troubleshooting_2.png)
 
-If you don't receive an email, please check your Spam folder. Failing that, have your team's DefectDojo admin confirm that you have an account registered on your instance.  
+If you don't receive an email, please check your Spam folder. Failing that, have your team's DefectDojo admin confirm that you have an account registered on your instance.
 
 
 
@@ -41,8 +41,8 @@ If the problem persists, please contact [support@defectdojo.com](mailto:support@
 If you can’t access the Cloud Manager, navigate to the Login page at <https://cloud.defectdojo.com/accounts/login/> and click **“Forgot your password?”**
 
 
-![image](images/Connectivity_Troubleshooting_3.png)  
-You’ll be prompted to enter your email address, and our team will send you an email with a link to reset your password and enter a new one. 
+![image](images/Connectivity_Troubleshooting_3.png)
+You’ll be prompted to enter your email address, and our team will send you an email with a link to reset your password and enter a new one.
 
 Please note that this login method only works for the **Cloud Manager**, an admin site which your team members may not all have access to. Directly logging into your instance to use DefectDojo is only possible by directly connecting to **yourcompanyinstance.cloud.defectdojo.com/login**.
 

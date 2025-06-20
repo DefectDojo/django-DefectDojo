@@ -13,7 +13,7 @@
 						<confidencedesc>Medium</confidencedesc>
 						<desc>This method was originally intended for file managemant operations. It is now most commonly used in REST services, PUT is most-often utilized for **update** capabilities, PUT-ing to a known resource URI with the request body containing the newly-updated representation of the original resource..</desc>
 						<instances>
-							
+
 								<instance>
 									<uri>http://localhost:8080/bodgeit/js/qndto7n63d</uri>
 									<method>PUT</method>

@@ -63,7 +63,7 @@
                 },
                 "updateTimestamp": "2023-03-23T16:22:54Z"
             }
-        }        
+        }
     ],
     "exposedsecretreports.aquasecurity.github.io": [
         {
@@ -128,7 +128,7 @@
                 },
                 "updateTimestamp": "2023-03-24T08:34:18Z"
             }
-        }        
+        }
     ],
     "infraassessmentreports.aquasecurity.github.io": [],
     "rbacassessmentreports.aquasecurity.github.io": [],
@@ -668,7 +668,6 @@
                     }
                 ]
             }
-        }        
+        }
     ]
   }
-  

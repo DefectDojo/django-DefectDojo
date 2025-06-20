@@ -27,7 +27,7 @@ Records have various attributes, including:
 
 Each Record needs to have a Mapping assigned. The Mapping tells DefectDojo where to store the scan data from the tool. A Mapped Record assigns the Vendor-Equivalent Product to a DefectDojo Product, and tells the Connector to start importing scan data to that location (as Engagements and Tests).
 
-You can assign Mappings yourself, or you can have DefectDojo assign them automatically. 
+You can assign Mappings yourself, or you can have DefectDojo assign them automatically.
 
 ### Auto-Mapping
 
@@ -39,9 +39,9 @@ If you don't have Auto-Mapping enabled, you can make your own decisions about wh
 
 David has just finished setting up a connector for his BurpSuite tool, and runs a Discover operation. David has Burp set up to scan 4 different 'Sites', and DefectDojo creates a new Record for each of those Sites.
 
-* If David decides to use Auto-Mapping, DefectDojo will create a new Product for each Site. From now on, when DefectDojo runs a Synchronize operation, the Connector will import scan data directly from the Site into the Product (via the Record mapping)  
+* If David decides to use Auto-Mapping, DefectDojo will create a new Product for each Site. From now on, when DefectDojo runs a Synchronize operation, the Connector will import scan data directly from the Site into the Product (via the Record mapping)
 ​
-* If David leaves Auto-Mapping off, DefectDojo will still discover those 4 Sites and create Records, but it won't import any data until David creates the Mappings himself.  
+* If David leaves Auto-Mapping off, DefectDojo will still discover those 4 Sites and create Records, but it won't import any data until David creates the Mappings himself.
 ​
 * David can always change how these mappings are set up later. Maybe he wants to consolidate the output of a few different Burp Sites into a single Product. Or maybe he's looking to have a Product which records scan data from a few different tools - including Burp. It's easy for David to change where Burp scan data is stored into DefectDojo by changing the Mapping of these Records.
 
@@ -49,7 +49,7 @@ David has just finished setting up a connector for his BurpSuite tool, and runs 
 
 Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans through a Sync Operation. Connectors can work alongside other DefectDojo import processes or interactive testing.
 
-* Record Mappings are designed to be non-invasive. If you map a Product to a Record which contains existing Engagements or Findings, those existing Engagements and Findings will not be affected or overwritten by the data sync process.  
+* Record Mappings are designed to be non-invasive. If you map a Product to a Record which contains existing Engagements or Findings, those existing Engagements and Findings will not be affected or overwritten by the data sync process.
 ​
 * All data created via a connector will be stored under a single Engagement called **Global Connectors**. That Engagement will create a separate Test for each Connector mapped to the Product.
 
@@ -87,7 +87,7 @@ Stale records can be remapped to an existing Product, or Ignored if the scan dat
 
 ### Missing
 
-If a Record has been Mapped, but the source data (or Vendor\-Equivalent Product) is not being detected by DefectDojo, the Record will be labeled as **Missing**. 
+If a Record has been Mapped, but the source data (or Vendor\-Equivalent Product) is not being detected by DefectDojo, the Record will be labeled as **Missing**.
 
 DefectDojo Connectors will adapt to name changes, directory changes and other data shifts, so this is possibly because the related Vendor\-Equivalent Product was deleted from the Tool you’re using.
 
@@ -109,7 +109,7 @@ Clicking **Edit Record** will open a window which allows you to change the desti
 
 ![image](images/edit_ignore_delete_records_2.png)
 
-The scan data associated with a Record can be directed to flow into a different Product by changing the mapping. 
+The scan data associated with a Record can be directed to flow into a different Product by changing the mapping.
 
 Select, or type in the name of a new Product from the drop\-down menu to the right.
 
@@ -119,24 +119,24 @@ The State of a Record can be changed from this menu as well. Records can be swit
 
 ### Ignoring a Record
 
-If you wish to ‘switch off’ one of the records or disregard the data it’s sending to DefectDojo, you can choose to ‘Ignore’ the record. An ‘Ignored’ record will move to the Unmapped Records list and will not push any new data to DefectDojo. 
+If you wish to ‘switch off’ one of the records or disregard the data it’s sending to DefectDojo, you can choose to ‘Ignore’ the record. An ‘Ignored’ record will move to the Unmapped Records list and will not push any new data to DefectDojo.
 
 You can Ignore a Mapped Record (which will remove the mapping), or a New Record (from the unmapped Records list).
 
 #### Restoring an Ignored Record
 
-If you would like to remove the Ignored status from a record, you can change it back to New with the same State dropdown menu. 
+If you would like to remove the Ignored status from a record, you can change it back to New with the same State dropdown menu.
 
-* If Auto\-Map Records is enabled, the Record will return to its original mapping once the Discover operation runs again.  
+* If Auto\-Map Records is enabled, the Record will return to its original mapping once the Discover operation runs again.
 * If Auto\-Map Records is not enabled, DefectDojo will not automatically restore a previous mapping, so you’ll need to set up the mapping for this Record again.
 
 ### Delete a Record
 
-You can also Delete Records, which will remove them from the Unmapped or Mapped Records table. 
+You can also Delete Records, which will remove them from the Unmapped or Mapped Records table.
 
 Keep in mind that the Discover function will always import all records from a tool \- meaning that even if a Record is deleted from DefectDojo, it will become re\-discovered later (and will return to the list of Records to be mapped again).
 
-* If you plan on removing the underlying Vendor\-Equivalent Product from your scan tool, then Deleting the Record is a good option. Otherwise, the next Discover operation will see that the associated data is missing, and this Record will change state to 'Missing'.  
+* If you plan on removing the underlying Vendor\-Equivalent Product from your scan tool, then Deleting the Record is a good option. Otherwise, the next Discover operation will see that the associated data is missing, and this Record will change state to 'Missing'.
 ​
 * However, if the underlying Vendor\-Equivalent Product still exists, it will be Discovered again on a future Discover operation. To prevent this behaviour, you can instead Ignore the Record.
 

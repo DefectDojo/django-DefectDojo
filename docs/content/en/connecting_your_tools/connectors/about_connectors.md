@@ -19,7 +19,7 @@ pro-feature: true
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
-DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized. 
+DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized.
 
 But everyone needs a starting point, and that's where Connectors come in. Connectors are designed to get your security tools connected and importing data to DefectDojo as quickly as possible.
 

@@ -7100,7 +7100,7 @@
           "name": "ubuntu",
           "url": "https://git.launchpad.net/ubuntu-cve-tracker"
         },
-  
+
         "ratings": [
           {
             "source": {
@@ -8023,4 +8023,3 @@
       }
     ]
   }
-  

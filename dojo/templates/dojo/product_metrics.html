@@ -60,7 +60,7 @@
                     <h3 id="verified-objects-title" class="sr-only">Verified {{ view }}{{ view|pluralize }} overview</h3>
                     <div class="panel-body">
                         <div id="verified_objs"
-                             class="graph" 
+                             class="graph"
                              role="img"
                              aria-labelledby="verified-objects-title"
                              aria-describedby="verified-objects-description"
@@ -75,7 +75,7 @@
                             {{ verified_objs_by_severity.Medium }} medium,
                             {{ verified_objs_by_severity.Low }} low and
                             {{ verified_objs_by_severity.Info }} informational.
-                        </p>                                               
+                        </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
@@ -106,7 +106,7 @@
                     </div>
                     <h3 id="open-objects-title" class="sr-only">Open {{ view }}{{ view|pluralize }} overview</h3>
                     <div class="panel-body">
-                        <div 
+                        <div
                         aria-labelledby="open-objects-title"
                         aria-describedby="open-objects-description"
                         id="open_objs"
@@ -122,7 +122,7 @@
                             {{ open_objs_by_severity.Medium }} medium,
                             {{ open_objs_by_severity.Low }} low, and
                             {{ open_objs_by_severity.Info }} informational.
-                        </p>   
+                        </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Opened since {{ start_date }}"
@@ -151,7 +151,7 @@
                     </div>
                     <h3 id="accepted-objects-title" class="sr-only">Risk Accepted {{ view|lower }}{{ view|pluralize }} overview</h3>
                     <div class="panel-body">
-                        <div 
+                        <div
                         aria-describedby="accepted-objects-description"
                         aria-labelledby="accepted-objects-title"
                         class="graph"
@@ -167,7 +167,7 @@
                         {{ accepted_objs_by_severity.Medium }} medium,
                         {{ accepted_objs_by_severity.Low }} low, and
                         {{ accepted_objs_by_severity.Info }} informational.
-                    </p>  
+                    </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
@@ -199,7 +199,7 @@
                         <div
                         aria-describedby="closed-objects-description"
                         aria-labelledby="closed-objects-title"
-                        class="graph" 
+                        class="graph"
                         id="closed_objs"
                         role="img"
                         tabindex="0"
@@ -212,7 +212,7 @@
                             {{ closed_objs_by_severity.Medium }} medium,
                             {{ closed_objs_by_severity.Low }} low, and
                             {{ closed_objs_by_severity.Info }} informational.
-                        </p>   
+                        </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Closed since {{ start_date }}"
@@ -256,7 +256,7 @@
                         {{ false_positive_objs_by_severity.Medium }} medium,
                         {{ false_positive_objs_by_severity.Low }} low, and
                         {{ false_positive_objs_by_severity.Info }} informational.
-                    </p>   
+                    </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Flagged since {{ start_date }}"
@@ -301,7 +301,7 @@
                         {{ out_of_scope_objs_by_severity.Medium }} medium,
                         {{ out_of_scope_objs_by_severity.Low }} low, and
                         {{ out_of_scope_objs_by_severity.Info }} informational.
-                    </p>   
+                    </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
@@ -346,7 +346,7 @@
                         {{ all_objs_by_severity.Medium }} Medium,
                         {{ all_objs_by_severity.Low }} Low, and
                         {{ all_objs_by_severity.Info }} Informational.
-                    </p> 
+                    </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}"
@@ -377,7 +377,7 @@
                         <div
                         aria-describedby="inactive-objects-description"
                         aria-labelledby="inactive-objects-title"
-                        class="graph" 
+                        class="graph"
                         id="inactive_objs"
                         role="img"
                         tabindex="0"
@@ -390,7 +390,7 @@
                             {{ inactive_objs_by_severity.Medium }} Medium,
                             {{ inactive_objs_by_severity.Low }} Low, and
                             {{ inactive_objs_by_severity.Info }} Informational.
-                        </p> 
+                        </p>
                     </div>
                     <div class="panel-footer">
                         <i title="Ingested since {{ start_date }}"
@@ -468,7 +468,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -511,7 +511,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-            
+
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
@@ -588,9 +588,9 @@
                         </h3>
                         <div
                         aria-describedby="critical-weekly-description"
-                        aria-labelledby="critical-weekly-title" 
+                        aria-labelledby="critical-weekly-title"
                         class="graph"
-                        id="severity_critical" 
+                        id="severity_critical"
                         role="img"
                         tabindex="0"></div>
                     </div>
@@ -686,7 +686,7 @@
                         <h3 id="medium-weekly-title" class="sr-only">
                             Weekly medium severity findings Overview
                         </h3>
-                        <div 
+                        <div
                              aria-describedby="medium-weekly-description"
                              aria-labelledby="medium-weekly-title"
                              class="graph"
@@ -716,7 +716,7 @@
                                 {% for week, values in medium_weekly.items %}
                                 <tr>
                                     <td>{{ values.week|safe }}</td>
-                                    <td>{{ values.count }}</td>  
+                                    <td>{{ values.count }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -768,7 +768,7 @@
                             </tbody>
                         </table>
                     </div>
-            
+
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
                             class="text-info fa-solid fa-circle-info"></i>
@@ -801,8 +801,8 @@
                             </p>
                         </div>
                         <table
-                        class="sr-only" 
-                        id="punchcard-table" 
+                        class="sr-only"
+                        id="punchcard-table"
                         aria-labelledby="punchcard-table-caption"
                         tabindex="0">
                      <caption id="punchcard-table-caption">Weekly Findings Activity Breakdown</caption>
@@ -833,7 +833,7 @@
                          {% endfor %}
                      </tbody>
                  </table>
-                 
+
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
@@ -905,7 +905,7 @@
                         aria-labelledby="open-vulnerabilities-title"
                         class="graph"
                         id="open_vulnerabilities"
-                        role="img" 
+                        role="img"
                         tabindex="0">
                     </div>
                     <div id="open-vulnerabilities-description" class="sr-only">
@@ -1044,8 +1044,8 @@
             $(document).ready(function() {
                 fetch_burndown_metrics({{ prod.id }});
 
-                let allVulnerabilities = "{{ all_vulnerabilities|safe }}"; 
-                let openVulnerabilities = "{{ open_vulnerabilities|safe }}"; 
+                let allVulnerabilities = "{{ all_vulnerabilities|safe }}";
+                let openVulnerabilities = "{{ open_vulnerabilities|safe }}";
                 updateVulnerabilitiesTable(allVulnerabilities, "total-vulnerabilities-table");
                 updateVulnerabilitiesTable(openVulnerabilities, "open-vulnerabilities-table");
 
@@ -1066,9 +1066,9 @@
                     success: function(response) {
                         $('#open_findings_burndown').show();
                         $('#id_open_findings_burndown_loader').hide();
-                        
+
                         updateBurndownTable(response);
-                        
+
                         open_findings_burndown(
                             response.critical,
                             response.high,
@@ -1087,13 +1087,13 @@
                 tableBody.empty();
 
                 // Gathering all timestamps
-                // Taken from 'critical' but severity type does not really matter 
+                // Taken from 'critical' but severity type does not really matter
                 // as all of them come with the same bunch of timestamps
-                let timestamps = data.critical.map(entry => entry[0]); 
+                let timestamps = data.critical.map(entry => entry[0]);
 
                 timestamps.forEach((timestamp, index) => {
                     // Converting timestamp to YYYY-MM-DD format
-                    let date = new Date(timestamp).toISOString().split('T')[0]; 
+                    let date = new Date(timestamp).toISOString().split('T')[0];
 
                     // Fetching values for each severity level or default to 0 if missing
                     let critical = data.critical[index] ? data.critical[index][1] : 0;
@@ -1189,7 +1189,7 @@
                 [[4, {{ new_objs_by_severity.Info }}]],
                 ticks);
 
-            
+
             var opened = [];
             var closed = [];
             var accepted = [];
@@ -1201,7 +1201,7 @@
                 accepted.push([{{ forloop.counter0 }}, {{ values.accepted }}])
             {% endfor %}
             open_close_weekly(opened, closed, accepted, ticks);
-            
+
             let critical = [];
             let high = [];
             let medium = [];
@@ -1217,7 +1217,7 @@
                 info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
             {% endfor %}
             severity_weekly(critical, high, medium, low, info, ticks);
-            
+
             critical = [];
             high = [];
             medium = [];
@@ -1235,7 +1235,7 @@
                 medium.push([{{ forloop.counter0 }}, {{ values.count }}]);
             {% endfor %}
             severity_counts_weekly(critical, high, medium, ticks);
-            
+
             var data = []
             {% for x, y in test_data.items %}
                 {% if y > 0 %}
@@ -1243,7 +1243,7 @@
                 {%  endif %}
             {% endfor %}
             test_type(data);
-            
+
             var data_2 = []
             var ticks = []
 
@@ -1256,19 +1256,19 @@
                 i++;
             });
             finding_age(data_2, ticks);
-            
+
             draw_vulnerabilities_graph("#open_vulnerabilities", {{ open_vulnerabilities|safe }});
             draw_vulnerabilities_graph("#all_vulnerabilities", {{ all_vulnerabilities|safe }});
 
             function updateVulnerabilitiesTable(dataInfo, tableId) {
                 let tableBody = $(`#${tableId} tbody`);
                 // Converting raw data to a key-value object
-                let cweDataArray = dataInfo.split(","); 
+                let cweDataArray = dataInfo.split(",");
                 let cweData = {};
                 for (let i = 0; i < cweDataArray.length; i += 2) {
                     // Trimming and removing unnecessary characters
-                    let cwe = cweDataArray[i].replace(/[\[\]']+/g, "").trim(); 
-                    let count = parseInt(cweDataArray[i + 1], 10) || 0; 
+                    let cwe = cweDataArray[i].replace(/[\[\]']+/g, "").trim();
+                    let count = parseInt(cweDataArray[i + 1], 10) || 0;
                     cweData[cwe] = count;
                 }
                 // If we have no valid data, write the info for users

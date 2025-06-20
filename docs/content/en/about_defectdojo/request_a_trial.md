@@ -43,7 +43,7 @@ Enter the IP address ranges, subnet mask and labels that you want to allow to ac
 
 ![image](images/request_a_trial_4.png)
 
-If you want to use external services with DefectDojo (GitHub or JIRA), check the appropriate boxes listed under **Select External Services.** 
+If you want to use external services with DefectDojo (GitHub or JIRA), check the appropriate boxes listed under **Select External Services.**
 
 ## Step 5: Confirm your Plan type and Billing Frequency
 

@@ -4,19 +4,19 @@
    <cdf:status date="2006-12-12">draft</cdf:status>
    <cdf:title>XCCDF Sample for Cisco IOS</cdf:title>
    <cdf:description>
-     This document defines a small set of rules for securing Cisco 
-     IOS routers. The set of rules constitute a <htm:i>benchmark</htm:i>. 
-     A benchmark usually represents an industry consensus of best 
-     practices.  It lists steps to be taken as well as rationale for 
+     This document defines a small set of rules for securing Cisco
+     IOS routers. The set of rules constitute a <htm:i>benchmark</htm:i>.
+     A benchmark usually represents an industry consensus of best
+     practices.  It lists steps to be taken as well as rationale for
      them.  This example benchmark is merely a small subset of the
      rules that would be necessary for securing an IOS router.
    </cdf:description>
 
    <cdf:notice id="Sample-Terms-Of-Use" xml:lang="en">
       This document may be copied and used subject to the
-      subject to the NIST terms of use 
+      subject to the NIST terms of use
       (http://www.nist.gov/public_affairs/disclaim.htm)
-      and the NSA Legal Notices 
+      and the NSA Legal Notices
       (http://www.nsa.gov/notices/notic00004.cfm?Address=/).
    </cdf:notice>
    <cdf:front-matter>
@@ -90,7 +90,7 @@
     <cdf:title>IOS - line exec timeout value</cdf:title>
     <cdf:description>
        The length of time, in minutes, that an interactive session
-       should be allowed to stay idle before being terminated.  
+       should be allowed to stay idle before being terminated.
     </cdf:description>
     <cdf:question>Session exec timeout time (in minutes)</cdf:question>
     <cdf:value>10</cdf:value>
@@ -102,7 +102,7 @@
   <cdf:Group id="mgmt-plane" selected="1" prohibitChanges="1" weight="3">
      <cdf:title>Management Plane Rules</cdf:title>
      <cdf:description>
-       Services, settings, and data streams related tosetting up 
+       Services, settings, and data streams related tosetting up
        and examining the static configuration of the router, and the
        authentication and authorization of administrators/operators.
      </cdf:description>
@@ -171,7 +171,7 @@
   <cdf:Group id="ctrl-plane" selected="1" prohibitChanges="1" weight="3">
      <cdf:title>Control Plane Rules</cdf:title>
      <cdf:description>
-          Services, settings, and data streams that support the 
+          Services, settings, and data streams that support the
           operation and dynamic status of the router.
      </cdf:description>
      <cdf:question>Check rules related to system control</cdf:question>
@@ -223,16 +223,16 @@
        <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
           <cdf:check-content-ref href="iosDefns.xml" name="OVAL1001"/>
        </cdf:check>
-     </cdf:Rule> 
+     </cdf:Rule>
 
      <cdf:Rule id="enabled-buffered-logging-at-level" selected="1" prohibitChanges="0" weight="8.5">
        <cdf:title xml:lang="en">
           Ensure buffered logging enabled at proper level
        </cdf:title>
        <cdf:description>
-          Make sure that buffered logging is enabled, and that 
+          Make sure that buffered logging is enabled, and that
           the buffered logging level to one of the appropriate
-          levels, Warning or higher. 
+          levels, Warning or higher.
        </cdf:description>
        <cdf:question>Check buffered logging and level</cdf:question>
        <cdf:fix>
@@ -256,10 +256,10 @@
      <cdf:description>
           Services and settings related to the data passing through
           the router (as opposed to directed to it). Basically, the
-          data plane is for everything not in control or mgmt planes. 
+          data plane is for everything not in control or mgmt planes.
      </cdf:description>
      <cdf:question>Check rules related to data flow</cdf:question>
-     
+
     <cdf:Group id="routing-rules" selected="1" prohibitChanges="1">
       <cdf:title>Routing Rules</cdf:title>
       <cdf:description>

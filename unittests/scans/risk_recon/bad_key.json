@@ -2,5 +2,5 @@
     "url_endpoint": "https://api.riskrecon.com/v1",
     "api_key": "bad_key",
     "companies": [],
-    "filters": {} 
+    "filters": {}
 }

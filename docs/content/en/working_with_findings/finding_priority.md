@@ -16,7 +16,7 @@ In DefectDojo Pro, Priority is a calculated field on Findings that can be used t
 - Product's Business Criticality
 - Whether the Product has an External Audience
 - Whether the Product is Internet Accessible
-- The Product's estimated revenue or user records count 
+- The Product's estimated revenue or user records count
 
 DefectDojo Pro's Finding Priority assigns a numerical rank to each Finding according to this metadata, to provide users with a stronger context on triage and remediation.
 

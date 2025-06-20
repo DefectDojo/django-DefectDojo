@@ -3,10 +3,10 @@
 requirements.txt @cneill @mtesauro @Maffooch
 # Any dockerfile or compose changes will need to be viewed by
 # these people
-Dockerfile.* @mtesauro @Maffooch 
-docker-compose.* @mtesauro @Maffooch 
-/docker/ @mtesauro @Maffooch 
-# Documentation changes 
+Dockerfile.* @mtesauro @Maffooch
+docker-compose.* @mtesauro @Maffooch
+/docker/ @mtesauro @Maffooch
+# Documentation changes
 /docs/content/ @paulOsinski @valentijnscholten @Maffooch
 # Kubernetes should be reviewed by reviewed first by those that know it
 /helm/ @cneill @kiblik @Maffooch

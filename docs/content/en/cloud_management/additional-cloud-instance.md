@@ -42,7 +42,7 @@ You can also proceed without a firewall by selecting **Proceed Without Firewall*
 
 ## Step 5: Confirm your Plan type and Billing Frequency
 
-At the end of our process, you'll be put in touch with our sales team, who can accurately quote your new server. We recommend you select the Plan Type which has the server specifications you require for the new instance. 
+At the end of our process, you'll be put in touch with our sales team, who can accurately quote your new server. We recommend you select the Plan Type which has the server specifications you require for the new instance.
 
 ![image](images/request_a_trial_5.png)
 

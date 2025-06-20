@@ -6,7 +6,7 @@ toc_hide: true
 ### File Types
 DefectDojo parser accepts a .json file.
 
-You can generate vulnerability data using the Anchore Enterprise CLI tool, [Anchorectl](https://docs.anchore.com/current/docs/using/cli_usage/images/inspecting_image_content/), or through the Enterprise UI. 
+You can generate vulnerability data using the Anchore Enterprise CLI tool, [Anchorectl](https://docs.anchore.com/current/docs/using/cli_usage/images/inspecting_image_content/), or through the Enterprise UI.
 
 ## Generating a Vulnerability Report:
 Using Anchorectl: Run the following command to generate a vulnerability report in JSON format
@@ -22,7 +22,7 @@ All properties are strings and are required by the parser. As the parser evolved
 ~~~
 
 {
-   
+
             "vulnerabilityId": "CVE-2023-24531",
             "cves": "CVE-2023-24531",
             "severity": "Critical",
@@ -34,7 +34,7 @@ All properties are strings and are required by the parser. As the parser evolved
             "fixObservedAt": "2025-03-18T08:09:03Z",
             "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-24531",
             "nvdCvssBaseScore": 9.8
-    
+
 }
 ~~~
 

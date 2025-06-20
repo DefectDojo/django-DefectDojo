@@ -7,7 +7,7 @@ weight: 3
 
 ## Regular releases
 
-The DefectDojo team aims to maintain the following cadence: 
+The DefectDojo team aims to maintain the following cadence:
 
 - Minor releases: at least once a month on the first Monday of the month.
 - Patch/Bugfix: releases every week on Monday.

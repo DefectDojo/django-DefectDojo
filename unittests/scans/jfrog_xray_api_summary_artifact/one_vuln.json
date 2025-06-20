@@ -28,7 +28,7 @@
                     "full_name": "OpenSSL LICENSE",
                     "more_info_url": ["https://spdx.org/licenses/OpenSSL.html", "http://www.openssl.org/source/license.html", "https://www.openssl.org/source/license.html", "https://spdx.org/licenses/OpenSSL"],
                     "components": ["alpine://3.12:libcrypto1.1:1.1.1k-r0", "alpine://3.12:libssl1.1:1.1.1k-r0", "alpine://3.12:openssl:1.1.1k-r0"]
-                } 
+                }
             ]
         }
     ]

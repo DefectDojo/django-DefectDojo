@@ -389,11 +389,11 @@
                 <GROUP>IG-DIAG</GROUP>
                 <DESCRIPTION><![CDATA[Several different techniques can be used to identify the operating system (OS) running on a host. A short description of these techniques is provided below. The specific technique used to identify the OS on this host is included in the RESULTS section of your report.
 <P>
-1) <B>TCP/IP Fingerprint</B>: The operating system of a host can be identified from a remote system using TCP/IP fingerprinting. All underlying operating system TCP/IP stacks have subtle differences that can be seen in their responses to specially-crafted TCP packets. According to the results of this "fingerprinting" technique, the OS version is among those listed below. 
+1) <B>TCP/IP Fingerprint</B>: The operating system of a host can be identified from a remote system using TCP/IP fingerprinting. All underlying operating system TCP/IP stacks have subtle differences that can be seen in their responses to specially-crafted TCP packets. According to the results of this "fingerprinting" technique, the OS version is among those listed below.
 <P>
 Note that if one or more of these subtle differences are modified by a firewall or a packet filtering device between the scanner and the host, the fingerprinting technique may fail. Consequently, the version of the OS may not be detected correctly. If the host is behind a proxy-type firewall, the version of the operating system detected may be that of the firewall instead of the host being scanned.
 <P>
-2) <B>NetBIOS</B>: Short for Network Basic Input Output System, an application programming interface (API) that augments the DOS BIOS by adding special functions for local-area networks (LANs). Almost all LANs for PCs are based on the NetBIOS. Some LAN manufacturers have even extended it, adding additional network capabilities. NetBIOS relies on a message format called Server Message Block (SMB). 
+2) <B>NetBIOS</B>: Short for Network Basic Input Output System, an application programming interface (API) that augments the DOS BIOS by adding special functions for local-area networks (LANs). Almost all LANs for PCs are based on the NetBIOS. Some LAN manufacturers have even extended it, adding additional network capabilities. NetBIOS relies on a message format called Server Message Block (SMB).
 <P>
 3) <B>PHP Info</B>: PHP is a hypertext pre-processor, an open-source, server-side, HTML-embedded scripting language used to create dynamic Web pages. Under some configurations it is possible to call PHP functions like phpinfo() and obtain operating system information.
 <P>
@@ -408,7 +408,7 @@ Note that if one or more of these subtle differences are modified by a firewall 
                 <SEVERITY>1</SEVERITY>
                 <TITLE>Host Scan Time</TITLE>
                 <GROUP>IG-DIAG</GROUP>
-                <DESCRIPTION><![CDATA[The Host Scan Time is the period of time it takes the scanning engine to perform the vulnerability assessment of a single target host. The Host Scan Time for this host is reported in the Result section below. 
+                <DESCRIPTION><![CDATA[The Host Scan Time is the period of time it takes the scanning engine to perform the vulnerability assessment of a single target host. The Host Scan Time for this host is reported in the Result section below.
 <P>
 The Host Scan Time does not have a direct correlation to the Duration time as displayed in the Report Summary section of a scan results report. The Duration is the period of time it takes the service to perform a scan task. The Duration includes the time it takes the service to scan all hosts, which may involve parallel scanning. It also includes the time it takes for a scanner appliance to pick up the scan task and transfer the results back to the service's Secure Operating Center. Further, when a scan task is distributed across multiple scanners, the Duration includes the time it takes to perform parallel host scanning on all scanners.
 <P>
@@ -437,11 +437,11 @@ For host running the Qualys Windows agent this QID reports the time taken by the
                 <SEVERITY>1</SEVERITY>
                 <TITLE>Links Crawled</TITLE>
                 <GROUP>IG-DIAG</GROUP>
-                <DESCRIPTION><![CDATA[The list of unique links crawled and HTML forms submitted by the Web application scanner appear in the Results section. This list may contain fewer links than the maximum threshold defined at scan launch. 
-<P>NOTE: This list also includes 
+                <DESCRIPTION><![CDATA[The list of unique links crawled and HTML forms submitted by the Web application scanner appear in the Results section. This list may contain fewer links than the maximum threshold defined at scan launch.
+<P>NOTE: This list also includes
 - All the unique links that are reported in QID 150140 (Redundant links/URL paths crawled and not crawled)
-- All the forms reported in QID 150152 (Forms Crawled), 
-- All the forms in QID 150115 (Authentication Form Found) and 
+- All the forms reported in QID 150152 (Forms Crawled),
+- All the forms in QID 150115 (Authentication Form Found) and
 - Certain requests from QID 150172 (Requests Crawled)]]></DESCRIPTION>
                 <IMPACT>N/A</IMPACT>
                 <SOLUTION>N/A</SOLUTION>
@@ -507,7 +507,7 @@ Further information can be found under <A HREF="https://media.blackhat.com/bh-dc
 - to limit the size of the acceptable request to each form requirements
 - establish minimal acceptable speed rate
 - establish absolute request timeout for connection with POST request
-Server-specific details can be found <A HREF="https://blog.qualys.com/securitylabs/2011/11/02/how-to-protect-against-slow-http-attacks" TARGET="_blank">here</A>. 
+Server-specific details can be found <A HREF="https://blog.qualys.com/securitylabs/2011/11/02/how-to-protect-against-slow-http-attacks" TARGET="_blank">here</A>.
 A tool that demonstrates this vulnerability in a more intrusive manner is available <A HREF="https://github.com/shekyan/slowhttptest" TARGET="_blank">here</A>.]]></SOLUTION>
             </QID>
             <QID>
@@ -516,8 +516,8 @@ A tool that demonstrates this vulnerability in a more intrusive manner is availa
                 <SEVERITY>3</SEVERITY>
                 <TITLE>Server accepts unnecessarily large POST request body</TITLE>
                 <GROUP>IG-WEAK</GROUP>
-                <DESCRIPTION><![CDATA[The scanner successfully sent a POST request with content type of application/x-www-form-urlencoded and 65536 bytes length random text data. 
-Accepting request bodies with unnecessarily large size could help attacker to use less connections to achieve Layer 7 DDoS of web server. 
+                <DESCRIPTION><![CDATA[The scanner successfully sent a POST request with content type of application/x-www-form-urlencoded and 65536 bytes length random text data.
+Accepting request bodies with unnecessarily large size could help attacker to use less connections to achieve Layer 7 DDoS of web server.
 More information can be found at the <A HREF="https://media.blackhat.com/bh-dc-11/Brennan/BlackHat_DC_2011_Brennan_Denial_Service-Slides.pdf" TARGET="_blank">here</A>]]></DESCRIPTION>
                 <IMPACT>Potentially could result in a successful application-layer DDoS attack. </IMPACT>
                 <SOLUTION><![CDATA[Limit the size of the request body to each form's requirements. For example, a search form with 256-char search field should not accept more than 1KB value.
@@ -566,7 +566,7 @@ If the cause is a real CPU strain or complex DB queries performed, there may be 
                 <SEVERITY>1</SEVERITY>
                 <TITLE>Forms Crawled</TITLE>
                 <GROUP>IG-DIAG</GROUP>
-                <DESCRIPTION><![CDATA[Results section consists of the unique forms submitted by the Web Application Scanner. Reported list of forms in this QID does not contain authentication forms (i.e. login forms) which are reported separately in QID 150115. There is redundancy checks done on forms based on form fields. Forms determined to be similar will be considered redundant and not tested. 
+                <DESCRIPTION><![CDATA[Results section consists of the unique forms submitted by the Web Application Scanner. Reported list of forms in this QID does not contain authentication forms (i.e. login forms) which are reported separately in QID 150115. There is redundancy checks done on forms based on form fields. Forms determined to be similar will be considered redundant and not tested.
 <P>NOTE: The regular expression specified under 'Redundant Links' are not applied to forms. Forms (unique or redundant) are not reported under QID 150140.]]></DESCRIPTION>
                 <IMPACT>N/A</IMPACT>
                 <SOLUTION>N/A</SOLUTION>
@@ -712,7 +712,7 @@ The following alternatives can be applied to avoid PRSSI vulnerabilities.<BR>
                 <WASC>WASC-15</WASC>
                 <DESCRIPTION>The Feature-Policy response header is not present. </DESCRIPTION>
                 <IMPACT><![CDATA[Feature Policy allows web developers to selectively enable, disable, and modify the behavior of certain APIs and web features such as "geolocation","camera", "usb", "fullscreen", "animations" etc in the browser.
-<P> 
+<P>
 These policies restrict what APIs the site can access or modify the browser's default behavior for certain features.]]></IMPACT>
                 <SOLUTION><![CDATA[It is recommended to set the Feature-Policy header to selectively enable, disable, and modify the behavior of certain APIs and web features.<P>
 

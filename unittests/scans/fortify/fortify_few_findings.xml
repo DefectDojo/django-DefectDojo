@@ -69,7 +69,7 @@ Details:
 Results Signature:
 
 	SCA Analysis Results has Valid signature
-	
+
 
 Rules Signature:
 
@@ -340,8 +340,8 @@ The Common Weakness Enumeration (CWE), co-sponsored and maintained by MITRE, is 
 
 Name: 		DISA CCI 2
 ID: 				7F037130-41E5-40F0-B653-7819A4B3E241
-The purpose of a Defense Information Systems Agency (DISA) Control Correlation Identifier (CCI) is to provide a standard identifier for policy based requirements which connect high-level policy expressions and low-level technical implementations. Associated with each CCI is a description for each of the singular, actionable, statements compromising an information assurance (IA) control or IA best practice. Using CCI allows high-level policy framework security requirements to be decomposed and explicitly associated with low-level implementations, thus enabling the assessment of related compliance assessment results spanning heterogeneous technologies. The current IA controls and best practices associated with each CCI, that are specified in NIST SP 800-53 Revision 4, can be viewed using the DISA STIG Viewer.  
-The following table summarizes the number of issues identified across the different CCIs broken down by Fortify Priority Order. The status of a CCI is considered "In Place" when there are no issues reported for a given CCI.  
+The purpose of a Defense Information Systems Agency (DISA) Control Correlation Identifier (CCI) is to provide a standard identifier for policy based requirements which connect high-level policy expressions and low-level technical implementations. Associated with each CCI is a description for each of the singular, actionable, statements compromising an information assurance (IA) control or IA best practice. Using CCI allows high-level policy framework security requirements to be decomposed and explicitly associated with low-level implementations, thus enabling the assessment of related compliance assessment results spanning heterogeneous technologies. The current IA controls and best practices associated with each CCI, that are specified in NIST SP 800-53 Revision 4, can be viewed using the DISA STIG Viewer.
+The following table summarizes the number of issues identified across the different CCIs broken down by Fortify Priority Order. The status of a CCI is considered "In Place" when there are no issues reported for a given CCI.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, CCI-003187 is not considered "In Place". Similarly, if the project is missing a Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, CCI-000366 and CCI-000256 are not considered "In Place".
 
@@ -439,164 +439,164 @@ Security Technical Implementation Guide Version 3.1 description
 Name: 		STIG 3.10
 ID: 				788A87FE-C9F9-4533-9095-0379A9B35B12
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APP5080: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APP5100: CAT II is not considered "In Place".
 
 Name: 		STIG 3.4
 ID: 				58E2C21D-C70F-4314-8994-B859E24CF855
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG identifies several severities with respect to vulnerabilities:
-    
-&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt; 
-&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt; 
+
+&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt;
+&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt;
 &lt;LI&gt;CAT III: provide information that potentially could lead to compromise.&lt;/LI&gt;  &lt;/UL&gt;
-  
+
 The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 Name: 		STIG 3.5
 ID: 				DD18E81F-3507-41FA-9DFA-2A9A15B5479F
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG identifies several severities with respect to vulnerabilities:
-    
-&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt; 
-&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt; 
+
+&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt;
+&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt;
 &lt;LI&gt;CAT III: provide information that potentially could lead to compromise.&lt;/LI&gt; &lt;/UL&gt;
-  
+
 The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 Name: 		STIG 3.6
 ID: 				000CA760-0FED-4374-8AA2-6FA3968A07B1
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG identifies several severities with respect to vulnerabilities:
-    
-&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt; 
-&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt; 
+
+&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt;
+&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt;
 &lt;LI&gt;CAT III: provide information that potentially could lead to compromise.&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APP5080: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APP5100: CAT II is not considered "In Place".
 
 Name: 		STIG 3.7
 ID: 				E69C07C0-81D8-4B04-9233-F3E74167C3D2
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG identifies several severities with respect to vulnerabilities:
-    
-&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt; 
-&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt; 
+
+&lt;LI&gt;CAT I: allow an attacker immediate access into a machine, allow super user access, or bypass a firewall.&lt;/LI&gt;
+&lt;LI&gt;CAT II: provide information that have a high potential of giving access to an intruder.&lt;/LI&gt;
 &lt;LI&gt;CAT III: provide information that potentially could lead to compromise.&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APP5080: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APP5100: CAT II is not considered "In Place".
 
 Name: 		STIG 3.9
 ID: 				1A9D736B-2D4A-49D1-88CA-DF464B40D732
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APP5080: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APP5100: CAT II is not considered "In Place".
 
 Name: 		STIG 4.1
 ID: 				95227C50-A9E4-4C9D-A8AF-FD98ABAE1F3C
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.2
 ID: 				672C15F8-8822-4E05-8C9E-1A4BAAA7A373
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.3
 ID: 				A0B313F0-29BD-430B-9E34-6D10F1178506
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.4
 ID: 				ECEC5CA2-7ACA-4B70-BF44-3248B9C6F4F8
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.5
 ID: 				E6010E0A-7F71-4388-B8B7-EE9A02143474
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.6
 ID: 				EFB9B012-44D6-456D-B197-03D2FD7C7AD6
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.7
 ID: 				B04A1E01-F1C1-48D3-A827-0F70872182D7
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 
 Name: 		STIG 4.8
 ID: 				E6805D9F-D5B5-4192-962C-46828FF68507
 Each requirement or recommendation identified by the Defense Information Systems Agency (DISA) STIG is represented by a STIG identifier (STIGID) which corresponds to a checklist item and a severity code [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;]. DISA STIG defines three severities with respect to vulnerabilities where their:
-    
-&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt; 
-&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt; 
+
+&lt;LI&gt;exploitation leads to direct and immediate loss of Confidentiality, Availability, or Integrity (CAT I).&lt;/LI&gt;
+&lt;LI&gt;exploitation potentially results in loss of Confidentiality, Availability, or Integrity (CAT II).&lt;/LI&gt;
 &lt;LI&gt;existence degrades protections against loss of Confidentiality, Availability, or Integrity (CAT III).&lt;/LI&gt;  &lt;/UL&gt;
-  
-The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.  
+
+The following table summarizes the number of issues identified across the different STIGIDs broken down by Fortify Priority Order. The status of a STIGID is considered "In Place" when there are no issues reported for a given STIGID.
 
 If the project is missing a Fortify Static Code Analyzer (SCA) scan, or the scan contains findings that have not been fixed, hidden or suppressed, STIGID APSC-DV-003170: CAT II is not considered "In Place". Similarly, if the project is missing an Micro Focus Fortify WebInspect scan, or the scan contains any critical findings, STIGID APSC-DV-001460: CAT II and STIGID APSC-DV-002930: CAT II are not considered "In Place".
 

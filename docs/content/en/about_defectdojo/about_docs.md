@@ -15,7 +15,7 @@ weight: 1
 
 DefectDojo is a DevSecOps platform. DefectDojo streamlines DevSecOps by serving as an aggregator and single pane of glass for your security tools.
 
-DefectDojo has smart features to enhance and tune the results from your security tools including the ability to merge findings, remember false positives, and distill duplicates. 
+DefectDojo has smart features to enhance and tune the results from your security tools including the ability to merge findings, remember false positives, and distill duplicates.
 
 DefectDojo also integrates with JIRA, provides metrics / reports, and can also be used for traditional pen test management.
 
@@ -23,7 +23,7 @@ DefectDojo also integrates with JIRA, provides metrics / reports, and can also b
 
 Whether you're a one-person security team for a small organization, or a CISO overseeing a large amount of software projects, DefectDojo allows you to organize your security work, and easily report your organization's security posture to other stakeholders.
 
-While security process automation and integrated development pipelines are the ultimate end goals of DefectDojo, this software is a bug tracker at its core for security vulnerabilities, which is meant to ingest, organize and standardize reports from many security tools. 
+While security process automation and integrated development pipelines are the ultimate end goals of DefectDojo, this software is a bug tracker at its core for security vulnerabilities, which is meant to ingest, organize and standardize reports from many security tools.
 
 DefectDojo's Product:Engagement model enables allows you to take inventory of your development environment and immediately place new security Findings in context.
 
@@ -79,7 +79,7 @@ A running example of DefectDojo (Open-Source Edition) is available on [our demo 
 
 DefectDojo Inc. hosts a commercial edition of this software, which includes:
 
-- [additional features](../pro_features), smart features and UI improvements 
+- [additional features](../pro_features), smart features and UI improvements
 - cloud hosting, with regular backups, updates and maintenance
 - premium support and implementation guidance
 

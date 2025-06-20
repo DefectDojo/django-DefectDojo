@@ -24,7 +24,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## May 2025: v2.46
 
-### ⚠️ Tag Format Change 
+### ⚠️ Tag Format Change
 
 As of version 2.46.0, Tags can no longer contain the following characters:
 - Commas (,)
@@ -282,7 +282,7 @@ curl -X 'GET' \
 - **(API)** Added an API endpoint to get the DefectDojo version number: `/api/v2/version` <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(API)**  Multiple Metadata objects can now be added to a single Endpoint, Finding or Product via POST or PATCH to `/api/v2/metadata/` .  Previously, only one Metadata key/value pair could be updated per call.
 - **(Pro UI)**  You can now Clear Alerts in the Pro UI.
-- **(Pro UI)**  Corrected an issue with Pro UI’s form validation when trying to connect a Jira Project with an Engagement.  
+- **(Pro UI)**  Corrected an issue with Pro UI’s form validation when trying to connect a Jira Project with an Engagement.
 - **(Pro UI)**  Fixed an issue in the Pro UI where new Product Tiles could not be created.
 - **(Reports)**  Changes have been made to the Report Generator's description text to clarify how new reports are created from existing reports.
 - **(Findings)**  “Verified” is now an optional status for many Finding workflows.  This can be changed from the System Settings page in the Legacy UI (not yet implemented in Pro UI).
@@ -316,9 +316,9 @@ curl -X 'GET' \
 
 If you manage Security Hub findings for multiple accounts from a centralized administrator account, you will need to
 create the IAM user under that account and configure the Connector with it in order to retrieve findings from those
-sub-accounts with a single connector configuration. 
+sub-accounts with a single connector configuration.
 
-"Member" accounts (either invited manually or automatically associated when using AWS Organizations) will be detected by the Discover operation, and Products will be created for each of your account + region pairs based on the administrator account's cross-region aggregation settings. 
+"Member" accounts (either invited manually or automatically associated when using AWS Organizations) will be detected by the Discover operation, and Products will be created for each of your account + region pairs based on the administrator account's cross-region aggregation settings.
 
 See [this
 section of the AWS Docs](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation-admin-member) about cross-region aggregation with multiple accounts for more information.
@@ -351,7 +351,7 @@ configuration fields.
 
 - **(Pro UI)**  Dropdown menus for Import Scan / Reimport Scan no longer block the active element of a form.
 - **(Pro UI)**  Finding counts by Severity now disregard Out Of Scope / False Positive Findings.
-- **(Dashboard)**  Tile filters with a Boolean filter of False are now saving correctly.  E.G. If you tried to create a Tile with a filter condition of “Has Jira = No” previously this would not be applied correctly.  
+- **(Dashboard)**  Tile filters with a Boolean filter of False are now saving correctly.  E.G. If you tried to create a Tile with a filter condition of “Has Jira = No” previously this would not be applied correctly.
 - **(Jira)**  Added help text for 'Push All Issues'.
 - **(Tools)**  AWS Security Hub EPSS score now parses correctly.
 
@@ -393,7 +393,7 @@ configuration fields.
 #### Sept 9, 2024: v2.38.1
 
 - **(Pro UI)**  Clearing a date filter and re-applying it no longer throws a 400 error.
-- **(Dashboard)**  Dashboard Tag Filters now work correctly in both legacy and Pro UIs.  
+- **(Dashboard)**  Dashboard Tag Filters now work correctly in both legacy and Pro UIs.
 - **(MFA)**  When an admin enforced Global MFA on a DefectDojo instance, there was a loop state that could occur with new users attempting to set up their accounts.  This issue has been corrected, and new users can set a password before enabling MFA.
 - **(Permissions)**  When a user had permission to edit a Product, but not a Product Type, there was a bug where they were unable to submit an ‘Edit Product’ form (due to interaction with the Product Type). This has been corrected.
 - **(Reimport)**  Reimport now correctly records additional vulnerability IDs beyond 1.  In the past, Findings that had more than one Vulnerability ID (a CVE, for example) would have those additional Vulnerability IDs discarded on reimport, so users were potentially losing those additional Vulnerability IDs.
@@ -423,7 +423,7 @@ configuration fields.
 
 - **(API)**  New Endpoint: /finding_groups allows you to GET, add Findings to, delete, or otherwise interact with Finding Groups.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(Pro UI)**  Relative date ranges for Findings have been added to Finding Filters (last 30 days, last 90 days, etc)
-- **(Pro UI)**  Bulk Edit / Risk Acceptance / Finding Group actions are now available in Pro UI.	
+- **(Pro UI)**  Bulk Edit / Risk Acceptance / Finding Group actions are now available in Pro UI.
 - **(Pro UI)**  Finding Groups are now available in the Pro UI.  Selecting multiple Findings allows you to create a Finding Group, provided those Findings are in the same Test.
 - **(Pro UI)**  Enhanced Endpoint View now available in Pro UI.
 - **(Pro UI)**  Jira Instances can now be added and edited via Pro UI.

@@ -12,7 +12,7 @@
                     User {{ requested_by }} has requested that the following users review the finding "{{ finding }}" for accuracy:
                 {% endblocktranslate %}
                 {% for user in reviewers %}
-                    <li>{{ user.get_full_name }}</li>    
+                    <li>{{ user.get_full_name }}</li>
                 {% endfor %}
                 <br/>
                 {{ note }}

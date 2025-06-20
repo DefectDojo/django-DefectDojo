@@ -56,7 +56,7 @@ Popeye scan findings don't match to public vulnerabilities, it just looks for po
 - Severity 0: Ok
 - Severity 1: Info
 - Severity 2: Warning
-- Severity 3: Error 
+- Severity 3: Error
 
 To match it to DefectDojo severity formula, Secerity 0 (Ok) findings from Popeye will be ignored as those are checks that does not need an action to be resolved. For the rest:
 

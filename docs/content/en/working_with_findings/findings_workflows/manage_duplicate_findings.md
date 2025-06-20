@@ -18,7 +18,7 @@ Once you’ve cleaned up your duplicate Findings, it’s a good practice to look
 
 ### Duplicate or Reused Engagements
 
-Engagements store one or more Tests for a particular testing context. That context is ultimately up to you to define for yourself, but if you see a few Engagements within your Product which should share the same context, consider combining them into a single engagement.  
+Engagements store one or more Tests for a particular testing context. That context is ultimately up to you to define for yourself, but if you see a few Engagements within your Product which should share the same context, consider combining them into a single engagement.
 ​
 ### Questions to ask when defining Engagement context:
 

@@ -35,7 +35,7 @@ flowchart TD
     ALL ==Removal of endpoint by user==> END
 ```
 
-Notes: 
+Notes:
 
 1. Transitions:
     - bold: manual changes by user
