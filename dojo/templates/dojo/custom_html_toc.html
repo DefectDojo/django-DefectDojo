@@ -39,17 +39,17 @@
                     }
 
                     level = parseInt(openLevel);
-                    
+
                     var anchor = titleText.trim().replace(/\s/g, "_");
 
                     if(tags)
                     {
                         if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                             "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                         }
                         else {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                             titleText + "<sup>" + tags + "</sup></a></li>";
                         }
 
@@ -59,11 +59,11 @@
                     else
                     {
                         if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                            toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                             "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
                         }
                         else {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                             titleText + "</a></li>";
                         }
 
@@ -75,7 +75,7 @@
                         + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                 }
             );
-            
+
         if (level) {
             toc += (new Array(level + 1)).join("</ul>");
         }

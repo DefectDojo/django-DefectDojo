@@ -66,14 +66,14 @@
     <script type="application/javascript">
         $(function () {
             $("*[data-type='choice']").parents('.form-group').hide();
-    
+
             if ($('#id_type').val() == 'choice'){
                 $("*[data-type='choice']").parents('.form-group').show();
             }
             if ($('#id_type').val() == 'text'){
                 $("*[data-type='choice']").parents('.form-group').hide();
             }
-    
+
             $('#id_type').change(function(){
                 $("*[data-type='choice']").parents('.form-group').hide();
                 if (this.value == 'choice'){

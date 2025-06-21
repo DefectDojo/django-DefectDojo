@@ -123,15 +123,15 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <p id="chart-description" class="sr-only">
-                                This pie chart represents findings categorized by severity: 
-                                critical ({{critical}}), high ({{high}}), medium ({{medium}}), 
+                                This pie chart represents findings categorized by severity:
+                                critical ({{critical}}), high ({{high}}), medium ({{medium}}),
                                 low ({{low}}), and informational ({{info}}).
                             </p>
-                            <div 
+                            <div
                                 aria-describedby="chart-description"
                                 aria-labelledby="homepage_pie_chart_heading"
-                                class="chart" 
-                                id="homepage_pie_chart" 
+                                class="chart"
+                                id="homepage_pie_chart"
                                 role="img"
                                 tabindex="0" >
                             </div>
@@ -221,11 +221,11 @@
                                                 {% else %}
                                                     <a href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
                                                 {% endif %}
-                                            </td> 
+                                            </td>
                                             <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
                                             <td>
-                                                <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
-                                            </td> 
+                                                <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a>
+                                            </td>
                                             <td>
                                                 {% if survey.responder %}
                                                     {{ survey.responder }}
@@ -271,7 +271,7 @@
                 </div>
             </div>
         {% endif %}
-    {% endblock %}    
+    {% endblock %}
     {% block punchcard %}
         <div class="row">
             {% if punchcard %}

@@ -1046,7 +1046,7 @@
             <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" role="dialog" aria-labelledby="sessionModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header"> 
+                    <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -1113,7 +1113,7 @@
                     function() { $(this).popover('show'); }, // hover
                     function() { $(this).popover('hide'); } // unhover
                 );
-                
+
                 {% if request.user.is_authenticated %}
                     function session_notifcation() {
                         var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
@@ -1124,7 +1124,7 @@
                             $('#sessionTimeoutModal').modal('show');
                         }, Math.min(timeout, 2147483) * 1000); // Do not allow a buffer overflow here
 
-                    }  
+                    }
                     session_notifcation();
                     $('#sessionTimeoutModal').on('show.bs.modal', function (event) {
                         $(this).attr('aria-hidden', 'false');

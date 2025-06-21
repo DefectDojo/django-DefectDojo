@@ -236,7 +236,7 @@
                         <p id="top-ten-description">
                             {% blocktrans %}
                             This bar chart represents the number of bugs categorized by severity for the top {{ length }} products.
-                            The x-axiscrepresents different products, and the y-axis represents the count of bugs for each severity. 
+                            The x-axiscrepresents different products, and the y-axis represents the count of bugs for each severity.
                             The following table represents the same data in text format.
                             {% endblocktrans %}
                         </p>
@@ -281,7 +281,7 @@
                 <div class="sr-only">
                     <h3 id="severity-pie-title">{% trans "Total findings in period by severity" %}</h3>
                     <p id="severity-pie-description">{% blocktrans with critical=in_period_counts.critical|default_if_none:0 high=in_period_counts.high|default_if_none:0 medium=in_period_counts.medium|default_if_none:0 low=in_period_counts.low|default_if_none:0 %}
-                        This pie chart represents the total number of findings categorized by severity. The following 
+                        This pie chart represents the total number of findings categorized by severity. The following
                         findings are included: {{ critical }} critical, {{ high }} high, {{ medium }}
                         medium, and {{ low }} low severity findings.
                         {% endblocktrans %}
@@ -306,7 +306,7 @@
                         <p id="total-accepted-in-period-description">
                             {% blocktrans with critical=accepted_in_period_counts.critical|default_if_none:0 high=accepted_in_period_counts.high|default_if_none:0 medium=accepted_in_period_counts.medium|default_if_none:0 low=accepted_in_period_counts.low|default_if_none:0 %}
                             This pie chart represents the total number of risk-accepted findings categorized by severity. The
-                            following findings are included: {{ critical }} critical, {{ high }} high, {{ medium }} medium 
+                            following findings are included: {{ critical }} critical, {{ high }} high, {{ medium }} medium
                             and {{ low }} low severity findings.
                             {%endblocktrans %}
                         </p>
@@ -331,7 +331,7 @@
                         <p id="total-accepted-in-period-description">
                             {% blocktrans with critical=closed_in_period_counts.critical|default_if_none:0 high=closed_in_period_counts.high|default_if_none:0 medium=closed_in_period_counts.medium|default_if_none:0 low=closed_in_period_counts.low|default_if_none:0 %}
                             This pie chart represents the total number of closed findings categorized by severity. The following
-                            findings are included: {{ critical }} critical, {{ high }} high {{ medium }} medium 
+                            findings are included: {{ critical }} critical, {{ high }} high {{ medium }} medium
                             and {{ low }} low severity findings.
                             {% endblocktrans %}
                         </p>
@@ -356,7 +356,7 @@
                             <h3 id="punchcard-title">{% trans "Weekly Activity of Findings Reported" %}</h3>
                             <p id="punchcard-description">
                                 {% trans "This chart represents the weekly activity of findings reported, categorized by day of the
-                                week. The x-axis represents the days of the week, while the y-axis represents the corresponding week 
+                                week. The x-axis represents the days of the week, while the y-axis represents the corresponding week
                                 number. The size of each data point indicates the number of findings reported on that particular day.
                                 The table below provides the same data in text format." %}
                             </p>

@@ -124,7 +124,7 @@
                                           </li>
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
-                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}  
+                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
                                               <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration

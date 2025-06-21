@@ -3,7 +3,7 @@
     $('.selectpicker').selectpicker({
         container: 'body'
     });
-    
+
     $('.dropdown-menu').on('click', function(event) {
         var target = $(event.target);
         var bs_select_parent = target.parents('.bootstrap-select')
@@ -13,8 +13,8 @@
                 bs_select_parent.removeClass('open');
             } else {
                 bs_select_parent.addClass('open');
-            }  
-        } 
+            }
+        }
         event.stopPropagation()
     });
 
@@ -30,10 +30,10 @@
             } else {
                 bs_select_parent.addClass('open');
             }
-        } 
+        }
         var hasClass = bs_select_parent.hasClass('open');
         if (selected == -1 && hasClass) {
             bs_select_parent.removeClass('open');
         }
-    });	    
+    });
 </script>

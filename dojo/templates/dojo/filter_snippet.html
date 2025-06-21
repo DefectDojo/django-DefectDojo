@@ -7,7 +7,7 @@
 {% block css %}
     {{ form.media.css }}
 {% endblock %}
-{% block js %}    
+{% block js %}
     {{ form.media.js }}
 {% endblock %}
 <div class="filter-set">
@@ -22,10 +22,10 @@
                             <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
                                 {{ field.label }}
                                 {% if field.help_text %}
-                                    <i class="fa-solid fa-circle-question has-popover" 
-                                    data-trigger="hover" 
-                                    data-content="{{ field.help_text }}" 
-                                    data-placement="right" 
+                                    <i class="fa-solid fa-circle-question has-popover"
+                                    data-trigger="hover"
+                                    data-content="{{ field.help_text }}"
+                                    data-placement="right"
                                     data-container="body">
                                     </i>
                                 {% endif %}
@@ -51,14 +51,14 @@
                             <i class="fa-solid fa-filter"></i> Apply Filters
                         </button>
                         {% if clear_js %}
-                            <a class="btn btn-outline-secondary me-2" href="#{{form_id}}" id="clear_js" role="button"> 
+                            <a class="btn btn-outline-secondary me-2" href="#{{form_id}}" id="clear_js" role="button">
                                 <i class="fa-solid fa-remove"></i> Clear Filters
                             </a>
                         {% else %}
                             <a class="btn btn-outline-secondary me-2" href="{{ clear_link|default:request.path }}" id="clear" role="button" >
                                 <i class="fa-solid fa-remove"></i> Clear Filters
                             </a>
-                        {% endif %}             
+                        {% endif %}
                         {% if restart_link %}
                             <a href="{{ restart_link }}" id="restart" class="btn btn-secondary">
                                 <i class="fa-solid fa-remove"></i> Restart
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        
+
     </form>
 </div>
 <script>
@@ -98,7 +98,7 @@
       event.preventDefault();
     });
 
-    // Clear filter logic below should clear filters without reload and 
+    // Clear filter logic below should clear filters without reload and
     // have the button disabled if no filters are active
 
     const clearFilterLink = $("#clear, #clear_js");
@@ -122,7 +122,7 @@
                         // Other input types
                         return value !== null && value !== undefined;
                     }
-                }).length > 0; 
+                }).length > 0;
         };
 
     const updateClearFiltersState = () => {
