@@ -1,8 +1,13 @@
 from datetime import datetime, timedelta
 
 from crum import impersonate
+from django.test import override_settings
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from dojo.models import DojoMeta, Engagement, Finding, Test, User
+from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_sync
 
 from .dojo_test_case import DojoTestCase
 
@@ -533,3 +538,125 @@ class TestFindingSLAExpiration(DojoTestCase):
         self.assertEqual(finding.sla_expiration_date, None)
         self.assertEqual(finding.sla_days_remaining(), None)
         self.assertEqual(finding.sla_deadline(), None)
+
+    @override_settings(SLA_CONFIG_ON_NON_PRODUCT_LEVELS=True)
+    def test_sla_expiration_date_after_eng_override_added(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a different engagement SLA was set
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config_1 = self.create_sla_configuration(name="test_sla_config_1")
+        sla_config_2 = self.create_sla_configuration(
+            name="test_sla_config_2",
+            critical=1,
+            high=2,
+            medium=3,
+            low=4)
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config_1
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        engagement.sla_configuration = sla_config_2
+        engagement.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(engagement.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    @override_settings(SLA_CONFIG_ON_NON_PRODUCT_LEVELS=True)
+    def test_sla_expiration_date_after_test_override_added(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a different test SLA was set
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config_1 = self.create_sla_configuration(name="test_sla_config_1")
+        sla_config_2 = self.create_sla_configuration(
+            name="test_sla_config_2",
+            critical=1,
+            high=2,
+            medium=3,
+            low=4)
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config_1
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        test.sla_configuration = sla_config_2
+        test.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(test.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_locks(self):
+        token = Token.objects.get(user__username="admin")
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        product_type = self.create_product_type("test_product_type")
+
+        sla_config_1 = self.create_sla_configuration(name="test_sla_config_1")
+        sla_config_1.async_updating = True
+        sla_config_1.save()
+        sla_config_2 = self.create_sla_configuration(name="test_sla_config_2")
+
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config_1
+        product.async_updating = True
+        product.save()
+
+        r = self.client.patch(reverse("product-detail", args=(product.pk,)), {
+            "sla_configuration": sla_config_2.pk,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        errors = r.json()["non_field_errors"]
+        self.assertEqual(errors, ["Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."], r.content[:1000])
+
+    def test_release_of_async_locks(self):
+        """Tests if the sla_conf.async_updating and prod.async_updating are released after processing"""
+        product_type = self.create_product_type("test_product_type")
+
+        sla_config = self.create_sla_configuration(name="test_sla_config")
+        sla_config.async_updating = True
+        sla_config.save()
+
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.async_updating = True
+        product.save()
+
+        update_sla_expiration_dates_sla_config_sync(sla_config, [product])
+
+        self.assertFalse(sla_config.async_updating)
+        self.assertFalse(product.async_updating)
