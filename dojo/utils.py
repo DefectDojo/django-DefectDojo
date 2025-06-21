@@ -2344,7 +2344,7 @@ class async_delete:
                 ).delete()
                 # Now delete the object again
                 obj.delete()
-    
+
     @dojo_async_task
     @app.task
     def delete(self, obj, **kwargs):
