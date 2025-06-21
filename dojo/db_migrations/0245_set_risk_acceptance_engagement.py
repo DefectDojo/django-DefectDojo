@@ -20,7 +20,7 @@ def set_engagement_based_on_findings(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0231_add_engagement_risk_acceptance'),
+        ('dojo', '0244_pghistory_indices'),
     ]
 
     operations = [
