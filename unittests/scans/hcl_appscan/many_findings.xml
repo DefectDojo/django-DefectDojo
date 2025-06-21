@@ -710,7 +710,7 @@ Proxy-Connection: Keep-Alive
 
 name=&amp;login=&amp;email=753+Main+Street&amp;password=&amp;--begin_highlight_tag--passwordConfirmation--end_highlight_tag--=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 7344
 Date: Tue, 03 Oct 2023 12:44:56 GMT
@@ -723,7 +723,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -753,7 +753,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -781,7 +781,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -794,8 +794,8 @@ Connection: keep-alive
                     &lt;h2&gt;Register&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
+
+
                         &lt;div
                     class="alert alert-danger actionError"                &gt;
                         &lt;p&gt;Name is required&lt;/p&gt;
@@ -806,9 +806,9 @@ Connection: keep-alive
 
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="register" name="register" action="/dvja-1.0-SNAPSHOT/register.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -926,7 +926,7 @@ Proxy-Connection: Keep-Alive
 
 login=&amp;--begin_highlight_tag--password--end_highlight_tag--=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5196
 Date: Tue, 03 Oct 2023 12:45:15 GMT
@@ -939,7 +939,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -969,7 +969,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -997,7 +997,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -1010,14 +1010,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -1154,7 +1154,7 @@ Proxy-Connection: Keep-Alive
 
 login=&amp;--begin_highlight_tag--password--end_highlight_tag--=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5196
 Date: Tue, 03 Oct 2023 12:45:15 GMT
@@ -1167,7 +1167,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -1197,7 +1197,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -1225,7 +1225,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -1238,14 +1238,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -1382,7 +1382,7 @@ Proxy-Connection: Keep-Alive
 
 name=&amp;login=&amp;email=753+Main+Street&amp;--begin_highlight_tag--password--end_highlight_tag--=&amp;passwordConfirmation=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 7344
 Date: Tue, 03 Oct 2023 12:44:56 GMT
@@ -1395,7 +1395,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -1425,7 +1425,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -1453,7 +1453,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -1466,8 +1466,8 @@ Connection: keep-alive
                     &lt;h2&gt;Register&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
+
+
                         &lt;div
                     class="alert alert-danger actionError"                &gt;
                         &lt;p&gt;Name is required&lt;/p&gt;
@@ -1478,9 +1478,9 @@ Connection: keep-alive
 
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="register" name="register" action="/dvja-1.0-SNAPSHOT/register.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -1592,7 +1592,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5372
 Date: Tue, 03 Oct 2023 12:46:00 GMT
@@ -1606,7 +1606,7 @@ Set-Cookie: JSESSIONID=EAF388C6E55705FAE840F20CF6D76517; Path=/dvja-1.0-SNAPSHOT
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -1636,7 +1636,7 @@ Set-Cookie: JSESSIONID=EAF388C6E55705FAE840F20CF6D76517; Path=/dvja-1.0-SNAPSHOT
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -1664,7 +1664,7 @@ Set-Cookie: JSESSIONID=EAF388C6E55705FAE840F20CF6D76517; Path=/dvja-1.0-SNAPSHOT
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -1677,14 +1677,14 @@ Set-Cookie: JSESSIONID=EAF388C6E55705FAE840F20CF6D76517; Path=/dvja-1.0-SNAPSHOT
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action;jsessionid=EAF388C6E55705FAE840F20CF6D76517" method="post"&gt;
 &lt;fieldset&gt;
@@ -1730,7 +1730,7 @@ Set-Cookie: JSESSIONID=EAF388C6E55705FAE840F20CF6D76517; Path=/dvja-1.0-SNAPSHOT
                     &lt;a href='/dvja-1.0-SNAPSHOT/register.action;jsessionid=EAF388C6E55705FAE840F20CF6D76517'&gt;Register a new account&lt;/a&gt; &lt;br/&gt;
                     &lt;a href='/dvja-1.0-SNAPSHOT/resetPasswordStart.action;jsessionid=EAF388C6E55705FAE840F20CF6D76517'&gt;Forgot password&lt;/a&gt;
                 &lt;/div&gt;
-          
+
 ...
 ...
 ...
@@ -1819,7 +1819,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 6358
 Date: Tue, 03 Oct 2023 12:46:00 GMT
@@ -1832,7 +1832,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -1862,7 +1862,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -1890,7 +1890,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -1903,14 +1903,14 @@ Connection: keep-alive
                     &lt;h2&gt;Register&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="register" name="register" action="/dvja-1.0-SNAPSHOT/register.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -2043,7 +2043,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5196
 Date: Tue, 03 Oct 2023 12:59:01 GMT
@@ -2056,7 +2056,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -2086,7 +2086,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -2114,7 +2114,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -2127,14 +2127,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -2282,7 +2282,7 @@ Content-Length: 16
 
 login=&amp;password=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5196
 Date: Tue, 03 Oct 2023 12:59:01 GMT
@@ -2295,7 +2295,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -2325,7 +2325,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -2353,7 +2353,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -2366,14 +2366,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -2510,7 +2510,7 @@ Content-Length: 16
 
 login=&amp;password=
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5196
 Date: Tue, 03 Oct 2023 12:59:01 GMT
@@ -2523,7 +2523,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -2553,7 +2553,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -2581,7 +2581,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -2594,14 +2594,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -2732,7 +2732,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 6358
 Date: Tue, 03 Oct 2023 12:46:00 GMT
@@ -2745,7 +2745,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -2775,7 +2775,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -2803,7 +2803,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -2816,14 +2816,14 @@ Connection: keep-alive
                     &lt;h2&gt;Register&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="register" name="register" action="/dvja-1.0-SNAPSHOT/register.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -2964,7 +2964,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 4711
 Date: Tue, 03 Oct 2023 12:46:17 GMT
@@ -2977,7 +2977,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -3035,7 +3035,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -3048,14 +3048,14 @@ Connection: keep-alive
                 &lt;h2&gt;Reset Password&lt;/h2&gt;
             &lt;/div&gt;
 
-            
-            
-            
+
+
+
 
             &lt;div class='page-body'&gt;
-                
-    
-    
+
+
+
 
 &lt;form id="resetPasswordStart" name="resetPasswordStart" action="/dvja-1.0-SNAPSHOT/resetPasswordStart.action" method="post"&gt;
 &lt;fieldset&gt;
@@ -3201,7 +3201,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=UTF-8
 Content-Length: 5372
 Date: Tue, 03 Oct 2023 12:46:14 GMT
@@ -3215,7 +3215,7 @@ Connection: keep-alive
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    
+
 
 
 &lt;title&gt;Damn Vulnerable Java Application&lt;/title&gt;
@@ -3245,7 +3245,7 @@ Connection: keep-alive
 
 &lt;/head&gt;
 &lt;body&gt;
-    
+
 
 &lt;nav class="navbar navbar-inverse navbar-fixed-top"&gt;
   &lt;div class="container"&gt;
@@ -3273,7 +3273,7 @@ Connection: keep-alive
                   &lt;i class="fa fa-exchange"&gt;&lt;/i&gt; Learning Mode
               &lt;/a&gt;
           &lt;/li&gt;
-        
+
       &lt;/ul&gt;
     &lt;/div&gt;&lt;!--/.navbar-collapse --&gt;
   &lt;/div&gt;
@@ -3286,14 +3286,14 @@ Connection: keep-alive
                     &lt;h2&gt;Login&lt;/h2&gt;
                 &lt;/div&gt;
 
-                
-                
-                
+
+
+
 
                 &lt;div class='page-body'&gt;
-                    
-    
-    
+
+
+
 
 &lt;form id="login" name="login" action="/dvja-1.0-SNAPSHOT/login.action;jsessionid=BFBF9769CB319FD10806E99FF49C01D9" method="post"&gt;
 &lt;fieldset&gt;
@@ -3339,7 +3339,7 @@ Connection: keep-alive
                     &lt;a href='/dvja-1.0-SNAPSHOT/register.action;jsessionid=BFBF9769CB319FD10806E99FF49C01D9'&gt;Register a new account&lt;/a&gt; &lt;br/&gt;
                     &lt;a href='/dvja-1.0-SNAPSHOT/resetPasswordStart.action;jsessionid=BFBF9769CB319FD10806E99FF49C01D9'&gt;Forgot password&lt;/a&gt;
                 &lt;/div&gt;
-          
+
 ...
 ...
 ...
@@ -3435,7 +3435,7 @@ Content-Length: 118
 
 --begin_mark_tag--login=%3E%22%27%3E%3Cscript%3Ealert%288%29%3C%2Fscript%3E--end_mark_tag--&amp;--begin_mark_tag--password=%3E%22%27%3E%3Cscript%3Ealert%288%29%3C%2Fscript%3E--end_mark_tag--
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Transfer-Encoding: chunked
 Date: Tue, 03 Oct 2023 12:46:21 GMT
@@ -3449,7 +3449,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -3483,7 +3483,7 @@ The last packet sent successfully to the --begin_highlight_tag--server was 0 mil
         &lt;td&gt;&lt;strong&gt;Line number&lt;/strong&gt;:&lt;/td&gt;
         &lt;td&gt;801&lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -3624,7 +3624,7 @@ Content-Length: 120
 
 --begin_mark_tag--login=%3E%22%27%3E%3Cscript%3Ealert%2883%29%3C%2Fscript%3E--end_mark_tag--&amp;--begin_mark_tag--password=%3E%22%27%3E%3Cscript%3Ealert%2883%29%3C%2Fscript%3E--end_mark_tag--
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Transfer-Encoding: chunked
 Date: Tue, 03 Oct 2023 12:46:21 GMT
@@ -3638,7 +3638,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -3672,7 +3672,7 @@ The last packet sent successfully to the --begin_highlight_tag--server was 0 mil
         &lt;td&gt;&lt;strong&gt;Line number&lt;/strong&gt;:&lt;/td&gt;
         &lt;td&gt;801&lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -3807,7 +3807,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3766
 Date: Tue, 03 Oct 2023 12:58:13 GMT
@@ -3821,7 +3821,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -3839,7 +3839,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (3)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -3983,7 +3983,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3756
 Date: Tue, 03 Oct 2023 12:51:21 GMT
@@ -3997,7 +3997,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4015,7 +4015,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~webstats/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -4159,7 +4159,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3766
 Date: Tue, 03 Oct 2023 12:58:13 GMT
@@ -4173,7 +4173,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4191,7 +4191,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (2)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -4335,7 +4335,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3758
 Date: Tue, 03 Oct 2023 12:51:15 GMT
@@ -4349,7 +4349,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4367,7 +4367,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [lost+found/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -4511,7 +4511,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3752
 Date: Tue, 03 Oct 2023 12:51:21 GMT
@@ -4525,7 +4525,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4543,7 +4543,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~wsdocs/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -4687,7 +4687,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3758
 Date: Tue, 03 Oct 2023 12:49:30 GMT
@@ -4701,7 +4701,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4719,7 +4719,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -4863,7 +4863,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3748
 Date: Tue, 03 Oct 2023 12:51:23 GMT
@@ -4877,7 +4877,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -4895,7 +4895,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~home/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5039,7 +5039,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:23 GMT
@@ -5053,7 +5053,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5071,7 +5071,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~mnt/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5215,7 +5215,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:27 GMT
@@ -5229,7 +5229,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5247,7 +5247,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~ftp/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5391,7 +5391,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3750
 Date: Tue, 03 Oct 2023 12:51:25 GMT
@@ -5405,7 +5405,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5423,7 +5423,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~admin/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5567,7 +5567,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3748
 Date: Tue, 03 Oct 2023 12:57:55 GMT
@@ -5581,7 +5581,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5599,7 +5599,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~root/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5743,7 +5743,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:25 GMT
@@ -5757,7 +5757,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5775,7 +5775,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~bin/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -5919,7 +5919,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:21 GMT
@@ -5933,7 +5933,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -5951,7 +5951,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~usr/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6095,7 +6095,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3758
 Date: Tue, 03 Oct 2023 12:51:15 GMT
@@ -6109,7 +6109,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -6127,7 +6127,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [lost+found/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6271,7 +6271,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3752
 Date: Tue, 03 Oct 2023 12:58:13 GMT
@@ -6285,7 +6285,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -6303,7 +6303,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~nobody/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6447,7 +6447,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3750
 Date: Tue, 03 Oct 2023 12:51:27 GMT
@@ -6461,7 +6461,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -6479,7 +6479,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~guest/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6623,7 +6623,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:25 GMT
@@ -6637,7 +6637,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -6655,7 +6655,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~dev/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6799,7 +6799,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:21 GMT
@@ -6813,7 +6813,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -6831,7 +6831,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~var/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -6975,7 +6975,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:27 GMT
@@ -6989,7 +6989,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7007,7 +7007,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~etc/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -7151,7 +7151,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3748
 Date: Tue, 03 Oct 2023 12:58:13 GMT
@@ -7165,7 +7165,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7183,7 +7183,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~sbin/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -7327,7 +7327,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3750
 Date: Tue, 03 Oct 2023 12:51:20 GMT
@@ -7341,7 +7341,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7359,7 +7359,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~stats/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -7503,7 +7503,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3748
 Date: Tue, 03 Oct 2023 12:51:20 GMT
@@ -7517,7 +7517,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7535,7 +7535,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~uucp/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -7679,7 +7679,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:20 GMT
@@ -7693,7 +7693,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7711,7 +7711,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~tmp/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -7855,7 +7855,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3746
 Date: Tue, 03 Oct 2023 12:51:32 GMT
@@ -7869,7 +7869,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -7887,7 +7887,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~log/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -8032,7 +8032,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Allow: GET, HEAD, POST, PUT, --begin_highlight_tag--DELETE--end_highlight_tag--, OPTIONS
 Content-Length: 0
 Date: Tue, 03 Oct 2023 12:49:35 GMT
@@ -8125,7 +8125,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Allow: GET, HEAD, POST, PUT, --begin_highlight_tag--DELETE--end_highlight_tag--, OPTIONS
 Content-Length: 0
 Date: Tue, 03 Oct 2023 12:49:35 GMT
@@ -8217,7 +8217,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Date: Tue, 03 Oct 2023 12:48:33 GMT
 Expires: Wed, 04 Oct 2023 12:48:33 GMT
 Retry-After: Wed, 04 Oct 2023 12:48:33 GMT
@@ -8328,7 +8328,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Date: Tue, 03 Oct 2023 12:48:33 GMT
 Expires: Wed, 04 Oct 2023 12:48:33 GMT
 Retry-After: Wed, 04 Oct 2023 12:48:33 GMT
@@ -8440,7 +8440,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3762
 Date: Tue, 03 Oct 2023 12:58:41 GMT
@@ -8454,7 +8454,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -8472,7 +8472,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~root - Copy/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -8616,7 +8616,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3780
 Date: Tue, 03 Oct 2023 12:58:39 GMT
@@ -8630,7 +8630,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -8648,7 +8648,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (2) (copy)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -8792,7 +8792,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3762
 Date: Tue, 03 Oct 2023 12:58:39 GMT
@@ -8806,7 +8806,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -8824,7 +8824,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~sbin (copy)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -8968,7 +8968,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3766
 Date: Tue, 03 Oct 2023 12:58:39 GMT
@@ -8982,7 +8982,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9000,7 +9000,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~nobody - Copy/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -9144,7 +9144,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3764
 Date: Tue, 03 Oct 2023 12:58:44 GMT
@@ -9158,7 +9158,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9176,7 +9176,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [Copy of ~sbin/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -9320,7 +9320,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3766
 Date: Tue, 03 Oct 2023 12:58:40 GMT
@@ -9334,7 +9334,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9352,7 +9352,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~nobody (copy)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -9496,7 +9496,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3780
 Date: Tue, 03 Oct 2023 12:58:39 GMT
@@ -9510,7 +9510,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9528,7 +9528,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (2) - Copy/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -9672,7 +9672,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3762
 Date: Tue, 03 Oct 2023 12:58:39 GMT
@@ -9686,7 +9686,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9704,7 +9704,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~sbin - Copy/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -9848,7 +9848,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3782
 Date: Tue, 03 Oct 2023 12:58:46 GMT
@@ -9862,7 +9862,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -9880,7 +9880,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [Copy of new folder (3)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10024,7 +10024,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3780
 Date: Tue, 03 Oct 2023 12:58:41 GMT
@@ -10038,7 +10038,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10056,7 +10056,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (3) - Copy/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10200,7 +10200,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3764
 Date: Tue, 03 Oct 2023 12:58:46 GMT
@@ -10214,7 +10214,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10232,7 +10232,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [Copy of ~root/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10376,7 +10376,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3780
 Date: Tue, 03 Oct 2023 12:58:41 GMT
@@ -10390,7 +10390,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10408,7 +10408,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [new folder (3) (copy)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10552,7 +10552,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3782
 Date: Tue, 03 Oct 2023 12:58:45 GMT
@@ -10566,7 +10566,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10584,7 +10584,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [Copy of new folder (2)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10728,7 +10728,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3762
 Date: Tue, 03 Oct 2023 12:58:41 GMT
@@ -10742,7 +10742,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10760,7 +10760,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~root (copy)/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -10904,7 +10904,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag-- 
+HTTP/1.1 --begin_highlight_tag--200--end_highlight_tag--
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3768
 Date: Tue, 03 Oct 2023 12:58:46 GMT
@@ -10918,7 +10918,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -10936,7 +10936,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [Copy of ~nobody/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -11078,7 +11078,7 @@ Cookie: JSESSIONID=AD12F9CF7835CC92885A381859462BAC
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: text/html;charset=ISO-8859-1
 Content-Length: 3748
 Date: Tue, 03 Oct 2023 12:57:55 GMT
@@ -11092,7 +11092,7 @@ Connection: keep-alive
     	pre {
 	    	margin: 0;
 	        padding: 0;
-	    }    
+	    }
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -11110,7 +11110,7 @@ Connection: keep-alive
                     &lt;li&gt;Action [~root/] does not match allowed action names pattern [[a-zA-Z0-9._!/\-]*]!&lt;/li&gt;
         &lt;/td&gt;
     &lt;/tr&gt;
-    
+
 &lt;/table&gt;
 &lt;/div&gt;
 
@@ -11251,7 +11251,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 
-HTTP/1.1 200 
+HTTP/1.1 200
 Accept-Ranges: bytes
 ETag: W/"1895-1693306356621"
 Last-Modified: Tue, 29 Aug 2023 10:52:36 GMT
@@ -11273,7 +11273,7 @@ Connection: keep-alive
 &lt;h1&gt;It works !&lt;/h1&gt;
 
 &lt;p&gt;If you're seeing this page via a web browser, it means you've setup Tomcat successfully. Congratulations!&lt;/p&gt;
- 
+
 &lt;p&gt;This is the default Tomcat home page. It can be found on the local filesystem at: &lt;code&gt;/var/lib/tomcat9/webapps/ROOT/index.html&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;Tomcat veterans might be pleased to learn that this system instance of Tomcat is installed with &lt;code&gt;CATALINA_HOME&lt;/code&gt; in &lt;code&gt;/usr/share/tomcat9&lt;/code&gt; and &lt;code&gt;CATALINA_BASE&lt;/code&gt; in &lt;code&gt;/var/lib/tomcat9&lt;/code&gt;, following the rules from &lt;code&gt;/usr/share/doc/tomcat9-common/RUNNING.txt.gz&lt;/code&gt;.&lt;/p&gt;
@@ -11375,7 +11375,7 @@ Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 
-HTTP/1.1 404 
+HTTP/1.1 404
 Content-Type: text/html;charset=utf-8
 Content-Language: en
 Content-Length: 769
@@ -11586,8 +11586,8 @@ Connection: keep-alive
         <item type="string">The following C# code dynamically constructs and executes a SQL query that searches for items matching a specified name. The query restricts the items displayed to those where owner matches the user name of the currently-authenticated user.</item>
         <item type="string">  ...
   string userName = ctx.getAuthenticatedUserName();
-  string query = "SELECT * FROM items WHERE owner = "'" 
-  				+ userName + "' AND itemname = '"  
+  string query = "SELECT * FROM items WHERE owner = "'"
+  				+ userName + "' AND itemname = '"
   				+ ItemName.Text + "'";
   sda = new SqlDataAdapter(query, conn);
   DataTable dt = new DataTable();
@@ -11630,18 +11630,18 @@ Connection: keep-alive
   Dim DS As DataSet
   Dim MyConnection As SqlConnection
   Dim MyCommand As SqlDataAdapter
-  
+
   Dim SelectCommand As String = "select * from users where username = @username"
   ...
   MyCommand.SelectCommand.Parameters.Add(New SqlParameter("@username", SqlDbType.NVarChar, 20))
   MyCommand.SelectCommand.Parameters("@username").Value = UserNameField.Value
-  
-  
+
+
   // C# example
   String selectCmd = "select * from Authors where state = @username";
   SqlConnection myConnection = new SqlConnection("server=...");
   SqlDataAdapter myCommand = new SqlDataAdapter(selectCmd, myConnection);
-  
+
   myCommand.SelectCommand.Parameters.Add(new SqlParameter("@username", SqlDbType.NVarChar, 20));
   myCommand.SelectCommand.Parameters["@username"].Value = UserNameField.Value;
 </item>
@@ -11752,10 +11752,10 @@ Connection: keep-alive
         <item type="string">  // J2EE EJB Example
   try {
       // lookup the User home interface
-      UserHome userHome = (UserHome)context.lookup(User.class);    
+      UserHome userHome = (UserHome)context.lookup(User.class);
       // find the User remote interface
-      User = userHome.findByPrimaryKey(new UserKey(userNameField));    
-      ...    
+      User = userHome.findByPrimaryKey(new UserKey(userNameField));
+      ...
   } catch (Exception e) {
       ...
   }
@@ -11975,7 +11975,7 @@ Connection: keep-alive
           boolean match = false;
           if (validateRequired(expression)) {
                RE r = new RE(expression);
-               match = r.match(value);             
+               match = r.match(value);
           }
           return match;
       }
@@ -12026,7 +12026,7 @@ Connection: keep-alive
                   // valid cookie value, continue processing request
                   ...
               }
-          }    
+          }
       }
   }
 </item>
@@ -12044,35 +12044,35 @@ Connection: keep-alive
       public static String filter(String value) {
           if (value == null) {
               return null;
-          }        
+          }
           StringBuffer result = new StringBuffer(value.length());
           for (int i=0; i&lt;value.length(); ++i) {
               switch (value.charAt(i)) {
               case '&lt;':
                   result.append("&lt;");
                   break;
-              case '&gt;': 
+              case '&gt;':
                   result.append("&gt;");
                   break;
-              case '"': 
+              case '"':
                   result.append(""");
                   break;
-              case '\'': 
+              case '\'':
                   result.append("'");
                   break;
-              case '%': 
+              case '%':
                   result.append("%");
                   break;
-              case ';': 
+              case ';':
                   result.append(";");
                   break;
-              case '(': 
+              case '(':
                   result.append("(");
                   break;
-              case ')': 
+              case ')':
                   result.append(")");
                   break;
-              case '&amp;': 
+              case '&amp;':
                   result.append("&amp;");
                   break;
               case '+':
@@ -12081,7 +12081,7 @@ Connection: keep-alive
               default:
                   result.append(value.charAt(i));
                   break;
-          }        
+          }
           return result;
       }
       ...
@@ -12106,14 +12106,14 @@ Connection: keep-alive
                       ServletResponse response,
                       FilterChain chain)
               throws IOException, ServletException {
-  
+
           PrintWriter out = response.getWriter();
           ResponseWrapper wrapper = new ResponseWrapper((HttpServletResponse)response);
           chain.doFilter(request, wrapper);
-  
+
           CharArrayWriter caw = new CharArrayWriter();
           caw.write(Validator.filter(wrapper.toString()));
-          
+
           response.setContentType("text/html");
           response.setContentLength(caw.toString().length());
           out.write(caw.toString());
@@ -12122,22 +12122,22 @@ Connection: keep-alive
       ...
       public class CharResponseWrapper extends HttpServletResponseWrapper {
           private CharArrayWriter output;
-  
+
           public String toString() {
               return output.toString();
           }
-      
+
           public CharResponseWrapper(HttpServletResponse response){
               super(response);
               output = new CharArrayWriter();
           }
-          
+
           public PrintWriter getWriter(){
               return new PrintWriter(output);
           }
       }
-  } 
-  
+  }
+
   }
 </item>
         <item type="string" />
@@ -12243,7 +12243,7 @@ Connection: keep-alive
     &lt;h:form formName="loginForm" &gt;
       &lt;h:input_text id="userName" size="20" modelReference="UserBean.userName"&gt;
           &lt;f:validate_required/&gt;
-          &lt;f:validate_length minimum="8" maximum="20"/&gt;    
+          &lt;f:validate_length minimum="8" maximum="20"/&gt;
       &lt;/h:input_text&gt;
       &lt;!-- display errors if present --&gt;
       &lt;h:output_errors id="loginErrors" clientId="userName"/&gt;
@@ -12314,7 +12314,7 @@ Connection: keep-alive
         <item type="string" />
         <item type="string">- ErrorKeys: defines all error keys</item>
         <item type="string" />
-        <item type="string">      // Example: ErrorKeys defining the following error keys:    
+        <item type="string">      // Example: ErrorKeys defining the following error keys:
       //    - ERROR_USERNAME_REQUIRED
       //    - ERROR_USERNAME_ALPHANUMERIC
       //    - ERROR_USERNAME_DUPLICATE
@@ -12333,31 +12333,31 @@ Connection: keep-alive
         <item type="string">      // Example: Error encapsulates an error key.
       // Error is serializable to support code executing in multiple JVMs.
       public Class Error implements Serializable {
-          
+
           // Constructor given a specified error key
           public Error(String key) {
               this(key, null);
           }
-          
+
           // Constructor given a specified error key and array of placeholder objects
           public Error(String key, Object[] values) {
               this.key = key;
               this.values = values;
           }
-          
+
           // Returns the error key
           public String getKey() {
               return this.key;
           }
-          
+
           // Returns the placeholder values
           public Object[] getValues() {
               return this.values;
           }
-          
+
           private String key = null;
           private Object[] values = null;
-      }    
+      }
 </item>
         <item type="string" />
         <item type="string">- Errors: encapsulates a Collection of errors</item>
@@ -12366,7 +12366,7 @@ Connection: keep-alive
       // Errors are stored in a HashMap where the key is the bean property name and value is an
       // ArrayList of Error objects.
       public Class Errors implements Serializable {
-      
+
           // Adds an Error object to the Collection of errors for the specified bean property.
           public void addError(String property, Error error) {
               ArrayList propertyErrors = (ArrayList)errors.get(property);
@@ -12374,19 +12374,19 @@ Connection: keep-alive
                   propertyErrors = new ArrayList();
                   errors.put(property, propertyErrors);
               }
-              propertyErrors.put(error);            
+              propertyErrors.put(error);
           }
-          
+
           // Returns true if there are any errors
           public boolean hasErrors() {
               return (errors.size &gt; 0);
           }
-          
+
           // Returns the Errors for the specified property
           public ArrayList getErrors(String property) {
               return (ArrayList)errors.get(property);
           }
-  
+
           private HashMap errors = new HashMap();
       }
 </item>
@@ -12409,7 +12409,7 @@ Connection: keep-alive
       // We assume that there is an existing UserValidationEJB session bean that implements
       // a checkIfDuplicate() method to verify if the user already exists in the database.
       try {
-          ...        
+          ...
           if (UserValidationEJB.checkIfDuplicate(userName)) {
               errors.addError("user_name", new Error(ErrorKeys.ERROR_USERNAME_DUPLICATE));
           }
@@ -12489,13 +12489,13 @@ Connection: keep-alive
   ################################################
   # required user name error message
   error.username.required=User name field is required
-  
+
   # invalid user name format
   error.username.alphanumeric=User name must be alphanumeric
-  
+
   # duplicate user name error message
   error.username.duplicate=User name {0} already exists, please choose another one
-  
+
   ...
 </item>
         <item type="string" />
@@ -12517,19 +12517,19 @@ Connection: keep-alive
         <item type="string">  // Example to render an error message from a localized ErrorMessages resource (properties file)
   // Utility class to retrieve locale-specific error messages
   public Class ErrorMessageResource {
-      
+
       // Returns the error message for the specified error key in the environment locale
       public String getErrorMessage(String errorKey) {
           return getErrorMessage(errorKey, defaultLocale);
       }
-      
+
       // Returns the error message for the specified error key in the specified locale
       public String getErrorMessage(String errorKey, Locale locale) {
           return getErrorMessage(errorKey, null, locale);
       }
-      
+
       // Returns a formatted error message for the specified error key in the specified locale
-      public String getErrorMessage(String errorKey, Object[] args, Locale locale) {    
+      public String getErrorMessage(String errorKey, Object[] args, Locale locale) {
           // Get localized ErrorMessageResource
           ResourceBundle errorMessageResource = ResourceBundle.getBundle("ErrorMessages", locale);
           // Get localized error message
@@ -12541,7 +12541,7 @@ Connection: keep-alive
               return errorMessage;
           }
       }
-      
+
       // default environment locale
       private Locale defaultLocale = Locale.getDefaultLocale();
   }
@@ -12632,7 +12632,7 @@ Connection: keep-alive
   &lt;html:html&gt;
   &lt;head&gt;
   &lt;body&gt;
-      &lt;html:form action="/logon.do"&gt;    
+      &lt;html:form action="/logon.do"&gt;
       &lt;table border="0" width="100%"&gt;
       &lt;tr&gt;
           &lt;th align="right"&gt;
@@ -12672,7 +12672,7 @@ Connection: keep-alive
     &lt;h:form formName="loginForm" &gt;
       &lt;h:input_text id="userName" size="20" modelReference="UserBean.userName"&gt;
           &lt;f:validate_required/&gt;
-          &lt;f:validate_length minimum="8" maximum="20"/&gt;    
+          &lt;f:validate_length minimum="8" maximum="20"/&gt;
       &lt;/h:input_text&gt;
       &lt;!-- display errors if present --&gt;
       &lt;h:output_errors id="loginErrors" clientId="userName"/&gt;
@@ -12827,9 +12827,9 @@ Connection: keep-alive
         <item type="string">In addition, in order to avoid UTF-7 variants of Cross-site Scripting, you should explicitly define the Content-Type header of the response, for example:</item>
         <item type="string" />
         <item type="string">  &lt;?php
-  
+
   header('Content-Type: text/html; charset=UTF-8');
-  
+
   ?&gt;
 </item>
         <item type="string" />
@@ -12840,16 +12840,16 @@ Connection: keep-alive
         <item type="string">You can use the following code example, for securing the cookie:</item>
         <item type="string" />
         <item type="string">  &lt;$php
-  
+
       $value = "some_value";
       $time = time()+3600;
       $path = "/application/";
       $domain = ".example.com";
       $secure = 1;
-  
+
       setcookie("CookieName", $value, $time, $path, $domain, $secure, TRUE);
   ?&gt;
-  
+
 </item>
         <item type="string" />
         <item type="string">In addition, we recommend that you use the HttpOnly flag. When the HttpOnly flag is set to TRUE the cookie will be made accessible only through the HTTP protocol. This means that the cookie won't be accessible by scripting languages, such as JavaScript. This setting can effectively help to reduce identity theft through XSS attacks (although it is not supported by all browsers).</item>
