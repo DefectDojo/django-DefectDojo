@@ -2333,7 +2333,16 @@ class async_delete:
                 logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
                 # The id must be None
                 # The object has already been deleted elsewhere
-
+            except LogEntry.MultipleObjectsReturned:
+                # Delete the log entrys first, then delete
+                LogEntry.objects.filter(
+                    content_type=ContentType.objects.get_for_model(obj.__class__),
+                    object_pk=str(obj.pk),
+                    action=LogEntry.Action.DELETE,
+                ).delete()
+                # Now delete the object again
+                obj.delete()
+    
     @dojo_async_task
     @app.task
     def delete(self, obj, **kwargs):
