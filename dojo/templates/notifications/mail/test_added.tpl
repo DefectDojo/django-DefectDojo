@@ -15,7 +15,7 @@
                 A new test has been added: <a href="{{prod_url}}">{{product}}</a> / <a href="{{eng_url}}">{{ eng_name }}</a> / <a href="{{ t_url }}">{{ test }}</a><br/>
                 Finding details in the 'scan_added' email, which is a separate notification (for now).
               {% endblocktranslate %}
-            </p>    
+            </p>
             <br/>
                 {% trans "Kind regards" %},</br>
             <br/>
