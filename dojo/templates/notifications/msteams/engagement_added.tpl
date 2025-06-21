@@ -27,7 +27,7 @@
                 "text": "{{ system_settings.disclaimer_notifications }}"
             }
         {% endif %}
-        
+
     ],
     "potentialAction": [
         {
