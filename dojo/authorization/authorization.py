@@ -23,6 +23,7 @@ from dojo.models import (
     Product_Type,
     Product_Type_Group,
     Product_Type_Member,
+    Risk_Acceptance,
     Stub_Finding,
     Test,
 )
@@ -92,6 +93,11 @@ def user_has_permission(user, obj, permission):
         and permission in Permissions.get_engagement_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
+    if (
+        isinstance(obj, Risk_Acceptance)
+        and permission in Permissions.get_engagement_permissions()
+    ):
+        return user_has_permission(user, obj.engagement, permission)
     if (
         isinstance(obj, Test)
         and permission in Permissions.get_test_permissions()
