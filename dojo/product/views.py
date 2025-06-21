@@ -71,6 +71,7 @@ from dojo.forms import (
 from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
+    Benchmark_Type,
     BurpRawRequestResponse,
     DojoMeta,
     Endpoint,
@@ -90,7 +91,6 @@ from dojo.models import (
     System_Settings,
     Test,
     Test_Type,
-    Benchmark_Type,
 )
 from dojo.product.queries import (
     get_authorized_global_groups_for_product,
