@@ -2,7 +2,7 @@
     "check_type":"terraform",
     "results":{
        "passed_checks":[
-          
+
        ],
        "failed_checks":[
           {
@@ -108,7 +108,7 @@
              "connected_node":null,
              "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_gcs_2",
              "details":[
-                
+
              ]
           },
           {
@@ -201,7 +201,7 @@
              "severity":"MEDIUM",
              "bc_category":"Storage",
              "benchmarks":{
-                
+
              },
              "description":null,
              "short_description":null,
@@ -209,7 +209,7 @@
              "connected_node":null,
              "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_logging_2",
              "details":[
-                
+
              ]
           },
           {
@@ -302,7 +302,7 @@
              "severity":"LOW",
              "bc_category":"General",
              "benchmarks":{
-                
+
              },
              "description":null,
              "short_description":null,
@@ -310,7 +310,7 @@
              "connected_node":null,
              "guideline":"https://docs.bridgecrew.io/docs/ensure-gcp-cloud-storage-has-versioning-enabled",
              "details":[
-                
+
              ]
           },
           {
@@ -387,15 +387,15 @@
              "connected_node":null,
              "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_public_1",
              "details":[
-                
+
              ]
           }
        ],
        "skipped_checks":[
-          
+
        ],
        "parsing_errors":[
-          
+
        ]
     },
     "summary":{

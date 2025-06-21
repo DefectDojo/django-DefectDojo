@@ -34,7 +34,7 @@
         }
       ]
     },
-    {   
+    {
       "id": "e4f855103139f6af7b2ac8c83aa6779fc97a168e06a45235fb6f072cf707c1b5",
       "category": "dependency_scanning",
       "name": "Nil Pointer Dereference",
@@ -46,38 +46,38 @@
       "scanner": {
         "id": "gemnasium",
         "name": "Gemnasium"
-      },  
+      },
       "location": {
         "file": "service/go.sum",
         "dependency": {
           "package": {
             "name": "golang.org/x/crypto"
-          },  
+          },
           "version": "v0.0.0-20190308221718-c2843e01d9a2"
-        }   
-      },  
+        }
+      },
       "identifiers": [
-        {   
+        {
           "type": "gemnasium",
           "name": "Gemnasium-ffb814a0-404c-11eb-b378-0242ac130002",
           "value": "ffb814a0-404c-11eb-b378-0242ac130002",
           "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/crypto/CVE-2020-29652.yml"
-        },  
-        {   
+        },
+        {
           "type": "cve",
           "name": "CVE-2020-29652",
           "value": "CVE-2020-29652",
           "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-29652"
-        }   
-      ],  
+        }
+      ],
       "links": [
-        {   
+        {
           "url": "https://go-review.googlesource.com/c/crypto/+/278852"
-        },  
-        {   
+        },
+        {
           "url": "https://groups.google.com/g/golang-announce/c/ouZIlBimOsE?pli=1"
-        },  
-        {   
+        },
+        {
           "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-29652"
         }
       ]

@@ -121,7 +121,7 @@
 							"md5": "b8065b6bfc248caba501c3f5bb508e66",
 							"path": "/etc/cron.daily/dpkg"
 						},
-						
+
 						{
 							"md5": "a5a35195d71029c6f7dfa1eb2a63c1e1",
 							"path": "/usr/share/dpkg/tupletable"

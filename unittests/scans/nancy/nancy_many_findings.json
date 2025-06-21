@@ -21,7 +21,7 @@
          "Coordinates":"pkg:golang/github.com/cockroachdb/cockroach@2.1.4",
          "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/cockroachdb/cockroach@2.1.4",
          "Vulnerabilities":[
-            
+
          ],
          "InvalidSemVer":false
       },
@@ -100,7 +100,7 @@
          "Coordinates":"pkg:golang/github.com/github/hub@2.0.0",
          "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/github/hub@2.0.0",
          "Vulnerabilities":[
-            
+
          ],
          "InvalidSemVer":false
       },
@@ -175,7 +175,7 @@
          "Coordinates":"pkg:golang/github.com/goharbor/harbor@1.7.2",
          "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/goharbor/harbor@1.7.2",
          "Vulnerabilities":[
-            
+
          ],
          "InvalidSemVer":false
       },
@@ -200,13 +200,13 @@
          "Coordinates":"pkg:golang/github.com/ipfs/go-ipfs@0.4.18",
          "Reference":"https://ossindex.sonatype.org/component/pkg:golang/github.com/ipfs/go-ipfs@0.4.18",
          "Vulnerabilities":[
-            
+
          ],
          "InvalidSemVer":false
       }
    ],
    "exclusions":[
-      
+
    ],
    "invalid":[
       {
