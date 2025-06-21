@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0230_alter_jira_instance_accepted_mapping_resolution_and_more'),
+        ('dojo', '0248_alter_general_survey_expiration'),
     ]
 
     operations = [

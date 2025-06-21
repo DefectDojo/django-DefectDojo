@@ -3815,13 +3815,15 @@ class Risk_Acceptance(models.Model):
 
     def clean(self):
         super().clean()
+        from dojo.risk_acceptance.helper import validate_findings_engagement
         if self.pk:
-            # Get all findings that do NOT belong to this engagement
-            problematic_findings = self.accepted_findings.exclude(test__engagement=self.engagement)
-            if problematic_findings.exists():
-                problematic_ids = list(problematic_findings.values_list("id", flat=True))
-                msg = f"Findings with IDs {problematic_ids} do not belong to engagement {self.engagement_id}."
-                raise ValidationError(msg)
+            validate_findings_engagement(self.engagement, self.accepted_findings.all())
+            # # Get all findings that do NOT belong to this engagement
+            # problematic_findings = self.accepted_findings.exclude(test__engagement=self.engagement)
+            # if problematic_findings.exists():
+            #     problematic_ids = list(problematic_findings.values_list("id", flat=True))
+            #     msg = f"Findings with IDs {problematic_ids} do not belong to engagement {self.engagement_id}."
+            #     raise ValidationError(msg)
 
     def filename(self):
         # logger.debug('path: "%s"', self.path)
@@ -3836,8 +3838,7 @@ class Risk_Acceptance(models.Model):
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
         bc += [{"title": str(self),
-                "url": reverse("view_risk_acceptance", args=(
-                    self.engagement.product.id, self.id))}]
+                "url": reverse("view_risk_acceptance", args=(self.id, ))}]
         return bc
 
     @property

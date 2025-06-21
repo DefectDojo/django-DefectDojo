@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0232_set_risk_acceptance_engagement'),
+        ('dojo', '0250_set_risk_acceptance_engagement'),
     ]
 
     operations = [
