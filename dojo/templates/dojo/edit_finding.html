@@ -137,14 +137,14 @@
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;
-		
+
         var tmp_val = null;
-		
+
         if ($('#id_mitigated').val() != null) {
             $('#id_mitigated').val($('#id_mitigated').val().slice(0,10));
             var tmp_val = $('#id_mitigated').val();
         }
-		
+
         function displayMitigated() {
             var elMitigated = $('#id_mitigated').closest('.form-group'),
                 elMitigatedBy = $('#id_mitigated_by').closest('.form-group'),

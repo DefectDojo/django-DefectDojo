@@ -398,7 +398,7 @@
             if (observer)
                 observer.observe($table[0]);
         };
-    
+
         {% if enable_table_filtering %}
             setTimeout(function() {
                 var table = $('#findings_table').DataTable({
@@ -417,8 +417,8 @@
                         { title: 'Vulnerability Id' },
                         { title: 'EPSS Score' },
                         { title: 'EPSS Precentile' },
-                        { 
-                            title: 'Date', 
+                        {
+                            title: 'Date',
                             render: function(data) {
                                 var date = new Date(data);
                                 var year = date.getFullYear();

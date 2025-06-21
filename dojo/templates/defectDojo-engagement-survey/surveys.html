@@ -64,12 +64,12 @@
                         </li>
                     </ul>
                 </td>
-                <td><a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a></td>  
+                <td><a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a></td>
                 <td>
                     {% if survey.assignee == None %}
                         Not Assigned
                     {% else %}
-                        {{ survey.assignee.username }} 
+                        {{ survey.assignee.username }}
                     {% endif %}
                 </td>
                 <td>

@@ -43,7 +43,7 @@
             {% else %}
                 No questionnaires found.
             {% endif %}
-        
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     General Questionnaires
@@ -66,9 +66,9 @@
                             {% for survey in general %}
                                 <tr>
                                     <td>{{ survey.survey.name }}</td>
-                                    <td algin="center">{{ survey.num_responses }}</td> 
+                                    <td algin="center">{{ survey.num_responses }}</td>
                                     <td>{{ survey.generated }}</td>
-                                    <td>{{ survey.expiration }}</td> 
+                                    <td>{{ survey.expiration }}</td>
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal"

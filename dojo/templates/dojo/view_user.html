@@ -34,7 +34,7 @@
                                 {% if "auth.delete_user"|has_configuration_permission:request and user.id != request.user.id %}
                                 <li role="separator" class="divider"></li>
                                 <li>
-                                    <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser"> 
+                                    <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser">
                                         <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                                 </li>
                                 {% endif %}
@@ -399,11 +399,11 @@
                         <td><strong>{{ field.display_name }}</strong></td>
                         <td class="centered">
                             {% if field.view_codename %}
-                            <input id="id_{{ field.view_codename }}" 
+                            <input id="id_{{ field.view_codename }}"
                                 {% if not request.user.is_superuser %}disabled{% endif %}
-                                name="{{ field.view_codename }}" 
-                                aria-label="{{ field.view_codename }}" 
-                                type="checkbox" 
+                                name="{{ field.view_codename }}"
+                                aria-label="{{ field.view_codename }}"
+                                type="checkbox"
                                 {% if user|user_has_configuration_permission_without_group:field.view_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
