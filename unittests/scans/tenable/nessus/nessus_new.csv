@@ -54,16 +54,16 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-02-25T15:07:55.004Z;008e61c1-0777-428e-a08e-ac56cab81bdd;2023-07-12T13:55:40.941Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
   diffie-hellman-group1-sha1
 ";22;TCP;;NONE;8ec25ec0-bb5e-4867-9c24-3a990cde8c00;Low;RESURFACED
-372;Blah6;10.0.0.6;;;Blah6;80a71790-bc3e-4488-8070-159730830c8f;Blah6;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""Amsterdam DRK""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+372;Blah6;10.0.0.6;;;Blah6;80a71790-bc3e-4488-8070-159730830c8f;Blah6;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""Amsterdam DRK""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-07-05T12:07:49.962Z;00cdea5f-cf65-4e26-b518-83849ee3a10b;2023-07-10T08:17:04.298Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -71,7 +71,7 @@ are supported :
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -239,16 +239,16 @@ The following running daemons are not managed by RPM :
 /opt/node_exporter/node_exporter
 /opt/traefik/traefik
 ";0;TCP;;NONE;18f99379-95e6-4c04-988d-b3e9a82519c8;Low;ACTIVE
-429;Blah17;10.0.0.17;;;Blah17;e672ed00-426f-4e49-af83-d11dfb50ffe7;Blah17;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+429;Blah17;10.0.0.17;;;Blah17;e672ed00-426f-4e49-af83-d11dfb50ffe7;Blah17;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-05-09T11:38:51.535Z;01f27e59-ec6c-4f18-a21e-60f795a4e97a;2023-07-11T13:39:21.328Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes256-cbc
 ";22;TCP;;NONE;2e2616c4-73be-4a5f-8462-0363fd979993;Low;RESURFACED
@@ -303,7 +303,7 @@ The following running daemon is not managed by dpkg :
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;71049;FALSE;FALSE;SSH Weak MAC Algorithms Enabled;;2013-11-22T00:00:00Z;2016-12-14T00:00:00Z;;;;Low;Contact the vendor or consult product documentation to disable MD5 and 96-bit MAC algorithms.;;The remote SSH server is configured to allow MD5 and 96-bit MAC algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-06-28T09:33:55.288Z;0275e78c-b263-42da-81b1-d2998fb411c0;2023-07-11T20:25:44.605Z;"'
 The following client-to-server Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-md5
   hmac-md5-96
@@ -313,7 +313,7 @@ are supported :
   hmac-sha1-96-etm@openssh.com
 
 The following server-to-client Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-md5
   hmac-md5-96
@@ -348,7 +348,7 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-06-27T12:27:30.880Z;0289084b-33b3-4eae-a2f3-1080f44e8dde;2023-07-10T12:58:08.592Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
   diffie-hellman-group1-sha1
@@ -386,12 +386,12 @@ The following running daemon is not managed by RPM :
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;71049;FALSE;FALSE;SSH Weak MAC Algorithms Enabled;;2013-11-22T00:00:00Z;2016-12-14T00:00:00Z;;;;Low;Contact the vendor or consult product documentation to disable MD5 and 96-bit MAC algorithms.;;The remote SSH server is configured to allow MD5 and 96-bit MAC algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-06-28T17:13:42.007Z;032e3367-a400-40ed-9029-5b1e2628a457;2023-07-11T18:27:26.306Z;"'
 The following client-to-server Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-sha1-96
 
 The following server-to-client Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-sha1-96
 ";22;TCP;;NONE;854b5db4-6ffb-4621-bd7c-ff36568fb465;Low;ACTIVE
@@ -407,7 +407,7 @@ to be weak :
 |-Subject        : C=NL/ST=Zuid-Holland/L=Gouda/O=Siqura/CN=037e95f2b6e1bcd0e82dcf83dd10966a/E=sales.nl@tkhsecurity.com
 |-RSA Key Length : 1024 bits
 ";8443;TCP;;NONE;2e2616c4-73be-4a5f-8462-0363fd979993;Low;RESURFACED
-233;Blah29;10.0.0.29;;00:c0:b7:4f:30:15;Blah29;d24e0c4e-bf14-4cbc-a5ed-6415ea085a93;Blah29;;00000000-0000-0000-0000-000000000000;Default;APC UPS Management Card;embedded;"[{""category"":""Office"",""value"":""Eindhoven""}]";;;1499;cpe:/a:microsoft:iis;CVE-2000-0649;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;2.0;CVSS2#E:POC/RL:OF/RC:C;3.1;CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N;2.8;CVSS:3.0/E:P/RL:O/RC:C;200;"This may expose internal IP addresses that are usually hidden or masked behind a Network Address Translation (NAT) Firewall or proxy server. 
+233;Blah29;10.0.0.29;;00:c0:b7:4f:30:15;Blah29;d24e0c4e-bf14-4cbc-a5ed-6415ea085a93;Blah29;;00000000-0000-0000-0000-000000000000;Default;APC UPS Management Card;embedded;"[{""category"":""Office"",""value"":""Eindhoven""}]";;;1499;cpe:/a:microsoft:iis;CVE-2000-0649;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;2.0;CVSS2#E:POC/RL:OF/RC:C;3.1;CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N;2.8;CVSS:3.0/E:P/RL:O/RC:C;200;"This may expose internal IP addresses that are usually hidden or masked behind a Network Address Translation (NAT) Firewall or proxy server.
 
 There is a known issue with Microsoft IIS 4.0 doing this in its default configuration. This may also affect other web servers, web applications, web proxies, load balancers and through a variety of misconfigurations related to redirection.";AVAILABLE;FALSE;FALSE;Web Servers;;;;;10759;FALSE;FALSE;Web Server HTTP Header Internal IP Disclosure;;2001-09-14T00:00:00Z;2022-12-30T00:00:00Z;1.63;BUGTRAQ=[1499], CVE=[CVE-2000-0649], CWE=[200];http://www.nessus.org/u?fe24f941, http://www.nessus.org/u?4eedfe2d, http://www.nessus.org/u?8e23582e;Low;Apply configuration suggested by vendor.;;This web server leaks a private IP address through its HTTP headers.;REMOTE;FALSE;;731;1.4;PROOF_OF_CONCEPT;LOW;VERY_LOW;;;No recorded events;2.2;2000-07-13T00:00:00Z;2022-11-21T14:31:30.330Z;03623962-ff30-4613-8e23-1d3b5705f01d;2023-07-10T12:58:08.592Z;"'
 Nessus was able to exploit the issue using the following request :
@@ -450,15 +450,15 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-07-10T00:26:58.483Z;0387704e-9db5-49a5-bca7-29f82a33fda1;2023-07-08T23:31:06.370Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
 ";22;TCP;;NONE;4e68d1bf-9631-41b9-b2f6-c6d6f294d6c0;Low;RESURFACED
-256;Blah31;10.0.0.31;;02:42:4c:bc:f4:e0;Blah31;6fe1a5bf-6e10-47db-980a-736c3147c882;Blah31;;00000000-0000-0000-0000-000000000000;Default;CentOS Linux 7 (Core);general-purpose;"[{""category"":""Compute"",""value"":""compute-onprem""},{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+256;Blah31;10.0.0.31;;02:42:4c:bc:f4:e0;Blah31;6fe1a5bf-6e10-47db-980a-736c3147c882;Blah31;;00000000-0000-0000-0000-000000000000;Default;CentOS Linux 7 (Core);general-purpose;"[{""category"":""Compute"",""value"":""compute-onprem""},{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-10-30T00:55:33.372Z;03962905-71a0-4c1b-acac-ed38fc9b9f8c;2023-07-08T23:42:25.583Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -468,7 +468,7 @@ are supported :
   cast128-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -593,12 +593,12 @@ Should be                : java-1.8.0-openjdk-headless-1.8.0.352.b08-2.el7_9
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;71049;FALSE;FALSE;SSH Weak MAC Algorithms Enabled;;2013-11-22T00:00:00Z;2016-12-14T00:00:00Z;;;;Low;Contact the vendor or consult product documentation to disable MD5 and 96-bit MAC algorithms.;;The remote SSH server is configured to allow MD5 and 96-bit MAC algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-05-09T09:16:58.224Z;0436af7b-88b9-4ec0-865d-b440dfce3a73;2023-07-11T19:42:24.202Z;"'
 The following client-to-server Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-sha1-96
 
 The following server-to-client Message Authentication Code (MAC) algorithms
-are supported : 
+are supported :
 
   hmac-sha1-96
 ";22;TCP;;NONE;2e2616c4-73be-4a5f-8462-0363fd979993;Low;RESURFACED
@@ -638,22 +638,22 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-10-02T00:56:55.396Z;0468f640-e6f3-4f64-af49-edbf44f17895;2023-06-25T00:36:07.814Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
 ";22;TCP;;NONE;ea5641d6-d304-4ca4-8226-2d2776bbb6f8;Low;RESURFACED
-270;Blah44;10.0.0.44;;;Blah44;c87eae4c-6ab4-4d9e-83b1-8e7e4a4fdb78;Blah44;;00000000-0000-0000-0000-000000000000;Default;Microsoft Windows Server 2012 R2;unknown;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+270;Blah44;10.0.0.44;;;Blah44;c87eae4c-6ab4-4d9e-83b1-8e7e4a4fdb78;Blah44;;00000000-0000-0000-0000-000000000000;Default;Microsoft Windows Server 2012 R2;unknown;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-10-16T04:06:22.335Z;047f0b7e-56d2-47ff-a539-9294cca7c122;2023-07-09T00:09:46.921Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -666,11 +666,11 @@ Note that Nessus has not tested for this issue but has instead relied only on th
   Installed version : 12.2.0.41219
   Fixed version     : 12.2.5
 ";445;TCP;;NONE;0fdce5fe-18b9-4de3-9854-9a686f30fb43;Low;ACTIVE
-372;Blah46;10.0.0.46;;;Blah46;de825088-4169-47da-be40-761560af616b;Blah46;;00000000-0000-0000-0000-000000000000;Default;FortiOS on Fortinet FortiGate;firewall;"[{""category"":""Office"",""value"":""Amsterdam DRK""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+372;Blah46;10.0.0.46;;;Blah46;de825088-4169-47da-be40-761560af616b;Blah46;;00000000-0000-0000-0000-000000000000;Default;FortiOS on Fortinet FortiGate;firewall;"[{""category"":""Office"",""value"":""Amsterdam DRK""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-07-05T11:58:12.454Z;04ade7dd-9ad0-49cf-b95c-520f0e5562e8;2023-07-13T07:40:38.695Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -678,7 +678,7 @@ are supported :
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -728,18 +728,18 @@ The following running daemon is not managed by dpkg :
 
 /snap/teams-insiders/10/usr/share/teams-insiders/teams-insiders
 ";0;TCP;;NONE;18ce976c-e315-475e-90a7-54f3234823d0;Low;RESURFACED
-368;Blah51;10.0.0.51;;;Blah51;100c88f1-22f2-4591-879c-28fe25af907f;Blah51;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6;general-purpose;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+368;Blah51;10.0.0.51;;;Blah51;100c88f1-22f2-4591-879c-28fe25af907f;Blah51;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6;general-purpose;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-07-09T23:42:54.423Z;04ed5f82-9d3b-4559-bc02-67c7fd023989;2023-07-08T23:42:25.583Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes128-cbc
   aes192-cbc
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes128-cbc
   aes192-cbc
@@ -835,7 +835,7 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-05-09T10:18:02.236Z;052fd512-fe81-4e47-b8cf-cca0beeddc3e;2023-07-10T11:38:40.994Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
 ";22;TCP;;NONE;06f8d74d-94b0-4a80-b581-fc3c273cc695;Low;RESURFACED
@@ -987,18 +987,18 @@ Remote package installed : java-17-openjdk-headless-17.0.4.1.1-2.el8_6
 Should be                : java-17-openjdk-headless-17.0.6.0.10-3.el8_7
 
 ";0;TCP;;NONE;18f99379-95e6-4c04-988d-b3e9a82519c8;Low;ACTIVE
-424;Blah63;10.0.0.63;;00:e0:d8:1d:ec:f8;Blah63;ae8d07dd-b026-4de1-be9f-83a93610cbd1;Blah63;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6.37.6-lsp-3.2.5_stm24_0012-spear3xx;general-purpose;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+424;Blah63;10.0.0.63;;00:e0:d8:1d:ec:f8;Blah63;ae8d07dd-b026-4de1-be9f-83a93610cbd1;Blah63;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6.37.6-lsp-3.2.5_stm24_0012-spear3xx;general-purpose;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-05-14T08:53:36.471Z;0616ab6e-482c-43a5-a33c-4305a9e96a14;2023-07-11T19:12:16.482Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -1098,7 +1098,7 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-07-05T12:14:10.075Z;063d87b4-599b-458a-a53b-80ddd3aeab2d;2023-07-10T07:32:54.089Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group1-sha1
 ";22;TCP;;NONE;a70b8545-fb33-43f4-9d57-a0dd5b754264;Low;RESURFACED
@@ -1251,40 +1251,40 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-06-27T12:27:30.880Z;07156aa2-1578-4d5d-b6f4-e3ccc222c2af;2023-07-10T15:23:04.165Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
   diffie-hellman-group1-sha1
 ";22;TCP;;NONE;06f8d74d-94b0-4a80-b581-fc3c273cc695;Low;RESURFACED
-376;Blah76;10.0.0.76;;;Blah76;52085b7c-379a-42f6-9aad-e6dc61d49ef7;Blah76;;00000000-0000-0000-0000-000000000000;Default;Ubuntu 16.04 Linux Kernel 4.4;unknown;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Network_Security"",""value"":""Assets""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+376;Blah76;10.0.0.76;;;Blah76;52085b7c-379a-42f6-9aad-e6dc61d49ef7;Blah76;;00000000-0000-0000-0000-000000000000;Default;Ubuntu 16.04 Linux Kernel 4.4;unknown;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Network_Security"",""value"":""Assets""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-07-01T08:42:51.567Z;0796e0f2-4969-4854-9f03-46552b6990ab;2023-07-11T13:43:41.727Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
   aes256-cbc
 ";22;TCP;;NONE;8aad221d-7476-4c0c-a177-0d6498dad745;Low;RESURFACED
-368;Blah77;10.0.0.77;;;Blah77;d273fc4c-eaeb-47da-91cb-d0be218bd50f;Blah77;;00000000-0000-0000-0000-000000000000;Default;F5 Networks BIG-IP;load-balancer;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+368;Blah77;10.0.0.77;;;Blah77;d273fc4c-eaeb-47da-91cb-d0be218bd50f;Blah77;;00000000-0000-0000-0000-000000000000;Default;F5 Networks BIG-IP;load-balancer;"[{""category"":""Data_Centers"",""value"":""EMEA: Data Center 1""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-07-10T00:27:38.683Z;079781ca-695b-4e1f-b505-bac25fdefacc;2023-07-09T00:08:31.714Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes128-cbc
   aes192-cbc
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes128-cbc
   aes192-cbc
@@ -1454,7 +1454,7 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-05-09T10:04:40.921Z;0894cb20-aa14-4348-af13-58dd0da22684;2023-07-10T13:48:01.762Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
 ";22;TCP;;NONE;06f8d74d-94b0-4a80-b581-fc3c273cc695;Low;RESURFACED
@@ -1469,11 +1469,11 @@ The following running daemons are not managed by RPM :
 /opt/prometheus/exporters/dist/node_exporter-0.18.1.linux-amd64/node_exporter
 /opt/prometheus/exporters/dist/prometheus_varnish_exporter-1.6.1.linux-amd64/prometheus_varnish_exporter
 ";0;TCP;;NONE;cb0fc0ca-e6eb-498e-9595-c41d6b82159c;Low;NEW
-379;Blah89;10.0.0.89;;;Blah89;4d869672-6935-49c3-96bf-def097c8895d;Blah89;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6;unknown;"[{""category"":""Office"",""value"":""ODE-TEST""},{""category"":""Office"",""value"":""Amsterdam ODE""},{""category"":""Office"",""value"":""Office Farmington Servers""},{""category"":""Network_Security"",""value"":""Assets""},{""category"":""Office"",""value"":""Farmington""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+379;Blah89;10.0.0.89;;;Blah89;4d869672-6935-49c3-96bf-def097c8895d;Blah89;;00000000-0000-0000-0000-000000000000;Default;Linux Kernel 2.6;unknown;"[{""category"":""Office"",""value"":""ODE-TEST""},{""category"":""Office"",""value"":""Amsterdam ODE""},{""category"":""Office"",""value"":""Office Farmington Servers""},{""category"":""Network_Security"",""value"":""Assets""},{""category"":""Office"",""value"":""Farmington""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-06-28T16:41:36.362Z;08b2ad89-422e-4566-be19-71e763a8cfe6;2023-07-13T07:21:29.712Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -1484,7 +1484,7 @@ are supported :
   rijndael-cbc@lysator.liu.se
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   3des-cbc
   aes128-cbc
@@ -1622,7 +1622,7 @@ This is based on the IETF draft document Key Exchange (KEX) Method Updates and R
   rsa1024-sha1
 
 Note that this plugin only checks for the options of the SSH server, and it does not check for vulnerable software versions.";;FALSE;FALSE;Misc.;;;;;153953;FALSE;FALSE;SSH Weak Key Exchange Algorithms Enabled;;2021-10-13T00:00:00Z;2021-10-13T00:00:00Z;1.2;;http://www.nessus.org/u?b02d91cd, https://datatracker.ietf.org/doc/html/rfc8732;Low;Contact the vendor or consult product documentation to disable the weak algorithms.;;The remote SSH server is configured to allow weak key exchange algorithms.;REMOTE;FALSE;;;;;;;;;;;;2022-05-09T10:04:40.921Z;09030cb6-b5a7-4c82-af35-f4730b7190a8;2023-07-10T11:38:40.994Z;"'
-The following weak key exchange algorithms are enabled : 
+The following weak key exchange algorithms are enabled :
 
   diffie-hellman-group-exchange-sha1
 ";22;TCP;;NONE;06f8d74d-94b0-4a80-b581-fc3c273cc695;Low;RESURFACED
@@ -1644,16 +1644,16 @@ Remote package installed : java-17-openjdk-headless-17.0.5.0.8-2.el8_6
 Should be                : java-17-openjdk-headless-17.0.6.0.10-3.el8_7
 
 ";0;TCP;;NONE;12fe8132-d877-41c8-bbb8-be9479d3c940;Low;ACTIVE
-429;Blah99;10.0.0.99;;;Blah99;054c8a6b-662f-4cb9-b087-6853b7bcd99c;Blah99;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext. 
+429;Blah99;10.0.0.99;;;Blah99;054c8a6b-662f-4cb9-b087-6853b7bcd99c;Blah99;;00000000-0000-0000-0000-000000000000;Default;CISCO IOS 12, CISCO PIX, Cisco IOS XE, CISCO IOS 15;router;"[{""category"":""Office"",""value"":""pune2""},{""category"":""Office"",""value"":""Pune""}]";;;32319;;CVE-2008-5161;2.6;CVSS2#AV:N/AC:H/Au:N/C:P/I:N/A:N;1.9;CVSS2#E:U/RL:OF/RC:C;;;;;200;"The SSH server is configured to support Cipher Block Chaining (CBC) encryption.  This may allow an attacker to recover the plaintext message from the ciphertext.
 
 Note that this plugin only checks for the options of the SSH server and does not check for vulnerable software versions.";NOT_AVAILABLE;FALSE;FALSE;Misc.;;;;;70658;FALSE;FALSE;SSH Server CBC Mode Ciphers Enabled;;2013-10-28T00:00:00Z;2018-07-30T00:00:00Z;1.4;BUGTRAQ=[32319], CERT=[958563], CVE=[CVE-2008-5161], CWE=[200];;Low;Contact the vendor or consult product documentation to disable CBC mode cipher encryption, and enable CTR or GCM cipher mode encryption.;;The SSH server is configured to use Cipher Block Chaining.;REMOTE;FALSE;;731;2.5;UNPROVEN;HIGH;VERY_LOW;;;No recorded events;2.5;2008-11-24T00:00:00Z;2022-05-09T12:45:55.100Z;09417309-dab6-48d2-bde4-9f1600454382;2023-07-11T19:42:24.202Z;"'
 The following client-to-server Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes256-cbc
 
 The following server-to-client Cipher Block Chaining (CBC) algorithms
-are supported : 
+are supported :
 
   aes256-cbc
 ";22;TCP;;NONE;2e2616c4-73be-4a5f-8462-0363fd979993;Low;RESURFACED
