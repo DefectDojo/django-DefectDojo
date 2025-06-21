@@ -158,6 +158,92 @@ simple metrics for easy reporting
 """
 
 
+def get_simple_metrics_data(date=None, product_type_id=None):
+    """
+    Get simple metrics data with optimized database queries.
+
+    Args:
+        date: Optional date for the metrics (defaults to current month)
+        product_type_id: Optional product type ID to filter by
+
+    Returns:
+        List of dictionaries containing metrics data by product type
+
+    """
+    # Use current date if not provided
+    if date is None:
+        date = timezone.now()
+
+    # Get authorized product types
+    product_types = get_authorized_product_types(Permissions.Product_Type_View)
+
+    # Optional filtering by specific product type
+    if product_type_id:
+        product_types = product_types.filter(id=product_type_id)
+
+    # Build base filter conditions
+    base_filter = Q(
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        date__month=date.month,
+        date__year=date.year,
+    )
+
+    # Apply verification status filtering if enabled
+    if (get_system_setting("enforce_verified_status", True) or
+            get_system_setting("enforce_verified_status_metrics", True)):
+        base_filter &= Q(verified=True)
+
+    # Collect metrics data
+    metrics_data = []
+
+    for pt in product_types:
+        # Single aggregated query
+        metrics = Finding.objects.filter(
+            test__engagement__product__prod_type=pt,
+        ).filter(base_filter).aggregate(
+            # Total count
+            total=Count("id"),
+
+            # Count by severity using conditional aggregation
+            critical=Count("id", filter=Q(severity="Critical")),
+            high=Count("id", filter=Q(severity="High")),
+            medium=Count("id", filter=Q(severity="Medium")),
+            low=Count("id", filter=Q(severity="Low")),
+            info=Count("id", filter=~Q(severity__in=["Critical", "High", "Medium", "Low"])),
+
+            # Count opened in current month
+            opened=Count("id", filter=Q(date__year=date.year, date__month=date.month)),
+
+            # Count closed in current month
+            closed=Count("id", filter=Q(
+                mitigated__isnull=False,
+                mitigated__year=date.year,
+                mitigated__month=date.month,
+            )),
+        )
+
+        # Build the findings summary
+        findings_summary = {
+            "product_type": pt,  # Keep product type object for template compatibility
+            "product_type_id": pt.id,
+            "product_type_name": pt.name,
+            "Total": metrics["total"] or 0,
+            "critical": metrics["critical"] or 0,
+            "high": metrics["high"] or 0,
+            "medium": metrics["medium"] or 0,
+            "low": metrics["low"] or 0,
+            "info": metrics["info"] or 0,
+            "Opened": metrics["opened"] or 0,
+            "Closed": metrics["closed"] or 0,
+        }
+
+        metrics_data.append(findings_summary)
+
+    return metrics_data
+
+
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def simple_metrics(request):
@@ -172,71 +258,13 @@ def simple_metrics(request):
     else:
         form = SimpleMetricsForm({"date": now})
 
+    # Get metrics data
+    metrics_data = get_simple_metrics_data(now)
+
+    # Convert to expected format for template
     findings_by_product_type = collections.OrderedDict()
-
-    # for each product type find each product with open findings and
-    # count the S0, S1, S2 and S3
-    # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
-    product_types = get_authorized_product_types(Permissions.Product_Type_View)
-    product_types = product_types.prefetch_related("prod_type")
-    for pt in product_types:
-        total_critical = []
-        total_high = []
-        total_medium = []
-        total_low = []
-        total_info = []
-        total_opened = []
-        findings_broken_out = {}
-
-        total = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       false_p=False,
-                                       duplicate=False,
-                                       out_of_scope=False,
-                                       date__month=now.month,
-                                       date__year=now.year,
-                                       )
-
-        closed = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       false_p=False,
-                                       duplicate=False,
-                                       out_of_scope=False,
-                                       mitigated__month=now.month,
-                                       mitigated__year=now.year,
-                                       )
-
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            total = total.filter(verified=True)
-            closed = closed.filter(verified=True)
-
-        total = total.distinct()
-        closed = closed.distinct()
-
-        for f in total:
-            if f.severity == "Critical":
-                total_critical.append(f)
-            elif f.severity == "High":
-                total_high.append(f)
-            elif f.severity == "Medium":
-                total_medium.append(f)
-            elif f.severity == "Low":
-                total_low.append(f)
-            else:
-                total_info.append(f)
-
-            if f.date.year == now.year and f.date.month == now.month:
-                total_opened.append(f)
-
-        findings_broken_out["Total"] = len(total)
-        findings_broken_out["S0"] = len(total_critical)
-        findings_broken_out["S1"] = len(total_high)
-        findings_broken_out["S2"] = len(total_medium)
-        findings_broken_out["S3"] = len(total_low)
-        findings_broken_out["S4"] = len(total_info)
-
-        findings_broken_out["Opened"] = len(total_opened)
-        findings_broken_out["Closed"] = len(closed)
-
-        findings_by_product_type[pt] = findings_broken_out
+    for metrics in metrics_data:
+        findings_by_product_type[metrics["product_type"]] = metrics
 
     add_breadcrumb(title=page_name, top_level=True, request=request)
 
@@ -407,16 +435,16 @@ def product_type_counts(request):
 
             top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            cip = {"S0": 0,
-                   "S1": 0,
-                   "S2": 0,
-                   "S3": 0,
+            cip = {"critical": 0,
+                   "high": 0,
+                   "medium": 0,
+                   "low": 0,
                    "Total": total_closed_in_period}
 
-            aip = {"S0": 0,
-                   "S1": 0,
-                   "S2": 0,
-                   "S3": 0,
+            aip = {"critical": 0,
+                   "high": 0,
+                   "medium": 0,
+                   "low": 0,
                    "Total": total_overall_in_pt}
 
             for o in closed_in_period:
@@ -612,16 +640,16 @@ def product_tag_counts(request):
 
             top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            cip = {"S0": 0,
-                   "S1": 0,
-                   "S2": 0,
-                   "S3": 0,
+            cip = {"critical": 0,
+                   "high": 0,
+                   "medium": 0,
+                   "low": 0,
                    "Total": total_closed_in_period}
 
-            aip = {"S0": 0,
-                   "S1": 0,
-                   "S2": 0,
-                   "S3": 0,
+            aip = {"critical": 0,
+                   "high": 0,
+                   "medium": 0,
+                   "low": 0,
                    "Total": total_overall_in_pt}
 
             for o in closed_in_period:
@@ -898,20 +926,20 @@ def view_engineer(request, eid):
             more_nine += 1
 
     # Data for the monthly charts
-    chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"]]
+    chart_data = [["Date", "critical", "high", "medium", "low", "Total"]]
     for thing in o_stuff:
         chart_data.insert(1, thing)
 
-    a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"]]
+    a_chart_data = [["Date", "critical", "high", "medium", "low", "Total"]]
     for thing in a_stuff:
         a_chart_data.insert(1, thing)
 
     # Data for the weekly charts
-    week_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"]]
+    week_chart_data = [["Date", "critical", "high", "medium", "low", "Total"]]
     for thing in week_o_stuff:
         week_chart_data.insert(1, thing)
 
-    week_a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"]]
+    week_a_chart_data = [["Date", "critical", "high", "medium", "low", "Total"]]
     for thing in week_a_stuff:
         week_a_chart_data.insert(1, thing)
 

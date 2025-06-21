@@ -166,52 +166,6 @@
       "last_reviewed": null
     }
   },{
-    "pk": 8,
-    "model": "dojo.finding",
-    "fields": {
-      "last_reviewed_by": null,
-      "reviewers": [],
-      "static_finding": false,
-      "date": "2017-12-31",
-      "references": "",
-      "files": [],
-      "payload": null,
-      "under_defect_review": false,
-      "impact": "High",
-      "false_p": false,
-      "verified": false,
-      "severity": "High",
-      "title": "DUMMY FINDING WITH REQRESP",
-      "param": null,
-      "created": "2017-12-01T00:00:00Z",
-      "duplicate": false,
-      "mitigation": "MITIGATION",
-      "found_by": [
-        1
-      ],
-      "numerical_severity": "S0",
-      "test": 5,
-      "out_of_scope": false,
-      "cwe": 1,
-      "file_path": "",
-      "duplicate_finding": null,
-      "description": "TEST finding",
-      "mitigated_by": null,
-      "reporter": 2,
-      "mitigated": null,
-      "active": false,
-      "line": 100,
-      "under_review": false,
-      "defect_review_requested_by": 2,
-      "review_requested_by": 2,
-      "thread_id": 1,
-      "url": "http://www.example.com",
-      "notes": [],
-      "dynamic_finding": false,
-      "hash_code": "c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0",
-      "last_reviewed": null
-    }
-  },{
     "pk": 123,
     "model": "dojo.burprawrequestresponse",
     "fields": {

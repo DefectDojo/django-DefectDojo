@@ -906,9 +906,9 @@ def get_period_counts_legacy(findings,
     opened_in_period = []
     accepted_in_period = []
     opened_in_period.append(
-        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
+        ["Timestamp", "Date", "critical", "high", "medium", "low", "Total", "Closed"])
     accepted_in_period.append(
-        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
+        ["Timestamp", "Date", "critical", "high", "medium", "low", "Total", "Closed"])
 
     for x in range(-1, period_interval):
         if relative_delta == "months":
@@ -1002,11 +1002,11 @@ def get_period_counts(findings,
     active_in_period = []
     accepted_in_period = []
     opened_in_period.append(
-        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
+        ["Timestamp", "Date", "critical", "high", "medium", "low", "Total", "Closed"])
     active_in_period.append(
-        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
+        ["Timestamp", "Date", "critical", "high", "medium", "low", "Total", "Closed"])
     accepted_in_period.append(
-        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
+        ["Timestamp", "Date", "critical", "high", "medium", "low", "Total", "Closed"])
 
     for x in range(-1, period_interval):
         if relative_delta == "months":
@@ -1165,13 +1165,13 @@ def opened_in_period(start_date, end_date, **kwargs):
                         output_field=IntegerField())))["total"]
 
         oip = {
-            "S0":
+            "critical":
             0,
-            "S1":
+            "high":
             0,
-            "S2":
+            "medium":
             0,
-            "S3":
+            "low":
             0,
             "Total":
             total_opened_in_period,
@@ -1229,13 +1229,13 @@ def opened_in_period(start_date, end_date, **kwargs):
                         output_field=IntegerField())))["total"]
 
         oip = {
-            "S0":
+            "critical":
             0,
-            "S1":
+            "high":
             0,
-            "S2":
+            "medium":
             0,
-            "S3":
+            "low":
             0,
             "Total":
             total_opened_in_period,
@@ -1265,8 +1265,18 @@ def opened_in_period(start_date, end_date, **kwargs):
                 severity__in=("Critical", "High", "Medium", "Low")).count(),
         }
 
+    # Map numerical severity to new field names
+    severity_mapping = {
+        "S0": "critical",
+        "S1": "high",
+        "S2": "medium",
+        "S3": "low",
+        "S4": "info",
+    }
+
     for o in opened_in_period:
-        oip[o["numerical_severity"]] = o["numerical_severity__count"]
+        severity_key = severity_mapping.get(o["numerical_severity"], o["numerical_severity"])
+        oip[severity_key] = o["numerical_severity__count"]
 
     return oip
 
@@ -2387,8 +2397,10 @@ def log_user_login(sender, request, user, **kwargs):
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
-
-    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    if user:
+        logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
+    else:
+        logger.info("logout attempt for anonymous user via ip: %s", request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
