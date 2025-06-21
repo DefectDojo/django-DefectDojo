@@ -8,15 +8,15 @@ weight: 2
 
 Individual users have four different kinds of permission that they can be assigned:
 
-* Users can be assigned as **Members to Products or Product Types**. This allows them to view and interact with Data Types (Product Types, Products, Engagements, Tests and Findings) in DefectDojo depending on the role they are assigned on the specific Product. Users can have multiple Product or Product Type memberships, with different levels of access.  
+* Users can be assigned as **Members to Products or Product Types**. This allows them to view and interact with Data Types (Product Types, Products, Engagements, Tests and Findings) in DefectDojo depending on the role they are assigned on the specific Product. Users can have multiple Product or Product Type memberships, with different levels of access.
 ​
-* Users can also have **Configuration Permissions** assigned, which allow them to access configuration pages in DefectDojo. Configuration Permissions are not related to Products or Product Types.  
+* Users can also have **Configuration Permissions** assigned, which allow them to access configuration pages in DefectDojo. Configuration Permissions are not related to Products or Product Types.
 ​
-* Users can be assigned **Global Roles**, which give them a standardized level of access to all Products and Product Types.  
+* Users can be assigned **Global Roles**, which give them a standardized level of access to all Products and Product Types.
 ​
 * Users can be set up as **Superusers**: administrator level roles which give them control and access to all DefectDojo data and configuration.
 
-You can also create Groups if you want to assign Product Membership, Configuration Permissions or Global Roles to a group of users at the same time. If you have a large number of users in DefectDojo, such as a dedicated testing team for a particular Product, Groups may be a more helpful feature. 
+You can also create Groups if you want to assign Product Membership, Configuration Permissions or Global Roles to a group of users at the same time. If you have a large number of users in DefectDojo, such as a dedicated testing team for a particular Product, Groups may be a more helpful feature.
 
 ## Superusers \& Global Roles
 
@@ -30,25 +30,25 @@ By default, the first account created on a new DefectDojo instance will have Sup
 
 ### Add Superuser or Global Role status to an existing user
 
-1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
+1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.
 ​
 ![image](images/Set_a_User's_Permissions.png)
 ​
-2. Click the name of the account that you wish to give Superuser privileges to. This will bring you to their User Page.  
+2. Click the name of the account that you wish to give Superuser privileges to. This will bring you to their User Page.
 ​
-3. From the Default Information section of their User Page, open the ☰ menu and select Edit.  
+3. From the Default Information section of their User Page, open the ☰ menu and select Edit.
 ​
 ![image](images/Set_a_User's_Permissions_2.png)
 
-4. From the Edit User page:   
-​  
-For Superuser Status, check off the ☑️Superuser Status box, located in the user's Default Information.  
-​  
-To assign a Global Role, select one from the dropdown Global Role menu at the bottom of the page.  
+4. From the Edit User page:
+​
+For Superuser Status, check off the ☑️Superuser Status box, located in the user's Default Information.
+​
+To assign a Global Role, select one from the dropdown Global Role menu at the bottom of the page.
 ​
 ![image](images/Set_a_User's_Permissions_3.png)
 ​
-5. Click Submit to accept these changes.  
+5. Click Submit to accept these changes.
 
 ## Product \& Product Type Membership
 
@@ -73,7 +73,7 @@ If a user has already been added as a Product Type member, and does not require 
 
 2. Locate the **Members** heading, click the **☰** menu, and select **\+ Add Users**.
 3. This will take you to a page where you can **Register new Members**. Select a User from the dropdown Users menu.
-4. Select the Role that you want that User to have on this Product or Product Type: **API Importer, Reader, Writer, Maintainer** or **Owner.**  
+4. Select the Role that you want that User to have on this Product or Product Type: **API Importer, Reader, Writer, Maintainer** or **Owner.**
 ​
 ![image](images/Set_a_User's_Permissions_5.png)
 
@@ -109,7 +109,7 @@ However, this does not work in reverse. If a User has a Product Type Role or Glo
 
 Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their superuser status. These Configuration Permissions allow regular users to access and contribute to parts of DefectDojo outside of their standard Product or Product Role assignment.
 
-Configuration Permissions are not related to a specific Product or Product Type \- users can have configuration permissions assigned without the need for other statuses or Product / Product Type Membership.  
+Configuration Permissions are not related to a specific Product or Product Type \- users can have configuration permissions assigned without the need for other statuses or Product / Product Type Membership.
 ​
 ### List of Configuration Permissions
 
@@ -136,14 +136,14 @@ Configuration Permissions are not related to a specific Product or Product Type 
 
 **Only Superusers can add Configuration Permissions to a User**.
 
-1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
+1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.
 ​
 ![image](images/Set_a_User's_Permissions_7.png)
 
-2. Click the name of the account that you wish to edit.  
+2. Click the name of the account that you wish to edit.
 ​
-3. Navigate to the Configuration Permissions List. This is located on the right\-hand side of the User Page.  
+3. Navigate to the Configuration Permissions List. This is located on the right\-hand side of the User Page.
 ​
-4. Select the User Configuration Permissions you wish to add.  
+4. Select the User Configuration Permissions you wish to add.
 ​
 For a detailed breakdown of User Configuration Permissions, please refer to our [Permission Chart](../user_permission_chart/).

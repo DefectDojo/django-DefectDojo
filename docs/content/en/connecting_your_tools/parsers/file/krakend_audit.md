@@ -2,7 +2,7 @@
 title: "KrakenD Audit Scan"
 toc_hide: true
 ---
-Import KrakenD Audit Scan results in JSON format. You can use the following command to audit the KrakenD configuration which then can be uploaded to DefectDojo: 
+Import KrakenD Audit Scan results in JSON format. You can use the following command to audit the KrakenD configuration which then can be uploaded to DefectDojo:
 ```
 krakend audit -c krakend.json -f "{{ marshal . }}" >> recommendations.json
 ```

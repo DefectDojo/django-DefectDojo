@@ -110,7 +110,7 @@ To assign a questionnaire to a user, select the _Assign User_ action. This will 
 
 ## Creating Questionnaires From Engagements
 
-While questionnaires are commonly created from the questionnaire dashboard, they can also be created at the engagement level. To create a new questionnaire from within an engagement, expand the _Additional Features_ dropdown to reveal the _Questionnaires_ dropdown. In the right side header of the _Questionnaires_ dropdown, select the plus to link a new questionnaire. 
+While questionnaires are commonly created from the questionnaire dashboard, they can also be created at the engagement level. To create a new questionnaire from within an engagement, expand the _Additional Features_ dropdown to reveal the _Questionnaires_ dropdown. In the right side header of the _Questionnaires_ dropdown, select the plus to link a new questionnaire.
 
 ![New Questionnaire from Engagement](images/questionnaires-add-from-engagement.png)
 

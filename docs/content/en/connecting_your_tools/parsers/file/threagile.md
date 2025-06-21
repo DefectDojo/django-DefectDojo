@@ -4,20 +4,20 @@ toc_hide: true
 ---
 
 ### File Types
-DefectDojo parser accepts a .json file.  
-JSON reports are created from the Threagile tool (default name `risks.json`) using the following command: 
+DefectDojo parser accepts a .json file.
+JSON reports are created from the Threagile tool (default name `risks.json`) using the following command:
 
 ```shell
 docker run --rm -it -v "$(pwd)":/app/work threagile/threagile -verbose -model /app/work/threagile.yaml -output /app/work
-``` 
+```
 
 
 ### Acceptable JSON Format
 Parser expects an array of finding.  All properties are strings. Required fields are the following
-- "category" 
-- "title" 
+- "category"
+- "title"
 - "severity"
-- "synthetic_id" 
+- "synthetic_id"
 - "exploitation_impact"
 
 `catergory` fields is used to set both the title of the Finding as well as the cwe.

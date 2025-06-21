@@ -6,23 +6,23 @@ weight: 4
 
 If you have a CI/CD pipeline, a daily scan process or any kind of repeated incoming report, setting up a Reimport process in advance is key to avoiding excessive duplicates. Reimport collapses the context and Findings associated with a recurring test into a single Test page, where you can review import history and track vulnerability changes across scans.
 
-1. Create an Engagement to store the CI/CD results for the object you’re running CI/CD on. This could be a code repository where you have CI/CD actions set up to run. Generally, you want a separate Engagement set up for each pipeline so that you can quickly understand where the Finding results are coming from.  
+1. Create an Engagement to store the CI/CD results for the object you’re running CI/CD on. This could be a code repository where you have CI/CD actions set up to run. Generally, you want a separate Engagement set up for each pipeline so that you can quickly understand where the Finding results are coming from.
 ​
-2. Each CI/CD action will import data to DefectDojo in a separate step, so each of those should be mapped to a separate Test. For example, if each pipeline execution runs an NPM\-audit as well as a dependency scan, each scan result will need to flow into a Test (nested under the Engagement).  
+2. Each CI/CD action will import data to DefectDojo in a separate step, so each of those should be mapped to a separate Test. For example, if each pipeline execution runs an NPM\-audit as well as a dependency scan, each scan result will need to flow into a Test (nested under the Engagement).
 ​
 3. You do not need to create a new Test each time the CI/CD action runs. Instead, you can **Reimport** data to the same test location.
 
 ## Reimport in action
 
-DefectDojo will compare the incoming scan data with the existing scan data, and then apply changes to the Findings contained within your Test as follows:  
+DefectDojo will compare the incoming scan data with the existing scan data, and then apply changes to the Findings contained within your Test as follows:
 ​
 ### Create Findings
 
-Any vulnerabilities which were not contained in the previous import will be added to the Test automatically as new Findings.  
+Any vulnerabilities which were not contained in the previous import will be added to the Test automatically as new Findings.
 ​
 ### Ignore existing Findings
 
-If any incoming Findings match Findings that already exist, the incoming Findings will be discarded rather than recorded as Duplicates. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.  
+If any incoming Findings match Findings that already exist, the incoming Findings will be discarded rather than recorded as Duplicates. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.
 ​
 ### Close Findings
 

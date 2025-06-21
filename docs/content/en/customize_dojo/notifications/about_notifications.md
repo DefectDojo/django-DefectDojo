@@ -39,7 +39,7 @@ The Alerts List is always visible in the top\-right hand corner of DefectDojo, a
 
 You can open your Alerts List by clicking on the **🔔▼ icon** on the top right hand corner:
 
-![image](images/About_In-App_Alerts.png) 
+![image](images/About_In-App_Alerts.png)
 
 To see all of your notifications, along with additional detail, you can click the **See All Alerts \>** button, which will open the **Alerts Page**.
 

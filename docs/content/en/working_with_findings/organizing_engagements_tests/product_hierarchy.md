@@ -25,9 +25,9 @@ Product Types can have Role\-Based Access Control rules applied, which limit tea
 
 #### What can a Product Type represent?
 
-* If a particular software project has many distinct deployments or versions, it may be worth creating a single Product Type which covers the scope of the entire project, and having each version exist as individual Products.  
+* If a particular software project has many distinct deployments or versions, it may be worth creating a single Product Type which covers the scope of the entire project, and having each version exist as individual Products.
 ​
-* You also might consider using Product Types to represent stages in your software development process: one Product Type for 'In Development', one Product Type for 'In Production', etc.  
+* You also might consider using Product Types to represent stages in your software development process: one Product Type for 'In Development', one Product Type for 'In Production', etc.
 ​
 * Ultimately, it's your decision how you wish to organize your Products, and what you Product Type to represent. Your DefectDojo hierarchy may need to change to fit your security teams' needs.
 
@@ -58,11 +58,11 @@ The following scenarios are good reasons to consider creating a separate DefectD
 * "**ExampleProduct 1\.0**" uses completely different software components from "**ExampleProduct 2\.0**", and both versions are actively supported by your company.
 * The team assigned to work on "**ExampleProduct version A**" is different than the product team assigned to work on "**ExampleProduct version B**", and needs to have different security permissions assigned as a result.
 
-These variations within a single Product can also be handled at the Engagement level. Note that Engagements don't have access control in the way Products and Product Types do. 
+These variations within a single Product can also be handled at the Engagement level. Note that Engagements don't have access control in the way Products and Product Types do.
 
 ## **Engagements**
 
-Once a Product is set up, you can begin creating and scheduling Engagements. Engagements are meant to represent moments in time when testing is taking place, and contain one or more **Tests**. 
+Once a Product is set up, you can begin creating and scheduling Engagements. Engagements are meant to represent moments in time when testing is taking place, and contain one or more **Tests**.
 
 Engagements always have:
 
@@ -72,12 +72,12 @@ Engagements always have:
 * an assigned **Testing Lead**
 * an associated **Product**
 
-There are two types of Engagement: **Interactive** and **CI/CD**. 
+There are two types of Engagement: **Interactive** and **CI/CD**.
 
 * An **Interactive Engagement** is typically run by an engineer. Interactive Engagements are focused on testing the application while the app is running, using an automated test, human tester, or any activity “interacting” with the application functionality. See [OWASP's definition of IAST](https://owasp.org/www-project-devsecops-guideline/latest/02c-Interactive-Application-Security-Testing#:~:text=Interactive%20Application%20Security%20Testing,interacting%E2%80%9D%20with%20the%20application%20functionality.).
 * A **CI/CD Engagement** is for automated integration with a CI/CD pipeline. CI/CD Engagements are meant to import data as an automated action, triggered by a step in the release process.
 
-Engagements can be tracked using DefectDojo's **Calendar** view. 
+Engagements can be tracked using DefectDojo's **Calendar** view.
 
 #### What can an Engagement represent?
 
@@ -91,7 +91,7 @@ If you have a planned testing effort scheduled, an Engagement offers you a place
 
 * **Test:** Nessus Scan Results (March 12\)
 * **Test:** NPM Scan Audit Results (March 12\)
-* **Test:** Snyk Scan Results (March 12\)  
+* **Test:** Snyk Scan Results (March 12\)
 ​
 You can also organize CI/CD Test results within an Engagement. These kinds of Engagements are 'Open\-Ended' meaning that they don't have a date, and will instead add additional data each time the associated CI/CD actions are run.
 
@@ -124,7 +124,7 @@ DefectDojo supports two categories of Test Types:
 
 1. **Parser-based Test Types**: These correspond to specific security scanners that produce output in formats like XML, JSON, or CSV. When importing scan results, DefectDojo uses specialized parsers to convert the scanner output into Findings.
 
-2. **Non-parser Test Types**: These are used for manually created findings not imported from a scan files. 
+2. **Non-parser Test Types**: These are used for manually created findings not imported from a scan files.
 The following Test Types appear in the "Scan Type" dropdown when creating a new test, but will not appear when selecting "Import Scan":
    * API Test
    * Static Check

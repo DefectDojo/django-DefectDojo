@@ -24,7 +24,7 @@ DefectDojo-CLI has the same functionality as Universal Importer, but also includ
 3. Extract the downloaded archive within a directory of your choice.
 Optional: Add the directory containing the extracted binary to your system's $PATH for repeat access.
 
-**Note that Macintosh users may be blocked from running DefectDojo-CLI or Universal Importer as they are apps from an unidentified developer.  See [Apple Support](https://support.apple.com/en-ca/guide/mac-help/mh40616/mac) for instructions on how to override the block from Apple.**  
+**Note that Macintosh users may be blocked from running DefectDojo-CLI or Universal Importer as they are apps from an unidentified developer.  See [Apple Support](https://support.apple.com/en-ca/guide/mac-help/mh40616/mac) for instructions on how to override the block from Apple.**
 
 **Windows Users: If you receive the "Couldn't download - virus detected" error, disabling Smartscreen may work. Otherwise, use a different browser to download the tool from the Cloud portal.**
 
@@ -32,12 +32,12 @@ Optional: Add the directory containing the extracted binary to your system's $PA
 
 Universal Importer & DefectDojo-CLI can be configured using flags, environment variables, or a configuration file. The most important configuration is the API token, which must be set as an environment variable:
 
-1. Add your API key to your environment variables. 
+1. Add your API key to your environment variables.
 You can retrieve your API key from: `https://YOUR_INSTANCE.cloud.defectdojo.com/api/key-v2`
 
-or 
+or
 
-Via the DefectDojo user interface 
+Via the DefectDojo user interface
 in the user dropdown in the top-right corner:
 
 ![image](images/api-token.png)
@@ -112,11 +112,11 @@ Note: On Windows, use `set` instead of `export`.
 - [`import`](./#import)       Imports findings into DefectDojo.
 - [`reimport`](./#reimport)     Reimports findings into DefectDojo.
 - [`export`](./#export)	Exports findings from DefectDojo.
-- [`interactive`](./#interactive)   Starts an interactive mode to configure the import and reimport process, step by 
+- [`interactive`](./#interactive)   Starts an interactive mode to configure the import and reimport process, step by
 
 ### Global Options
 
-`--help, -h`     
+`--help, -h`
 * show help
 
 `--version, -v`
@@ -200,14 +200,14 @@ defectdojo-cli import \
 
 #### Options
 
-`--active, -a` 
+`--active, -a`
 * Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_CLI_API_SCAN_CONFIGURATION]`
 
 `--apply-tags-endpoints, --te`
-* If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false) 
+* If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false)
 `[$DD_CLI_APPLY_TAGS_ENDPOINTS]`
 
 `--apply-tags-findings, --tf`
@@ -254,7 +254,7 @@ defectdojo-cli import \
 
 **Settings:**
 
-`--config value, -c value`          
+`--config value, -c value`
 * The path to the TOML configuration file is used to set values for the options. If the option is set in the configuration file and the CLI, the option will take the value set from the CLI. `[$DD_CLI_CONFIG_FILE]`
 `--defectdojo-url value, -u value`
 * The URL of the DefectDojo instance to import findings into. (required). `[$DD_CLI_DEFECTDOJO_URL]`
@@ -319,56 +319,56 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 #### Options
 
-`--active, -a`                                    
+`--active, -a`
 * Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_CLI_API_SCAN_CONFIGURATION]`
 
-`--apply-tags-endpoints, --te`                     
+`--apply-tags-endpoints, --te`
 * If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false) `[$DD_CLI_APPLY_TAGS_ENDPOINTS]`
 
-`--apply-tags-findings, --tf`                      
+`--apply-tags-findings, --tf`
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_CLI_APPLY_TAGS_FINDINGS]`
 
-`--auto-create-context, --acc`                 
+`--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
 
-`--deduplication-on-engagement, --doe`          
+`--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
 
-`--engagement-name value, -e value`               
+`--engagement-name value, -e value`
 * The name of the Engagement to import findings into. `[$DD_CLI_ENGAGEMENT_NAME]`
 
-`--minimum-severity value, --ms value`          
+`--minimum-severity value, --ms value`
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_CLI_MINIMUM_SEVERITY]`
 
-`--product-name value, -p value`                   
+`--product-name value, -p value`
 * The name of the Product to import findings into. `[$DD_CLI_PRODUCT_NAME]`
 
-`--product-type-name value, --pt value`         
+`--product-type-name value, --pt value`
 * The name of the Product Type to import findings into. `[$DD_CLI_PRODUCT_TYPE_NAME]`
 
-`--report-path value, -r value`                    
+`--report-path value, -r value`
 * The path to the report to import. (required). `[$DD_CLI_REPORT_PATH]`
 
-`--scan-type value, -s value`                      
+`--scan-type value, -s value`
 * The scan type of the tool (required). `[$DD_CLI_SCAN_TYPE]`
 
-`--tag value, -t value [ --tag value, -t value ]`  
+`--tag value, -t value [ --tag value, -t value ]`
 * Any tags to be applied to the Test object `[$DD_CLI_TAGS]`
 
-`--test-id value, --ti value`                      
+`--test-id value, --ti value`
 * The ID of the Test to reimport findings into. (default: 0) `[$DD_CLI_TEST_ID]`
 
-`--test-name value, --tn value`                    
+`--test-name value, --tn value`
 * The name of the Test to import findings into - Defaults to the name of the scan type. `[$DD_CLI_TEST_NAME]`
 
-`--test-version value, -V value`                   
+`--test-version value, -V value`
 * The version of the test. `[$DD_CLI_TEST_VERSION]`
 
-`--verified, -v`                                   
+`--verified, -v`
 * Dictates whether findings should be set to Verified on import. (default: false) `[$DD_CLI_VERIFIED]`
 
 **Settings:**
@@ -376,7 +376,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 `--config value, -c value`
 * The path to the TOML configuration file is used to set values for the options. If the option is set in the configuration file and the CLI, the option will take the value set from the CLI. `[$DD_CLI_CONFIG_FILE]`
 
-`--defectdojo-url value, -u value`  
+`--defectdojo-url value, -u value`
 * The URL of the DefectDojo instance to import findings into. (required). `[$DD_CLI_DEFECTDOJO_URL]`
 
 `--insecure-tls, --no-tls`
@@ -438,7 +438,7 @@ defectdojo-cli export \
 `--cvssv3-score value`
 * Findings by CVSS v3 score. (default: ignored) `[$DD_CLI_FINDINGS_FILTERS_CVSSV3_SCORE]`
 
-`--cwe value` 
+`--cwe value`
 * Findings by CWE ID. (default: ignored) `[$DD_CLI_FINDINGS_FILTERS_CWE]`
 
 `--date value`
@@ -573,7 +573,7 @@ defectdojo-cli interactive
 
 #### Options
 
-`--skip-intro `    
+`--skip-intro `
 * Skip the intro screen (default: false)
 
 `--no-full-screen`
@@ -595,11 +595,11 @@ Usage of Universal Importer is similar to DefectDojo-CLI, however Universal Impo
 
 - [`import`](./#import-1)       Imports findings into DefectDojo.
 - [`reimport`](./#reimport-1)     Reimports findings into DefectDojo.
-- [`interactive`](./#interactive-1)   Starts an interactive mode to configure the import and reimport process, step by 
+- [`interactive`](./#interactive-1)   Starts an interactive mode to configure the import and reimport process, step by
 
 ### Global Options
 
-`--help, -h`     
+`--help, -h`
 * show help
 
 `--version, -v`
@@ -686,14 +686,14 @@ defectdojo-cli import \
 
 #### Options
 
-`--active, -a` 
+`--active, -a`
 * Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
 
 `--apply-tags-endpoints, --te`
-* If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false) 
+* If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false)
 `[$DD_IMPORTER_APPLY_TAGS_ENDPOINTS]`
 
 `--apply-tags-findings, --tf`
@@ -740,7 +740,7 @@ defectdojo-cli import \
 
 **Settings:**
 
-`--config value, -c value`          
+`--config value, -c value`
 * The path to the TOML configuration file is used to set values for the options. If the option is set in the configuration file and the CLI, the option will take the value set from the CLI. `[$DD_IMPORTER_CONFIG_FILE]`
 `--defectdojo-url value, -u value`
 * The URL of the DefectDojo instance to import findings into. (required). `[$DD_IMPORTER_DEFECTDOJO_URL]`
@@ -805,55 +805,55 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 #### Options
 
-`--active, -a`                                    
+`--active, -a`
 * Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
 
-`--apply-tags-endpoints, --te`                     
+`--apply-tags-endpoints, --te`
 * If set to true, the tags (from the option --tag) will be applied to the endpoints (default: false) `[$DD_IMPORTER_APPLY_TAGS_ENDPOINTS]`
 
-`--apply-tags-findings, --tf`                      
+`--apply-tags-findings, --tf`
 * If set to true, the tags (from the option --tag) will be applied to the findings (default: false) `[$DD_IMPORTER_APPLY_TAGS_FINDINGS]`
 
-`--auto-create-context, --acc`                 
+`--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
 
-`--deduplication-on-engagement, --doe`          
+`--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
 
-`--engagement-name value, -e value`               
+`--engagement-name value, -e value`
 * The name of the Engagement to import findings into. `[$DD_IMPORTER_ENGAGEMENT_NAME]`
 
-`--minimum-severity value, --ms value`          
+`--minimum-severity value, --ms value`
 * Dictates the lowest level severity that should be imported. Valid values are: Critical, High, Medium, Low, Info. (default: "Info") `[$DD_IMPORTER_MINIMUM_SEVERITY]`
 
-`--product-name value, -p value`                   
+`--product-name value, -p value`
 * The name of the Product to import findings into. `[$DD_IMPORTER_PRODUCT_NAME]`
 
-`--product-type-name value, --pt value`         
+`--product-type-name value, --pt value`
 * The name of the Product Type to import findings into. `[$DD_IMPORTER_PRODUCT_TYPE_NAME]`
 
-`--report-path value, -r value`                    
+`--report-path value, -r value`
 * The path to the report to import. (required). `[$DD_IMPORTER_REPORT_PATH]`
 
-`--scan-type value, -s value`                      
+`--scan-type value, -s value`
 * The scan type of the tool (required). `[$DD_IMPORTER_SCAN_TYPE]`
 
-`--tag value, -t value [ --tag value, -t value ]`  
+`--tag value, -t value [ --tag value, -t value ]`
 * Any tags to be applied to the Test object `[$DD_IMPORTER_TAGS]`
 
-`--test-id value, --ti value`                      
+`--test-id value, --ti value`
 * The ID of the Test to reimport findings into. (default: 0) `[$DD_IMPORTER_TEST_ID]`
 
-`--test-name value, --tn value`                    
+`--test-name value, --tn value`
 * The name of the Test to import findings into - Defaults to the name of the scan type. `[$DD_IMPORTER_TEST_NAME]`
 
-`--test-version value, -V value`                   
+`--test-version value, -V value`
 * The version of the test. `[$DD_IMPORTER_TEST_VERSION]`
 
-`--verified, -v`                                   
+`--verified, -v`
 * Dictates whether findings should be set to Verified on import. (default: false) `[$DD_IMPORTER_VERIFIED]`
 
 **Settings:**
@@ -861,7 +861,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 `--config value, -c value`
 * The path to the TOML configuration file is used to set values for the options. If the option is set in the configuration file and the CLI, the option will take the value set from the CLI. `[$DD_IMPORTER_CONFIG_FILE]`
 
-`--defectdojo-url value, -u value`  
+`--defectdojo-url value, -u value`
 * The URL of the DefectDojo instance to import findings into. (required). `[$DD_IMPORTER_DEFECTDOJO_URL]`
 
 `--insecure-tls, --no-tls`
@@ -880,7 +880,7 @@ defectdojo-cli interactive
 
 #### Options
 
-`--skip-intro `    
+`--skip-intro `
 * Skip the intro screen (default: false)
 
 `--no-full-screen`
@@ -897,4 +897,4 @@ If you encounter any issues with these tools, please check the following:
 - Ensure you're using the correct binary for your operating system and CPU architecture.
 - Verify that the API key is set correctly in your environment variables.
 - Check that the DefectDojo URL is correct and accessible.
-- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for DefectDojo on our [supported tools list](../parsers). 
+- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for DefectDojo on our [supported tools list](../parsers).
