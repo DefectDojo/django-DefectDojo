@@ -2637,13 +2637,13 @@
 <script_version>$Revision: 1.59 $</script_version>
 <solution>n/a</solution>
 <synopsis>Information about the Nessus scan.</synopsis>
-<plugin_output>Information about this scan : 
+<plugin_output>Information about this scan :
 
 Nessus version : 5.2.1
 Plugin feed version : 201306251015
 Type of plugin feed : HomeFeed (Non-commercial use only)
 Scanner IP : 172.16.138.167
-Port scanner(s) : nessus_syn_scanner 
+Port scanner(s) : nessus_syn_scanner
 Port range : default
 Thorough tests : no
 Experimental tests : no
@@ -2684,7 +2684,7 @@ Confidence level : 70
 </plugin_output>
 </ReportItem>
 <ReportItem port="0" svc_name="general" protocol="tcp" severity="0" pluginID="45590" pluginName="Common Platform Enumeration (CPE)" pluginFamily="General">
-<description>By using information obtained from a Nessus scan, this plugin reports CPE (Common Platform Enumeration) matches for various hardware and software products found on a host. 
+<description>By using information obtained from a Nessus scan, this plugin reports CPE (Common Platform Enumeration) matches for various hardware and software products found on a host.
 
 Note that if an official CPE is not available for the product, this plugin computes the best possible CPE based on the information available from the scan.</description>
 <fname>cpe.nbin</fname>
@@ -2698,7 +2698,7 @@ Note that if an official CPE is not available for the product, this plugin compu
 <solution>n/a</solution>
 <synopsis>It is possible to enumerate CPE names that matched on the remote system.</synopsis>
 <plugin_output>
-The remote operating system matched the following CPE : 
+The remote operating system matched the following CPE :
 
   cpe:/o:cisco:pix_firewall:7.0
 </plugin_output>
@@ -2719,7 +2719,7 @@ Remote operating system : CISCO PIX 7.0
 Confidence Level : 70
 Method : SinFP
 
- 
+
 The remote host is running CISCO PIX 7.0</plugin_output>
 </ReportItem>
 <ReportItem port="0" svc_name="general" protocol="tcp" severity="0" pluginID="12053" pluginName="Host Fully Qualified Domain Name (FQDN) Resolution" pluginFamily="General">

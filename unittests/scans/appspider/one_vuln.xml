@@ -39,13 +39,13 @@
         <p>
         The response browser cache headers allow response caching. If the response contains sensitive information then it may be leaked into the browser cache.
         </p><p>
-        By default, a response is cacheable if the requirements of the request method, request header fields, and the response status indicate that it is cacheable. 
-        Finally, unless specifically constrained by a cache-control directive, a caching system MAY always store a successful response as a cache entry, 
-        MAY return it without validation if it is fresh, and MAY return it after successful validation. If there is neither a cache validator nor an explicit expiration time associated with a response, 
-        we do not expect it to be cached, but certain caches MAY violate this expectation (for example, when little or no network connectivity is available). 
-        A client can usually detect that such a response was taken from a cache by comparing the Date header to the current time. 
-        Therefore, the browser has a capability to temporarily store some of the pages browsed. These cached files are stored in a folder. 
-        When we ask for these pages again, the browser displays them from its cache. Logging out from an application obviously does not clear the browser cache of any sensitive information 
+        By default, a response is cacheable if the requirements of the request method, request header fields, and the response status indicate that it is cacheable.
+        Finally, unless specifically constrained by a cache-control directive, a caching system MAY always store a successful response as a cache entry,
+        MAY return it without validation if it is fresh, and MAY return it after successful validation. If there is neither a cache validator nor an explicit expiration time associated with a response,
+        we do not expect it to be cached, but certain caches MAY violate this expectation (for example, when little or no network connectivity is available).
+        A client can usually detect that such a response was taken from a cache by comparing the Date header to the current time.
+        Therefore, the browser has a capability to temporarily store some of the pages browsed. These cached files are stored in a folder.
+        When we ask for these pages again, the browser displays them from its cache. Logging out from an application obviously does not clear the browser cache of any sensitive information
         that might have been stored.
         </p>]]>
             </Description>
