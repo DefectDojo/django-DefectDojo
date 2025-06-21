@@ -15,7 +15,7 @@
    "min_os_version":"11.0",
    "bundle_id":"mycompany.hu.smart",
    "bundle_url_types":[
-      
+
    ],
    "bundle_supported_platforms":[
       "iPhoneOS"
@@ -336,10 +336,10 @@
       }
    },
    "ios_api":{
-      
+
    },
    "code_analysis":{
-      
+
    },
    "file_analysis":[
       {
@@ -1445,7 +1445,7 @@
       }
    ],
    "domains":{
-      
+
    },
    "emails":[
       {

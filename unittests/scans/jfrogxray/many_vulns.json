@@ -1,4 +1,4 @@
-{     
+{
    "total_count": 3,
    "data": [
       {
@@ -29,16 +29,16 @@
                      "cvss_v3": "9.8/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
                   }
                ],
-               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",                                                                                                                            
+               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",
                "provider": "JFrog"
             }
          },
          "edited": "2019-05-14T00:21:16Z"
       },
-      {                      
-         "id": "",           
-         "severity": "High", 
-         "summary": "Apache MINA SFTP Server Absolute Path Traversal Remote File Disclosure",                                        
+      {
+         "id": "",
+         "severity": "High",
+         "summary": "Apache MINA SFTP Server Absolute Path Traversal Remote File Disclosure",
          "issue_type": "security",
          "provider": "JFrog",
          "component": "org.apache.sshd:sshd-core",
@@ -48,22 +48,22 @@
             "id": "org.apache.sshd:sshd-core",
             "vulnerable_versions": [
                "1.0.0 ≤ Version ≤ 1.2.0"
-            ],                
+            ],
             "fixed_versions": [
-               "1.3.0"       
-            ],               
+               "1.3.0"
+            ],
             "more_details": {
-               "cves": [     
-                  {          
+               "cves": [
+                  {
                      "cvss_v2": "7.8/AV:N/AC:L/Au:N/C:C/I:N/A:N"
-                  }          
-               ],            
+                  }
+               ],
                "description": "Apache MINA contains a flaw that allows traversing outside of a restricted path. The issue is due to SFTP servers failing to properly sanitizing user input, specifically absolute paths. With a specially crafted request, a remote attacker can gain access to arbitrary files.",
                "provider": "JFrog"
-            }                 
+            }
          }
 	 },
-         {    
+         {
 		 "id": "",
 		 "severity": "Low",
 		 "summary": "Denial of Service (DoS)",

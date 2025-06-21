@@ -64,7 +64,7 @@
              "__typename":"cicdscanpolicyparamssecrets",
              "countThreshold":1,
              "pathAllowList":[
-                
+
              ]
           }
        }
@@ -72,7 +72,7 @@
     "extraInfo":null,
     "tags":null,
     "outdatedPolicies":[
-       
+
     ],
     "taggedResource":null,
     "scanOriginResource":{
@@ -86,7 +86,7 @@
     "result":{
        "__typename":"CICDIACScanResult",
        "failedPolicyMatches":[
-          
+
        ],
        "ruleMatches":null,
        "scanStatistics":{

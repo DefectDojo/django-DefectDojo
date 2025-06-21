@@ -57,7 +57,7 @@
             "url": "https://security-tracker.debian.org/tracker/CVE-2018-15686",
             "vuln": "CVE-2018-15686"
         },
-        
+
         {
             "feed": "vulnerabilities",
             "feed_group": "debian:9",
