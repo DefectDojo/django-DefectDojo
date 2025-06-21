@@ -8,9 +8,9 @@ As a maintainer, you invest a significant number of hours reviewing code, contri
 
 **Contributors**
 
-Contributors who earn 100 Sponsorship Points in a calendar year will qualify for sponsorship status. Sponsorship Points are available in the following forms. 
+Contributors who earn 100 Sponsorship Points in a calendar year will qualify for sponsorship status. Sponsorship Points are available in the following forms.
 
-For reporting a bug that is verified, the contributor will receive 10 point. 
+For reporting a bug that is verified, the contributor will receive 10 point.
 
 For merged pull requests, points will be awarded as follows:
 
@@ -21,5 +21,5 @@ For merged pull requests, points will be awarded as follows:
 21- 30 lines = 3 Points
 
 Etc, etc
-	
+
 Issues will also be labeled with points. When a fix is merged, the contributor will receive the corresponding points, and the points associated with the line rewards above.

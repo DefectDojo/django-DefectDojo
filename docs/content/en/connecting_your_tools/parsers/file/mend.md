@@ -4,7 +4,7 @@ toc_hide: true
 ---
 
 ### File Types
-Accepts a JSON file, generated from the Mend* Unified Agent.  
+Accepts a JSON file, generated from the Mend* Unified Agent.
 
 ### Sample Scan Data / Unit Tests
 Unit tests for Mend JSON files can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/mend

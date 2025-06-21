@@ -50,10 +50,10 @@ In the screenshot above, all Findings that are in the Product 'Product One' will
 
 Once you have a set of Filters that you want to apply, Click the Next Button.
 
-### Step 3: Set the Rule Actions 
+### Step 3: Set the Rule Actions
 From the **Action** dropdown, select the Action that you want to apply to a Finding that matches all filters from Step 2.  Multiple Actions can be applied.
 
-You can set an additional Conditional Values which allow you to take additional actions, if certain criteria are met.  
+You can set an additional Conditional Values which allow you to take additional actions, if certain criteria are met.
 
 ![image](images/rules_engine_4.png)
 
@@ -72,9 +72,9 @@ Any Findings that match the filter conditions, plus these **additional** conditi
 
 ### Step 4 - Preview your Rule
 
-The Rule Preview displays all of the Findings that will be changed by this rule once it is run, along with a preview of the Actions taken.  Confirm that you are happy with the proposed changes, and Click Submit to save your rule. 
+The Rule Preview displays all of the Findings that will be changed by this rule once it is run, along with a preview of the Actions taken.  Confirm that you are happy with the proposed changes, and Click Submit to save your rule.
 
-If you do not believe that this rule was applied correctly, you can Select the Back Button and go back to any of the previous steps. 
+If you do not believe that this rule was applied correctly, you can Select the Back Button and go back to any of the previous steps.
 
 ![image](images/rules_engine_5.png)
 
@@ -99,7 +99,7 @@ Once the Rule has successfully finished Running, the number of Items Changed wil
 * **Filters**: the number of Filters applied by this Rule.
 * **Actions**: the number of Actions taken by this Rule.
 * **Owner**: the User who created this Rule.
-* **Status**: the Status report of the last time this Rule executed.  
+* **Status**: the Status report of the last time this Rule executed.
     'E' = 'Error', 'R' = 'Running', 'S' = 'Success'.
 * **Last Run**: the timestamp of the last time this Rule was executed.
 * **Items Changed:** count of objects that were changed on the last rule execution.

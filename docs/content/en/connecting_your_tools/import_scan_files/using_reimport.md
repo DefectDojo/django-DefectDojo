@@ -54,7 +54,7 @@ If you’re using a triage\-less scanner, or you don’t otherwise want Closed F
 
 The **Re\-Import Findings** form can be accessed on any Test page, under the **⚙️Gear** drop\-down menu.
 
-![image](images/using_reimport_2.png) 
+![image](images/using_reimport_2.png)
 
 The **Re\-import Findings** **Form** will **not** allow you to import a different scan type, or change the destination of the Findings you’re trying to upload. If you’re trying to do one of those things, you’ll need to use the **Import Scan Form**.
 

@@ -48,12 +48,12 @@ Adding JIRA to Dojo
 
 1.  Click \'JIRA\' from the left hand menu.
 2.  Select \'Add Configuration\' from the drop-down.
-3.  For JIRA Server: 
-    
+3.  For JIRA Server:
+
     Enter the _Username_ & _Password_. A _Username_ and JIRA _Personal Access Token_ will not necessarily work.
-    
+
     For JIRA Cloud:
-    
+
     Enter _Email Address_ & [API token for Jira](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
 4.  To obtain the \'open status key\' and \'closed status key\'
     visit <https://>\<**YOUR JIRA

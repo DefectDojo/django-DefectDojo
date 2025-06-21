@@ -8,7 +8,7 @@ Findings are the main way that DefectDojo standardizes and guides the reporting 
 
 ## What are Findings?
 
-Findings in DefectDojo are made up of the following components: 
+Findings in DefectDojo are made up of the following components:
 
 * The reported vulnerability data in question
 * The ‘status’ of the Finding, used to track remediation, risk acceptance or other decisions made around the vulnerability
@@ -27,23 +27,23 @@ The Finding Page contains various components. Each will be populated by the Impo
 
 ![image](images/Introduction_to_Findings.png)
 
-1. **The Title of the Finding:** Usually this is a descriptive shorthand which identifies the vulnerability or issue detected. This section is also where user\-created Tags are displayed if they exist.  
+1. **The Title of the Finding:** Usually this is a descriptive shorthand which identifies the vulnerability or issue detected. This section is also where user\-created Tags are displayed if they exist.
 ​
-2. **Finding Overview:** This section contains five separate pages of relevant information for the Finding: Description, Mitigation, Impact, References and Notes. These fields can be populated automatically based on the incoming vulnerability data, or they can be edited by a DefectDojo user to provide additional context.  
-​  
-​**\- Description** is a more detailed summary and explanation of the Finding in question.  
-​**\- Mitigation** is a suggested method for mitigating the Finding so that it is no longer present in your system.  
-​**\- Impact** describes the impact of the vulnerability on your security posture. This page might hold descriptive text, or it may include a [CVSS Vector String](https://qualysguard.qualys.com/qwebhelp/fo_portal/setup/cvss_vector_strings.htm), which is a shorthand way to communicate the vulnerability’s overall exploitability and with the consequences of an exploitation to your organization. Impact is closely related to a Finding’s Severity field.  
-​**\- References** will list any links or additional information relevant to this Finding if included.  
-​**\- Notes** is a page where you can record any other relevant information to this Finding. Notes are ‘DefectDojo\-only’ metadata, and they are not created at the time of import. Use this field to track your mitigation progress or to add more specific detail to the Finding.  
+2. **Finding Overview:** This section contains five separate pages of relevant information for the Finding: Description, Mitigation, Impact, References and Notes. These fields can be populated automatically based on the incoming vulnerability data, or they can be edited by a DefectDojo user to provide additional context.
+​
+​**\- Description** is a more detailed summary and explanation of the Finding in question.
+​**\- Mitigation** is a suggested method for mitigating the Finding so that it is no longer present in your system.
+​**\- Impact** describes the impact of the vulnerability on your security posture. This page might hold descriptive text, or it may include a [CVSS Vector String](https://qualysguard.qualys.com/qwebhelp/fo_portal/setup/cvss_vector_strings.htm), which is a shorthand way to communicate the vulnerability’s overall exploitability and with the consequences of an exploitation to your organization. Impact is closely related to a Finding’s Severity field.
+​**\- References** will list any links or additional information relevant to this Finding if included.
+​**\- Notes** is a page where you can record any other relevant information to this Finding. Notes are ‘DefectDojo\-only’ metadata, and they are not created at the time of import. Use this field to track your mitigation progress or to add more specific detail to the Finding.
 ​
 3. **Additional Details:** This section lists other details related to this Finding, if relevant:
 
 
 	* Request/Response Pairs associated with the vulnerability
 	* Steps To Reproduce the vulnerability
-	* Severity Justification where you can record a more detailed explanation of the severity or impact of the Finding.  
-	​  
+	* Severity Justification where you can record a more detailed explanation of the severity or impact of the Finding.
+	​
 	​
 4. **Metadata: This section contains filterable metadata related to the Finding:**
 
@@ -60,7 +60,7 @@ The Finding Page contains various components. Each will be populated by the Impo
 	* **CWE:** this field is a link to the external CWE (Common Weakness Enumeration) definition which applies to this Finding.
 	* **Vulnerability ID:** if there is a particular ID value for this vulnerability within the tool itself, it will be tracked here.
 	* **EPSS Score / Percentile:** if the source data has a CWE value, DefectDojo will automatically pull an [EPSS Score](https://www.first.org/epss/) and Percentile (Exploit Prediction Scoring System). EPSS represents the likelihood that a software vulnerability can be exploited, based on real\-world exploit data. EPSS scores are updated on an ongoing basis, using the latest exploitation data from First.
-	* **Found By:** This will list the scanner used to find this vulnerability.  
+	* **Found By:** This will list the scanner used to find this vulnerability.
 	​
 
 ## Example Finding Workflows

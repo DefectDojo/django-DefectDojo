@@ -398,8 +398,8 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 ```YAML
 apiversion: v1
 kind: Secret
-metadata:  
-  name: defectdojo-postgresql-specific  
+metadata:
+  name: defectdojo-postgresql-specific
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
   password: <user-password>
@@ -410,7 +410,7 @@ stringData:  # I chose stringData for better visualization of the credentials fo
 If you need to simulate a PostgreSQL database external to DefectDojo, you can install PostgreSQL using the following Helm command:
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami 
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 helm install defectdojo-postgresql bitnami/postgresql -n defectdojo -f postgresql/values.yaml
 ```
@@ -439,7 +439,7 @@ postgresql:
   auth:
     username: defectdojo # your database user
     database: defectdojo # your database name
-    secretKeys: 
+    secretKeys:
       adminPasswordKey: password # the name of the field containing the password value
       userPasswordKey: password # the name of the field containing the password value
       replicationPasswordKey: password # the name of the field containing the password value

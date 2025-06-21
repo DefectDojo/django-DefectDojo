@@ -6,7 +6,7 @@ weight: 3
 
 Permissions in <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> have been simplified, to make it easier to assign object access.  This feature can be accessed through the [Pro UI](/en/about_defectdojo/ui_pro_vs_os/).
 
-### Opening the Permissions window 
+### Opening the Permissions window
 
 ![image](images/pro_permissions.png)
 

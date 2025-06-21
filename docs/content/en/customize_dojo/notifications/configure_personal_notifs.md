@@ -26,7 +26,7 @@ In addition to standard personal notifications, DefectDojo Users can also receiv
 
 This configuration can be changed from the **Notifications** section on the **Product** page: e.g. `your-instance.defectdojo.com/product/{id}`.
 
-From here, you can set whether you want to receive **🔔 Alert**, **Mail** or **Slack** notifications for actions taken on this particular Product. These notifications apply in addition to any system\-wide notifications you are already receiving. 
+From here, you can set whether you want to receive **🔔 Alert**, **Mail** or **Slack** notifications for actions taken on this particular Product. These notifications apply in addition to any system\-wide notifications you are already receiving.
 
 Microsoft Teams cannot send personal notifications of any kind, so Teams notifications cannot be chosen from this menu.
 

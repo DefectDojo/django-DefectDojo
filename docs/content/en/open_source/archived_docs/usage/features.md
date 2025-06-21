@@ -31,20 +31,20 @@ Tags can be formatted in any of the following ways:
 Tags can be managed in the following ways
 
 1. Creating or Editing new objects
-   
+
    When a new object is created or edited through the UI or API, there is a field for specifying
    the tags to be set on a given object. This field is a multiselect field that also has
-   auto completion to make searching and adding existing tags a breeze. Here is what the field 
+   auto completion to make searching and adding existing tags a breeze. Here is what the field
    looks like on the product from the screenshot in the previous section:
-   
+
    ![Tag management on an object](images/tags-management-on-object.png)
-    
+
 2. Import and Reimport
 
     Tags can also be applied to a given test at the time of import or reimport. This is a very
     handy use case when importing via the API with automation as it provides an opportunity to
     append automation run details and tool information that may not be captured in the test
-    or finding object directly. 
+    or finding object directly.
 
     The field looks and behaves exactly as it does on a given object
 
@@ -53,7 +53,7 @@ Tags can be managed in the following ways
     When needing to update many findings with the same set of tags, the bulk edit menu can be
     used to ease the burden.
 
-    In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"]. 
+    In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"].
     First I would select the tags to be updated:
 
     ![Select findings for bulk edit tag update](images/tags-select-findings-for-bulk-edit.png)
@@ -302,7 +302,7 @@ DEDUPE_ALGO_LEGACY (value for `DD_DEDUPLICATION_ALGORITHM_PER_PARSER`: `legacy`)
 
 The hash_code computation can be configured for each parser using the
 parameter `HASHCODE_FIELDS_PER_SCANNER` in
-`settings.dist.py`, or via the env variable (useful for Kubernetes deployments) `DD_HASHCODE_FIELDS_PER_SCANNER` with a JSON string like 
+`settings.dist.py`, or via the env variable (useful for Kubernetes deployments) `DD_HASHCODE_FIELDS_PER_SCANNER` with a JSON string like
 ```json
 {"ScannerName":["field1", "field2"]}
 ```
@@ -390,7 +390,7 @@ details about the deduplication process : switch
     duplicates and that were in the previous scan of the same type
     (example ZAP) for the same engagement (or product in case of
     \"close_old_findings_product_scope\") and that are not present in the new
-    scan are closed (Inactive, Verified, Mitigated). 
+    scan are closed (Inactive, Verified, Mitigated).
 - `close_old_findings_product_scope` : if true, close_old_findings applies
     to all findings of the same type in the product. Note that
     \"Deduplication on engagement\" is no longer used to determine the
@@ -423,7 +423,7 @@ remind teams whenever a SLA is about to get breached, or is breached.
 
 To apply SLAs to Findings, open the `System Settings` page and check 'Enable Finding SLAs'.
 
-You will then need to create one or more SLA Configurations, from the SLA Configuration menu (your-defectdojo.com/sla_config).  
+You will then need to create one or more SLA Configurations, from the SLA Configuration menu (your-defectdojo.com/sla_config).
 
 ![SLA configuration screen](images/sla_settings.png)
 
@@ -647,12 +647,12 @@ a future release this will be brought out to the UI.
 
 ## Endpoint Meta Importer
 
-For heavy infrastructure scanning organizations, endpoints need to be as 
+For heavy infrastructure scanning organizations, endpoints need to be as
 flexible as possible to get the most of DefectDojo. This flexibility comes
 in the form of Tags and custom fields. Tags allow users to filter, sort, and
 report objects in ways the base object is not totally proficient in doing.
 
-Endpoint Meta Importer provides a means to apply arbitrary tags and custom fields to 
+Endpoint Meta Importer provides a means to apply arbitrary tags and custom fields to
 endpoints in mass via a CSV file. Tags and customs fields are stored in the
 format of column:row.
 

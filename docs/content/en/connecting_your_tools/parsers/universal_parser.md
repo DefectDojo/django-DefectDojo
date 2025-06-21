@@ -80,7 +80,7 @@ If you've uploaded a scan file in JSON format that looks like this:
 }
 ```
 
-You'll see a hierarchical representation of the unique fields we detected based on the structure of the input file, with icons indicating the type of each field (if we can determine this). You can then select the "title" input field in the drop-down menu that populates the "Title" output field, the "description" input field can go with the "Description" output field, and so on. 
+You'll see a hierarchical representation of the unique fields we detected based on the structure of the input file, with icons indicating the type of each field (if we can determine this). You can then select the "title" input field in the drop-down menu that populates the "Title" output field, the "description" input field can go with the "Description" output field, and so on.
 
 Input field names don't have to match the names of output fields, and your scan file may not have an equivalent to all DefectDojo output fields.
 

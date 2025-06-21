@@ -24,7 +24,7 @@ Veracode reports can be ingested in either XML or JSON Format
             ]
         }
         ```
-    - Embedded 
+    - Embedded
       - This response can be saved directly to a file and uploaded
       - Not as ideal for crafting a refined report consisting of multiple requests
       - Desired Format:
@@ -35,7 +35,7 @@ Veracode reports can be ingested in either XML or JSON Format
                    {
                         ...
                     },
-                    ... 
+                    ...
                 ]
             },
             "_links": {

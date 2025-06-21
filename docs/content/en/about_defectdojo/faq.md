@@ -81,7 +81,7 @@ Many of DefectDojo's core features can be completely automated.  CI/CD (or any k
 Findings can have many statuses which indicate their status.  A status of Active or Inactive is always set on a Finding, while other statuses such as Verified, False Positive, or Out Of Scope can be applied at your discretion.
 
 These statuses are described in more detail in our [Finding Status Definitions](/en/working_with_findings/findings_workflows/finding_status_definitions/) guide, along with information about how they can be used.
- 
+
 ### How can I delete Findings from DefectDojo?
 
 It's important to maintain historical records in AppSec work, so generally speaking, we recommend retaining Closed Findings as 'Inactive' rather than deleting them outright.  Deleting a Finding will remove all notes and metric-tracking from that Finding outright, which can lead to inaccurate reports or an incomplete archive.

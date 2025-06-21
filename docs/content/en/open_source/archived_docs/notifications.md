@@ -43,7 +43,7 @@ DefectDojo allows `template` to be used, administrator can use this feature to d
 #### Basic Integration
 This method will allow DefectDojo to send Global notifications to a Slack channel.  It can also send Personal notifications to an individual user's Slackbot.
 
-To configure Slack messaging, you will first need to create a new Slack app at https://api.slack.com/apps.  
+To configure Slack messaging, you will first need to create a new Slack app at https://api.slack.com/apps.
 
 This app can be created from scratch, or from a JSON manifest which includes all necessary scopes and bot functionality.  This manifest can be copied and pasted into the Slack App wizard when you select 'Build From Manifest'.
 

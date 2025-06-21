@@ -9,7 +9,7 @@ DefectDojo parser accepts JSON report format.
 See Aqua documention: https://docs.aquasec.com
 
 ### CI/CD Scans
-Aqua scanning can be integrated with several types of third-party CI/CD systems. 
+Aqua scanning can be integrated with several types of third-party CI/CD systems.
 
 If there is no plugin available for a particular development tool, Aqua can be integrated with the CI/CD pipeline using Scanner CLI.
 

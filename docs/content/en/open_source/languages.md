@@ -28,4 +28,4 @@ GitHub updates its language colors from time to time, when new languages emerge.
 
 `./manage.py import_github_languages`
 
-reads data from a JSON file hosted in https://github.com/ozh/github-colors to add new languages and update colors. 
+reads data from a JSON file hosted in https://github.com/ozh/github-colors to add new languages and update colors.

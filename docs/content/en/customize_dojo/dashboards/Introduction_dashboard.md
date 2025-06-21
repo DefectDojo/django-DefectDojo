@@ -17,7 +17,7 @@ Each team member shares a single dashboard, but the results of the dashboard are
 
 ### Dashboard Tiles
 
-Tiles are designed to provide relevant information and speed up navigation within DefectDojo. 
+Tiles are designed to provide relevant information and speed up navigation within DefectDojo.
 
 ![image](images/Introduction_to_Dashboard_Features_2.png)
 
@@ -57,7 +57,7 @@ This chart allows you to monitor the volume and severity distribution of incomin
 
 #### Unassigned Answered Engagement Questionnaires
 
-If you have completed Engagement Questionnaires for review, those will be listed in this table. 
+If you have completed Engagement Questionnaires for review, those will be listed in this table.
 
 ![image](images/Introduction_to_Dashboard_Features_5.png)
 

@@ -20,8 +20,8 @@ All parsers which using API have common basic configuration step but with differ
 - Click on the `All Products` option and then `+ Add Product`.
 - Fill in the fields presented.
 - Once the product is added, click on the `Settings` option then `Add API Scan Configuration`.
-- Select the previously added Edgescan `Tool Configuration`. 
-- Provide the edgescan asset ID(s) that you wish to import the findings for in the field `Service key 1`. 
+- Select the previously added Edgescan `Tool Configuration`.
+- Provide the edgescan asset ID(s) that you wish to import the findings for in the field `Service key 1`.
     - Note that multiple asset IDs should be comma separated with no spacing.
     - If you want to import vulnerabilities for all assets, simply leave the Service key 1 field empty.
 
@@ -29,7 +29,7 @@ All parsers which using API have common basic configuration step but with differ
 
 - After the previous steps are complete, you can import the findings by selecting the `Findings` option
 on the product's page and then `Import Scan Results`.
-- Once you are presented with a series of fields, select `Edgescan Scan` as the scan type. 
+- Once you are presented with a series of fields, select `Edgescan Scan` as the scan type.
     - If you have more than one asset configured, you must also select which Edgescan `API Scan Configuration` to use.
 - Click on the `Import` button.
 

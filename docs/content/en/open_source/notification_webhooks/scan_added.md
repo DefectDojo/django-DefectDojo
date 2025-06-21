@@ -5,7 +5,7 @@ chapter: true
 exclude_search: true
 ---
 
-Event `scan_added_empty` describes a situation when reimport did not affect the existing test (no finding has been created or closed). 
+Event `scan_added_empty` describes a situation when reimport did not affect the existing test (no finding has been created or closed).
 
 ## Event HTTP header for scan_added
 ```yaml

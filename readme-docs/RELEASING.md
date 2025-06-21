@@ -4,8 +4,8 @@
 
 We have two types of releases:
 
-1. **Feature releases** - These are created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
-2. **Bugfix releases** - These are created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`. 
+1. **Feature releases** - These are created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`.
+2. **Bugfix releases** - These are created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`.
 
 The release process will then:
 
@@ -18,7 +18,7 @@ The steps are identical for both release types, unless specified otherwise below
 # Creating and preparing the release branch
 
 ### Feature release
-- Make sure the `dev` branch contains exactly that what you want to release. 
+- Make sure the `dev` branch contains exactly that what you want to release.
 - Create a new release branch from the `dev` branch:
 
 ![image](https://user-images.githubusercontent.com/4426050/149572033-49a6c2a7-6c5b-4272-84e5-040c661598b4.png)
@@ -113,7 +113,7 @@ Check the PR and versio number updates. For a fix version problably the version 
 
 ![image](https://user-images.githubusercontent.com/4426050/149618605-fd94b6a8-d348-4fc5-8eaf-92f23b1b54b7.png)
 
-Wait for the tests to complete. 
+Wait for the tests to complete.
 
 You can work on the release notes in the next step while waiting.
 
@@ -169,7 +169,7 @@ All should be good now, including the release notes. So let's publish!
 
 - Head over to [Release](https://github.com/DefectDojo/django-DefectDojo/releases)
 - Click on the 'edit' icon for the release you just created
-- Publish: 
+- Publish:
 
 ![image](https://user-images.githubusercontent.com/4426050/149619971-262104a7-55e6-4dc7-80f8-988c28d1b3ad.png)
 

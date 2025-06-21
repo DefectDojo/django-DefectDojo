@@ -15,7 +15,7 @@ DefectDojo is designed handle any security implementation: no matter your securi
 
 ### Large Enterprise: RBAC and Engagements
 
-'BigCorp' is a large multinational enterprise, with a CISO and a centralized IC security group that includes AppSec. 
+'BigCorp' is a large multinational enterprise, with a CISO and a centralized IC security group that includes AppSec.
 
 Security at BICORP is highly centralized.  Certain things are delegated out to BISOs (Business Information Security Officers).
 
@@ -36,7 +36,7 @@ Each of these report categories can be handled by a separate Engagement, with a 
 
 ![image](images/example_product_hierarchy_bigcorp.png)
 
-- If a Product has a CI/CD pipeline, all of the results from that pipeline can be continuously imported into a single open-ended Engagement. Each tool used will create a separate Test within the 'CI/CD' Engagement, which can be continuously updated with new data.  
+- If a Product has a CI/CD pipeline, all of the results from that pipeline can be continuously imported into a single open-ended Engagement. Each tool used will create a separate Test within the 'CI/CD' Engagement, which can be continuously updated with new data.
 (See our guide to [Reimport](/en/connecting_your_tools/import_scan_files/using_reimport/))
 - Each Pen Test effort can have a separate Engagement created to contain all of the results: e.g. 'Q1 Pen Test 2024', 'Q2 Pen Test 2024', etc.
 - BigCorp will likely want to run their own mock PCI Audit so that they're prepared for the real thing when it happens. The results of those audits can also be stored as a separate Engagement.
@@ -62,7 +62,7 @@ Key concerns for Cyber Robotics:
 
 #### Testing Model
 
-Cyber Robotics has a standardized testing process for all of their embedded systems: 
+Cyber Robotics has a standardized testing process for all of their embedded systems:
 
 - CI/CD, SAST, and SCA tests are run.
 - Security Control Reviews

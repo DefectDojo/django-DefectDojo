@@ -118,7 +118,7 @@ The WYSIWYG (What You See Is What You Get) widget can be used to add a section c
 
 The Findings Widget provides a list and summary of each Finding you want to include in your report. You can set the scope of the Findings you wish to include with Filters.
 
-The Findings Widget is divided into two sections. The upper section contains a list of filters which can be used to determine which Findings you want to include, and the lower section contains the resulting list of Findings after filters are applied. 
+The Findings Widget is divided into two sections. The upper section contains a list of filters which can be used to determine which Findings you want to include, and the lower section contains the resulting list of Findings after filters are applied.
 
 To apply filters to your Findings widget, set the filter parameters and click the **Apply Filter** button at the bottom. You can preview the results of your filter by checking the Findings list located underneath the Filters section.
 
