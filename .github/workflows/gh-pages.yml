@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: cd docs && npm ci
-      
+
       - name: Build production website
         env:
           HUGO_ENVIRONMENT: production
