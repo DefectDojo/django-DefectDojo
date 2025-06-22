@@ -1955,8 +1955,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
             vulnerability_id_set = validated_data.pop(
@@ -1976,8 +1974,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
                 new_finding_template, vulnerability_ids,
             )
             new_finding_template.save()
-
-        self._save_tags(new_finding_template, to_be_tagged)
 
         return new_finding_template
 

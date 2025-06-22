@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0229_alter_finding_unique_id_from_tool'),
+        ('dojo', '0230_alter_jira_instance_accepted_mapping_resolution_and_more'),
     ]
 
     operations = [
