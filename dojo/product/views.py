@@ -148,7 +148,7 @@ def product(request):
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
     # Get benchmark types for the template
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by("name")
+    benchmark_types = Benchmark_Type.objects.filter(enabled=True).order_by("name")
 
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
@@ -157,7 +157,7 @@ def product(request):
         "prod_filter": prod_filter,
         "name_words": sorted(set(name_words)),
         "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-        "benchmark_type": benchmark_type,
+        "benchmark_types": benchmark_types,
         "user": request.user})
 
 
