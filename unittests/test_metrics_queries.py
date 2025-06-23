@@ -50,7 +50,6 @@ class FindingQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json", "unit_metrics_additional_data.json"]
 
     def setUp(self):
-        self.maxDiff = None
         user = User.objects.get(username="user1")
         self.request = RequestFactory().get(reverse("metrics"), {
             "start_date": "2017-12-26",
