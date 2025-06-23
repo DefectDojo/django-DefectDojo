@@ -138,9 +138,7 @@ def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None)
 
 
 def tomorrow():
-    """
-    Returns a date representing the day after today.
-    """
+    """Returns a date representing the day after today."""
     return timezone.now().date() + timedelta(days=1)
 
 
