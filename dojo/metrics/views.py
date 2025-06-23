@@ -200,6 +200,9 @@ def simple_metrics(request):
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
+                                       active=False,
+                                       is_mitigated=True,
+                                       mitigated__isnull=False,
                                        mitigated__month=now.month,
                                        mitigated__year=now.year,
                                        )
