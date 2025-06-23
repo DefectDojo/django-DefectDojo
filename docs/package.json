@@ -20,7 +20,7 @@
     "thulite": "2.5.0"
   },
   "devDependencies": {
-    "prettier": "3.5.3",
+    "prettier": "3.6.0",
     "vite": "6.3.5"
   },
   "engines": {
