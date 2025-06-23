@@ -60,6 +60,7 @@ from dojo.filters import (
     ApiRiskAcceptanceFilter,
     ApiTemplateFindingFilter,
     ApiTestFilter,
+    ApiUserFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
     TestImportAPIFilter,
@@ -2378,15 +2379,7 @@ class UsersViewSet(
     serializer_class = serializers.UserSerializer
     queryset = User.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "username",
-        "first_name",
-        "last_name",
-        "email",
-        "is_active",
-        "is_superuser",
-    ]
+    filterset_class = ApiUserFilter
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
     def get_queryset(self):

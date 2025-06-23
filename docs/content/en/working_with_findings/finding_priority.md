@@ -1,13 +1,18 @@
 ---
-title: "Finding Priority Enhancement (Pro)"
+title: "⏱️ Finding Priority and Risk (Pro)"
 description: "How DefectDojo ranks your Findings"
 weight: 1
 ---
 
 Additional Finding filters are available in DefectDojo Pro to more easily triage, filter and prioritize Findings.
 
-* Priority sorts Findings based on the context and importance of the Product they are stored in.
-* Risk considers the Product's context, with a greater emphasis on the exploitability of a Finding.
+![image](images/pro_risk_example.png)
+
+* **Priority** sorts Findings based on the context and importance of the Product they are stored in.
+* **Risk** considers the Product's context, with a greater emphasis on the exploitability of a Finding.
+
+Learn more about Priority and Risk with DefectDojo Inc's May 2025 Office Hours:
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4SN0BWWsVm4?si=VYUzEGNeijjhoD22" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Finding Priority
 
