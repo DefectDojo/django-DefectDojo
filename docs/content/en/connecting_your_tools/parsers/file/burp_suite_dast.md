@@ -1,26 +1,26 @@
 ---
-title: "Burp Enterprise Scan"
+title: "Burp Suite DAST Scan (formerly known as Burp Enterprise)"
 toc_hide: true
 ---
 
 ## Overview
-The Burp Enterprise Scan parser processes HTML reports from Burp Enterprise Edition and imports the findings into DefectDojo. The parser extracts vulnerability details, severity ratings, descriptions, remediation steps, and other metadata from the HTML report.
+The Burp Suite DAST Scan parser processes HTML reports from Burp Suite DAST and imports the findings into DefectDojo. The parser extracts vulnerability details, severity ratings, descriptions, remediation steps, and other metadata from the HTML report.
 
 ## Supported File Types
 The parser accepts a Standard Report as an HTML file. To parse an XML file instead, use the [Burp XML parser](https://docs.defectdojo.com/en/connecting_your_tools/parsers/file/burp/).
 
-See the Burp documentation for information on how to export a Standard Report: [PortSwigger Enterprise Edition Downloading reports](https://portswigger.net/burp/documentation/enterprise/work-with-scan-results/generate-reports)
+See the Burp documentation for information on how to export a Standard Report: [Burp Suite DAST Downloading reports](https://portswigger.net/burp/documentation/dast/user-guide/work-with-scan-results/generate-reports)
 
 ## Standard Format HTML (Main Format)
 
 ### Total Fields in HTML
-- Total data fields in Burp Enterprise Scan HTML output: 15
+- Total data fields in Burp Suite DAST Scan HTML output: 15
 - Total data fields parsed into DefectDojo finding: 13
 - Total data fields NOT parsed: 2
 
 ### Standard Format Field Mapping Details
 
-| Data Field # | Burp Enterprise Scan Data Field | DefectDojo Finding Field | Parser Line # | Notes |
+| Data Field # | Burp Suite DAST Scan Data Field | DefectDojo Finding Field | Parser Line # | Notes |
 |-------------|--------------------------------|--------------------------|--------------|-------|
 | 1 | Title | title | 101, 165 | Extracted from issue container h2 element and table rows with "issue-type-row" class |
 | 2 | Severity | severity | 101, 168 | Extracted from table rows, mapped directly (High/Medium/Low/Info) |
@@ -39,7 +39,7 @@ See the Burp documentation for information on how to export a Standard Report: [
 | 15 | Issue ID/Anchor | Not Parsed | - | HTML anchor tags like "#7459896704422157312" are not extracted |
 
 ### Field Mapping Details
-The parser has different handling logic for various sections of the Burp Enterprise report:
+The parser has different handling logic for various sections of the Burp Suite DAST report:
 
 - For table content sections (using `table_contents_xpath`), the parser extracts:
   - Base endpoint from h1 elements (e.g., "https://instance.example.com")
@@ -101,7 +101,7 @@ This parser has special handling for different section types within the HTML rep
 - It extracts CWE numbers and vulnerability classifications from reference sections
 
 ### Sample Scan Data
-Sample Burp Enterprise Scan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp_enterprise).
+Sample Burp Suite DAST Scan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp_suite_dast).
 
 ### Link to Tool
-[Burp Enterprise Edition](https://portswigger.net/burp/enterprise)
+[Burp Suite DAST](https://portswigger.net/burp/dast)
