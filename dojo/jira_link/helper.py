@@ -674,6 +674,9 @@ def push_to_jira(obj, *args, **kwargs):
         raise ValueError(msg)
 
     if isinstance(obj, Finding):
+        if obj.has_finding_group:
+            logger.debug("pushing finding group for %s to JIRA", obj)
+            return push_finding_group_to_jira(obj.finding_group, *args, **kwargs)
         return push_finding_to_jira(obj, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
