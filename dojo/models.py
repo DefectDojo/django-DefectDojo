@@ -5,7 +5,7 @@ import logging
 import re
 import warnings
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
@@ -135,6 +135,13 @@ def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None)
         if field.name not in {"id", *exclude_fields}:
             setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
     return new_model_instance
+
+
+def tomorrow():
+    """
+    Returns a date representing the day after today.
+    """
+    return timezone.now().date() + timedelta(days=1)
 
 
 @deconstructible
@@ -2331,6 +2338,16 @@ class Finding(models.Model):
                               verbose_name=_("EPSS percentile"),
                               help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
                               validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    known_exploited = models.BooleanField(default=False,
+                                          verbose_name=_("Known Exploited"),
+                                          help_text=_("Whether this vulnerability is known to have been exploited in the wild."))
+    ransomware_used = models.BooleanField(default=False,
+                                          verbose_name=_("Used in Ransomware"),
+                                          help_text=_("Whether this vulnerability is known to have been leveraged as part of a ransomware campaign."))
+    kev_date = models.DateField(null=True, blank=True,
+                                verbose_name=_("KEV Date Added"),
+                                help_text=_("The date the vulnerability was added to the KEV catalog."),
+                                validators=[MaxValueValidator(tomorrow)])
     cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
@@ -2660,6 +2677,9 @@ class Finding(models.Model):
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
+            models.Index(fields=["known_exploited"]),
+            models.Index(fields=["ransomware_used"]),
+            models.Index(fields=["kev_date"]),
         ]
 
     def __init__(self, *args, **kwargs):
