@@ -4,7 +4,7 @@ toc_hide: true
 ---
 JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
-The status field in Trivy is mapped to the Defect Dojo status flags in the following way:
+The [status](https://trivy.dev/latest/docs/configuration/filtering/) field in Trivy is mapped to the Defect Dojo status flags in the following way:
 
 | Trivy Status         | Active | Verified | Mitigated | False Positive | Remarks                                                                                                         |
 |----------------------|--------|----------|-----------|---------------|-----------------------------------------------------------------------------------------------------------------|
@@ -19,6 +19,7 @@ The status field in Trivy is mapped to the Defect Dojo status flags in the follo
 
 The status field contains the status as assigned by the OS/Package vendor such as Red Hat, Debian, etc.
 As s Defect Dojo user you still have to asses the appropiate action in your product context.
+If you want to exclude certain status from being imported into Defect Dojo, please [filter them in the export from Trivy](https://trivy.dev/latest/docs/configuration/filtering/)
 
 ### Sample Scan Data
 Sample Trivy scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/trivy).
