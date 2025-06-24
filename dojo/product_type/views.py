@@ -57,7 +57,7 @@ Product Type views
 def get_products_name(request, pid):
     data = Product.objects.filter(prod_type=pid).values("id", "name")
     product_filter = ProductFilter(request.GET, queryset=data)
-    ps = get_page_items(request, product_filter.qs, 10)
+    ps = get_page_items(request, product_filter.qs, 25)
     return JsonResponse({"data": list(ps)})
 
 
