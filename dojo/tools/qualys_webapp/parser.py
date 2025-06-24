@@ -194,9 +194,6 @@ def get_unique_vulnerabilities(
         url = vuln.findtext("URL")
         if url is not None:
             urls.append(str(url))
-        access_path = vuln.find("ACCESS_PATH")
-        if access_path is not None:
-            urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
         req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
@@ -258,9 +255,6 @@ def get_vulnerabilities(
         url = vuln.findtext("URL")
         if url is not None:
             urls.append(str(url))
-        access_path = vuln.find("ACCESS_PATH")
-        if access_path is not None:
-            urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
         req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
