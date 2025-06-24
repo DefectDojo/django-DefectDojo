@@ -53,10 +53,12 @@ Status: in prod
 Product Type views
 """
 
-def get_products_name(_request, pid):
-    prod_type = Product_Type.objects.get(id=pid)
-    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
-    return JsonResponse({"data": list(data)})
+
+def get_products_name(request, pid):
+    data = Product.objects.filter(prod_type=pid).values("id", "name")
+    product_filter = ProductFilter(request.GET, queryset=data)
+    ps = get_page_items(request, product_filter.qs, 10)
+    return JsonResponse({"data": list(ps)})
 
 
 def get_description_product(_request, pid):
