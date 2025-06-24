@@ -249,7 +249,7 @@ Number  Content
                 finding = findings[1]
                 self.assertEqual(False, finding.active)
                 self.assertEqual(True, finding.verified)
-                self.assertEqual(True, finding.false_p)
+                self.assertEqual(False, finding.false_p)
                 self.assertEqual(False, finding.out_of_scope)
                 self.assertEqual(True, finding.is_mitigated)
 

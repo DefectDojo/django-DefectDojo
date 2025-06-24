@@ -104,7 +104,6 @@ class TrivyParser:
                 # false positive is the most appropriate status for not affected as out of scope might be interpreted as something else
                 "active": False,
                 "verified": True,
-                "false_p": True,
                 "is_mitigated": True,
             },
             "affected": {
