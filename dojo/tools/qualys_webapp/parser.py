@@ -8,13 +8,13 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 
 try:
-    from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
+    from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
 except ImportError:
     # Avoid breaking change
     QUALYS_WAS_WEAKNESS_IS_VULN = False
 
 try:
-    from django.conf.settings import QUALYS_WAS_UNIQUE_ID
+    from dojo.settings.settings import QUALYS_WAS_UNIQUE_ID
 except ImportError:
     # Avoid breaking change
     QUALYS_WAS_UNIQUE_ID = False
