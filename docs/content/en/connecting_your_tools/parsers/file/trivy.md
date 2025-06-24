@@ -18,7 +18,7 @@ The [status](https://trivy.dev/latest/docs/configuration/filtering/) field in Tr
 | end_of_life          | True   | True     | False     |               | no different from affected as Defect Dojo doesn't have a flag to capture will_not_fix by OS/Package Vendor; we can't set active to False as the user needs to (temporarily) risk accept
 
 The status field contains the status as assigned by the OS/Package vendor such as Red Hat, Debian, etc.
-As s Defect Dojo user you still have to asses the appropiate action in your product context.
+It is recommended to assess the appropriate action in your Product's context
 If you want to exclude certain status from being imported into Defect Dojo, please [filter them in the export from Trivy](https://trivy.dev/latest/docs/configuration/filtering/)
 
 ### Sample Scan Data
