@@ -16,16 +16,15 @@ from dojo.notifications.helper import create_notification
 @receiver(post_delete, sender=Test)
 def test_post_delete(sender, instance, using, origin, **kwargs):
     if instance == origin:
+        description = _('The test "%(name)s" was deleted') % {"name": str(instance)}
         if settings.ENABLE_AUDITLOG:
-            le = LogEntry.objects.get(
+            if le := LogEntry.objects.filter(
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label="dojo", model="test"),
                 object_id=instance.id,
-            )
-            description = _('The test "%(name)s" was deleted by %(user)s') % {
+            ).order_by('-id').first():
+                description = _('The test "%(name)s" was deleted by %(user)s') % {
                                 "name": str(instance), "user": le.actor}
-        else:
-            description = _('The test "%(name)s" was deleted') % {"name": str(instance)}
         create_notification(event="test_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                             title=_("Deletion of %(name)s") % {"name": str(instance)},
                             description=description,
