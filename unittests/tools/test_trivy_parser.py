@@ -230,3 +230,73 @@ Number  Content
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 37)
+
+    def test_all_statuses(self):
+        with sample_path("all_statuses.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 8)
+
+            with self.subTest("unknown"):
+                finding = findings[0]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("not_affected"):
+                finding = findings[1]
+                self.assertEqual(False, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(True, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(True, finding.is_mitigated)
+
+            with self.subTest("affected"):
+                finding = findings[2]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("fixed"):
+                finding = findings[3]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("under_investigation"):
+                finding = findings[4]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("will_not_fix"):
+                finding = findings[5]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("fix_deferred"):
+                finding = findings[6]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("end_of_life"):
+                finding = findings[7]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
