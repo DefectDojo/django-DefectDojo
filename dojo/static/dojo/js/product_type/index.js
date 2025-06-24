@@ -21,17 +21,14 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $('#id_destination_product').selectpicker(); 
-    console.log("Input event triggered");
+    $('#id_destination_product').selectpicker();
     $('#id_destination_product').on('shown.bs.select', function ()
     {
         const searchInput = $('.bs-searchbox input');
         searchInput.off('input').on('input', function () {
             const query = $(this).val().trim();
-            console.log("User typed:", query);  // Debug
 
             if (query.length > 1) {
-                console.log("Input event triggered");
                 handleProductTypeChange(query);
             }
         });
