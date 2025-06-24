@@ -159,6 +159,7 @@ def endpoint_queries(
     endpoints_qs = queryset_check(endpoints)
 
     if not endpoints_qs.exists():
+        endpoints = endpoints_qs
         messages.add_message(
             request,
             messages.WARNING,
