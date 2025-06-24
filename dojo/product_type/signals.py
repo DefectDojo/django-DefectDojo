@@ -29,7 +29,7 @@ def product_type_post_delete(sender, instance, **kwargs):
             action=LogEntry.Action.DELETE,
             content_type=ContentType.objects.get(app_label="dojo", model="product_type"),
             object_id=instance.id,
-        ).order_by('-id').first():
+        ).order_by("-id").first():
             description = _('The product type "%(name)s" was deleted by %(user)s') % {
                             "name": instance.name, "user": le.actor}
     create_notification(event="product_type_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing

@@ -22,7 +22,7 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label="dojo", model="test"),
                 object_id=instance.id,
-            ).order_by('-id').first():
+            ).order_by("-id").first():
                 description = _('The test "%(name)s" was deleted by %(user)s') % {
                                 "name": str(instance), "user": le.actor}
         create_notification(event="test_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing

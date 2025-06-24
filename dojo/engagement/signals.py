@@ -45,7 +45,7 @@ def engagement_post_delete(sender, instance, using, origin, **kwargs):
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label="dojo", model="engagement"),
                 object_id=instance.id,
-            ).order_by('-id').first():
+            ).order_by("-id").first():
                 description = _('The engagement "%(name)s" was deleted by %(user)s') % {
                                 "name": instance.name, "user": le.actor}
         create_notification(event="engagement_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
