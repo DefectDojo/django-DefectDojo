@@ -1,4 +1,5 @@
 
+import logging
 import operator
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -31,6 +32,8 @@ from dojo.utils import (
     get_system_setting,
     queryset_check,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_metrics_finding_filter_class() -> type[MetricsFindingFilter | MetricsFindingFilterWithoutObjectLookups]:
@@ -159,13 +162,13 @@ def endpoint_queries(
     endpoints_qs = queryset_check(endpoints)
 
     if not endpoints_qs.exists():
-        endpoints = endpoints_qs
         messages.add_message(
             request,
             messages.WARNING,
             _("No endpoints match the current filters."),
             extra_tags="alert-danger")
 
+    endpoints = endpoints_qs
     start_date, end_date = get_date_range(endpoints_qs)
 
     if len(prod_type) > 0:
