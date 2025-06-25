@@ -214,8 +214,8 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
 
         # Click on link of finding name to promote to finding
-        driver.find_elements(By.NAME, "stub_finding_name")[0].click()
-        # Check we have the correct stub finding
+        driver.find_element(By.PARTIAL_LINK_TEXT, "App Vulnerable to XSS3").click()
+        self.assertTrue(self.is_info_message_present(text="In order to promote a Potential Finding to a Verified Finding you must provide the following information."))
         self.assertEqual(driver.find_element(By.ID, "id_title").get_attribute("value"), "App Vulnerable to XSS3")
         # Edit finding Description
         driver.find_element(By.ID, "id_cvssv3_score").send_keys(Keys.TAB, Keys.TAB, "This is a promoted stub finding")
