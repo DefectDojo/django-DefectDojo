@@ -533,6 +533,11 @@ env = environ.FileAwareEnv(
     DD_CORS_ALLOW_METHODS=(list, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]),
     DD_CORS_ALLOW_HEADERS=(list, ["Authorization", "Content-Type", "Accept", "session-cookie"]),
     DD_CORS_ALLOW_CREDENTIALS=(bool, True),
+
+    # Pool conecction
+    DD_MIN_CONNS=(int, 10),
+    DD_MAX_CONNS=(int, 50),
+    DD_TIMEOUT_CONNS=(int, 10),
 )
 
 
@@ -633,6 +638,10 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 # ------------------------------------------------------------------------------
 # DATABASE
 # ------------------------------------------------------------------------------
+# Pool connection settings
+MIN_CONNS = env("DD_MIN_CONNS")
+MAX_CONNS = env("DD_MAX_CONNS")
+TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
@@ -641,7 +650,12 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
+                "pool": {
+                    "min_size": MIN_CONNS,
+                    "max_size": MAX_CONNS,
+                    "timeout": TIMEOUT_CONNS
+                    }
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -658,7 +672,12 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
+                "pool": {
+                    "min_size": MIN_CONNS,
+                    "max_size": MAX_CONNS,
+                    "timeout": TIMEOUT_CONNS
+                }
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
@@ -675,7 +694,12 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": f"-c search_path={SCHEMA_DB}"
+                    "options": f"-c search_path={SCHEMA_DB}",
+                    "pool": {
+                        "min_size": MIN_CONNS,
+                        "max_size": MAX_CONNS,
+                        "timeout": TIMEOUT_CONNS
+                    }
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
