@@ -46,15 +46,20 @@
         <!-- jquery cookie -->
         <script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
         <!-- DataTables Javascript -->
-        <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
-        <script src="{% static "datatables.net-dt/js/dataTables.dataTables.min.js" %}"></script>
-        <script src="{% static "datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
-        <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
-        <script src="{% static "datatables.net-buttons/js/buttons.html5.min.js" %}"></script>
-        <script src="{% static "datatables.net-buttons/js/buttons.colVis.min.js" %}"></script>
-        <script src="{% static "datatables.net-buttons/js/buttons.print.min.js" %}"></script>
-        <script src="{% static "datatables.net-buttons-bs/js/buttons.bootstrap.min.js" %}"></script>
-        <script src="{% static "datatables.net-colreorder/js/dataTables.colReorder.min.js" %}"></script>
+        <!-- DataTables core (required) -->
+        <script src="{% static 'datatables.net/js/dataTables.min.js' %}"></script>
+        <!-- DataTables with Bootstrap styling (integration) -->
+        <script src="{% static 'datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+        <!-- DataTables Buttons extension (core) -->
+        <script src="{% static 'datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
+        <!-- DataTables Buttons Bootstrap integration -->
+        <script src="{% static 'datatables.net-buttons-bs/js/buttons.bootstrap.min.js' %}"></script>
+        <!-- Other Buttons extensions -->
+        <script src="{% static 'datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
+        <script src="{% static 'datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
+        <script src="{% static 'datatables.net-buttons/js/buttons.print.min.js' %}"></script>
+        <!-- ColReorder extension -->
+        <script src="{% static 'datatables.net-colreorder/js/dataTables.colReorder.min.js' %}"></script>
 
         <script src="{% static "pdfmake/build/pdfmake.min.js" %}"></script>
         <script src="{% static "pdfmake/build/vfs_fonts.js" %}"></script>
@@ -1044,7 +1049,7 @@
             <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" role="dialog" aria-labelledby="sessionModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header"> 
+                    <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -1111,7 +1116,7 @@
                     function() { $(this).popover('show'); }, // hover
                     function() { $(this).popover('hide'); } // unhover
                 );
-                
+
                 {% if request.user.is_authenticated %}
                     function session_notifcation() {
                         var warningTime = "{{ session_notify_time|default:0|escapejs }}"; // When the warning will show
@@ -1122,7 +1127,7 @@
                             $('#sessionTimeoutModal').modal('show');
                         }, timeout * 1000);
 
-                    }  
+                    }
                     session_notifcation();
                     $('#sessionTimeoutModal').on('show.bs.modal', function (event) {
                         $(this).attr('aria-hidden', 'false');
