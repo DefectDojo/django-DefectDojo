@@ -71,6 +71,7 @@ from dojo.forms import (
 from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
+    Benchmark_Type,
     BurpRawRequestResponse,
     DojoMeta,
     Endpoint,
@@ -146,6 +147,9 @@ def product(request):
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
+    # Get benchmark types for the template
+    benchmark_types = Benchmark_Type.objects.filter(enabled=True).order_by("name")
+
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
     return render(request, "dojo/product.html", {
@@ -153,6 +157,7 @@ def product(request):
         "prod_filter": prod_filter,
         "name_words": sorted(set(name_words)),
         "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
+        "benchmark_types": benchmark_types,
         "user": request.user})
 
 
@@ -294,6 +299,7 @@ def view_product(request, pid):
         "system_settings": system_settings,
         "benchmarks_percents": benchAndPercent,
         "benchmarks": benchmarks,
+        "benchmark_type": product_tab.benchmark_type,
         "product_members": product_members,
         "global_product_members": global_product_members,
         "product_type_members": product_type_members,
