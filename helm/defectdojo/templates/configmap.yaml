@@ -54,5 +54,6 @@ data:
 {{- if  .Values.django.uwsgi.certificates.enabled }}
   REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
 {{- end }}
-{{- with .Values.extraConfigs  }}
-  {{- toYaml . | nindent 2 }}{{- end }}
+{{- with .Values.extraConfigs }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
