@@ -161,6 +161,16 @@ celery:
     # A list of extra volumes to mount
     # @type: array<map>
     extraVolumes: []
+    # Enable liveness probe for Celery beat container.
+    livenessProbe: {}
+      # exec:
+      #   command:
+      #     - bash
+      #     - -c
+      #     - celery -A dojo inspect ping -t 5
+      # initialDelaySeconds: 30
+      # periodSeconds: 60
+      # timeoutSeconds: 10
     nodeSelector: {}
     replicas: 1
     resources:
@@ -183,6 +193,16 @@ celery:
     # A list of extra volumes to mount.
     # @type: array<map>
     extraVolumes: []
+    # Enable liveness probe for Celery worker containers.
+    livenessProbe: {}
+      # exec:
+      #   command:
+      #     - bash
+      #     - -c
+      #     - celery -A dojo inspect ping -t 5
+      # initialDelaySeconds: 30
+      # periodSeconds: 60
+      # timeoutSeconds: 10
     nodeSelector: {}
     replicas: 1
     resources:
