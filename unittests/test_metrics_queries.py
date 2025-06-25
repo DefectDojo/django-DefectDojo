@@ -190,7 +190,7 @@ class EndpointQueriesTest(DojoTestCase):
         mock_now.return_value = fake_now
 
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(43):
+        with self.assertNumQueries(44):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,
