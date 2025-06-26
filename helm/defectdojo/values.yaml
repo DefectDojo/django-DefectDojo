@@ -1,4 +1,4 @@
----
+  ---
 # Global settings
 # create defectdojo specific secret
 createSecret: false
@@ -11,6 +11,9 @@ createPostgresqlSecret: false
 # - disabled, default
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
+
+# Avoid using pre-install hooks, which might cause issues with ArgoCD
+disableHooks: false
 
 extraLabels: {}
 # Add extra labels for k8s
