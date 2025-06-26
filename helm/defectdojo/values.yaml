@@ -452,7 +452,7 @@ gke:
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
 redis:
-  # To use an external Redis instance, set enabled to false and set the address in .Values.celery.brokerHost
+  # To use an external Redis instance, switch enabled to false and set the address in .Values.celery.brokerHost
   enabled: true
   auth:
     existingSecret: defectdojo-redis-specific
