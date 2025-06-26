@@ -375,6 +375,7 @@ initializer:
   # This might be handy for ArgoCD deployments
   staticName: false
 
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
 postgresql:
   enabled: true
   auth:
