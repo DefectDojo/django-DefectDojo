@@ -464,6 +464,17 @@ redis:
   #   service:
   #     ports:
   #       redis: xxxx
+  # Sentinel configuration parameters
+  sentinel:
+    enabled: false
+  # If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates
+  # from an existing secret.
+  tls:
+    enabled: false
+    # existingSecret: redis-tls
+    # certFilename: tls.crt
+    # certKeyFilename: tls.key
+    # certCAFilename: ca.crt
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
