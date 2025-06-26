@@ -677,7 +677,6 @@ and root can view others metrics
 """
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
@@ -705,24 +704,27 @@ def view_engineer(request, eid):
     # --------------------
     # Month & week buckets
     month_start = datetime(now.year, now.month, 1, tzinfo=tz)
-    month_end = month_start.replace(day=monthrange(now.year, now.month)[1])
+    month_end = month_start + relativedelta(months=1)  # first day of next month (exclusive)
 
-    open_month = reporter_findings.filter(date__range=[month_start, month_end])
-    closed_month = closed_findings.filter(mitigated__range=[month_start, month_end])
+    open_month = reporter_findings.filter(date__gte=month_start, date__lt=month_end)
+    closed_month = closed_findings.filter(mitigated__gte=month_start, mitigated__lt=month_end)
     accepted_month = (
         Finding.objects.filter(
             risk_acceptance__owner=user,
-            risk_acceptance__created__range=[month_start, month_end],
+            risk_acceptance__created__gte=month_start,
+            risk_acceptance__created__lt=month_end,
         ).distinct()
     )
 
     week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-    open_week = reporter_findings.filter(date__range=[week_start, now])
-    closed_week = closed_findings.filter(mitigated__range=[week_start, now])
+    week_end = week_start + timedelta(days=7)  # next Monday 00:00 (exclusive)
+    open_week = reporter_findings.filter(date__gte=week_start, date__lt=week_end)
+    closed_week = closed_findings.filter(mitigated__gte=week_start, mitigated__lt=week_end)
     accepted_week = (
         Finding.objects.filter(
             risk_acceptance__owner=user,
-            risk_acceptance__created__range=[week_start, now],
+            risk_acceptance__created__gte=week_start,
+            risk_acceptance__created__lt=week_end,
         ).distinct()
     )
 
@@ -735,20 +737,20 @@ def view_engineer(request, eid):
 
     # --------------------------
     # Historic series for charts
-    stuff, o_stuff, a_stuff = [], [], []
-    findings_this_period(reporter_findings, 1, stuff, o_stuff, a_stuff)
+    monthly_total_series, monthly_open_series, monthly_accepted_series = [], [], []
+    findings_this_period(reporter_findings, 1, monthly_total_series, monthly_open_series, monthly_accepted_series)
 
-    week_stuff, week_o_stuff, week_a_stuff = [], [], []
-    findings_this_period(reporter_findings, 0, week_stuff, week_o_stuff, week_a_stuff)
+    weekly_total_series, weekly_open_series, weekly_accepted_series = [], [], []
+    findings_this_period(reporter_findings, 0, weekly_total_series, weekly_open_series, weekly_accepted_series)
 
     ras_owner_qs = Risk_Acceptance.objects.filter(owner=user)
-    _augment_series_with_accepted(a_stuff, ras_owner_qs, period="month", tz=tz)
-    _augment_series_with_accepted(week_a_stuff, ras_owner_qs, period="week", tz=tz)
+    _augment_series_with_accepted(monthly_accepted_series, ras_owner_qs, period="month", tz=tz)
+    _augment_series_with_accepted(weekly_accepted_series, ras_owner_qs, period="week", tz=tz)
 
-    chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *o_stuff]
-    a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *a_stuff]
-    week_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *week_o_stuff]
-    week_a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *week_a_stuff]
+    chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *monthly_open_series]
+    a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *monthly_accepted_series]
+    week_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *weekly_open_series]
+    week_a_chart_data = [["Date", "S0", "S1", "S2", "S3", "Total"], *weekly_accepted_series]
 
     # --------------
     # Product tables
@@ -806,12 +808,12 @@ def view_engineer(request, eid):
             "high_c_month": closed_count["high"],
             "critical_c_month": closed_count["crit"],
             # week
-            "week_stuff": week_stuff,
-            "week_a_stuff": week_a_stuff,
+            "week_stuff": weekly_total_series,
+            "week_a_stuff": weekly_accepted_series,
             # series
-            "a_total": a_stuff,
-            "total": stuff,
-            "sub": len(stuff),
+            "a_total": monthly_accepted_series,
+            "total": monthly_total_series,
+            "sub": len(monthly_total_series),
             # product tables
             "update": update,
             "total_update": total_update,
@@ -872,15 +874,19 @@ def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz
     for bucket in series:
         if period == "month":
             start = datetime.strptime(bucket[0].strip(), "%b %Y").replace(tzinfo=tz)
-            end = start.replace(day=monthrange(start.year, start.month)[1])
+            end = start + relativedelta(months=1)  # first day of next month (exclusive)
         else:  # "week"
-            wk_a, wk_b = (d.strip() for d in bucket[0].split("-"))
+            wk_a, _ = (d.strip() for d in bucket[0].split("-"))
             year = timezone.now().year
             start = datetime.strptime(f"{wk_a} {year}", "%b %d %Y").replace(tzinfo=tz)
-            end = datetime.strptime(f"{wk_b} {year}", "%b %d %Y").replace(tzinfo=tz)
+            end = start + timedelta(days=7)  # next Monday 00:00 (exclusive)
 
         accepted = (
-            Finding.objects.filter(risk_acceptance__owner=owner, risk_acceptance__created__range=[start, end])
+            Finding.objects.filter(
+                risk_acceptance__owner=owner,
+                risk_acceptance__created__gte=start,
+                risk_acceptance__created__lt=end,
+            )
             .values("severity")
             .annotate(cnt=Count("id"))
         )
@@ -911,8 +917,10 @@ def _product_stats(products) -> tuple[list, list]:
     by_id = {c["pid"]: c for c in counts}
     top10 = sorted(by_id.items(), key=lambda kv: kv[1]["total"], reverse=True)[:10]
 
+    product_lookup = {p.id: p for p in products}
+
     def row(prod_id):
-        prod = next(p for p in products if p.id == prod_id)
+        prod = product_lookup[prod_id]
         link = f"<a href='{reverse('product_open_findings', args=(prod.id,))}'>{escape(prod.name)}</a>"
         data = by_id[prod_id]
         return [link, data["critical"], data["high"], data["medium"], data["low"], data["total"]]
