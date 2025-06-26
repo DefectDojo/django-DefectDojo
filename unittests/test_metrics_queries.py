@@ -8,7 +8,7 @@ from django.test import RequestFactory
 from django.urls import reverse
 
 from dojo.metrics import utils
-from dojo.models import User
+from dojo.models import Product_Type, User
 
 from .dojo_test_case import DojoTestCase
 
@@ -184,10 +184,14 @@ class EndpointQueriesTest(DojoTestCase):
             [],
         )
 
-    def test_endpoint_queries(self):
+    @patch("dojo.filters.now")
+    def test_endpoint_queries(self, mock_now):
+        fake_now = pytz.UTC.localize(datetime(2020, 7, 1))
+        mock_now.return_value = fake_now
+
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(43):
-            product_types = []
+        with self.assertNumQueries(44):
+            product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,
                 self.request,
