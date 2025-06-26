@@ -28,7 +28,7 @@ data:
   DD_CELERY_BROKER_USER: ''
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{- if ( hasKey .Values.redis "master" ) -}}{{ .Values.redis.master.service.ports.redis }}{{ else }}6379{{ end }}{{- end -}}'
-  DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
+  DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.tls.enabled -}}{{ .Values.celery.brokerParams | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.appSettings.poolType | default "solo" }}

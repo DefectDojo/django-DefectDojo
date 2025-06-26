@@ -61,7 +61,7 @@ Create the name of the service account to use
 {{- if .Values.redis.enabled -}}
 {{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- .Values.celery.brokerHost }}
+{{ .Values.celery.brokerHost }}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -71,9 +71,9 @@ Create the name of the service account to use
 */}}
 {{- define "redis.scheme" -}}
 {{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.transportEncryption.enabled -}}
+{{- if .Values.redis.tls.enabled -}}
 {{- printf "rediss" -}}
-{{- else if eq .Values.redis.scheme "sentinel" -}}
+{{- else if .Values.redis.sentinel.enabled -}}
 {{- printf "sentinel" -}}
 {{- else -}}
 {{- printf "redis" -}}

@@ -147,6 +147,8 @@ celery:
   broker: redis
   # To use an external celery broker, set the hostname here
   brokerHost: ""
+  # Parameters attached to the broker URL, defaults to "ssl_cert_reqs=optional" if redis.tls.enabled
+  brokerParams: ""
   logLevel: INFO
   annotations: {}
   beat:
@@ -447,7 +449,7 @@ gke:
   # Only works with serviceAccount.create = true
   workloadIdentityEmail: ""
 
-# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
 redis:
   # To use an external Redis instance, set enabled to false and set the address in .Values.celery.brokerHost
   enabled: true
