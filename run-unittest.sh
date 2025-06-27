@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 unset TEST_CASE
 
 bash ./docker/docker-compose-check.sh
