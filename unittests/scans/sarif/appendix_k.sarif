@@ -472,7 +472,7 @@
               "message": {
                 "text": "Path from declaration to usage"
               },
- 
+
               "threadFlows": [
                 {
                   "id": "thread-52",
