@@ -2080,8 +2080,6 @@ class Test(models.Model):
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
-    estimated_time = models.TimeField(null=True, blank=True, editable=False)
-    actual_time = models.TimeField(null=True, blank=True, editable=False)
     percent_complete = models.IntegerField(null=True, blank=True,
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
