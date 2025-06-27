@@ -107,22 +107,22 @@ Unreachable (type=3 code=2)	IP with High Protocol	Protocol Unreachable]]></RESUL
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.16ms	ICMP	 
-2	216.52.125.61	0.39ms	ICMP	 
-3	216.52.127.7	0.97ms	ICMP	 
-4	129.250.200.137	0.44ms	ICMP	 
-5	129.250.5.195	0.58ms	ICMP	 
-6	129.250.5.190	0.47ms	ICMP	 
-7	4.68.71.237	0.97ms	ICMP	 
+1	64.39.99.3	0.16ms	ICMP
+2	216.52.125.61	0.39ms	ICMP
+3	216.52.127.7	0.97ms	ICMP
+4	129.250.200.137	0.44ms	ICMP
+5	129.250.5.195	0.58ms	ICMP
+6	129.250.5.190	0.47ms	ICMP
+7	4.68.71.237	0.97ms	ICMP
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	0.87ms	ICMP	 
-10	63.235.42.158	0.94ms	ICMP	 
-11	206.28.100.137	67.25ms	ICMP	 
-12	206.28.101.22	7.31ms	ICMP	 
-13	206.28.101.38	65.21ms	ICMP	 
-14	204.70.207.38	64.49ms	ICMP	 
-15	204.70.207.29	64.41ms	ICMP	 
-16	216.35.14.46	64.69ms	ICMP	 
+9	63.235.42.5	0.87ms	ICMP
+10	63.235.42.158	0.94ms	ICMP
+11	206.28.100.137	67.25ms	ICMP
+12	206.28.101.22	7.31ms	ICMP
+13	206.28.101.38	65.21ms	ICMP
+14	204.70.207.38	64.49ms	ICMP
+15	204.70.207.29	64.41ms	ICMP
+16	216.35.14.46	64.69ms	ICMP
 17	64.41.200.243	64.79ms	UDP	80]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:48Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:48Z</LAST_FOUND>
@@ -164,7 +164,7 @@ Service name: SNMP on UDP port 161.]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 Duration: 31 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:48Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:48Z</LAST_FOUND>
@@ -336,7 +336,7 @@ cipher	arcfour]]></RESULT>
           <QID id="qid_370876">370876</QID>
           <TYPE>Practice</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[Vulnerable AMD processor detected: 
+          <RESULT><![CDATA[Vulnerable AMD processor detected:
 
 model  : 8
 model name : AMD Ryzen Threadripper 2950X 16-Core Processor
@@ -457,22 +457,22 @@ Unreachable (type=3 code=3)	UDP Port 80	Port Unreachable]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.17ms	ICMP	 
-2	216.52.125.61	0.34ms	ICMP	 
-3	216.52.127.7	1.01ms	ICMP	 
-4	129.250.200.137	0.80ms	ICMP	 
-5	129.250.5.195	0.65ms	ICMP	 
-6	129.250.5.190	0.53ms	ICMP	 
-7	4.68.71.237	0.98ms	ICMP	 
+1	64.39.99.3	0.17ms	ICMP
+2	216.52.125.61	0.34ms	ICMP
+3	216.52.127.7	1.01ms	ICMP
+4	129.250.200.137	0.80ms	ICMP
+5	129.250.5.195	0.65ms	ICMP
+6	129.250.5.190	0.53ms	ICMP
+7	4.68.71.237	0.98ms	ICMP
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	0.87ms	ICMP	 
-10	63.235.42.158	0.87ms	ICMP	 
-11	206.28.100.137	65.05ms	ICMP	 
-12	206.28.101.22	7.31ms	ICMP	 
-13	206.28.101.38	66.54ms	ICMP	 
-14	204.70.207.38	64.47ms	ICMP	 
-15	204.70.207.29	64.41ms	ICMP	 
-16	216.35.14.46	64.60ms	ICMP	 
+9	63.235.42.5	0.87ms	ICMP
+10	63.235.42.158	0.87ms	ICMP
+11	206.28.100.137	65.05ms	ICMP
+12	206.28.101.22	7.31ms	ICMP
+13	206.28.101.38	66.54ms	ICMP
+14	204.70.207.38	64.47ms	ICMP
+15	204.70.207.29	64.41ms	ICMP
+16	216.35.14.46	64.60ms	ICMP
 17	64.41.200.244	64.67ms	ICMP]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:10Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:10Z</LAST_FOUND>
@@ -513,7 +513,7 @@ Qualys SAVV-S233755-0]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 Duration: 30 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:10Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:10Z</LAST_FOUND>
@@ -717,7 +717,7 @@ jitter=0.001, noise=0.001, stability=0.000, tai=0]]></RESULT>
           <QID id="qid_370876">370876</QID>
           <TYPE>Practice</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[Vulnerable AMD processor detected: 
+          <RESULT><![CDATA[Vulnerable AMD processor detected:
 
 model  : 8
 model name : AMD Ryzen Threadripper 2950X 16-Core Processor
@@ -837,22 +837,22 @@ Unreachable (type=3 code=3)	UDP Port 512	Port Unreachable]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.15ms	ICMP	 
-2	216.52.125.61	0.32ms	ICMP	 
-3	216.52.127.7	0.72ms	ICMP	 
-4	129.250.200.137	1.07ms	ICMP	 
-5	129.250.5.215	0.63ms	ICMP	 
-6	129.250.5.192	0.41ms	ICMP	 
-7	4.68.71.237	0.89ms	ICMP	 
+1	64.39.99.3	0.15ms	ICMP
+2	216.52.125.61	0.32ms	ICMP
+3	216.52.127.7	0.72ms	ICMP
+4	129.250.200.137	1.07ms	ICMP
+5	129.250.5.215	0.63ms	ICMP
+6	129.250.5.192	0.41ms	ICMP
+7	4.68.71.237	0.89ms	ICMP
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	0.87ms	ICMP	 
-10	63.235.42.158	0.92ms	ICMP	 
-11	206.28.100.137	67.05ms	ICMP	 
-12	206.28.101.22	7.23ms	ICMP	 
-13	206.28.101.38	65.96ms	ICMP	 
-14	204.70.207.38	64.46ms	ICMP	 
-15	204.70.207.29	64.38ms	ICMP	 
-16	216.35.14.46	64.54ms	ICMP	 
+9	63.235.42.5	0.87ms	ICMP
+10	63.235.42.158	0.92ms	ICMP
+11	206.28.100.137	67.05ms	ICMP
+12	206.28.101.22	7.23ms	ICMP
+13	206.28.101.38	65.96ms	ICMP
+14	204.70.207.38	64.46ms	ICMP
+15	204.70.207.29	64.38ms	ICMP
+16	216.35.14.46	64.54ms	ICMP
 17	64.41.200.245	69.88ms	ICMP]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:04Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:04Z</LAST_FOUND>
@@ -893,7 +893,7 @@ CenturyLink Communications, LLC]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 22: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 Duration: 31 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:57:04Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:57:04Z</LAST_FOUND>
@@ -1154,22 +1154,22 @@ NBTSTAT	00:50:56:B2:71:56	VMWARE, INC.]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.15ms	ICMP	 
-2	216.52.125.61	0.36ms	ICMP	 
-3	216.52.127.7	0.95ms	ICMP	 
-4	129.250.200.137	1.33ms	ICMP	 
-5	129.250.5.195	0.64ms	ICMP	 
-6	129.250.5.190	1.38ms	ICMP	 
+1	64.39.99.3	0.15ms	ICMP
+2	216.52.125.61	0.36ms	ICMP
+3	216.52.127.7	0.95ms	ICMP
+4	129.250.200.137	1.33ms	ICMP
+5	129.250.5.195	0.64ms	ICMP
+6	129.250.5.190	1.38ms	ICMP
 7	*.*.*.*	0.00ms	Other	80
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	0.88ms	ICMP	 
-10	63.235.42.158	0.88ms	ICMP	 
-11	206.28.100.137	64.85ms	ICMP	 
-12	206.28.101.22	7.15ms	ICMP	 
-13	206.28.101.38	64.68ms	ICMP	 
-14	204.70.207.38	64.38ms	ICMP	 
-15	204.70.207.29	64.32ms	ICMP	 
-16	216.35.14.46	64.46ms	ICMP	 
+9	63.235.42.5	0.88ms	ICMP
+10	63.235.42.158	0.88ms	ICMP
+11	206.28.100.137	64.85ms	ICMP
+12	206.28.101.22	7.15ms	ICMP
+13	206.28.101.38	64.68ms	ICMP
+14	204.70.207.38	64.38ms	ICMP
+15	204.70.207.29	64.32ms	ICMP
+16	216.35.14.46	64.46ms	ICMP
 17	64.41.200.247	64.55ms	ICMP]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1226,7 +1226,7 @@ CIFS Version	SMB v2.1]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 135: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 135: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 Duration: 31 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1268,8 +1268,8 @@ SMBv2 is enabled.]]></RESULT>
           <RESULT format="table"><![CDATA[Description	Version	TCP Ports	UDP Ports	HTTP Ports	NetBIOS/CIFS Pipes
 Microsoft Scheduler Control Service	1.0	 	 	 	\PIPE\atsvc
 Microsoft Security Account Manager	1.0	49182	 	 	\pipe\lsass
-Microsoft Service Control Service	2.0	49180	 	 	 
-Microsoft Spool Subsystem	1.0	49181	 	 	 
+Microsoft Service Control Service	2.0	49180
+Microsoft Spool Subsystem	1.0	49181
 Microsoft Task Scheduler	1.0	 	 	 	\PIPE\atsvc
 WinHttp Auto-Proxy Service	5.1	 	 	 	\PIPE\W32TIME_ALT
 (Unknown Service)	1.0	49152	 	 	\PIPE\InitShutdown
@@ -1285,7 +1285,7 @@ XactSrv service	1.0	49154	 	 	\PIPE\atsvc
 IP Transition Configuration endpoint	1.0	49154	 	 	\PIPE\atsvc
 IKE/Authip API	1.0	49154	 	 	\PIPE\atsvc
 (Unknown Service)	1.0	49154	 	 	\PIPE\atsvc
-Remote Fw APIs	1.0	49181	 	 	 
+Remote Fw APIs	1.0	49181
 (Unknown Service)	1.0	 	 	 	\pipe\trkwks]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1337,7 +1337,7 @@ TRN-WIN7	NetBIOS]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Operating System	Technique	ID
-Windows 2008 R2/7	NTLMSSP	 
+Windows 2008 R2/7	NTLMSSP
 Windows Vista / Windows 2008 / Windows 7 / Windows 2012	TCP/IP Fingerprint	U3041:135]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1348,8 +1348,8 @@ Windows Vista / Windows 2008 / Windows 7 / Windows 2012	TCP/IP Fingerprint	U3041
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Port	IANA Assigned Ports/Services	Description	Service Detected	OS On Redirected Port
-135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper 	 
-445	microsoft-ds	Microsoft-DS	microsoft-ds 	 
+135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper
+445	microsoft-ds	Microsoft-DS	microsoft-ds
 3389	ms-wbt-server	MS WBT Server	win remote desktop]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1430,13 +1430,13 @@ End time: Wed, Jul 31 2019, 21:58:08 GMT]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	VALUE
-(0)CERTIFICATE 0	 
+(0)CERTIFICATE 0
 (0)Version	3 (0x2)
-(0)Serial Number	 7f:75:a0:a3:91:b1:cb:83:46:5c:c6:cd:9e:be:c9:e2 
+(0)Serial Number	 7f:75:a0:a3:91:b1:cb:83:46:5c:c6:cd:9e:be:c9:e2
 (0)Signature Algorithm	sha1WithRSAEncryption
-(0)ISSUER NAME	 
+(0)ISSUER NAME
 commonName	trn-win7.trn.qualys.com
-(0)SUBJECT NAME	 
+(0)SUBJECT NAME
 commonName	trn-win7.trn.qualys.com
 (0)Valid From	Apr 1 20:25:08 2019 GMT
 (0)Valid Till	Oct 1 20:25:08 2019 GMT
@@ -1463,7 +1463,7 @@ commonName	trn-win7.trn.qualys.com
 (0)	 86:3c:38:0e:ed:36:8a:a0:90:b9:c2:ac:61:07:54:
 (0)	 2c:6d
 (0)	 Exponent: 65537 (0x10001)
-(0)X509v3 EXTENSIONS	 	
+(0)X509v3 EXTENSIONS
 (0)X509v3 Extended Key Usage	 TLS Web Server Authentication
 (0)X509v3 Key Usage	 Key Encipherment, Data Encipherment
 (0)Signature	(256 octets)
@@ -1548,10 +1548,10 @@ my version	target version
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv2 PROTOCOL IS DISABLED	 	 	 	 	 
-SSLv3 PROTOCOL IS DISABLED	 	 	 	 	 
-TLSv1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1	COMPRESSION METHOD	None	 	 	 
+SSLv2 PROTOCOL IS DISABLED
+SSLv3 PROTOCOL IS DISABLED
+TLSv1 PROTOCOL IS ENABLED
+TLSv1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
@@ -1559,8 +1559,8 @@ AES128-SHA	RSA	RSA	SHA1	AES(128)	MEDIUM
 AES256-SHA	RSA	RSA	SHA1	AES(256)	HIGH
 ECDHE-RSA-AES128-SHA	ECDH	RSA	SHA1	AES(128)	MEDIUM
 ECDHE-RSA-AES256-SHA	ECDH	RSA	SHA1	AES(256)	HIGH
-TLSv1.1 PROTOCOL IS DISABLED	 	 	 	 	 
-TLSv1.2 PROTOCOL IS DISABLED	 	 	 	 	 
+TLSv1.1 PROTOCOL IS DISABLED
+TLSv1.2 PROTOCOL IS DISABLED
 TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1574,7 +1574,7 @@ TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	GROUP	KEY-SIZE	FORWARD-SECRET	CLASSICAL-STRENGTH	QUANTUM-STRENGTH
-TLSv1	 	 	 	 	 
+TLSv1
 RSA	 	2048	no	110	low
 ECDHE	secp256r1	256	yes	128	low
 ECDHE	secp384r1	384	yes	192	low]]></RESULT>
@@ -1590,7 +1590,7 @@ ECDHE	secp384r1	384	yes	192	low]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	STATUS
-TLSv1	 
+TLSv1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	no
@@ -1636,7 +1636,7 @@ SCT extension	no]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-TLSv1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
@@ -1665,7 +1665,7 @@ RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T21:58:08Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T21:58:08Z</LAST_FOUND>
@@ -1724,22 +1724,22 @@ We have omitted from this list 708 higher ports to keep the report size manageab
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.17ms	ICMP	 
-2	216.52.125.61	0.37ms	ICMP	 
-3	216.52.127.71	0.83ms	ICMP	 
-4	129.250.200.137	0.41ms	ICMP	 
-5	129.250.5.215	0.62ms	ICMP	 
-6	129.250.5.190	0.91ms	ICMP	 
+1	64.39.99.3	0.17ms	ICMP
+2	216.52.125.61	0.37ms	ICMP
+3	216.52.127.71	0.83ms	ICMP
+4	129.250.200.137	0.41ms	ICMP
+5	129.250.5.215	0.62ms	ICMP
+6	129.250.5.190	0.91ms	ICMP
 7	*.*.*.*	0.00ms	Other	80
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	1.28ms	ICMP	 
-10	63.235.42.158	0.92ms	ICMP	 
-11	206.28.100.137	67.11ms	ICMP	 
-12	206.28.101.22	7.34ms	ICMP	 
-13	204.70.192.90	73.58ms	ICMP	 
-14	204.70.207.38	64.49ms	ICMP	 
-15	204.70.207.29	69.75ms	ICMP	 
-16	216.35.14.46	64.58ms	ICMP	 
+9	63.235.42.5	1.28ms	ICMP
+10	63.235.42.158	0.92ms	ICMP
+11	206.28.100.137	67.11ms	ICMP
+12	206.28.101.22	7.34ms	ICMP
+13	204.70.192.90	73.58ms	ICMP
+14	204.70.207.38	64.49ms	ICMP
+15	204.70.207.29	69.75ms	ICMP
+16	216.35.14.46	64.58ms	ICMP
 17	64.41.200.246	69.91ms	TCP	80]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:01:18Z</LAST_FOUND>
@@ -1796,7 +1796,7 @@ CIFS Version	SMB v2.1]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 80: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 80: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 Duration: 30 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:01:18Z</LAST_FOUND>
@@ -1816,19 +1816,19 @@ Duration: 30 milli seconds]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Description	Version	TCP Ports	UDP Ports	HTTP Ports	NetBIOS/CIFS Pipes
-DCE Endpoint Mapper	3.0	135	 	 	 
-DCOM OXID Resolver	0.0	135	 	 	 
-DCOM Remote Activation	0.0	135	 	 	 
-DCOM System Activator	0.0	135	 	 	 
+DCE Endpoint Mapper	3.0	135
+DCOM OXID Resolver	0.0	135
+DCOM Remote Activation	0.0	135
+DCOM System Activator	0.0	135
 Microsoft Scheduler Control Service	1.0	 	 	 	\PIPE\atsvc
 Microsoft Security Account Manager	1.0	63238	 	 	\pipe\lsass
-Microsoft Service Control Service	2.0	49180	 	 	 
-Microsoft Spool Subsystem	1.0	49181	 	 	 
+Microsoft Service Control Service	2.0	49180
+Microsoft Spool Subsystem	1.0	49181
 Microsoft Task Scheduler	1.0	 	 	 	\PIPE\atsvc
 WinHttp Auto-Proxy Service	5.1	 	 	 	\PIPE\W32TIME_ALT
-(Unknown Service)	1.0	135	 	 	 
-(Unknown Service)	0.0	135	 	 	 
-(Unknown Service)	2.0	135	 	 	 
+(Unknown Service)	1.0	135
+(Unknown Service)	0.0	135
+(Unknown Service)	2.0	135
 (Unknown Service)	1.0	49152	 	 	\PIPE\InitShutdown
 (Unknown Service)	1.0	 	 	 	\PIPE\InitShutdown
 DHCP Client LRPC Endpoint	1.0	49153	 	 	\pipe\eventlog
@@ -1912,8 +1912,8 @@ WIN2008R2	NetBIOS]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Operating System	Technique	ID
-Windows 2008 R2 Enterprise Service Pack 1	CIFS via TCP Port 445	 
-Windows 2008 R2/7	NTLMSSP	 
+Windows 2008 R2 Enterprise Service Pack 1	CIFS via TCP Port 445
+Windows 2008 R2/7	NTLMSSP
 Windows 2008 R2 / Windows 7	TCP/IP Fingerprint	U3414:80
 Windows 2003/XP/Vista/2008/2012	MS-RPC Fingerprint]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
@@ -1925,10 +1925,10 @@ Windows 2003/XP/Vista/2008/2012	MS-RPC Fingerprint]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Port	IANA Assigned Ports/Services	Description	Service Detected	OS On Redirected Port
-80	www-http	World Wide Web HTTP	http 	 
-135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper 	 
-139	netbios-ssn	NETBIOS Session Service	netbios ssn 	 
-445	microsoft-ds	Microsoft-DS	microsoft-ds 	 
+80	www-http	World Wide Web HTTP	http
+135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper
+139	netbios-ssn	NETBIOS Session Service	netbios ssn
+445	microsoft-ds	Microsoft-DS	microsoft-ds
 3389	ms-wbt-server	MS WBT Server	win remote desktop]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:01:18Z</LAST_FOUND>
@@ -2170,13 +2170,13 @@ Content-Length: 0]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	VALUE
-(0)CERTIFICATE 0	 
+(0)CERTIFICATE 0
 (0)Version	3 (0x2)
-(0)Serial Number	 18:07:86:99:24:0a:51:9f:44:ce:40:90:1b:fb:92:27 
+(0)Serial Number	 18:07:86:99:24:0a:51:9f:44:ce:40:90:1b:fb:92:27
 (0)Signature Algorithm	sha1WithRSAEncryption
-(0)ISSUER NAME	 
+(0)ISSUER NAME
 commonName	win2008R2.trn.qualys.com
-(0)SUBJECT NAME	 
+(0)SUBJECT NAME
 commonName	win2008R2.trn.qualys.com
 (0)Valid From	Apr 1 21:59:46 2019 GMT
 (0)Valid Till	Oct 1 21:59:46 2019 GMT
@@ -2203,7 +2203,7 @@ commonName	win2008R2.trn.qualys.com
 (0)	 4e:59:76:75:e6:68:bc:2c:5e:b3:cb:1d:6e:cb:87:
 (0)	 3c:df
 (0)	 Exponent: 65537 (0x10001)
-(0)X509v3 EXTENSIONS	 	
+(0)X509v3 EXTENSIONS
 (0)X509v3 Extended Key Usage	 TLS Web Server Authentication
 (0)X509v3 Key Usage	 Key Encipherment, Data Encipherment
 (0)Signature	(256 octets)
@@ -2276,10 +2276,10 @@ my version	target version
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv2 PROTOCOL IS DISABLED	 	 	 	 	 
-SSLv3 PROTOCOL IS DISABLED	 	 	 	 	 
-TLSv1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1	COMPRESSION METHOD	None	 	 	 
+SSLv2 PROTOCOL IS DISABLED
+SSLv3 PROTOCOL IS DISABLED
+TLSv1 PROTOCOL IS ENABLED
+TLSv1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
@@ -2287,8 +2287,8 @@ AES128-SHA	RSA	RSA	SHA1	AES(128)	MEDIUM
 AES256-SHA	RSA	RSA	SHA1	AES(256)	HIGH
 ECDHE-RSA-AES128-SHA	ECDH	RSA	SHA1	AES(128)	MEDIUM
 ECDHE-RSA-AES256-SHA	ECDH	RSA	SHA1	AES(256)	HIGH
-TLSv1.1 PROTOCOL IS DISABLED	 	 	 	 	 
-TLSv1.2 PROTOCOL IS DISABLED	 	 	 	 	 
+TLSv1.1 PROTOCOL IS DISABLED
+TLSv1.2 PROTOCOL IS DISABLED
 TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:01:18Z</LAST_FOUND>
@@ -2302,7 +2302,7 @@ TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	GROUP	KEY-SIZE	FORWARD-SECRET	CLASSICAL-STRENGTH	QUANTUM-STRENGTH
-TLSv1	 	 	 	 	 
+TLSv1
 RSA	 	2048	no	110	low
 ECDHE	secp256r1	256	yes	128	low
 ECDHE	secp384r1	384	yes	192	low]]></RESULT>
@@ -2318,7 +2318,7 @@ ECDHE	secp384r1	384	yes	192	low]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	STATUS
-TLSv1	 
+TLSv1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	no
@@ -2351,7 +2351,7 @@ SCT extension	no]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-TLSv1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
@@ -2380,7 +2380,7 @@ RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:01:18Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:01:18Z</LAST_FOUND>
@@ -2456,7 +2456,7 @@ Unreachable (type=3 code=3)	UDP Port 1026	Port Unreachable]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 53: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 53: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2
 Duration: 30 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:00:12Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:00:12Z</LAST_FOUND>
@@ -2580,24 +2580,24 @@ The TCP timestamps from the host are in units of 10 milliseconds.]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Description	Version	TCP Ports	UDP Ports	HTTP Ports	NetBIOS/CIFS Pipes
-DCE Endpoint Mapper	3.0	135	 	593	 
-DCOM OXID Resolver	0.0	135	 	593	 
-DCOM Remote Activation	0.0	135	 	593	 
-DCOM System Activator	0.0	135	 	593	 
-Domain Name System	5.0	49171	 	 	 
+DCE Endpoint Mapper	3.0	135	 	593
+DCOM OXID Resolver	0.0	135	 	593
+DCOM Remote Activation	0.0	135	 	593
+DCOM System Activator	0.0	135	 	593
+Domain Name System	5.0	49171
 Microsoft Local Security Architecture	0.0	49155	 	49157	\PIPE\lsarpc, \pipe\311a06c6f29352ff, \pipe\lsass
 Microsoft Network Logon	1.0	49158, 49155	 	49157	\PIPE\NETLOGON, \pipe\311a06c6f29352ff, \pipe\lsass
 Microsoft NT Directory DRS Interface	4.0	49155	 	49157	\pipe\311a06c6f29352ff, \pipe\lsass
 Microsoft Registry	1.0	 	 	 	\PIPE\winreg
 Microsoft Scheduler Control Service	1.0	 	 	 	\PIPE\atsvc
 Microsoft Security Account Manager	1.0	49158, 49155	 	49157	\PIPE\samr, \pipe\311a06c6f29352ff, \pipe\lsass
-Microsoft Service Control Service	2.0	49162	 	 	 
-Microsoft Spool Subsystem	1.0	49178	 	 	 
+Microsoft Service Control Service	2.0	49162
+Microsoft Spool Subsystem	1.0	49178
 Microsoft Task Scheduler	1.0	 	 	 	\PIPE\atsvc
 WinHttp Auto-Proxy Service	5.1	 	 	 	\PIPE\W32TIME_ALT
-(Unknown Service)	1.0	135	 	593	 
-(Unknown Service)	0.0	135	 	593	 
-(Unknown Service)	2.0	135	 	593	 
+(Unknown Service)	1.0	135	 	593
+(Unknown Service)	0.0	135	 	593
+(Unknown Service)	2.0	135	 	593
 (Unknown Service)	1.0	49152	 	 	\PIPE\InitShutdown
 (Unknown Service)	1.0	 	 	 	\PIPE\InitShutdown
 DHCP Client LRPC Endpoint	1.0	49153	 	 	\pipe\eventlog
@@ -2608,8 +2608,8 @@ RemoteRegistry Perflib Interface	1.0	 	 	 	\PIPE\winreg
 DfsDs service	1.0	 	 	 	\PIPE\wkssvc
 RemoteAccessCheck	0.0	49158, 49155	 	49157	\pipe\311a06c6f29352ff, \pipe\lsass
 Impl friendly name	1.0	49155, 53132	 	 	\pipe\lsass, \PIPE\browser, \PIPE\srvsvc, \PIPE\atsvc
-Remote Fw APIs	1.0	49178	 	 	 
-Frs2 Service	1.0	49193	 	 	 
+Remote Fw APIs	1.0	49178
+Frs2 Service	1.0	49193
 (Unknown Service)	1.0	53132	 	 	\PIPE\browser, \PIPE\srvsvc, \PIPE\atsvc
 Proxy Manager client server endpoint	1.0	53132	 	 	\PIPE\srvsvc, \PIPE\atsvc
 Proxy Manager provider server endpoint	1.0	53132	 	 	\PIPE\srvsvc, \PIPE\atsvc
@@ -2628,8 +2628,8 @@ XactSrv service	1.0	53132	 	 	\PIPE\atsvc]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Operating System	Technique	ID
-Windows 2012 Standard	CIFS via TCP Port 445	 
-Windows 2012/8	NTLMSSP	 
+Windows 2012 Standard	CIFS via TCP Port 445
+Windows 2012/8	NTLMSSP
 Windows Vista / Windows 2008 / Windows 7 / Windows 2012 / Windows 8 / Windows 10	TCP/IP Fingerprint	U3414:53
 Windows 2003/XP/Vista/2008/2012	MS-RPC Fingerprint]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:00:12Z</FIRST_FOUND>
@@ -2674,15 +2674,15 @@ SMBv2 is enabled.]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Port	IANA Assigned Ports/Services	Description	Service Detected	OS On Redirected Port
-53	domain	Domain Name Server	DNS Server 	 
-88	kerberos	Kerberos	Kerberos-5 	 
-135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper 	 
-389	ldap	Lightweight Directory Access Protocol	ldap 	 
-445	microsoft-ds	Microsoft-DS	microsoft-ds 	 
-464	kpasswd	kpasswd	Kerberos Password 	 
-593	http-rpc-epmap	HTTP RPC Ep Map	msrpc-over-http 	 
-636	ldaps	ldap protocol over TLS/SSL (was sldap)	unknown 	 
-3268	msft-gc	Microsoft Global Catalog	ldap 	 
+53	domain	Domain Name Server	DNS Server
+88	kerberos	Kerberos	Kerberos-5
+135	msrpc-epmap	epmap DCE endpoint resolution	DCERPC Endpoint Mapper
+389	ldap	Lightweight Directory Access Protocol	ldap
+445	microsoft-ds	Microsoft-DS	microsoft-ds
+464	kpasswd	kpasswd	Kerberos Password
+593	http-rpc-epmap	HTTP RPC Ep Map	msrpc-over-http
+636	ldaps	ldap protocol over TLS/SSL (was sldap)	unknown
+3268	msft-gc	Microsoft Global Catalog	ldap
 3269	msft-gc-ssl	Microsoft Global Catalog with LDAP/SSL	unknown]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:00:12Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:00:12Z</LAST_FOUND>
@@ -2781,22 +2781,22 @@ NBTSTAT	00:50:56:B2:C5:72	VMWARE, INC.]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.18ms	ICMP	 
-2	216.52.125.61	0.43ms	ICMP	 
-3	216.52.127.71	1.01ms	ICMP	 
-4	129.250.200.137	0.48ms	ICMP	 
-5	129.250.5.195	0.71ms	ICMP	 
-6	129.250.5.190	0.65ms	ICMP	 
-7	4.68.71.237	1.11ms	ICMP	 
+1	64.39.99.3	0.18ms	ICMP
+2	216.52.125.61	0.43ms	ICMP
+3	216.52.127.71	1.01ms	ICMP
+4	129.250.200.137	0.48ms	ICMP
+5	129.250.5.195	0.71ms	ICMP
+6	129.250.5.190	0.65ms	ICMP
+7	4.68.71.237	1.11ms	ICMP
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	1.11ms	ICMP	 
-10	63.235.42.158	1.04ms	ICMP	 
-11	206.28.100.137	65.26ms	ICMP	 
-12	204.70.197.26	71.32ms	ICMP	 
-13	204.70.192.90	73.11ms	ICMP	 
-14	204.70.207.38	64.49ms	ICMP	 
-15	204.70.207.29	69.86ms	ICMP	 
-16	216.35.14.46	64.62ms	ICMP	 
+9	63.235.42.5	1.11ms	ICMP
+10	63.235.42.158	1.04ms	ICMP
+11	206.28.100.137	65.26ms	ICMP
+12	204.70.197.26	71.32ms	ICMP
+13	204.70.192.90	73.11ms	ICMP
+14	204.70.207.38	64.49ms	ICMP
+15	204.70.207.29	69.86ms	ICMP
+16	216.35.14.46	64.62ms	ICMP
 17	64.41.200.249	64.64ms	UDP	80]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:00:12Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:00:12Z</LAST_FOUND>
@@ -2886,22 +2886,22 @@ CIFS Version	SMB v3.0]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Hops	IP	Round Trip Time	Probe	Port
-1	64.39.99.3	0.24ms	ICMP	 
-2	216.52.125.61	0.49ms	ICMP	 
-3	216.52.127.7	0.85ms	ICMP	 
-4	129.250.200.137	1.11ms	ICMP	 
-5	129.250.5.215	0.74ms	ICMP	 
-6	129.250.5.190	0.68ms	ICMP	 
-7	4.68.71.237	1.80ms	ICMP	 
+1	64.39.99.3	0.24ms	ICMP
+2	216.52.125.61	0.49ms	ICMP
+3	216.52.127.7	0.85ms	ICMP
+4	129.250.200.137	1.11ms	ICMP
+5	129.250.5.215	0.74ms	ICMP
+6	129.250.5.190	0.68ms	ICMP
+7	4.68.71.237	1.80ms	ICMP
 8	*.*.*.*	0.00ms	Other	80
-9	63.235.42.5	1.10ms	ICMP	 
-10	63.235.42.158	1.06ms	ICMP	 
-11	206.28.100.137	68.35ms	ICMP	 
-12	206.28.101.22	7.43ms	ICMP	 
-13	206.28.101.38	67.31ms	ICMP	 
-14	204.70.207.38	70.02ms	ICMP	 
-15	204.70.207.29	69.96ms	ICMP	 
-16	216.35.14.46	70.14ms	ICMP	 
+9	63.235.42.5	1.10ms	ICMP
+10	63.235.42.158	1.06ms	ICMP
+11	206.28.100.137	68.35ms	ICMP
+12	206.28.101.22	7.43ms	ICMP
+13	206.28.101.38	67.31ms	ICMP
+14	204.70.207.38	70.02ms	ICMP
+15	204.70.207.29	69.96ms	ICMP
+16	216.35.14.46	70.14ms	ICMP
 17	64.41.200.250	64.71ms	UDP	80]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:15:32Z</LAST_FOUND>
@@ -2974,7 +2974,7 @@ CenturyLink Communications, LLC]]></RESULT>
           <QID id="qid_82046">82046</QID>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[IP ID changes observed (network order) for port 111: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+          <RESULT><![CDATA[IP ID changes observed (network order) for port 111: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 Duration: 30 milli seconds]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:15:32Z</LAST_FOUND>
@@ -3025,12 +3025,12 @@ The TCP timestamps from the host are in units of 1 milliseconds.]]></RESULT>
           <TYPE>Ig</TYPE>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[Port	IANA Assigned Ports/Services	Description	Service Detected	OS On Redirected Port
-22	ssh	SSH Remote Login Protocol	ssh 	 
-80	www-http	World Wide Web HTTP	http 	 
-111	sunrpc	SUN Remote Procedure Call	rpc 	 
-443	https	http protocol over TLS/SSL	http over ssl	 
-8009	unknown	unknown	AJP 	 
-8080	http-alt	HTTP Alternate (see port 80)	http 	 
+22	ssh	SSH Remote Login Protocol	ssh
+80	www-http	World Wide Web HTTP	http
+111	sunrpc	SUN Remote Procedure Call	rpc
+443	https	http protocol over TLS/SSL	http over ssl
+8009	unknown	unknown	AJP
+8080	http-alt	HTTP Alternate (see port 80)	http
 8443	unknown	unknown	http over ssl]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:15:32Z</LAST_FOUND>
@@ -3076,14 +3076,14 @@ Tested on port 22 with an injected SYN/RST offset by 16 bytes.]]></RESULT>
           <QID id="qid_11803">11803</QID>
           <TYPE>Vuln</TYPE>
           <SSL>false</SSL>
-          <RESULT><![CDATA[Vulnerable version of libxml2 detected on port: 443 
+          <RESULT><![CDATA[Vulnerable version of libxml2 detected on port: 443
 libxml2 Version &lt;/td&gt;&lt;td class=&quot;v&quot;&gt;2.7.6 &lt;/td&gt;&lt;/tr&gt;GET /phpinfo.php HTTP/1.1
 Host: demo20.s02.sjc01.qualys.com
 Connection: Keep-Alive
 
 
 
-Vulnerable version of libxml2 detected on port: 8443 
+Vulnerable version of libxml2 detected on port: 8443
 GET /phpinfo.php HTTP/1.1
 Host: demo20.s02.sjc01.qualys.com:8443
 Connection: Keep-Alive]]></RESULT>
@@ -3600,7 +3600,7 @@ Apache-Coyote/1.1	Apache-Coyote/1.1]]></RESULT>
           <SERVICE>http over ssl</SERVICE>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
-          <RESULT><![CDATA[libxml2 version detected on port: 443 
+          <RESULT><![CDATA[libxml2 version detected on port: 443
 libxml2 Version &lt;/td&gt;&lt;td class=&quot;v&quot;&gt;2.7.6 &lt;/td&gt;&lt;/tr&gt;GET /phpinfo.php HTTP/1.1
 Host: demo20.s02.sjc01.qualys.com
 Connection: Keep-Alive]]></RESULT>
@@ -3729,16 +3729,16 @@ Connection: Keep-Alive
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	VALUE
-(0)CERTIFICATE 0	 
+(0)CERTIFICATE 0
 (0)Version	3 (0x2)
-(0)Serial Number	 06:2c:d8:03:93:a9:6d 
+(0)Serial Number	 06:2c:d8:03:93:a9:6d
 (0)Signature Algorithm	sha256WithRSAEncryption
-(0)ISSUER NAME	 
+(0)ISSUER NAME
 countryName	IL
  organizationName	StartCom Ltd.
  organizationalUnitName	Secure Digital Certificate Signing
  commonName	StartCom Class 1 Primary Intermediate Server CA
-(0)SUBJECT NAME	 
+(0)SUBJECT NAME
 countryName	DE
  commonName	demo1.vmtest.me
  emailAddress	postmaster@vmtest.me
@@ -3767,7 +3767,7 @@ countryName	DE
 (0)	 ae:4c:24:70:41:bb:fc:c0:e5:55:80:31:df:f3:0f:
 (0)	 43:05
 (0)	 Exponent: 65537 (0x10001)
-(0)X509v3 EXTENSIONS	 	
+(0)X509v3 EXTENSIONS
 (0)X509v3 Basic Constraints	 CA:FALSE
 (0)X509v3 Key Usage	 Digital Signature, Key Encipherment, Key Agreement
 (0)X509v3 Extended Key Usage	 TLS Web Server Authentication
@@ -3781,7 +3781,7 @@ countryName	DE
 (0)	 Organization: StartCom Certification Authority
 (0)	 Number: 1
 (0)	 Explicit Text: This certificate was issued according to the Class 1 Validation requirements of the StartCom CA policy, reliance only for the intended purpose in compliance of the relying party obligations.
-(0)X509v3 CRL Distribution Points	
+(0)X509v3 CRL Distribution Points
 (0)	 Full Name:
 (0)	 URI:http://crl.startssl.com/crt1-crl.crl
 (0)Authority Information Access	 OCSP - URI:http://ocsp.startssl.com/sub/class1/server/ca
@@ -3804,16 +3804,16 @@ countryName	DE
 (0)	b2:ac:46:df:b9:59:dc:55:a7:c4:dd:1d:1c:71:ea:36
 (0)	84:7a:e5:8b:74:04:f5:03:76:88:bc:d9:60:70:0d:59
 (0)	ef:94:85:54:1e:dc:4a:9f:36:7a:b5:21:38:3a:71:1f
-(1)CERTIFICATE 1	 
+(1)CERTIFICATE 1
 (1)Version	3 (0x2)
-(1)Serial Number	 17:15:3d:9e:ab:3f:bf 
+(1)Serial Number	 17:15:3d:9e:ab:3f:bf
 (1)Signature Algorithm	sha256WithRSAEncryption
-(1)ISSUER NAME	 
+(1)ISSUER NAME
 countryName	IL
  organizationName	StartCom Ltd.
  organizationalUnitName	Secure Digital Certificate Signing
  commonName	StartCom Certification Authority
-(1)SUBJECT NAME	 
+(1)SUBJECT NAME
 countryName	IL
  organizationName	StartCom Ltd.
  organizationalUnitName	Secure Digital Certificate Signing
@@ -3843,7 +3843,7 @@ countryName	IL
 (1)	 d5:a8:e1:d7:70:31:a9:c4:b3:cf:af:6d:53:2f:06:
 (1)	 f4:a7
 (1)	 Exponent: 65537 (0x10001)
-(1)X509v3 EXTENSIONS	 	
+(1)X509v3 EXTENSIONS
 (1)X509v3 Basic Constraints	critical
 (1)	 CA:TRUE, pathlen:0
 (1)X509v3 Key Usage	critical
@@ -3852,7 +3852,7 @@ countryName	IL
 (1)X509v3 Authority Key Identifier	 keyid:4E:0B:EF:1A:A4:40:5B:A5:17:69:87:30:CA:34:68:43:D0:41:AE:F2
 (1)Authority Information Access	 OCSP - URI:http://ocsp.startssl.com/ca
 (1)	 CA Issuers - URI:http://aia.startssl.com/certs/ca.crt
-(1)X509v3 CRL Distribution Points	
+(1)X509v3 CRL Distribution Points
 (1)	 Full Name:
 (1)	 URI:http://crl.startssl.com/sfsca.crl
 (1)X509v3 Certificate Policies	 Policy: X509v3 Any Policy
@@ -3958,9 +3958,9 @@ my version	target version
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv2 PROTOCOL IS DISABLED	 	 	 	 	 
-SSLv3 PROTOCOL IS ENABLED	 	 	 	 	 
-SSLv3	COMPRESSION METHOD	None	 	 	 
+SSLv2 PROTOCOL IS DISABLED
+SSLv3 PROTOCOL IS ENABLED
+SSLv3	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -3978,8 +3978,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1	COMPRESSION METHOD	None	 	 	 
+TLSv1 PROTOCOL IS ENABLED
+TLSv1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -3997,8 +3997,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1.1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1.1	COMPRESSION METHOD	None	 	 	 
+TLSv1.1 PROTOCOL IS ENABLED
+TLSv1.1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -4016,8 +4016,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1.2 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1.2	COMPRESSION METHOD	None	 	 	 
+TLSv1.2 PROTOCOL IS ENABLED
+TLSv1.2	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -4056,16 +4056,16 @@ TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	GROUP	KEY-SIZE	FORWARD-SECRET	CLASSICAL-STRENGTH	QUANTUM-STRENGTH
-SSLv3	 	 	 	 	 
+SSLv3
 RSA	 	2048	no	110	low
 DHE	 	1024	yes	80	low
-TLSv1	 	 	 	 	 
+TLSv1
 RSA	 	2048	no	110	low
 DHE	 	1024	yes	80	low
-TLSv1.1	 	 	 	 	 
+TLSv1.1
 RSA	 	2048	no	110	low
 DHE	 	1024	yes	80	low
-TLSv1.2	 	 	 	 	 
+TLSv1.2
 RSA	 	2048	no	110	low
 DHE	 	1024	yes	80	low]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -4080,9 +4080,9 @@ DHE	 	1024	yes	80	low]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	STATUS
-SSLv3	 
+SSLv3
 Cipher priority controlled by	client
-TLSv1	 
+TLSv1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -4090,7 +4090,7 @@ Truncated HMAC	no
 Cipher priority controlled by	client
 OCSP stapling	no
 SCT extension	no
-TLSv1.1	 
+TLSv1.1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -4098,7 +4098,7 @@ Truncated HMAC	no
 Cipher priority controlled by	client
 OCSP stapling	no
 SCT extension	no
-TLSv1.2	 
+TLSv1.2
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -5096,7 +5096,7 @@ Qualys-Scan: VM
           <SERVICE>http over ssl</SERVICE>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
-          <RESULT><![CDATA[libxml2 version detected on port: 8443 
+          <RESULT><![CDATA[libxml2 version detected on port: 8443
 libxml2 Version &lt;/td&gt;&lt;td class=&quot;v&quot;&gt;2.7.6 &lt;/td&gt;&lt;/tr&gt;GET /phpinfo.php HTTP/1.1
 Host: demo20.s02.sjc01.qualys.com:8443
 Connection: Keep-Alive]]></RESULT>
@@ -5225,11 +5225,11 @@ Connection: Keep-Alive
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	VALUE
-(0)CERTIFICATE 0	 
+(0)CERTIFICATE 0
 (0)Version	1 (0x0)
-(0)Serial Number	 f3:3e:95:d6:95:03:d0:5b 
+(0)Serial Number	 f3:3e:95:d6:95:03:d0:5b
 (0)Signature Algorithm	sha1WithRSAEncryption
-(0)ISSUER NAME	 
+(0)ISSUER NAME
 countryName	DE
  stateOrProvinceName	Berlin
  localityName	Berlin
@@ -5237,7 +5237,7 @@ countryName	DE
  organizationalUnitName	lab
  commonName	demo1.vmtest.me
  emailAddress	postmaster@vmtest.me
-(0)SUBJECT NAME	 
+(0)SUBJECT NAME
 countryName	DE
  stateOrProvinceName	Berlin
  localityName	Berlin
@@ -5270,16 +5270,16 @@ countryName	DE
 (0)	12:86:56:e5:ef:24:37:62:f3:27:ce:c6:22:37:f2:25
 (0)	76:92:2f:2b:8f:18:15:01:6a:5f:ea:d2:35:2a:56:90
 (0)	e0:fe:41:d0:11:2c:37:4b:aa:7d:f5:2d:1c:d0:8b:2d
-(1)CERTIFICATE 1	 
+(1)CERTIFICATE 1
 (1)Version	3 (0x2)
-(1)Serial Number	 17:15:3d:9e:ab:3f:bf 
+(1)Serial Number	 17:15:3d:9e:ab:3f:bf
 (1)Signature Algorithm	sha256WithRSAEncryption
-(1)ISSUER NAME	 
+(1)ISSUER NAME
 countryName	IL
  organizationName	StartCom Ltd.
  organizationalUnitName	Secure Digital Certificate Signing
  commonName	StartCom Certification Authority
-(1)SUBJECT NAME	 
+(1)SUBJECT NAME
 countryName	IL
  organizationName	StartCom Ltd.
  organizationalUnitName	Secure Digital Certificate Signing
@@ -5309,7 +5309,7 @@ countryName	IL
 (1)	 d5:a8:e1:d7:70:31:a9:c4:b3:cf:af:6d:53:2f:06:
 (1)	 f4:a7
 (1)	 Exponent: 65537 (0x10001)
-(1)X509v3 EXTENSIONS	 	
+(1)X509v3 EXTENSIONS
 (1)X509v3 Basic Constraints	critical
 (1)	 CA:TRUE, pathlen:0
 (1)X509v3 Key Usage	critical
@@ -5318,7 +5318,7 @@ countryName	IL
 (1)X509v3 Authority Key Identifier	 keyid:4E:0B:EF:1A:A4:40:5B:A5:17:69:87:30:CA:34:68:43:D0:41:AE:F2
 (1)Authority Information Access	 OCSP - URI:http://ocsp.startssl.com/ca
 (1)	 CA Issuers - URI:http://aia.startssl.com/certs/ca.crt
-(1)X509v3 CRL Distribution Points	
+(1)X509v3 CRL Distribution Points
 (1)	 Full Name:
 (1)	 URI:http://crl.startssl.com/sfsca.crl
 (1)X509v3 Certificate Policies	 Policy: X509v3 Any Policy
@@ -5424,9 +5424,9 @@ my version	target version
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv2 PROTOCOL IS DISABLED	 	 	 	 	 
-SSLv3 PROTOCOL IS ENABLED	 	 	 	 	 
-SSLv3	COMPRESSION METHOD	None	 	 	 
+SSLv2 PROTOCOL IS DISABLED
+SSLv3 PROTOCOL IS ENABLED
+SSLv3	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -5444,8 +5444,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1	COMPRESSION METHOD	None	 	 	 
+TLSv1 PROTOCOL IS ENABLED
+TLSv1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -5463,8 +5463,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1.1 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1.1	COMPRESSION METHOD	None	 	 	 
+TLSv1.1 PROTOCOL IS ENABLED
+TLSv1.1	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -5482,8 +5482,8 @@ CAMELLIA256-SHA	RSA	RSA	SHA1	Camellia(256)	HIGH
 DHE-RSA-CAMELLIA256-SHA	DH	RSA	SHA1	Camellia(256)	HIGH
 SEED-SHA	RSA	RSA	SHA1	SEED(128)	MEDIUM
 DHE-RSA-SEED-SHA	DH	RSA	SHA1	SEED(128)	MEDIUM
-TLSv1.2 PROTOCOL IS ENABLED	 	 	 	 	 
-TLSv1.2	COMPRESSION METHOD	None	 	 	 
+TLSv1.2 PROTOCOL IS ENABLED
+TLSv1.2	COMPRESSION METHOD	None
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
@@ -5522,16 +5522,16 @@ TLSv1.3 PROTOCOL IS DISABLED]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	GROUP	KEY-SIZE	FORWARD-SECRET	CLASSICAL-STRENGTH	QUANTUM-STRENGTH
-SSLv3	 	 	 	 	 
+SSLv3
 RSA	 	1024	no	80	low
 DHE	 	1024	yes	80	low
-TLSv1	 	 	 	 	 
+TLSv1
 RSA	 	1024	no	80	low
 DHE	 	1024	yes	80	low
-TLSv1.1	 	 	 	 	 
+TLSv1.1
 RSA	 	1024	no	80	low
 DHE	 	1024	yes	80	low
-TLSv1.2	 	 	 	 	 
+TLSv1.2
 RSA	 	1024	no	80	low
 DHE	 	1024	yes	80	low]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -5546,9 +5546,9 @@ DHE	 	1024	yes	80	low]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>false</SSL>
           <RESULT format="table"><![CDATA[NAME	STATUS
-SSLv3	 
+SSLv3
 Cipher priority controlled by	client
-TLSv1	 
+TLSv1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -5556,7 +5556,7 @@ Truncated HMAC	no
 Cipher priority controlled by	client
 OCSP stapling	no
 SCT extension	no
-TLSv1.1	 
+TLSv1.1
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -5564,7 +5564,7 @@ Truncated HMAC	no
 Cipher priority controlled by	client
 OCSP stapling	no
 SCT extension	no
-TLSv1.2	 
+TLSv1.2
 Extended Master Secret	no
 Encrypt Then MAC	no
 Heartbeat	yes
@@ -6615,16 +6615,16 @@ Qualys-Scan: VM
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+SSLv3 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1.1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1.2 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.2 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -6653,16 +6653,16 @@ RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WEAK CIPHERS	 	 	 	 	 
+SSLv3 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1 WEAK CIPHERS	 	 	 	 	 
+TLSv1 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1.1 WEAK CIPHERS	 	 	 	 	 
+TLSv1.1 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1.2 WEAK CIPHERS	 	 	 	 	 
+TLSv1.2 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -6678,25 +6678,25 @@ EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+SSLv3 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1.1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1.2 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.2 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
@@ -6715,13 +6715,13 @@ EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+SSLv3 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1.1 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1.1 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1.2 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1.2 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:15:32Z</LAST_FOUND>
@@ -6828,16 +6828,16 @@ RC4-SHA	DHE-RSA-CAMELLIA256-SHA	TLSv1]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+SSLv3 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1.1 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.1 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM
-TLSv1.2 WITH RC4 CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.2 WITH RC4 CIPHERS IS SUPPORTED
 RC4-MD5	RSA	RSA	MD5	RC4(128)	MEDIUM
 RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -6868,16 +6868,16 @@ RC4-SHA	RSA	RSA	SHA1	RC4(128)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WEAK CIPHERS	 	 	 	 	 
+SSLv3 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1 WEAK CIPHERS	 	 	 	 	 
+TLSv1 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1.1 WEAK CIPHERS	 	 	 	 	 
+TLSv1.1 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
-TLSv1.2 WEAK CIPHERS	 	 	 	 	 
+TLSv1.2 WEAK CIPHERS
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
@@ -6893,25 +6893,25 @@ EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+SSLv3 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1.1 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.1 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
 EDH-RSA-DES-CBC-SHA	DH	RSA	SHA1	DES(56)	LOW
 EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM
-TLSv1.2 WITH 64-BIT CBC CIPHERS IS SUPPORTED	 	 	 	 	 
+TLSv1.2 WITH 64-BIT CBC CIPHERS IS SUPPORTED
 IDEA-CBC-SHA	RSA	RSA	SHA1	IDEA(128)	MEDIUM
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
 DES-CBC3-SHA	RSA	RSA	SHA1	3DES(168)	MEDIUM
@@ -6930,13 +6930,13 @@ EDH-RSA-DES-CBC3-SHA	DH	RSA	SHA1	3DES(168)	MEDIUM]]></RESULT>
           <PROTOCOL>tcp</PROTOCOL>
           <SSL>true</SSL>
           <RESULT format="table"><![CDATA[CIPHER	KEY-EXCHANGE	AUTHENTICATION	MAC	ENCRYPTION(KEY-STRENGTH)	GRADE
-SSLv3 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+SSLv3 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1.1 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1.1 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW
-TLSv1.2 SELECTED THE FOLLOWING WEAK CIPHER	 	 	 	 	 
+TLSv1.2 SELECTED THE FOLLOWING WEAK CIPHER
 DES-CBC-SHA	RSA	RSA	SHA1	DES(56)	LOW]]></RESULT>
           <FIRST_FOUND>2019-07-31T22:15:32Z</FIRST_FOUND>
           <LAST_FOUND>2019-07-31T22:15:32Z</LAST_FOUND>
@@ -7058,7 +7058,7 @@ frequency=-22.555, sys_jitter=0.000, clk_jitter=0.000, clk_wander=0.000]]></RESU
         <TITLE><![CDATA[Hidden RPC Services]]></TITLE>
         <SEVERITY>2</SEVERITY>
         <CATEGORY>RPC</CATEGORY>
-        <THREAT><![CDATA[The Portmapper/Rpcbind listens on port 111 and stores an updated list of registered RPC services running on the server (RPC name, version and port number). It acts as a "gateway" for clients wanting to connect to any RPC daemon. 
+        <THREAT><![CDATA[The Portmapper/Rpcbind listens on port 111 and stores an updated list of registered RPC services running on the server (RPC name, version and port number). It acts as a "gateway" for clients wanting to connect to any RPC daemon.
 <P>
 When the portmapper/rpcbind is removed or firewalled, standard RPC client programs fail to obtain the portmapper list.  However, by sending carefully crafted packets, it's possible to determine which RPC programs are listening on which port. This technique is known as direct RPC scanning. It's used to bypass portmapper/rpcbind in order to find RPC programs running on a port (TCP or UDP ports). On Linux servers, RPC services are typically listening on privileged ports (below 1024), whereas on Solaris, RPC services are on temporary ports (starting with port 32700).]]></THREAT>
         <IMPACT><![CDATA[Unauthorized users can build a list of RPC services running on the host. If they discover vulnerable RPC services on the host, they then can exploit them.]]></IMPACT>
@@ -7071,7 +7071,7 @@ When the portmapper/rpcbind is removed or firewalled, standard RPC client progra
         <TITLE><![CDATA[phpinfo Information Disclosure Vulnerability]]></TITLE>
         <SEVERITY>3</SEVERITY>
         <CATEGORY>CGI</CATEGORY>
-        <THREAT><![CDATA[This host has a publicly-accessible PHP file that calls the phpinfo() function (or some other function similar to it). 
+        <THREAT><![CDATA[This host has a publicly-accessible PHP file that calls the phpinfo() function (or some other function similar to it).
 <P>
 If a user requests this file (such as via an Internet browser), the user may obtain a page containing sensitive information about the Web server host. The information displayed to the user could include the exact version numbers of various software products (Operating Systems, Web Servers, PHP, XML, MySQL), the values of some environment variables ($PATH, $SYSTEM_ROOT), paths to various programs (cmd.exe), and much more.
 <P>
@@ -7705,7 +7705,7 @@ Virtual Patch #1006256: 1006256 - GNU Bash Remote Code Execution Vulnerability<B
         <TITLE><![CDATA[SSH daemon information retrieving]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>General remote services</CATEGORY>
-        <THREAT><![CDATA[SSH is a secure protocol, provided it is fully patched, properly configured, and uses FIPS approved algorithms. 
+        <THREAT><![CDATA[SSH is a secure protocol, provided it is fully patched, properly configured, and uses FIPS approved algorithms.
 <P>
 <PRE>
 For Red Hat ES 4:-
@@ -7785,7 +7785,7 @@ SSLRequireCipher ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM<BR><P>
 
 <B>Tomcat</B>
 <BR>
-sslProtocol=&quot;SSLv3&quot;                
+sslProtocol=&quot;SSLv3&quot;
 <BR>ciphers=&quot;SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_DHE_RSA_W
 <BR>ITH_3DES_EDE_CBC_SHA&quot;
 <BR><P>
@@ -7794,7 +7794,7 @@ sslProtocol=&quot;SSLv3&quot;
 <A HREF="http://support.microsoft.com/default.aspx?scid=kb;EN-US;245030" TARGET="_blank">How to Restrict the Use of Certain Cryptographic Algorithms and Protocols in Schannel.dll</A> (Windows restart required)
 <BR><A HREF="http://support.microsoft.com/default.aspx?scid=kb;en-us;187498" TARGET="_blank">How to disable PCT 1.0, SSL 2.0, SSL 3.0, or TLS 1.0 in Internet Information Services</A> (Windows restart required)
 <BR><A HREF="http://www.microsoft.com/technet/security/prodtech/IIS.mspx" TARGET="_blank">Security Guidance for IIS</A>
-<P>For Novell Netware 6.5 please refer to the following document 
+<P>For Novell Netware 6.5 please refer to the following document
 <A HREF="http://support.novell.com/cgi-bin/search/searchtid.cgi?10100633.htm" TARGET="_blank">SSL Allows the use of Weak Ciphers. -TID10100633 </A>]]></SOLUTION>
         <PCI_FLAG>1</PCI_FLAG>
         <LAST_UPDATE>2018-10-25T21:41:27Z</LAST_UPDATE>
@@ -7827,7 +7827,7 @@ SSLCipherSuite ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM<P>
 <A HREF="http://httpd.apache.org/docs/2.1/mod/mod_ssl.html#SSLHonorCipherOrder" TARGET="_blank">SSLHonorCipherOrder Directive</A>
 <P>
 <A HREF="http://support.microsoft.com/kb/245030" TARGET="_blank">How to Control the Ciphers for SSL and TLS on IIS</A>
-<P>For Novell Netware 6.5 please refer to the following document 
+<P>For Novell Netware 6.5 please refer to the following document
 <A HREF="http://support.novell.com/cgi-bin/search/searchtid.cgi?10100633.htm" TARGET="_blank">SSL Allows the use of Weak Ciphers. -TID10100633 </A>]]></SOLUTION>
         <PCI_FLAG>1</PCI_FLAG>
         <LAST_UPDATE>2018-10-25T21:42:36Z</LAST_UPDATE>
@@ -7989,7 +7989,7 @@ This attack is not very practical as it requires the attacker to have access to 
         <TITLE><![CDATA[SSLv3 Padding Oracle Attack Information Disclosure Vulnerability (POODLE)]]></TITLE>
         <SEVERITY>3</SEVERITY>
         <CATEGORY>General remote services</CATEGORY>
-        <THREAT><![CDATA[The SSL protocol 3.0 design error, uses nondeterministic CBC padding, which makes it easier for man-in-the-middle attacks. 
+        <THREAT><![CDATA[The SSL protocol 3.0 design error, uses nondeterministic CBC padding, which makes it easier for man-in-the-middle attacks.
 <P>
 The target supports SSLv3, which makes it vulnerable to POODLE (Padding Oracle On Downgraded Legacy Encryption), even if it also supports more recent versions of TLS. It's subject to a downgrade attack, in which the attacker tricks the browser into connecting with SSLv3.<P>
 <B> This QID is an automatic PCI FAIL in accordance with the PCI standards. <P>
@@ -8060,7 +8060,7 @@ Further details can be found under: <BR>
 </B>
 <P>]]></THREAT>
         <IMPACT><![CDATA[An attacker can exploit this vulnerability to read secure communications or maliciously modify messages.]]></IMPACT>
-        <SOLUTION><![CDATA[Disable the SSL 3.0 protocol in the client and in the server, refer to 
+        <SOLUTION><![CDATA[Disable the SSL 3.0 protocol in the client and in the server, refer to
 How to disable SSLv3 : <A HREF="http://disablessl3.com/" TARGET="_blank">Disable SSLv3</A>]]></SOLUTION>
         <PCI_FLAG>1</PCI_FLAG>
         <LAST_UPDATE>2018-12-20T23:36:40Z</LAST_UPDATE>
@@ -8070,7 +8070,7 @@ How to disable SSLv3 : <A HREF="http://disablessl3.com/" TARGET="_blank">Disable
         <TITLE><![CDATA[SSL Server default Diffie-Hellman prime information]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>General remote services</CATEGORY>
-        <THREAT><![CDATA[Diffie-Hellman is a popular cryptographic algorithm used by SSL/TLS. 
+        <THREAT><![CDATA[Diffie-Hellman is a popular cryptographic algorithm used by SSL/TLS.
 - For fixed primes: 1024 and below are considered unsafe.
 
 - For variable primes: 512 is unsafe. 768 is probably mostly safe, but might not be for long. 1024 and above are considered safe.]]></THREAT>
@@ -8171,7 +8171,7 @@ If the test is successful, then the target support TLSv1]]></SOLUTION>
         <TITLE><![CDATA[Birthday attacks against TLS ciphers with 64bit block size vulnerability (Sweet32)]]></TITLE>
         <SEVERITY>3</SEVERITY>
         <CATEGORY>General remote services</CATEGORY>
-        <THREAT><![CDATA[Legacy block ciphers having block size of 64 bits are vulnerable to a practical collision attack when used in CBC mode. 
+        <THREAT><![CDATA[Legacy block ciphers having block size of 64 bits are vulnerable to a practical collision attack when used in CBC mode.
 All versions of SSL/TLS protocol support cipher suites which use DES, 3DES, IDEA or RC2 as the symmetric encryption cipher are affected.]]></THREAT>
         <IMPACT><![CDATA[Remote attackers can obtain cleartext data via a birthday attack against a long-duration encrypted session.]]></IMPACT>
         <SOLUTION><![CDATA[Disable and stop using DES, 3DES, IDEA or RC2 ciphers.<BR>
@@ -8230,7 +8230,7 @@ More information can be found at <A HREF="https://docs.microsoft.com/en-us/windo
         <CATEGORY>General remote services</CATEGORY>
         <THREAT><![CDATA[The SSH protocol (Secure Shell) is a method for secure remote login from one computer to another.<P>
 The SSH Server is using a small Public Key.<P>
-Best practices require that RSA digital signatures be 2048 or more bits long to provide adequate security. Key lengths of 1024 are acceptable through 2013, but since 2011 they are considered deprecated. 
+Best practices require that RSA digital signatures be 2048 or more bits long to provide adequate security. Key lengths of 1024 are acceptable through 2013, but since 2011 they are considered deprecated.
 <P>For more information, please refer to NIST Special Publication 800-131A (<A HREF="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar1.pdf" TARGET="_blank">http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar1.pdf</A>).<P>
 Only server keys that are not part of a certificate are reported in this QID. OpenSSH certificates using short keys are reported in QID 38733. X.509 certificates using short keys are reported in QID 38171.]]></THREAT>
         <IMPACT><![CDATA[A man-in-the-middle attacker can exploit this vulnerability to record the communication to decrypt the session key and even the messages.<P>]]></IMPACT>
@@ -8286,7 +8286,7 @@ This issue affects only a modified OpenSSL package for Debian prior to Version 0
 Please note that the keys that were generated on a vulnerable system and then moved to a different non-Debian system are still vulnerable and can cause a compromise of that non-Debian system.]]></IMPACT>
         <SOLUTION><![CDATA[The vendor has released updates to address this issue. See the references for more information.
 <P>
-The Results section contains identifications for the weak keys detected on the target system. The keys are identified by calculating a hash over the public key. The hash function as well as the information the hash function is calculated upon is different for SSH and SSL keys. 
+The Results section contains identifications for the weak keys detected on the target system. The keys are identified by calculating a hash over the public key. The hash function as well as the information the hash function is calculated upon is different for SSH and SSL keys.
 <P>
 For SSL the following command can be used to calculate the hash of a key in a X.509 certificate:
 <BR>
@@ -8363,7 +8363,7 @@ Following are links for downloading patches to fix the vulnerabilities:
         <TITLE><![CDATA[Remote Access or Management Service Detected]]></TITLE>
         <SEVERITY>3</SEVERITY>
         <CATEGORY>General remote services</CATEGORY>
-        <THREAT><![CDATA[A remote access or remote management service was detected. If such a service is accessible to malicious users it can be used to carry different type of attacks. Malicious users could try to brute force credentials or collect additional information on the service which could enable them in crafting further attacks. 
+        <THREAT><![CDATA[A remote access or remote management service was detected. If such a service is accessible to malicious users it can be used to carry different type of attacks. Malicious users could try to brute force credentials or collect additional information on the service which could enable them in crafting further attacks.
 <P>
 The Results section includes information on the remote access service that was found on the target.
 <P>
@@ -8576,7 +8576,7 @@ This information was returned from: 1) the WHOIS service, or 2) the infrastructu
         <TITLE><![CDATA[Internet Service Provider]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>Information gathering</CATEGORY>
-        <THREAT><![CDATA[The information shown in the Result section was returned by the network infrastructure responsible for routing traffic from our cloud platform to the target network (where the scanner appliance is located). 
+        <THREAT><![CDATA[The information shown in the Result section was returned by the network infrastructure responsible for routing traffic from our cloud platform to the target network (where the scanner appliance is located).
 
 <P>This information was returned from: 1) the WHOIS service, or 2) the infrastructure provided by the closest gateway server to our cloud platform. If your ISP is routing traffic, your ISP's gateway server returned this information.]]></THREAT>
         <IMPACT><![CDATA[This information can be used by malicious users to gather more information about the network infrastructure that may aid in launching further attacks against it.]]></IMPACT>
@@ -8623,11 +8623,11 @@ The root DSE (DSA-Specific Entry) data can be retrieved from an LDAPv3 server by
         <CATEGORY>Information gathering</CATEGORY>
         <THREAT><![CDATA[Several different techniques can be used to identify the operating system (OS) running on a host. A short description of these techniques is provided below. The specific technique used to identify the OS on this host is included in the RESULTS section of your report.
 <P>
-1) <B>TCP/IP Fingerprint</B>: The operating system of a host can be identified from a remote system using TCP/IP fingerprinting. All underlying operating system TCP/IP stacks have subtle differences that can be seen in their responses to specially-crafted TCP packets. According to the results of this &quot;fingerprinting&quot; technique, the OS version is among those listed below. 
+1) <B>TCP/IP Fingerprint</B>: The operating system of a host can be identified from a remote system using TCP/IP fingerprinting. All underlying operating system TCP/IP stacks have subtle differences that can be seen in their responses to specially-crafted TCP packets. According to the results of this &quot;fingerprinting&quot; technique, the OS version is among those listed below.
 <P>
 Note that if one or more of these subtle differences are modified by a firewall or a packet filtering device between the scanner and the host, the fingerprinting technique may fail. Consequently, the version of the OS may not be detected correctly. If the host is behind a proxy-type firewall, the version of the operating system detected may be that of the firewall instead of the host being scanned.
 <P>
-2) <B>NetBIOS</B>: Short for Network Basic Input Output System, an application programming interface (API) that augments the DOS BIOS by adding special functions for local-area networks (LANs). Almost all LANs for PCs are based on the NetBIOS. Some LAN manufacturers have even extended it, adding additional network capabilities. NetBIOS relies on a message format called Server Message Block (SMB). 
+2) <B>NetBIOS</B>: Short for Network Basic Input Output System, an application programming interface (API) that augments the DOS BIOS by adding special functions for local-area networks (LANs). Almost all LANs for PCs are based on the NetBIOS. Some LAN manufacturers have even extended it, adding additional network capabilities. NetBIOS relies on a message format called Server Message Block (SMB).
 <P>
 3) <B>PHP Info</B>: PHP is a hypertext pre-processor, an open-source, server-side, HTML-embedded scripting language used to create dynamic Web pages. Under some configurations it is possible to call PHP functions like phpinfo() and obtain operating system information.
 <P>
@@ -8666,7 +8666,7 @@ The exact method(s) used are shown in the Results section.]]></THREAT>
         <TITLE><![CDATA[Host Scan Time]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>Information gathering</CATEGORY>
-        <THREAT><![CDATA[The Host Scan Time is the period of time it takes the scanning engine to perform the vulnerability assessment of a single target host. The Host Scan Time for this host is reported in the Result section below. 
+        <THREAT><![CDATA[The Host Scan Time is the period of time it takes the scanning engine to perform the vulnerability assessment of a single target host. The Host Scan Time for this host is reported in the Result section below.
 <P>
 The Host Scan Time does not have a direct correlation to the Duration time as displayed in the Report Summary section of a scan results report. The Duration is the period of time it takes the service to perform a scan task. The Duration includes the time it takes the service to scan all hosts, which may involve parallel scanning. It also includes the time it takes for a scanner appliance to pick up the scan task and transfer the results back to the service's Secure Operating Center. Further, when a scan task is distributed across multiple scanners, the Duration includes the time it takes to perform parallel host scanning on all scanners.
 <P>
@@ -8718,11 +8718,11 @@ The QID checks for key &quot;HKLM\SOFTWARE\Microsoft\InetStp SetupString&quot; v
         <TITLE><![CDATA[SMB Version 1 Enabled]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>Information gathering</CATEGORY>
-        <THREAT><![CDATA[The Server Message Block (SMB) Protocol is a network file sharing protocol, and as implemented in Microsoft Windows is known as Microsoft SMB Protocol. 
+        <THREAT><![CDATA[The Server Message Block (SMB) Protocol is a network file sharing protocol, and as implemented in Microsoft Windows is known as Microsoft SMB Protocol.
 <P>
 The Windows host has SMBv1 protocol enabled for either : <BR>
 Client or <BR>
-Server 
+Server
 <P>]]></THREAT>
         <IMPACT><![CDATA[SMB protocols could allow a remote attacker to obtain sensitive information from affected systems.]]></IMPACT>
         <SOLUTION><![CDATA[Microsoft recommends users to update to latest SMB versions and stop using SMBv1.
@@ -8886,7 +8886,7 @@ The service also attempts to authenticate using common credentials. You should v
         <CATEGORY>TCP/IP</CATEGORY>
         <THREAT><![CDATA[ICMP (Internet Control and Error Message Protocol) is a protocol encapsulated in IP packets. It's principal purpose is to provide a protocol layer able to inform gateways of the inter-connectivity and accessibility of other gateways or hosts. &quot;ping&quot; is a well-known program for determining if a host is up or down. It uses ICMP echo packets. ICMP timestamp packets are used to synchronize clocks between hosts.]]></THREAT>
         <IMPACT><![CDATA[Unauthorized users can obtain information about your network by sending ICMP timestamp packets. For example, the internal systems clock should not be disclosed since some internal daemons use this value to calculate ID or sequence numbers (i.e., on SunOS servers).]]></IMPACT>
-        <SOLUTION><![CDATA[You can filter ICMP messages of type &quot;Timestamp&quot; and &quot;Timestamp Reply&quot; at the firewall level. Some system administrators choose to filter most types of ICMP messages for various reasons. For example, they may want to protect their internal hosts from ICMP-based Denial Of Service attacks, such as the <I>Ping of Death</I> or <I>Smurf</I> attacks. 
+        <SOLUTION><![CDATA[You can filter ICMP messages of type &quot;Timestamp&quot; and &quot;Timestamp Reply&quot; at the firewall level. Some system administrators choose to filter most types of ICMP messages for various reasons. For example, they may want to protect their internal hosts from ICMP-based Denial Of Service attacks, such as the <I>Ping of Death</I> or <I>Smurf</I> attacks.
 <P>
 However, you should never filter <B>ALL</B> ICMP messages, as some of them (&quot;Don't Fragment&quot;, &quot;Destination Unreachable&quot;, &quot;Source Quench&quot;, etc) are necessary for proper behavior of Operating System TCP/IP stacks.
 <P>
@@ -8956,9 +8956,9 @@ Normally, the IP Identification field is intended to be a reasonably unique valu
         <TITLE><![CDATA[ICMP Replies Received]]></TITLE>
         <SEVERITY>1</SEVERITY>
         <CATEGORY>TCP/IP</CATEGORY>
-        <THREAT><![CDATA[ICMP (Internet Control and Error Message Protocol) is a protocol encapsulated in IP packets. ICMP's principal purpose is to provide a protocol layer that informs gateways of the inter-connectivity and accessibility of other gateways or hosts. 
+        <THREAT><![CDATA[ICMP (Internet Control and Error Message Protocol) is a protocol encapsulated in IP packets. ICMP's principal purpose is to provide a protocol layer that informs gateways of the inter-connectivity and accessibility of other gateways or hosts.
 <P>
-We have sent the following types of packets to trigger the host to send us ICMP replies: 
+We have sent the following types of packets to trigger the host to send us ICMP replies:
 <P>
 Echo Request (to trigger Echo Reply)<br>
 Timestamp Request (to trigger Timestamp Reply)<br>
@@ -9023,7 +9023,7 @@ Please note that for reliability reasons only the network traffic from open TCP 
         <TITLE><![CDATA[TCP Sequence Number Approximation Based Denial of Service]]></TITLE>
         <SEVERITY>2</SEVERITY>
         <CATEGORY>TCP/IP</CATEGORY>
-        <THREAT><![CDATA[TCP provides stateful communications between hosts on a network. TCP sessions are established by a three-way handshake and use random 32-bit sequence and acknowledgement numbers to ensure the validity of traffic. A vulnerability was reported that may permit TCP sequence numbers to be more easily approximated by remote attackers. This issue affects products released by multiple vendors.  
+        <THREAT><![CDATA[TCP provides stateful communications between hosts on a network. TCP sessions are established by a three-way handshake and use random 32-bit sequence and acknowledgement numbers to ensure the validity of traffic. A vulnerability was reported that may permit TCP sequence numbers to be more easily approximated by remote attackers. This issue affects products released by multiple vendors.
 <P>
 The cause of the vulnerability is that affected implementations will accept TCP sequence numbers within a certain range, known as the acknowledgement range, of the expected sequence number for a packet in the session. This is determined by the TCP window size, which is negotiated during the three-way handshake for the session. Larger TCP window sizes may be set to allow for more throughput, but the larger the TCP window size, the more probable it is to guess a TCP sequence number that falls within an acceptable range. It was initially thought that guessing an acceptable sequence number was relatively difficult for most implementations given random distribution, making this type of attack impractical. However, some implementations may make it easier to successfully approximate an acceptable TCP sequence number, making these attacks possible with a number of protocols and implementations.
 <P>
@@ -9207,9 +9207,9 @@ Some operating systems (e.g., MacOS, OpenBSD) use a non-zero, probably random, i
         <CATEGORY>Web server</CATEGORY>
         <THREAT><![CDATA[A Web server was detected that supports the HTTP TRACE method. This method allows debugging and connection trace analysis for connections from the client to the Web server. Per the HTTP specification, when this method is used, the Web server echoes back the information sent to it by the client unmodified and unfiltered. Microsoft IIS web server uses an alias TRACK for this method, and is functionally the same.
 <P>
-A vulnerability related to this method was discovered. A malicious, active component in a Web page can send Trace requests to a Web server that supports this Trace method. Usually, browser security disallows access to Web sites outside of the present site's domain. Although unlikely and difficult to achieve, it's possible, in the presence of other browser vulnerabilities, for the active HTML content to make external requests to arbitrary Web servers beyond the hosting Web server. Since the chosen Web server then echoes back the client request unfiltered, the response also includes cookie-based or Web-based (if logged on) authentication credentials that the browser automatically sent to the specified Web application on the specified Web server. 
+A vulnerability related to this method was discovered. A malicious, active component in a Web page can send Trace requests to a Web server that supports this Trace method. Usually, browser security disallows access to Web sites outside of the present site's domain. Although unlikely and difficult to achieve, it's possible, in the presence of other browser vulnerabilities, for the active HTML content to make external requests to arbitrary Web servers beyond the hosting Web server. Since the chosen Web server then echoes back the client request unfiltered, the response also includes cookie-based or Web-based (if logged on) authentication credentials that the browser automatically sent to the specified Web application on the specified Web server.
 <P>
-The significance of the Trace capability in this vulnerability is that the active component in the page visited by the victim user has no direct access to this authentication information, but gets it after the target Web server echoes it back as its Trace response. 
+The significance of the Trace capability in this vulnerability is that the active component in the page visited by the victim user has no direct access to this authentication information, but gets it after the target Web server echoes it back as its Trace response.
 <P>
 Since this vulnerability exists as a support for a method required by the HTTP protocol specification, most common Web servers are vulnerable.
 <P>
@@ -9281,10 +9281,10 @@ For more details about other web servers :<A HREF="http://www.kb.cert.org/vuls/i
 <P>
 A cache management feature for Apache makes use of an entity tag (ETag) header. When this option is enabled and a request is made for a document relating to a file, an ETag response header is returned containing various file attributes for caching purposes. ETag information allows subsequent file requests to contain specific information, such as the file's inode number.
 <P>
-A weakness has been found in the generation of ETag headers under certain configurations implementing the FileETag directive. Among the file attributes included in the header is the file inode number that is returned to a client. 
+A weakness has been found in the generation of ETag headers under certain configurations implementing the FileETag directive. Among the file attributes included in the header is the file inode number that is returned to a client.
 <P>
 <B>Affected Versions:</B><BR>
-By default, all Versions of Apache are vulnerable. 
+By default, all Versions of Apache are vulnerable.
 <P>
 In Apache Versions 1.3.22 and earlier, it's not possible to disable inodes in in ETag headers to mitigate this vulnerability, so Apache Version 1.3.22 and earlier are vulnerable at all times.
 <P>
@@ -9368,7 +9368,7 @@ Autocomplete should be turned off for any input that takes sensitive information
         <IMPACT><![CDATA[If the browser is used in a shared computing environment where more than one person may use the browser, then &quot;autocomplete&quot; values may be retrieved or submitted by an unauthorized user. <P>]]></IMPACT>
         <SOLUTION><![CDATA[Contact the vendor to have the AutoComplete attribute disabled for the password field in all forms. The AutoComplete attribute should also be disabled for the user ID field. <P>
 Developers can add the following attribute to the form or input element: autocomplete=&quot;off&quot; <BR>
-This attribute prevents the browser from prompting the user to save the populated form values for later reuse. <BR> 
+This attribute prevents the browser from prompting the user to save the populated form values for later reuse. <BR>
 Most browsers no longer honor autocomplete=&quot;off&quot; for password input fields. These browsers include  Chrome, Firefox, Microsoft Edge, IE, Opera<BR>
 However, there is still an ability to turn off autocomplete through the browser and that is recommended for a shared computing environment.<BR>
 Since the ability to turn autocomplete off for password inputs fields is controlled by the user it is highly recommended for application to enforce strong password rules.<P>]]></SOLUTION>
@@ -9535,9 +9535,9 @@ For more details on configuration on windows server 2012 and 2012 R2 systems see
         <TITLE><![CDATA[Microsoft SMB Server Remote Code Execution Vulnerability (MS17-010) and Shadow Brokers]]></TITLE>
         <SEVERITY>5</SEVERITY>
         <CATEGORY>Windows</CATEGORY>
-        <THREAT><![CDATA[Microsoft Server Message Block (SMB) Protocol is a Microsoft network file sharing protocol used in Microsoft Windows. 
+        <THREAT><![CDATA[Microsoft Server Message Block (SMB) Protocol is a Microsoft network file sharing protocol used in Microsoft Windows.
 <P>
-The Microsoft SMB Server is vulnerable to multiple remote code execution vulnerabilities due to the way that the Microsoft Server Message Block 1.0 (SMBv1) server handles certain requests. 
+The Microsoft SMB Server is vulnerable to multiple remote code execution vulnerabilities due to the way that the Microsoft Server Message Block 1.0 (SMBv1) server handles certain requests.
 <P>
 This security update is rated Critical for all supported editions of Windows XP, Windows 2003, Windows 8, Windows Vista, Windows Server 2008, Windows 7, Windows Server 2008 R2, Windows Server 2012 and 2012 R2, Windows 8.1 and RT 8.1, Windows 10 and Windows Server 2016.
 <P>
@@ -10099,7 +10099,7 @@ Squid version 5.0.1 to 5.0.4<P>
 QID Detection Logic:<BR>
 This QID checks for vulnerable version of Squid.<P>]]></THREAT>
         <IMPACT><![CDATA[Successful exploitation could allow a trusted client to perform HTTP Request Smuggling and access services otherwise forbidden by Squid security controls.<P>]]></IMPACT>
-        <SOLUTION><![CDATA[Customers are advised to upgrade to a fixed version of 
+        <SOLUTION><![CDATA[Customers are advised to upgrade to a fixed version of
 <A HREF="http://www.squid-cache.org/Versions/v4/changesets/SQUID-2020_11.patch" TARGET="_blank">Squid versions 4.14 and 5.0.5</A> to remediate this vulnerability.<BR>
 
 
@@ -10161,4 +10161,4 @@ Following are links for downloading patches to fix the vulnerabilities:
     </TEMPLATE_DETAILS>
   </APPENDICES>
 </ASSET_DATA_REPORT>
-<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2019, Qualys, Inc. //--> 
+<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2019, Qualys, Inc. //-->

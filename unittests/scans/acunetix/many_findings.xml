@@ -14,25 +14,25 @@
         <WebServer><![CDATA[nginx/1.12.2]]></WebServer>
         <Technologies>
             <![CDATA[
-                
+
             ]]>
         </Technologies>
         <Crawler StartUrl="http://www.itsecgames.com/">
             <Cookies>
-                
+
             </Cookies>
             <SiteFiles>
 <SiteFile id="1">
                     <Name><![CDATA[http://www.itsecgames.com/]]></Name>
                     <URL><![CDATA[/]]></URL>
                     <FullURL><![CDATA[http://www.itsecgames.com/]]></FullURL>
-                    
+
                 </SiteFile>
 <SiteFile id="2">
                     <Name><![CDATA[sitemap.xml]]></Name>
                     <URL><![CDATA[/sitemap.xml]]></URL>
                     <FullURL><![CDATA[http://www.itsecgames.com/sitemap.xml]]></FullURL>
-                    
+
                 </SiteFile>
             </SiteFiles>
         </Crawler>
@@ -58,10 +58,10 @@ Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol
                     <Request><![CDATA[]]></Request>
                 </TechnicalDetails>
                 <CWEList>
-                    
+
                 </CWEList>
                 <CVEList>
-                    
+
                 </CVEList>
                 <CVSS>
                   <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:P]]></Descriptor>
@@ -76,7 +76,7 @@ Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS>
-                
+
                 <CVSS3>
                   <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></Descriptor>
                   <Score><![CDATA[5.3]]></Score>
@@ -94,19 +94,19 @@ Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS3>
-                
+
                 <References>
-                    
+
                     <Reference>
                       <Database><![CDATA[Slowloris DOS Mitigation Guide]]></Database>
                       <URL><![CDATA[https://www.funtoo.org/Slowloris_DOS_Mitigation_Guide]]></URL>
                     </Reference>
-                    
+
                     <Reference>
                       <Database><![CDATA[Protect Apache Against Slowloris Attack]]></Database>
                       <URL><![CDATA[https://web.archive.org/web/20180329210925/http://blog.secaserver.com/2011/08/protect-apache-slowloris-attack/]]></URL>
                     </Reference>
-                    
+
                 </References>
             </ReportItem>
 <ReportItem id="2" color="blue">
@@ -116,7 +116,7 @@ Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol
    &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;itsecgames.com&lt;/title&gt;  
+  &lt;title&gt;itsecgames.com&lt;/title&gt;
   &lt;meta name=&quot;description&quot; content=&quot;bWAPP&quot;&gt;
   &lt;meta name=&quot;keywords&quot; content=&quot;bWAPP&quot;&gt;
 &lt;/head&gt;
@@ -142,12 +142,12 @@ This web server is responding differently when the Host header is manipulated an
                     <Request><![CDATA[]]></Request>
                 </TechnicalDetails>
                 <CWEList>
-                    
+
                     <CWE id="200"><![CDATA[CWE-200]]></CWE>
-                    
+
                 </CWEList>
                 <CVEList>
-                    
+
                 </CVEList>
                 <CVSS>
                   <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:P/I:N/A:N]]></Descriptor>
@@ -162,7 +162,7 @@ This web server is responding differently when the Host header is manipulated an
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS>
-                
+
                 <CVSS3>
                   <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></Descriptor>
                   <Score><![CDATA[7.5]]></Score>
@@ -180,14 +180,14 @@ This web server is responding differently when the Host header is manipulated an
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS3>
-                
+
                 <References>
-                    
+
                     <Reference>
                       <Database><![CDATA[Virtual hosting]]></Database>
                       <URL><![CDATA[https://en.wikipedia.org/wiki/Virtual_hosting]]></URL>
                     </Reference>
-                    
+
                 </References>
             </ReportItem>
 <ReportItem id="3" color="blue">
@@ -217,12 +217,12 @@ Connection: Keep-alive
 ]]></Request>
                 </TechnicalDetails>
                 <CWEList>
-                    
+
                     <CWE id="310"><![CDATA[CWE-310]]></CWE>
-                    
+
                 </CWEList>
                 <CVEList>
-                    
+
                 </CVEList>
                 <CVSS>
                   <Descriptor><![CDATA[AV:N/AC:M/Au:N/C:P/I:P/A:N]]></Descriptor>
@@ -237,7 +237,7 @@ Connection: Keep-alive
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS>
-                
+
                 <CVSS3>
                   <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></Descriptor>
                   <Score><![CDATA[9.1]]></Score>
@@ -255,9 +255,9 @@ Connection: Keep-alive
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS3>
-                
+
                 <References>
-                    
+
                 </References>
             </ReportItem>
 <ReportItem id="4" color="green">
@@ -295,12 +295,12 @@ Connection: Keep-alive
 ]]></Request>
                 </TechnicalDetails>
                 <CWEList>
-                    
+
                     <CWE id="16"><![CDATA[CWE-16]]></CWE>
-                    
+
                 </CWEList>
                 <CVEList>
-                    
+
                 </CVEList>
                 <CVSS>
                   <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
@@ -315,19 +315,19 @@ Connection: Keep-alive
                   <RL><![CDATA[]]></RL>
                   <RC><![CDATA[]]></RC>
                 </CVSS>
-                
+
                 <References>
-                    
+
                     <Reference>
                       <Database><![CDATA[Content Security Policy (CSP)]]></Database>
                       <URL><![CDATA[https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP]]></URL>
                     </Reference>
-                    
+
                     <Reference>
                       <Database><![CDATA[Implementing Content Security Policy]]></Database>
                       <URL><![CDATA[https://hacks.mozilla.org/2016/02/implementing-content-security-policy/]]></URL>
                     </Reference>
-                    
+
                 </References>
             </ReportItem>
         </ReportItems>

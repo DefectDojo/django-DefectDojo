@@ -34,7 +34,7 @@
     <wascid>13</wascid>
     <sourceid>3</sourceid>
   </alertitem>
-  <alertitem>  
+  <alertitem>
     <pluginid>10011</pluginid>
     <alert>zap2: Cookie Without Secure Flag</alert>
     <name>Cookie Without Secure Flag</name>

