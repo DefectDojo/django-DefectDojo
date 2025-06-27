@@ -75,7 +75,7 @@ function homepage_severity_plot(critical, high, medium, low) {
             hoverable: true,
             borderWidth: 1,
             borderColor: '#e7e7e7',
-    
+
         },
         tooltip: true,
     };
@@ -130,7 +130,7 @@ function opened_per_month(critical, high, medium, low) {
             hoverable: false,
             borderWidth: 1,
             borderColor: '#e7e7e7',
-    
+
         },
         tooltip: false,
     };
@@ -177,11 +177,11 @@ function accepted_per_month(critical, high, medium, low) {
             hoverable: false,
             borderWidth: 1,
             borderColor: '#e7e7e7',
-    
+
         },
         tooltip: false,
     };
-    
+
     $.plot($("#accepted_per_month"), [{
                 data: critical,
                 label: " Critical",
@@ -739,32 +739,32 @@ function accepted_per_week_2(critical, high, medium, low) {
 }
 
 
-// This function is valid besides metrics.html also for the dashboard-metrics.html, 
+// This function is valid besides metrics.html also for the dashboard-metrics.html,
 // dashboard.html, and product-metrics.html
 function updatePunchcardTable(punchcardData, ticks) {
     let tableBody = $("#punchcard-table tbody");
 
     const daysMap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     let formattedData = {};
-    
+
     // No table processing in case of no data
-    if (punchcardData.length === 0 || ticks.length === 0) return; 
+    if (punchcardData.length === 0 || ticks.length === 0) return;
 
     // Removing html elements from the ticks dates
     let ticksMap = {};
     ticks.forEach(entry => {
         let weekIndex = String(entry[0]);
-        let rawHtml = entry[1]; 
+        let rawHtml = entry[1];
 
-        // Goodbye <span> + space instead of <br/> 
+        // Goodbye <span> + space instead of <br/>
         let cleanDate = rawHtml.replace(/<\/?span[^>]*>/g, "").replace(/<br\s*\/?>/g, " ");
         cleanDate = cleanDate.trim();
         ticksMap[weekIndex] = cleanDate;
     });
 
-    let minWeekOffset = ticks[0][0]; 
-    let maxWeekOffset = ticks[ticks.length - 1][0]; 
-    
+    let minWeekOffset = ticks[0][0];
+    let maxWeekOffset = ticks[ticks.length - 1][0];
+
     for (let weekOffset = minWeekOffset; weekOffset <= maxWeekOffset; weekOffset++) {
         let formattedDate = ticksMap[String(weekOffset)] || "Unknown Date";
         let formattedWeek = `Week ${weekOffset - minWeekOffset + 1}, starting on ${formattedDate}`;
@@ -777,7 +777,7 @@ function updatePunchcardTable(punchcardData, ticks) {
 
     // Populating week data
     punchcardData.forEach(entry => {
-        let weekOffset = entry[0]; 
+        let weekOffset = entry[0];
         let day = daysMap[entry[1]];
         let value = entry[3] || 0;
 
@@ -834,7 +834,7 @@ function open_findings_burndown(critical, high, medium, low, info, y_max, y_min)
             hoverable: true,
             borderWidth: 1,
             borderColor: '#e7e7e7',
-    
+
         },
         legend: {
             position: 'nw'

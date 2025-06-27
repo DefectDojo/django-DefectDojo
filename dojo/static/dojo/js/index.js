@@ -345,9 +345,9 @@ function clear_form(form){
                 case 'select-multiple':
                 // Clear all types of multiple select versions
                 if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).data('select2').$container.find(".select2-selection__choice").remove(); 
+                    $(this).data('select2').$container.find(".select2-selection__choice").remove();
                 }
-                $(this).val(null).trigger('change'); 
+                $(this).val(null).trigger('change');
                 break;
         }
     });
