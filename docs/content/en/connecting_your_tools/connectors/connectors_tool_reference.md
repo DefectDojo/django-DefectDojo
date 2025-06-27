@@ -38,21 +38,21 @@ AWS's "**[AWSSecurityHubReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-
 A working policy definition might look like the following:
 
 ```
-{  
-    "Version": "2012-10-17",  
-    "Statement": [  
-        {  
-            "Sid": "AWSSecurityHubConnectorPerms",  
-            "Effect": "Allow",  
-            "Action": [  
-                "securityhub:DescribeHub",  
-                "securityhub:GetFindingAggregator",  
-                "securityhub:GetFindings",  
-                "securityhub:ListFindingAggregators"  
-            ],  
-            "Resource": "*"  
-        }  
-    ]  
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AWSSecurityHubConnectorPerms",
+            "Effect": "Allow",
+            "Action": [
+                "securityhub:DescribeHub",
+                "securityhub:GetFindingAggregator",
+                "securityhub:GetFindings",
+                "securityhub:ListFindingAggregators"
+            ],
+            "Resource": "*"
+        }
+    ]
 }
 ```
 
@@ -72,11 +72,11 @@ DefectDojo can pull Findings from more than one region using Security Hub's **cr
 
 ## **BurpSuite**
 
-DefectDojo’s Burp connector calls Burp’s GraphQL API to fetch data. 
+DefectDojo’s Burp connector calls Burp’s GraphQL API to fetch data.
 
 #### Prerequisites
 
-Before you can set up this connector, you will need an API key from a Burp Service Account. Burp user accounts don’t have API keys by default, so you may need to create a new user specifically for this purpose. 
+Before you can set up this connector, you will need an API key from a Burp Service Account. Burp user accounts don’t have API keys by default, so you may need to create a new user specifically for this purpose.
 
 See [Burp Documentation](https://portswigger.net/burp/documentation/enterprise/user-guide/api-documentation/create-api-user) for a guide on setting up a Service Account user with an API key.
 
@@ -93,13 +93,13 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 
 #### **Connector Mappings**
 
-1. Enter your **Tenant Name** in the **Checkmarx Tenant** field. This name should be visible on the Checkmarx ONE login page in the top\-right hand corner:   
-" Tenant: \<**your tenant name**\> "  
+1. Enter your **Tenant Name** in the **Checkmarx Tenant** field. This name should be visible on the Checkmarx ONE login page in the top\-right hand corner:
+" Tenant: \<**your tenant name**\> "
 ​
 ![image](images/connectors_tool_reference_2.png)
 
 2. Enter a valid API key. You may need to generate a new one: see [Checkmarx API Documentation](https://docs.checkmarx.com/en/34965-68618-generating-an-api-key.html#UUID-f3b6481c-47f4-6cd8-9f0d-990896e36cd6_UUID-39ccc262-c7cb-5884-52ed-e1692a635e08) for details.
-3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
+3. Enter your tenant location in the **Location** field. This URL is formatted as follows:
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
 
 ## Dependency\-Track
@@ -130,7 +130,7 @@ This connector uses the Probely REST API to fetch data.
 1. Enter the appropriate API server address in the **Location** field. (either <https://api.us.probely.com/> or <https://api.eu.probely.com/> )
 2. Enter a valid API key in the **Secret** field.
 
-You can find an API key under the User \> API Keys menu in Probely.  
+You can find an API key under the User \> API Keys menu in Probely.
 See [Probely documentation](https://help.probely.com/en/articles/8592281-how-to-generate-an-api-key) for more info.
 
 ## **Semgrep**
@@ -141,8 +141,8 @@ This connector uses the Semgrep REST API to fetch data.
 
 Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 
-1. Enter a valid API key in the **Secret** field. You can find this on the Tokens page:   
-​  
+1. Enter a valid API key in the **Secret** field. You can find this on the Tokens page:
+​
 "Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.

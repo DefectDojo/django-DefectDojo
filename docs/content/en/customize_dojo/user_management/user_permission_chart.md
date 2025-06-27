@@ -49,7 +49,7 @@ This chart is intended to list all permissions related to a Product or Product T
 
 Each Configuration Permission refers to a particular function in the software, and has an associated set of actions a user can perform related to this function.
 
-The majority of Configuration Permissions give users access to certain pages in the UI. 
+The majority of Configuration Permissions give users access to certain pages in the UI.
 
 | **Configuration Permission** | **View ☑️** | **Add ☑️** | **Edit ☑️** | **Delete ☑️** |
 | --- | --- | --- | --- | --- |

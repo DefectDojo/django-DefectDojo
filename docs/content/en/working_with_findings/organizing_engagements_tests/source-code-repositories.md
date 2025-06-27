@@ -29,7 +29,7 @@ For CI/CD Engagements, the commit hash, branch/tag and code line can vary, so yo
 - for public BitBucket, Gitea and Codeberg - like `https://bitbucket.org/some-user/some-project.git` (like git clone url)
 - for standalone/onpremise BitBucket `https://bb.example.com/scm/some-project.git` or `https://bb.example.com/scm/some-user-name/some-repo.git` for user public repo (like git clone url)
 
-In a CI/CD Engagement, you can specify a commit hash or branch/tag in the **Edit Engagement** form, which will be appended to any links rendered by DefectDojo.  If these are not set, the SCM URL will need to contain a complete link which includes the code branch. 
+In a CI/CD Engagement, you can specify a commit hash or branch/tag in the **Edit Engagement** form, which will be appended to any links rendered by DefectDojo.  If these are not set, the SCM URL will need to contain a complete link which includes the code branch.
 
 SCM navigation URL is composed from Repo URL using SCM Type. A specific SCM type can be set in Product custom field "scm-type". If no "scm-type" is set and the URL contains "https://github.com", a "github" SCM type is assumed.
 

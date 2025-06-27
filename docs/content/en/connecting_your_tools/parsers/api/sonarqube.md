@@ -8,10 +8,10 @@ In `Tool Configuration`, select `Tool Type` to "SonarQube" and `Authentication T
 Note the url must be in the format of `https://<sonarqube_host>/api`
 Paste your SonarQube API token in the "API Key" field.
 By default the tool will import vulnerabilities issues
-and security hotspots only, but additional filters can be setup using the 
+and security hotspots only, but additional filters can be setup using the
 Extras field separated by commas (e.g. `BUG,VULNERABILITY,CODE_SMELL`). When using
 SonarCloud, you must also specify the Organization ID in the Extras field as follows
-`OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
+`OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please
 seperate the items in the Extras field by a vertical bar as follows
 `BUG,VULNERABILITY,CODE_SMELL|OrgID=sonarcloud-organzation-ID`
 

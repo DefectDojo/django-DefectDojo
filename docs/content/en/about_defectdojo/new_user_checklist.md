@@ -16,7 +16,7 @@ Here's a quick reference you can use to ensure successful implementation - from 
 
 3. Try [creating a Report](/en/share_your_findings/pro_reports/using_the_report_builder/) to summarize the data you've imported.  Reports can be used to quickly share Findings with stakeholders such as Product Owners.
 
-This is the essence of DefectDojo - import security data, organize it, and present it to the folks who need to know. 
+This is the essence of DefectDojo - import security data, organize it, and present it to the folks who need to know.
 
 All of these features can be automated, and because DefectDojo can handle over 190 tools (at time of writing) you should be all set to create a functional security inventory of your entire organizational output.
 

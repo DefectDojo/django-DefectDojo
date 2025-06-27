@@ -38,7 +38,7 @@ Tags can be managed in the following ways:
 
 2. **When Importing/Reimporting Findings**
 
-  Tags are available on the Import/Reimport form, both in the UI and via the API.  When this form is submitted, the **Test** will be tagged with `[tag]` and `[daily-import]`.  If "Apply Tags to Findings" or "Apply Tags to Endpoints" is selected, those objects will also be tagged.  Tags provide an opportunity to append automation run details and tool information that may not be captured in the Test or Finding object directly. 
+  Tags are available on the Import/Reimport form, both in the UI and via the API.  When this form is submitted, the **Test** will be tagged with `[tag]` and `[daily-import]`.  If "Apply Tags to Findings" or "Apply Tags to Endpoints" is selected, those objects will also be tagged.  Tags provide an opportunity to append automation run details and tool information that may not be captured in the Test or Finding object directly.
 
    ![tag](images/tags_importscan.png)
 
@@ -61,7 +61,7 @@ Tags can be managed in the following ways:
 
    When a new object is created or edited through the UI or API, there is a field for specifying
    the tags to be set on a given object. This field is a multiselect field that also has
-   auto completion to make searching and adding existing tags a breeze. Here is what the field 
+   auto completion to make searching and adding existing tags a breeze. Here is what the field
    looks like on the Product from the screenshot in the previous section:
 
    ![Tag management on an object](images/tags-management-on-object.png)
@@ -71,7 +71,7 @@ Tags can be managed in the following ways:
     Tags can also be applied to a given test at the time of import or reimport. This is a very
     handy use case when importing via the API with automation as it provides an opportunity to
     append automation run details and tool information that may not be captured in the test
-    or finding object directly. 
+    or finding object directly.
 
     The field looks and behaves exactly as it does on a given object
 
@@ -80,7 +80,7 @@ Tags can be managed in the following ways:
     When needing to update many Findings with the same set of tags, the bulk edit menu can be
     used to ease the burden.
 
-    In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"]. 
+    In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"].
     First I would select the tags to be updated:
 
     ![Select findings for bulk edit tag update](images/tags-select-findings-for-bulk-edit.png)

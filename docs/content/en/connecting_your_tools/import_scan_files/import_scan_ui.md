@@ -9,7 +9,7 @@ If you have a brand new DefectDojo instance, the Import Scan Form is a logical f
 * Store these Findings under an existing Product Type / Product / Engagement **or**
 * Create a new Product Type / Product / Engagement to store these Findings
 
-It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
+It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet.
 
 For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different tools concurrently as part of a single testing effort.
 
@@ -40,7 +40,7 @@ The Test will be created with a name that matches the Scan Type: e.g. a Tenable 
 ### Form Options
 
 * **Scan File:** by clicking on the Choose button, you can select a file from your computer to upload.
-* **Scan Date (optional):** if you want to select a single Scan Date to be applied to all Findings that result from this import, you can select the date in this field.   
+* **Scan Date (optional):** if you want to select a single Scan Date to be applied to all Findings that result from this import, you can select the date in this field.
 If you do not select a Scan Date, Findings created from this report will use the date specified by the tool. SLAs for each Finding will be calculated based on their date.
 * **Scan Type:** select the tool used to create this data.
 * **Product Type / Product / Engagement Name:** select the Product Type, Product, and Engagement Name which you want to create a new Test under. You can also create a new Product Type, Product and/or Engagement at this time if you wish to, by entering the names of the objects that you want to create.
@@ -54,7 +54,7 @@ When this field is enabled, DefectDojo will use a background process to populate
 
 When this field is disabled, DefectDojo will wait until all Findings have been successfully created before you can proceed to the next screen. This could take significant time depending on the size of your file.
 
-This option is especially relevant when using the API to import data. If uploading data with Process Findings Asynchronously turned **off**, DefectDojo will not return a successful response until all Findings have been created successfully, 
+This option is especially relevant when using the API to import data. If uploading data with Process Findings Asynchronously turned **off**, DefectDojo will not return a successful response until all Findings have been created successfully,
 
 ### Optional Fields
 

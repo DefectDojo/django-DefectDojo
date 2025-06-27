@@ -11,9 +11,9 @@ This parser support JSON format export by bug tracker.
 #YAML
 cx-flow:
   bug-tracker:Json
-  
+
 #CLI
---cx-flow.bug-tracker=json  
+--cx-flow.bug-tracker=json
 ```
 
 - `Checkmarx CxFlow SAST`: JSON report from Checkmarx Cxflow.

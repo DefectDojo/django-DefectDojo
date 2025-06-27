@@ -12,13 +12,13 @@ Deduplication can be implemented at either a Product level or at a more narrow E
 
 ![image](images/enabling_product-level_deduplication.png)
 
-2. **Deduplication and Finding Settings** are at the top of the **System Settings** menu.  
+2. **Deduplication and Finding Settings** are at the top of the **System Settings** menu.
 ​
 ![image](images/enabling_product-level_deduplication_2.png)
 
 ### Enable Finding Deduplication
 
-**Enable Finding Deduplication** will turn on the Deduplication Algorithm for all Findings. Deduplication will be triggered on all subsequent imports \- when this happens, DefectDojo will look at any Findings contained in the destination Product, and deduplicate as per your settings. 
+**Enable Finding Deduplication** will turn on the Deduplication Algorithm for all Findings. Deduplication will be triggered on all subsequent imports \- when this happens, DefectDojo will look at any Findings contained in the destination Product, and deduplicate as per your settings.
 
 ### Delete Deduplicate Findings
 
@@ -34,15 +34,15 @@ Rather than Deduplicating across an entire Product, you can set a deduplication 
 
 ### Edit Engagement page
 
-* To enable Deduplication within a New Engagement, start with the **\+ New Engagement** option from the sidebar, which you can find by opening the **📥Engagements** sub\-menu.  
+* To enable Deduplication within a New Engagement, start with the **\+ New Engagement** option from the sidebar, which you can find by opening the **📥Engagements** sub\-menu.
 ​
 ![image](images/enabling_deduplication_within_an_engagement.png)
 
-* To enable Deduplication within an existing Engagement: from the **All Engagements** page, select the **Edit Engagement** option from the **⋮** menu.   
+* To enable Deduplication within an existing Engagement: from the **All Engagements** page, select the **Edit Engagement** option from the **⋮** menu.
 ​
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
-* You can also open this menu from a specific **Engagement Page** by clicking the ⚙️Gear icon in the top\-right hand corner.  
+* You can also open this menu from a specific **Engagement Page** by clicking the ⚙️Gear icon in the top\-right hand corner.
 ​
 ![image](images/enabling_deduplication_within_an_engagement_3.png)
 

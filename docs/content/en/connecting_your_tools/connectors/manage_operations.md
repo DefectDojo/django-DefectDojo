@@ -61,7 +61,7 @@ On a daily basis, DefectDojo will look at each **Mapped Record** for new scan da
 
 ### How Sync handles new vulnerability data
 
-Whenever Sync runs, it will compare the latest scan data against the existing list of Findings for changes. 
+Whenever Sync runs, it will compare the latest scan data against the existing list of Findings for changes.
 
 * If there are new Findings detected, they will be added to the Test as new Findings.
 * If there are any Findings which aren’t detected in the latest scan, they will be marked as Inactive in the Test.
@@ -72,7 +72,7 @@ To learn more about Products, Engagements, Tests and Findings, see our [Product 
 
 To have DefectDojo run a Sync operation off\-schedule:
 
-1. Navigate to the **Manage Records \& Operations** page for the connector you want to use. From the **API Connectors** page, click the drop\-down menu on the Connector you wish to work with, and select Manage Records \& Operations.  
+1. Navigate to the **Manage Records \& Operations** page for the connector you want to use. From the **API Connectors** page, click the drop\-down menu on the Connector you wish to work with, and select Manage Records \& Operations.
 ​
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 

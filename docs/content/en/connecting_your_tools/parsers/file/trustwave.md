@@ -14,7 +14,7 @@ Fields in order of appearance:
 4. Domain - Primary choice for endpoint host
 5. Vulnerability Name - Maps to finding title
 6. Description - Maps to finding description
-7. Remediation - Maps to finding mitigation 
+7. Remediation - Maps to finding mitigation
 8. Protocol - Added to endpoint if present
 9. Port - Added to endpoint port if present, converted to integer
 10. Severity - Mapped through severity levels:
@@ -30,7 +30,7 @@ Fields in order of appearance:
 ### Field Mapping Details
 For each finding created, the parser:
 - Creates endpoints by combining Domain/IP, Port, and Protocol fields
-- Sets default nb_occurences to 1, incremented for duplicates 
+- Sets default nb_occurences to 1, incremented for duplicates
 - Uses SHA256 hash of severity + title + description for deduplication
 - Defaults severity to Low if mapping not matched
 

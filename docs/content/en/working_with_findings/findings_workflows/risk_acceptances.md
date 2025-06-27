@@ -32,7 +32,7 @@ Risk Acceptances can be added to a Finding in two ways:
 * Using the **Bulk Edit** menu, when looking at a list of Findings
 * Using the **Add Risk Acceptance** button on an individual Finding
 
-![image](images/Risk_Acceptances.png) 
+![image](images/Risk_Acceptances.png)
 
 
 ![image](images/Risk_Acceptances_2.png)
@@ -48,7 +48,7 @@ To create a New Risk Acceptance, complete the Add to New Risk Acceptance form on
 
 If you don’t want to create a Full Risk Acceptance object and would prefer to simply **apply a status of ‘Risk Accepted’ to a Finding**, you can do so through the Bulk Edit menu. This method is called **Simple Risk Acceptance**.
 
-Before you can apply a Simple Risk Acceptance to a Finding, Simple Risk Acceptance will need to be enabled at the Product level. This setting can be found on the **Edit Product Form**. 
+Before you can apply a Simple Risk Acceptance to a Finding, Simple Risk Acceptance will need to be enabled at the Product level. This setting can be found on the **Edit Product Form**.
 
 ### Apply a Simple Risk Acceptance
 
