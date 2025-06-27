@@ -94,4 +94,10 @@
 {{ finding.references|safe }}
 {% endif %}
 
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe }}
+{% endif %}
+
+
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

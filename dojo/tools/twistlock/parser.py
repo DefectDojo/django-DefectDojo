@@ -149,23 +149,23 @@ def get_item(vulnerability, test):
 
     # create the finding object
     finding = Finding(
-        title=vulnerability["id"]
+        title=vulnerability.get("id", "Unknown Vulnerability")
         + ": "
-        + vulnerability["packageName"]
+        + vulnerability.get("packageName", "Unknown Package")
         + " - "
-        + vulnerability["packageVersion"],
+        + str(vulnerability.get("packageVersion", "")),
         test=test,
         severity=severity,
-        description=vulnerability["description"]
+        description=vulnerability.get("description", "")
         + "<p> Vulnerable Package: "
-        + vulnerability["packageName"]
+        + vulnerability.get("packageName", "")
         + "</p><p> Current Version: "
-        + str(vulnerability["packageVersion"])
+        + str(vulnerability.get("packageVersion", ""))
         + "</p>",
-        mitigation=status.title(),
+        mitigation=status.title() if isinstance(status, str) else "",
         references=vulnerability.get("link"),
-        component_name=vulnerability["packageName"],
-        component_version=vulnerability["packageVersion"],
+        component_name=vulnerability.get("packageName", ""),
+        component_version=vulnerability.get("packageVersion", ""),
         false_p=False,
         duplicate=False,
         out_of_scope=False,
@@ -173,7 +173,7 @@ def get_item(vulnerability, test):
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
     )
-    finding.unsaved_vulnerability_ids = [vulnerability["id"]]
+    finding.unsaved_vulnerability_ids = [vulnerability["id"]] if "id" in vulnerability else None
     finding.description = finding.description.strip()
 
     return finding

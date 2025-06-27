@@ -85,6 +85,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     TextQuestion,
+    User,
     Vulnerability_Id,
 )
 from dojo.product.queries import get_authorized_products
@@ -3551,6 +3552,44 @@ class QuestionTypeFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = None
         return self.options[value][1](self, qs, self.options[value][0])
+
+
+class ApiUserFilter(filters.FilterSet):
+    last_login = filters.DateFromToRangeFilter()
+    date_joined = filters.DateFromToRangeFilter()
+    is_active = filters.BooleanFilter()
+    is_superuser = filters.BooleanFilter()
+    username = filters.CharFilter(lookup_expr="icontains")
+    first_name = filters.CharFilter(lookup_expr="icontains")
+    last_name = filters.CharFilter(lookup_expr="icontains")
+    email = filters.CharFilter(lookup_expr="icontains")
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "is_superuser",
+            "last_login",
+            "date_joined",
+        ]
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("username", "username"),
+            ("last_name", "last_name"),
+            ("first_name", "first_name"),
+            ("email", "email"),
+            ("is_active", "is_active"),
+            ("is_superuser", "is_superuser"),
+            ("date_joined", "date_joined"),
+            ("last_login", "last_login"),
+        ),
+    )
 
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):

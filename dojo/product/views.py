@@ -364,7 +364,7 @@ def identify_view(request):
     return "Finding"
 
 
-def finding_querys(request, prod):
+def finding_queries(request, prod):
     filters = {}
     findings_query = Finding.objects.filter(test__engagement__product=prod)
     # prefetch only what's needed to avoid lots of repeated queries
@@ -433,7 +433,7 @@ def finding_querys(request, prod):
     return filters
 
 
-def endpoint_querys(request, prod):
+def endpoint_queries(request, prod):
     filters = {}
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
                                                      finding__severity__in=(
@@ -449,13 +449,11 @@ def endpoint_querys(request, prod):
     filters["form"] = endpoints.form
 
     if not endpoints_qs and not endpoints_query:
-        endpoints = endpoints_query
-        endpoints_qs = queryset_check(endpoints)
-        messages.add_message(request,
-                             messages.ERROR,
-                             _("All objects have been filtered away. Displaying all objects"),
-                             extra_tags="alert-danger")
-
+        messages.add_message(
+            request,
+            messages.WARNING,
+            _("No Endpoints match the current filters."),
+            extra_tags="alert-danger")
     try:
         start_date = endpoints_qs.earliest("date").date
         start_date = datetime(start_date.year,
@@ -538,9 +536,9 @@ def view_product_metrics(request, pid):
 
     filters = {}
     if view == "Finding":
-        filters = finding_querys(request, prod)
+        filters = finding_queries(request, prod)
     elif view == "Endpoint":
-        filters = endpoint_querys(request, prod)
+        filters = endpoint_queries(request, prod)
 
     start_date = timezone.make_aware(datetime.combine(filters["start_date"], datetime.min.time()))
     end_date = filters["end_date"]

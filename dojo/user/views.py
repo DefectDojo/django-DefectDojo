@@ -149,7 +149,7 @@ def login_view(request):
             return HttpResponseRedirect("/saml2/login")
         try:
             return HttpResponseRedirect("{}?{}".format(reverse("social:begin", args=[social_auth]),
-                                                   urlencode({"next": request.GET.get("next")})))
+                                                   urlencode({"next": request.GET.get("next", "/dashboard")})))
         except:
             return HttpResponseRedirect(reverse("social:begin", args=[social_auth]))
     else:

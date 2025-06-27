@@ -21,7 +21,6 @@
                 {
                     "id": "PRISMA-2021-0013",
                     "status": "fixed in 1.1.1",
-                    "description": "marked package prior to 1.1.1 are vulnerable to  Regular Expression Denial of Service (ReDoS). The regex within src/rules.js file have multiple unused capture groups which could lead to a denial of service attack if user input is reachable.  Origin: https://github.com/markedjs/marked/commit/bd4f8c464befad2b304d51e33e89e567326e62e0",
                     "severity": "medium",
                     "packageName": "marked",
                     "packageVersion": "0.3.9",

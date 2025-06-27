@@ -11,6 +11,32 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## June 2025: v2.47
 
+### June 16, 2025: v2.47.2
+
+- **(Pro UI)** Endpoint Metadata can now be uploaded to Products.  You can now import a .csv list of all endpoints associated with a Product, from **View Product > Endpoints > Import Endpoint Metadata**
+
+![image](images/pro_endpoint_metadata.png)
+
+- **(Pro UI)** Pie Charts for Metrics now dynamically update based on selected categories.
+- **(Pro UI)** Finding metadata (specifically notes, endpoints, and file path/line number) are now visible from the Findings table if present.
+- **(Pro UI)** Findings table now uses icons to identify linked Endpoints, Notes or Files.  Clicking the Endpoints or Notes icon opens a window which lists all Endpoints or Notes.
+
+![image](images/pro_finding_icons.png)
+
+- **(Pro UI)** Login page has been redesigned.
+
+![image](images/pro_login.png)
+
+
+### June 9, 2025: v2.47.1
+
+- **(Pro UI)** Vulnerable Endpoints table has now been added to Finding pages.
+
+![image](images/pro_vulnerable_endpoints.png)
+
+- **(Pro UI)** "Original Finding" link has been added to Finding Metadata table for Duplicate Findings.
+- **(Pro UI)** CI/CD Metadata has been added to Engagement view.
+
 ### June 2, 2025: v2.47.0
 
 - **(Pro UI)** Finding review can now be set through the Pro UI.  You can now Request Review or clear a Finding review from Finding tables, or from the Finding View.

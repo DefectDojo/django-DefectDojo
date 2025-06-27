@@ -362,6 +362,14 @@ def get_epic_name_field_name(jira_instance):
     return "customfield_" + str(jira_instance.epic_name_id)
 
 
+def get_jira_finding_text(jira_instance):
+    if jira_instance and jira_instance.finding_text:
+        return jira_instance.finding_text
+
+    logger.debug("finding_text not found in Jira instance")
+    return None
+
+
 def has_jira_issue(obj):
     return get_jira_issue(obj) is not None
 
@@ -627,12 +635,11 @@ def jira_summary(obj):
     return summary.replace("\r", "").replace("\n", "")[:255]
 
 
-def jira_description(obj):
+def jira_description(obj, **kwargs):
     template = get_jira_issue_template(obj)
 
     logger.debug("rendering description for jira from: %s", template)
 
-    kwargs = {}
     if isinstance(obj, Finding):
         kwargs["finding"] = obj
     elif isinstance(obj, Finding_Group):
@@ -840,7 +847,7 @@ def add_jira_issue(obj, *args, **kwargs):
             project_key=jira_project.project_key,
             issuetype_name=jira_instance.default_issue_type,
             summary=jira_summary(obj),
-            description=jira_description(obj),
+            description=jira_description(obj, finding_text=get_jira_finding_text(jira_instance)),
             component_name=jira_project.component,
             custom_fields=jira_project.custom_fields,
             labels=labels,
@@ -968,7 +975,7 @@ def update_jira_issue(obj, *args, **kwargs):
             project_key=jira_project.project_key,
             issuetype_name=jira_instance.default_issue_type,
             summary=jira_summary(obj),
-            description=jira_description(obj),
+            description=jira_description(obj, finding_text=get_jira_finding_text(jira_instance)),
             component_name=jira_project.component if not issue.fields.components else None,
             labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
