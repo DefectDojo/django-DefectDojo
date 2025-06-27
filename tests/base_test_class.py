@@ -260,6 +260,9 @@ class BaseTestCase(unittest.TestCase):
             return False
         return True
 
+    def is_info_message_present(self, text=None):
+        return self.is_element_by_css_selector_present(".alert-info", text=text)
+
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-success", text=text)
 
