@@ -672,12 +672,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}",
-                "pool": {
-                    "min_size": MIN_CONNS,
-                    "max_size": MAX_CONNS,
-                    "timeout": TIMEOUT_CONNS
-                }
+                "options": f"-c search_path={SCHEMA_DB}"
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
