@@ -1087,7 +1087,6 @@
       "target_start": "2018-01-01T01:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": null,
       "target_end": "2018-01-02T01:00:00Z"
     }
   },
@@ -1104,7 +1103,6 @@
         1
       ],
       "percent_complete": 100,
-      "actual_time": "00:30:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
