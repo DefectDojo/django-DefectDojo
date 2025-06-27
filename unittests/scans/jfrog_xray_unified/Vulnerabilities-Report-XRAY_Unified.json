@@ -162,7 +162,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T17:24:37Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",
@@ -171,7 +171,7 @@
          "provider":"JFrog",
          "description":"The XML parser in Expat does not use sufficient entropy for hash initialization, which allows context-dependent attackers to cause a denial of service (CPU consumption) via crafted identifiers in an XML document.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2012-0876.",
          "references":[
-            
+
          ]
       },
       {
@@ -192,7 +192,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T17:25:18Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",
@@ -201,7 +201,7 @@
          "provider":"JFrog",
          "description":"The _asn1_extract_der_octet function in lib/decoding.c in GNU Libtasn1 before 4.8, when used without the ASN1_DECODE_FLAG_STRICT_DER flag, allows remote attackers to cause a denial of service (infinite recursion) via a crafted certificate.",
          "references":[
-            
+
          ]
       },
       {
@@ -222,7 +222,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T17:07:18Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",
@@ -231,7 +231,7 @@
          "provider":"JFrog",
          "description":"json-c through 0.14 has an integer overflow and out-of-bounds write via a large JSON file, as demonstrated by printbuf_memappend.",
          "references":[
-            
+
          ]
       },
       {
@@ -252,7 +252,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T17:12:04Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",
@@ -261,7 +261,7 @@
          "provider":"JFrog",
          "description":"An issue was discovered in the Binary File Descriptor (BFD) library (aka libbfd), as distributed in GNU Binutils 2.32. It is an out-of-bounds read leading to a SEGV in bfd_getl32 in libbfd.c, when called from pex64_get_runtime_function in pei-x86_64.c.",
          "references":[
-            
+
          ]
       },
       {
@@ -282,7 +282,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T17:09:47Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",
@@ -291,7 +291,7 @@
          "provider":"JFrog",
          "description":"There is a heap-based buffer over-read in the _nc_find_entry function in tinfo/comp_hash.c in the terminfo library in ncurses before 6.1-20191012.",
          "references":[
-            
+
          ]
       },
       {
@@ -312,7 +312,7 @@
          "impacted_artifact":"docker://test-artifact:1.0.0",
          "path":"docker-reg/test-artifact/1.0.0/",
          "fixed_versions":[
-            
+
          ],
          "published":"2020-07-12T18:03:07Z",
          "artifact_scan_time":"2020-07-30T13:46:42Z",

@@ -1,4 +1,4 @@
-{     
+{
    "total_count": 1,
    "data": [
       {
@@ -29,7 +29,7 @@
                      "cvss_v3": "9.8/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
                   }
                ],
-               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",                                                                                                                            
+               "description": "An issue was discovered in libX11 through 1.6.5. The function XListExtensions in ListExt.c interprets a variable as signed instead of unsigned, resulting in an out-of-bounds write (of up to 128 bytes), leading to DoS or remote code execution.",
                "provider": "JFrog"
             }
          },

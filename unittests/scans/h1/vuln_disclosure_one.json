@@ -119,17 +119,17 @@
                 "eligible_for_bounty": true,
                 "eligible_for_submission": true,
                 "reference": "H001001"
-              }        
-            } 
+              }
+            }
           },
           "bounties": {
             "data": [
-  
+
             ]
           },
           "custom_field_values": {
             "data": [
-  
+
             ]
           }
         }

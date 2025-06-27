@@ -28,7 +28,7 @@
     "description": "The React Framework",
     "reference": "https://ossindex.sonatype.org/component/pkg:npm/next@12.2.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
     "vulnerabilities": [
-      
+
     ]
   },
   {
@@ -49,7 +49,7 @@
     "coordinates": "pkg:npm/%40swc/helpers@0.4.2",
     "reference": "https://ossindex.sonatype.org/component/pkg:npm/%40swc/helpers@0.4.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
     "vulnerabilities": [
-      
+
     ]
   },
   {

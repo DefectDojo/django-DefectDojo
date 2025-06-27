@@ -102,7 +102,7 @@
           "api_test": true,
           "deduplication_on_engagement": true
         }
-      },    
+      },
 {
     "pk": 5,
     "model": "dojo.test",

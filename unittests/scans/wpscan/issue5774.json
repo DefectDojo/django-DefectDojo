@@ -23,10 +23,10 @@
         "found_by": "Headers (Passive Detection)",
         "confidence": 100,
         "confirmed_by": {
-  
+
         },
         "references": {
-  
+
         },
         "interesting_entries": [
           "x-cdn-diag: jfk4-2051-2-9270-r-0-0-304-0.068--;2051-14-9468----0-0-72"
@@ -39,7 +39,7 @@
         "found_by": "Link Tag (Passive Detection)",
         "confidence": 30,
         "confirmed_by": {
-  
+
         },
         "references": {
           "url": [
@@ -53,7 +53,7 @@
           ]
         },
         "interesting_entries": [
-  
+
         ]
       }
     ],
@@ -843,13 +843,13 @@
       "found_by": "Css Style In Homepage (Passive Detection)",
       "confidence": 70,
       "interesting_entries": [
-  
+
       ],
       "confirmed_by": {
-  
+
       },
       "vulnerabilities": [
-  
+
       ],
       "version": {
         "number": "1.9",
@@ -859,11 +859,11 @@
           "http://example.com/wordpress/wp-content/themes/twentyfourteen/style.css?ver=4.7.6, Match: 'Version: 1.9'"
         ],
         "confirmed_by": {
-  
+
         }
       },
       "parents": [
-  
+
       ]
     },
     "plugins": {
@@ -879,10 +879,10 @@
         "found_by": "Comment (Passive Detection)",
         "confidence": 30,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
           {
@@ -956,7 +956,7 @@
             "http://example.com/wordpress/, Match: 'All in One SEO Pack 2.3.12.2.1 by'"
           ],
           "confirmed_by": {
-  
+
           }
         }
       },
@@ -972,13 +972,13 @@
         "found_by": "Urls In Homepage (Passive Detection)",
         "confidence": 80,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
-  
+
         ],
         "version": null
       },
@@ -994,13 +994,13 @@
         "found_by": "Comment (Passive Detection)",
         "confidence": 30,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
-  
+
         ],
         "version": {
           "number": "2.2.3",
@@ -1010,7 +1010,7 @@
             "http://example.com/wordpress/, Match: '<meta name=\"NextGEN\" version=\"2.2.3\"'"
           ],
           "confirmed_by": {
-  
+
           }
         }
       },
@@ -1026,10 +1026,10 @@
         "found_by": "Comment (Passive Detection)",
         "confidence": 30,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
           {
@@ -1144,7 +1144,7 @@
             "http://example.com/wordpress/, Match: '<meta name=\"NextGEN\" version=\"2.2.3\"'"
           ],
           "confirmed_by": {
-  
+
           }
         }
       },
@@ -1160,13 +1160,13 @@
         "found_by": "Urls In Homepage (Passive Detection)",
         "confidence": 80,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
-  
+
         ],
         "version": null
       },
@@ -1182,10 +1182,10 @@
         "found_by": "Urls In Homepage (Passive Detection)",
         "confidence": 80,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
           {
@@ -1233,19 +1233,19 @@
         "found_by": "Urls In Homepage (Passive Detection)",
         "confidence": 80,
         "interesting_entries": [
-  
+
         ],
         "confirmed_by": {
-  
+
         },
         "vulnerabilities": [
-  
+
         ],
         "version": null
       }
     },
     "config_backups": {
-  
+
     },
     "vuln_api": {
       "plan": "professional_yearly",
