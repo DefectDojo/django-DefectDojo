@@ -18,6 +18,7 @@ import crum
 import hyperlink
 import vobject
 from asteval import Interpreter
+from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from dateutil.parser import parse
@@ -25,6 +26,7 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
@@ -2333,6 +2335,15 @@ class async_delete:
                 logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
                 # The id must be None
                 # The object has already been deleted elsewhere
+            except LogEntry.MultipleObjectsReturned:
+                # Delete the log entrys first, then delete
+                LogEntry.objects.filter(
+                    content_type=ContentType.objects.get_for_model(obj.__class__),
+                    object_pk=str(obj.pk),
+                    action=LogEntry.Action.DELETE,
+                ).delete()
+                # Now delete the object again
+                obj.delete()
 
     @dojo_async_task
     @app.task

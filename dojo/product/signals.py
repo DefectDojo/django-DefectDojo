@@ -23,16 +23,15 @@ def product_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Product)
 def product_post_delete(sender, instance, **kwargs):
+    description = _('The product "%(name)s" was deleted') % {"name": instance.name}
     if settings.ENABLE_AUDITLOG:
-        le = LogEntry.objects.get(
+        if le := LogEntry.objects.filter(
             action=LogEntry.Action.DELETE,
             content_type=ContentType.objects.get(app_label="dojo", model="product"),
             object_id=instance.id,
-        )
-        description = _('The product "%(name)s" was deleted by %(user)s') % {
+        ).order_by("-id").first():
+            description = _('The product "%(name)s" was deleted by %(user)s') % {
                             "name": instance.name, "user": le.actor}
-    else:
-        description = _('The product "%(name)s" was deleted') % {"name": instance.name}
     create_notification(event="product_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                         title=_("Deletion of %(name)s") % {"name": instance.name},
                         description=description,
