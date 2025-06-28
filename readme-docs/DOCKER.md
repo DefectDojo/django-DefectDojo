@@ -109,7 +109,7 @@ This will run the application based on merged configurations from docker-compose
     *  python code (uwsgi and celeryworker containers).
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
-*  Hot-reloading for the **celeryworker** container is implemented via `wathmedo` from the `watchdog` package.
+*  Hot-reloading for the **celeryworker** container is implemented via `watchmedo` from the `watchdog` package.
 *  Changes in `.html` and `.tpl` files will also trigger a roload.
 
 ```
