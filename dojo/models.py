@@ -2773,7 +2773,8 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+        system_settings = System_Settings.objects.get()
+        if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
