@@ -16,64 +16,68 @@ class TestWizcliDirParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual("google.golang.org/protobuf - CVE-2024-24786", finding.title)
-            self.assertEqual("Medium", finding.severity)
-            self.assertEqual("/grpc/proto/go.mod", finding.file_path)
+            self.assertEqual("github.com/golang-jwt/jwt/v4 4.5.1 - CVE-2025-30204", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("/settlements/go.mod", finding.file_path)
             self.assertIn(
-                "**Library Name**: google.golang.org/protobuf\n"
-                "**Library Version**: 1.28.1\n"
-                "**Library Path**: /grpc/proto/go.mod\n"
-                "**Vulnerability Name**: CVE-2024-24786\n"
-                "**Fixed Version**: 1.33.0\n"
-                "**Source**: https://github.com/advisories/GHSA-8r3f-844c-mc37\n"
-                "**Description**: None\n"
-                "**Score**: None\n"
-                "**Exploitability Score**: None\n"
-                "**Has Exploit**: False\n"
-                "**Has CISA KEV Exploit**: False\n",
+                "**Vulnerability**: `CVE-2025-30204`\n"
+                "**Severity**: High\n"
+                "**Library**: `github.com/golang-jwt/jwt/v4`\n"
+                "**Version**: `4.5.1`\n"
+                "**Path/Manifest**: `/settlements/go.mod`\n"
+                "**Fixed Version**: 4.5.2\n"
+                "**Source**: https://github.com/advisories/GHSA-mh63-6h87-95cp\n"
+                "**Has Exploit (Known)**: False\n"
+                "**In CISA KEV**: False",
                 finding.description,
             )
+            self.assertEqual("Update `github.com/golang-jwt/jwt/v4` to version `4.5.2` or later in path/manifest `/settlements/go.mod`.", finding.mitigation)
+            self.assertEqual("CVE-2025-30204", finding.cve)
+            self.assertEqual("https://github.com/advisories/GHSA-mh63-6h87-95cp", finding.references)
+            self.assertTrue(finding.static_finding)
+            self.assertFalse(finding.dynamic_finding)
+            self.assertTrue(finding.active)
 
     def test_multiple_findings(self):
         with (get_unit_tests_scans_path("wizcli_dir") / "wizcli_dir_many_vul.json").open(encoding="utf-8") as testfile:
             parser = WizcliDirParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(7, len(findings))
-            finding = findings[0]
-            self.assertEqual("golang.org/x/net - CVE-2023-44487", finding.title)
-            self.assertEqual("Medium", finding.severity)
-            self.assertEqual("/grpc/proto/go.mod", finding.file_path)
-            self.assertIn(
-                "**Library Name**: golang.org/x/net\n"
-                "**Library Version**: 0.14.0\n"
-                "**Library Path**: /grpc/proto/go.mod\n"
-                "**Vulnerability Name**: CVE-2023-44487\n"
-                "**Fixed Version**: 0.17.0\n"
-                "**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
-                "**Description**: None\n"
-                "**Score**: 7.5\n"
-                "**Exploitability Score**: 3.9\n"
-                "**Has Exploit**: True\n"
-                "**Has CISA KEV Exploit**: True\n",
-                finding.description,
-            )
+            self.assertEqual(204, len(findings))
 
-            finding = findings[1]
-            self.assertEqual("golang.org/x/net - CVE-2023-45288", finding.title)
-            self.assertEqual("Medium", finding.severity)
-            self.assertEqual("/grpc/proto/go.mod", finding.file_path)
-            self.assertEqual(None, finding.line)
+            # Test first finding
+            finding = findings[0]
+            self.assertEqual("github.com/golang-jwt/jwt/v4 4.5.1 - CVE-2025-30204", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("/settlements/go.mod", finding.file_path)
             self.assertIn(
-                "**Library Name**: golang.org/x/net\n"
-                "**Library Version**: 0.14.0\n"
-                "**Library Path**: /grpc/proto/go.mod\n"
-                "**Vulnerability Name**: CVE-2023-45288\n"
-                "**Fixed Version**: 0.23.0\n"
-                "**Source**: https://github.com/advisories/GHSA-4v7x-pqxf-cx7m\n"
-                "**Description**: None\n"
-                "**Score**: None\n"
-                "**Exploitability Score**: None\n"
-                "**Has Exploit**: False\n"
-                "**Has CISA KEV Exploit**: False\n",
+                "**Vulnerability**: `CVE-2025-30204`\n"
+                "**Severity**: High\n"
+                "**Library**: `github.com/golang-jwt/jwt/v4`\n"
+                "**Version**: `4.5.1`\n"
+                "**Path/Manifest**: `/settlements/go.mod`\n"
+                "**Fixed Version**: 4.5.2\n"
+                "**Source**: https://github.com/advisories/GHSA-mh63-6h87-95cp",
                 finding.description,
             )
+            self.assertEqual("CVE-2025-30204", finding.cve)
+            self.assertEqual("https://github.com/advisories/GHSA-mh63-6h87-95cp", finding.references)
+
+            # Test second finding
+            finding = findings[1]
+            self.assertEqual("github.com/golang-jwt/jwt/v5 5.2.1 - CVE-2025-30204", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("/settlements/go.mod", finding.file_path)
+            self.assertIn(
+                "**Vulnerability**: `CVE-2025-30204`\n"
+                "**Severity**: High\n"
+                "**Library**: `github.com/golang-jwt/jwt/v5`\n"
+                "**Version**: `5.2.1`\n"
+                "**Path/Manifest**: `/settlements/go.mod`\n"
+                "**Fixed Version**: 5.2.2\n"
+                "**Source**: https://github.com/advisories/GHSA-mh63-6h87-95cp",
+                finding.description,
+            )
+            self.assertEqual("CVE-2025-30204", finding.cve)
+            self.assertTrue(finding.static_finding)
+            self.assertFalse(finding.dynamic_finding)
+            self.assertTrue(finding.active)

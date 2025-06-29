@@ -1,109 +1,152 @@
 {
-    "id":"80015b15-ad9b-4e75-8975-963680aaccc3",
-    "projects":null,
-    "createdAt":"2024-07-17T07:19:19.187834637Z",
-    "startedAt":"0001-01-01T00:00:00Z",
-    "createdBy":{
-       "serviceAccount":{
-          "id":"12312312312312312"
+   "id": "80018f07-b8ec-4cb0-8159-570683fb26a8",
+   "projects": null,
+   "createdAt": "2025-05-14T10:27:25.982799496Z",
+   "startedAt": "2025-05-14T10:27:08.345715984Z",
+   "createdBy": {
+     "serviceAccount": {
+       "id": "hycyzczp25cxpbmp67mtt2cg4mcadi4doz2fey4y4bgrqmk5b2ugs"
+     }
+   },
+   "status": {
+     "state": "SUCCESS",
+     "verdict": "FAILED_BY_POLICY"
+   },
+   "policies": [
+     {
+       "id": "9c01526d-0e05-4598-80a3-e1a5a8c6795d",
+       "name": "Default IaC policy",
+       "description": "Default built-in policy for Infrastructure as Code scanning",
+       "type": "IAC",
+       "builtin": false,
+       "projects": null,
+       "policyLifecycleEnforcements": [
+         {
+           "enforcementMethod": "AUDIT",
+           "deploymentLifecycle": "ADMISSION_CONTROLLER"
+         },
+         {
+           "enforcementMethod": "BLOCK",
+           "deploymentLifecycle": "CLI"
+         }
+       ],
+       "ignoreRules": null,
+       "lifecycleTargets": null,
+       "Default": false,
+       "params": {
+         "__typename": "cicdscanpolicyparamsiac",
+         "severityThreshold": "HIGH",
+         "countThreshold": 1,
+         "ignoredRules": null,
+         "validatableIgnoredRules": null,
+         "builtinIgnoreTagsEnabled": false,
+         "customIgnoreTags": null,
+         "securityFrameworks": null,
+         "cloudConfigurationRules": null
        }
-    },
-    "status":{
-       "state":"SUCCESS",
-       "verdict":"PASSED_BY_POLICY"
-    },
-    "policies":[
+     },
+     {
+       "id": "5a03dfb5-99ff-49b6-8a48-a9b65b13bf9a",
+       "name": "test Default secrets policy",
+       "description": "Default built-in policy for secret scanning",
+       "type": "SECRETS",
+       "builtin": false,
+       "projects": null,
+       "policyLifecycleEnforcements": [
+         {
+           "enforcementMethod": "BLOCK",
+           "deploymentLifecycle": "CLI"
+         }
+       ],
+       "ignoreRules": null,
+       "lifecycleTargets": null,
+       "Default": false,
+       "params": {
+         "__typename": "cicdscanpolicyparamssecrets",
+         "countThreshold": 1,
+         "pathAllowList": [
+           "/.git/config",
+           ".git/config"
+         ],
+         "secretFindingSeverityThreshold": "INFORMATIONAL"
+       }
+     }
+   ],
+   "extraInfo": null,
+   "tags": null,
+   "outdatedPolicies": null,
+   "taggedResource": null,
+   "scanOriginResource": {
+     "__typename": "CICDScanOriginIAC",
+     "name": "IAC scan 2025-05-14T10:27:07Z",
+     "subTypes": [
+       "TERRAFORM",
+       "KUBERNETES"
+     ]
+   },
+   "result": {
+     "__typename": "CICDIACScanResult",
+     "failedPolicyMatches": [
        {
-          "id":"ce4872e0-ea52-463f-aad7-6ba1807062fa",
-          "name":"Default IaC policy",
-          "description":"Default built-in policy for Infrastructure as Code scanning",
-          "type":"IAC",
-          "builtin":true,
-          "projects":null,
-          "policyLifecycleEnforcements":[
+         "policy": {
+           "id": "9c01526d-0e05-4598-80a3-e1a5a8c6795d",
+           "name": "test Default IaC policy",
+           "description": "Default built-in policy for Infrastructure as Code scanning",
+           "type": "IAC",
+           "builtin": false,
+           "projects": null,
+           "policyLifecycleEnforcements": [
              {
-                "enforcementMethod":"AUDIT",
-                "deploymentLifecycle":"ADMISSION_CONTROLLER"
+               "enforcementMethod": "AUDIT",
+               "deploymentLifecycle": "ADMISSION_CONTROLLER",
+               "enforcementConfig": null
              },
              {
-                "enforcementMethod":"BLOCK",
-                "deploymentLifecycle":"CLI"
+               "enforcementMethod": "BLOCK",
+               "deploymentLifecycle": "CLI",
+               "enforcementConfig": null
              }
-          ],
-          "ignoreRules":null,
-          "lifecycleTargets":null,
-          "Default":false,
-          "params":{
-             "__typename":"cicdscanpolicyparamsiac",
-             "severityThreshold":"CRITICAL",
-             "countThreshold":1,
-             "ignoredRules":null,
-             "validatableIgnoredRules":null,
-             "builtinIgnoreTagsEnabled":false,
-             "customIgnoreTags":null,
-             "securityFrameworks":null
-          }
-       },
-       {
-          "id":"40b3e31c-9b23-47cd-8b83-eb062d04250e",
-          "name":"Default secrets policy",
-          "description":"Default built-in policy for secret scanning",
-          "type":"SECRETS",
-          "builtin":true,
-          "projects":null,
-          "policyLifecycleEnforcements":[
-             {
-                "enforcementMethod":"AUDIT",
-                "deploymentLifecycle":"CLI"
-             }
-          ],
-          "ignoreRules":null,
-          "lifecycleTargets":null,
-          "Default":false,
-          "params":{
-             "__typename":"cicdscanpolicyparamssecrets",
-             "countThreshold":1,
-             "pathAllowList":[
-                
-             ]
-          }
+           ],
+           "ignoreRules": null,
+           "lifecycleTargets": null,
+           "Default": false,
+           "params": {
+             "__typename": "cicdscanpolicyparamsiac",
+             "severityThreshold": "HIGH",
+             "countThreshold": 1,
+             "ignoredRules": null,
+             "validatableIgnoredRules": null,
+             "builtinIgnoreTagsEnabled": false,
+             "customIgnoreTags": null,
+             "securityFrameworks": null,
+             "cloudConfigurationRules": null
+           }
+         },
+         "ignoreReason": null,
+         "matchedIgnoreRules": null
        }
-    ],
-    "extraInfo":null,
-    "tags":null,
-    "outdatedPolicies":[
-       
-    ],
-    "taggedResource":null,
-    "scanOriginResource":{
-       "__typename":"CICDScanOriginIAC",
-       "name":"IAC scan 2024-07-17T07:18:31Z",
-       "subTypes":[
-          "KUBERNETES",
-          "CLOUD_FORMATION"
-       ]
-    },
-    "result":{
-       "__typename":"CICDIACScanResult",
-       "failedPolicyMatches":[
-          
-       ],
-       "ruleMatches":null,
-       "scanStatistics":{
-          "infoMatches":0,
-          "lowMatches":0,
-          "mediumMatches":0,
-          "highMatches":0,
-          "criticalMatches":0,
-          "totalMatches":0,
-          "filesFound":114,
-          "filesParsed":74,
-          "queriesLoaded":389,
-          "queriesExecuted":541,
-          "queriesExecutionFailed":0
-       },
-       "secrets":null,
-       "fileTypes":null
-    },
-    "reportUrl":"https://app.wiz.io/findings/cicd-scans"
+     ],
+     "ruleMatches": null,
+     "scanStatistics": {
+       "infoMatches": 0,
+       "lowMatches": 0,
+       "mediumMatches": 0,
+       "highMatches": 0,
+       "criticalMatches": 0,
+       "totalMatches": 0,
+       "filesFound": 107,
+       "filesParsed": 107,
+       "queriesLoaded": 1485,
+       "queriesExecuted": 1474,
+       "queriesExecutionFailed": 0
+     },
+     "secrets": null,
+     "fileTypes": [
+       "KUBERNETES",
+       "TERRAFORM"
+     ],
+     "discoveredResources": null
+   },
+   "reportUrl": "https://app.wiz.io/findings/cicd-scans#~%2528cicd_scan~%252780018f07-b8ec-4cb0-8159-570683fb26a8%252A2c2025-05-14T10%2525%25252A3a27%2525%25252A3a08.345715984Z%2527%2529"
  }
+ 
