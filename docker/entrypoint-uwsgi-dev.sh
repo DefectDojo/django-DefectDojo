@@ -21,6 +21,14 @@ if [ "${DD_DEBUG}" = "True" ]; then
   DD_UWSGI_NUM_OF_THREADS=1
 fi
 
+# hot reload also on html/template changes
+watchmedo shell-command \
+  --patterns="*.html;*.tpl" \
+  --recursive \
+  --command='touch /app/dojo/settings/settings.py' \
+  /app/dojo &
+
+
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
@@ -33,5 +41,5 @@ exec uwsgi \
   --py-autoreload 1 \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --lazy-apps \
-  --touch-reload="/app/dojo/setting/settings.py" \
+  --touch-reload="/app/dojo/settings/settings.py" \
   --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
