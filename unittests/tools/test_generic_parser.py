@@ -456,6 +456,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertIn("network", finding.unsaved_tags)
                 self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
+                # finding.clean_fields(exclude=["reporter", "numerical_severity", "planned_remediation_date"])
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("test title2", finding.title)

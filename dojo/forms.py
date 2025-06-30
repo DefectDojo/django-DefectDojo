@@ -110,8 +110,8 @@ from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
-    tag_validator,
 )
+from dojo.validators import tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)

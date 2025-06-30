@@ -13,7 +13,8 @@ services:
       dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_started
     environment:
       NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
       DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
@@ -36,7 +37,12 @@ services:
       target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - postgres
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     environment:
       DD_DEBUG: 'False'
@@ -55,8 +61,12 @@ services:
   celerybeat:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - postgres
-      - redis
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
@@ -71,8 +81,12 @@ services:
   celeryworker:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - postgres
-      - redis
+      initializer:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
@@ -88,7 +102,8 @@ services:
   initializer:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_started
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '--', '/entrypoint-initializer.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/defectdojo}
@@ -105,7 +120,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:17.5-alpine@sha256:f325a29ec9deb7039c5f07761d77d79d537dac836ecd99f982f6ca5476724604
+    image: postgres:17.5-alpine@sha256:fbe21607052bb5c298674f2fd8cf044a63aa3ddf50b81627f894f91f40f50bcb
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
@@ -114,7 +129,7 @@ services:
       - defectdojo_postgres:/var/lib/postgresql/data
   redis:
     # Pinning to this version due to licensing constraints
-    image: redis:7.2.8-alpine@sha256:c88ea2979a49ca497bbf7d39241b237f86c98e58cb2f6b1bc2dd167621f819bb
+    image: redis:7.2.9-alpine@sha256:fce236b99c58ef7196c4e243e43f533b404d5c17239cae4e6e262b729a1952b3
     volumes:
       - defectdojo_redis:/data
 volumes:
