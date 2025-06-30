@@ -108,3 +108,11 @@ Sample Nexpose XML 2.0 (Rapid7) scans can be found in the [unit test example sca
 ### Link To Tool
 - [Rapid7 Nexpose](https://www.rapid7.com/products/nexpose/)
 - [Nexpose Documentation](https://docs.rapid7.com/nexpose/)
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- severity
+- vulnerability ids
+- cwe
