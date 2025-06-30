@@ -106,7 +106,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
                     try:
                         instance = model.objects.get(id=model_or_id)
                     except model.DoesNotExist:
-                        logger.debug("error instantiating model_or_id: %s for model: %s: DoesNotExist", model_or_id, model)
+                        logger.warning("error instantiating model_or_id: %s for model: %s: DoesNotExist", model_or_id, model)
                         instance = None
                     args = list(args)
                     args[parameter] = instance

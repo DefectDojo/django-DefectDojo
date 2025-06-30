@@ -351,6 +351,10 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
+    if not finding:
+        logger.warning("post_process_finding_save called with finding==None, skipping post processing")
+        return
+
     system_settings = System_Settings.objects.get()
 
     # STEP 1 run all status changing tasks sequentially to avoid race conditions
