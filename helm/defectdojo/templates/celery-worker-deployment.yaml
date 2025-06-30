@@ -13,12 +13,10 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-{{- if .Values.celery.annotations }}
+  {{- with .Values.celery.worker.annotations }}
   annotations:
-{{- with .Values.celery.annotations }}
-  {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.celery.worker.replicas }}
   {{- if .Values.revisionHistoryLimit }}
@@ -158,6 +156,9 @@ spec:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
               optional: true
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.celery.worker.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}

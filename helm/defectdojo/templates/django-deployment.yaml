@@ -12,12 +12,10 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-{{- if .Values.django.annotations }}
+  {{- with .Values.django.annotations }}
   annotations:
-{{- with .Values.django.annotations }}
-  {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.django.replicas }}
   {{- with .Values.django.strategy }}
@@ -211,6 +209,9 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.uwsgi.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -264,6 +265,9 @@ spec:
           value: '{{ .Values.django.nginx.tls.enabled }}'
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.nginx.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}

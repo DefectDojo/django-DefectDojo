@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: "2.47.3"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.6.194-dev
+version: 1.6.193
 icon: https://www.defectdojo.org/img/favicon.ico
 maintainers:
   - name: madchap
@@ -14,6 +14,6 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
   - name: redis
-    version: ~21.2.5
+    version: ~19.6.0
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled

@@ -1,4 +1,4 @@
-  ---
+---
 # Global settings
 # create defectdojo specific secret
 createSecret: false
@@ -491,6 +491,15 @@ redis:
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
 extraConfigs: {}
+
+# To add (or override) extra variables which need to be pulled from another configMap, you can
+# use extraEnv. For example:
+# extraEnv:
+# - name: DD_DATABASE_HOST
+#   valueFrom:
+#     configMapKeyRef:
+#       name: my-other-postgres-configmap
+#       key: cluster_endpoint
 
 # To add code snippet which would extend setting functionality, you might add it here
 # It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
