@@ -1662,8 +1662,6 @@ class TestsTest(BaseClass.BaseClassTest):
             "test_type": 1,
             "environment": 1,
             "engagement": 2,
-            "estimated_time": "0:30:20",
-            "actual_time": "0:20:30",
             "notes": [],
             "target_start": "2017-01-12T00:00",
             "target_end": "2017-01-12T00:00",
