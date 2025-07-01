@@ -703,11 +703,7 @@ else:
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
                     "options": f"-c search_path={SCHEMA_DB}",
-                    "pool": {
-                        "min_size": MIN_CONNS,
-                        "max_size": MAX_CONNS,
-                        "timeout": TIMEOUT_CONNS
-                    }
+                    "pool": db_options
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
