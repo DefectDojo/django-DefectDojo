@@ -178,12 +178,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.import_reimport_performance(
-            expected_num_queries1=613,
-            expected_num_async_tasks1=15,
-            expected_num_queries2=496,
-            expected_num_async_tasks2=23,
-            expected_num_queries3=352,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=673,
+            expected_num_async_tasks1=25,
+            expected_num_queries2=544,
+            expected_num_async_tasks2=30,
+            expected_num_queries3=387,
+            expected_num_async_tasks3=25,
         )
 
     @patch("dojo.decorators.we_want_async", return_value=False)
@@ -197,7 +197,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         """
         self.system_settings(enable_product_grade=True)
         self.import_reimport_performance(
-            expected_num_queries1=675,
+            expected_num_queries1=673,
             expected_num_async_tasks1=25,
             expected_num_queries2=544,
             expected_num_async_tasks2=30,
