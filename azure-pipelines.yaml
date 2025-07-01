@@ -112,14 +112,14 @@ steps:
       rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
       includeRootFolder: false
       archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-      condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
+    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: $(DefinitionName)_artifact"
     inputs:
       PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
       ArtifactName: "$(DefinitionName)_artifact"
-      condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
+    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
 
   - task: ArtifactoryGenericUpload@2
     displayName: "Artifactory Generic Upload"
@@ -134,4 +134,4 @@ steps:
             }
           ]
         }
-      condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
+    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
