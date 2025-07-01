@@ -171,7 +171,7 @@
             "created": "2016-05-04T16:34:12.000Z",
             "updated": "2018-04-17T12:58:40.142Z",
             "deleted": null,
-            "title": "Regular Expression Denial of Service",
+            "title": "Regular Expression Denial of Service Different Title",
             "found_by": {
                 "name": "Adam Baldwin"
             },
@@ -213,7 +213,7 @@
             "created": "2016-05-04T16:34:12.000Z",
             "updated": "2018-04-17T12:58:40.142Z",
             "deleted": null,
-            "title": "2222Regular Expression Denial of Service",
+            "title": "2222Regular Expression Denial of Service Different Title",
             "found_by": {
                 "name": "Adam Baldwin"
             },
@@ -255,7 +255,7 @@
             "created": "2017-08-13T04:26:17.960Z",
             "updated": "2018-04-08T22:40:41.503Z",
             "deleted": null,
-            "title": "Remote Code Execution",
+            "title": "Remote Code Execution Different Title",
             "found_by": {
                 "name": "Sehrope Sarkuni"
             },
@@ -300,7 +300,7 @@
             "created": "2017-09-08T20:23:54.164Z",
             "updated": "2018-04-09T00:15:21.807Z",
             "deleted": null,
-            "title": "Regular Expression Denial of Service",
+            "title": "Regular Expression Denial of Service Different Title",
             "found_by": {
                 "name": "Cristian-Alexandru Staicu"
             },
@@ -342,7 +342,7 @@
             "created": "2017-08-13T04:26:17.960Z",
             "updated": "2018-04-08T22:40:41.503Z",
             "deleted": null,
-            "title": "2222Remote Code Execution",
+            "title": "2222Remote Code Execution Different Title",
             "found_by": {
                 "name": "Sehrope Sarkuni"
             },
