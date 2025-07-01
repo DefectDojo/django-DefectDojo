@@ -538,6 +538,7 @@ env = environ.FileAwareEnv(
     DD_MIN_CONNS=(int, 10),
     DD_MAX_CONNS=(int, 50),
     DD_TIMEOUT_CONNS=(int, 10),
+    DD_USE_DB_POOL=(bool, False),
 )
 
 
@@ -642,6 +643,20 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 MIN_CONNS = env("DD_MIN_CONNS")
 MAX_CONNS = env("DD_MAX_CONNS")
 TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
+USE_DB_POOL = env("DD_USE_DB_POOL")
+
+# Timeout limit for database connections
+db_options = {
+    "options": f"-c search_path={SCHEMA_DB} -c statement_timeout=10000",
+}
+
+# if USE_DB_POOL is True, we add the pool configuration
+if USE_DB_POOL:
+    db_options["pool"] = {
+        "min_size": MIN_CONNS,
+        "max_size": MAX_CONNS,
+        "timeout": TIMEOUT_CONNS,
+    }
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
@@ -651,11 +666,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
                 "options": f"-c search_path={SCHEMA_DB}",
-                "pool": {
-                    "min_size": MIN_CONNS,
-                    "max_size": MAX_CONNS,
-                    "timeout": TIMEOUT_CONNS
-                    }
+                "pool": db_options
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -665,6 +676,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PASSWORD": secret_database["password"],
             "HOST": secret_database["host"],
             "PORT": secret_database["port"],
+            "CONN_MAX_AGE": None,
         }
     }
     if env("DD_DATABASE_REPLICA"):
@@ -673,11 +685,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
                 "options": f"-c search_path={SCHEMA_DB}",
-                "pool": {
-                    "min_size": MIN_CONNS,
-                    "max_size": MAX_CONNS,
-                    "timeout": TIMEOUT_CONNS
-                }
+                "pool": db_options
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
