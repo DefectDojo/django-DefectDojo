@@ -99,7 +99,7 @@ class DojoTestUtilsMixin:
         jira_webhook_secret=None,
         enable_product_tag_inehritance=False,
         enable_product_grade=True,
-        enable_webhooks_notifications=False,
+        enable_webhooks_notifications=True,
     ):
         ss = System_Settings.objects.get()
         ss.enable_jira = enable_jira
