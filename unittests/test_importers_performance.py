@@ -18,6 +18,9 @@ STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_v
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
+NPM_AUDIT_NO_VULN_FILENAME = get_unit_tests_scans_path("npm_audit") / "no_vuln.json"
+NPM_AUDIT_SCAN_TYPE = "NPM Audit Scan"
+
 
 class TestDojoImporterPerformance(DojoTestCase):
 
@@ -25,6 +28,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         super().setUp()
         self.system_settings(enable_webhooks_notifications=False)
         self.system_settings(enable_product_grade=False)
+        self.system_settings(enable_github=False)
 
     @contextmanager
     def assertNumAsyncTask(self, num):
@@ -65,6 +69,30 @@ class TestDojoImporterPerformance(DojoTestCase):
         )
         lead, _ = User.objects.get_or_create(username="admin")
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
+
+        # first we do a bogus import to make sure any caches are loaded.
+        # without this the number of queries will be higher as the audit log will load content_type ids from the db
+
+        engagement_dummy, _created = Engagement.objects.get_or_create(
+            name="Test Create Dummy Engagement",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        import_options = {
+            "user": lead,
+            "lead": lead,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "sync": True,
+            "scan_type": NPM_AUDIT_SCAN_TYPE,
+            "engagement": engagement_dummy,
+        }
+        importer = DefaultImporter(**import_options)
+        test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(NPM_AUDIT_NO_VULN_FILENAME.open(encoding="utf-8"))
 
         # first import the subset which missed one finding and a couple of endpoints on some of the findings
         with (
@@ -132,7 +160,7 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=603,
+            expected_num_queries1=605,
             expected_num_async_tasks1=15,
             expected_num_queries2=489,
             expected_num_async_tasks2=23,
@@ -169,7 +197,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         """
         self.system_settings(enable_product_grade=True)
         self.import_reimport_performance(
-            expected_num_queries1=673,
+            expected_num_queries1=675,
             expected_num_async_tasks1=25,
             expected_num_queries2=544,
             expected_num_async_tasks2=30,

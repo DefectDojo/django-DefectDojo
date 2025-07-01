@@ -97,6 +97,7 @@ class DojoTestUtilsMixin:
         enable_jira_web_hook=False,
         disable_jira_webhook_secret=False,
         jira_webhook_secret=None,
+        enable_github=False,
         enable_product_tag_inehritance=False,
         enable_product_grade=True,
         enable_webhooks_notifications=True,
@@ -106,6 +107,7 @@ class DojoTestUtilsMixin:
         ss.enable_jira_web_hook = enable_jira_web_hook
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
+        ss.enable_github = enable_github
         ss.enable_product_tag_inheritance = enable_product_tag_inehritance
         ss.enable_product_grade = enable_product_grade
         ss.enable_webhooks_notifications = enable_webhooks_notifications
