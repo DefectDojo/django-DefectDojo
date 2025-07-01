@@ -20,13 +20,11 @@ STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
 
 class TestDojoImporterPerformance(DojoTestCase):
-    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
         super().setUp()
-        user = User.objects.get(username="admin")
-        user.usercontactinfo.block_execution = True
-        user.save()
+        self.system_settings(enable_webhooks_notifications=False)
+        self.system_settings(enable_product_grade=False)
 
     @contextmanager
     def assertNumAsyncTask(self, num):
@@ -46,7 +44,14 @@ class TestDojoImporterPerformance(DojoTestCase):
             raise self.failureException(msg)
 
     def import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
-        """Despite all efforts, these imports here run in async mode, so celery tasks are executed in the background"""
+        """
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        It could be usefule to capture the output in `less`:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | less
+        Then search for `expected` to find the lines where the expected number of queries is printed.
+        Or you can use `grep` to filter the output:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | grep expected
+        """
         product_type, _created = Product_Type.objects.get_or_create(name="test")
         product, _created = Product.objects.get_or_create(
             name="TestDojoDefaultImporter",
@@ -127,12 +132,12 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=617,
-            expected_num_async_tasks1=18,
-            expected_num_queries2=496,
-            expected_num_async_tasks2=25,
-            expected_num_queries3=348,
-            expected_num_async_tasks3=21,
+            expected_num_queries1=606,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=489,
+            expected_num_async_tasks2=23,
+            expected_num_queries3=347,
+            expected_num_async_tasks3=20,
         )
 
     @patch("dojo.decorators.we_want_async", return_value=False)
@@ -145,10 +150,29 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.import_reimport_performance(
-            expected_num_queries1=708,
-            expected_num_async_tasks1=29,
-            expected_num_queries2=566,
-            expected_num_async_tasks2=32,
-            expected_num_queries3=400,
-            expected_num_async_tasks3=26,
+            expected_num_queries1=613,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=496,
+            expected_num_async_tasks2=23,
+            expected_num_queries3=352,
+            expected_num_async_tasks3=20,
+        )
+
+    @patch("dojo.decorators.we_want_async", return_value=False)
+    def test_import_reimport_reimport_performance_no_async_with_product_grading(self, mock):
+        """
+        This test checks the performance of the importers when they are run in sync mode.
+        The reason for this is that we also want to be aware of when a PR affects the number of queries
+        or async tasks created by a background task.
+        The impersonate context manager above does not work as expected for disabling async,
+        so we patch the we_want_async decorator to always return False.
+        """
+        self.system_settings(enable_product_grade=True)
+        self.import_reimport_performance(
+            expected_num_queries1=673,
+            expected_num_async_tasks1=25,
+            expected_num_queries2=544,
+            expected_num_async_tasks2=30,
+            expected_num_queries3=387,
+            expected_num_async_tasks3=25,
         )
