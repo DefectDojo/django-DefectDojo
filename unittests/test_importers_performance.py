@@ -8,7 +8,17 @@ from django.utils import timezone
 from dojo.decorators import dojo_async_task_counter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
-from dojo.models import Development_Environment, Dojo_User, Engagement, Product, Product_Type, User
+from dojo.models import (
+    Development_Environment,
+    Dojo_User,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    User,
+)
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -18,7 +28,7 @@ STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_v
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
-NPM_AUDIT_NO_VULN_FILENAME = get_unit_tests_scans_path("npm_audit") / "no_vuln.json"
+NPM_AUDIT_NO_VULN_FILENAME = get_unit_tests_scans_path("npm_audit") / "one_vuln.json"
 NPM_AUDIT_SCAN_TYPE = "NPM Audit Scan"
 
 
@@ -94,6 +104,21 @@ class TestDojoImporterPerformance(DojoTestCase):
         importer = DefaultImporter(**import_options)
         test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(NPM_AUDIT_NO_VULN_FILENAME.open(encoding="utf-8"))
 
+        # if True:
+        #     exit(0)  # this is to make sure the importers are not run when running the tests in the IDE, as it will take too long
+
+        finding = Finding.objects.filter(test=test).first()
+
+        endpoint = Endpoint.objects.create(host="foo.bar", product=product)
+        Endpoint_Status.objects.create(
+                finding=finding,
+                endpoint=endpoint,
+        )
+
+        finding.endpoints.add(endpoint)
+        finding.title = "Dummy finding to ensure audit log is created"
+        finding.save()
+
         # first import the subset which missed one finding and a couple of endpoints on some of the findings
         with (
             self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
@@ -160,7 +185,7 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=605,
+            expected_num_queries1=602,
             expected_num_async_tasks1=15,
             expected_num_queries2=489,
             expected_num_async_tasks2=23,
