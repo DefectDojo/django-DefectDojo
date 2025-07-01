@@ -539,6 +539,7 @@ env = environ.FileAwareEnv(
     DD_MAX_CONNS=(int, 50),
     DD_TIMEOUT_CONNS=(int, 10),
     DD_USE_DB_POOL=(bool, False),
+    DD_STATEMENT_TIMEOUT=(str, "10000"),
 )
 
 
@@ -644,10 +645,11 @@ MIN_CONNS = env("DD_MIN_CONNS")
 MAX_CONNS = env("DD_MAX_CONNS")
 TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
 USE_DB_POOL = env("DD_USE_DB_POOL")
+STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
 
 # Timeout limit for database connections
 db_options = {
-    "options": f"-c search_path={SCHEMA_DB} -c statement_timeout=10000",
+    "options": f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}",
 }
 
 # if USE_DB_POOL is True, we add the pool configuration
