@@ -685,7 +685,6 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
                 "options": f"-c search_path={SCHEMA_DB}",
-                "pool": db_options
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
