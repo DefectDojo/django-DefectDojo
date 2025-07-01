@@ -16,6 +16,7 @@ from dojo.models import Dojo_User
 from dojo.models import GeneralSettings
 from dojo.reports.report_manager import CSVReportManager
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from django.urls import reverse
 from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 
@@ -166,9 +167,10 @@ def async_generate_report(request_data: dict):
     )
     report_csv = csv_report_manager.generate_report()
     bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
+    expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
     
     try:
-        session_s3 = boto3.Session().client('s3')
+        session_s3 = boto3.Session().client('s3', region_name="us-east-1")
         response = upload_s3(
             session_s3,
             report_csv,
@@ -179,11 +181,21 @@ def async_generate_report(request_data: dict):
             url = get_url_presigned(
                 session_s3,
                 KEY,
-                bucket
+                bucket,
+                expires_in=expiration_time
             )
             logger.debug(f"REPORT FINDING: URL {url}")
             create_notification(
-                subject=f"Reporte Finding is ready🔔")
+                event="url_report_finding",
+                subject="Reporte Finding is ready📄",
+                title="Reporte is ready",
+                description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
+                url=url,
+                recipients=[request.user.username],
+                icon="download",
+                color_icon="#096C11",
+                expiration_time=f"{int(expiration_time / 60)} minutes")
+
             return response
     except botocore.exceptions.ClientError as e:
         logger.error(f"Failed to upload report to S3: {e}")

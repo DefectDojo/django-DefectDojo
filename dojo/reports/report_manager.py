@@ -1,4 +1,5 @@
 import re
+import sys
 import io
 import logging
 import csv
@@ -77,14 +78,16 @@ class CSVReportManager(BaseReportManager):
 
     def generate_report(self, *args, **kwargs):
         findings = self.add_findings_data()
+        logger.debug("REPORT FINDING: size of findings: " + str(sys.getsizeof(findings)))
         buffer = io.StringIO()
         writer = csv.writer(buffer)
+        logger.debug("REPORT FINDING: size of buffer init: " + str(sys.getsizeof(findings)))
         allowed_attributes = self.get_attributes()
         excludes_list = self.get_excludes()
         allowed_foreign_keys = self.get_attributes()
         first_row = True
 
-        for finding in findings:
+        for finding in findings.iterator():
             self.finding = finding
             if first_row:
                 fields = []
@@ -177,4 +180,5 @@ class CSVReportManager(BaseReportManager):
                 self.add_extra_values()
 
                 writer.writerow(fields)
+        logger.debug("REPORT FINDING: size of buffer: " + str(sys.getsizeof(buffer)))
         return buffer
