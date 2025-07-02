@@ -647,18 +647,17 @@ TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
 USE_DB_POOL = env("DD_USE_DB_POOL")
 STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
 
-# Timeout limit for database connections
-db_options = {
-    "options": f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}",
-}
-
+db_options = {}
 # if USE_DB_POOL is True, we add the pool configuration
 if USE_DB_POOL:
+    add_options = f"-c search_path={SCHEMA_DB}  -c statement_timeout={STATEMENT_TIMEOUT}", 
     db_options["pool"] = {
         "min_size": MIN_CONNS,
         "max_size": MAX_CONNS,
         "timeout": TIMEOUT_CONNS,
     }
+else:
+    add_options = f"-c search_path={SCHEMA_DB}", 
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
@@ -667,7 +666,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}",
+                "options": add_options,
                 "pool": db_options
             },
             "NAME": secret_database["dbname"],
@@ -686,7 +685,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}",
+                "options": add_options,
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
@@ -703,7 +702,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": f"-c search_path={SCHEMA_DB}",
+                    "options": add_options,
                     "pool": db_options
                 },
                 "NAME": env("DD_DATABASE_NAME"),
