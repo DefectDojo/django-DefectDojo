@@ -649,7 +649,6 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
                 "options": f"-c search_path={SCHEMA_DB}",
-                "pool": db_options
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -685,7 +684,6 @@ else:
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
                     "options": f"-c search_path={SCHEMA_DB}",
-                    "pool": db_options
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
@@ -708,11 +706,14 @@ STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
 
 # If the database engine is PostgreSQL, we add the pool configuration
 if USE_DB_POOL:
-    DATABASES["default"]["CONN_MAX_AGE"] = None
+    if "OPTIONS" not in DATABASES["default"].keys():
+        DATABASES["default"]["OPTIONS"] = {}
+    DATABASES["default"]["CONN_MAX_AGE"] = 0
+    DATABASES["default"]["OPTIONS"]["pool"] = {}
     DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
-    DATABASES["default"]["OPTIONS"]["options"]["timeout"] = f"-c search_path={SCHEMA_DB}  -c statement_timeout={STATEMENT_TIMEOUT}"
+    DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout=10000"
 
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
