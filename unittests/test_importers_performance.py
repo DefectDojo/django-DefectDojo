@@ -18,6 +18,7 @@ from dojo.models import (
     Finding,
     Product,
     Product_Type,
+    Test,
     User,
 )
 
@@ -44,7 +45,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User]:
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
             ContentType.objects.get_for_model(model)
 
     @contextmanager
@@ -153,7 +154,7 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=604,
+            expected_num_queries1=603,
             expected_num_async_tasks1=15,
             expected_num_queries2=489,
             expected_num_async_tasks2=23,
