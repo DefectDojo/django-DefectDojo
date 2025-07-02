@@ -216,7 +216,11 @@ class EndpointQueriesTest(DojoTestCase):
 
             # Assert that we get expected querysets back. This is to be used to
             # support refactoring, in attempt of lowering the query count.
-            self.assertSequenceEqual(
+
+            # assertCountEqual(first, second, msg=None)¶
+            # Test that sequence first contains the same elements as second, regardless of their order. When they dont, an error message listing the differences between the sequences will be generated.
+            # Duplicate elements are not ignored when comparing first and second. It verifies whether each element has the same count in both sequences. Equivalent to: assertEqual(Counter(list(first)), Counter(list(second))) but works with sequences of unhashable objects as well.
+            self.assertCountEqual(
                 endpoint_queries["all"].values(),
                 [
                     {"id": 1, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 2, "finding_id": 2, "endpoint__product__prod_type__member": False, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
