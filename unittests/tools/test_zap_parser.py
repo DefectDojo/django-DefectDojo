@@ -253,6 +253,7 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("example-domain.com", endpoint.host)
                 self.assertEqual(443, endpoint.port)
                 # Check request and response pair
+                self.assertEqual(1, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
                 response = request_pair["resp"]
@@ -308,6 +309,7 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("example-domain.com", endpoint.host)
                 self.assertEqual(443, endpoint.port)
                 # Check request and response pair
+                self.assertEqual(5, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
                 response = request_pair["resp"]
@@ -360,6 +362,7 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("example-domain.com", endpoint.host)
                 self.assertEqual(443, endpoint.port)
                 # Check request and response pair
+                self.assertEqual(3, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
                 response = request_pair["resp"]
@@ -413,10 +416,10 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("example-domain.com", endpoint.host)
                 self.assertEqual(443, endpoint.port)
                 # Check request and response pair
+                self.assertEqual(4, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
                 response = request_pair["resp"]
-                self.maxDiff = 999999999
                 # I can't make sense of the whitespace diff the assertEqual is producing, so I will just check the stripped versions
                 expected_request = """
                             DELETE https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key?persistence=0 HTTP/1.1
