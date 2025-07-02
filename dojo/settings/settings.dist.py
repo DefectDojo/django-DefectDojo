@@ -226,6 +226,7 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    DD_JIRA_DESCRIPTION_MAX_LENGTH=(int, 32768),
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
@@ -1643,6 +1644,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
