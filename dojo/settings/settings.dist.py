@@ -640,24 +640,6 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 # ------------------------------------------------------------------------------
 # DATABASE
 # ------------------------------------------------------------------------------
-# Pool connection settings
-MIN_CONNS = env("DD_MIN_CONNS")
-MAX_CONNS = env("DD_MAX_CONNS")
-TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
-USE_DB_POOL = env("DD_USE_DB_POOL")
-STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
-
-db_options = {}
-# if USE_DB_POOL is True, we add the pool configuration
-if USE_DB_POOL:
-    add_options = f"-c search_path={SCHEMA_DB}  -c statement_timeout={STATEMENT_TIMEOUT}", 
-    db_options["pool"] = {
-        "min_size": MIN_CONNS,
-        "max_size": MAX_CONNS,
-        "timeout": TIMEOUT_CONNS,
-    }
-else:
-    add_options = f"-c search_path={SCHEMA_DB}", 
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
@@ -666,7 +648,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": add_options,
+                "options": f"-c search_path={SCHEMA_DB}",
                 "pool": db_options
             },
             "NAME": secret_database["dbname"],
@@ -679,13 +661,13 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PORT": secret_database["port"],
             "CONN_MAX_AGE": None,
         }
-    }
+    }    
     if env("DD_DATABASE_REPLICA"):
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": add_options,
+                "options": f"-c search_path={SCHEMA_DB}",
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
@@ -702,7 +684,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": add_options,
+                    "options": f"-c search_path={SCHEMA_DB}",
                     "pool": db_options
                 },
                 "NAME": env("DD_DATABASE_NAME"),
@@ -715,6 +697,22 @@ else:
                 "PORT": env("DD_DATABASE_PORT"),
             }
         }
+
+
+# Pool connection settings
+MIN_CONNS = env("DD_MIN_CONNS")
+MAX_CONNS = env("DD_MAX_CONNS")
+TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
+USE_DB_POOL = env("DD_USE_DB_POOL")
+STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
+
+# If the database engine is PostgreSQL, we add the pool configuration
+if USE_DB_POOL:
+    DATABASES["default"]["CONN_MAX_AGE"] = None
+    DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
+    DATABASES["default"]["OPTIONS"]["options"]["timeout"] = f"-c search_path={SCHEMA_DB}  -c statement_timeout={STATEMENT_TIMEOUT}"
 
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
