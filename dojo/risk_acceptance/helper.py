@@ -32,8 +32,8 @@ def expire_now(risk_acceptance):
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-
-                finding.save(dedupe_option=False)
+                # this method both saves and pushed to JIRA (no other post processing)
+                jira_helper.save_and_push_to_jira(finding)
 
                 reactivated_findings.append(finding)
             else:
@@ -71,7 +71,8 @@ def reinstate(risk_acceptance, old_expiration_date):
                 finding.risk_accepted = True
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=True)
-                finding.save(dedupe_option=False)
+                # this method both saves and pushed to JIRA (no other post processing)
+                jira_helper.save_and_push_to_jira(finding)
                 reinstated_findings.append(finding)
             else:
                 logger.debug("%i:%s: already inactive, not making any changes", finding.id, finding)
@@ -111,7 +112,8 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
     finding.risk_accepted = False
     # Update any endpoint statuses on each of the findings
     update_endpoint_statuses(finding, accept_risk=False)
-    finding.save(dedupe_option=False)
+    # this method both saves and pushed to JIRA (no other post processing)
+    jira_helper.save_and_push_to_jira(finding)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
     # Add a note to reflect that the finding was removed from the risk acceptance

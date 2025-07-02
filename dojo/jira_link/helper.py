@@ -1836,7 +1836,7 @@ def save_and_push_to_jira(finding):
         push_to_jira_decision = is_push_all_issues(finding) \
             or get_jira_instance(finding).finding_jira_sync
     # Save the finding
-    finding.save(push_to_jira=(push_to_jira_decision and not finding_in_group))
+    finding.save(dedupe_option=False, product_grading_option=False, issue_updater_option=False, push_to_jira=(push_to_jira_decision and not finding_in_group))
     # we only push the group after saving the finding to make sure
     # the updated data of the finding is pushed as part of the group
     if push_to_jira_decision and finding_in_group:
