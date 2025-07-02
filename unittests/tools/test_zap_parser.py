@@ -139,7 +139,7 @@ class TestZapParser(DojoTestCase):
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
                 self.assertEqual("bodgeit.securecodebox-demo.svc", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(8080, endpoint.port)
                 endpoint = finding.unsaved_endpoints[1]
                 self.assertEqual("http", endpoint.protocol)
                 self.assertEqual("bodgeit.securecodebox-demo.svc", endpoint.host)
@@ -220,7 +220,7 @@ class TestZapParser(DojoTestCase):
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
                 self.assertEqual("localhost", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(8080, endpoint.port)
                 # Check request and response pair
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
