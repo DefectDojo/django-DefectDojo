@@ -1758,7 +1758,14 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     jira_instance = get_jira_instance(finding)
 
     if resolved:
-        if jira_instance and resolution_name in jira_instance.accepted_resolutions and (finding.test.engagement.product.enable_simple_risk_acceptance or finding.test.engagement.enable_full_risk_acceptance):
+        if (
+            jira_instance
+            and resolution_name in jira_instance.accepted_resolutions
+            and (
+            finding.test.engagement.product.enable_simple_risk_acceptance
+            or finding.test.engagement.enable_full_risk_acceptance
+            )
+        ):
             if not finding.risk_accepted:
                 logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted.")
                 finding.risk_accepted = True

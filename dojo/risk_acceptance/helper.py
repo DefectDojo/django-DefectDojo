@@ -24,19 +24,22 @@ def expire_now(risk_acceptance):
         for finding in risk_acceptance.accepted_findings.all():
             if not finding.active:  # not sure why this is important
                 logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
+                finding.active = True
+                finding.risk_accepted = False
 
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
-                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-                    finding.save(dedupe_option=False)  # resave if changed after risk_unaccept
+
+                finding.save(dedupe_option=False)
 
                 reactivated_findings.append(finding)
             else:
                 logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
+        # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
 
     risk_acceptance.expiration_date = timezone.now()
@@ -73,7 +76,7 @@ def reinstate(risk_acceptance, old_expiration_date):
             else:
                 logger.debug("%i:%s: already inactive, not making any changes", finding.id, finding)
 
-        # best effort JIRA integration, no status changes
+        # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
 
     risk_acceptance.expiration_date_handled = None
