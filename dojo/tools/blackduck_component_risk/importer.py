@@ -42,10 +42,10 @@ class BlackduckCRImporter:
         """
         components = {}
         source = {}
-        try:
-            with zipfile.ZipFile(str(report)) as zipf:
-                c_file = False
-                s_file = False
+        with zipfile.ZipFile(str(report)) as zipf:
+            c_file = False
+            s_file = False
+            try:
                 for full_file_name in zipf.namelist():
                     # Just in case the word component or security is in the name of
                     # zip file, best to ignore it.
@@ -62,14 +62,13 @@ class BlackduckCRImporter:
                     elif "source" in file_name:
                         with io.TextIOWrapper(zipf.open(full_file_name), encoding="utf-8") as f:
                             source = self.__get_source(f)
-                # Raise exception to error-out if the zip is missing either of
-                # these files.
-                if not (c_file and s_file):
-                    msg = "Zip file missing needed files!"
-                    raise Exception(msg)
-
-        except Exception:
-            logger.exception("Could not process zip file")
+            except Exception:
+                logger.exception("Could not process zip file")
+            # Raise exception to error-out if the zip is missing either of
+            # these files.
+            if not (c_file and s_file):
+                msg = "Zip file missing needed files!"
+                raise Exception(msg)
 
         return components, security_issues, source
 
