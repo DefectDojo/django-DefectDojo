@@ -37,6 +37,7 @@ from dojo.notifications.helper import create_notification
 from dojo.utils import (
     add_error_message_to_response,
     get_file_images,
+    get_full_url,
     get_system_setting,
     prod_name,
     to_str_typed,
@@ -646,6 +647,12 @@ def jira_description(obj, **kwargs):
         kwargs["finding_group"] = obj
 
     description = render_to_string(template, kwargs)
+    defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
+    max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
+    suffix = f"\n\nIssue Description Too Long: See [DefectDojo|{defect_dojo_obj_url}] for full description."
+    if len(description) > max_length:
+        # suffix can be longer after rendering do to urlenocoding, so we take twice the length of the suffix as a buffer
+        description = description[:max_length - (2 * len(suffix))] + suffix
     logger.debug("rendered description: %s", description)
     return description
 
