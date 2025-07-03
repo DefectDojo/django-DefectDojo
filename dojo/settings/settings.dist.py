@@ -1347,6 +1347,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
+    "Wizcli Img Scan": ["title", "file_path", "line", "component_name", "component_version"],
+    "Wizcli Dir Scan": ["title", "file_path", "line", "component_name", "component_version"],
+    "Wizcli IaC Scan": ["title", "file_path", "line", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1593,6 +1596,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli Img Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli Dir Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli IaC Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
     "AWS Inspector2 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
