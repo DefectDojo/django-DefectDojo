@@ -15,7 +15,6 @@ class WazuhV4_8:
             severity = vuln.get("severity")
             cvssv3_score = vuln.get("score").get("base")
             publish_date = vuln.get("published_at").split("T")[0]
-            agent_name = item.get("agent").get("name")
             agent_id = item.get("agent").get("id")
             detection_time = vuln.get("detected_at").split("T")[0]
 
@@ -45,5 +44,6 @@ class WazuhV4_8:
                 unique_id_from_tool=dupe_key,
                 date=detection_time,
             )
+            find.unsaved_vulnerability_ids = cve
             dupes[dupe_key] = find
         return list(dupes.values())
