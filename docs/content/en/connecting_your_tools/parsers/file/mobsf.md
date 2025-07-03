@@ -2,6 +2,8 @@
 title: "MobSF Scanner"
 toc_hide: true
 ---
+"Mobsfscan Scan" has been merged into the "MobSF Scan" parser. The "Mobsfscan Scan" scan_type has been retained to keep deduplication working for existing Tests, but users are encouraged to move to the "MobSF Scan" scan_type.
+
 Export a JSON file using the API, api/v1/report\_json and import it to Defectdojo or import a JSON report from <https://github.com/MobSF/mobsfscan>
 
 ### Sample Scan Data
