@@ -648,7 +648,7 @@ def jira_description(obj, **kwargs):
 
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
-    max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32768)
+    max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
     suffix = f"\n\nIssue Description Too Long: See [DefectDojo|{defect_dojo_obj_url}] for full description."
     if len(description) > max_length:
         # suffix can be longer after rendering do to urlenocoding, so we take twice the length of the suffix as a buffer
