@@ -56,4 +56,4 @@ class TestWazuhParser(DojoTestCase):
         with (get_unit_tests_scans_path("wazuh") / "v4-8_many_findings.json").open(encoding="utf-8") as testfile:
             parser = WazuhParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(0, len(findings))
+            self.assertEqual(10, len(findings))
