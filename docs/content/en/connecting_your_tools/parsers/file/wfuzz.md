@@ -16,3 +16,12 @@ missing          |  Low
 
 ### Sample Scan Data
 Sample Wfuzz JSON importer scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/wfuzz).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- cwe
+- line
+- file path
+- description

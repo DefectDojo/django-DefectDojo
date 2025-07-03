@@ -179,3 +179,9 @@ Sample Wiz Scanner scans can be found in the [sample scan data folder](https://g
 - [Wiz.io](https://www.wiz.io/)
 - [Wiz Documentation](https://docs.wiz.io/)
 
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these hashcode fields:
+
+- title
+- description
+- severity
