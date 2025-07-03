@@ -81,7 +81,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "001",
+              "id": "0201",
               "name": "myhost0",
               "type": "Wazuh",
               "version": "v4.11.1"
@@ -142,7 +142,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "001",
+              "id": "4001",
               "name": "myhost0",
               "type": "Wazuh",
               "version": "v4.11.1"
@@ -203,7 +203,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "001",
+              "id": "0016",
               "name": "myhost0",
               "type": "Wazuh",
               "version": "v4.11.1"
@@ -264,7 +264,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "001",
+              "id": "0701",
               "name": "myhost0",
               "type": "Wazuh",
               "version": "v4.11.1"
@@ -325,7 +325,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "001",
+              "id": "0037",
               "name": "myhost0",
               "type": "Wazuh",
               "version": "v4.11.1"
@@ -386,7 +386,7 @@
           "_score": 5.596354,
           "_source": {
             "agent": {
-              "id": "002",
+              "id": "0012",
               "name": "myhost1",
               "type": "Wazuh",
               "version": "v4.11.1"

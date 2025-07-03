@@ -25,7 +25,7 @@ class WazuhV4_8:
                 cve + " (agent_id: " + agent_id + ")"
             )
 
-            dupe_key = title + agent_name + description
+            dupe_key = title + agent_id + description
             dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
