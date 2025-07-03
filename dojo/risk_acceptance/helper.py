@@ -35,6 +35,7 @@ def expire_now(risk_acceptance):
                 # this method both saves and pushed to JIRA (no other post processing)
                 finding.save(dedupe_option=False)
                 if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                    logger.info("pushing finding to JIRA after expiration of risk acceptance")
                     jira_helper.push_to_jira(finding)
 
                 reactivated_findings.append(finding)
@@ -76,6 +77,7 @@ def reinstate(risk_acceptance, old_expiration_date):
                 # this method both saves and pushed to JIRA (no other post processing)
                 finding.save(dedupe_option=False)
                 if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                    logger.info("pushing finding to JIRA after reinstating risk acceptance")
                     jira_helper.push_to_jira(finding)
                 reinstated_findings.append(finding)
             else:
@@ -119,6 +121,7 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
     # this method both saves and pushed to JIRA (no other post processing)
     finding.save(dedupe_option=False)
     if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+        logger.info("pushing finding to JIRA after removal from risk acceptance")
         jira_helper.push_to_jira(finding)
 
     # best effort jira integration, no status changes
@@ -144,7 +147,13 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
             finding.save(dedupe_option=False)
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, accept_risk=True)
+
             risk_acceptance.accepted_findings.add(finding)
+
+            if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                logger.info("pushing finding to JIRA after adding to risk acceptance")
+                jira_helper.push_to_jira(finding)
+
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
