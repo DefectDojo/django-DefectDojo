@@ -1,0 +1,989 @@
+<?xml version="1.0"?>
+<OWASPZAPReport programName="ZAP"
+                version="2.16.1"
+                generated="Sun, 22 Jun 2025 04:04:14">
+    <site name="https://example-domain.com"
+          host="example-domain.com"
+          port="443"
+          ssl="true">
+        <alerts>
+            <alertitem>
+                <pluginid>10111</pluginid>
+                <alertRef>10111</alertRef>
+                <alert>Authentication Request Identified</alert>
+                <name>Authentication Request Identified</name>
+                <riskcode>0</riskcode>
+                <confidence>1</confidence>
+                <riskdesc>Informational (Low)</riskdesc>
+                <confidencedesc>Low</confidencedesc>
+                <desc>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to "Auto-Detect" then this rule will change the authentication to match the request identified.</desc>
+                <instances>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/account/verifypasswordless</uri>
+                        <method>POST</method>
+                        <param>user_identifier</param>
+                        <attack />
+                        <evidence>passwordless_code</evidence>
+                        <otherinfo>
+                            userParam=user_identifier
+                            userValue=string
+                            passwordParam=passwordless_code
+                        </otherinfo>
+                        <requestheader>
+                            POST https://example-domain.com/cpapi/api/account/verifypasswordless HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: */*
+                            content-type: application/json-patch+json
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 89
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody>{"user_identifier":"string","method":0,"client_id":"string","passwordless_code":"string"}</requestbody>
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:25 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                </instances>
+                <count>1</count>
+                <solution>This is an informational alert rather than a vulnerability and so there is nothing to fix.</solution>
+                <otherinfo>
+                    userParam=user_identifier
+                    userValue=string
+                    passwordParam=passwordless_code
+                </otherinfo>
+                <reference>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/auth-req-id/</reference>
+                <cweid>-1</cweid>
+                <wascid>-1</wascid>
+                <sourceid>449</sourceid>
+                <tags />
+            </alertitem>
+            <alertitem>
+                <pluginid>10029</pluginid>
+                <alertRef>10029</alertRef>
+                <alert>Cookie Poisoning</alert>
+                <name>Cookie Poisoning</name>
+                <riskcode>0</riskcode>
+                <confidence>1</confidence>
+                <riskdesc>Informational (Low)</riskdesc>
+                <confidencedesc>Low</confidencedesc>
+                <desc>This check looks at user-supplied input in query string parameters and POST data to identify where cookie parameters might be controlled. This is called a cookie poisoning attack, and becomes exploitable when an attacker can manipulate the cookie in various ways. In some cases this will not be exploitable, however, allowing URL parameters to set cookie values is generally considered a bug.</desc>
+                <instances>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true</uri>
+                        <method>GET</method>
+                        <param>clearCache</param>
+                        <attack />
+                        <evidence />
+                        <otherinfo>
+                            An attacker may be able to poison cookie values through URL parameters. Try injecting a semicolon to see if you can add cookie values (e.g. name=controlledValue;name=anotherValue;).
+
+                            This was identified at:
+
+                            https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true
+
+                            User-input was found in the following cookie:
+                            HttpOnly=true
+
+                            The user input was:
+                            clearCache=true
+                        </otherinfo>
+                        <requestheader>
+                            GET https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:24 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/consumer/dynamic/bundle?addToSession=true</uri>
+                        <method>POST</method>
+                        <param>addToSession</param>
+                        <attack />
+                        <evidence />
+                        <otherinfo>
+                            An attacker may be able to poison cookie values through POST parameters. To test if this is a more serious issue, you should try resending that request as a GET, with the POST parameter included as a query string parameter. For example: https://nottrusted.com/page?value=maliciousInput.
+
+                            This was identified at:
+
+                            https://example-domain.com/cpapi/api/consumer/dynamic/bundle?addToSession=true
+
+                            User-input was found in the following cookie:
+                            HttpOnly=true
+
+                            The user input was:
+                            addToSession=true
+                        </otherinfo>
+                        <requestheader>
+                            POST https://example-domain.com/cpapi/api/consumer/dynamic/bundle?addToSession=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            sessionId: "[REDACTED]"
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:23 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/consumer/ola/dynamic/PartialSave?allowPartialSave=true</uri>
+                        <method>POST</method>
+                        <param>allowPartialSave</param>
+                        <attack />
+                        <evidence />
+                        <otherinfo>
+                            An attacker may be able to poison cookie values through POST parameters. To test if this is a more serious issue, you should try resending that request as a GET, with the POST parameter included as a query string parameter. For example: https://nottrusted.com/page?value=maliciousInput.
+
+                            This was identified at:
+
+                            https://example-domain.com/cpapi/api/consumer/ola/dynamic/PartialSave?allowPartialSave=true
+
+                            User-input was found in the following cookie:
+                            HttpOnly=true
+
+                            The user input was:
+                            allowPartialSave=true
+                        </otherinfo>
+                        <requestheader>
+                            POST https://example-domain.com/cpapi/api/consumer/ola/dynamic/PartialSave?allowPartialSave=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            sessionId: "[REDACTED]"
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:24 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/InvalidateCacheByKey?rehydrate=true</uri>
+                        <method>POST</method>
+                        <param>rehydrate</param>
+                        <attack />
+                        <evidence />
+                        <otherinfo>
+                            An attacker may be able to poison cookie values through POST parameters. To test if this is a more serious issue, you should try resending that request as a GET, with the POST parameter included as a query string parameter. For example: https://nottrusted.com/page?value=maliciousInput.
+
+                            This was identified at:
+
+                            https://example-domain.com/cpapi/api/InvalidateCacheByKey?rehydrate=true
+
+                            User-input was found in the following cookie:
+                            HttpOnly=true
+
+                            The user input was:
+                            rehydrate=true
+                        </otherinfo>
+                        <requestheader>
+                            POST https://example-domain.com/cpapi/api/InvalidateCacheByKey?rehydrate=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            content-type: application/json-patch+json
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 6
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody>string</requestbody>
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:23 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/consumer/dynamic/bundle?allowPartialSave=true&amp;generateAppId=false</uri>
+                        <method>PUT</method>
+                        <param>allowPartialSave</param>
+                        <attack />
+                        <evidence />
+                        <otherinfo>
+                            This was identified at:
+
+                            https://example-domain.com/cpapi/api/consumer/dynamic/bundle?allowPartialSave=true&amp;generateAppId=false
+
+                            User-input was found in the following cookie:
+                            HttpOnly=true
+
+                            The user input was:
+                            allowPartialSave=true
+                        </otherinfo>
+                        <requestheader>
+                            PUT https://example-domain.com/cpapi/api/consumer/dynamic/bundle?allowPartialSave=true&amp;generateAppId=false HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            content-type: application/json-patch+json
+                            sessionId: "[REDACTED]"
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 78
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody>[{"operationType":0,"path":"string","op":"string","from":"string","value":{}}]</requestbody>
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:23 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                </instances>
+                <count>5</count>
+                <solution>Do not allow user input to control cookie names and values. If some query string parameters must be set in cookie values, be sure to filter out semicolon's that can serve as name/value pair delimiters.</solution>
+                <otherinfo>
+                    An attacker may be able to poison cookie values through URL parameters. Try injecting a semicolon to see if you can add cookie values (e.g. name=controlledValue;name=anotherValue;).
+
+                    This was identified at:
+
+                    https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true
+
+                    User-input was found in the following cookie:
+                    HttpOnly=true
+
+                    The user input was:
+                    clearCache=true
+                </otherinfo>
+                <reference>
+                    https://en.wikipedia.org/wiki/HTTP_cookie
+                    https://cwe.mitre.org/data/definitions/565.html
+                </reference>
+                <cweid>565</cweid>
+                <wascid>20</wascid>
+                <sourceid>371</sourceid>
+                <tags>
+                    <tag>
+                        <tag>CWE-565</tag>
+                        <link>https://cwe.mitre.org/data/definitions/565.html</link>
+                    </tag>
+                    <tag>
+                        <tag>OWASP_2021_A03</tag>
+                        <link>https://owasp.org/Top10/A03_2021-Injection/</link>
+                    </tag>
+                    <tag>
+                        <tag>POLICY_QA_STD</tag>
+                        <link />
+                    </tag>
+                    <tag>
+                        <tag>POLICY_PENTEST</tag>
+                        <link />
+                    </tag>
+                    <tag>
+                        <tag>OWASP_2017_A01</tag>
+                        <link>https://owasp.org/www-project-top-ten/2017/A1_2017-Injection.html</link>
+                    </tag>
+                    <tag>
+                        <tag>POLICY_DEV_STD</tag>
+                        <link />
+                    </tag>
+                </tags>
+            </alertitem>
+            <alertitem>
+                <pluginid>10024</pluginid>
+                <alertRef>10024</alertRef>
+                <alert>Information Disclosure - Sensitive Information in URL</alert>
+                <name>Information Disclosure - Sensitive Information in URL</name>
+                <riskcode>0</riskcode>
+                <confidence>2</confidence>
+                <riskdesc>Informational (Medium)</riskdesc>
+                <confidencedesc>Medium</confidencedesc>
+                <desc>The request appeared to contain sensitive information leaked in the URL. This can violate PCI and most organizational compliance policies. You can configure the list of strings for this check to add or remove values specific to your environment.</desc>
+                <instances>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/oid/validateToken?accessToken=accessToken</uri>
+                        <method>GET</method>
+                        <param>accessToken</param>
+                        <attack />
+                        <evidence>accessToken</evidence>
+                        <otherinfo>
+                            The URL contains potentially sensitive information. The following string was found via the pattern: token
+                            accessToken
+                        </otherinfo>
+                        <requestheader>
+                            GET https://example-domain.com/cpapi/api/oid/validateToken?accessToken=accessToken HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:24 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true</uri>
+                        <method>GET</method>
+                        <param>otuToken</param>
+                        <attack />
+                        <evidence>otuToken</evidence>
+                        <otherinfo>
+                            The URL contains potentially sensitive information. The following string was found via the pattern: token
+                            otuToken
+                        </otherinfo>
+                        <requestheader>
+                            GET https://example-domain.com/cpapi/api/redirect/getPrefillOtuTokenData?otuToken=otuToken&amp;clearCache=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:24 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/consumer/dynamic/bundle?addToSession=true</uri>
+                        <method>POST</method>
+                        <param>addToSession</param>
+                        <attack />
+                        <evidence>addToSession</evidence>
+                        <otherinfo>
+                            The URL contains potentially sensitive information. The following string was found via the pattern: session
+                            addToSession
+                        </otherinfo>
+                        <requestheader>
+                            POST https://example-domain.com/cpapi/api/consumer/dynamic/bundle?addToSession=true HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: text/plain, application/json, text/json
+                            sessionId: "[REDACTED]"
+                            x-api-version: "[REDACTED]"
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 400 Bad Request
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 0
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:23 GMT
+
+                        </responseheader>
+                        <responsebody />
+                    </instance>
+                </instances>
+                <count>3</count>
+                <solution>Do not pass sensitive information in URIs.</solution>
+                <otherinfo>
+                    The URL contains potentially sensitive information. The following string was found via the pattern: token
+                    accessToken
+                </otherinfo>
+                <reference />
+                <cweid>598</cweid>
+                <wascid>13</wascid>
+                <sourceid>341</sourceid>
+                <tags>
+                    <tag>
+                        <tag>CWE-598</tag>
+                        <link>https://cwe.mitre.org/data/definitions/598.html</link>
+                    </tag>
+                    <tag>
+                        <tag>OWASP_2021_A01</tag>
+                        <link>https://owasp.org/Top10/A01_2021-Broken_Access_Control/</link>
+                    </tag>
+                    <tag>
+                        <tag>POLICY_QA_STD</tag>
+                        <link />
+                    </tag>
+                    <tag>
+                        <tag>POLICY_PENTEST</tag>
+                        <link />
+                    </tag>
+                    <tag>
+                        <tag>OWASP_2017_A03</tag>
+                        <link>https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure.html</link>
+                    </tag>
+                    <tag>
+                        <tag>POLICY_DEV_STD</tag>
+                        <link />
+                    </tag>
+                </tags>
+            </alertitem>
+            <alertitem>
+                <pluginid>10015</pluginid>
+                <alertRef>10015</alertRef>
+                <alert>Re-examine Cache-control Directives</alert>
+                <name>Re-examine Cache-control Directives</name>
+                <riskcode>0</riskcode>
+                <confidence>1</confidence>
+                <riskdesc>Informational (Low)</riskdesc>
+                <confidencedesc>Low</confidencedesc>
+                <desc>The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.</desc>
+                <instances>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key?persistence=0</uri>
+                        <method>DELETE</method>
+                        <param>cache-control</param>
+                        <attack />
+                        <evidence>no-store, no-cache</evidence>
+                        <otherinfo />
+                        <requestheader>
+                            DELETE https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key?persistence=0 HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: */*
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 200 OK
+                            Cache-Control: no-store, no-cache
+                            Content-Type: application/json
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:25 GMT
+                            content-length: 1631
+
+                        </responseheader>
+                        <responsebody>{"data":[{"item1":"[FEATURE_FLAG_1]","item2":true},{"item1":"[FEATURE_FLAG_2]","item2":true},{"item1":"[FEATURE_FLAG_3]","item2":true},{"item1":"[FEATURE_FLAG_4]","item2":true},{"item1":"[FEATURE_FLAG_5]","item2":true},{"item1":"[FEATURE_FLAG_6]","item2":true},{"item1":"[FEATURE_FLAG_7]","item2":true},{"item1":"[FEATURE_FLAG_8]","item2":true},{"item1":"[FEATURE_FLAG_9]","item2":true},{"item1":"[FEATURE_FLAG_10]","item2":true},{"item1":"[FEATURE_FLAG_11]","item2":true},{"item1":"[FEATURE_FLAG_12]","item2":true},{"item1":"[FEATURE_FLAG_13]","item2":false},{"item1":"[FEATURE_FLAG_14]","item2":false},{"item1":"[FEATURE_FLAG_15]","item2":false},{"item1":"[FEATURE_FLAG_16]","item2":true},{"item1":"[FEATURE_FLAG_17]","item2":true},{"item1":"[FEATURE_FLAG_18]","item2":true},{"item1":"[FEATURE_FLAG_19]","item2":true},{"item1":"[FEATURE_FLAG_20]","item2":true},{"item1":"[FEATURE_FLAG_21]","item2":true},{"item1":"[FEATURE_FLAG_22]","item2":true},{"item1":"[FEATURE_FLAG_23]","item2":false},{"item1":"[FEATURE_FLAG_24]","item2":false},{"item1":"[FEATURE_FLAG_25]","item2":false},{"item1":"[FEATURE_FLAG_26]","item2":true},{"item1":"[FEATURE_FLAG_27]","item2":false},{"item1":"[FEATURE_FLAG_28]","item2":true},{"item1":"[FEATURE_FLAG_29]","item2":true},{"item1":"[FEATURE_FLAG_30]","item2":false},{"item1":"[FEATURE_FLAG_31]","item2":true},{"item1":"[FEATURE_FLAG_32]","item2":true}],"isSuccess":true,"message":"Features retrieved successfully","reason":null,"code":"200","validation":null,"applicationId":null}</responsebody>
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key</uri>
+                        <method>GET</method>
+                        <param>cache-control</param>
+                        <attack />
+                        <evidence>no-store, no-cache</evidence>
+                        <otherinfo />
+                        <requestheader>
+                            GET https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: */*
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 200 OK
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 29
+                            Content-Type: application/json; charset=utf-8
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:25 GMT
+
+                        </responseheader>
+                        <responsebody>{"error":"Tenant not found."}</responsebody>
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/workflow/config?products=products&amp;topics=topics</uri>
+                        <method>GET</method>
+                        <param>cache-control</param>
+                        <attack />
+                        <evidence>no-store, no-cache</evidence>
+                        <otherinfo />
+                        <requestheader>
+                            GET https://example-domain.com/cpapi/api/workflow/config?products=products&amp;topics=topics HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: */*
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 0
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody />
+                        <responseheader>
+                            HTTP/1.1 200 OK
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 29
+                            Content-Type: application/json; charset=utf-8
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:25 GMT
+
+                        </responseheader>
+                        <responsebody>{"error":"Tenant not found."}</responsebody>
+                    </instance>
+                    <instance>
+                        <uri>https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key?arrayHandling=0&amp;persistence=0</uri>
+                        <method>PUT</method>
+                        <param>cache-control</param>
+                        <attack />
+                        <evidence>no-store, no-cache</evidence>
+                        <otherinfo />
+                        <requestheader>
+                            PUT https://example-domain.com/cpapi/api/workflow/config/json/tenant/product/topic/key?arrayHandling=0&amp;persistence=0 HTTP/1.1
+                            host: example-domain.com
+                            user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+                            pragma: no-cache
+                            cache-control: no-cache
+                            accept: */*
+                            content-type: application/json-patch+json
+                            X-Correlation-Id: "[REDACTED]"
+                            content-length: 10
+                            authorization: Bearer [REDACTED]
+
+                        </requestheader>
+                        <requestbody>"John Doe"</requestbody>
+                        <responseheader>
+                            HTTP/1.1 200 OK
+                            Cache-Control: no-store, no-cache
+                            Content-Length: 29
+                            Content-Type: application/json; charset=utf-8
+                            Set-Cookie: TiPMix=[REDACTED]; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: x-ms-routing-name=self; path=/; HttpOnly; Domain=example-internal-domain.net; Max-Age=3600; Secure; SameSite=None
+                            Set-Cookie: HttpOnly=true
+                            Set-Cookie: ARRAffinity=[REDACTED];Path=/;HttpOnly;Secure;Domain=example-internal-domain.net
+                            Set-Cookie: ARRAffinitySameSite=[REDACTED];Path=/;HttpOnly;SameSite=None;Secure;Domain=example-internal-domain.net
+                            Strict-Transport-Security: max-age=31536000; includeSubDomains
+                            Request-Context: appId=cid-v1:[REDACTED]
+                            X-Frame-Options: SAMEORIGIN
+                            Content-Security-Policy: frame-ancestors 'self'
+                            X-Content-Type-Options: nosniff
+                            X-XSS-Protection: 1; mode=block
+                            X-Correlation-Id: [REDACTED]
+                            Access-Control-Allow-Origin: *
+                            Access-Control-Allow-Headers: *
+                            Access-Control-Allow-Methods: *
+                            Date: Sun, 22 Jun 2025 00:17:25 GMT
+
+                        </responseheader>
+                        <responsebody>{"error":"Tenant not found."}</responsebody>
+                    </instance>
+                </instances>
+                <count>4</count>
+                <solution>For secure content, ensure the cache-control HTTP header is set with "no-cache, no-store, must-revalidate". If an asset should be cached consider setting the directives "public, max-age, immutable".</solution>
+                <otherinfo />
+                <reference>
+                    https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching
+                    https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+                    https://grayduck.mn/2021/09/13/cache-control-recommendations/
+                </reference>
+                <cweid>525</cweid>
+                <wascid>13</wascid>
+                <sourceid>440</sourceid>
+                <tags>
+                    <tag>
+                        <tag>WSTG-v42-ATHN-06</tag>
+                        <link>https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/04-Authentication_Testing/06-Testing_for_Browser_Cache_Weaknesses</link>
+                    </tag>
+                    <tag>
+                        <tag>CWE-525</tag>
+                        <link>https://cwe.mitre.org/data/definitions/525.html</link>
+                    </tag>
+                    <tag>
+                        <tag>POLICY_PENTEST</tag>
+                        <link />
+                    </tag>
+                </tags>
+            </alertitem>
+        </alerts>
+        <statistics>
+            <statistic>
+                <key>stats.tag.JSON</key>
+                <value>9354</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.204</key>
+                <value>79</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.403</key>
+                <value>1260</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.404</key>
+                <value>49450</value>
+            </statistic>
+            <statistic>
+                <key>stats.tag.SetCookie</key>
+                <value>681868</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.405</key>
+                <value>1</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.200</key>
+                <value>2173</value>
+            </statistic>
+            <statistic>
+                <key>stats.auth.sessiontoken.ARRAffinitySameSite</key>
+                <value>153</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.400</key>
+                <value>640415</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.500</key>
+                <value>287</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.401</key>
+                <value>38</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.2048</key>
+                <value>16</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.128</key>
+                <value>3442</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.2</key>
+                <value>5926</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.64</key>
+                <value>6016</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.4</key>
+                <value>3579</value>
+            </statistic>
+            <statistic>
+                <key>stats.contentType.application/json</key>
+                <value>6939</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.8</key>
+                <value>499917</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.16</key>
+                <value>149350</value>
+            </statistic>
+            <statistic>
+                <key>stats.contentType.text/html; charset=us-ascii</key>
+                <value>4940</value>
+            </statistic>
+            <statistic>
+                <key>stats.auth.sessiontoken.TiPMix</key>
+                <value>153</value>
+            </statistic>
+            <statistic>
+                <key>stats.contentType.application/json; charset=utf-8</key>
+                <value>2415</value>
+            </statistic>
+            <statistic>
+                <key>stats.auth.sessiontoken.ARRAffinity</key>
+                <value>153</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.0</key>
+                <value>15</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.32</key>
+                <value>20881</value>
+            </statistic>
+            <statistic>
+                <key>stats.auth.state.unknown</key>
+                <value>690442</value>
+            </statistic>
+            <statistic>
+                <key>stats.code.415</key>
+                <value>26</value>
+            </statistic>
+            <statistic>
+                <key>stats.contentType.text/html</key>
+                <value>35858</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.256</key>
+                <value>1629</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.1024</key>
+                <value>2178</value>
+            </statistic>
+            <statistic>
+                <key>stats.auth.state.loggedout</key>
+                <value>603</value>
+            </statistic>
+            <statistic>
+                <key>stats.responseTime.512</key>
+                <value>780</value>
+            </statistic>
+            <statistic>
+                <key>stats.contentType.application/problem+json; charset=utf-8</key>
+                <value>42</value>
+            </statistic>
+        </statistics>
+    </site>
+    <statistics>
+        <statistic>
+            <key>stats.ascan.40016.started</key>
+            <value>1</value>
+        </statistic>
+    </statistics>
+</OWASPZAPReport>
