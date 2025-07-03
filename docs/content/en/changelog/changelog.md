@@ -11,6 +11,22 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## June 2025: v2.47
 
+### July 1, 2025: v2.47.4
+
+- **(Pro UI)** Products, Engagements, Tests, Findings and Endpoints can be edited directly from their respective tables via a modal.
+- **(Pro UI)** Calendar view now supports additional query parameters for filtering Tests or Engagements.
+- **(Pro UI)** Engagements, Tests and the entire Calendar can be exported as .ics files.
+
+![image](images/pro_ics_export.png)
+
+### June 23, 2025: v2.47.3
+
+- **(Pro UI)** Finding Templates can now be added in the Pro UI, from **Findings > Finding Templates** on the sidebar.
+- **(Pro UI)** A better error message is displayed when Jira Instance deletion is unsuccessful.
+- **(Pro UI)** Product Types can now be edited through a modal: **"⋮" > Edit Product Type** will open a pop-up modal window instead of taking a user to a new page.
+
+![image](images/pro_product_type_modal.png)
+
 ### June 16, 2025: v2.47.2
 
 - **(Pro UI)** Endpoint Metadata can now be uploaded to Products.  You can now import a .csv list of all endpoints associated with a Product, from **View Product > Endpoints > Import Endpoint Metadata**
@@ -26,7 +42,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(Pro UI)** Login page has been redesigned.
 
 ![image](images/pro_login.png)
-
 
 ### June 9, 2025: v2.47.1
 
@@ -71,7 +86,7 @@ This update improves consistency, enhances DefectDojo's search capabilities, and
 
 We recommend reviewing your current tags to ensure they align with the new format.  Following the deployment of these new behaviors, requests sent to the API or through the UI with any of the violations listed above will result in an error, with the details of the error raised in the response.
 
-### May 26, 2025: v2.46.4
+#### May 26, 2025: v2.46.4
 
 - **(Pro Metrics)** Rework of filter menu within insights dashboards to remove cross Product Type and Product filtering capabilities.
 - **(Pro UI)** Clickable links within insights dashboards.
@@ -87,7 +102,7 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 
 - **(Pro UI)** More detailed messages in Bulk Edit provide a better explanation of why some Findings may have been skipped.
 
-### May 19, 2025: v2.46.3
+#### May 19, 2025: v2.46.3
 
 - **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
 - **(Dashboard)** Added Finding Status filter for Dashboard tiles.
@@ -97,17 +112,17 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 ![image](images/pro_dashboard_priority.png)
 - **(Universal Parser)** Added a 'SOC Alerts' flag to Universal Parser, to indicate whether the Findings from the parser originate from a Security Operations Center.
 
-### May 12, 2025: v2.46.2
+#### May 12, 2025: v2.46.2
 
 - **(Findings)** Component Name and Version have been added to the metadata table on a Finding View.
 - **(Metrics)** Pro Insights Dashboards can now be filtered by Tag.
 - **(Users)** The Users table can now be exported as a .csv file.
 
-### May 7, 2025: v2.46.1
+#### May 7, 2025: v2.46.1
 
 Hotfix release - no significant feature changes.
 
-### May 5, 2025: v2.46.0
+#### May 5, 2025: v2.46.0
 
 
 - **(Import)** Mitigated timestamp in reports are no longer ignored/overwritten on Reimport.
