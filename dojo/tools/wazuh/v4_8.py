@@ -7,7 +7,8 @@ class WazuhV4_8:
     def parse_findings(self, test, data):
         dupes = {}
         vulnerabilities = data.get("hits", {}).get("hits", [])
-        for item in vulnerabilities:
+        for item_source in vulnerabilities:
+            item = item_source.get("_source")
             vuln = item.get("vulnerability")
             cve = vuln.get("id")
             description = vuln.get("description")
@@ -44,5 +45,5 @@ class WazuhV4_8:
                 unique_id_from_tool=dupe_key,
                 date=detection_time,
             )
-        dupes[dupe_key] = find
+            dupes[dupe_key] = find
         return list(dupes.values())
