@@ -255,6 +255,9 @@ def get_group_by_group_name(finding, finding_group_by_option):
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
         group_name = finding.title
+    elif finding_group_by_option == "vuln_id_from_tool":
+        if finding.vuln_id_from_tool:
+            group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
     else:
         msg = f"Invalid group_by option {finding_group_by_option}"
         raise ValueError(msg)

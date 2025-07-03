@@ -3446,7 +3446,8 @@ class Finding_Group(TimeStampedModel):
     GROUP_BY_OPTIONS = [("component_name", "Component Name"),
                         ("component_name+component_version", "Component Name + Version"),
                         ("file_path", "File path"),
-                        ("finding_title", "Finding Title")]
+                        ("finding_title", "Finding Title"),
+                        ("vuln_id_from_tool", "Vulnerability ID from Tool")]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
