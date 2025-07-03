@@ -1243,11 +1243,14 @@ def add_risk_acceptance(request, eid, fid=None):
         risk_acceptance_title_suggestion = f"Accept: {finding}"
         form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
 
-    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by("title")
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
+        # Set the initial selected finding
         form.fields["accepted_findings"].initial = {fid}
+        # Change the label for each finding in the dropdown
+        form.fields["accepted_findings"].label_from_instance = lambda obj: f"({obj.test.scan_type}) - ({obj.severity}) - {obj.title} - {obj.date} - {obj.status()} - {obj.finding_group})"
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
