@@ -57,3 +57,6 @@ class TestWazuhParser(DojoTestCase):
             parser = WazuhParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(10, len(findings))
+            self.assertEqual("CVE-2025-27558 (agent_id: 001)", findings[0].title)
+            self.assertEqual("Critical", findings[0].severity)
+            self.assertEqual(9.1, findings[0].cvssv3_score)
