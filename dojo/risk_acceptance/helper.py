@@ -33,7 +33,9 @@ def expire_now(risk_acceptance):
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
                 # this method both saves and pushed to JIRA (no other post processing)
-                jira_helper.save_and_push_to_jira(finding)
+                finding.save(dedupe_option=False)
+                if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                    jira_helper.push_to_jira(finding)
 
                 reactivated_findings.append(finding)
             else:
@@ -72,7 +74,9 @@ def reinstate(risk_acceptance, old_expiration_date):
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=True)
                 # this method both saves and pushed to JIRA (no other post processing)
-                jira_helper.save_and_push_to_jira(finding)
+                finding.save(dedupe_option=False)
+                if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                    jira_helper.push_to_jira(finding)
                 reinstated_findings.append(finding)
             else:
                 logger.debug("%i:%s: already inactive, not making any changes", finding.id, finding)
@@ -113,7 +117,10 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
     # Update any endpoint statuses on each of the findings
     update_endpoint_statuses(finding, accept_risk=False)
     # this method both saves and pushed to JIRA (no other post processing)
-    jira_helper.save_and_push_to_jira(finding)
+    finding.save(dedupe_option=False)
+    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+        jira_helper.push_to_jira(finding)
+
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
     # Add a note to reflect that the finding was removed from the risk acceptance
@@ -319,6 +326,9 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) 
         finding.save(dedupe_option=False)
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
     # only contains some text so that's ok
+    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+        jira_helper.push_to_jira(finding)
+
     post_jira_comment(finding, accepted_message_creator)
     # Add a note to reflect that the finding was removed from the risk acceptance
     if user is not None:
@@ -349,7 +359,8 @@ def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_
             post_jira_comment(finding, unaccepted_message_creator)
 
         # Update the JIRA obect for this finding
-        jira_helper.save_and_push_to_jira(finding)
+        if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+            jira_helper.push_to_jira(finding)
 
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
