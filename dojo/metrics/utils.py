@@ -1,4 +1,5 @@
 
+import logging
 import operator
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -32,6 +33,8 @@ from dojo.utils import (
     queryset_check,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def get_metrics_finding_filter_class() -> type[MetricsFindingFilter | MetricsFindingFilterWithoutObjectLookups]:
     if get_system_setting("filter_string_matching", False):
@@ -62,14 +65,12 @@ def finding_queries(
     findings_filter = finding_filter_class(request.GET, queryset=all_authorized_findings)
     form = findings_filter.form
     filtered_findings: QuerySet[Finding] = queryset_check(findings_filter)
-    # Quick check to determine if the filters were too tight and filtered everything away. If so, fall back to using all
-    # authorized Findings instead.
-    if not filtered_findings.exists() and all_authorized_findings.exists():
-        filtered_findings = all_authorized_findings
+
+    if not filtered_findings.exists():
         messages.add_message(
             request,
-            messages.ERROR,
-            _("All objects have been filtered away. Displaying all objects"),
+            messages.WARNING,
+            _("No findings match the current filters."),
             extra_tags="alert-danger")
 
     start_date, end_date = get_date_range(filtered_findings)
@@ -161,14 +162,13 @@ def endpoint_queries(
     endpoints_qs = queryset_check(endpoints)
 
     if not endpoints_qs.exists():
-        endpoints = endpoints_query
-        endpoints_qs = endpoints if isinstance(endpoints, QuerySet) else endpoints.qs
         messages.add_message(
             request,
-            messages.ERROR,
-            _("All objects have been filtered away. Displaying all objects"),
+            messages.WARNING,
+            _("No endpoints match the current filters."),
             extra_tags="alert-danger")
 
+    endpoints = endpoints_qs
     start_date, end_date = get_date_range(endpoints_qs)
 
     if len(prod_type) > 0:

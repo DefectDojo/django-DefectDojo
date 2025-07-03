@@ -65,6 +65,26 @@ def toggle_system_setting_boolean(flag_name, value):
     return decorator
 
 
+def with_system_setting(field, value):
+    """Decorator to temporarily set a value in System Settings."""
+
+    def decorator(test_func):
+        @wraps(test_func)
+        def wrapper(*args, **kwargs):
+            old_value = getattr(System_Settings.objects.get(), field)
+            # Set the flag to the specified value
+            System_Settings.objects.update(**{field: value})
+            try:
+                return test_func(*args, **kwargs)
+            finally:
+                # Reset the flag to its original state after the test
+                System_Settings.objects.update(**{field: old_value})
+
+        return wrapper
+
+    return decorator
+
+
 class DojoTestUtilsMixin:
 
     def get_test_admin(self, *args, **kwargs):
@@ -106,10 +126,10 @@ class DojoTestUtilsMixin:
         product.save()
         return product
 
-    def patch_product_api(self, product_id, product_details):
+    def patch_product_api(self, product_id, product_details: dict, expected_status_code: int = 200):
         payload = copy.deepcopy(product_details)
         response = self.client.patch(reverse("product-list") + f"{product_id}/", payload, format="json")
-        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def patch_endpoint_api(self, endpoint_id, endpoint_details):
@@ -385,6 +405,10 @@ class DojoTestUtilsMixin:
     def get_jira_issue_status(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
         return jira_helper.get_jira_status(finding)
+
+    def get_jira_issue_priority(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        return jira_helper.get_jira_priortiy(finding)
 
     def get_jira_issue_updated(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
@@ -783,6 +807,23 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         logger.debug("endpoint statuses")
         for eps in Endpoint_Status.objects.all():
             logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
+
+    def get_product_api(self, product_id):
+        response = self.client.get(reverse("product-list") + f"{product_id}/", format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
+    def post_new_product_api(self, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.post(reverse("product-list"), payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
+
+    def put_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.put(reverse("product-list") + f"{product_id}/", payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
 
 
 class DojoVCRTestCase(DojoTestCase, VCRTestCase):

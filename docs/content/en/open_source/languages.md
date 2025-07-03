@@ -1,5 +1,5 @@
 ---
-title: "Languages and lines of code"
+title: "Languages and lines of code (Open-Source)"
 description: "You can import an analysis of languages used in a project, including lines of code."
 draft: false
 weight: 10

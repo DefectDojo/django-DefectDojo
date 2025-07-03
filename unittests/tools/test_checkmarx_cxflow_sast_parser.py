@@ -22,6 +22,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
+        my_file_handle.close()
         self.assertEqual(0, len(findings))
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_1_finding(self):
@@ -52,6 +53,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
                       "Scripting (XSS)", finding.description)
         self.assertEqual(True, finding.active)
         self.assertEqual(False, finding.verified)
+        my_file_handle.close()
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_4_findings(self):
         my_file_handle, _, _, test = self.init(
@@ -72,3 +74,4 @@ class TestCheckmarxCxflowSast(DojoTestCase):
             self.assertIsNotNone(finding.line)
             self.assertIsNotNone(finding.false_p)
             self.assertIsNotNone(finding.description)
+        my_file_handle.close()

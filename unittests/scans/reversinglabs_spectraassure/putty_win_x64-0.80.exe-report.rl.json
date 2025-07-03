@@ -1,0 +1,2414 @@
+{
+  "catalogue": 2,
+  "duration": "00:00:02.315",
+  "report": {
+    "info": {
+      "detections": {
+        "Goodware": {
+          "No Threats Detected": 589
+        }
+      },
+      "disabled": [
+        "SQ14120",
+        "SQ14126",
+        "SQ14129",
+        "SQ14130",
+        "SQ14131",
+        "SQ14132",
+        "SQ14133",
+        "SQ14136",
+        "SQ18114",
+        "SQ20105",
+        "SQ30101"
+      ],
+      "file": {
+        "classification": {
+          "result": "",
+          "status": "Goodware"
+        },
+        "format": "",
+        "hashes": [
+          [
+            "md5",
+            "a9c5924063a253f64fb86bc924be6996"
+          ],
+          [
+            "sha1",
+            "c39ba1e011318b3edf295d4bdde3d56b5de89972"
+          ],
+          [
+            "sha256",
+            "eb1b278b91a8f183f9749948abd9556ec21b03ca852c53e423d824d5d7cc3de4"
+          ]
+        ],
+        "identity": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Goodware"
+          },
+          "community": "general",
+          "cpe": "cpe:2.3:a:putty:putty:0.80:*:*:*:*:*:*:*",
+          "dependencies": [
+            "5241da9e-dc5e-41ba-856e-bfd33a686e3a",
+            "6ec7a56a-6207-4db8-a4ae-7565d1e3ff6b",
+            "88734367-33f8-4b75-a578-5b62f42a8d8a",
+            "99085d31-bc40-4e58-9800-1e9eaacdfe4a",
+            "bd8ac201-4c7b-491c-8c85-3a1ac51b9cae",
+            "cb966324-7d96-4d0a-9e08-b8ff538e1bed",
+            "cce29ecc-58f1-4226-870d-74cebf57ffa5",
+            "f65f7ec6-e9e7-4579-b8ff-158e5b3bed15"
+          ],
+          "edit": null,
+          "homepage": "",
+          "license": "Permissive (MIT)",
+          "original": [],
+          "product": "PuTTY",
+          "publisher": "Simon Tatham",
+          "purl": "",
+          "repository": "",
+          "scenario": null,
+          "verified": true,
+          "version": "0.80",
+          "vulnerabilities": {
+            "active": [
+              "CVE-2024-31497"
+            ],
+            "triaged": []
+          }
+        },
+        "name": "putty_win_x64-0.80.exe",
+        "path": "",
+        "properties": [],
+        "quality": {
+          "effort": "high",
+          "priority": 2,
+          "severity": "medium",
+          "status": "pass"
+        },
+        "sbom": true,
+        "size": 1661216,
+        "subtype": "Exe",
+        "type": "PE+",
+        "version": ""
+      },
+      "inhibitors": {
+        "customized": false,
+        "exclusions": {},
+        "next_level": 5,
+        "scan_level": 5
+      },
+      "properties": [],
+      "statistics": {
+        "bad_checksum": 0,
+        "bad_format": 0,
+        "bad_password": 0,
+        "components": 4,
+        "extracted": 589,
+        "licenses": {
+          "copyleft": 0,
+          "freemium": 0,
+          "freeware": 0,
+          "non_commercial": 0,
+          "permissive": 1,
+          "proprietary": 1,
+          "public_domain": 0,
+          "shareware": 0,
+          "undeclared": 0,
+          "weak_copyleft": 0
+        },
+        "quality": {
+          "issues": {
+            "fail": 0,
+            "high": 0,
+            "low": 4,
+            "medium": 2,
+            "pass": 6,
+            "total": 6,
+            "warning": 0
+          },
+          "metrics": {
+            "fail": 0,
+            "high": 0,
+            "low": 6,
+            "medium": 2,
+            "pass": 8,
+            "total": 8,
+            "warning": 0
+          },
+          "priority": 2,
+          "status": "pass"
+        },
+        "unsupported": 0,
+        "vulnerabilities": {
+          "critical": 0,
+          "exploit": 1,
+          "fixable": 1,
+          "high": 0,
+          "low": 0,
+          "malware": 0,
+          "mandate": 0,
+          "medium": 1,
+          "named": 0,
+          "total": 1,
+          "triaged": 0
+        }
+      },
+      "unpacking": {
+        "errors": {},
+        "warnings": {}
+      },
+      "warnings": []
+    },
+    "metadata": {
+      "assessments": {
+        "hardening": {
+          "count": 1,
+          "evaluations": [
+            {
+              "count": 1,
+              "label": "low priority mitigations absent",
+              "priority": 3,
+              "status": "pass",
+              "violations": [
+                "SQ14127"
+              ]
+            }
+          ],
+          "final": false,
+          "label": "modern mitigations missing",
+          "priority": 3,
+          "status": "warning",
+          "violations": [
+            "SQ14122"
+          ]
+        },
+        "licenses": {
+          "count": 0,
+          "evaluations": [],
+          "final": false,
+          "label": "No license compliance issues",
+          "priority": null,
+          "status": "pass",
+          "violations": []
+        },
+        "malware": {
+          "count": 0,
+          "evaluations": [],
+          "final": false,
+          "label": "No evidence of malware inclusion",
+          "priority": null,
+          "status": "pass",
+          "violations": []
+        },
+        "secrets": {
+          "count": 0,
+          "evaluations": [],
+          "final": false,
+          "label": "No sensitive information found",
+          "priority": null,
+          "status": "pass",
+          "violations": []
+        },
+        "tampering": {
+          "count": 0,
+          "evaluations": [],
+          "final": false,
+          "label": "No evidence of software tampering",
+          "priority": null,
+          "status": "pass",
+          "violations": []
+        },
+        "vulnerabilities": {
+          "count": 1,
+          "evaluations": [],
+          "final": true,
+          "label": "medium severity vulnerabilities",
+          "priority": 2,
+          "status": "warning",
+          "violations": [
+            "SQ31106"
+          ]
+        }
+      },
+      "components": {
+        "023dcfaf-b24e-568c-9948-0a6dcd4cfe93": {
+          "classification": {
+            "result": "",
+            "status": "Goodware"
+          },
+          "format": "",
+          "hashes": [
+            [
+              "md5",
+              "a9c5924063a253f64fb86bc924be6996"
+            ],
+            [
+              "sha1",
+              "c39ba1e011318b3edf295d4bdde3d56b5de89972"
+            ],
+            [
+              "sha256",
+              "eb1b278b91a8f183f9749948abd9556ec21b03ca852c53e423d824d5d7cc3de4"
+            ]
+          ],
+          "identity": {
+            "authors": [],
+            "classification": {
+              "result": "",
+              "status": "Goodware"
+            },
+            "community": "general",
+            "cpe": "cpe:2.3:a:putty:putty:0.80:*:*:*:*:*:*:*",
+            "dependencies": [
+              "5241da9e-dc5e-41ba-856e-bfd33a686e3a",
+              "6ec7a56a-6207-4db8-a4ae-7565d1e3ff6b",
+              "88734367-33f8-4b75-a578-5b62f42a8d8a",
+              "99085d31-bc40-4e58-9800-1e9eaacdfe4a",
+              "bd8ac201-4c7b-491c-8c85-3a1ac51b9cae",
+              "cb966324-7d96-4d0a-9e08-b8ff538e1bed",
+              "cce29ecc-58f1-4226-870d-74cebf57ffa5",
+              "f65f7ec6-e9e7-4579-b8ff-158e5b3bed15"
+            ],
+            "edit": null,
+            "homepage": "",
+            "license": "Permissive (MIT)",
+            "original": [],
+            "product": "PuTTY",
+            "publisher": "Simon Tatham",
+            "purl": "",
+            "repository": "",
+            "scenario": null,
+            "verified": true,
+            "version": "0.80",
+            "vulnerabilities": {
+              "active": [
+                "CVE-2024-31497"
+              ],
+              "triaged": []
+            }
+          },
+          "name": "putty_win_x64-0.80.exe",
+          "path": "",
+          "properties": [],
+          "quality": {
+            "effort": "high",
+            "priority": 2,
+            "severity": "medium",
+            "status": "pass"
+          },
+          "sbom": true,
+          "size": 1661216,
+          "subtype": "Exe",
+          "type": "PE+",
+          "version": ""
+        },
+        "3a6f60d3-10d0-54bf-be31-a62c754313fb": {
+          "classification": {
+            "result": "",
+            "status": "Goodware"
+          },
+          "format": "HTML",
+          "hashes": [
+            [
+              "md5",
+              "9138f1f88497e900e3e9833d19c7c0aa"
+            ],
+            [
+              "sha1",
+              "ff71ba38616b4accb1835c946ff207c3110eba38"
+            ],
+            [
+              "sha256",
+              "d69ba78812b65e88edc7e9a316e7f829972d74a78e4c854710947b484f84eaaa"
+            ]
+          ],
+          "identity": {
+            "authors": [],
+            "classification": {
+              "result": "",
+              "status": "Goodware"
+            },
+            "community": "general",
+            "cpe": "",
+            "dependencies": [],
+            "edit": null,
+            "homepage": "",
+            "license": "",
+            "original": [],
+            "product": "",
+            "publisher": "",
+            "purl": "",
+            "repository": "",
+            "scenario": null,
+            "verified": false,
+            "version": "Generic",
+            "vulnerabilities": null
+          },
+          "name": "using-cmdline-ncmode.html",
+          "path": "binary_layer/resource/2000/2000:1033/using-cmdline-ncmode.html",
+          "properties": [],
+          "quality": {
+            "effort": "high",
+            "priority": 3,
+            "severity": "low",
+            "status": "pass"
+          },
+          "sbom": false,
+          "size": 3100,
+          "subtype": "HTML",
+          "type": "Text",
+          "version": "Generic"
+        },
+        "7756f17e-35e9-5083-9aff-eecf53ff5afc": {
+          "classification": {
+            "result": "",
+            "status": "Goodware"
+          },
+          "format": "HTML",
+          "hashes": [
+            [
+              "md5",
+              "403446f1c0c4b7be1d4201dcb1f2dda0"
+            ],
+            [
+              "sha1",
+              "93ccc6e35e9d0d5953179b3e9b2103e7c349606f"
+            ],
+            [
+              "sha256",
+              "1ca6dd14465e01fb826c487267c023b721494e294b0d44922fcb1e4d35f056db"
+            ]
+          ],
+          "identity": {
+            "authors": [],
+            "classification": {
+              "result": "",
+              "status": "Goodware"
+            },
+            "community": "general",
+            "cpe": "",
+            "dependencies": [],
+            "edit": null,
+            "homepage": "",
+            "license": "",
+            "original": [],
+            "product": "",
+            "publisher": "",
+            "purl": "",
+            "repository": "",
+            "scenario": null,
+            "verified": false,
+            "version": "Generic",
+            "vulnerabilities": null
+          },
+          "name": "using-port-forwarding.html",
+          "path": "binary_layer/resource/2000/2000:1033/using-port-forwarding.html",
+          "properties": [],
+          "quality": {
+            "effort": "high",
+            "priority": 3,
+            "severity": "low",
+            "status": "pass"
+          },
+          "sbom": false,
+          "size": 6777,
+          "subtype": "HTML",
+          "type": "Text",
+          "version": "Generic"
+        },
+        "b41bd087-da2a-5b89-92b3-4b9e2465bd18": {
+          "classification": {
+            "result": "",
+            "status": "Goodware"
+          },
+          "format": "HTML",
+          "hashes": [
+            [
+              "md5",
+              "1fb950efc4e2d79cfb083132b69249fe"
+            ],
+            [
+              "sha1",
+              "19a4d70b95a2294c51368858488eacb630046a1c"
+            ],
+            [
+              "sha256",
+              "f3a84471da9a6b42763159a881124322785e61460c6f5a0edb903f0e2da223ed"
+            ]
+          ],
+          "identity": {
+            "authors": [],
+            "classification": {
+              "result": "",
+              "status": "Goodware"
+            },
+            "community": "general",
+            "cpe": "",
+            "dependencies": [],
+            "edit": null,
+            "homepage": "",
+            "license": "",
+            "original": [],
+            "product": "",
+            "publisher": "",
+            "purl": "",
+            "repository": "",
+            "scenario": null,
+            "verified": false,
+            "version": "Generic",
+            "vulnerabilities": null
+          },
+          "name": "config-ssh-portfwd.html",
+          "path": "binary_layer/resource/2000/2000:1033/config-ssh-portfwd.html",
+          "properties": [],
+          "quality": {
+            "effort": "high",
+            "priority": 3,
+            "severity": "low",
+            "status": "pass"
+          },
+          "sbom": false,
+          "size": 5370,
+          "subtype": "HTML",
+          "type": "Text",
+          "version": "Generic"
+        }
+      },
+      "cryptography": {
+        "algorithms": {
+          "178929b3-f970-47ce-9041-b48ee5f9cb7c": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 0,
+            "sources": [
+              "pattern"
+            ],
+            "type": "haval",
+            "violations": []
+          },
+          "1a9cd198-61d5-47b7-888c-3f4a715e5f54": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 128,
+            "sources": [
+              "pattern"
+            ],
+            "type": "ripemd128",
+            "violations": []
+          },
+          "1b23d5e3-683a-4778-8b7b-e0c78090b497": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 128,
+            "sources": [
+              "pattern"
+            ],
+            "type": "md5",
+            "violations": []
+          },
+          "29f94155-7b1c-47db-9a75-3799b8e5f8d1": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 5,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 512,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha512",
+            "violations": []
+          },
+          "30b7e5e2-3a94-4d86-a2f6-099757d89582": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 160,
+            "sources": [
+              "pattern"
+            ],
+            "type": "ripemd160",
+            "violations": []
+          },
+          "49d97487-9960-40be-acaa-9e5893373596": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 384,
+            "sources": [
+              "pattern"
+            ],
+            "type": "blake384",
+            "violations": []
+          },
+          "4adfa604-82c6-4137-bb94-c8ce83237f01": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 256,
+            "sources": [
+              "pattern"
+            ],
+            "type": "blake256",
+            "violations": []
+          },
+          "4ae094c1-47a1-40e5-8d2c-b52731e5db9a": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 128,
+            "sources": [
+              "pattern"
+            ],
+            "type": "md4",
+            "violations": []
+          },
+          "4c3bb2d1-950d-4467-915d-d8609bf7d5ac": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 160,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha1",
+            "violations": []
+          },
+          "5f7d92ad-1674-445d-a624-5372ad89cdab": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 2,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 256,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha256",
+            "violations": []
+          },
+          "74e2f2d9-54a1-4866-bd9f-36582c6301c9": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 0,
+            "sources": [
+              "pattern"
+            ],
+            "type": "blake2",
+            "violations": []
+          },
+          "760b7cf9-e0dd-4751-bd87-a432d100bc53": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 224,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha224",
+            "violations": []
+          },
+          "831d94f5-82f5-4439-aaed-4e05f8373dea": {
+            "functions": [
+              "decrypt",
+              "encrypt"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "stream-cipher",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 0,
+            "sources": [
+              "pattern"
+            ],
+            "type": "chacha20",
+            "violations": []
+          },
+          "b5f558f8-eee4-4454-80c2-7b586073dd91": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 512,
+            "sources": [
+              "pattern"
+            ],
+            "type": "blake512",
+            "violations": []
+          },
+          "e0676676-9df8-41f0-a798-9ee6d88156df": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 0,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha3",
+            "violations": []
+          },
+          "edb0189e-811f-4759-8b7d-a40af7a51699": {
+            "functions": [
+              "decrypt",
+              "encrypt"
+            ],
+            "mode": "unknown",
+            "pqc_level": 0,
+            "primitive": "block-cipher",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 0,
+            "sources": [
+              "pattern"
+            ],
+            "type": "blowfish",
+            "violations": []
+          },
+          "f4e0af92-b707-4ba9-9ae7-9976761ac119": {
+            "functions": [
+              "digest"
+            ],
+            "mode": "unknown",
+            "pqc_level": 4,
+            "primitive": "hash",
+            "properties": [],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "size": 384,
+            "sources": [
+              "pattern"
+            ],
+            "type": "sha384",
+            "violations": []
+          }
+        },
+        "certificates": {
+          "8b5d2a54b182d234cc46d2fd4d9b139610ce6d3abf3beef328e3884e9b14a850": {
+            "algorithm": "sha384WithRSAEncryption",
+            "extensions": [
+              {
+                "is_critical": false,
+                "name": "X509v3 Authority Key Identifier",
+                "value": "0F:2A:CB:20:87:28:B8:EC:6F:48:AE:2B:54:A6:29:AA:17:A4:CD:0C"
+              },
+              {
+                "is_critical": false,
+                "name": "X509v3 Subject Key Identifier",
+                "value": "FF:81:BD:4D:75:16:75:02:B0:BE:63:75:70:AB:31:77:DB:D2:E0:3F"
+              },
+              {
+                "is_critical": true,
+                "name": "X509v3 Key Usage",
+                "value": "Digital Signature"
+              },
+              {
+                "is_critical": true,
+                "name": "X509v3 Basic Constraints",
+                "value": "CA:FALSE"
+              },
+              {
+                "is_critical": false,
+                "name": "X509v3 Extended Key Usage",
+                "value": "Code Signing"
+              },
+              {
+                "is_critical": false,
+                "name": "Netscape Cert Type",
+                "value": "Object Signing"
+              },
+              {
+                "is_critical": false,
+                "name": "X509v3 Certificate Policies",
+                "value": "Policy: 1.3.6.1.4.1.6449.1.2.1.3.2\n  CPS: https://sectigo.com/CPS\nPolicy: 2.23.140.1.4.1"
+              },
+              {
+                "is_critical": false,
+                "name": "X509v3 CRL Distribution Points",
+                "value": "Full Name:\n  URI:http://crl.sectigo.com/SectigoPublicCodeSigningCAR36.crl"
+              },
+              {
+                "is_critical": false,
+                "name": "Authority Information Access",
+                "value": "CA Issuers - URI:http://crt.sectigo.com/SectigoPublicCodeSigningCAR36.crt\nOCSP - URI:http://ocsp.sectigo.com"
+              }
+            ],
+            "issuer": [
+              [
+                "countryName",
+                "GB"
+              ],
+              [
+                "organizationName",
+                "Sectigo Limited"
+              ],
+              [
+                "commonName",
+                "Sectigo Public Code Signing CA R36"
+              ]
+            ],
+            "references": {
+              "component": [
+                "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+              ]
+            },
+            "serial_number": "8e3fbfb91be6da041ba41f7a983ad61e",
+            "size": 0,
+            "subject": [
+              [
+                "countryName",
+                "GB"
+              ],
+              [
+                "stateOrProvinceName",
+                "Cambridgeshire"
+              ],
+              [
+                "organizationName",
+                "Simon Tatham"
+              ],
+              [
+                "commonName",
+                "Simon Tatham"
+              ]
+            ],
+            "thumbprint": "8b5d2a54b182d234cc46d2fd4d9b139610ce6d3abf3beef328e3884e9b14a850",
+            "type": "X.509",
+            "valid_from": "2021-11-06T00:00:00Z",
+            "valid_to": "2024-11-05T23:59:59Z",
+            "violations": [
+              "SQ20119",
+              "SQ20121"
+            ]
+          }
+        },
+        "materials": null,
+        "protocols": null
+      },
+      "dependencies": {
+        "5241da9e-dc5e-41ba-856e-bfd33a686e3a": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "imm32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "6ec7a56a-6207-4db8-a4ae-7565d1e3ff6b": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "ole32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "88734367-33f8-4b75-a578-5b62f42a8d8a": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "gdi32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "99085d31-bc40-4e58-9800-1e9eaacdfe4a": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "comdlg32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "bd8ac201-4c7b-491c-8c85-3a1ac51b9cae": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "advapi32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "cb966324-7d96-4d0a-9e08-b8ff538e1bed": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "kernel32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "cce29ecc-58f1-4226-870d-74cebf57ffa5": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "shell32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        },
+        "f65f7ec6-e9e7-4579-b8ff-158e5b3bed15": {
+          "authors": [],
+          "classification": {
+            "result": "",
+            "status": "Unknown"
+          },
+          "community": "general",
+          "cpe": "",
+          "edit": null,
+          "homepage": "",
+          "license": "Proprietary (LicenseRef-rlsecure-microsoft-software-license-terms)",
+          "original": [],
+          "product": "user32",
+          "publisher": "Microsoft Corporation",
+          "purl": "",
+          "repository": "",
+          "scenario": "release",
+          "verified": false,
+          "version": "Generic",
+          "vulnerabilities": null
+        }
+      },
+      "indicators": {
+        "03705237-b87a-476a-a494-399997002121": {
+          "category": "registry",
+          "description": "Changes the value of a registry key.",
+          "occurrences": 1,
+          "priority": 6,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12168",
+          "violations": 0
+        },
+        "097e5572-787b-40ca-9279-53299f887f93": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the SHA-224 hash function, from the SHA-2 hash family.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13644",
+          "violations": 0
+        },
+        "0a19e629-a474-46e9-abd3-d5509f58aade": {
+          "category": "execution",
+          "description": "Creates a thread.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13418",
+          "violations": 0
+        },
+        "0f5de484-a542-4817-aa55-e9fd45468d87": {
+          "category": "search",
+          "description": "Checks if the specified window is minimized.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13443",
+          "violations": 0
+        },
+        "170344c9-be5d-4ac6-bf3e-5c9c7dea0042": {
+          "category": "registry",
+          "description": "Deletes a registry key and its values.",
+          "occurrences": 1,
+          "priority": 7,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12225",
+          "violations": 0
+        },
+        "186b7a46-9a17-4555-b91e-60fc2a4afe02": {
+          "category": "file",
+          "description": "Writes to files.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13329",
+          "violations": 0
+        },
+        "1aa8ba34-a441-4db6-b297-b54f5f2dd25e": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the RIPEMD128 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13639",
+          "violations": 0
+        },
+        "1f485593-b47f-48c9-81be-eb4d6998d14a": {
+          "category": "network",
+          "description": "Contains placeholders for IP addresses.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH16330",
+          "violations": 0
+        },
+        "2002063c-4a40-4509-b337-3034d5caafe3": {
+          "category": "search",
+          "description": "Checks if the window is maximized.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13421",
+          "violations": 0
+        },
+        "2342e5c2-1b73-4502-8488-3e6d4162470a": {
+          "category": "execution",
+          "description": "Writes data to the STDOUT stream.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13412",
+          "violations": 0
+        },
+        "2895398f-ce80-4ad4-a4c6-7db0621607f5": {
+          "category": "network",
+          "description": "Contains URLs related to online payment services.",
+          "occurrences": 1,
+          "priority": 6,
+          "references": [],
+          "rule_id": "BH16103",
+          "violations": 0
+        },
+        "299fd2e3-e4b1-4cbc-bd5b-5d46565e322b": {
+          "category": "settings",
+          "description": "Queries the system time.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13417",
+          "violations": 0
+        },
+        "2b5c497c-4d00-4764-b825-f404e8cff239": {
+          "category": "execution",
+          "description": "Forces a window to close.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13409",
+          "violations": 0
+        },
+        "2c6a652e-e3f1-4f04-89b1-f6ab48d08c4e": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the Keccak (SHA3) hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13635",
+          "violations": 0
+        },
+        "2f77c35a-80de-43de-af3e-0eb3e4963214": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the SHA-256 hash function, from the SHA-2 hash family.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13645",
+          "violations": 0
+        },
+        "2ff05bfd-4fd6-4814-888d-0bfa19026c08": {
+          "category": "execution",
+          "description": "Contains reference to shell32.dll which is Windows Shell Common Dll.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12846",
+          "violations": 0
+        },
+        "318e6fef-1c63-42db-8d06-632c363463c5": {
+          "category": "signature",
+          "description": "Contains HTTP header fields.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH16327",
+          "violations": 0
+        },
+        "3406a0f0-62f1-470e-8969-1e1958b22dc3": {
+          "category": "search",
+          "description": "Retrieves the name of the user associated with the process.",
+          "occurrences": 1,
+          "priority": 7,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19452",
+          "violations": 0
+        },
+        "362ee2e5-006a-4b76-a76d-b739e85c74f3": {
+          "category": "network",
+          "description": "Contains URLs related to search engines.",
+          "occurrences": 2,
+          "priority": 2,
+          "references": [],
+          "rule_id": "BH16364",
+          "violations": 0
+        },
+        "37693c24-23ac-4faf-b112-9094e0f2dd7b": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the BLAKE-256 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13630",
+          "violations": 0
+        },
+        "38389af7-4bd3-4550-8af5-378b4279ebe0": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the RIPEMD160 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13640",
+          "violations": 0
+        },
+        "38ebf9d0-bf5f-4d89-9481-36f432adaa18": {
+          "category": "search",
+          "description": "Queries memory related information.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13428",
+          "violations": 0
+        },
+        "39fb9612-ef8f-4e11-aa96-dc869a3c8e01": {
+          "category": "anomaly",
+          "description": "Plays a sound.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13424",
+          "violations": 0
+        },
+        "3e8d88f6-3121-4803-8c99-58677a55fdb1": {
+          "category": "network",
+          "description": "Contains IP addresses.",
+          "occurrences": 3,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93",
+            "b41bd087-da2a-5b89-92b3-4b9e2465bd18"
+          ],
+          "rule_id": "BH16329",
+          "violations": 0
+        },
+        "402d1810-3805-4c50-9b9d-a1b4fe9b8e9d": {
+          "category": "execution",
+          "description": "Terminates a process/thread.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12794",
+          "violations": 0
+        },
+        "4296ea8d-34db-474b-8724-f5fe8e5936e6": {
+          "category": "monitor",
+          "description": "Contains timestamp-related format strings.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13402",
+          "violations": 0
+        },
+        "42f51258-7bde-4034-8d20-266bb6f1562b": {
+          "category": "monitor",
+          "description": "Detects/enumerates process modules.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19545",
+          "violations": 0
+        },
+        "44c1efa7-4b26-482f-bea8-8e620da51cab": {
+          "category": "execution",
+          "description": "Creates a mutual exclusion (mutex) lock.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13414",
+          "violations": 0
+        },
+        "4695de41-77dc-4625-a49b-65c037768064": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the SHA-1 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13643",
+          "violations": 0
+        },
+        "47d433c1-6ea5-4ebd-a561-1e5f46a7a8d7": {
+          "category": "network",
+          "description": "Contains URLs that use non-standard ports.",
+          "occurrences": 3,
+          "priority": 5,
+          "references": [
+            "3a6f60d3-10d0-54bf-be31-a62c754313fb",
+            "7756f17e-35e9-5083-9aff-eecf53ff5afc",
+            "b41bd087-da2a-5b89-92b3-4b9e2465bd18"
+          ],
+          "rule_id": "BH16111",
+          "violations": 0
+        },
+        "49088ed9-b817-476b-ac98-1a2c36352aa3": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the MD4 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13637",
+          "violations": 0
+        },
+        "4c5550c0-eadc-441c-ba6d-c0110c392f8f": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the Blowfish symmetric-key block cipher.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13651",
+          "violations": 0
+        },
+        "4e5ba37e-555d-4acb-b16c-4d7466134b67": {
+          "category": "file",
+          "description": "Queries the file type of a file.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13441",
+          "violations": 0
+        },
+        "50876364-4b6e-43f6-897f-14dccbf5f264": {
+          "category": "execution",
+          "description": "Tampers with module search locations.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12678",
+          "violations": 0
+        },
+        "514cd419-1517-412f-bc58-88bce18c05c5": {
+          "category": "behavior",
+          "description": "Retrieves the position of the mouse cursor.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13411",
+          "violations": 0
+        },
+        "56428a7b-a4b9-4849-889e-a6cde5be44c1": {
+          "category": "file",
+          "description": "Flushes the file's buffer to disk.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13407",
+          "violations": 0
+        },
+        "67c57e07-5341-4fdb-974f-34e910b68027": {
+          "category": "network",
+          "description": "Loads additional networking APIs.",
+          "occurrences": 2,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH16334",
+          "violations": 0
+        },
+        "68ae7f46-8f79-4596-aae7-998d2f7c1e47": {
+          "category": "settings",
+          "description": "Enumerates system variables.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19547",
+          "violations": 0
+        },
+        "695157b9-5aeb-48bb-966a-044475deca20": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the BLAKE-512 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13632",
+          "violations": 0
+        },
+        "6a940913-b66f-46d2-8000-9deff3e722ba": {
+          "category": "execution",
+          "description": "Reads data from the STDIN stream.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13432",
+          "violations": 0
+        },
+        "6adaa089-f68d-49e2-b668-43d49a8f54ba": {
+          "category": "file",
+          "description": "Reads from files.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13328",
+          "violations": 0
+        },
+        "6cef43ed-1953-49b8-b6aa-cfbc8766ece0": {
+          "category": "search",
+          "description": "Enumerates user locale information.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19548",
+          "violations": 0
+        },
+        "6d356fad-eda5-4fd8-9bba-838f41b0721a": {
+          "category": "file",
+          "description": "Queries the size of a file.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13410",
+          "violations": 0
+        },
+        "6e7f10ce-83a6-410a-9d62-bbb646700cf5": {
+          "category": "steal",
+          "description": "Retrieves text from the clipboard.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13272",
+          "violations": 0
+        },
+        "6eab9f89-2e22-4095-8aee-dbe31d73fc0f": {
+          "category": "execution",
+          "description": "Releases a mutual exclusion (mutex) lock.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13415",
+          "violations": 0
+        },
+        "6f6a049a-4d52-4b0c-9a5a-45171e6b49ee": {
+          "category": "execution",
+          "description": "Loads additional APIs.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13334",
+          "violations": 0
+        },
+        "70e3f0e6-75b1-4ae1-9064-43460be82ca3": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the SHA-512 hash function, from the SHA-2 hash family.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13647",
+          "violations": 0
+        },
+        "738dcee7-b8b1-450d-9e5c-f3786f67bec2": {
+          "category": "execution",
+          "description": "Contains a reference to a common dynamic library or an executable file.",
+          "occurrences": 13,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13314",
+          "violations": 0
+        },
+        "77e80d42-0a7a-4bc0-bad6-20c58fcea13c": {
+          "category": "search",
+          "description": "Reads path to temporary file location on Windows.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13388",
+          "violations": 0
+        },
+        "79206a0c-6ece-4036-a012-a8449de923a2": {
+          "category": "execution",
+          "description": "Contains reference to kernel32.dll which is Windows NT BASE API Client DLL.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12842",
+          "violations": 0
+        },
+        "7a12ce24-2b2a-45b6-8b65-a7c4d43084d3": {
+          "category": "monitor",
+          "description": "Tampers with keyboard/mouse status.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12670",
+          "violations": 0
+        },
+        "7e36b1ea-89c5-4c49-9e4d-b3db0f894ec4": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the HAVAL hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13634",
+          "violations": 0
+        },
+        "82b043a4-584b-4061-9445-1a4388a55b8a": {
+          "category": "permissions",
+          "description": "Enumerates user/account privilege information.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19330",
+          "violations": 0
+        },
+        "830168a6-a330-4635-832c-8a60ae3adfc5": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the BLAKE-384 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13631",
+          "violations": 0
+        },
+        "861eecec-50f7-4d3f-97a2-74f1de1e7d56": {
+          "category": "monitor",
+          "description": "Logs timestamped data to file.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13403",
+          "violations": 0
+        },
+        "884510b9-65e8-4509-95dd-ed69bffa04c5": {
+          "category": "file",
+          "description": "Changes the size of a file.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13442",
+          "violations": 0
+        },
+        "8ac99d4f-e672-47eb-9215-1b8e7b94d014": {
+          "category": "monitor",
+          "description": "Takes screenshots.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12590",
+          "violations": 0
+        },
+        "8b1d96aa-cd7a-4015-9c77-1366331e3e91": {
+          "category": "execution",
+          "description": "Uses pipes for interprocess communication.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13378",
+          "violations": 0
+        },
+        "91161bc1-3778-4100-9560-373c2553dbf6": {
+          "category": "registry",
+          "description": "Opens registry keys.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13288",
+          "violations": 0
+        },
+        "915319fb-5ace-4dd4-a110-6a7a29ac5e94": {
+          "category": "settings",
+          "description": "Tampers with system environment variables.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12739",
+          "violations": 0
+        },
+        "9196cfd8-3ea8-4609-a185-41301334c9f5": {
+          "category": "network",
+          "description": "Contains URLs.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH16331",
+          "violations": 0
+        },
+        "9796b0b8-29e0-4214-80fb-caa53ec95068": {
+          "category": "registry",
+          "description": "Enumerates the values of a registry key.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19456",
+          "violations": 0
+        },
+        "982ffb96-a550-46f5-8922-65a07ccd3910": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the base64 binary-to-text encoding algorithm.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13760",
+          "violations": 0
+        },
+        "9c0c8959-4f70-4cf6-9b44-6472be423e9c": {
+          "category": "execution",
+          "description": "Loads additional libraries.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12406",
+          "violations": 0
+        },
+        "9ce56620-a342-4b56-8624-7c55a96332f8": {
+          "category": "file",
+          "description": "Sets or updates the file pointer position within an open file.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13405",
+          "violations": 0
+        },
+        "9dd201ff-3c4c-442c-9051-4a4bdb970cf1": {
+          "category": "search",
+          "description": "Enumerates files.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19546",
+          "violations": 0
+        },
+        "9f0db531-fe47-47dc-be38-40f9ee839b69": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the SHA-384 hash function, from the SHA-2 hash family.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13646",
+          "violations": 0
+        },
+        "9fe97c16-cd13-462d-8e07-e480045e106c": {
+          "category": "search",
+          "description": "Enumerates system information.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19295",
+          "violations": 0
+        },
+        "a098bed4-b8c9-4bef-83b6-d0f6e3d18212": {
+          "category": "execution",
+          "description": "Contains reference to advapi32.dll which is Advanced Windows 32 Base API.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12838",
+          "violations": 0
+        },
+        "a22d2449-30f4-4f47-a3c8-b73fb61fcdd9": {
+          "category": "steal",
+          "description": "Accesses clipboard.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13350",
+          "violations": 0
+        },
+        "a2f8b7e3-dd5c-4a4c-8201-8c5012ae2e9b": {
+          "category": "monitor",
+          "description": "Monitors mouse activity.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13355",
+          "violations": 0
+        },
+        "a37ec86c-6325-4e7b-b0ae-5d8d16245f79": {
+          "category": "file",
+          "description": "Opens a file for reading or writing.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13401",
+          "violations": 0
+        },
+        "a410bff3-ec64-4f56-ab61-012b5a2da5a5": {
+          "category": "evasion",
+          "description": "Contains potentially deceptive links.",
+          "occurrences": 1,
+          "priority": 8,
+          "references": [],
+          "rule_id": "BH16101",
+          "violations": 0
+        },
+        "a4510138-f980-4b9a-996b-7cd2176063d8": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the Salsa20 stream cipher.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13682",
+          "violations": 0
+        },
+        "a47c377e-dea6-4674-adce-7c96a130c014": {
+          "category": "file",
+          "description": "Reads from files in Windows system directories.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13336",
+          "violations": 0
+        },
+        "a4a9afcf-9b36-445f-875f-e8b0d4ed6033": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the MD5 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13638",
+          "violations": 0
+        },
+        "a7c32356-1a52-44ca-a8d1-c6799eb21516": {
+          "category": "file",
+          "description": "Deletes a file/directory.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12223",
+          "violations": 0
+        },
+        "b32b5cd8-fa1a-4c3a-85a7-4b53fea9a50e": {
+          "category": "signature",
+          "description": "Contains patterns identifying the constants related to the BLAKE2 hash function.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13628",
+          "violations": 0
+        },
+        "b436bc14-fac6-48ac-b443-a122788b358e": {
+          "category": "registry",
+          "description": "Accesses/modifies registry.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13330",
+          "violations": 0
+        },
+        "b4946ac7-16b0-44ec-8da8-87c3266fe9ab": {
+          "category": "network",
+          "description": "Contains generic SQL database queries.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13368",
+          "violations": 0
+        },
+        "b66626f5-4106-45f5-a537-0bb64a321c5b": {
+          "category": "file",
+          "description": "Creates/opens files in Windows system directories.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13335",
+          "violations": 0
+        },
+        "badfeec1-86b2-47ea-a338-96c7c5d6b2d8": {
+          "category": "search",
+          "description": "Retrieves keyboard layout list.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13394",
+          "violations": 0
+        },
+        "bdbba796-2e76-4f1b-941f-28046aa9d978": {
+          "category": "registry",
+          "description": "Enumerates registry keys.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH19536",
+          "violations": 0
+        },
+        "c81810ae-6f20-456e-9fd3-b314c3f981de": {
+          "category": "file",
+          "description": "Deletes files in Windows system directories.",
+          "occurrences": 1,
+          "priority": 7,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12237",
+          "violations": 0
+        },
+        "cd46a344-aa38-4c5f-895c-3c02050f9a83": {
+          "category": "search",
+          "description": "Gets the current working directory.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13419",
+          "violations": 0
+        },
+        "d044ee29-4736-4b60-866b-3e3cb9f6be97": {
+          "category": "execution",
+          "description": "Executes a file.",
+          "occurrences": 1,
+          "priority": 6,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13331",
+          "violations": 0
+        },
+        "d47e9a51-df83-49cd-89b6-3cd97b6f67cb": {
+          "category": "registry",
+          "description": "Creates registry keys.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12216",
+          "violations": 0
+        },
+        "d5ffcd61-6bbf-4ad2-971b-8a59e019a7fe": {
+          "category": "evasion",
+          "description": "Detects presence of debuggers.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12805",
+          "violations": 0
+        },
+        "d75c5f94-8c58-47a5-80df-f9bc0a569f81": {
+          "category": "file",
+          "description": "Creates/Opens a file.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13327",
+          "violations": 0
+        },
+        "d891adde-05d0-4c66-886e-957c720ee86d": {
+          "category": "anomaly",
+          "description": "Writes text to the clipboard.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13429",
+          "violations": 0
+        },
+        "dd3f911d-92e5-4f45-9d6b-82638894cf02": {
+          "category": "file",
+          "description": "Writes to files in Windows system directories.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12820",
+          "violations": 0
+        },
+        "e11e6b00-391a-4d22-af93-d29db581b27d": {
+          "category": "memory",
+          "description": "Allocates additional memory in the calling process.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13404",
+          "violations": 0
+        },
+        "e361e79c-3e81-42ac-85a9-7844958b55d7": {
+          "category": "search",
+          "description": "Checks operating system version.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13380",
+          "violations": 0
+        },
+        "ec9a7d81-2417-4e6c-b5bf-f081e48595ae": {
+          "category": "file",
+          "description": "Changes the current directory.",
+          "occurrences": 1,
+          "priority": 3,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13423",
+          "violations": 0
+        },
+        "eca509a5-7561-4a1a-811c-56bdb84b417b": {
+          "category": "registry",
+          "description": "Closes a previously open registry key.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13406",
+          "violations": 0
+        },
+        "edd00c84-2a89-4ce1-8b75-3d141eb49e8d": {
+          "category": "anomaly",
+          "description": "Contains a reference to ActiveX GUID with the Kill-Bit flag set.",
+          "occurrences": 1,
+          "priority": 5,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13395",
+          "violations": 0
+        },
+        "f0b03f29-f833-49e3-bc80-adfa6dd6e884": {
+          "category": "execution",
+          "description": "Displays a dialog box with a message.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13408",
+          "violations": 0
+        },
+        "f820dfe7-4fe9-4f97-a8c8-55180f09a811": {
+          "category": "search",
+          "description": "Reads paths to system directories on Windows.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13387",
+          "violations": 0
+        },
+        "fa3962f9-0d31-4a6f-9fa9-0a2b74e14902": {
+          "category": "monitor",
+          "description": "Monitors keyboard strokes.",
+          "occurrences": 1,
+          "priority": 4,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH12432",
+          "violations": 0
+        },
+        "fc788bc0-a65c-4c88-9534-2137a003ae1a": {
+          "category": "file",
+          "description": "Closes a previously open file.",
+          "occurrences": 1,
+          "priority": 1,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH13434",
+          "violations": 0
+        },
+        "fca7792b-1749-4f93-9528-8fee4b3544f0": {
+          "category": "network",
+          "description": "Accesses PuTTY registry keys.",
+          "occurrences": 1,
+          "priority": 2,
+          "references": [
+            "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+          ],
+          "rule_id": "BH17301",
+          "violations": 0
+        }
+      },
+      "licenses": {
+        "LicenseRef-rlsecure-microsoft-software-license-terms": {
+          "audit": null,
+          "family": "Proprietary",
+          "violations": []
+        },
+        "MIT": {
+          "audit": null,
+          "family": "Permissive",
+          "violations": []
+        }
+      },
+      "ml_models": null,
+      "secrets": null,
+      "services": null,
+      "violations": {
+        "183b7599-1c52-4064-858a-ead0932003ac": {
+          "audit": null,
+          "category": "signatures",
+          "description": "Detected digital signatures that rely on a weak digest algorithm for integrity validation.",
+          "effort": "medium",
+          "enabled": true,
+          "priority": 3,
+          "references": {
+            "component": [
+              "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+            ]
+          },
+          "rule_id": "SQ20119",
+          "severity": "low",
+          "statistics": {
+            "applicable": 1,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 1
+          },
+          "status": "pass"
+        },
+        "265d60a1-f34d-4ce4-82e5-3a7fdb7468c8": {
+          "audit": null,
+          "category": "vulnerabilities",
+          "description": "Detected presence of medium severity vulnerabilities.",
+          "effort": "high",
+          "enabled": true,
+          "priority": 2,
+          "references": {
+            "component": [
+              "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+            ]
+          },
+          "rule_id": "SQ31106",
+          "severity": "medium",
+          "statistics": {
+            "applicable": 1,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 1
+          },
+          "status": "pass"
+        },
+        "89c3053e-a25f-4346-a861-95fcf3946078": {
+          "audit": null,
+          "category": "hardening",
+          "description": "Detected Windows executable files that do not implement long jump control flow vulnerability mitigation protection.",
+          "effort": "medium",
+          "enabled": true,
+          "priority": 3,
+          "references": {
+            "component": [
+              "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+            ]
+          },
+          "rule_id": "SQ14127",
+          "severity": "low",
+          "statistics": {
+            "applicable": 1,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 1
+          },
+          "status": "pass"
+        },
+        "d610ce5b-9c65-42a6-848b-bd03cac786a4": {
+          "audit": null,
+          "category": "hardening",
+          "description": "Detected Windows executable files that do not implement CFG vulnerability mitigation protection.",
+          "effort": "medium",
+          "enabled": true,
+          "priority": 3,
+          "references": {
+            "component": [
+              "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+            ]
+          },
+          "rule_id": "SQ14122",
+          "severity": "medium",
+          "statistics": {
+            "applicable": 1,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 1
+          },
+          "status": "pass"
+        },
+        "edd00600-f73a-4c2f-a2a9-7ca0de0c3bd4": {
+          "audit": null,
+          "category": "hunting",
+          "description": "Detected presence of files containing URLs that use non-standard ports.",
+          "effort": "high",
+          "enabled": true,
+          "priority": 3,
+          "references": {
+            "component": [
+              "3a6f60d3-10d0-54bf-be31-a62c754313fb",
+              "7756f17e-35e9-5083-9aff-eecf53ff5afc",
+              "b41bd087-da2a-5b89-92b3-4b9e2465bd18"
+            ]
+          },
+          "rule_id": "TH17115",
+          "severity": "low",
+          "statistics": {
+            "applicable": 3,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 3
+          },
+          "status": "pass"
+        },
+        "f58959f7-ef29-42b5-9b41-65dd49420de4": {
+          "audit": null,
+          "category": "signatures",
+          "description": "Detected digital signatures that have not been performed with an extended validation certificate.",
+          "effort": "high",
+          "enabled": true,
+          "priority": 4,
+          "references": {
+            "component": [
+              "023dcfaf-b24e-568c-9948-0a6dcd4cfe93"
+            ]
+          },
+          "rule_id": "SQ20121",
+          "severity": "low",
+          "statistics": {
+            "applicable": 1,
+            "enforcements": 0,
+            "exclusions": 0,
+            "violations": 1
+          },
+          "status": "pass"
+        }
+      },
+      "vulnerabilities": {
+        "CVE-2024-31497": {
+          "cvss": {
+            "baseScore": "5.9",
+            "metrics": [
+              [
+                "Attack Vector",
+                "Network"
+              ],
+              [
+                "Attack Complexity",
+                "High"
+              ],
+              [
+                "Privileges Required",
+                "None"
+              ],
+              [
+                "User Interaction",
+                "None"
+              ],
+              [
+                "Scope",
+                "Unchanged"
+              ],
+              [
+                "Confidentiality Impact",
+                "High"
+              ],
+              [
+                "Integrity Impact",
+                "None"
+              ],
+              [
+                "Availability Impact",
+                "None"
+              ]
+            ],
+            "version": 3
+          },
+          "exploit": [
+            "EXISTS",
+            "FIXABLE"
+          ],
+          "name": "",
+          "sources": [
+            "NVD"
+          ],
+          "violations": [
+            "SQ31106"
+          ]
+        }
+      }
+    }
+  },
+  "schema": 3,
+  "timestamp": "2025-04-14T10:21:15+02:00",
+  "version": "5.3.0.115"
+}

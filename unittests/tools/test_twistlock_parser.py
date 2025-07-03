@@ -20,8 +20,8 @@ class TestTwistlockParser(DojoTestCase):
         self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
         self.assertEqual("CVE-2013-7459", findings[0].unsaved_vulnerability_ids[0])
 
-    def test_parse_file_with_no_link(self):
-        testfile = (get_unit_tests_scans_path("twistlock") / "one_vuln_no_link.json").open(encoding="utf-8")
+    def test_parse_file_with_no_link_no_description(self):
+        testfile = (get_unit_tests_scans_path("twistlock") / "one_vuln_no_link_no_description.json").open(encoding="utf-8")
         parser = TwistlockParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

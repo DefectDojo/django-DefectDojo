@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseParser:
+class BurpSuiteDASTParser:
     vulnerability_list_xpath = (
         "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
     )
@@ -20,13 +20,15 @@ class BurpEnterpriseParser:
     references_headers = ["vulnerability classifications", "references"]
 
     def get_scan_types(self):
-        return ["Burp Enterprise Scan"]
+        return ["Burp Suite DAST Scan", "Burp Enterprise Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return scan_type  # no custom label for now
+        return scan_type if scan_type == "Burp Suite DAST Scan" else "Burp Enterprise Scan (RENAMED to Burp Suite DAST Scan)"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Burp Enterprise Edition findings in HTML format"
+        if scan_type == "Burp Suite DAST Scan":
+            return "Import Burp Suite DAST findings in HTML format"
+        return "Import Burp Enterprise Edition findings in HTML format (RENAMED to Burp Suite DAST Scan)"
 
     def get_findings(self, filename, test):
         tree = html.parse(filename)

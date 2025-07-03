@@ -5,7 +5,7 @@ import operator
 import re
 import time
 from datetime import datetime
-from functools import reduce
+from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
@@ -16,7 +16,8 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -104,6 +105,7 @@ from dojo.utils import (
     add_error_message_to_response,
     add_success_message_to_response,
     async_delete,
+    build_count_subquery,
     calculate_grade,
     generate_file_response_from_file_path,
     get_cal_event,
@@ -151,7 +153,6 @@ def engagement_calendar(request):
 
 
 def get_filtered_engagements(request, view):
-
     if view not in {"all", "active"}:
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
@@ -161,8 +162,11 @@ def get_filtered_engagements(request, view):
     if view == "active":
         engagements = engagements.filter(active=True)
 
-    engagements = engagements.select_related("product", "product__prod_type") \
+    engagements = (
+        engagements
+        .select_related("product", "product__prod_type")
         .prefetch_related("lead", "tags", "product__tags")
+    )
 
     if System_Settings.objects.get().enable_jira:
         engagements = engagements.prefetch_related(
@@ -170,28 +174,17 @@ def get_filtered_engagements(request, view):
             "product__jira_project_set__jira_instance",
         )
 
+    test_count_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")), group_field="engagement_id",
+    )
+    engagements = engagements.annotate(test_count=Coalesce(test_count_subquery, Value(0)))
+
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementDirectFilterWithoutObjectLookups if filter_string_matching else EngagementDirectFilter
     return filter_class(request.GET, queryset=engagements)
 
 
-def get_test_counts(engagements):
-    # Get the test counts per engagement. As a separate query, this is much
-    # faster than annotating the above `engagements` query.
-    return {
-        test["engagement"]: test["test_count"]
-        for test in Test.objects.filter(
-            engagement__in=engagements,
-        ).values(
-            "engagement",
-        ).annotate(
-            test_count=Count("engagement"),
-        )
-    }
-
-
 def engagements(request, view):
-
     if not view:
         view = "active"
 
@@ -209,7 +202,6 @@ def engagements(request, view):
     return render(
         request, "dojo/engagement.html", {
             "engagements": engs,
-            "engagement_test_counts": get_test_counts(filtered_engagements.qs),
             "filter_form": filtered_engagements.form,
             "product_name_words": product_name_words,
             "engagement_name_words": engagement_name_words,
@@ -592,23 +584,27 @@ class ViewEngagement(View):
 
 
 def prefetch_for_view_tests(tests):
-    prefetched = tests
-    if isinstance(tests,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-
-        prefetched = prefetched.select_related("lead")
-        prefetched = prefetched.prefetch_related("tags", "test_type", "notes")
-        prefetched = prefetched.annotate(count_findings_test_all=Count("finding__id", distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active=Count("finding__id", filter=Q(finding__active=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active_verified=Count("finding__id", filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count("finding__id", filter=Q(finding__is_mitigated=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_dups=Count("finding__id", filter=Q(finding__duplicate=True), distinct=True))
-        prefetched = prefetched.annotate(total_reimport_count=Count("test_import__id", filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
-
-    else:
+    # old code can arrive here with prods being a list because the query was already executed
+    if not isinstance(tests, QuerySet):
         logger.warning("unable to prefetch because query was already executed")
+        return tests
 
-    return prefetched
+    prefetched = tests.select_related("lead", "test_type").prefetch_related("tags", "notes")
+    base_findings = Finding.objects.filter(test_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="test_id")
+    return prefetched.annotate(
+        count_findings_test_all=Coalesce(count_subquery(base_findings), Value(0)),
+        count_findings_test_active=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
+        count_findings_test_active_verified=Coalesce(
+            count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
+        ),
+        count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
+        count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
+        total_reimport_count=Coalesce(
+            count_subquery(Test_Import.objects.filter(test_id=OuterRef("pk"), type=Test_Import.REIMPORT_TYPE)),
+            Value(0),
+        ),
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Test_Add, "eid")
@@ -1583,14 +1579,18 @@ def get_engagements(request):
         query = get_list_index(path_items, 1)
 
     request.GET = QueryDict(query)
-    engagements = get_filtered_engagements(request, view).qs
-    test_counts = get_test_counts(engagements)
-
-    return engagements, test_counts
+    return get_filtered_engagements(request, view).qs
 
 
 def get_excludes():
-    return ["is_ci_cd", "jira_issue", "jira_project", "objects", "unaccepted_open_findings"]
+    return [
+        "is_ci_cd",
+        "jira_issue",
+        "jira_project",
+        "objects",
+        "unaccepted_open_findings",
+        "test_count",  # already exported separately as “tests”
+    ]
 
 
 def get_foreign_keys():
@@ -1600,7 +1600,7 @@ def get_foreign_keys():
 
 def csv_export(request):
     logger.debug("starting csv export")
-    engagements, test_counts = get_engagements(request)
+    engagements = get_engagements(request)
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = "attachment; filename=engagements.csv"
@@ -1627,7 +1627,7 @@ def csv_export(request):
                     if value and isinstance(value, str):
                         value = value.replace("\n", " NEWLINE ").replace("\r", "")
                     fields.append(value)
-            fields.append(test_counts.get(engagement.id, 0))
+            fields.append(getattr(engagement, "test_count", 0))
 
             writer.writerow(fields)
     logger.debug("done with csv export")
@@ -1636,7 +1636,7 @@ def csv_export(request):
 
 def excel_export(request):
     logger.debug("starting excel export")
-    engagements, test_counts = get_engagements(request)
+    engagements = get_engagements(request)
 
     workbook = Workbook()
     workbook.iso_dates = True
@@ -1668,7 +1668,7 @@ def excel_export(request):
                         value = value.replace(tzinfo=None)
                     worksheet.cell(row=row_num, column=col_num, value=value)
                     col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=test_counts.get(engagement.id, 0))
+            worksheet.cell(row=row_num, column=col_num, value=getattr(engagement, "test_count", 0))
         row_num += 1
 
     with NamedTemporaryFile() as tmp:

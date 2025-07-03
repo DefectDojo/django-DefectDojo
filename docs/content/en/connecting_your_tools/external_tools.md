@@ -623,11 +623,11 @@ Use the import command to import new findings into DefectDojo.
 #### Usage
 
 ```
-defectdojo-cli [global options] import <required flags> [optional flags]
-	or: defectdojo-cli [global options] import  --config ./config-file-path
-	or: defectdojo-cli import [-h | --help]
-	or: defectdojo-cli import example [subcommand options]
-	or: defectdojo-cli import example [-h | --help]
+universal-importer [global options] import <required flags> [optional flags]
+	or: universal-importer [global options] import  --config ./config-file-path
+	or: universal-importer import [-h | --help]
+	or: universal-importer import example [subcommand options]
+	or: universal-importer import example [-h | --help]
 
 >> The API token must be set in the environment variable `DD_IMPORTER_DOJO_API_TOKEN`.
 ```
@@ -657,13 +657,13 @@ You can use `deduplication-on-engagement` to restrict deduplication for imported
 **Import Basic syntax:**
 
 ```
-defectdojo-cli import [options]
+universal-importer import [options]
 ```
 
 #### **Import Example:**
 
 ```
-defectdojo-cli import \
+universal-importer import \
 --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
 --scan-type "burp scan" \
 --report-path "./examples/burp_findings.xml" \
@@ -772,11 +772,11 @@ You can use `deduplication-on-engagement` to restrict deduplication for imported
 #### Usage
 
 ```
-defectdojo-cli [global options] reimport <required flags> [optional flags]
-   or: defectdojo-cli [global options] reimport  --config ./config-file-path
-   or: defectdojo-cli reimport [-h | --help]
-   or: defectdojo-cli reimport example [subcommand options]
-   or: defectdojo-cli reimport example [-h | --help]
+universal-importer [global options] reimport <required flags> [optional flags]
+   or: universal-importer [global options] reimport  --config ./config-file-path
+   or: universal-importer reimport [-h | --help]
+   or: universal-importer reimport example [subcommand options]
+   or: universal-importer reimport example [-h | --help]
 
 >> The API token must be set in the environment variable `DD_IMPORTER_DOJO_API_TOKEN`.
 ```
@@ -784,7 +784,7 @@ defectdojo-cli [global options] reimport <required flags> [optional flags]
 #### **Reimport Example:**
 
 ```
-defectdojo-cli reimport \
+universal-importer reimport \
 --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
 --scan-type "Nancy Scan" \
 --report-path "./examples/nancy_findings.json" \
@@ -873,9 +873,9 @@ Interactive mode allows you to configure import and reimport process, step-by-st
 #### Usage
 
 ```
-defectdojo-cli interactive
-	or: defectdojo-cli interactive  [--skip-intro] [--no-full-screen] [--log-path]
-	or: defectdojo-cli interactive [-h | --help]
+universal-importer interactive
+	or: universal-importer interactive  [--skip-intro] [--no-full-screen] [--log-path]
+	or: universal-importer interactive [-h | --help]
 ```
 
 #### Options

@@ -977,7 +977,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 1,
       "scan_type": "ZAP Scan",
       "engagement": 1,
@@ -985,7 +984,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -994,7 +992,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 1,
       "scan_type": "ZAP Scan",
       "title": "My ZAP Scan",
@@ -1003,7 +1000,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1012,14 +1008,12 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 120,
       "engagement": 3,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1028,7 +1022,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 999,
       "scan_type": "Checkmarx Scan detailed",
       "engagement": 5,
@@ -1036,7 +1029,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1045,7 +1037,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 999,
       "scan_type": "Checkmarx Scan detailed",
       "engagement": 5,
@@ -1053,7 +1044,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1062,7 +1052,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 555,
       "scan_type": "Veracode Scan",
       "engagement": 5,
@@ -1070,7 +1059,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1079,14 +1067,12 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 555,
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1095,14 +1081,12 @@
     "model": "dojo.test",
     "fields": {
       "lead": 2,
-      "estimated_time": null,
       "test_type": 1,
       "engagement": 2,
       "environment": 1,
       "target_start": "2018-01-01T01:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": null,
       "target_end": "2018-01-02T01:00:00Z"
     }
   },
@@ -1111,7 +1095,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "02:00:00",
       "test_type": 1,
       "engagement": 1,
       "environment": 1,
@@ -1120,7 +1103,6 @@
         1
       ],
       "percent_complete": 100,
-      "actual_time": "00:30:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -1129,7 +1111,6 @@
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 1,
       "scan_type": "ZAP Scan",
       "title": "Endpoint mitigation tests",
@@ -1138,7 +1119,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },
@@ -2164,7 +2144,7 @@
       "epic_name_id": 10011,
       "open_status_key": 11,
       "close_status_key": 41,
-      "info_mapping_severity": "Trivial",
+      "info_mapping_severity": "Lowest",
       "low_mapping_severity": "Low",
       "medium_mapping_severity": "Medium",
       "high_mapping_severity": "High",

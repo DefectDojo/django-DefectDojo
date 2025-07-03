@@ -8,6 +8,7 @@ from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 from dojo.tools.qualys import csv_parser
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -352,7 +353,11 @@ def parse_finding(host, tree):
         finding.is_mitigated = temp["mitigated"]
         finding.active = temp["active"]
         if temp.get("CVSS_vector") is not None:
-            finding.cvssv3 = temp.get("CVSS_vector")
+            cvss_data = parse_cvss_data(temp.get("CVSS_vector"))
+            if cvss_data:
+                finding.cvssv3 = cvss_data.get("vector")
+                finding.cvssv3_score = cvss_data.get("score")
+
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True

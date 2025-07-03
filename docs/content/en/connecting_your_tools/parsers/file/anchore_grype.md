@@ -5,11 +5,11 @@ toc_hide: true
 ### File Types
 DefectDojo parser accepts a .json file.
 
-Anchore Grype JSON files are created using the Grype CLI, using the '-o json' option.  See: https://github.com/anchore/grype
+Anchore Grype JSON files are created using the Grype CLI, using the '--output=json' option.  See: https://github.com/anchore/grype
 
 **Example:**
 {{< highlight bash >}}
-grype yourApp/example-page -o json > example_vulns.json
+grype yourApp/example-page --output=json=example_vulns.json
 {{< /highlight >}}
 
 ### Acceptable JSON Format

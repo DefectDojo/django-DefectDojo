@@ -60,6 +60,7 @@ from dojo.filters import (
     ApiRiskAcceptanceFilter,
     ApiTemplateFindingFilter,
     ApiTestFilter,
+    ApiUserFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
     TestImportAPIFilter,
@@ -989,13 +990,13 @@ class FindingViewSet(
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data[
                     "tags"
                 ]
+                for tag in new_tags.validated_data["tags"]:
+                    for sub_tag in tagulous.utils.parse_tags(tag):
+                        if sub_tag not in all_tags:
+                            all_tags.append(sub_tag)
 
-                for tag in tagulous.utils.parse_tags(
-                    new_tags.validated_data["tags"],
-                ):
-                    if tag not in all_tags:
-                        all_tags.append(tag)
                 new_tags = tagulous.utils.render_tags(all_tags)
+
                 finding.tags = new_tags
                 finding.save()
             else:
@@ -1238,19 +1239,18 @@ class FindingViewSet(
             ]
 
             # serializer turns it into a string, but we need a list
-            del_tags = tagulous.utils.parse_tags(
-                delete_tags.validated_data["tags"],
-            )
+            del_tags = delete_tags.validated_data["tags"]
             if len(del_tags) < 1:
                 return Response(
                     {"error": "Empty Tag List Not Allowed"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             for tag in del_tags:
                 if tag not in all_tags:
                     return Response(
                         {
-                            "error": f"'{tag}' is not a valid tag in list",
+                            "error": f"'{tag}' is not a valid tag in list '{all_tags}'",
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -2379,15 +2379,7 @@ class UsersViewSet(
     serializer_class = serializers.UserSerializer
     queryset = User.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "username",
-        "first_name",
-        "last_name",
-        "email",
-        "is_active",
-        "is_superuser",
-    ]
+    filterset_class = ApiUserFilter
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
     def get_queryset(self):
@@ -2508,7 +2500,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             jira_driver = engagement or (product or None)
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
-        logger.debug(f"push_to_jira: {push_to_jira}")
+        # logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):

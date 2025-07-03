@@ -1,5 +1,5 @@
 ---
-title: "Architecture"
+title: "Architecture (Open-Source)"
 description: "The DefectDojo platform consists of several components that work together closely."
 draft: false
 weight: 1

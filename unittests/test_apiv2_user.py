@@ -88,3 +88,41 @@ class UserTest(APITestCase):
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Update of password though API is not allowed", r.content.decode("utf-8"))
+
+    def test_user_deactivate(self):
+        # user with good password
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-10",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+
+        # user with good password
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-2",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+
+        # deactivate
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "is_active": False,
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+        # check is_active field
+        r = self.client.get("{}{}/".format(reverse("user-list"), user_id))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(r.json()["is_active"], False, r.content[:1000])
+
+        # API key retrieval should fail for inactive user
+        r = self.client.post(reverse("api-token-auth"), {
+            "username": "api-user-2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])

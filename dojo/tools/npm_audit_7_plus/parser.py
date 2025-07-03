@@ -3,6 +3,7 @@ import json
 import logging
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +167,10 @@ def get_item(item_node, tree, test):
         dojo_finding.cwe = cwe
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
-        dojo_finding.cvssv3 = cvssv3
+        cvss_data = parse_cvss_data(cvssv3)
+        if cvss_data:
+            dojo_finding.cvssv3 = cvss_data.get("vector")
+            dojo_finding.cvssv3_score = cvss_data.get("score")
 
     return dojo_finding
 
