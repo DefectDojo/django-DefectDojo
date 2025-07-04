@@ -1175,7 +1175,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "dojo.api_v2.exception_handler.custom_exception_handler",
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'dojo.authorization.role_based_rate_throttle.RoleBasedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': THROTTLE_ANON,
