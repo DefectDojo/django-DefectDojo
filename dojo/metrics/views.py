@@ -160,7 +160,7 @@ simple metrics for easy reporting
 """
 
 
-@cache_page(60 * 15)  # cache for 15 minutes
+@cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def simple_metrics(request):
     page_name = _("Simple Metrics")
@@ -747,7 +747,7 @@ and root can view others metrics
 
 
 # noinspection DjangoOrm
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)

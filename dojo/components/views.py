@@ -5,7 +5,10 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
+from django.views.decorators.cache import cache_page
+from django.conf import settings
 
+@cache_page(settings.CACHE_PAGE_TIME)
 def components(request):
     add_breadcrumb(title="Components", top_level=True, request=request)
     

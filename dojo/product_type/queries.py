@@ -1,4 +1,5 @@
 import json
+import re
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
 
@@ -104,10 +105,8 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
     product_obj = Product.objects.get(id=product)
     product_type_obj = Product_Type.objects.get(id=product_type)
     risk_rule_map = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])
-    product_type_prefix_key = (
-        lambda prefix: prefix[0] if prefix and prefix[0] in risk_rule_map else "DEFAULT"
-    )(product_type_obj.name.split(" - "))
-    type_contacts = rule["type_contacts"][risk_rule_map[product_type_prefix_key]]
+    prefix_math = re.match(r"" + settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1], product_type_obj.name)
+    type_contacts = rule["type_contacts"][risk_rule_map[prefix_math.group(1) if prefix_math else "DEFAULT"]]
     contacts_list = type_contacts["users"]
 
     if user.is_superuser:
