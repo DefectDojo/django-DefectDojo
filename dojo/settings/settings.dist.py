@@ -526,6 +526,7 @@ env = environ.FileAwareEnv(
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
     # Redis
     DD_USE_CACHE_REDIS=(bool, False),
+    DD_CACHE_PAGE_TIME=(int, 60 * 5),  # 5 minutes
 
     # Cors
     DD_CORS_ENABLED=(bool, False),
@@ -2423,6 +2424,8 @@ if USE_CACHE_REDIS:
             "OPTIONS": OPTIONS_CACHE,
         }
     }
+
+CACHE_PAGE_TIME = env("DD_CACHE_PAGE_TIME")
 
 # ------------------------------------------------------------------------------
 # Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>

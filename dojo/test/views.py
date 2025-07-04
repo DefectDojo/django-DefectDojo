@@ -406,7 +406,7 @@ def copy_test(request, tid):
     })
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def test_calendar(request):
 
