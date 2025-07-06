@@ -1287,41 +1287,67 @@ class FindingsTest(BaseClass.BaseClassTest):
             result = self.client.patch(self.url + "2/", data={"cvssv3": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "cvssv3_score": 3})
             self.assertEqual(result.status_code, status.HTTP_200_OK)
             finding = Finding.objects.get(id=2)
+            # valid so vector must be set and score calculated does not ovewrite the score provided by us/the report
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+            self.assertEqual(3.0, finding.cvssv3_score)
+
+        with self.subTest(i=1):
+            result = self.client.patch(self.url + "5/", data={"cvssv3": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"})
+            self.assertEqual(result.status_code, status.HTTP_200_OK)
+            finding = Finding.objects.get(id=5)
             # valid so vector must be set and score calculated
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual(8.8, finding.cvssv3_score)
 
-        with self.subTest(i=1):
+        with self.subTest(i=2):
             # extra slash makes it invalid
             result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/", "cvssv3_score": 3})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
             finding = Finding.objects.get(id=3)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
-            # invalid vector, so no calculated score and no score stored
-            self.assertEqual(None, finding.cvssv3)
-            self.assertEqual(None, finding.cvssv3_score)
-
-        with self.subTest(i=2):
-            # no CVSS version prefix makes it invalid
-            result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "cvssv3_score": 4})
-            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            finding = Finding.objects.get(id=3)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"])
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
             self.assertEqual(None, finding.cvssv3_score)
 
         with self.subTest(i=3):
+            # no CVSS version prefix makes it invalid
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "cvssv3_score": 4})
+            self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
+            finding = Finding.objects.get(id=3)
+            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"])
+            # invalid vector, so no calculated score and no score stored
+            self.assertEqual(None, finding.cvssv3)
+            self.assertEqual(None, finding.cvssv3_score)
+
+        with self.subTest(i=4):
             # CVSS4 version makes it invalid
             result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "cvssv3_score": 5})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
             self.assertEqual(None, finding.cvssv3_score)
 
         with self.subTest(i=4):
+            # CVSS4 version valid
+            result = self.client.patch(self.url + "3/", data={"cvssv4": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", "cvssv4_score": 5})
+            self.assertEqual(result.status_code, status.HTTP_200_OK)
+            finding = Finding.objects.get(id=3)
+            # invalid vector, so no calculated score and our provided score is stored (not overwritten)
+            self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", finding.cvssv4)
+            self.assertEqual(5.0, finding.cvssv4_score)
+
+        with self.subTest(i=14):
+            # CVSS4 version valid, calculate score
+            result = self.client.patch(self.url + "3/", data={"cvssv4": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N"})
+            self.assertEqual(result.status_code, status.HTTP_200_OK)
+            finding = Finding.objects.get(id=3)
+            # invalid vector, so no calculated score and our provided score is stored (not overwritten)
+            self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", finding.cvssv4)
+            self.assertEqual(5.0, finding.cvssv4_score)
+
+        with self.subTest(i=5):
             # CVSS2 style vector makes not supported
             result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/Au:N/C:P/I:P/A:P", "cvssv3_score": 6})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1331,31 +1357,31 @@ class FindingsTest(BaseClass.BaseClassTest):
             self.assertEqual(None, finding.cvssv3)
             self.assertEqual(None, finding.cvssv3_score)
 
-        with self.subTest(i=5):
+        with self.subTest(i=6):
             # CVSS2 prefix makes it invalid
             result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P", "cvssv3_score": 7})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
             self.assertEqual(None, finding.cvssv3_score)
 
-        with self.subTest(i=6):
+        with self.subTest(i=7):
             # try to put rubbish in there
             result = self.client.patch(self.url + "4/", data={"cvssv3": "happy little vector", "cvssv3_score": 3})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"])
             finding = Finding.objects.get(id=4)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
             self.assertEqual(None, finding.cvssv3_score)
 
-        with self.subTest(i=7):
+        with self.subTest(i=8):
             # CVSS4 prefix makes it invalid
-            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/S:U/C:H/I:H/A:H", "cvssv3_score": 7})
+            result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", "cvssv3_score": 7})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["No valid CVSS vectors found by cvss.parse_cvss_from_text()"])
+            self.assertEqual(result.json()["cvssv3"], ["CVSS(4) vector vannot be stored in the cvss3 field. Use the cvss4 fields."])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)

@@ -2743,7 +2743,7 @@ class Finding(models.Model):
             try:
                 cvss_data = parse_cvss_data(self.cvssv4)
                 if cvss_data:
-                    self.cvssv4 = cvss_data.get("cvssv4_vector")
+                    self.cvssv4 = cvss_data.get("cvssv4")
                     if not self.cvssv4_score:
                         self.cvssv4_score = cvss_data.get("cvssv4_score")
 

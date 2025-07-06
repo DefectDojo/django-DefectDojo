@@ -292,16 +292,16 @@
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
-                                    {% if finding.cvssv3 %}
+                                    {{ finding.severity_display }}
+                                    {% if finding.cvssv4_score %}
+                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                            data-content="{{ finding.cvssv4 }}">
+                                        ({{ finding.cvssv4_score }}{% if finding.cvssv3_score %},{% else %}){% endif %}</i>
+                                    {% endif %}
+                                    {% if finding.cvssv3_score %}
                                         <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                             data-content="{{ finding.cvssv3 }}">
-                                    {% endif %}
-                                    {{ finding.severity_display }}
-                                    {% if finding.cvssv3_score %}
-                                        ({{ finding.cvssv3_score }})
-                                    {% endif %}
-                                    {% if finding.cvssv3 %}
-                                        </i>
+                                        {% if not finding.cvssv4_score %}({% endif %}{{ finding.cvssv3_score }})</i>
                                     {% endif %}
                                 {% else %}
                                     Unknown
@@ -760,7 +760,7 @@
                     </div>
                 {% endif %}
             </span>
-        </div>  
+        </div>
     {% endif %}
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
     <form method="post" style="display: none" id="related_action">

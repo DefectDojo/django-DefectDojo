@@ -2,7 +2,6 @@ import logging
 import re
 from collections.abc import Callable
 
-import cvss.parser
 from cvss import CVSS2, CVSS3, CVSS4
 from django.core.exceptions import ValidationError
 
@@ -28,7 +27,8 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
     logger.debug("cvss3_validator called with value: %s", value)
-    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
+    from dojo.utils import parse_cvss_from_text
+    cvss_vectors = parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
 
@@ -48,13 +48,14 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
 
     # Explicitly raise an error if no CVSS vectors are found,
     # to avoid 'NoneType' errors during severity processing later.
-    msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
+    msg = "No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"
     raise exception_class(msg)
 
 
 def cvss4_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
     logger.debug("cvss4_validator called with value: %s", value)
-    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
+    from dojo.utils import parse_cvss_from_text
+    cvss_vectors = parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
 
@@ -74,5 +75,5 @@ def cvss4_validator(value: str | list[str], exception_class: Callable = Validati
 
     # Explicitly raise an error if no CVSS vectors are found,
     # to avoid 'NoneType' errors during severity processing later.
-    msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
+    msg = "No valid CVSS4 vectors found by cvss.parse_cvss_from_text()"
     raise exception_class(msg)

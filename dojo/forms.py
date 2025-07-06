@@ -1354,6 +1354,9 @@ class FindingForm(forms.ModelForm):
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1385,7 +1388,7 @@ class FindingForm(forms.ModelForm):
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvssv3",
-                   "cvssv3_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
+                   "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
                    "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified", "false_p", "duplicate",
                    "out_of_scope", "risk_accept", "under_defect_review")
 
