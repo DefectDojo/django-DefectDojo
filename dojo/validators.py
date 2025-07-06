@@ -27,7 +27,7 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
 
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
-    logger.error("cvss3_validator called with value: %s", value)
+    logger.debug("cvss3_validator called with value: %s", value)
     cvss_vectors = cvss.parser.parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
@@ -37,8 +37,33 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
             return
 
         if isinstance(vector_obj, CVSS4):
-            # CVSS4 is not supported yet by the parse_cvss_from_text function, but let's prepare for it anyway: https://github.com/RedHatProductSecurity/cvss/issues/53
-            msg = "Unsupported CVSS(4) version detected."
+            msg = "CVSS(4) vector vannot be stored in the cvss3 field. Use the cvss4 fields."
+            raise exception_class(msg)
+        if isinstance(vector_obj, CVSS2):
+            msg = "Unsupported CVSS(2) version detected."
+            raise exception_class(msg)
+
+        msg = "Unsupported CVSS version detected."
+        raise exception_class(msg)
+
+    # Explicitly raise an error if no CVSS vectors are found,
+    # to avoid 'NoneType' errors during severity processing later.
+    msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
+    raise exception_class(msg)
+
+
+def cvss4_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
+    logger.debug("cvss4_validator called with value: %s", value)
+    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
+    if len(cvss_vectors) > 0:
+        vector_obj = cvss_vectors[0]
+
+        if isinstance(vector_obj, CVSS4):
+            # all is good
+            return
+
+        if isinstance(vector_obj, CVSS3):
+            msg = "CVSS(3) vector vannot be stored in the cvss3 field. Use the cvss3 fields."
             raise exception_class(msg)
         if isinstance(vector_obj, CVSS2):
             msg = "Unsupported CVSS(2) version detected."

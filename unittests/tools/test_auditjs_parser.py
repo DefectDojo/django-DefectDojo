@@ -45,14 +45,17 @@ class TestAuditJSParser(DojoTestCase):
             # Tests for vulnerabilities with CVSS V4 vector
             self.assertEqual("dompurify", findings[0].component_name)
             self.assertEqual("2.5.7", findings[0].component_version)
-            self.assertEqual(6.4, findings[0].cvssv3_score)
+            self.assertEqual(None, findings[0].cvssv3_score)
+            self.assertEqual(6.4, findings[0].cvssv4_score)
             self.assertEqual("Medium", findings[0].severity)
-            self.assertEqual(2.1, findings[1].cvssv3_score)
+            self.assertEqual(None, findings[1].cvssv3_score)
+            self.assertEqual(2.1, findings[1].cvssv4_score)
             self.assertEqual("Low", findings[1].severity)
             self.assertEqual("CVE-2024-47875", findings[0].unique_id_from_tool)
             self.assertIn("DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. DOMpurify was...",
                 findings[0].description)
-            self.assertIn("\nCVSS V4 Vector:", findings[0].description)
+            self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:L/SI:H/SA:L", findings[0].cvssv4)
+            self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N", findings[1].cvssv4)
             self.assertEqual("[CVE-2024-47875] CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
                 findings[0].title)
             self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
@@ -64,6 +67,7 @@ class TestAuditJSParser(DojoTestCase):
             self.assertEqual("connect", findings[2].component_name)
             self.assertEqual("2.6.0", findings[2].component_version)
             self.assertEqual(5.4, findings[2].cvssv3_score)
+            self.assertEqual(None, findings[2].cvssv4_score)
             self.assertEqual("Medium", findings[2].severity)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N", findings[2].cvssv3)
             self.assertEqual("7df31426-09a2-4b5f-a0ab-acc699023c57", findings[2].unique_id_from_tool)
@@ -80,7 +84,8 @@ class TestAuditJSParser(DojoTestCase):
             # Tests for vulnerabilities with CVSS V2 vector
             self.assertEqual("qs", findings[7].component_name)
             self.assertEqual("0.5.1", findings[7].component_version)
-            self.assertEqual(5, findings[7].cvssv3_score)
+            self.assertEqual(None, findings[7].cvssv3_score)
+            self.assertEqual(None, findings[7].cvssv4_score)
             self.assertEqual("Medium", findings[7].severity)
             self.assertEqual("3a3bf289-21dc-4c84-a46e-39280f80bb01", findings[7].unique_id_from_tool)
             self.assertIn("The qs module before 1.0.0 in Node.js does not call the compact function for array data, which allows...", findings[7].description)

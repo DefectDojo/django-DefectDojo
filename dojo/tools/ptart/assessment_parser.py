@@ -1,5 +1,6 @@
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 
 class PTARTAssessmentParser:
@@ -43,10 +44,18 @@ class PTARTAssessmentParser:
             finding.vuln_id_from_tool = hit.get("id")
             finding.cve = hit.get("id")
 
-        # Clean up and parse the CVSS vector
-        cvss_vector = ptart_tools.parse_cvss_vector(hit, self.cvss_type)
+        cvss_vector = hit.get("cvss_vector", None)
+        cvss_score = hit.get("cvss_score", None)
         if cvss_vector:
-            finding.cvssv3 = cvss_vector
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                finding.cvssv3 = cvss_data["cvssv3"]
+                finding.cvssv4 = cvss_data["cvssv4"]
+                # The score in the report can be different from what the cvss library calulates
+                if cvss_data["major_version"] == 3:
+                    finding.cvssv3_score = cvss_score
+                if cvss_data["major_version"] == 4:
+                    finding.cvssv4_score = cvss_score
 
         if "labels" in hit:
             finding.unsaved_tags = hit["labels"]

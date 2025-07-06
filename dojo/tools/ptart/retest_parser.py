@@ -1,5 +1,6 @@
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 
 def generate_retest_hit_title(hit, original_hit):
@@ -16,13 +17,8 @@ def generate_retest_hit_title(hit, original_hit):
 
 
 class PTARTRetestParser:
-    def __init__(self):
-        self.cvss_type = None
-
     def get_test_data(self, tree):
-        self.cvss_type = None
         if "retests" in tree:
-            self.cvss_type = tree.get("cvss_type", None)
             retests = tree["retests"]
         else:
             return []
@@ -82,12 +78,18 @@ class PTARTRetestParser:
             finding.vuln_id_from_tool = original_hit.get("id")
             finding.cve = original_hit.get("id")
 
-        cvss_vector = ptart_tools.parse_cvss_vector(
-            original_hit,
-            self.cvss_type,
-        )
+        cvss_vector = original_hit.get("cvss_vector", None)
+        cvss_score = original_hit.get("cvss_score", None)
         if cvss_vector:
-            finding.cvssv3 = cvss_vector
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                finding.cvssv3 = cvss_data["cvssv3"]
+                finding.cvssv4 = cvss_data["cvssv4"]
+                # The score in the report can be different from what the cvss library calulates
+                if cvss_data["major_version"] == 3:
+                    finding.cvssv3_score = cvss_score
+                if cvss_data["major_version"] == 4:
+                    finding.cvssv4_score = cvss_score
 
         if "labels" in original_hit:
             finding.unsaved_tags = original_hit["labels"]

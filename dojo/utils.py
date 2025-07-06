@@ -15,14 +15,13 @@ from pathlib import Path
 
 import bleach
 import crum
-import cvss.parser
 import hyperlink
 import vobject
 from asteval import Interpreter
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cvss.cvss3 import CVSS3
+from cvss import CVSS2, CVSS3, CVSS4, CVSSError
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
@@ -2669,18 +2668,84 @@ def generate_file_response_from_file_path(
     return response
 
 
+# TEMPORARY: Local implementation until the upstream PR is merged & released: https://github.com/RedHatProductSecurity/cvss/pull/75
+def parse_cvss_from_text(text):
+    """
+    Parses CVSS2, CVSS3, and CVSS4 vectors from arbitrary text and returns a list of CVSS objects.
+
+    Parses text for substrings that look similar to CVSS vector
+    and feeds these matches to CVSS constructor.
+
+    Args:
+        text (str): arbitrary text
+
+    Returns:
+        A list of CVSS objects.
+
+    """
+    # Looks for substrings that resemble CVSS2, CVSS3, or CVSS4 vectors.
+    # CVSS3 and CVSS4 vectors start with a 'CVSS:x.x/' prefix and are matched by the optional non-capturing group.
+    # CVSS2 vectors do not include a prefix and are matched by raw vector pattern only.
+    # Minimum total match length is 26 characters to reduce false positives.
+    matches = re.compile(r"(?:CVSS:[3-4]\.\d/)?[A-Za-z:/]{26,}").findall(text)
+
+    cvsss = set()
+    for match in matches:
+        try:
+            if match.startswith("CVSS:4."):
+                cvss = CVSS4(match)
+            elif match.startswith("CVSS:3."):
+                cvss = CVSS3(match)
+            else:
+                cvss = CVSS2(match)
+
+            cvsss.add(cvss)
+        except (CVSSError, KeyError):
+            pass
+
+    return list(cvsss)
+
+
 def parse_cvss_data(cvss_vector_string: str) -> dict:
     if not cvss_vector_string:
         return {}
 
-    vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
-    if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+    vectors = parse_cvss_from_text(cvss_vector_string)
+    if len(vectors) > 0:
+        vector = vectors[0]
+        # For CVSS2, environmental score is at index 2
+        # For CVSS3, environmental score is at index 2
+        # For CVSS4, only base score is available (at index 0)
+        # These CVSS2/3/4 objects do not have a version field (only a minor_version field)
+        major_version = cvssv2 = cvssv2_score = cvssv3 = cvssv3_score = cvssv4 = cvssv4_score = severity = None
+        if type(vector) is CVSS4:
+            major_version = 4
+            cvssv4 = vector.clean_vector()
+            cvssv4_score = vector.scores()[0]
+            severity = vector.severities()[0]
+        elif type(vector) is CVSS3:
+            major_version = 3
+            cvssv3 = vector.clean_vector()
+            cvssv3_score = vector.scores()[2]
+            severity = vector.severities()[0]
+        elif type(vector) is CVSS2:
+            # CVSS2 is not supported, but we return it anyway to allow parser to use the severity or score for other purposes
+            cvssv2 = vector.clean_vector()
+            cvssv2_score = vector.scores()[2]
+            severity = vector.severities()[0]
+            major_version = 2
+
         return {
-            "vector": vectors[0].clean_vector(),
-            "score": vectors[0].scores()[2],  # environmental score is the most detailed one
-            "severity":  vectors[0].severities()[0],
+            "major_version": major_version,
+            "cvssv2": cvssv2,
+            "cvssv2_score": cvssv2_score,
+            "cvssv3": cvssv3,
+            "cvssv3_score": cvssv3_score,
+            "cvssv4": cvssv4,
+            "cvssv4_score": cvssv4_score,
+            "severity": severity,
         }
-    logger.debug("No valid CVSS3 vector found in %s", cvss_vector_string)
+    logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
 
 

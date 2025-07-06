@@ -43,7 +43,7 @@ from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
-from dojo.validators import cvss3_validator
+from dojo.validators import cvss3_validator, cvss4_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2356,6 +2356,17 @@ class Finding(models.Model):
                                         help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
+    cvssv4 = models.TextField(validators=[cvss4_validator],
+                              max_length=117,
+                              null=True,
+                              verbose_name=_("CVSS v4 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 4 (CVSSv4) score associated with this finding."))
+    cvssv4_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name=_("CVSSv4 score"),
+                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+
     url = models.TextField(null=True,
                            blank=True,
                            editable=False,
@@ -2712,19 +2723,33 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         # Synchronize cvssv3 score using cvssv3 vector
+
         if self.cvssv3:
             try:
-
                 cvss_data = parse_cvss_data(self.cvssv3)
                 if cvss_data:
-                    self.cvssv3 = cvss_data.get("vector")
-                    self.cvssv3_score = cvss_data.get("score")
+                    self.cvssv3 = cvss_data.get("cvssv3")
+                    if not self.cvssv3_score:
+                        self.cvssv3_score = cvss_data.get("cvssv3_score")
 
             except Exception as ex:
                 logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
                 # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
                 if self.pk is None:
                     self.cvssv3 = None
+
+        # behaviour for CVVS4 is slightly different. Extracting thsi into a method would lead to probabl hard to read code
+        if self.cvssv4:
+            try:
+                cvss_data = parse_cvss_data(self.cvssv4)
+                if cvss_data:
+                    self.cvssv4 = cvss_data.get("cvssv4_vector")
+                    if not self.cvssv4_score:
+                        self.cvssv4_score = cvss_data.get("cvssv4_score")
+
+            except Exception as ex:
+                logger.warning("Can't compute cvssv4 score for finding id %i. Invalid cvssv4 vector found: '%s'. Exception: %s.", self.id, self.cvssv4, ex)
+                self.cvssv4 = None
 
         self.set_hash_code(dedupe_option)
 

@@ -255,8 +255,8 @@ class TrivyParser:
                                 cvssv3_string = dict(cvssclass).get("V3Vector")
                                 cvss_data = parse_cvss_data(cvssv3_string)
                                 if cvss_data:
-                                    cvssv3 = cvss_data.get("vector")
-                                    cvssv3_score = cvss_data.get("score")
+                                    cvssv3 = cvss_data.get("cvssv3")
+                                    cvssv3_score = cvss_data.get("cvssv3_score")
                             elif cvssclass.get("V3Score") is not None:
                                 cvssv3_score = cvssclass.get("V3Score")
                             elif cvssclass.get("V2Score") is not None:
