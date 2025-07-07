@@ -14,7 +14,6 @@ import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
-from cvss import CVSS3
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -43,6 +42,8 @@ from polymorphic.models import PolymorphicModel
 from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+
+from dojo.validators import cvss3_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2084,8 +2085,6 @@ class Test(models.Model):
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
-    estimated_time = models.TimeField(null=True, blank=True, editable=False)
-    actual_time = models.TimeField(null=True, blank=True, editable=False)
     percent_complete = models.IntegerField(null=True, blank=True,
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
@@ -2346,12 +2345,11 @@ class Finding(models.Model):
                                 verbose_name=_("KEV Date Added"),
                                 help_text=_("The date the vulnerability was added to the KEV catalog."),
                                 validators=[MaxValueValidator(tomorrow)])
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex],
+    cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw."))
+                              verbose_name=_("CVSS v3 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
                                         verbose_name=_("CVSSv3 score"),
@@ -2696,7 +2694,6 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-
         from dojo.finding import helper as finding_helper
 
         # if not isinstance(self.date, (datetime, date)):
@@ -2717,11 +2714,17 @@ class Finding(models.Model):
         # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
             try:
-                cvss_object = CVSS3(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_object.scores()[2]
+
+                cvss_data = parse_cvss_data(self.cvssv3)
+                if cvss_data:
+                    self.cvssv3 = cvss_data.get("vector")
+                    self.cvssv3_score = cvss_data.get("score")
+
             except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+                logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
+                # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
+                if self.pk is None:
+                    self.cvssv3 = None
 
         self.set_hash_code(dedupe_option)
 
@@ -3534,8 +3537,8 @@ class Finding_Template(models.Model):
                            blank=False,
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
+    cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
@@ -3891,8 +3894,8 @@ class JIRA_Instance(models.Model):
     high_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: High"))
     critical_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Critical"))
     finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_("JIRA resolution names (comma-separated values) that maps to an Accepted Finding"))
-    false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_("JIRA resolution names (comma-separated values) that maps to a False Positive Finding"))
+    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution."))
+    false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
@@ -4651,7 +4654,11 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 
-from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
+from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
+    calculate_grade,
+    parse_cvss_data,
+    to_str_typed,
+)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)

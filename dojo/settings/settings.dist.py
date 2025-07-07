@@ -226,6 +226,7 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    DD_JIRA_DESCRIPTION_MAX_LENGTH=(int, 32767),
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
@@ -1346,6 +1347,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
+    "Cycognito Scan": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1643,6 +1645,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
@@ -1836,6 +1839,7 @@ VULNERABILITY_URLS = {
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "GO-": "https://pkg.go.dev/vuln/",  # e.g. https://pkg.go.dev/vuln/GO-2025-3703
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
+    "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953

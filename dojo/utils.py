@@ -15,21 +15,22 @@ from pathlib import Path
 
 import bleach
 import crum
+import cvss.parser
 import hyperlink
 import vobject
 from asteval import Interpreter
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cvss.cvss3 import CVSS3
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models import Case, Count, IntegerField, Q, Subquery, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -2668,18 +2669,24 @@ def generate_file_response_from_file_path(
     return response
 
 
-def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
-    TAG_PATTERN = re.compile(r'[ ,\'"]')
-    error_messages = []
+def parse_cvss_data(cvss_vector_string: str) -> dict:
+    if not cvss_vector_string:
+        return {}
 
-    if isinstance(value, list):
-        error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
-    elif isinstance(value, str):
-        if TAG_PATTERN.search(value):
-            error_messages.append(f"Invalid tag: '{value}'. Tags should not contain spaces, commas, or quotes.")
-    else:
-        error_messages.append(f"Value must be a string or list of strings: {value} - {type(value)}.")
+    vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
+    if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+        return {
+            "vector": vectors[0].clean_vector(),
+            "score": vectors[0].scores()[2],  # environmental score is the most detailed one
+            "severity":  vectors[0].severities()[0],
+        }
+    logger.debug("No valid CVSS3 vector found in %s", cvss_vector_string)
+    return {}
 
-    if error_messages:
-        logger.debug(f"Tag validation failed: {error_messages}")
-        raise exception_class(error_messages)
+
+def build_count_subquery(model_qs: QuerySet, group_field: str) -> Subquery:
+    """Return a Subquery that yields one aggregated count per `group_field`."""
+    return Subquery(
+        model_qs.values(group_field).annotate(c=Count("*")).values("c")[:1],  # one row per group_field
+        output_field=IntegerField(),
+    )

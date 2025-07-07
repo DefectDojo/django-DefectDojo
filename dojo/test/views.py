@@ -150,7 +150,7 @@ class ViewTest(View):
         findings = Finding.objects.filter(test=test).order_by("numerical_severity")
         filter_string_matching = get_system_setting("filter_string_matching", False)
         finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
-        findings = finding_filter_class(request.GET, queryset=findings)
+        findings = finding_filter_class(request.GET, pid=test.engagement.product.id, queryset=findings)
         paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix="findings")
 
         return {
