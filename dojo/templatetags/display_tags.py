@@ -793,6 +793,8 @@ def vulnerability_url(vulnerability_id):
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
+            if key == "JVNDB-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.split("-")[1]) + "/" + str(vulnerability_id) + ".html"
             if "&&" in settings.VULNERABILITY_URLS[key]:
                 # Process specific keys specially if need
                 if key in {"CAPEC", "CWE"}:
