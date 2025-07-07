@@ -30,6 +30,7 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -438,7 +439,7 @@ class ListFindings(View, BaseListFindings):
             add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
         return request, context
-
+    @vary_on_cookie
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id

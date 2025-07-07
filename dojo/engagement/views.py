@@ -197,6 +197,7 @@ def get_test_counts(engagements):
     }
 
 @cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def engagements(request, view):
 
     if not view:
