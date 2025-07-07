@@ -288,6 +288,14 @@ else
     #     echo "Error: Zap integration test failed"; exit 1
     # fi
 
+    test="Notifications tests"
+    echo "Running: $test"
+    if python3 tests/notifications_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
     test="Tool Config integration tests"
     echo "Running: $test"
     if python3 tests/tool_config.py ; then
