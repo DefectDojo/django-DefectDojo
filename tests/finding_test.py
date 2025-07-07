@@ -198,7 +198,7 @@ class FindingTest(BaseTestCase):
             expected_cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             expected_cvssv3_score="2",
             expect_success=False,
-            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+            error_message="No valid CVSS3 vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
@@ -209,7 +209,7 @@ class FindingTest(BaseTestCase):
             expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
             expected_cvssv3_score="3",
             expect_success=False,
-            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+            error_message="No valid CVSS3 vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
@@ -220,7 +220,7 @@ class FindingTest(BaseTestCase):
             expected_cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
             expected_cvssv3_score="4",
             expect_success=False,
-            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+            error_message="No valid CVSS3 vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
