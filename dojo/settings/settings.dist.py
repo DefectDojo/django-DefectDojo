@@ -713,7 +713,7 @@ if USE_DB_POOL:
     DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
-    DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout=10000"
+    DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
 
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND

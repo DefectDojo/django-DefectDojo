@@ -80,8 +80,6 @@ function getContact(contact){
 
 function getProductOptions(productTypeId, productElement, query){
     const $select = $('#id_destination_product');
-    $select.empty();
-    $select.selectpicker();
     let timeout = null;
     query = {"name": query};
     clearTimeout(timeout);
@@ -91,13 +89,17 @@ function getProductOptions(productTypeId, productElement, query){
             type: "GET",
             data: query,
             success: function(response) {
-                response.data.forEach(function(product) {
-                    addOption(productElement, product.id, product.name);
-                });
-                addOption(productElement, '', '...');
-                refreshSelectPicker();
                 $select.empty();
-                $select.selectpicker();
+                response.data.forEach(function(product) {
+                    $select.append(new Option(product.name, product.id));
+                });
+                $select.append(new Option('...', ''));
+                $select.selectpicker('refresh');
+                if (response.data.length === 1) {
+                    $select.trigger('change');               
+                    $select.trigger('changed.bs.select'); 
+                }
+
             },
             error: function(error) {
                 console.error(error);
