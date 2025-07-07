@@ -271,7 +271,7 @@ class ProductTest(BaseTestCase):
         # cvssv3 field
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element(By.ID, "id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding")
+        driver.find_element(By.ID, "id_description").send_keys(Keys.TAB, "This is just a Test Case Finding")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("REF-1\nREF-2")
         # Finding Mitigation
