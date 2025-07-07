@@ -166,43 +166,53 @@ Good example:
        finding.cwe = data["mykey"]
 ```
 
-### Do not parse CVSS by hand (vector, score or severity)
+### Parsing of CVSS vectors
 
-Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
-For parser, we rely on module `cvss`. But we also have a helper method to validate the vector and extract the base score and severity from it.
+Data can have `CVSS` vectors or scores. Defect Dojo use the `cvss` module provided by RedHat Security.
+There's also a helper method to validate the vector and extract the base score and severity from it.
 
 ```python
-from dojo.utils import parse_cvss_data
-cvss_data = parse_cvss_data("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
-if cvss_data:
-    finding.cvssv3 = cvss_data.get("vector")
-    finding.cvssv3_score = cvss_data.get("score")
-    finding.severity = cvss_data.get("severity")  # if your tool does generate severity
-```
+    from dojo.utils import parse_cvss_data
 
-If you need more manual processing, you can parse the `CVSS3` vector directly.
+    cvss_vector = <get CVSS3 or CVSS4 vector from the report>
+    cvss_data = parse_cvss_data(cvss_vector)
+    if cvss_data:
+        finding.severity = cvss_data["severity"]
+        finding.cvssv3 = cvss_data["cvssv3"]
+        finding.cvssv3_score = cvss_data["cvssv3_score"]
+        finding.cvssv4 = cvss_data["cvssv4"]
+        finding.cvssv4_score = cvss_data["cvssv4_score"]
+```
+Not all values have to be used as scan reports usuyall provide their own value for `severity`.
+And sometimes also for `cvss_score`. Defect Dojo will not overwrite any `cvss3_score` or `cvss4_score`.
+If no score is set, Defect Dojo will use the `cvss` library to calculate the score.
+The response also has the detected major version of the CVSS vector in `cvss_data["major_version"]`.
+
+
+If you need more manual processing, you can parse the `CVSS` vector directly.
 
 Example of use:
 
 ```python
-import cvss.parser
-from cvss import CVSS2, CVSS3
+    import cvss.parser
+    from cvss import CVSS2, CVSS3, CVSS4
 
-vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
-if len(vectors) > 0 and type(vectors[0]) is CVSS3:
-    print(vectors[0].severities())  # this is the 3 severities
+    # TEMPORARY: Use Defect Dojo implementation of `parse_cvss_from_text` white waiting for https://github.com/RedHatProductSecurity/cvss/pull/75 to be released
+    vectors = dojo.utils.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
+        if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+            print(vectors[0].severities())  # this is the 3 severities
 
-    cvssv3 = vectors[0].clean_vector()
-    severity = vectors[0].severities()[0]
-    vectors[0].compute_base_score()
-    cvssv3_score = vectors[0].scores()[0]
-    finding.severity = severity
-    finding.cvssv3_score = cvssv3_score
+            cvssv3 = vectors[0].clean_vector()
+            severity = vectors[0].severities()[0]
+            vectors[0].compute_base_score()
+            cvssv3_score = vectors[0].scores()[0]
+            finding.severity = severity
+            finding.cvssv3_score = cvssv3_score
 ```
 
-Bad example (DIY):
+Do not do something like this:
 
-```python
+```
     def get_severity(self, cvss, cvss_version="2.0"):
         cvss = float(cvss)
         cvss_version = float(cvss_version[:1])
