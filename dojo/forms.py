@@ -133,6 +133,22 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
 EFFORT_FOR_FIXING_INVALID_CHOICE = _("Select valid choice: Low,Medium,High")
 
 
+class BulletListDisplayWidget(forms.Widget):
+    def __init__(self, urls_dict=None, *args, **kwargs):
+        self.urls_dict = urls_dict or {}
+        super().__init__(*args, **kwargs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if not self.urls_dict:
+            return ""
+
+        html = '<ul style="margin: 0; padding-left: 20px;">'
+        for url, text in self.urls_dict.items():
+            html += f'<li style="list-style-type: disc;"><a href="{url}" target="_blank"><i class="fa fa-arrow-up-right-from-square" style="margin-right: 5px;"></i>{text}</a></li>'
+        html += "</ul>"
+        return mark_safe(html)
+
+
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super().render(name, *args, **kwargs)
@@ -1125,8 +1141,10 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1153,7 +1171,7 @@ class AddFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv4", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
+    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv3_Score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
                    "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "verified", "false_p", "duplicate", "out_of_scope",
                    "risk_accepted", "under_defect_review")
 
@@ -1210,8 +1228,21 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv4 = forms.CharField(max_length=255, required=False)
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget({
+            "https://www.first.org/cvss/calculator/3-0": "CVSS3 Calculator by FIRST",
+            "https://www.first.org/cvss/calculator/4-0": "CVSS4 Calculator by FIRST",
+            "https://www.metaeffekt.com/security/cvss/calculator/": "CVSS2/3/4 Calculator by Metaeffekt",
+        }),
+        required=False,
+        disabled=True)
+
+    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1238,9 +1269,9 @@ class AdHocFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv4", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
-                   "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                   "risk_accepted", "under_defect_review", "sla_start_date", "sla_expiration_date")
+    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation",
+                   "impact", "request", "response", "steps_to_reproduce", "severity_justification", "endpoints", "endpoints_to_add", "references",
+                   "active", "verified", "false_p", "duplicate", "out_of_scope", "risk_accepted", "under_defect_review", "sla_start_date", "sla_expiration_date")
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop("req_resp")
@@ -1293,8 +1324,10 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1355,10 +1388,10 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
 
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
