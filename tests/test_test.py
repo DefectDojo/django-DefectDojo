@@ -162,7 +162,9 @@ class TestUnitTest(BaseTestCase):
         # cvss
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element(By.ID, "id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding2")
+        # Note item [0] is a meta tag on the top of the page with name "description", so we use [1]
+        driver.execute_script("document.getElementsByName('description')[1].style.display = 'inline'")
+        driver.find_elements(By.NAME, "description")[1].send_keys(Keys.TAB, "This is just a test finding")
         # Finding Mitigation
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
         # Any Text written to textarea automatically reflects in Editor field.

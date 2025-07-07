@@ -150,8 +150,9 @@ class FindingTest(BaseTestCase):
         # Set cvssv3 value and score
         driver.find_element(By.ID, "id_cvssv3").clear()
         driver.find_element(By.ID, "id_cvssv3").send_keys(cvssv3_value)
-        driver.find_element(By.ID, "id_cvssv3_score").clear()
-        driver.find_element(By.ID, "id_cvssv3_score").send_keys(str(cvssv3_score))
+        if cvssv3_score:
+            driver.find_element(By.ID, "id_cvssv3_score").clear()
+            driver.find_element(By.ID, "id_cvssv3_score").send_keys(str(cvssv3_score))
         # Submit the form
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
 
@@ -174,6 +175,16 @@ class FindingTest(BaseTestCase):
         self._edit_finding_cvssv3_and_assert(
             cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             cvssv3_score="1",
+            expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="1",
+            expect_success=True,
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_valid_vector_no_score(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score=None,
             expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             expected_cvssv3_score="8.8",
             expect_success=True,
