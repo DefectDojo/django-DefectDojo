@@ -1347,6 +1347,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
+    "Cycognito Scan": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
