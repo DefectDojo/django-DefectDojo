@@ -219,8 +219,11 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "App Vulnerable to XSS3").click()
         self.assertTrue(self.is_info_message_present(text="In order to promote a Potential Finding to a Verified Finding you must provide the following information."))
         self.assertEqual(driver.find_element(By.ID, "id_title").get_attribute("value"), "App Vulnerable to XSS3")
-        # Edit finding Description
-        driver.find_element(By.ID, "id_cvssv3_score").send_keys(Keys.TAB, Keys.TAB, "This is a promoted stub finding")
+        # finding Description
+        # Note item [0] is a meta tag on the top of the page with name "description", so we use [1]
+        driver.execute_script("document.getElementsByName('description')[1].style.display = 'inline'")
+        driver.find_elements(By.NAME, "description")[1].send_keys(Keys.TAB, "This is just a test finding")
+
         # "Click" the Done button to Edit the finding
         driver.find_element(By.ID, "submit").click()
 
