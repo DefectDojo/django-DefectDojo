@@ -123,6 +123,13 @@ FINDING_STATUS = (("verified", "Verified"),
                   ("duplicate", "Duplicate"),
                   ("out_of_scope", "Out of Scope"))
 
+CVSS_CALCULATOR_URLS = {
+        "https://www.first.org/cvss/calculator/3-0": "CVSS3 Calculator by FIRST",
+        "https://www.first.org/cvss/calculator/4-0": "CVSS4 Calculator by FIRST",
+        "https://www.metaeffekt.com/security/cvss/calculator/": "CVSS2/3/4 Calculator by Metaeffekt",
+    }
+
+
 vulnerability_ids_field = forms.CharField(max_length=5000,
     required=False,
     label="Vulnerability Ids",
@@ -1231,11 +1238,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     cvss_info = forms.CharField(
         label="CVSS",
-        widget=BulletListDisplayWidget({
-            "https://www.first.org/cvss/calculator/3-0": "CVSS3 Calculator by FIRST",
-            "https://www.first.org/cvss/calculator/4-0": "CVSS4 Calculator by FIRST",
-            "https://www.metaeffekt.com/security/cvss/calculator/": "CVSS2/3/4 Calculator by Metaeffekt",
-        }),
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
         required=False,
         disabled=True)
 
@@ -1324,6 +1327,13 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
+        required=False,
+        disabled=True)
+
     cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
     cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
@@ -1344,7 +1354,7 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvssv3",
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
                    "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
                     "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified",
                     "false_p", "duplicate", "out_of_scope", "risk_accept", "under_defect_review")
@@ -1388,6 +1398,13 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
+        required=False,
+        disabled=True)
+
     cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
     cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
@@ -1423,7 +1440,7 @@ class FindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvssv3",
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
                    "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
                    "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified", "false_p", "duplicate",
                    "out_of_scope", "risk_accept", "under_defect_review")
