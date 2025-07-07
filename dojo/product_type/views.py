@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.conf import settings
 
 from dojo.authorization.authorization import user_has_permission
@@ -90,6 +91,7 @@ def get_description_product(_request, pid):
 
 
 @cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def product_type(request):
     prod_types = get_authorized_product_types(Permissions.Product_Type_View)
     name_words = prod_types.values_list("name", flat=True)
