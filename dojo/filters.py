@@ -1975,6 +1975,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         self.set_related_object_fields(*args, **kwargs)
 
     def set_related_object_fields(self, *args: list, **kwargs: dict):
+        finding_group_query = Finding_Group.objects.all()
         if self.pid is not None:
             del self.form.fields["test__engagement__product"]
             del self.form.fields["test__engagement__product__prod_type"]
@@ -1983,6 +1984,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                 product_id=self.pid,
             ).all()
             self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
+            finding_group_query = Finding_Group.objects.filter(test__engagement__product_id=self.pid)
         else:
             self.form.fields[
                 "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
@@ -1992,7 +1994,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
         self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
@@ -2982,7 +2984,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ["id", "title", "test_type", "target_start",
                      "target_end", "notes", "percent_complete",
-                     "actual_time", "engagement", "version",
+                     "engagement", "version",
                      "branch_tag", "build_id", "commit_hash",
                      "api_scan_configuration", "scan_type"]
 

@@ -1,0 +1,1973 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2022-28391",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-28391",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://git.alpinelinux.org/aports/plain/main/busybox/0001-libbb-sockaddr2str-ensure-only-printable-characters-.patch",
+          "https://git.alpinelinux.org/aports/plain/main/busybox/0002-nslookup-sanitize-all-printed-strings-with-printable.patch",
+          "https://gitlab.alpinelinux.org/alpine/aports/-/issues/13661",
+          "https://git.alpinelinux.org/aports/plain/main/busybox/0001-libbb-sockaddr2str-ensure-only-printable-characters-.patch",
+          "https://git.alpinelinux.org/aports/plain/main/busybox/0002-nslookup-sanitize-all-printed-strings-with-printable.patch",
+          "https://gitlab.alpinelinux.org/alpine/aports/-/issues/13661"
+        ],
+        "description": "BusyBox through 1.35.0 allows remote attackers to execute arbitrary code if netstat is used to print a DNS PTR record's value to a VT compatible terminal. Alternatively, the attacker could choose to change the terminal's colors.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 8.8,
+              "exploitabilityScore": 2.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.8,
+              "exploitabilityScore": 8.6,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 8.8,
+              "exploitabilityScore": 2.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-28391",
+            "epss": 0.0719,
+            "percentile": 0.91123,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 5.620183333333334
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-28391",
+            "versionConstraint": "<= 1.35.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-28831",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-28831",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://git.busybox.net/busybox/commit/?id=f25d254dfd4243698c31a4f3153d4ac72aa9e9bd",
+          "https://lists.debian.org/debian-lts-announce/2021/04/msg00001.html",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3UDQGJRECXFS5EZVDH2OI45FMO436AC4/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/Z7ZIFKPRR32ZYA3WAA2NXFA3QHHOU6FJ/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZASBW7QRRLY5V2R44MQ4QQM4CZIDHM2U/",
+          "https://security.gentoo.org/glsa/202105-09",
+          "https://git.busybox.net/busybox/commit/?id=f25d254dfd4243698c31a4f3153d4ac72aa9e9bd",
+          "https://lists.debian.org/debian-lts-announce/2021/04/msg00001.html",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3UDQGJRECXFS5EZVDH2OI45FMO436AC4/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/Z7ZIFKPRR32ZYA3WAA2NXFA3QHHOU6FJ/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZASBW7QRRLY5V2R44MQ4QQM4CZIDHM2U/",
+          "https://security.gentoo.org/glsa/202105-09",
+          "https://security.netapp.com/advisory/ntap-20250509-0005/"
+        ],
+        "description": "decompress_gunzip.c in BusyBox through 1.32.1 mishandles the error bit on the huft_build result pointer, with a resultant invalid free or segmentation fault, via malformed gzip data.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+            "metrics": {
+              "baseScore": 5,
+              "exploitabilityScore": 10,
+              "impactScore": 2.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-28831",
+            "epss": 0.00878,
+            "percentile": 0.74313,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.6219166666666667
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-28831",
+            "versionConstraint": ">= 1.32.0, <= 1.32.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2022-48174",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-48174",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://bugs.busybox.net/show_bug.cgi?id=15216",
+          "https://bugs.busybox.net/show_bug.cgi?id=15216",
+          "https://security.netapp.com/advisory/ntap-20241129-0001/"
+        ],
+        "description": "There is a stack overflow vulnerability in ash.c:6030 in busybox before 1.35. In the environment of Internet of Vehicles, this vulnerability can be executed from command to arbitrary code execution.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-48174",
+            "epss": 0.00451,
+            "percentile": 0.62761,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.4239400000000001
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-48174",
+            "versionConstraint": "<= 1.35.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42380",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42380",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the clrvar function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42380",
+            "epss": 0.00277,
+            "percentile": 0.50908,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.2003633333333333
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42380",
+            "versionConstraint": ">= 1.28.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42381",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42381",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the hash_init function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42381",
+            "epss": 0.00197,
+            "percentile": 0.42221,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.14249666666666666
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42381",
+            "versionConstraint": ">= 1.21.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42382",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42382",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_s function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42382",
+            "epss": 0.00197,
+            "percentile": 0.42221,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.14249666666666666
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42382",
+            "versionConstraint": ">= 1.26.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42386",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42386",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the nvalloc function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42386",
+            "epss": 0.00183,
+            "percentile": 0.40722,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.13237
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42386",
+            "versionConstraint": ">= 1.16.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42385",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42385",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the evaluate function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42385",
+            "epss": 0.0018,
+            "percentile": 0.40314,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.13019999999999998
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42385",
+            "versionConstraint": ">= 1.16.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42378",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42378",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_i function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42378",
+            "epss": 0.00145,
+            "percentile": 0.35906,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.10488333333333333
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42378",
+            "versionConstraint": ">= 1.16.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42379",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42379",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the next_input_file function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42379",
+            "epss": 0.00145,
+            "percentile": 0.35906,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.10488333333333333
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42379",
+            "versionConstraint": ">= 1.18.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42384",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42384",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the handle_special function",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 8,
+              "impactScore": 6.5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 7.2,
+              "exploitabilityScore": 1.3,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42384",
+            "epss": 0.00145,
+            "percentile": 0.35906,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.10488333333333333
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42384",
+            "versionConstraint": ">= 1.18.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42374",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42374",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "An out-of-bounds heap read in Busybox's unlzma applet leads to information leak and denial of service when crafted LZMA-compressed input is decompressed. This can be triggered by any applet/format that",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:H",
+            "metrics": {
+              "baseScore": 5.3,
+              "exploitabilityScore": 1.1,
+              "impactScore": 4.3
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:L/AC:M/Au:N/C:P/I:N/A:P",
+            "metrics": {
+              "baseScore": 3.3,
+              "exploitabilityScore": 3.4,
+              "impactScore": 5
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:H",
+            "metrics": {
+              "baseScore": 5.3,
+              "exploitabilityScore": 1.1,
+              "impactScore": 4.3
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42374",
+            "epss": 0.00077,
+            "percentile": 0.23977,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.03708833333333333
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42374",
+            "versionConstraint": ">= 1.27.0, <= 1.33.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-42376",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-42376",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/",
+          "https://claroty.com/team82/research/unboxing-busybox-14-vulnerabilities-uncovered-by-claroty-jfrog",
+          "https://jfrog.com/blog/unboxing-busybox-14-new-vulnerabilities-uncovered-by-claroty-and-jfrog/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6T2TURBYYJGBMQTTN2DSOAIQGP7WCPGV/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UQXGOGWBIYWOIVXJVRKHZR34UMEHQBXS/",
+          "https://security.netapp.com/advisory/ntap-20211223-0002/"
+        ],
+        "description": "A NULL pointer dereference in Busybox's hush applet leads to denial of service when processing a crafted shell command, due to missing validation after a \\x03 delimiter character. This may be used for DoS under very rare conditions of filtered command input.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 5.5,
+              "exploitabilityScore": 1.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:L/AC:M/Au:N/C:N/I:N/A:P",
+            "metrics": {
+              "baseScore": 1.9,
+              "exploitabilityScore": 3.4,
+              "impactScore": 2.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-42376",
+            "epss": 0.00028,
+            "percentile": 0.06078,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "1.34.0"
+          ],
+          "state": "fixed"
+        },
+        "advisories": [],
+        "risk": 0.01218
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-42376",
+            "versionConstraint": ">= 1.16.0, < 1.34.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "1.34.0"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2024-58251",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2024-58251",
+        "namespace": "nvd:cpe",
+        "severity": "Low",
+        "urls": [
+          "https://bugs.busybox.net/show_bug.cgi?id=15922",
+          "https://www.busybox.net",
+          "https://www.busybox.net/downloads/",
+          "http://www.openwall.com/lists/oss-security/2025/04/23/6"
+        ],
+        "description": "In netstat in BusyBox through 1.37.0, local users can launch of network application with an argv[0] containing an ANSI terminal escape sequence, leading to a denial of service (terminal locked up) when netstat is used by a victim.",
+        "cvss": [
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:N/A:L",
+            "metrics": {
+              "baseScore": 2.5,
+              "exploitabilityScore": 1.1,
+              "impactScore": 1.5
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2024-58251",
+            "epss": 0.0002,
+            "percentile": 0.0361,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.0055000000000000005
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2024-58251",
+            "versionConstraint": "<= 1.37.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-46394",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-46394",
+        "namespace": "nvd:cpe",
+        "severity": "Low",
+        "urls": [
+          "https://bugs.busybox.net/show_bug.cgi?id=16018",
+          "https://www.busybox.net",
+          "https://www.busybox.net/downloads/",
+          "http://www.openwall.com/lists/oss-security/2025/04/23/5",
+          "http://www.openwall.com/lists/oss-security/2025/04/24/3"
+        ],
+        "description": "In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences.",
+        "cvss": [
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:L/A:N",
+            "metrics": {
+              "baseScore": 3.2,
+              "exploitabilityScore": 1.5,
+              "impactScore": 1.5
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-46394",
+            "epss": 0.00017,
+            "percentile": 0.02652,
+            "date": "2025-06-18"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.00527
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "busybox",
+              "version": "1.32.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-46394",
+            "versionConstraint": "<= 1.37.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "836b7280d95fc2e6",
+        "name": "busybox",
+        "version": "1.32.1",
+        "type": "binary",
+        "locations": [
+          {
+            "path": "/bin/[",
+            "layerID": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+            "accessPath": "/bin/busybox",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:busybox:busybox:1.32.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:generic/busybox@1.32.1",
+        "upstreams": []
+      }
+    }
+  ],
+  "source": {
+    "type": "image",
+    "target": {
+      "userInput": "busybox:1.32.1",
+      "imageID": "sha256:388056c9a6838deea3792e8f00705b35b439cf57b3c9c2634fb4e95cfc896de6",
+      "manifestDigest": "sha256:123b1fd3a44eaaf7322e08e9175d9ca57d49ebf2955d4fa1f5607e99dc31bcbb",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "tags": [
+        "busybox:1.32.1"
+      ],
+      "imageSize": 1231733,
+      "layers": [
+        {
+          "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+          "digest": "sha256:67f770da229bf16d0c280f232629b0c1f1243a884df09f6b940a1c7288535a6d",
+          "size": 1231733
+        }
+      ],
+      "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjoxNDU2LCJkaWdlc3QiOiJzaGEyNTY6Mzg4MDU2YzlhNjgzOGRlZWEzNzkyZThmMDA3MDViMzViNDM5Y2Y1N2IzYzljMjYzNGZiNGU5NWNmYzg5NmRlNiJ9LCJsYXllcnMiOlt7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLCJzaXplIjoxNDQ5OTg0LCJkaWdlc3QiOiJzaGEyNTY6NjdmNzcwZGEyMjliZjE2ZDBjMjgwZjIzMjYyOWIwYzFmMTI0M2E4ODRkZjA5ZjZiOTQwYTFjNzI4ODUzNWE2ZCJ9XX0=",
+      "config": "eyJhcmNoaXRlY3R1cmUiOiJhbWQ2NCIsImNvbmZpZyI6eyJIb3N0bmFtZSI6IiIsIkRvbWFpbm5hbWUiOiIiLCJVc2VyIjoiIiwiQXR0YWNoU3RkaW4iOmZhbHNlLCJBdHRhY2hTdGRvdXQiOmZhbHNlLCJBdHRhY2hTdGRlcnIiOmZhbHNlLCJUdHkiOmZhbHNlLCJPcGVuU3RkaW4iOmZhbHNlLCJTdGRpbk9uY2UiOmZhbHNlLCJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iXSwiQ21kIjpbInNoIl0sIkltYWdlIjoic2hhMjU2OmE5ODg3MTA2ZDA1MDVjZGFjOWNhY2U5Yjc3ODllNDcwNjgyZDM2ZWRmMjRlOTEwYzY3YzVlNGQ0OTBiNmY5YmQiLCJWb2x1bWVzIjpudWxsLCJXb3JraW5nRGlyIjoiIiwiRW50cnlwb2ludCI6bnVsbCwiT25CdWlsZCI6bnVsbCwiTGFiZWxzIjpudWxsfSwiY29udGFpbmVyIjoiY2M1NWUwMzg5OTEzMzM5ZWNlYjU1ZTNhZmM3ZTU3MzdmOWJiZTY3YWU0YjZhMmRlNGFiYTRiZjhlMzI4YTcyMSIsImNvbnRhaW5lcl9jb25maWciOnsiSG9zdG5hbWUiOiJjYzU1ZTAzODk5MTMiLCJEb21haW5uYW1lIjoiIiwiVXNlciI6IiIsIkF0dGFjaFN0ZGluIjpmYWxzZSwiQXR0YWNoU3Rkb3V0IjpmYWxzZSwiQXR0YWNoU3RkZXJyIjpmYWxzZSwiVHR5IjpmYWxzZSwiT3BlblN0ZGluIjpmYWxzZSwiU3RkaW5PbmNlIjpmYWxzZSwiRW52IjpbIlBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluIl0sIkNtZCI6WyIvYmluL3NoIiwiLWMiLCIjKG5vcCkgIiwiQ01EIFtcInNoXCJdIl0sIkltYWdlIjoic2hhMjU2OmE5ODg3MTA2ZDA1MDVjZGFjOWNhY2U5Yjc3ODllNDcwNjgyZDM2ZWRmMjRlOTEwYzY3YzVlNGQ0OTBiNmY5YmQiLCJWb2x1bWVzIjpudWxsLCJXb3JraW5nRGlyIjoiIiwiRW50cnlwb2ludCI6bnVsbCwiT25CdWlsZCI6bnVsbCwiTGFiZWxzIjp7fX0sImNyZWF0ZWQiOiIyMDIxLTA0LTA4VDAxOjE5OjM3Ljc2NjQ1NjYxOFoiLCJkb2NrZXJfdmVyc2lvbiI6IjE5LjAzLjEyIiwiaGlzdG9yeSI6W3siY3JlYXRlZCI6IjIwMjEtMDQtMDhUMDE6MTk6MzcuNTk5NDg0MDNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApIEFERCBmaWxlOjhkNTczMzFkYzMzMTgwNWYwYzczMDIwZTI5ZTQwZDZkZTk3Yjk3MWY3MDE2MDliMjA2MmJmMzhjZTU2MDZiNDUgaW4gLyAifSx7ImNyZWF0ZWQiOiIyMDIxLTA0LTA4VDAxOjE5OjM3Ljc2NjQ1NjYxOFoiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyAjKG5vcCkgIENNRCBbXCJzaFwiXSIsImVtcHR5X2xheWVyIjp0cnVlfV0sIm9zIjoibGludXgiLCJyb290ZnMiOnsidHlwZSI6ImxheWVycyIsImRpZmZfaWRzIjpbInNoYTI1Njo2N2Y3NzBkYTIyOWJmMTZkMGMyODBmMjMyNjI5YjBjMWYxMjQzYTg4NGRmMDlmNmI5NDBhMWM3Mjg4NTM1YTZkIl19fQ==",
+      "repoDigests": [
+        "busybox@sha256:ae39a6f5c07297d7ab64dbd4f82c77c874cc6a94cea29fdec309d0992574b4f7"
+      ],
+      "architecture": "amd64",
+      "os": "linux"
+    }
+  },
+  "distro": {
+    "name": "busybox",
+    "version": "1.32.1",
+    "idLike": [
+      "busybox"
+    ]
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "0.94.0",
+    "configuration": {
+      "output": [
+        "json"
+      ],
+      "file": "",
+      "pretty": false,
+      "distro": "",
+      "add-cpes-if-none": false,
+      "output-template-file": "",
+      "check-for-app-update": true,
+      "only-fixed": false,
+      "only-notfixed": false,
+      "ignore-wontfix": "",
+      "platform": "",
+      "search": {
+        "scope": "squashed",
+        "unindexed-archives": false,
+        "indexed-archives": true
+      },
+      "ignore": [
+        {
+          "vulnerability": "",
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "kernel-headers",
+            "version": "",
+            "language": "",
+            "type": "rpm",
+            "location": "",
+            "upstream-name": "kernel"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux(-.*)?-headers-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-libc-dev",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        }
+      ],
+      "exclude": [],
+      "externalSources": {
+        "enable": false,
+        "maven": {
+          "searchUpstreamBySha1": true,
+          "baseUrl": "https://search.maven.org/solrsearch/select",
+          "rateLimit": 300000000
+        }
+      },
+      "match": {
+        "java": {
+          "using-cpes": false
+        },
+        "jvm": {
+          "using-cpes": true
+        },
+        "dotnet": {
+          "using-cpes": false
+        },
+        "golang": {
+          "using-cpes": false,
+          "always-use-cpe-for-stdlib": true,
+          "allow-main-module-pseudo-version-comparison": false
+        },
+        "javascript": {
+          "using-cpes": false
+        },
+        "python": {
+          "using-cpes": false
+        },
+        "ruby": {
+          "using-cpes": false
+        },
+        "rust": {
+          "using-cpes": false
+        },
+        "stock": {
+          "using-cpes": true
+        }
+      },
+      "fail-on-severity": "",
+      "registry": {
+        "insecure-skip-tls-verify": false,
+        "insecure-use-http": false,
+        "auth": null,
+        "ca-cert": ""
+      },
+      "show-suppressed": false,
+      "by-cve": false,
+      "SortBy": {
+        "sort-by": "risk"
+      },
+      "name": "",
+      "default-image-pull-source": "",
+      "vex-documents": [],
+      "vex-add": [],
+      "match-upstream-kernel-headers": false,
+      "db": {
+        "cache-dir": "/home/user/.cache/grype/db",
+        "update-url": "https://grype.anchore.io/databases",
+        "ca-cert": "",
+        "auto-update": true,
+        "validate-by-hash-on-start": true,
+        "validate-age": true,
+        "max-allowed-built-age": 432000000000000,
+        "require-update-check": false,
+        "update-available-timeout": 30000000000,
+        "update-download-timeout": 300000000000,
+        "max-update-check-frequency": 7200000000000
+      },
+      "exp": {},
+      "dev": {
+        "db": {
+          "debug": false
+        }
+      }
+    },
+    "db": {
+      "status": {
+        "schemaVersion": "v6.0.2",
+        "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.0.2_2025-06-19T01:31:03Z_1750306358.tar.zst?checksum=sha256%3A35a59e3dd282d373be7a671056b3777bd8ef3b388f4f1ef6bc076f9fb9696f3d",
+        "built": "2025-06-19T04:12:38Z",
+        "path": "/home/user/.cache/grype/db/6/vulnerability.db",
+        "valid": true
+      },
+      "providers": {
+        "alpine": {
+          "captured": "2025-06-19T01:31:03Z",
+          "input": "xxh64:8b1fadb434f430b8"
+        },
+        "amazon": {
+          "captured": "2025-06-19T01:31:57Z",
+          "input": "xxh64:50e489b31e90b7b7"
+        },
+        "bitnami": {
+          "captured": "2025-06-19T01:32:00Z",
+          "input": "xxh64:ab18c52120d8b7af"
+        },
+        "chainguard": {
+          "captured": "2025-06-19T01:32:08Z",
+          "input": "xxh64:49f0db15c49ec964"
+        },
+        "debian": {
+          "captured": "2025-06-19T01:32:15Z",
+          "input": "xxh64:2e5903d8f8583154"
+        },
+        "echo": {
+          "captured": "2025-06-19T01:32:12Z",
+          "input": "xxh64:801478cd2a0e8f77"
+        },
+        "epss": {
+          "captured": "2025-06-19T01:32:09Z",
+          "input": "xxh64:4c1209db50ff737c"
+        },
+        "github": {
+          "captured": "2025-06-19T01:32:10Z",
+          "input": "xxh64:fe70ed823eee7324"
+        },
+        "kev": {
+          "captured": "2025-06-19T01:32:21Z",
+          "input": "xxh64:0eef13cf1bff9fdb"
+        },
+        "mariner": {
+          "captured": "2025-06-19T01:32:12Z",
+          "input": "xxh64:0055ed8381491b1e"
+        },
+        "minimos": {
+          "captured": "2025-06-19T01:32:00Z",
+          "input": "xxh64:cd2539474106178f"
+        },
+        "nvd": {
+          "captured": "2025-06-19T01:32:31Z",
+          "input": "xxh64:572c6b7abefa5ac6"
+        },
+        "oracle": {
+          "captured": "2025-06-19T01:32:10Z",
+          "input": "xxh64:2d244771cf28c6f3"
+        },
+        "rhel": {
+          "captured": "2025-06-19T01:33:08Z",
+          "input": "xxh64:f92574e731a14fe1"
+        },
+        "sles": {
+          "captured": "2025-06-19T01:32:14Z",
+          "input": "xxh64:888021a9507fcf62"
+        },
+        "ubuntu": {
+          "captured": "2025-06-19T01:32:57Z",
+          "input": "xxh64:0a8d392ff1d8528e"
+        },
+        "wolfi": {
+          "captured": "2025-06-19T01:32:08Z",
+          "input": "xxh64:8781b3a3780565d4"
+        }
+      }
+    },
+    "timestamp": "2025-06-19T11:43:35.523947199Z"
+  }
+}

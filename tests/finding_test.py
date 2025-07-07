@@ -112,7 +112,6 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Edit Finding`
         driver.find_element(By.LINK_TEXT, "Edit Finding").click()
-        # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
         # finding Vulnerability Ids
@@ -165,6 +164,8 @@ class FindingTest(BaseTestCase):
             self.assertEqual(str(expected_cvssv3_score), driver.find_element(By.ID, "id_cvssv3_score").get_attribute("value"))
         else:
             self.assertTrue(self.is_error_message_present(text=error_message))
+            self.assertEqual(expected_cvssv3_value, driver.find_element(By.ID, "id_cvssv3").get_attribute("value"))
+            self.assertEqual(str(expected_cvssv3_score), driver.find_element(By.ID, "id_cvssv3_score").get_attribute("value"))
 
     # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
     # Capturing current behavior which might not be the desired one yet
@@ -184,8 +185,9 @@ class FindingTest(BaseTestCase):
             cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             cvssv3_score="2",
             expected_cvssv3_value="AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
-            expected_cvssv3_score="2.0",
-            expect_success=True,
+            expected_cvssv3_score="2",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
@@ -194,29 +196,53 @@ class FindingTest(BaseTestCase):
             cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
             cvssv3_score="3",
             expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/",
-            expected_cvssv3_score="3.0",
-            expect_success=True,
+            expected_cvssv3_score="3",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v2_vector_invalid_due_to_prefix(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            cvssv3_score="4",
+            expected_cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            expected_cvssv3_score="4",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
     def test_edit_finding_cvssv3_with_v2_vector(self):
         self._edit_finding_cvssv3_and_assert(
-            cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            cvssv3_value="AV:N/AC:L/Au:N/C:P/I:P/A:P",
             cvssv3_score="4",
-            expected_cvssv3_value="CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
-            expected_cvssv3_score="4.0",
-            expect_success=True,
+            expected_cvssv3_value="AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            expected_cvssv3_score="4",
+            expect_success=False,
+            error_message="Unsupported CVSS(2) version detected.",
+        )
+
+    @on_exception_html_source_logger
+    def test_edit_finding_cvssv3_with_v4_vector(self):
+        self._edit_finding_cvssv3_and_assert(
+            cvssv3_value="CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            cvssv3_score="5",
+            expected_cvssv3_value="CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            expected_cvssv3_score="5",
+            expect_success=False,
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
         )
 
     @on_exception_html_source_logger
     def test_edit_finding_cvssv3_with_rubbish(self):
         self._edit_finding_cvssv3_and_assert(
             cvssv3_value="happy little vector",
-            cvssv3_score="4",
-            expected_cvssv3_value=None,
-            expected_cvssv3_score=None,
+            cvssv3_score="5",
+            expected_cvssv3_value="happy little vector",
+            expected_cvssv3_score="5",
             expect_success=False,
-            error_message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'",
+            error_message="No valid CVSS vectors found by cvss.parse_cvss_from_text()",
         )
 
     def test_add_image(self):
@@ -654,6 +680,8 @@ def add_finding_tests_to_suite(suite, *, jira=False, github=False, block_executi
     suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_no_prefix"))
     suite.addTest(FindingTest("test_edit_finding_cvssv3_valid_vector_with_trailing_slash"))
     suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v2_vector"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v2_vector_invalid_due_to_prefix"))
+    suite.addTest(FindingTest("test_edit_finding_cvssv3_with_v4_vector"))
     suite.addTest(FindingTest("test_edit_finding_cvssv3_with_rubbish"))
     suite.addTest(FindingTest("test_add_note_to_finding"))
     suite.addTest(FindingTest("test_add_image"))
