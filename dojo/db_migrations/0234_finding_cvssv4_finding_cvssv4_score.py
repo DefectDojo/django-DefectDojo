@@ -7,8 +7,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('dojo', '0234_finding_cvssv4_finding_cvssv4_score'), ('dojo', '0235_alter_finding_cvssv3_score_alter_finding_cvssv4_and_more'), ('dojo', '0236_alter_finding_cvssv3_alter_finding_cvssv3_score_and_more')]
-
     dependencies = [
         ('dojo', '0233_remove_test_actual_time_remove_test_estimated_time'),
     ]
