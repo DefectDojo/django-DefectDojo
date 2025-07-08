@@ -8,9 +8,6 @@
 {% load get_endpoint_status %}
 {% block add_styles %}
     {{ block.super }}
-  .tooltip-inner {
-    max-width: 650px;
-  }
 {% endblock %}
 {% block add_css_before %}
     {{ block.super }}
@@ -293,15 +290,10 @@
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
                                     {{ finding.severity_display }}
-                                    {% if finding.cvssv4_score %}
-                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                            data-content="{{ finding.cvssv4 }}">
-                                        ({{ finding.cvssv4_score }}{% if finding.cvssv3_score %},{% else %}){% endif %}</i>
-                                    {% endif %}
-                                    {% if finding.cvssv3_score %}
-                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                            data-content="{{ finding.cvssv3 }}">
-                                        {% if not finding.cvssv4_score %}({% endif %}{{ finding.cvssv3_score }})</i>
+                                    {% if finding.cvssv4_score or finding.cvssv3_score %}
+                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" data-html="true" title="" href="#"
+                                            data-content="{% if finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if finding.cvssv4 and finding.cvssv3 %}<br/>{% endif %}{% if finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
+                                        ({% if finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if finding.cvssv3_score %}, {% endif %}{% endif %}{% if finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
                                     {% endif %}
                                 {% else %}
                                     Unknown
@@ -1218,6 +1210,32 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+            
+            // Configure tooltips for CVSS vectors - try multiple approaches
+            $(document).on('shown.bs.tooltip shown.bs.popover', function() {
+                $('.tooltip-inner, .popover-content').css({
+                    'max-width': '1200px !important',
+                    'white-space': 'nowrap !important',
+                    'word-wrap': 'normal !important'
+                });
+                $('.tooltip, .popover').css({
+                    'max-width': '1200px !important'
+                });
+            });
+            
+            // Force tooltip configuration
+            $('.has-popover').each(function() {
+                $(this).on('mouseenter', function() {
+                    setTimeout(function() {
+                        $('.tooltip-inner, .popover-content').css({
+                            'max-width': '1200px',
+                            'white-space': 'nowrap',
+                            'word-wrap': 'normal',
+                            'overflow': 'visible'
+                        });
+                    }, 10);
+                });
+            });
         });
 
         // keyboard shortcuts
