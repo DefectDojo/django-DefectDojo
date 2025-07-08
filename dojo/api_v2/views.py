@@ -2243,7 +2243,7 @@ class ProductTypeMemberViewSet(
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "user_id"]
+    filterset_fields = ["id", "product_type_id", "user_id", "role"]
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasProductTypeMemberPermission,
