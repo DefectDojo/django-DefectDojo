@@ -75,7 +75,7 @@ class FindingQueriesTest(DojoTestCase):
 
     @patch("django.utils.timezone.now")
     def test_finding_queries(self, mock_timezone):
-        self.maxDiff = 999999999
+        self.maxDiff = None
         mock_datetime = datetime(2020, 12, 9, tzinfo=UTC)
         mock_timezone.return_value = mock_datetime
 
