@@ -1148,10 +1148,10 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1242,10 +1242,10 @@ class AdHocFindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1334,10 +1334,10 @@ class PromoteFindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1405,10 +1405,10 @@ class FindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
 
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(

@@ -2348,23 +2348,23 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3 vector"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."))
+                              verbose_name=_("CVSS3 Vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSS3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
-                                        verbose_name=_("CVSSv3 score"),
-                                        help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+                                        verbose_name=_("CVSS3 Score"),
+                                        help_text=_("Numerical CVSS3 score for the vulnerability. If the vector is given without a score, the score is calcaulated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     cvssv4 = models.TextField(validators=[cvss4_validator],
-                              max_length=117,
+                              max_length=255,
                               null=True,
-                              verbose_name=_("CVSS v4 vector"),
-                              help_text=_("Common Vulnerability Scoring System version 4 (CVSSv4) score associated with this finding."))
+                              verbose_name=_("CVSS4 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."))
     cvssv4_score = models.FloatField(null=True,
                                         blank=True,
-                                        verbose_name=_("CVSSv4 score"),
-                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+                                        verbose_name=_("CVSSv4 Score"),
+                                        help_text=_("Numerical CVSS4 score for the vulnerability. If the vector is given without a score, the score is calcaulated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     url = models.TextField(null=True,
