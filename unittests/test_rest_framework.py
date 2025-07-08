@@ -1351,7 +1351,7 @@ class FindingsTest(BaseClass.BaseClassTest):
             # CVSS2 style vector makes not supported
             result = self.client.patch(self.url + "3/", data={"cvssv3": "AV:N/AC:L/Au:N/C:P/I:P/A:P", "cvssv3_score": 6})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["Unsupported CVSS(2) version detected."])
+            self.assertEqual(result.json()["cvssv3"], ["Unsupported CVSS2 version detected."])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
@@ -1381,7 +1381,7 @@ class FindingsTest(BaseClass.BaseClassTest):
             # CVSS4
             result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", "cvssv3_score": 7})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["CVSS3 vector cannot be stored in the cvssv4 field. Use the cvssv3 field."])
+            self.assertEqual(result.json()["cvssv3"], ["CVSS4 vector cannot be stored in the cvssv3 field. Use the cvssv4 field."])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)
