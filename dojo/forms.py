@@ -2312,7 +2312,8 @@ class UserContactInfoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            if not user_has_configuration_permission(current_user, "auth.change_user"):
+            if not user_has_configuration_permission(current_user, "auth.change_user") and \
+               not user_has_configuration_permission(current_user, "auth.add_user"):
                 del self.fields["force_password_reset"]
             if not get_system_setting("enable_user_profile_editable"):
                 for field in self.fields:
