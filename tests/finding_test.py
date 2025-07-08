@@ -258,7 +258,7 @@ class FindingTest(BaseTestCase):
             expected_cvssv3_value="CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
             expected_cvssv3_score="5",
             expect_success=False,
-            error_message="CVSS4 vector vannot be stored in the cvss3 field. Use the cvss4 field.",
+            error_message="CVSS4 vector cannot be stored in the cvssv3 field. Use the cvssv4 field.",
         )
 
     @on_exception_html_source_logger
@@ -345,7 +345,7 @@ class FindingTest(BaseTestCase):
             expected_cvssv4_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             expected_cvssv4_score="5",
             expect_success=False,
-            error_message="CVSS3 vector vannot be stored in the cvss4 field. Use the cvss3 field.",
+            error_message="CVSS3 vector cannot be stored in the cvssv4 field. Use the cvssv3 field.",
         )
 
     @on_exception_html_source_logger

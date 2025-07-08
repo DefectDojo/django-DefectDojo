@@ -1378,10 +1378,10 @@ class FindingsTest(BaseClass.BaseClassTest):
             self.assertEqual(None, finding.cvssv3_score)
 
         with self.subTest(i=8):
-            # CVSS4 prefix makes it invalid
+            # CVSS4
             result = self.client.patch(self.url + "3/", data={"cvssv3": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", "cvssv3_score": 7})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(result.json()["cvssv3"], ["CVSS(4) vector vannot be stored in the cvss3 field. Use the cvss4 fields."])
+            self.assertEqual(result.json()["cvssv3"], ["CVSS3 vector cannot be stored in the cvssv4 field. Use the cvssv3 field."])
             finding = Finding.objects.get(id=3)
             # invalid vector, so no calculated score and no score stored
             self.assertEqual(None, finding.cvssv3)

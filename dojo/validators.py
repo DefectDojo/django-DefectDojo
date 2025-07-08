@@ -37,7 +37,7 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
             return
 
         if isinstance(vector_obj, CVSS4):
-            msg = "CVSS4 vector vannot be stored in the cvss3 field. Use the cvss4 field."
+            msg = "CVSS4 vector cannot be stored in the cvssv3 field. Use the cvssv4 field."
             raise exception_class(msg)
         if isinstance(vector_obj, CVSS2):
             msg = "Unsupported CVSS2 version detected."
@@ -64,7 +64,7 @@ def cvss4_validator(value: str | list[str], exception_class: Callable = Validati
             return
 
         if isinstance(vector_obj, CVSS3):
-            msg = "CVSS3 vector vannot be stored in the cvss3 field. Use the cvss3 field."
+            msg = "CVSS3 vector cannot be stored in the cvssv4 field. Use the cvssv3 field."
             raise exception_class(msg)
         if isinstance(vector_obj, CVSS2):
             msg = "Unsupported CVSS2 version detected."
