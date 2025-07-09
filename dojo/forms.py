@@ -30,6 +30,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
@@ -2311,7 +2312,9 @@ class UserContactInfoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            del self.fields["force_password_reset"]
+            if not user_has_configuration_permission(current_user, "auth.change_user") and \
+               not user_has_configuration_permission(current_user, "auth.add_user"):
+                del self.fields["force_password_reset"]
             if not get_system_setting("enable_user_profile_editable"):
                 for field in self.fields:
                     self.fields[field].disabled = True
