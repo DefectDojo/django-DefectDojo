@@ -104,7 +104,7 @@ class AuditJSParser:
                         cvssv4 = cvss_data["cvssv4"]
                         # The score in the report can be different from what the cvss library calulates
                         if cvss_data["major_version"] == 2:
-                            description += "\nCVSS V2 Vector:" + cvss_data["cvssv2"] + " (Score: " + cvss_score + ")"
+                            description += "\nCVSS V2 Vector:" + cvss_data["cvssv2"] + " (Score: " + str(cvss_score) + ")"
                     else:
                         # If there is no vector, calculate severity based on CVSS score
                         severity = self.get_severity(cvss_score)

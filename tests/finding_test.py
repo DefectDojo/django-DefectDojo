@@ -192,7 +192,7 @@ class FindingTest(BaseTestCase):
             cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
             cvssv3_score="1",
             expected_cvssv3_value="CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
-            expected_cvssv3_score="1.0",
+            expected_cvssv3_score="8.8",
             expect_success=True,
         )
 
