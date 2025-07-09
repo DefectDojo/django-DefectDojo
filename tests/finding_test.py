@@ -279,7 +279,7 @@ class FindingTest(BaseTestCase):
             cvssv4_value="CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
             cvssv4_score="1",
             expected_cvssv4_value="CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
-            expected_cvssv4_score="1.0",
+            expected_cvssv4_score="7.3",
             expect_success=True,
         )
 
