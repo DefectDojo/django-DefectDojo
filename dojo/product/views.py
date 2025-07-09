@@ -5,6 +5,7 @@ import logging
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
 from math import ceil
+from django.conf import settings
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -21,6 +22,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from github import Github
 
 import dojo.finding.helper as finding_helper
@@ -134,7 +137,8 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
-
+@cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def product(request):
     prods = get_authorized_products(Permissions.Product_View)
     # perform all stuff for filtering and pagination first, before annotation/prefetching

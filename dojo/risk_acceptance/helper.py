@@ -1,4 +1,5 @@
 import logging
+import re
 import crum
 import requests
 import json
@@ -351,7 +352,11 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
 
 
 def get_expired_risk_acceptances_to_handle():
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_date__isnull=False, expiration_date_handled__isnull=True, expiration_date__date__lte=timezone.now().date())
+    risk_acceptances = Risk_Acceptance.objects.filter(
+        expiration_date__isnull=False,
+        expiration_date_handled__isnull=True,
+        expiration_date__date__lte=timezone.now().date(),
+        engagement__isnull=False)
     return prefetch_for_expiration(risk_acceptances)
 
 
@@ -362,7 +367,7 @@ def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
         expiration_date_warned__isnull=True,
         expiration_date__date__lte=timezone.now().date() + relativedelta(days=heads_up_days),
         expiration_date__date__gte=timezone.now().date(),
-        engagement__isnull=False,
+        engagement__isnull=False
         )
     return prefetch_for_expiration(risk_acceptances)
 
@@ -556,7 +561,5 @@ def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
 
 def get_product_type_prefix_key(product_type_name):
     risk_rule_map = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])
-    product_type_prefix_key = (
-        lambda prefix: prefix[0] if prefix and prefix[0] in risk_rule_map else "DEFAULT"
-    )(product_type_name.split(" - "))
-    return risk_rule_map[product_type_prefix_key]
+    prefix_math = re.match(r"" + settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1], product_type_name)
+    return risk_rule_map[prefix_math.group(1) if prefix_math else "DEFAULT"]

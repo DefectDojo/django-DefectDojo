@@ -37,11 +37,12 @@ Markdown==3.7
 openpyxl==3.1.5
 Pillow==11.1.0  # required by django-imagekit
 psycopg[c]==3.2.6
+psycopg-pool==3.2.6
 cryptography==44.0.2
 python-dateutil==2.9.0.post0
 pytz==2025.1
 redis==5.2.1
-requests==2.32.3
+requests==2.32.4
 sqlalchemy==2.0.40  # Required by Celery broker transport
 urllib3==1.26.20
 uWSGI==2.0.28
@@ -96,7 +97,7 @@ opentelemetry-instrumentation==0.41b0
 django-redis==5.4.0
 # Pinning Dependencies
 azure-core==1.32.0
-protobuf==4.25.6
+protobuf==4.25.8
 billiard==4.2.1
 botocore==1.37.33
 et_xmlfile==2.0.0

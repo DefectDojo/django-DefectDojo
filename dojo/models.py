@@ -2122,7 +2122,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 
 class Test(models.Model):
-    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
+    engagement = models.ForeignKey(Engagement, editable=True, on_delete=models.CASCADE)
     lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)

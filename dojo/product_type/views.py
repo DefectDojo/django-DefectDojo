@@ -10,6 +10,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.conf import settings
 
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
@@ -53,10 +56,12 @@ Status: in prod
 Product Type views
 """
 
-def get_products_name(_request, pid):
-    prod_type = Product_Type.objects.get(id=pid)
-    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
-    return JsonResponse({"data": list(data)})
+
+def get_products_name(request, pid):
+    data = Product.objects.filter(prod_type=pid).values("id", "name")
+    product_filter = ProductFilter(request.GET, queryset=data)
+    ps = get_page_items(request, product_filter.qs, 25)
+    return JsonResponse({"data": list(ps)})
 
 
 def get_description_product(_request, pid):
@@ -64,10 +69,6 @@ def get_description_product(_request, pid):
     Returns a list of products with their contacts.
     """
     product = Product.objects.get(id=pid)
-    engagements = Engagement.objects.filter(product=product)
-    engagement_list = []
-    for engagement in engagements:
-        engagement_list.append({"id": engagement.id, "engagement_name": engagement.name})
     contacts = {
         "contacts": {
             "product_manager": {
@@ -84,11 +85,13 @@ def get_description_product(_request, pid):
             }
         }
     }
-    data = {"message": "Success", "id": product.id, "engagements": engagement_list}
+    data = {"message": "Success", "id": product.id}
     data.update(contacts)
     return JsonResponse(data)
 
 
+@cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def product_type(request):
     prod_types = get_authorized_product_types(Permissions.Product_Type_View)
     name_words = prod_types.values_list("name", flat=True)

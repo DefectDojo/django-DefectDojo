@@ -706,6 +706,34 @@ class EngagementViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return response
+ 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        if response.data["results"] and request.query_params.get("product", None):
+            product_id = request.query_params.get("product")
+            try: 
+                product = Product.objects.get(id=product_id)
+                contacts = {
+                    "contacts": {
+                        "product_manager": {
+                            "id": product.product_manager.id if product.product_manager else "",
+                            "username": product.product_manager.username if product.product_manager else ""
+                        },
+                        "technical_contact": {
+                            "id": product.technical_contact.id if product.technical_contact else "",
+                            "username": product.technical_contact.username if product.technical_contact else ""
+                        },
+                        "team_manager": {
+                            "id": product.team_manager.id if product.team_manager else "",
+                            "username": product.team_manager.username if product.team_manager else ""
+                        }
+                    }
+                }
+                response.data.update(contacts)
+            except Product.DoesNotExist:
+                pass
+        return response
+
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -2215,7 +2243,7 @@ class ProductTypeMemberViewSet(
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "user_id"]
+    filterset_fields = ["id", "product_type_id", "user_id", "role"]
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasProductTypeMemberPermission,

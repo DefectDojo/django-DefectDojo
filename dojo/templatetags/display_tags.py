@@ -26,6 +26,7 @@ from django.utils import timezone
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
+from django.template import Context, Template
 
 from dojo.engine_tools.models import FindingExclusion
 import dojo.jira_link.helper as jira_helper
@@ -158,6 +159,10 @@ def dojo_version():
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
     return f"v. {version.replace('v', '')}"
+
+@register.simple_tag
+def team_name():
+    return System_Settings.objects.get().team_name
 
 
 @register.simple_tag
@@ -297,32 +302,44 @@ def finding_sla(finding):
     if not enforce_sla:
         return ""
 
-    title = ""
     severity = finding.severity
     find_sla = finding.sla_days_remaining()
+    status = "green"
+
     if finding.mitigated:
         status = "blue"
-        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
-        if find_sla and find_sla < 0:
+        status_text = f"Remediated within SLA for {severity.lower()} findings ({sla_age} days since {finding.get_sla_start_date().strftime('%b %d, %Y')})"
+        if find_sla is not None and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = "Out of SLA: Remediated " + str(
-                find_sla) + " days past SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+            status_text = f"Out of SLA: Remediated {find_sla} days past SLA for {severity.lower()} findings ({sla_age} days since {finding.get_sla_start_date().strftime('%b %d, %Y')})"
     else:
-        status = "green"
-        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
-        if find_sla and find_sla < 0:
+        status_text = f"Remediation for {severity.lower()} findings in {sla_age} days or less since {finding.get_sla_start_date().strftime('%b %d, %Y')}"
+        if find_sla is not None and find_sla < 0:
             status = "red"
-            status_text = "Overdue: Remediation for " + severity.lower() + " findings in " + str(
-                sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+            status_text = f"Overdue: Remediation for {severity.lower()} findings in {sla_age} days or less since {finding.get_sla_start_date().strftime('%b %d, %Y')}"
 
-    if find_sla is not None:
-        title = (
-            f'<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="{status_text}">'
-            f'<span class="label severity age-{status}">{find_sla}</span></a>'
-        )
+    if find_sla is None:
+        return ""
 
-    return mark_safe(title)
+    html_template = Template("""
+        <a class="has-popover"
+           data-toggle="tooltip"
+           data-placement="bottom"
+           title=""
+           href="#"
+           data-content="{{ status_text|escape }}">
+           <span class="label severity age-{{ status|escape }}">{{ find_sla }}</span>
+        </a>
+    """)
+
+    context = Context({
+        'status_text': status_text,
+        'status': status,
+        'find_sla': find_sla
+    })
+
+    return html_template.render(context)
 
 
 @register.filter(name="product_grade")
@@ -1008,19 +1025,8 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
     if not jira_project:
         return ""
 
-    html = """
-    <i class="fa %s has-popover %s"
-        title="<i class='fa %s'></i> <b>JIRA Project Configuration%s</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-        data-content="<b>Jira:</b> %s<br/>
-        <b>Project Key:</b> %s<br/>
-        <b>Component:</b> %s<br/>
-        <b>Push All Issues:</b> %s<br/>
-        <b>Engagement Epic Mapping:</b> %s<br/>
-        <b>Push Notes:</b> %s">
-    </i>
-    """
     jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
-    inherited = bool(not jira_project_no_inheritance)
+    inherited = not bool(jira_project_no_inheritance)
 
     icon = "fa-bug"
     color = ""
@@ -1034,13 +1040,37 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
         color = "red"
         icon = "fa-exclamation-triangle"
 
-    return mark_safe(html % (icon, color, icon, inherited_text,  # indicator if jira_instance is missing
-                                esc(jira_project.jira_instance),
-                                esc(jira_project.project_key),
-                                esc(jira_project.component),
-                                esc(jira_project.push_all_issues),
-                                esc(jira_project.enable_engagement_epic_mapping),
-                                esc(jira_project.push_notes)))
+    # Template en string
+    template_string = """
+    <i class="fa {{ icon }} has-popover {{ color }}"
+       title="<i class='fa {{ icon }}'></i> <b>JIRA Project Configuration{{ inherited_text }}</b>"
+       data-trigger="hover"
+       data-container="body"
+       data-html="true"
+       data-placement="bottom"
+       data-content="<b>Jira:</b> {{ jira_instance }}<br/>
+                     <b>Project Key:</b> {{ project_key }}<br/>
+                     <b>Component:</b> {{ component }}<br/>
+                     <b>Push All Issues:</b> {{ push_all_issues }}<br/>
+                     <b>Engagement Epic Mapping:</b> {{ engagement_epic_mapping }}<br/>
+                     <b>Push Notes:</b> {{ push_notes }}">
+    </i>
+    """
+
+    template_obj = Template(template_string)
+    context = Context({
+        "icon": icon,
+        "color": color,
+        "inherited_text": esc(inherited_text),
+        "jira_instance": esc(jira_project.jira_instance),
+        "project_key": esc(jira_project.project_key),
+        "component": esc(jira_project.component),
+        "push_all_issues": esc(jira_project.push_all_issues),
+        "engagement_epic_mapping": esc(jira_project.enable_engagement_epic_mapping),
+        "push_notes": esc(jira_project.push_notes),
+    })
+
+    return template_obj.render(context)
 
 
 @register.filter
@@ -1165,6 +1195,8 @@ def enable_like_status(finding):
 @register.filter()
 def render_risk_acceptance_accepted_by(finding: Finding):
     accepted_by = finding.accepted_by
+    if finding.accepted_by is None:
+        accepted_by = ""
     accepted_by_user = ""
     if finding.risk_acceptance.accepted_by:
         accepted_by_recommendation_ra = finding.risk_acceptance.accepted_by_user

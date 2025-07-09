@@ -526,6 +526,7 @@ env = environ.FileAwareEnv(
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
     # Redis
     DD_USE_CACHE_REDIS=(bool, False),
+    DD_CACHE_PAGE_TIME=(int, 60 * 5),  # 5 minutes
 
     # Cors
     DD_CORS_ENABLED=(bool, False),
@@ -533,6 +534,13 @@ env = environ.FileAwareEnv(
     DD_CORS_ALLOW_METHODS=(list, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]),
     DD_CORS_ALLOW_HEADERS=(list, ["Authorization", "Content-Type", "Accept", "session-cookie"]),
     DD_CORS_ALLOW_CREDENTIALS=(bool, True),
+
+    # Pool conecction
+    DD_MIN_CONNS=(int, 10),
+    DD_MAX_CONNS=(int, 50),
+    DD_TIMEOUT_CONNS=(int, 10),
+    DD_USE_DB_POOL=(bool, False),
+    DD_STATEMENT_TIMEOUT=(str, "10000"),
 )
 
 
@@ -641,7 +649,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -651,14 +659,15 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PASSWORD": secret_database["password"],
             "HOST": secret_database["host"],
             "PORT": secret_database["port"],
+            "CONN_MAX_AGE": None,
         }
-    }
+    }    
     if env("DD_DATABASE_REPLICA"):
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
@@ -675,7 +684,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": f"-c search_path={SCHEMA_DB}"
+                    "options": f"-c search_path={SCHEMA_DB}",
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
@@ -687,6 +696,25 @@ else:
                 "PORT": env("DD_DATABASE_PORT"),
             }
         }
+
+
+# Pool connection settings
+MIN_CONNS = env("DD_MIN_CONNS")
+MAX_CONNS = env("DD_MAX_CONNS")
+TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
+USE_DB_POOL = env("DD_USE_DB_POOL")
+STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
+
+# If the database engine is PostgreSQL, we add the pool configuration
+if USE_DB_POOL:
+    if "OPTIONS" not in DATABASES["default"].keys():
+        DATABASES["default"]["OPTIONS"] = {}
+    DATABASES["default"]["CONN_MAX_AGE"] = 0
+    DATABASES["default"]["OPTIONS"]["pool"] = {}
+    DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
+    DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
 
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
@@ -1174,7 +1202,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "dojo.api_v2.exception_handler.custom_exception_handler",
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'dojo.authorization.role_based_rate_throttle.RoleBasedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': THROTTLE_ANON,
@@ -2423,6 +2451,8 @@ if USE_CACHE_REDIS:
             "OPTIONS": OPTIONS_CACHE,
         }
     }
+
+CACHE_PAGE_TIME = env("DD_CACHE_PAGE_TIME")
 
 # ------------------------------------------------------------------------------
 # Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>

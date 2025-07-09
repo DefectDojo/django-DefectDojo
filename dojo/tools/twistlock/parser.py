@@ -55,9 +55,8 @@ class TwistlockCSVParser:
         data_vulnerability_link = row.get("Vulnerability Link", "")
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
-        data_unique_id = row.get("Custom Id")
-        data_registry = row.get("Registry", "")
-        data_repository = row.get("Repository", "")
+        data_unique_id = row.get("Custom Id", "")
+        data_ami_id = row.get("Ami Id", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -109,7 +108,8 @@ class TwistlockCSVParser:
                 data_vulnerability_link,
                 data_account_id,
                 data_discovered,
-                data_unique_id
+                data_unique_id,
+                data_ami_id
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -179,7 +179,8 @@ class TwistlockCSVParser:
         data_vulnerability_link,
         data_account_id,
         data_discovered,
-        data_unique_id
+        data_unique_id,
+        data_ami_id
     ):
         return (
             "<p><strong>Description:</strong> "
@@ -254,6 +255,9 @@ class TwistlockCSVParser:
             + "</p>"
             + "</p><p><strong>Discovered:</strong> "
             + str(data_discovered)
+            + "</p>"
+            + "</p><p><strong>Ami Id:</strong> "
+            + str(data_ami_id)
             + "</p>"
             + "</p><p><strong>Custom Id:</strong> "
             + (
