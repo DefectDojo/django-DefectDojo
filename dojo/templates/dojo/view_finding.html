@@ -290,10 +290,10 @@
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
                                     {{ finding.severity_display }}
-                                    {% if finding.cvssv4_score or finding.cvssv3_score %}
+                                    {% if system_settings.enable_cvss4_display and finding.cvssv4_score or system_settings.enable_cvss3_display and finding.cvssv3_score %}
                                         <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" data-html="true" title="" href="#"
-                                            data-content="{% if finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if finding.cvssv4 and finding.cvssv3 %}<br/>{% endif %}{% if finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
-                                        ({% if finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if finding.cvssv3_score %}, {% endif %}{% endif %}{% if finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
+                                            data-content="{% if system_settings.enable_cvss4_display and finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if system_settings.enable_cvss4_display and finding.cvssv4 and system_settings.enable_cvss3_display and finding.cvssv3 %}<br/>{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
+                                        ({% if system_settings.enable_cvss4_display and finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}, {% endif %}{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
                                     {% endif %}
                                 {% else %}
                                     Unknown
@@ -1169,9 +1169,9 @@
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
-        var firstID = {{findings_list.0}};
-        var currentID = {{finding.id}};
-        var lastID = {{findings_list_lastElement}};
+        var firstID = {% if findings_list.0 %}{{findings_list.0}}{% else %}null{% endif %};
+        var currentID = {% if finding.id %}{{finding.id}}{% else %}null{% endif %};
+        var lastID = {% if findings_list_lastElement %}{{findings_list_lastElement}}{% else %}null{% endif %};
         if(currentID != firstID)
         {
             $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' prev_finding_id %}" class="btn btn-primary">Previous Finding</a> ');

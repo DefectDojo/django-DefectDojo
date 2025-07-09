@@ -32,4 +32,14 @@ class Migration(migrations.Migration):
             name='cvssv4_score',
             field=models.FloatField(blank=True, help_text='Numerical CVSS4 score for the vulnerability. If the vector is given without a score, the score is calcaulated while saving the finding. The value must be between 0-10.', null=True, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(10.0)], verbose_name='CVSSv4 Score'),
         ),
+        migrations.AddField(
+            model_name='system_settings',
+            name='enable_cvss3_display',
+            field=models.BooleanField(default=True, help_text='With this setting turned off, CVSS3 fields will be hidden in the user interface.', verbose_name='Enable CVSS3 Display'),
+        ),
+        migrations.AddField(
+            model_name='system_settings',
+            name='enable_cvss4_display',
+            field=models.BooleanField(default=True, help_text='With this setting turned off, CVSS4 fields will be hidden in the user interface.', verbose_name='Enable CVSS4 Display'),
+        ),        
     ]

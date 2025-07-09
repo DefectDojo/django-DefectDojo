@@ -598,6 +598,16 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable Calendar"),
         help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
+    enable_cvss3_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS3 Display"),
+        help_text=_("With this setting turned off, CVSS3 fields will be hidden in the user interface."))
+    enable_cvss4_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS4 Display"),
+        help_text=_("With this setting turned off, CVSS4 fields will be hidden in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -816,7 +826,7 @@ class FileUpload(models.Model):
 class Product_Type(models.Model):
 
     """
-    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing "types" of products.
     `
        Examples:
          * IAM Team

@@ -1148,10 +1148,10 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1200,6 +1200,9 @@ class AddFindingForm(forms.ModelForm):
 
         self.endpoints_to_add_list = []
 
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
+
     def clean(self):
         cleaned_data = super().clean()
         if ((cleaned_data["active"] or cleaned_data["verified"]) and cleaned_data["duplicate"]):
@@ -1242,10 +1245,10 @@ class AdHocFindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1294,6 +1297,9 @@ class AdHocFindingForm(forms.ModelForm):
 
         self.endpoints_to_add_list = []
 
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
+
     def clean(self):
         cleaned_data = super().clean()
         if ((cleaned_data["active"] or cleaned_data["verified"]) and cleaned_data["duplicate"]):
@@ -1334,10 +1340,10 @@ class PromoteFindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1370,6 +1376,9 @@ class PromoteFindingForm(forms.ModelForm):
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=product)
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1405,10 +1414,10 @@ class FindingForm(forms.ModelForm):
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
 
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1496,6 +1505,9 @@ class FindingForm(forms.ModelForm):
             self.fields["group"].initial = self.instance.finding_group
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1585,6 +1597,9 @@ class ApplyFindingTemplateForm(forms.Form):
         if template:
             self.template.vulnerability_ids = "\n".join(template.vulnerability_ids)
 
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -1613,7 +1628,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1626,6 +1641,9 @@ class FindingTemplateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["tags"].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by("name")
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     class Meta:
         model = Finding_Template
@@ -3797,3 +3815,30 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             msg = "Neither user or group are set"
             raise Exception(msg)
+
+
+def hide_cvss_fields_if_disabled(form_instance):
+    """Hide CVSS fields based on system settings."""
+    enable_cvss3 = get_system_setting("enable_cvss3_display", True)
+    enable_cvss4 = get_system_setting("enable_cvss4_display", True)
+
+    # Hide CVSS3 fields if disabled
+    if not enable_cvss3:
+        if "cvssv3" in form_instance.fields:
+            del form_instance.fields["cvssv3"]
+        if "cvssv3_score" in form_instance.fields:
+            del form_instance.fields["cvssv3_score"]
+        if "cvss_info" in form_instance.fields:
+            del form_instance.fields["cvss_info"]
+
+    # Hide CVSS4 fields if disabled
+    if not enable_cvss4:
+        if "cvssv4" in form_instance.fields:
+            del form_instance.fields["cvssv4"]
+        if "cvssv4_score" in form_instance.fields:
+            del form_instance.fields["cvssv4_score"]
+
+    # If both are disabled, hide all CVSS related fields
+    if not enable_cvss3 and not enable_cvss4:
+        if "cvss_info" in form_instance.fields:
+            del form_instance.fields["cvss_info"]
