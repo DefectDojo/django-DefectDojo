@@ -179,9 +179,8 @@ There's also a helper method to validate the vector and extract the base score a
     if cvss_data:
         finding.severity = cvss_data["severity"]
         finding.cvssv3 = cvss_data["cvssv3"]
-        finding.cvssv3_score = cvss_data["cvssv3_score"]
         finding.cvssv4 = cvss_data["cvssv4"]
-        finding.cvssv4_score = cvss_data["cvssv4_score"]
+        # we don't set any score fields as those will be overwritten by Defect Dojo
 ```
 Not all values have to be used as scan reports usuyall provide their own value for `severity`.
 And sometimes also for `cvss_score`. Defect Dojo will not overwrite any `cvss3_score` or `cvss4_score`.

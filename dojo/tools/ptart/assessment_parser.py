@@ -45,17 +45,11 @@ class PTARTAssessmentParser:
             finding.cve = hit.get("id")
 
         cvss_vector = hit.get("cvss_vector", None)
-        cvss_score = hit.get("cvss_score", None)
         if cvss_vector:
             cvss_data = parse_cvss_data(cvss_vector)
             if cvss_data:
                 finding.cvssv3 = cvss_data["cvssv3"]
                 finding.cvssv4 = cvss_data["cvssv4"]
-                # The score in the report can be different from what the cvss library calulates
-                if cvss_data["major_version"] == 3:
-                    finding.cvssv3_score = cvss_score
-                if cvss_data["major_version"] == 4:
-                    finding.cvssv4_score = cvss_score
 
         if "labels" in hit:
             finding.unsaved_tags = hit["labels"]

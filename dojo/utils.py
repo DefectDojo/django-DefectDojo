@@ -2722,6 +2722,7 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
             major_version = 4
             cvssv4 = vector.clean_vector()
             cvssv4_score = vector.scores()[0]
+            logger.debug("CVSS4 vector: %s, score: %s", cvssv4, cvssv4_score)
             severity = vector.severities()[0]
         elif type(vector) is CVSS3:
             major_version = 3

@@ -2363,7 +2363,7 @@ class Finding(models.Model):
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
                                         verbose_name=_("CVSS3 Score"),
-                                        help_text=_("Numerical CVSS3 score for the vulnerability. If the vector is given without a score, the score is calcaulated while saving the finding. The value must be between 0-10."),
+                                        help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     cvssv4 = models.TextField(validators=[cvss4_validator],
@@ -2374,7 +2374,7 @@ class Finding(models.Model):
     cvssv4_score = models.FloatField(null=True,
                                         blank=True,
                                         verbose_name=_("CVSSv4 Score"),
-                                        help_text=_("Numerical CVSS4 score for the vulnerability. If the vector is given without a score, the score is calcaulated while saving the finding. The value must be between 0-10."),
+                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     url = models.TextField(null=True,
@@ -2739,8 +2739,7 @@ class Finding(models.Model):
                 cvss_data = parse_cvss_data(self.cvssv3)
                 if cvss_data:
                     self.cvssv3 = cvss_data.get("cvssv3")
-                    if not self.cvssv3_score:
-                        self.cvssv3_score = cvss_data.get("cvssv3_score")
+                    self.cvssv3_score = cvss_data.get("cvssv3_score")
 
             except Exception as ex:
                 logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
@@ -2754,8 +2753,7 @@ class Finding(models.Model):
                 cvss_data = parse_cvss_data(self.cvssv4)
                 if cvss_data:
                     self.cvssv4 = cvss_data.get("cvssv4")
-                    if not self.cvssv4_score:
-                        self.cvssv4_score = cvss_data.get("cvssv4_score")
+                    self.cvssv4_score = cvss_data.get("cvssv4_score")
 
             except Exception as ex:
                 logger.warning("Can't compute cvssv4 score for finding id %i. Invalid cvssv4 vector found: '%s'. Exception: %s.", self.id, self.cvssv4, ex)
