@@ -1,7 +1,5 @@
 import re
 import logging
-import boto3
-import botocore.exceptions
 from dojo.api_v2.api_error import ApiError
 from time import sleep
 from dojo.authorization.roles_permissions import Permissions
@@ -17,42 +15,8 @@ from dojo.models import GeneralSettings
 from dojo.reports.report_manager import CSVReportManager
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.urls import reverse
-from dojo.notifications.helper import create_notification
 from django.conf import settings
 logger = logging.getLogger(__name__)
-
-BUCKET = 'mybuket-rene'
-KEY = 'reportes/reporte.csv'
-CHUNKSIZE = 1
-
-
-def upload_s3(session_s3, buffer, bucket, key, retries=3, delay=10):
-    for attempt in range(retries):
-        try:
-            response = session_s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
-            logger.info(f"REPORT FINDING: Upload successful: {response}")
-            if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-                return response
-            else:
-                logger.error(f"REPORT FINDING: Upload failed with status code: {response['ResponseMetadata']['HTTPStatusCode']}")
-                raise Exception(response["ResponseMetadata"]["HTTPStatusCode"], "Failed to upload to S3")
-        except Exception as e:
-            logger.error(f"REPORT FINDING: Attempt {attempt + 1} failed with error: {e}")
-            sleep(delay)
-    raise Exception("Failed to upload to S3 after multiple attempts due to expired token.")
-
-
-def get_url_presigned(session,
-                      key,
-                      buket,
-                      expires_in=3600):
-    url = session.generate_presigned_url(
-        'get_object',
-        Params={'Bucket': buket, 'Key': key},
-        ExpiresIn=expires_in
-    )
-    logger.debug(f"REPORT FINDING: {url}")
-    return url
 
 
 def get_list_index(full_list, index):
@@ -166,42 +130,8 @@ def async_generate_report(request_data: dict):
     csv_report_manager = CSVReportManager(
        findings, request
     )
-    report_csv = csv_report_manager.generate_report()
-    bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
-    expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
+    response = csv_report_manager.generate_report()
     
-    try:
-        session_s3 = boto3.Session().client('s3', region_name=settings.AWS_REGION)
-        response = upload_s3(
-            session_s3,
-            report_csv,
-            bucket,
-            KEY,
-        )
-        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-            url = get_url_presigned(
-                session_s3,
-                KEY,
-                bucket,
-                expires_in=expiration_time
-            )
-            logger.debug(f"REPORT FINDING: URL {url}")
-            create_notification(
-                event="url_report_finding",
-                subject="Reporte Finding is ready📄",
-                title="Reporte is ready",
-                description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
-                url=url,
-                recipients=[request.user.username],
-                icon="download",
-                color_icon="#096C11",
-                expiration_time=f"{int(expiration_time / 60)} minutes")
-
-            return response
-    except botocore.exceptions.ClientError as e:
-        logger.error(f"Failed to upload report to S3: {e}")
-        raise
-
 
 def get_excludes():
     return [

@@ -3,10 +3,16 @@ import sys
 import io
 import logging
 import csv
+import boto3
+import botocore.exceptions
 from abc import ABC, abstractmethod
+from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.http import HttpResponse
 from dojo.reports.custom_request import CustomRequest
+form dojo.models import GeneralSettings
+from dojo.reports.utils import get_url_presigned
+from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 
 
@@ -86,9 +92,38 @@ class CSVReportManager(BaseReportManager):
         excludes_list = self.get_excludes()
         allowed_foreign_keys = self.get_attributes()
         first_row = True
+        chunk_size = 1000
+        bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
+        expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
 
-        for finding in findings.iterator():
-            self.finding = finding
+        for counter, finding in enumerate(findings.iterator(chunck_size=chunk_size), start=1):
+            if counter % chunk_size == 0:
+                try:
+                    session_s3 = boto3.Session().client('s3', region_name=settings.AWS_REGION)
+                    url = get_url_presigned(
+                        session_s3,
+                        "reportes/reporte_rene.csv",
+                        bucket,
+                        expires_in=expiration_time
+                    )
+                    logger.debug(f"REPORT FINDING: URL {url}")
+                    create_notification(
+                        event="url_report_finding",
+                        subject="Reporte Finding is ready📄",
+                        title="Reporte is ready",
+                        description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
+                        url=url,
+                        recipients=[request.user.username],
+                        icon="download",
+                        color_icon="#096C11",
+                        expiration_time=f"{int(expiration_time / 60)} minutes")
+                    if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+
+                        return response
+                except botocore.exceptions.ClientError as e:
+                    logger.error(f"Failed to upload report to S3: {e}")
+                    raise
+
             if first_row:
                 fields = []
                 self.fields = fields
@@ -182,3 +217,50 @@ class CSVReportManager(BaseReportManager):
                 writer.writerow(fields)
         logger.debug("REPORT FINDING: size of buffer: " + str(sys.getsizeof(buffer)))
         return buffer
+
+
+def upload_file_multipart_s3(file_obj, bucket_name, object_name, chunk_size=5 * 1024 * 1024):
+    """
+    Sube un archivo a S3 en fragmentos (multipart upload) para evitar impacto en la base de datos.
+    file_obj: archivo tipo file-like object (por ejemplo, request.FILES['archivo'])
+    bucket_name: nombre del bucket S3
+    object_name: nombre del objeto en S3
+    chunk_size: tamaño de cada fragmento (por defecto 5MB)
+    """
+    s3_client = boto3.client('s3')
+    try:
+        # Inicia el multipart upload
+        mpu = s3_client.create_multipart_upload(Bucket=bucket_name, Key=object_name)
+        parts = []
+        part_number = 1
+        while True:
+            data = file_obj.read(chunk_size)
+            if not data:
+                break
+            part = s3_client.upload_part(
+                Bucket=bucket_name,
+                Key=object_name,
+                PartNumber=part_number,
+                UploadId=mpu['UploadId'],
+                Body=data
+            )
+            parts.append({'PartNumber': part_number, 'ETag': part['ETag']})
+            part_number += 1
+        # Completa el multipart upload
+        s3_client.complete_multipart_upload(
+            Bucket=bucket_name,
+            Key=object_name,
+            UploadId=mpu['UploadId'],
+            MultipartUpload={'Parts': parts}
+        )
+        return True
+    except (BotoCoreError, ClientError) as e:
+        logger.error(f"Error al subir archivo multipart a S3: {e}")
+        # Si hay error, aborta el multipart upload
+        if 'mpu' in locals():
+            s3_client.abort_multipart_upload(
+                Bucket=bucket_name,
+                Key=object_name,
+                UploadId=mpu['UploadId']
+            )
+        return False
