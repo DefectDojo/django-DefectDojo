@@ -705,6 +705,11 @@ TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
 USE_DB_POOL = env("DD_USE_DB_POOL")
 STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
 
+if STATEMENT_TIMEOUT:
+    if "OPTIONS" not in DATABASES["default"].keys():
+        DATABASES["default"]["OPTIONS"] = {}
+        DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
+
 # If the database engine is PostgreSQL, we add the pool configuration
 if USE_DB_POOL:
     if "OPTIONS" not in DATABASES["default"].keys():
@@ -714,7 +719,6 @@ if USE_DB_POOL:
     DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
     DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
-    DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
 
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
