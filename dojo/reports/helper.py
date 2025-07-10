@@ -18,6 +18,7 @@ from dojo.reports.report_manager import CSVReportManager
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.urls import reverse
 from dojo.notifications.helper import create_notification
+from django.conf import settings
 logger = logging.getLogger(__name__)
 
 BUCKET = 'mybuket-rene'
@@ -170,7 +171,7 @@ def async_generate_report(request_data: dict):
     expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
     
     try:
-        session_s3 = boto3.Session().client('s3', region_name="us-east-1")
+        session_s3 = boto3.Session().client('s3', region_name=settings.AWS_REGION)
         response = upload_s3(
             session_s3,
             report_csv,

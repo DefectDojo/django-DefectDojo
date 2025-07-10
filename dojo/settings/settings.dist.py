@@ -567,12 +567,14 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     return "".join(result_list)
 
 
+AWS_REGION = env("AWS_REGION", default="us-east-1")
+
+
 def get_secret(secret_name):
-    region_name = env("AWS_REGION")
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
+    client = session.client(service_name="secretsmanager", region_name=AWS_REGION)
 
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)

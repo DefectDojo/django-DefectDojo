@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0246_alter_finding_unique_id_from_tool'),
+        ('dojo', '0247_alter_test_engagement'),
     ]
 
     operations = [

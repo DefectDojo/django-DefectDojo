@@ -769,8 +769,9 @@ class CSVExportView(View):
                 "post_data": request.POST.dict(),
                 "user_id": request.user.id
             }
-            helper_reports.async_generate_report.apply_async(
-                args=(request_data,))
+            # helper_reports.async_generate_report.apply_async(
+            #     args=(request_data,))
+            helper_reports.async_generate_report(request_data)
             messages.add_message(
                 request,
                 messages.WARNING,
@@ -780,7 +781,7 @@ class CSVExportView(View):
                 ),
                 extra_tags="alert-warning"
             )
-            return redirect_to_return_url_or_else(request, reverse('open_findings')) # TODO: Validar reverse en ulr del product open finding
+            return redirect_to_return_url_or_else(request, reverse('open_findings'))
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
