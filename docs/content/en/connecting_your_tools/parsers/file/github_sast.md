@@ -1,5 +1,5 @@
 ---
-title: "Github SAST"
+title: "Github SAST Scan"
 toc_hide: true
 ---
 Import findings in JSON format from Github Code Scanning REST API:
