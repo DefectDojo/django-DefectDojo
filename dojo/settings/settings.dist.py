@@ -541,6 +541,7 @@ env = environ.FileAwareEnv(
     DD_TIMEOUT_CONNS=(int, 10),
     DD_USE_DB_POOL=(bool, False),
     DD_STATEMENT_TIMEOUT=(str, "10000"),
+    DD_STATEMENT_TIMEOUT_REPLICA=(str, "10000"),
 )
 
 
@@ -704,11 +705,18 @@ MAX_CONNS = env("DD_MAX_CONNS")
 TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
 USE_DB_POOL = env("DD_USE_DB_POOL")
 STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
+STATEMENT_TIMEOUT_REPLICA = env("DD_STATEMENT_TIMEOUT_REPLICA")
 
 if STATEMENT_TIMEOUT:
     if "OPTIONS" not in DATABASES["default"].keys():
         DATABASES["default"]["OPTIONS"] = {}
         DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
+
+if STATEMENT_TIMEOUT_REPLICA:
+    if "replica" in DATABASES.keys():
+        if "OPTIONS" not in DATABASES["replica"].keys():
+            DATABASES["default"]["OPTIONS"] = {}
+            DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT_REPLICA}"
 
 # If the database engine is PostgreSQL, we add the pool configuration
 if USE_DB_POOL:
