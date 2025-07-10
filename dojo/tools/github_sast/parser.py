@@ -21,34 +21,44 @@ class GithubSASTParser:
             rule = vuln.get("rule", {})
             inst = vuln.get("most_recent_instance", {})
             loc = inst.get("location", {})
-
-            title = rule.get("id")
+            html_url = vuln.get('html_url')
+            rule_id = rule.get("id")
+            title = f"{rule.get('description')} ({rule_id})"
             severity = rule.get("security_severity_level", "Info").title()
             active = vuln.get("state") == "open"
 
-            desc = rule.get("description", "") + "\n"
-            desc += f"**Location:** {loc.get('path')}:{loc.get('start_line')}\n"
-            desc += f"**Message:** {inst.get('message', {}).get('text')}\n"
-            desc += f"**Rule Severity:** {rule.get('severity')}\n"
+            # Build description with context
+            desc_lines = []
+            if html_url:
+                desc_lines.append(f"GitHub Alert: {html_url}")
+            if loc.get('path') and loc.get('start_line'):
+                desc_lines.append(f"Location: {loc['path']}:{loc['start_line']}")
+            msg = inst.get('message', {}).get('text')
+            if msg:
+                desc_lines.append(f"Message: {msg}")
+            if severity:
+                desc_lines.append(f"Rule Severity: {severity}")
+            if rule.get("full_description"):
+                desc_lines.append(f"Description: {rule.get('full_description')}")
+            description = "\n".join(desc_lines)
 
             finding = Finding(
                 title=title,
                 test=test,
-                description=desc,
+                description=description,
                 severity=severity,
                 active=active,
                 static_finding=True,
                 dynamic_finding=False,
-                unique_id_from_tool=f"{vuln.get('rule', {}).get('id')}|{vuln.get('url')}|{loc.get('start_line')}",
+                vuln_id_from_tool=rule_id
             )
 
-            # file path & line
+            # File path & line
             finding.file_path = loc.get('path')
             finding.line = loc.get('start_line')
 
-            # endpoint
-            html_url = vuln.get('html_url')
             if html_url:
+                finding.url = html_url
                 finding.unsaved_endpoints = [Endpoint.from_uri(html_url)]
 
             findings.append(finding)
