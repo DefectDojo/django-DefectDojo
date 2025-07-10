@@ -698,7 +698,7 @@ def view_engineer(request, eid):
     open_findings = (
         reporter_findings.filter(mitigated__isnull=True)
         .select_related("test__engagement__product__prod_type", "reporter")
-        .prefetch_related("risk_acceptance")
+        .prefetch_related("risk_acceptance_set")
     )
 
     # --------------------
