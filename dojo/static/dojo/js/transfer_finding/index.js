@@ -135,7 +135,9 @@ function innerData(data, findings_related){
             <td><a href="http://${host}/finding/${transfer_findings_finding.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id help help-toolpit" title="View Origin Finding" target="_blank" type="button">${transfer_findings_finding.findings.id} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>
             <td class="cls-transfer-finding-title">${transfer_findings_finding.findings.title}</td>
             <td>${transfer_findings_finding.findings.severity}</td>
-            <td>${transfer_findings_finding.findings.cve}</td>`
+            <td>${transfer_findings_finding.findings.cve}</td>
+            <td>${transfer_findings_finding.findings.file_path}</td>
+            <td>${ transfer_findings_finding.findings.description}</td>`
             if(["Transfer Accepted", "Transfer Expired"].includes(transfer_findings_finding.findings.risk_status)){
                 row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link help help-tooltip" title="View transfered finding" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
                 if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){

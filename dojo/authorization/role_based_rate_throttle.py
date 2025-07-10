@@ -19,6 +19,10 @@ class RoleBasedRateThrottle(UserRateThrottle):
                     self.rate = GeneralSettings.get_value(
                         "RATE_LIMIT_API_IMPORTERS",
                         "400/second")
+                elif request.user.global_role.role.name == "Maintainer":
+                    self.rate = GeneralSettings.get_value(
+                        "RATE_LIMIT_API_MAINTAINERS",
+                        "400/second")
             self.num_requests, self.duration = self.parse_rate(self.rate)
             self.key = self.get_cache_key(request, view)
             if self.key is None:
