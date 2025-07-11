@@ -10,8 +10,8 @@ class TestMayhemParser(DojoTestCase):
         if finding.cwe:
             self.assertIsInstance(finding.cwe, int)
         self.assertFalse(finding.static_finding)  # Mayhem is DAST!
-        self.assertTrue(True, finding.dynamic_finding)  # Mayhem is DAST!
-        self.assertIsInstance(finding.description, str) 
+        self.assertTrue(finding.dynamic_finding)  # Mayhem is DAST!
+        self.assertIsInstance(finding.description, str)
         self.assertEqual(1, finding.reporter_id)
 
     def test_mcode_many_report(self):
