@@ -304,13 +304,12 @@ def get_compliance_item(compliance, test, image_metadata=""):
 
     desc_parts.append(f"<p><strong>Description:</strong> {description}</p>")
 
-    if layer_time:
-        desc_parts.append(f"<p><strong>Layer Time:</strong> {layer_time}</p>")
-
     # Build impact field combining severity and image metadata
     impact_parts = [severity]
     if image_metadata:
         impact_parts.append(image_metadata)
+    if layer_time:
+        desc_parts.append(f"Layer Time: {layer_time}")
     impact_text = "\n".join(impact_parts)
 
     # create the finding object for compliance

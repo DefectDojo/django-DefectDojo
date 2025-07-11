@@ -21,43 +21,37 @@ class TestTwistlockParser(DojoTestCase):
         self.assertEqual(2, len(findings))
 
         # Find the vulnerability and compliance findings
-        vulnerability_finding = None
-        compliance_finding = None
         for finding in findings:
             if finding.title.startswith("Compliance:"):
-                compliance_finding = finding
+                # Verify compliance finding exists and has correct properties
+                self.assertIsNotNone(finding)
+                self.assertEqual("Compliance: (CIS_Kubernetes_v1.6.0 - 1.1) Ensure API server encryption is enabled", finding.title)
+                self.assertEqual("High", finding.severity)
+                self.assertIn("Compliance ID", finding.description)
+                self.assertIn("912", finding.description)
+                self.assertIn("Category", finding.description)
+                self.assertIn("Kubernetes", finding.description)
+                self.assertIn("Encrypting etcd data at rest", finding.description)
+                self.assertIn("Layer Time", finding.description)
+                self.assertEqual("912", finding.vuln_id_from_tool)
+                self.assertIn("compliance", finding.unsaved_tags)
+                self.assertIn("kubernetes", finding.unsaved_tags)
+
+                # Verify compliance finding has image metadata in impact field
+                self.assertIn("Image ID:", finding.impact)
+                self.assertIn("Distribution:", finding.impact)
+                self.assertTrue("\n" in finding.impact)
             else:
-                vulnerability_finding = finding
+                # Verify vulnerability finding exists and has correct properties
+                self.assertIsNotNone(finding)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2013-7459", finding.unsaved_vulnerability_ids[0])
 
-        # Verify vulnerability finding exists and has correct properties
-        self.assertIsNotNone(vulnerability_finding)
-        self.assertEqual(1, len(vulnerability_finding.unsaved_vulnerability_ids))
-        self.assertEqual("CVE-2013-7459", vulnerability_finding.unsaved_vulnerability_ids[0])
-
-        # Verify vulnerability finding has image metadata in impact field
-        self.assertIn("Image ID:", vulnerability_finding.impact)
-        self.assertIn("Distribution:", vulnerability_finding.impact)
-        self.assertIn("Debian GNU/Linux 9", vulnerability_finding.impact)
-        self.assertTrue("\n" in vulnerability_finding.impact)
-
-        # Verify compliance finding exists and has correct properties
-        self.assertIsNotNone(compliance_finding)
-        self.assertEqual("Compliance: (CIS_Kubernetes_v1.6.0 - 1.1) Ensure API server encryption is enabled", compliance_finding.title)
-        self.assertEqual("High", compliance_finding.severity)
-        self.assertIn("Compliance ID", compliance_finding.description)
-        self.assertIn("912", compliance_finding.description)
-        self.assertIn("Category", compliance_finding.description)
-        self.assertIn("Kubernetes", compliance_finding.description)
-        self.assertIn("Encrypting etcd data at rest", compliance_finding.description)
-        self.assertIn("Layer Time", compliance_finding.description)
-        self.assertEqual("912", compliance_finding.vuln_id_from_tool)
-        self.assertIn("compliance", compliance_finding.unsaved_tags)
-        self.assertIn("kubernetes", compliance_finding.unsaved_tags)
-
-        # Verify compliance finding has image metadata in impact field
-        self.assertIn("Image ID:", compliance_finding.impact)
-        self.assertIn("Distribution:", compliance_finding.impact)
-        self.assertTrue("\n" in compliance_finding.impact)
+                # Verify vulnerability finding has image metadata in impact field
+                self.assertIn("Image ID:", finding.impact)
+                self.assertIn("Distribution:", finding.impact)
+                self.assertIn("Debian GNU/Linux 9", finding.impact)
+                self.assertTrue("\n" in finding.impact)
 
     def test_parse_csv_with_timestamps_and_metadata(self):
         testfile = (
@@ -113,15 +107,12 @@ class TestTwistlockParser(DojoTestCase):
         self.assertEqual(2, len(findings))
 
         # Find the vulnerability finding (not compliance)
-        vulnerability_finding = None
         for finding in findings:
             if not finding.title.startswith("Compliance:"):
-                vulnerability_finding = finding
+                self.assertIsNotNone(finding)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("PRISMA-2021-0013", finding.unsaved_vulnerability_ids[0])
                 break
-
-        self.assertIsNotNone(vulnerability_finding)
-        self.assertEqual(1, len(vulnerability_finding.unsaved_vulnerability_ids))
-        self.assertEqual("PRISMA-2021-0013", vulnerability_finding.unsaved_vulnerability_ids[0])
 
     def test_parse_file_with_many_vulns(self):
         testfile = (get_unit_tests_scans_path("twistlock") / "many_vulns.json").open(encoding="utf-8")
