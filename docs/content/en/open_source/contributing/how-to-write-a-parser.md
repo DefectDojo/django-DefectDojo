@@ -182,7 +182,7 @@ There's also a helper method to validate the vector and extract the base score a
         finding.cvssv4 = cvss_data["cvssv4"]
         # we don't set any score fields as those will be overwritten by Defect Dojo
 ```
-Not all values have to be used as scan reports usuyall provide their own value for `severity`.
+Not all values have to be used as scan reports usually provide their own value for `severity`.
 And sometimes also for `cvss_score`. Defect Dojo will not overwrite any `cvss3_score` or `cvss4_score`.
 If no score is set, Defect Dojo will use the `cvss` library to calculate the score.
 The response also has the detected major version of the CVSS vector in `cvss_data["major_version"]`.
