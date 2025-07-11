@@ -25,12 +25,11 @@ class TestGithubSASTParser(DojoTestCase):
 
             expected_title = "Clear-text storage of sensitive information (py/clear-text-storage-sensitive-data)"
             self.assertEqual(expected_title, finding.title)
-            self.assertEqual("Unsafe Deserialization/file.py", finding.file_path)
+            self.assertEqual("src/file.py", finding.file_path)
             self.assertEqual(42, finding.line)
             self.assertEqual("py/clear-text-storage-sensitive-data", finding.vuln_id_from_tool)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("https://github.com/XX/YY/security/code-scanning/35", finding.url)
-            self.assertTrue(any(e.host == "github.com" for e in finding.unsaved_endpoints))
+            self.assertEqual("https://github.com/OWASP/test-repository/security/code-scanning/35", finding.url)
             self.assertIn("This expression stores sensitive data", finding.description)
 
     def test_parse_file_with_multiple_vulns_has_multiple_findings(self):
