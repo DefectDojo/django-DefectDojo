@@ -9,8 +9,10 @@ class TestMayhemParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         if finding.cwe:
             self.assertIsInstance(finding.cwe, int)
-        self.assertEqual(False, finding.static_finding)  # Mayhem is DAST!
-        self.assertEqual(True, finding.dynamic_finding)  # Mayhem is DAST!
+        self.assertFalse(finding.static_finding)  # Mayhem is DAST!
+        self.assertTrue(True, finding.dynamic_finding)  # Mayhem is DAST!
+        self.assertIsInstance(finding.description, str) 
+        self.assertEqual(1, finding.reporter_id)
 
     def test_mcode_many_report(self):
         with (
@@ -21,6 +23,15 @@ class TestMayhemParser(DojoTestCase):
             self.assertEqual(8, len(findings))
             for finding in findings:
                 self.common_checks(finding)
+            # Sample a finding
+            finding = findings[3]
+            self.assertEqual("Uncontrolled Resource Consumption", finding.title)
+            self.assertEqual(400, finding.cwe)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("https://www.mayhem.security/", finding.references)
+            self.assertEqual(48, finding.line)
+            self.assertEqual("app/src/gps_uploader.c", finding.file_path)
+            self.assertEqual("MI102", finding.vuln_id_from_tool)
 
     def test_mapi_many_report(self):
         with (
@@ -31,6 +42,14 @@ class TestMayhemParser(DojoTestCase):
             self.assertEqual(20, len(findings))
             for finding in findings:
                 self.common_checks(finding)
+            # Sample a finding
+            finding = findings[7]
+            self.assertEqual("Internal Server Error in POST /pet.", finding.title)
+            self.assertEqual(550, finding.cwe)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(497, finding.line)
+            self.assertEqual("io/swagger/oas/inflector/controllers/OpenAPIOperationController.java", finding.file_path)
+            self.assertEqual("internal-server-error (io.swagger.oas.inflector.utils.ApiException)", finding.vuln_id_from_tool)
 
     def test_mcode_one_report(self):
         with (
@@ -41,7 +60,11 @@ class TestMayhemParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.common_checks(finding)
+            self.assertEqual("Improper Input Validation", finding.title)
             self.assertEqual(20, finding.cwe)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("https://www.mayhem.security/", finding.references)
+            self.assertEqual("MI101", finding.vuln_id_from_tool)
 
     def test_mapi_one_report(self):
         with (
@@ -52,7 +75,10 @@ class TestMayhemParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.common_checks(finding)
+            self.assertEqual("Default Credentials Used in GET /info.", finding.title)
             self.assertEqual(1392, finding.cwe)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("default-credentials", finding.vuln_id_from_tool)
 
     def test_mcode_no_vulns_report(self):
         with (
