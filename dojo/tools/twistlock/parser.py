@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import textwrap
+from datetime import datetime
 
 from dojo.models import Finding
 
@@ -24,6 +25,71 @@ class TwistlockCSVParser:
         data_cvss = row.get("CVSS", "")
         data_description = row.get("Description", "")
 
+        # Parse timestamp information (Item 4)
+        published_date = row.get("Published", "")
+        discovered_date = row.get("Discovered", "")
+        finding_date = None
+
+        # Use Published date as primary, fallback to Discovered
+        date_str = published_date or discovered_date
+        if date_str:
+            try:
+                # Handle format like "2020-09-04 00:15:00.000"
+                finding_date = datetime.strptime(date_str.split(".")[0], "%Y-%m-%d %H:%M:%S").date()
+            except ValueError:
+                try:
+                    # Handle alternative formats
+                    finding_date = datetime.strptime(date_str[:10], "%Y-%m-%d").date()
+                except ValueError:
+                    logger.warning(f"Could not parse date: {date_str}")
+
+        # Build container/image metadata for impact field (Item 3)
+        impact_parts = []
+
+        # Registry and repository information which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
+        registry = row.get("Registry", "")
+        repository = row.get("Repository", "")
+        tag = row.get("Tag", "")
+        image_id = row.get("Id", "")
+        distro = row.get("Distro", "")
+
+        if registry:
+            impact_parts.append(f"Registry: {registry}")
+        if repository:
+            impact_parts.append(f"Repository: {repository}")
+        if tag:
+            impact_parts.append(f"Tag: {tag}")
+        if image_id:
+            impact_parts.append(f"Image ID: {image_id}")
+        if distro:
+            impact_parts.append(f"Distribution: {distro}")
+
+        # Host and container information
+        hosts = row.get("Hosts", "")
+        containers = row.get("Containers", "")
+        clusters = row.get("Clusters", "")
+        binaries = row.get("Binaries", "")
+        custom_labels = row.get("Custom Labels", "")
+
+        if hosts:
+            impact_parts.append(f"Hosts: {hosts}")
+        if containers:
+            impact_parts.append(f"Containers: {containers}")
+        if clusters:
+            impact_parts.append(f"Clusters: {clusters}")
+        if binaries:
+            impact_parts.append(f"Binaries: {binaries}")
+        if custom_labels:
+            impact_parts.append(f"Custom Labels: {custom_labels}")
+
+        # Add timestamp information to impact
+        if published_date:
+            impact_parts.append(f"Published: {published_date}")
+        if discovered_date:
+            impact_parts.append(f"Discovered: {discovered_date}")
+
+        impact_text = "\n".join(impact_parts) if impact_parts else data_severity
+
         if data_vulnerability_id and data_package_name:
             title = (
                 data_vulnerability_id
@@ -40,6 +106,7 @@ class TwistlockCSVParser:
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
+            date=finding_date,
             severity=convert_severity(data_severity),
             description=data_description
             + "<p> Vulnerable Package: "
@@ -52,12 +119,8 @@ class TwistlockCSVParser:
                 data_package_name, width=200, placeholder="...",
             ),
             component_version=data_package_version,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False,
-            mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
-            impact=data_severity,
+            impact=impact_text,
         )
         finding.description = finding.description.strip()
         if data_vulnerability_id:
@@ -116,19 +179,53 @@ class TwistlockJsonParser:
     def get_items(self, tree, test):
         items = {}
         if "results" in tree:
-            vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
+            # Extract image metadata for impact field (Item 3)
+            result = tree["results"][0]
+            image_metadata = self.build_image_metadata(result)
+
+            # Parse vulnerabilities
+            vulnerabilityTree = result.get("vulnerabilities", [])
             for node in vulnerabilityTree:
-                item = get_item(node, test)
+                item = get_item(node, test, image_metadata)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
                     + str(node["severity"]),
                 )
                 items[unique_key] = item
+
+            # Parse compliance findings
+            complianceTree = result.get("compliances", [])
+            for node in complianceTree:
+                item = get_compliance_item(node, test, image_metadata)
+                # Create unique key for compliance findings - prefer ID if available
+                if node.get("id"):
+                    unique_key = f"compliance_{node['id']}"
+                else:
+                    # Fallback to hash of title + description
+                    unique_key = "compliance_" + hashlib.md5(
+                        (node.get("title", "") + node.get("description", "")).encode("utf-8"),
+                        usedforsecurity=False,
+                    ).hexdigest()
+                items[unique_key] = item
         return list(items.values())
 
+    def build_image_metadata(self, result):
+        """Build image metadata string for impact field"""
+        metadata_parts = []
 
-def get_item(vulnerability, test):
+        image_id = result.get("id", "")
+        distro = result.get("distro", "")
+
+        if image_id:
+            metadata_parts.append(f"Image ID: {image_id}")
+        if distro:
+            metadata_parts.append(f"Distribution: {distro}")
+
+        return "\n".join(metadata_parts)
+
+
+def get_item(vulnerability, test, image_metadata=""):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
@@ -146,6 +243,12 @@ def get_item(vulnerability, test):
     riskFactors = (
         vulnerability.get("riskFactors", "No risk factors.")
     )
+
+    # Build impact field combining severity and image metadata which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
+    impact_parts = [severity]
+    if image_metadata:
+        impact_parts.append(image_metadata)
+    impact_text = "\n".join(impact_parts)
 
     # create the finding object
     finding = Finding(
@@ -166,15 +269,67 @@ def get_item(vulnerability, test):
         references=vulnerability.get("link"),
         component_name=vulnerability.get("packageName", ""),
         component_version=vulnerability.get("packageVersion", ""),
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated=None,
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
-        impact=severity,
+        cvssv3_score=cvss,
+        impact=impact_text,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]] if "id" in vulnerability else None
     finding.description = finding.description.strip()
+
+    return finding
+
+
+def get_compliance_item(compliance, test, image_metadata=""):
+    """Create a Finding object for compliance issues"""
+    severity = (
+        convert_severity(compliance["severity"])
+        if "severity" in compliance
+        else "Info"
+    )
+
+    title = compliance.get("title", "Unknown Compliance Issue")
+    description = compliance.get("description", "No description specified")
+    compliance_id = compliance.get("id", "")
+    category = compliance.get("category", "")
+    layer_time = compliance.get("layerTime", "")
+
+    # Build comprehensive description
+    desc_parts = [f"<p><strong>Compliance Issue:</strong> {title}</p>"]
+
+    if compliance_id:
+        desc_parts.append(f"<p><strong>Compliance ID:</strong> {compliance_id}</p>")
+
+    if category:
+        desc_parts.append(f"<p><strong>Category:</strong> {category}</p>")
+
+    desc_parts.append(f"<p><strong>Description:</strong> {description}</p>")
+
+    # Build impact field combining severity and image metadata
+    impact_parts = [severity]
+    if image_metadata:
+        impact_parts.append(image_metadata)
+    if layer_time:
+        desc_parts.append(f"Layer Time: {layer_time}")
+    impact_text = "\n".join(impact_parts)
+
+    # create the finding object for compliance
+    finding = Finding(
+        title=f"Compliance: {title}",
+        test=test,
+        severity=severity,
+        description="".join(desc_parts),
+        mitigation="Review and address the compliance issue as described in the description.",
+        severity_justification=f"Compliance severity: {severity}",
+        impact=impact_text,
+        vuln_id_from_tool=str(compliance_id) if compliance_id else None,
+    )
+    finding.description = finding.description.strip()
+
+    # Add compliance-specific tags
+    tags = ["compliance"]
+    if category:
+        tags.append(category.lower())
+    finding.unsaved_tags = tags
 
     return finding
 
