@@ -145,7 +145,6 @@ def is_keep_in_sync_with_jira(finding):
     keep_in_sync_enabled = False
     # Check if there is a jira issue that needs to be updated
     jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    # Only push if the finding is not in a group
     if jira_issue_exists:
         # Determine if any automatic sync should occur
         keep_in_sync_enabled = get_jira_instance(finding).finding_jira_sync
