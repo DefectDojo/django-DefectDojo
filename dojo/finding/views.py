@@ -1410,7 +1410,9 @@ def reopen_finding(request, fid):
         status.save()
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
-    jira_helper.save_and_push_to_jira(finding)
+    finding.save(dedupe_option=False, push_to_jira=False)
+    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+        jira_helper.push_to_jira(finding)
 
     reopen_external_issue(finding, "re-opened by defectdojo", "github")
 

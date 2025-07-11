@@ -1,5 +1,6 @@
 # from unittest import skip
 import logging
+from unittest.mock import patch
 
 from crum import impersonate
 from django.urls import reverse
@@ -70,7 +71,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.testuser = User.objects.get(username="admin")
         self.testuser.usercontactinfo.block_execution = True
         self.testuser.usercontactinfo.save()
-
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
@@ -321,7 +321,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
 
-    def test_import_grouped_reopen_expired_sla(self):
+    def test_import_grouped_reopen_expired_risk_acceptance(self):
         # steps
         # import scan, make sure they are in grouped JIRA
         # risk acceptance all the grouped findings, make sure they are closed in JIRA
@@ -367,6 +367,59 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # We do this to update the JIRA
         for finding in ra_data["accepted_findings"]:
             self.patch_finding_api(finding, {"push_to_jira": True})
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @patch("dojo.decorators.we_want_async", return_value=False)
+    def test_import_grouped_reopen_expired_risk_acceptance_with_finding_sync(self, mock):
+        # steps
+        # import scan, make sure they are in grouped JIRA
+        # risk acceptance all the grouped findings, make sure they are closed in JIRA
+        # expire risk acceptance on all grouped findings, make sure they are open in JIRA
+        JIRA_Instance.objects.update(finding_jira_sync=True)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        findings = self.get_test_findings_api(test_id)
+        finding_id = findings["results"][0]["id"]
+
+        ra_data = {
+            "name": "Accept: Unit test",
+            "accepted_findings": [],
+            "recommendation": "A",
+            "recommendation_details": "recommendation 1",
+            "decision": "A",
+            "decision_details": "it has been decided!",
+            "accepted_by": "pointy haired boss",
+            "owner": 1,
+            "expiration_date": "2024-12-31",
+            "reactivate_expired": True,
+            }
+
+        for finding in findings["results"]:
+            ra_data["accepted_findings"].append(finding["id"])
+
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+
+        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        self.assertEqual("/engagement/1", response.url)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        pre_jira_status = post_jira_status
+        ra = Risk_Acceptance.objects.last()
+        ra_helper.expire_now(ra)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
 
         post_jira_status = self.get_jira_issue_status(finding_id)
         self.assertNotEqual(pre_jira_status, post_jira_status)
