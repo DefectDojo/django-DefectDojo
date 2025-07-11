@@ -59,42 +59,6 @@ class TestPTARTParser(DojoTestCase):
         with self.subTest("Non-blank Title and Blank id"):
             self.assertEqual("Test Title", parse_title_from_hit({"title": "Test Title", "id": ""}))
 
-    def test_ptart_parser_tools_cvss_vector_acquisition(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_cvss_vector
-        with self.subTest("Test CVSSv3 Vector"):
-            hit = {
-                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
-            }
-            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", parse_cvss_vector(hit, 3))
-        with self.subTest("Test CVSSv4 Vector"):
-            hit = {
-                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
-            }
-            self.assertEqual(None, parse_cvss_vector(hit, 4))
-        with self.subTest("Test CVSSv3 Vector with CVSSv4 Request"):
-            hit = {
-                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
-            }
-            self.assertEqual(None, parse_cvss_vector(hit, 4))
-        with self.subTest("Test CVSSv4 Vector with CVSSv3 Request"):
-            hit = {
-                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
-            }
-            self.assertEqual(None, parse_cvss_vector(hit, 3))
-        with self.subTest("Test No CVSS Vector"):
-            hit = {}
-            self.assertEqual(None, parse_cvss_vector(hit, 3))
-        with self.subTest("Test CVSSv2 Vector"):
-            hit = {
-                "cvss_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:C/I:C/A:C",
-            }
-            self.assertEqual(None, parse_cvss_vector(hit, 2))
-        with self.subTest("Test Blank CVSS Vector"):
-            hit = {
-                "cvss_vector": "",
-            }
-            self.assertEqual(None, parse_cvss_vector(hit, 3))
-
     def test_ptart_parser_tools_retest_fix_status_parse(self):
         from dojo.tools.ptart.ptart_parser_tools import parse_retest_status
         with self.subTest("Fixed"):

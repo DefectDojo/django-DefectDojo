@@ -307,6 +307,7 @@ class BaseEngineParser:
     #####
     def parse_cvss_vector(self, value: str) -> str | None:
         # CVSS4 vectors don't parse with the handy-danty parse method :(
+        # TODO: This needs a rewrite to use dojo.utils.parse_cvss_data
         try:
             if (severity := cvss.CVSS4(value).severity) in Finding.SEVERITIES:
                 return severity

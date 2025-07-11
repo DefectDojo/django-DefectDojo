@@ -271,7 +271,9 @@ class ProductTest(BaseTestCase):
         # cvssv3 field
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element(By.ID, "id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding")
+        # Note item [0] is a meta tag on the top of the page with name "description", so we use [1]
+        driver.execute_script("document.getElementsByName('description')[1].style.display = 'inline'")
+        driver.find_elements(By.NAME, "description")[1].send_keys(Keys.TAB, "This is just a test finding")
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("REF-1\nREF-2")
         # Finding Mitigation
