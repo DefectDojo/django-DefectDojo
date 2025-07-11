@@ -535,13 +535,13 @@ class ImportScanForm(forms.Form):
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
     close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This only affects findings within the same engagement.",
-                                            label="Close old findings within this engagement",
+                                                        "This affects findings within the same engagement by default.",
+                                            label="Close old findings",
                                             required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This only affects findings within the same product.",
+                                                        "This affects findings within the same product.",
                                             label="Close old findings within this product",
                                             required=False,
                                             initial=False)
