@@ -48,7 +48,7 @@ class KiuwanSCAParser:
             # We want one unique finding in DD for each component affected:
             for component in components:
                 finding = Finding(test=test)
-                finding.unique_id_from_tool = row["id"]
+                finding.unique_id_from_tool = f"{row['cve']}|{component.get('artifact')}|{component.get('version')}"
                 finding.cve = row["cve"]
                 finding.description = row["description"]
                 finding.severity = self.SEVERITY[row["securityRisk"]]
@@ -74,7 +74,11 @@ class KiuwanSCAParser:
 
                 key = hashlib.sha256(
                     (
-                        finding.description
+                        str(finding.unique_id_from_tool)
+                        + "|"
+                        + finding.cve
+                        + "|"
+                        + finding.description
                         + "|"
                         + finding.severity
                         + "|"
@@ -82,7 +86,7 @@ class KiuwanSCAParser:
                         + "|"
                         + finding.component_version
                         + "|"
-                        + str(finding.cwe)
+                        + str(finding.cwe or "")
                     ).encode("utf-8"),
                 ).hexdigest()
 
