@@ -1336,7 +1336,7 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings_count, 4)
 
     # close_old_findings functionality: second import to different engagement with different service should not close findings from the first engagement
-    def test_import_param_close_old_findings_different_engagements_different_services(self):
+    def test_reimport_close_old_findings_different_engagements_different_services(self):
         logger.debug("importing clair report with service A into engagement 1")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import1 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, engagement=1, close_old_findings=True, service="service_A")
