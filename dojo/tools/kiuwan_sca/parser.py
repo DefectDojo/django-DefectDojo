@@ -48,7 +48,7 @@ class KiuwanSCAParser:
             # We want one unique finding in DD for each component affected:
             for component in components:
                 finding = Finding(test=test)
-                finding.unique_id_from_tool = str(row['id'])
+                finding.unique_id_from_tool = str(row["id"])
                 finding.cve = row["cve"]
                 finding.description = row["description"]
                 finding.severity = self.SEVERITY[row["securityRisk"]]
