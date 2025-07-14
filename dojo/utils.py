@@ -30,7 +30,7 @@ from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.db.models import Case, Count, IntegerField, Q, Subquery, Sum, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Subquery, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -578,40 +578,31 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-def count_findings(findings):
-    product_count = {}
-    finding_count = {"low": 0, "med": 0, "high": 0, "crit": 0}
-    for f in findings:
-        product = f.test.engagement.product
-        if product in product_count:
-            product_count[product][4] += 1
-            if f.severity == "Low":
-                product_count[product][3] += 1
-                finding_count["low"] += 1
-            if f.severity == "Medium":
-                product_count[product][2] += 1
-                finding_count["med"] += 1
-            if f.severity == "High":
-                product_count[product][1] += 1
-                finding_count["high"] += 1
-            if f.severity == "Critical":
-                product_count[product][0] += 1
-                finding_count["crit"] += 1
-        else:
-            product_count[product] = [0, 0, 0, 0, 0]
-            product_count[product][4] += 1
-            if f.severity == "Low":
-                product_count[product][3] += 1
-                finding_count["low"] += 1
-            if f.severity == "Medium":
-                product_count[product][2] += 1
-                finding_count["med"] += 1
-            if f.severity == "High":
-                product_count[product][1] += 1
-                finding_count["high"] += 1
-            if f.severity == "Critical":
-                product_count[product][0] += 1
-                finding_count["crit"] += 1
+def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict[str, int]]:
+    agg = (
+        findings.values(prod_id=F("test__engagement__product_id"))
+        .annotate(
+            crit=Count("id", filter=Q(severity="Critical")),
+            high=Count("id", filter=Q(severity="High")),
+            med=Count("id", filter=Q(severity="Medium")),
+            low=Count("id", filter=Q(severity="Low")),
+            total=Count("id"),
+        )
+    )
+    rows = list(agg)
+
+    from dojo.models import Product  # imported lazily to avoid circulars
+
+    products = Product.objects.in_bulk([r["prod_id"] for r in rows])
+    product_count = {
+        products[r["prod_id"]]: [r["crit"], r["high"], r["med"], r["low"], r["total"]] for r in rows
+    }
+    finding_count = {
+        "low": sum(r["low"] for r in rows),
+        "med": sum(r["med"] for r in rows),
+        "high": sum(r["high"] for r in rows),
+        "crit": sum(r["crit"] for r in rows),
+    }
     return product_count, finding_count
 
 
