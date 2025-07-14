@@ -7,7 +7,7 @@ class TestGithubSASTParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         """Empty list should yield no findings"""
         with (get_unit_tests_scans_path("github_sast") / "github_sast_zero_vul.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = GithubSASTParser()
             findings = parser.get_findings(testfile, Test())
@@ -35,7 +35,7 @@ class TestGithubSASTParser(DojoTestCase):
     def test_parse_file_with_multiple_vulns_has_multiple_findings(self):
         """Multiple entries produce corresponding findings"""
         with (get_unit_tests_scans_path("github_sast") / "github_sast_many_vul.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = GithubSASTParser()
             findings = parser.get_findings(testfile, Test())
