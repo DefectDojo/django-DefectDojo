@@ -2337,6 +2337,14 @@ class Finding(models.Model):
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
+    cve_list = TagField(blank=True,
+                        force_lowercase=False,
+                        case_sensitive=True,
+                        max_count=0,
+                        space_delimiter=False,
+                        autocomplete_view="cve_list_autocomplete_url_name",
+                        help_text=_("A list of CVE IDs associated with this finding. This is used to store multiple CVEs for a single finding."),
+                        verbose_name=_("CVE List"))
     epss_score = models.FloatField(default=None, null=True, blank=True,
                               verbose_name=_("EPSS Score"),
                               help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
@@ -4699,6 +4707,7 @@ tagulous.admin.register(Test.tags)
 tagulous.admin.register(Test.inherited_tags)
 tagulous.admin.register(Finding.tags)
 tagulous.admin.register(Finding.inherited_tags)
+tagulous.admin.register(Finding.cve_list)
 tagulous.admin.register(Engagement.tags)
 tagulous.admin.register(Engagement.inherited_tags)
 tagulous.admin.register(Endpoint.tags)

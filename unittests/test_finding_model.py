@@ -330,7 +330,6 @@ class TestFindingModel(DojoTestCase):
             test=test,
             reporter=user,
             title="test_finding",
-            severity="Critical",
             date=datetime.now().date())
         finding.cvssv3 = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
         finding.save()
@@ -357,6 +356,49 @@ class TestFindingModel(DojoTestCase):
 
         # we already have more cvssv3 test in test_rest_framework.py and finding_test.py
         # the above here only shows that invalid vectors can be saved
+
+    def test_finding_with_cve_list(self):
+        """Tests creating, updating, and filtering a finding with the cve_list field."""
+        # 1. Create a finding with a cve_list
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+
+        cve_list = sorted(["CVE-2025-12345", "CVE-2025-67890"])
+        finding = Finding.objects.create(
+            test=test,
+            title="Test Finding with CVE List",
+            description="This is a test finding with a CVE list.",
+            cve_list=cve_list,
+        )
+        finding.save()
+
+        retrieved_finding = Finding.objects.get(id=finding.id)
+        saved_cves = sorted([str(cve) for cve in retrieved_finding.cve_list.all()])
+        self.assertEqual(saved_cves, cve_list)
+
+        # 2. Update the cve_list of the finding
+        updated_cve_list = sorted(["CVE-2025-11111", "CVE-2025-22222"])
+        retrieved_finding.cve_list.set(updated_cve_list)
+        retrieved_finding.save()
+
+        updated_finding = Finding.objects.get(id=finding.id)
+        final_cves = sorted([str(cve) for cve in updated_finding.cve_list.all()])
+        self.assertEqual(final_cves, updated_cve_list)
+
+        # 3. Filter findings by cve_list
+        cve_list_to_be_filtered = ["CVE-2025-11111"]
+        other_finding = Finding.objects.create(
+            test=test,
+            title="Other Finding",
+            description="This is another test finding with a CVE list.",
+            cve_list=cve_list_to_be_filtered,
+        )
+
+        filtered_finding = Finding.objects.filter(cve_list__name__in=cve_list_to_be_filtered)
+        self.assertIn(updated_finding, filtered_finding)
+        self.assertIn(other_finding, filtered_finding)
 
 
 class TestFindingSLAExpiration(DojoTestCase):

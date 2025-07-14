@@ -399,6 +399,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
     fields.extend([
         "date",
         "cwe",
+        "cve_list",
         "severity",
         "last_reviewed",
         "last_status_update",

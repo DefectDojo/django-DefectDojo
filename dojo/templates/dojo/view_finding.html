@@ -914,6 +914,10 @@
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
               <pre>{{ finding.description|markdown_render|default_if_none:"" }}</pre>
+              {% if finding.cve_list %}
+                <b>CVEs:</b> {{ finding.cve_list|join:", " }}
+              {% endif %} 
+              
             </div>
         </div>
 

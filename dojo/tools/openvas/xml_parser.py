@@ -44,6 +44,19 @@ class OpenVASXMLParser:
                 if field.tag == "nvt":
                     description.append(f"**NVT**: {field.text}")
                     script_id = field.get("oid") or field.text
+
+                    refs = field.find("refs")
+                    cve_list = []
+                    if refs is not None:
+                        cve_list = [ref.get("id") for ref in refs.findall("ref") if ref.get("type") == "cve"]
+
+                    solution = field.find("solution")
+                    mitigation_text = ""
+                    if solution is not None:
+                        solution_type = solution.attrib.get("type", "text")
+                        solution_text = solution.text or ""
+                        mitigation_text = str(solution_type) + "\n\n" + str(solution_text)
+
                 if field.tag == "severity":
                     description.append(f"**Severity**: {field.text}")
                 if field.tag == "threat":
@@ -62,6 +75,8 @@ class OpenVASXMLParser:
                 dynamic_finding=True,
                 static_finding=False,
                 vuln_id_from_tool=script_id,
+                cve_list=cve_list,
+                mitigation=mitigation_text,
             )
             finding.unsaved_endpoints = [unsaved_endpoint]
             findings.append(finding)
