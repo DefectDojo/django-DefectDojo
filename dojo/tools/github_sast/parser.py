@@ -1,5 +1,6 @@
 import json
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Finding
 
 
 class GithubSASTParser:
@@ -15,7 +16,8 @@ class GithubSASTParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         if not isinstance(data, list):
-            raise ValueError("Invalid SAST report format, expected a JSON list of alerts.")
+            error_msg = "Invalid SAST report format, expected a JSON list of alerts."
+            raise TypeError(error_msg)
 
         findings = []
         for vuln in data:
