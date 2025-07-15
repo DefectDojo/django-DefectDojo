@@ -1760,6 +1760,7 @@ class FindingFilterHelper(FilterSet):
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
             'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
+    kev_date = DateFilter(field_name="kev_date", lookup_expr="exact", label="Added to KEV On")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1776,6 +1777,9 @@ class FindingFilterHelper(FilterSet):
             ("service", "service"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
+            ("known_exploited", "known_exploited"),
+            ("ransomware_used", "ransomware_used"),
+            ("kev_date", "kev_date"),
         ),
         field_labels={
             "numerical_severity": "Severity",
@@ -1786,6 +1790,9 @@ class FindingFilterHelper(FilterSet):
             "test__engagement__product__name": "Product Name",
             "epss_score": "EPSS Score",
             "epss_percentile": "EPSS Percentile",
+            "known_exploited": "Known Exploited",
+            "ransomware_used": "Ransomware Used",
+            "kev_date": "Date added to KEV",
         },
     )
 
