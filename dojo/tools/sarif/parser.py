@@ -127,7 +127,7 @@ class SarifParser:
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
         for result in run.get("results", []):
-            result_items = get_items_from_result(result, rules, artifacts, run_date)
+            result_items = self.get_items_from_result(result, rules, artifacts, run_date)
             if result_items:
                 items.extend(result_items)
         return items
@@ -142,6 +142,48 @@ class SarifParser:
             return None
         # if the data is here we try to convert it to datetime
         return dateutil.parser.isoparse(raw_date)
+
+    # Extension points for subclasses
+    def get_items_from_result(self, result, rules, artifacts, run_date):
+        """
+        Main method to extract findings from a SARIF result.
+        This method can be overridden by subclasses for custom behavior.
+        """
+        return get_items_from_result_extensible(self, result, rules, artifacts, run_date)
+
+    def get_finding_cwes(self, result):
+        """
+        Hook method for subclasses to extract custom CWE values from result.
+        Override this method to add custom CWE extraction logic.
+        """
+        return []
+
+    def get_finding_title(self, result, rule, location):
+        """
+        Hook method for subclasses to customize title.
+        Override this method to add custom title formatting.
+        """
+        return get_title(result, rule)
+
+    def get_finding_description(self, result, rule, location):
+        """
+        Hook method for subclasses to customize description.
+        Override this method to add custom description formatting.
+        """
+        return get_description(result, rule, location)
+
+    def get_finding_type(self):
+        """
+        Hook method for subclasses to specify finding type.
+        Returns tuple of (static_finding, dynamic_finding).
+        """
+        return (True, False)  # SARIF is static by definition
+
+    def customize_finding(self, finding, result, rule, location):
+        """
+        Hook method for subclasses to customize the finding after creation.
+        Override this method to add custom fields or modify the finding.
+        """
 
 
 def get_rules(run):
@@ -176,6 +218,16 @@ def get_rule_cwes(rule):
             search_cwe(value, cwes)
         return cwes
 
+    # Check for CWE values in rule properties (e.g., Snyk Code)
+    if "properties" in rule and "cwe" in rule["properties"]:
+        cwe_values = rule["properties"]["cwe"]
+        if isinstance(cwe_values, list):
+            for cwe_value in cwe_values:
+                search_cwe(cwe_value, cwes)
+        else:
+            search_cwe(cwe_values, cwes)
+        return cwes
+
     for tag in get_properties_tags(rule):
         search_cwe(tag, cwes)
     return cwes
@@ -187,6 +239,25 @@ def get_result_cwes_properties(result):
     if "properties" in result and "cwe" in result["properties"]:
         value = result["properties"]["cwe"]
         search_cwe(value, cwes)
+    return cwes
+
+
+def get_result_cwes_taxa(result):
+    """Extract CWEs from SARIF taxa (official SARIF approach)"""
+    cwes = []
+    if "taxa" in result and isinstance(result["taxa"], list):
+        for taxon in result["taxa"]:
+            if isinstance(taxon, dict):
+                # Check if this is a CWE taxonomy reference
+                tool_component = taxon.get("toolComponent", {})
+                if tool_component.get("name") == "CWE":
+                    cwe_id = taxon.get("id")
+                    if cwe_id:
+                        try:
+                            cwes.append(int(cwe_id))
+                        except ValueError:
+                            # Handle cases where CWE ID is not a pure number
+                            search_cwe(f"CWE-{cwe_id}", cwes)
     return cwes
 
 
@@ -414,6 +485,18 @@ def get_severity(result, rule):
 
 
 def get_items_from_result(result, rules, artifacts, run_date):
+    """
+    Default implementation of get_items_from_result for backward compatibility.
+    This can be used by subclasses that don't need the extension points.
+    """
+    return get_items_from_result_extensible(None, result, rules, artifacts, run_date)
+
+
+def get_items_from_result_extensible(parser_instance, result, rules, artifacts, run_date):
+    """
+    Extensible version of get_items_from_result that uses hook methods from parser_instance.
+    If parser_instance is None, uses default behavior.
+    """
     # see
     # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
     # / 3.27.9
@@ -462,12 +545,27 @@ def get_items_from_result(result, rules, artifacts, run_date):
         # test rule link
         rule = rules.get(result.get("ruleId"))
 
+        # Get description from parser
+        description = get_description(result, rule, location)  # default
+        if parser_instance:
+            description = parser_instance.get_finding_description(result, rule, location)
+
+        # Get title from parser
+        title = get_title(result, rule)  # default
+        if parser_instance:
+            title = parser_instance.get_finding_title(result, rule, location)
+
+        # Get finding type (static/dynamic)
+        static_finding, dynamic_finding = (True, False)  # default
+        if parser_instance:
+            static_finding, dynamic_finding = parser_instance.get_finding_type()
+
         finding = Finding(
-            title=get_title(result, rule),
+            title=title,
             severity=get_severity(result, rule),
-            description=get_description(result, rule, location),
-            static_finding=True,  # by definition
-            dynamic_finding=False,  # by definition
+            description=description,
+            static_finding=static_finding,
+            dynamic_finding=dynamic_finding,
             false_p=suppressed,
             active=not suppressed,
             file_path=file_path,
@@ -505,6 +603,17 @@ def get_items_from_result(result, rules, artifacts, run_date):
         if len(cwes_properties_extracted) > 0:
             finding.cwe = cwes_properties_extracted[-1]
 
+        # manage the case that some tools produce CWE using taxa (official SARIF approach)
+        cwes_taxa_extracted = get_result_cwes_taxa(result)
+        if len(cwes_taxa_extracted) > 0:
+            finding.cwe = cwes_taxa_extracted[-1]
+
+        # Get custom CWEs if available
+        if parser_instance:
+            custom_cwes = parser_instance.get_finding_cwes(result)
+            if custom_cwes:
+                finding.cwe = custom_cwes[-1]  # Use the last CWE like other logic
+
         # manage fixes provided in the report
         if "fixes" in result:
             finding.mitigation = "\n".join(
@@ -535,6 +644,10 @@ def get_items_from_result(result, rules, artifacts, run_date):
             finding.unique_id_from_tool = "|".join(
                 [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
             )
+
+        # Allow subclasses to customize the finding
+        if parser_instance:
+            parser_instance.customize_finding(finding, result, rule, location)
 
         result_items.append(finding)
 
