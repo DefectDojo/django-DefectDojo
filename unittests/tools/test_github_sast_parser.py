@@ -49,5 +49,5 @@ class TestGithubSASTParser(DojoTestCase):
 
         bad_json = io.StringIO('{"not": "a list"}')
         parser = GithubSASTParser()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             parser.get_findings(bad_json, Test())
