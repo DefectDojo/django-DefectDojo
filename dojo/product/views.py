@@ -107,6 +107,7 @@ from dojo.product_type.queries import (
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.tool_config.factory import create_API
 from dojo.tools.factory import get_api_scan_configuration_hints
@@ -117,7 +118,6 @@ from dojo.utils import (
     add_external_issue,
     add_field_errors_to_response,
     async_delete,
-    build_count_subquery,
     calculate_finding_age,
     get_enabled_notifications_list,
     get_open_findings_burndown,

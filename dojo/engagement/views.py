@@ -95,6 +95,7 @@ from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
@@ -105,7 +106,6 @@ from dojo.utils import (
     add_error_message_to_response,
     add_success_message_to_response,
     async_delete,
-    build_count_subquery,
     calculate_grade,
     generate_file_response_from_file_path,
     get_cal_event,
