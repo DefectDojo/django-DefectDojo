@@ -1797,6 +1797,7 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["on"].widget = date_input_widget
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
+        self.form.fields["kev_date"].widget = date_input_widget
         self.form.fields["mitigated_on"].widget = date_input_widget
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
