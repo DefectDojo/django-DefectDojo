@@ -1382,6 +1382,36 @@ class ImportReimportMixin:
             self.assertTrue(finding.is_mitigated)
             self.assertEqual(finding.service, "service_A")
 
+        # reimporting an empty report with service B should close all findings from the second  import, and not reopen any findings
+        self.reimport_scan_with_params(test_id, self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_B")
+
+        engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
+        self.assertEqual(engagement1_active_finding_count.count(), 0)
+        engagement1_mitigated_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=False, is_mitigated=True)
+        self.assertEqual(engagement1_mitigated_finding_count.count(), 8)
+
+        for finding in engagement1_mitigated_finding_count:
+            self.assertFalse(finding.active)
+            self.assertTrue(finding.is_mitigated)
+
+        # reimporting a report with findings and service A should reopen the 4findings with service_A but leave the findings with service_B closed.
+        self.reimport_scan_with_params(test_id, self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_A")
+
+        engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
+        self.assertEqual(engagement1_active_finding_count.count(), 4)
+        engagement1_mitigated_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=False, is_mitigated=True)
+        self.assertEqual(engagement1_mitigated_finding_count.count(), 4)
+
+        for finding in engagement1_active_finding_count:
+            self.assertTrue(finding.active)
+            self.assertFalse(finding.is_mitigated)
+            self.assertEqual(finding.service, "service_A")
+
+        for finding in engagement1_mitigated_finding_count:
+            self.assertFalse(finding.active)
+            self.assertTrue(finding.is_mitigated)
+            self.assertEqual(finding.service, "service_B")
+
     def test_import_reimport_generic(self):
         """
         This test do a basic import and re-import of a generic JSON report
