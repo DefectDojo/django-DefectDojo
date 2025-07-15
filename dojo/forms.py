@@ -3828,8 +3828,6 @@ def hide_cvss_fields_if_disabled(form_instance):
             del form_instance.fields["cvssv3"]
         if "cvssv3_score" in form_instance.fields:
             del form_instance.fields["cvssv3_score"]
-        if "cvss_info" in form_instance.fields:
-            del form_instance.fields["cvss_info"]
 
     # Hide CVSS4 fields if disabled
     if not enable_cvss4:
