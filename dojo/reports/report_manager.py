@@ -5,13 +5,17 @@ import logging
 import csv
 import boto3
 import botocore.exceptions
+from dojo.home.helper import get_key_for_user_and_urlpath, encode_string
+from hashids import Hashids
 from abc import ABC, abstractmethod
+from django.core.cache import cache
+from django.utils import timezone
 from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.http import HttpResponse
 from dojo.reports.custom_request import CustomRequest
-form dojo.models import GeneralSettings
-from dojo.reports.utils import get_url_presigned
+from dojo.models import GeneralSettings
+from dojo.reports.utils import get_url_presigned, upload_s3
 from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 
@@ -23,6 +27,10 @@ class BaseReportManager(ABC):
         self.fields = None
         self.request = request
         self.findings = findings
+    
+
+    def get_url_encode(self):
+        return encode_string(self.request.META.get("QUERY_STRING", ""))
 
     def get_excludes(self):
         return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
@@ -82,6 +90,40 @@ class BaseReportManager(ABC):
 
 class CSVReportManager(BaseReportManager):
 
+    def __init__(self, findings, request):
+        super().__init__(findings, request)
+        self.bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
+        self.expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
+        self.key_cache = get_key_for_user_and_urlpath(self.request, base_key="report_finding")
+        self.url_path = f"{GeneralSettings.get_value("URL_FILE_BUKECT_REPORT_FINDINGS", 'report/')}{self.request.user.username}_{self.get_url_encode()}.csv"
+        self.chunk_size = GeneralSettings.get_value("CHUNK_SIZE_REPORT", 500)
+
+    def get_url_path(self):
+        if value := cache.get(self.key_cache):
+            logger.debug(f"REPORT FINDING: Cache get for key {self.key_cache} value {value}")
+            return value
+        else:
+            cache.set(
+                self.key_cache,
+                self.url_path,
+                self.expiration_time)
+            logger.debug(f"REPORT FINDING: Cache set for key {self.key_cache}")
+        return self.url_path
+
+    def send_report(self, buffer):
+        try:
+            session_s3 = boto3.Session().client(
+                's3',
+                region_name=settings.AWS_REGION)
+            key = self.get_url_path()
+            upload_s3(session_s3,
+                      buffer,
+                      self.bucket,
+                      key)
+        except botocore.exceptions.ClientError as e:
+            logger.error(f"Failed to upload report to S3: {e}")
+            raise
+
     def generate_report(self, *args, **kwargs):
         findings = self.add_findings_data()
         logger.debug("REPORT FINDING: size of findings: " + str(sys.getsizeof(findings)))
@@ -92,38 +134,9 @@ class CSVReportManager(BaseReportManager):
         excludes_list = self.get_excludes()
         allowed_foreign_keys = self.get_attributes()
         first_row = True
-        chunk_size = 1000
-        bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
-        expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
+        counter = 0
 
-        for counter, finding in enumerate(findings.iterator(chunck_size=chunk_size), start=1):
-            if counter % chunk_size == 0:
-                try:
-                    session_s3 = boto3.Session().client('s3', region_name=settings.AWS_REGION)
-                    url = get_url_presigned(
-                        session_s3,
-                        "reportes/reporte_rene.csv",
-                        bucket,
-                        expires_in=expiration_time
-                    )
-                    logger.debug(f"REPORT FINDING: URL {url}")
-                    create_notification(
-                        event="url_report_finding",
-                        subject="Reporte Finding is ready📄",
-                        title="Reporte is ready",
-                        description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
-                        url=url,
-                        recipients=[request.user.username],
-                        icon="download",
-                        color_icon="#096C11",
-                        expiration_time=f"{int(expiration_time / 60)} minutes")
-                    if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-
-                        return response
-                except botocore.exceptions.ClientError as e:
-                    logger.error(f"Failed to upload report to S3: {e}")
-                    raise
-
+        for counter, finding in enumerate(findings.iterator(chunk_size=self.chunk_size), start=1):
             if first_row:
                 fields = []
                 self.fields = fields
@@ -215,52 +228,30 @@ class CSVReportManager(BaseReportManager):
                 self.add_extra_values()
 
                 writer.writerow(fields)
-        logger.debug("REPORT FINDING: size of buffer: " + str(sys.getsizeof(buffer)))
-        return buffer
-
-
-def upload_file_multipart_s3(file_obj, bucket_name, object_name, chunk_size=5 * 1024 * 1024):
-    """
-    Sube un archivo a S3 en fragmentos (multipart upload) para evitar impacto en la base de datos.
-    file_obj: archivo tipo file-like object (por ejemplo, request.FILES['archivo'])
-    bucket_name: nombre del bucket S3
-    object_name: nombre del objeto en S3
-    chunk_size: tamaño de cada fragmento (por defecto 5MB)
-    """
-    s3_client = boto3.client('s3')
-    try:
-        # Inicia el multipart upload
-        mpu = s3_client.create_multipart_upload(Bucket=bucket_name, Key=object_name)
-        parts = []
-        part_number = 1
-        while True:
-            data = file_obj.read(chunk_size)
-            if not data:
-                break
-            part = s3_client.upload_part(
-                Bucket=bucket_name,
-                Key=object_name,
-                PartNumber=part_number,
-                UploadId=mpu['UploadId'],
-                Body=data
+        
+            if counter % self.chunk_size == 0:
+                self.send_report(buffer)
+        if counter % self.chunk_size != 0:
+            logger.debug("REPORT FINDING: Sending report at the end of the loop")
+            self.send_report(buffer)
+            session_s3 = boto3.Session().client(
+                's3',
+                region_name=settings.AWS_REGION)
+            url = get_url_presigned(
+                session_s3,
+                key=self.get_url_path(),
+                bucket=self.bucket,
+                expires_in=self.expiration_time
             )
-            parts.append({'PartNumber': part_number, 'ETag': part['ETag']})
-            part_number += 1
-        # Completa el multipart upload
-        s3_client.complete_multipart_upload(
-            Bucket=bucket_name,
-            Key=object_name,
-            UploadId=mpu['UploadId'],
-            MultipartUpload={'Parts': parts}
-        )
+            logger.debug(f"REPORT FINDING: URL {url}")
+            create_notification(
+                event="url_report_finding",
+                subject="Reporte Finding is ready📄",
+                title="Reporte is ready",
+                description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
+                url=url,
+                recipients=[self.request.user.username],
+                icon="download",
+                color_icon="#096C11",
+                expiration_time=f"{int(self.expiration_time / 60)} minutes")
         return True
-    except (BotoCoreError, ClientError) as e:
-        logger.error(f"Error al subir archivo multipart a S3: {e}")
-        # Si hay error, aborta el multipart upload
-        if 'mpu' in locals():
-            s3_client.abort_multipart_upload(
-                Bucket=bucket_name,
-                Key=object_name,
-                UploadId=mpu['UploadId']
-            )
-        return False

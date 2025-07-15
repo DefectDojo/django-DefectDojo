@@ -12,6 +12,7 @@ from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views import View
+from django.core.cache import cache
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from django.contrib import messages
@@ -42,6 +43,7 @@ from dojo.models import (
     Test,
     GeneralSettings)
 from dojo.reports import helper as helper_reports
+from dojo.home.helper import get_key_for_user_and_urlpath
 from dojo.reports.helper import get_findings
 from dojo.reports.widgets import (
     CoverPage,
@@ -678,7 +680,7 @@ class QuickReportView(View):
         return "dojo/finding_pdf_report.html"
 
     def get(self, request):
-        findings, obj = get_findings(request)
+        findings, obj, _url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
@@ -739,11 +741,7 @@ class CSVExportView(View):
         pass
 
     def get(self, request):
-        # create_notification(
-        #         event="other",
-        #         recipients=request.user.get_username(),
-        #         subject=f"Reporte Finding is ready🔔")
-        findings, _obj = get_findings(request)
+        findings, _obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
@@ -769,19 +767,31 @@ class CSVExportView(View):
                 "post_data": request.POST.dict(),
                 "user_id": request.user.id
             }
-            # helper_reports.async_generate_report.apply_async(
-            #     args=(request_data,))
-            helper_reports.async_generate_report(request_data)
-            messages.add_message(
-                request,
-                messages.WARNING,
-                message=(
-                    "Hold on a moment! We're generating your report and will "
-                    f"send it to your email ({request.user.email}) as soon as it's ready."
-                ),
-                extra_tags="alert-warning"
-            )
-            return redirect_to_return_url_or_else(request, reverse('open_findings'))
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                helper_reports.async_generate_report.apply_async(
+                    args=(request_data,))
+                # helper_reports.async_generate_report(request_data)
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
@@ -900,7 +910,7 @@ class ExcelExportView(View):
         pass
 
     def get(self, request):
-        findings, _obj = get_findings(request)
+        findings, _obj, _url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(
                 objs=findings,

@@ -108,14 +108,14 @@ def get_findings(request):
         test_id=tid)
     findings = list_findings.get_fully_filtered_findings(request).qs
 
-    return findings, obj
+    return findings, obj, url
 
 
 def get_name_key(user, product):
     """
     Generate a unique key for the report based on the user's name and current time.
     """
-    url = GeneralSettings.get_value("URL_FILE_BOKECT_REPORT_FINDINGS", "")
+    url = GeneralSettings.get_value("URL_FILE_BUKECT_REPORT_FINDINGS", "")
     key = f"{url}/{product}_{user.username}.csv"
     return key 
 
@@ -124,13 +124,13 @@ def get_name_key(user, product):
 def async_generate_report(request_data: dict):
     logger.debug(f"REPORT FINDING: async_generate_report {request_data}")
     request = CustomRequest(**request_data)
-    findings, _obj = get_findings(request)
+    findings, _obj, _url = get_findings(request)
     if findings.count() == 0:
         raise Exception(500, "No findings found for the report.")
     csv_report_manager = CSVReportManager(
        findings, request
     )
-    response = csv_report_manager.generate_report()
+    csv_report_manager.generate_report()
     
 
 def get_excludes():

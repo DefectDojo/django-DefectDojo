@@ -1,6 +1,14 @@
+import hashlib
+import logging
 from hashids import Hashids
 from django.http import HttpRequest
 from dojo.models import Product_Member, Product_Type_Member
+logger = logging.getLogger(__name__)
+
+
+def encode_string(value):
+    key = hashlib.md5(value.encode()).hexdigest()[:12]
+    return key
 
 
 def get_key_for_usermember_cache(request: HttpRequest) -> str:
@@ -23,3 +31,16 @@ def get_key_for_usermember_cache(request: HttpRequest) -> str:
         .order_by("product_type"))
     permission_product_type = hashids.encode(*permission_product_type)
     return f"dashboard:{permission_product}:{permission_product_type}"
+
+
+def get_key_for_user_and_urlpath(
+        request: HttpRequest,
+        base_key="default"
+) -> str:
+    """
+    Generate a cache key based on the user and the URL path query.
+    """
+    key = encode_string(request.META.get("QUERY_STRING", ""))
+    logger.debug(f"REPORT FINDING: calculate key url path {key}")
+    key = f"{base_key}:{request.user.username}:{key}"
+    return key
