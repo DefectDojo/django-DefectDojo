@@ -448,6 +448,9 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "epss_score_range",
         "epss_percentile",
         "epss_percentile_range",
+        "known_exploited",
+        "ransomware_used",
+        "kev_date",
     ])
 
     if similar:
