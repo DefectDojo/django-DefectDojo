@@ -149,7 +149,151 @@ class SarifParser:
         Main method to extract findings from a SARIF result.
         This method can be overridden by subclasses for custom behavior.
         """
-        return get_items_from_result_extensible(self, result, rules, artifacts, run_date)
+        # see
+        # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
+        # / 3.27.9
+        kind = result.get("kind", "fail")
+        if kind != "fail":
+            return None
+
+        # if finding is suppressed, mark it as False Positive
+        # Note: see
+        # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127852
+        suppressed = False
+        if result.get("suppressions"):
+            suppressed = True
+
+        # if there is a location get all files into files list
+        files = []
+
+        if "locations" in result:
+            for location in result["locations"]:
+                file_path = None
+                line = None
+
+                if "physicalLocation" in location:
+                    file_path = location["physicalLocation"]["artifactLocation"]["uri"]
+
+                    # 'region' attribute is optionnal
+                    if "region" in location["physicalLocation"]:
+                        # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
+                        # need to check whether it is byteOffset
+                        if "byteOffset" in location["physicalLocation"]["region"]:
+                            pass
+                        else:
+                            line = location["physicalLocation"]["region"]["startLine"]
+
+                files.append((file_path, line, location))
+
+        if not files:
+            files.append((None, None, None))
+
+        result_items = []
+
+        for file_path, line, location in files:
+            # test rule link
+            rule = rules.get(result.get("ruleId"))
+
+            # Get description from parser (uses inheritance)
+            description = self.get_finding_description(result, rule, location)
+
+            # Get title from parser (uses inheritance)
+            title = self.get_finding_title(result, rule, location)
+
+            # Get finding type (uses inheritance)
+            static_finding, dynamic_finding = self.get_finding_type()
+
+            finding = Finding(
+                title=title,
+                severity=get_severity(result, rule),
+                description=description,
+                static_finding=static_finding,
+                dynamic_finding=dynamic_finding,
+                false_p=suppressed,
+                active=not suppressed,
+                file_path=file_path,
+                line=line,
+                references=get_references(rule),
+            )
+
+            if "ruleId" in result:
+                finding.vuln_id_from_tool = result["ruleId"]
+                # for now we only support when the id of the rule is a CVE
+                if cve_try(result["ruleId"]):
+                    finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
+
+            # some time the rule id is here but the tool doesn't define it
+            if rule is not None:
+                cwes_extracted = get_rule_cwes(rule)
+                if len(cwes_extracted) > 0:
+                    finding.cwe = cwes_extracted[-1]
+
+                # Some tools such as GitHub or Grype return the severity in properties
+                # instead
+                if "properties" in rule and "security-severity" in rule["properties"]:
+                    try:
+                        cvss = float(rule["properties"]["security-severity"])
+                        severity = cvss_to_severity(cvss)
+                        finding.cvssv3_score = cvss
+                        finding.severity = severity
+                    except ValueError:
+                        if rule["properties"]["security-severity"].lower().capitalize() in {"Info", "Low", "Medium", "High", "Critical"}:
+                            finding.severity = rule["properties"]["security-severity"].lower().capitalize()
+                        else:
+                            finding.severity = "Info"
+
+            # manage the case that some tools produce CWE as properties of the result
+            cwes_properties_extracted = get_result_cwes_properties(result)
+            if len(cwes_properties_extracted) > 0:
+                finding.cwe = cwes_properties_extracted[-1]
+
+            # manage the case that some tools produce CWE using taxa (official SARIF approach)
+            cwes_taxa_extracted = get_result_cwes_taxa(result)
+            if len(cwes_taxa_extracted) > 0:
+                finding.cwe = cwes_taxa_extracted[-1]
+
+            # Get custom CWEs if available (uses inheritance)
+            custom_cwes = self.get_finding_cwes(result)
+            if custom_cwes:
+                finding.cwe = custom_cwes[-1]  # Use the last CWE like other logic
+
+            # manage fixes provided in the report
+            if "fixes" in result:
+                finding.mitigation = "\n".join(
+                    [fix.get("description", {}).get("text") for fix in result["fixes"]],
+                )
+
+            if run_date:
+                finding.date = run_date
+
+            # manage tags provided in the report and rule and remove duplicated
+            tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
+            tags = [s.removeprefix("external/cwe/") for s in tags]
+            finding.tags = tags
+
+            # manage fingerprints
+            # fingerprinting in SARIF is more complete than in current implementation
+            # SARIF standard make it possible to have multiple version in the same report
+            # for now we just take the first one and keep the format to be able to
+            # compare it
+            if result.get("fingerprints"):
+                hashes = get_fingerprints_hashes(result["fingerprints"])
+                first_item = next(iter(hashes.items()))
+                finding.unique_id_from_tool = first_item[1]["value"]
+            elif result.get("partialFingerprints"):
+                # for this one we keep an order to have id that could be compared
+                hashes = get_fingerprints_hashes(result["partialFingerprints"])
+                sorted_hashes = sorted(hashes.keys())
+                finding.unique_id_from_tool = "|".join(
+                    [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
+                )
+
+            # Allow subclasses to customize the finding (uses inheritance)
+            self.customize_finding(finding, result, rule, location)
+
+            result_items.append(finding)
+
+        return result_items
 
     def get_finding_cwes(self, result):
         """
@@ -160,17 +304,72 @@ class SarifParser:
 
     def get_finding_title(self, result, rule, location):
         """
-        Hook method for subclasses to customize title.
-        Override this method to add custom title formatting.
+        Get title for the finding. Subclasses can override this method
+        to add custom title formatting. Use super() to get the base title.
         """
-        return get_title(result, rule)
+        title = None
+        if "message" in result:
+            title = get_message_from_multiformatMessageString(
+                result["message"], rule,
+            )
+        if title is None and rule is not None:
+            if "shortDescription" in rule:
+                title = get_message_from_multiformatMessageString(
+                    rule["shortDescription"], rule,
+                )
+            elif "fullDescription" in rule:
+                title = get_message_from_multiformatMessageString(
+                    rule["fullDescription"], rule,
+                )
+            elif "name" in rule:
+                title = rule["name"]
+            elif "id" in rule:
+                title = rule["id"]
+
+        if title is None:
+            msg = "No information found to create a title"
+            raise ValueError(msg)
+
+        return textwrap.shorten(title, 150)
 
     def get_finding_description(self, result, rule, location):
         """
-        Hook method for subclasses to customize description.
-        Override this method to add custom description formatting.
+        Get description for the finding. Subclasses can override this method
+        to add custom description formatting. Use super() to get the base description.
         """
-        return get_description(result, rule, location)
+        description = ""
+        message = ""
+        if "message" in result:
+            message = get_message_from_multiformatMessageString(
+                result["message"], rule,
+            )
+            description += f"**Result message:** {message}\n"
+        if get_snippet(location) is not None:
+            description += f"**Snippet:**\n```\n{get_snippet(location)}\n```\n"
+        if rule is not None:
+            if "name" in rule:
+                description += f"**{_('Rule name')}:** {rule.get('name')}\n"
+            shortDescription = ""
+            if "shortDescription" in rule:
+                shortDescription = get_message_from_multiformatMessageString(
+                    rule["shortDescription"], rule,
+                )
+                if shortDescription != message:
+                    description += f"**{_('Rule short description')}:** {shortDescription}\n"
+            if "fullDescription" in rule:
+                fullDescription = get_message_from_multiformatMessageString(
+                    rule["fullDescription"], rule,
+                )
+                if (
+                    fullDescription != message
+                    and fullDescription != shortDescription
+                ):
+                    description += f"**{_('Rule full description')}:** {fullDescription}\n"
+
+        if len(result.get("codeFlows", [])) > 0:
+            description += get_codeFlowsDescription(result["codeFlows"])
+
+        return description.removesuffix("\n")
 
     def get_finding_type(self):
         """
@@ -297,33 +496,6 @@ def cve_try(val):
     return None
 
 
-def get_title(result, rule):
-    title = None
-    if "message" in result:
-        title = get_message_from_multiformatMessageString(
-            result["message"], rule,
-        )
-    if title is None and rule is not None:
-        if "shortDescription" in rule:
-            title = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule,
-            )
-        elif "fullDescription" in rule:
-            title = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule,
-            )
-        elif "name" in rule:
-            title = rule["name"]
-        elif "id" in rule:
-            title = rule["id"]
-
-    if title is None:
-        msg = "No information found to create a title"
-        raise ValueError(msg)
-
-    return textwrap.shorten(title, 150)
-
-
 def get_snippet(location):
 
     snippet = None
@@ -397,42 +569,6 @@ def get_codeFlowsDescription(code_flows):
     return description
 
 
-def get_description(result, rule, location):
-    description = ""
-    message = ""
-    if "message" in result:
-        message = get_message_from_multiformatMessageString(
-            result["message"], rule,
-        )
-        description += f"**Result message:** {message}\n"
-    if get_snippet(location) is not None:
-        description += f"**Snippet:**\n```\n{get_snippet(location)}\n```\n"
-    if rule is not None:
-        if "name" in rule:
-            description += f"**{_('Rule name')}:** {rule.get('name')}\n"
-        shortDescription = ""
-        if "shortDescription" in rule:
-            shortDescription = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule,
-            )
-            if shortDescription != message:
-                description += f"**{_('Rule short description')}:** {shortDescription}\n"
-        if "fullDescription" in rule:
-            fullDescription = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule,
-            )
-            if (
-                fullDescription != message
-                and fullDescription != shortDescription
-            ):
-                description += f"**{_('Rule full description')}:** {fullDescription}\n"
-
-    if len(result.get("codeFlows", [])) > 0:
-        description += get_codeFlowsDescription(result["codeFlows"])
-
-    return description.removesuffix("\n")
-
-
 def get_references(rule):
     reference = None
     if rule is not None:
@@ -482,176 +618,6 @@ def get_severity(result, rule):
     if severity == "error":
         return "High"
     return "Medium"
-
-
-def get_items_from_result(result, rules, artifacts, run_date):
-    """
-    Default implementation of get_items_from_result for backward compatibility.
-    This can be used by subclasses that don't need the extension points.
-    """
-    return get_items_from_result_extensible(None, result, rules, artifacts, run_date)
-
-
-def get_items_from_result_extensible(parser_instance, result, rules, artifacts, run_date):
-    """
-    Extensible version of get_items_from_result that uses hook methods from parser_instance.
-    If parser_instance is None, uses default behavior.
-    """
-    # see
-    # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
-    # / 3.27.9
-    kind = result.get("kind", "fail")
-    if kind != "fail":
-        return None
-
-    # if finding is suppressed, mark it as False Positive
-    # Note: see
-    # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127852
-    suppressed = False
-    if result.get("suppressions"):
-        suppressed = True
-
-    # if there is a location get all files into files list
-
-    files = []
-
-    if "locations" in result:
-        for location in result["locations"]:
-
-            file_path = None
-            line = None
-
-            if "physicalLocation" in location:
-                file_path = location["physicalLocation"]["artifactLocation"]["uri"]
-
-                # 'region' attribute is optionnal
-                if "region" in location["physicalLocation"]:
-                    # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
-                    # need to check whether it is byteOffset
-                    if "byteOffset" in location["physicalLocation"]["region"]:
-                        pass
-                    else:
-                        line = location["physicalLocation"]["region"]["startLine"]
-
-            files.append((file_path, line, location))
-
-    if not files:
-        files.append((None, None, None))
-
-    result_items = []
-
-    for file_path, line, location in files:
-
-        # test rule link
-        rule = rules.get(result.get("ruleId"))
-
-        # Get description from parser
-        description = get_description(result, rule, location)  # default
-        if parser_instance:
-            description = parser_instance.get_finding_description(result, rule, location)
-
-        # Get title from parser
-        title = get_title(result, rule)  # default
-        if parser_instance:
-            title = parser_instance.get_finding_title(result, rule, location)
-
-        # Get finding type (static/dynamic)
-        static_finding, dynamic_finding = (True, False)  # default
-        if parser_instance:
-            static_finding, dynamic_finding = parser_instance.get_finding_type()
-
-        finding = Finding(
-            title=title,
-            severity=get_severity(result, rule),
-            description=description,
-            static_finding=static_finding,
-            dynamic_finding=dynamic_finding,
-            false_p=suppressed,
-            active=not suppressed,
-            file_path=file_path,
-            line=line,
-            references=get_references(rule),
-        )
-
-        if "ruleId" in result:
-            finding.vuln_id_from_tool = result["ruleId"]
-            # for now we only support when the id of the rule is a CVE
-            if cve_try(result["ruleId"]):
-                finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
-        # some time the rule id is here but the tool doesn't define it
-        if rule is not None:
-            cwes_extracted = get_rule_cwes(rule)
-            if len(cwes_extracted) > 0:
-                finding.cwe = cwes_extracted[-1]
-
-            # Some tools such as GitHub or Grype return the severity in properties
-            # instead
-            if "properties" in rule and "security-severity" in rule["properties"]:
-                try:
-                    cvss = float(rule["properties"]["security-severity"])
-                    severity = cvss_to_severity(cvss)
-                    finding.cvssv3_score = cvss
-                    finding.severity = severity
-                except ValueError:
-                    if rule["properties"]["security-severity"].lower().capitalize() in {"Info", "Low", "Medium", "High", "Critical"}:
-                        finding.severity = rule["properties"]["security-severity"].lower().capitalize()
-                    else:
-                        finding.severity = "Info"
-
-        # manage the case that some tools produce CWE as properties of the result
-        cwes_properties_extracted = get_result_cwes_properties(result)
-        if len(cwes_properties_extracted) > 0:
-            finding.cwe = cwes_properties_extracted[-1]
-
-        # manage the case that some tools produce CWE using taxa (official SARIF approach)
-        cwes_taxa_extracted = get_result_cwes_taxa(result)
-        if len(cwes_taxa_extracted) > 0:
-            finding.cwe = cwes_taxa_extracted[-1]
-
-        # Get custom CWEs if available
-        if parser_instance:
-            custom_cwes = parser_instance.get_finding_cwes(result)
-            if custom_cwes:
-                finding.cwe = custom_cwes[-1]  # Use the last CWE like other logic
-
-        # manage fixes provided in the report
-        if "fixes" in result:
-            finding.mitigation = "\n".join(
-                [fix.get("description", {}).get("text") for fix in result["fixes"]],
-            )
-
-        if run_date:
-            finding.date = run_date
-
-        # manage tags provided in the report and rule and remove duplicated
-        tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
-        tags = [s.removeprefix("external/cwe/") for s in tags]
-        finding.tags = tags
-
-        # manage fingerprints
-        # fingerprinting in SARIF is more complete than in current implementation
-        # SARIF standard make it possible to have multiple version in the same report
-        # for now we just take the first one and keep the format to be able to
-        # compare it
-        if result.get("fingerprints"):
-            hashes = get_fingerprints_hashes(result["fingerprints"])
-            first_item = next(iter(hashes.items()))
-            finding.unique_id_from_tool = first_item[1]["value"]
-        elif result.get("partialFingerprints"):
-            # for this one we keep an order to have id that could be compared
-            hashes = get_fingerprints_hashes(result["partialFingerprints"])
-            sorted_hashes = sorted(hashes.keys())
-            finding.unique_id_from_tool = "|".join(
-                [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
-            )
-
-        # Allow subclasses to customize the finding
-        if parser_instance:
-            parser_instance.customize_finding(finding, result, rule, location)
-
-        result_items.append(finding)
-
-    return result_items
 
 
 def get_fingerprints_hashes(values):

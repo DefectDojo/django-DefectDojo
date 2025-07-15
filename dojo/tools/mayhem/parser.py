@@ -7,7 +7,6 @@ from dojo.tools.sarif.parser import (
     SarifParser,
     get_codeFlowsDescription,
     get_snippet,
-    get_title,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class MayhemParser(SarifParser):
     def get_finding_title(self, result, rule, location):
         """Get and clean the title text for Mayhem SARIF reports."""
         # Get the default title first
-        title = get_title(result, rule)
+        title = super().get_finding_title(result, rule, location)
 
         if not title:
             return ""
