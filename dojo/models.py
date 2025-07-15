@@ -2747,7 +2747,7 @@ class Finding(models.Model):
                 if self.pk is None:
                     self.cvssv3 = None
 
-        # behaviour for CVVS4 is slightly different. Extracting thsi into a method would lead to probabl hard to read code
+        # behaviour for CVVS4 is slightly different. Extracting this into a method would lead to probably hard to read code
         if self.cvssv4:
             try:
                 cvss_data = parse_cvss_data(self.cvssv4)
