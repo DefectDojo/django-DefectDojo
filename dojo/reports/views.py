@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from django.http import Http404, HttpRequest, HttpResponse, QueryDict, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views import View
@@ -1061,3 +1061,10 @@ class ExcelExportView(View):
         )
         response["Content-Disposition"] = "attachment; filename=findings.xlsx"
         return response
+
+
+def get_url_presigned(request, id):
+    if value := cache.get(f"report_finding:{request.user.username}:{id}"):
+        return HttpResponseRedirect(value)
+    else:
+        return "The url of the report was not found, it is possible that the report has not been generated or has expired."

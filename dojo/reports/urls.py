@@ -36,4 +36,5 @@ urlpatterns = [
         views.CSVExportView.as_view(), name="csv_export"),
     re_path(r"^reports/excel_export$",
         views.ExcelExportView.as_view(), name="excel_export"),
+    re_path(r"^url_presigned/(?P<id>[\w\-]+)/$", views.get_url_presigned, name="get_url_presigned"),
 ]

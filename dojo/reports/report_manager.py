@@ -97,29 +97,22 @@ class CSVReportManager(BaseReportManager):
         self.key_cache = get_key_for_user_and_urlpath(self.request, base_key="report_finding")
         self.url_path = f"{GeneralSettings.get_value("URL_FILE_BUKECT_REPORT_FINDINGS", 'report/')}{self.request.user.username}_{self.get_url_encode()}.csv"
         self.chunk_size = GeneralSettings.get_value("CHUNK_SIZE_REPORT", 500)
+        self.url_presigned = ""
 
-    def get_url_path(self):
+    def get_url(self):
         if value := cache.get(self.key_cache):
             logger.debug(f"REPORT FINDING: Cache get for key {self.key_cache} value {value}")
             return value
-        else:
-            cache.set(
-                self.key_cache,
-                self.url_path,
-                self.expiration_time)
-            logger.debug(f"REPORT FINDING: Cache set for key {self.key_cache}")
-        return self.url_path
 
     def send_report(self, buffer):
         try:
             session_s3 = boto3.Session().client(
                 's3',
                 region_name=settings.AWS_REGION)
-            key = self.get_url_path()
             upload_s3(session_s3,
                       buffer,
                       self.bucket,
-                      key)
+                      self.url_path)
         except botocore.exceptions.ClientError as e:
             logger.error(f"Failed to upload report to S3: {e}")
             raise
@@ -239,9 +232,14 @@ class CSVReportManager(BaseReportManager):
                 region_name=settings.AWS_REGION)
             url = get_url_presigned(
                 session_s3,
-                key=self.get_url_path(),
+                key=self.url_path,
                 bucket=self.bucket,
                 expires_in=self.expiration_time
+            )
+            cache.set(
+                self.key_cache,
+                url,
+                self.expiration_time
             )
             logger.debug(f"REPORT FINDING: URL {url}")
             create_notification(
@@ -249,7 +247,7 @@ class CSVReportManager(BaseReportManager):
                 subject="Reporte Finding is ready📄",
                 title="Reporte is ready",
                 description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
-                url=url,
+                url=f"{settings.SITE_URL}/url_presigned/{self.get_url_encode()}",
                 recipients=[self.request.user.username],
                 icon="download",
                 color_icon="#096C11",
