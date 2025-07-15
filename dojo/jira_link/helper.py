@@ -142,6 +142,17 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
     return status or ["Inactive"]
 
 
+def is_keep_in_sync_with_jira(finding):
+    keep_in_sync_enabled = False
+    # Check if there is a jira issue that needs to be updated
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+    if jira_issue_exists:
+        # Determine if any automatic sync should occur
+        keep_in_sync_enabled = get_jira_instance(finding).finding_jira_sync
+
+    return keep_in_sync_enabled
+
+
 # checks if a finding can be pushed to JIRA
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
@@ -1765,7 +1776,14 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     jira_instance = get_jira_instance(finding)
 
     if resolved:
-        if jira_instance and resolution_name in jira_instance.accepted_resolutions and (finding.test.engagement.product.enable_simple_risk_acceptance or finding.test.engagement.enable_full_risk_acceptance):
+        if (
+            jira_instance
+            and resolution_name in jira_instance.accepted_resolutions
+            and (
+            finding.test.engagement.product.enable_simple_risk_acceptance
+            or finding.test.engagement.enable_full_risk_acceptance
+            )
+        ):
             if not finding.risk_accepted:
                 logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted.")
                 finding.risk_accepted = True
@@ -1821,26 +1839,6 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if status_changed:
         finding.save()
     return status_changed
-
-
-def save_and_push_to_jira(finding):
-    # Manage the jira status changes
-    push_to_jira_decision = False
-    # Determine if the finding is in a group. if so, not push to jira yet
-    finding_in_group = finding.has_finding_group
-    # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    # Only push if the finding is not in a group
-    if jira_issue_exists:
-        # Determine if any automatic sync should occur
-        push_to_jira_decision = is_push_all_issues(finding) \
-            or get_jira_instance(finding).finding_jira_sync
-    # Save the finding
-    finding.save(push_to_jira=(push_to_jira_decision and not finding_in_group))
-    # we only push the group after saving the finding to make sure
-    # the updated data of the finding is pushed as part of the group
-    if push_to_jira_decision and finding_in_group:
-        push_to_jira(finding.finding_group)
 
 
 def get_finding_group_findings_above_threshold(finding_group):
