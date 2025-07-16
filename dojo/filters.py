@@ -451,6 +451,8 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "known_exploited",
         "ransomware_used",
         "kev_date",
+        "kev_before",
+        "kev_after",
     ])
 
     if similar:
@@ -1761,6 +1763,8 @@ class FindingFilterHelper(FilterSet):
             'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
     kev_date = DateFilter(field_name="kev_date", lookup_expr="exact", label="Added to KEV On")
+    kev_before = DateFilter(field_name="kev_date", lookup_expr="lt", label="Added to KEV Before")
+    kev_after = DateFilter(field_name="kev_date", lookup_expr="gt", label="Added to KEV After")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1805,6 +1809,8 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
         self.form.fields["kev_date"].widget = date_input_widget
+        self.form.fields["kev_before"].widget = date_input_widget
+        self.form.fields["kev_after"].widget = date_input_widget
         self.form.fields["mitigated_on"].widget = date_input_widget
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
