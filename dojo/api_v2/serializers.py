@@ -2754,7 +2754,6 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         if minimum_password_length and minimum_password_length < 9:
             msg = "Minimum required password length must be at least 9"
             raise ValidationError(msg)
-        
         if maximum_password_length and maximum_password_length > 48:
             msg = "Maximum required password length must be less than or equal to 48"
             raise ValidationError(msg)
