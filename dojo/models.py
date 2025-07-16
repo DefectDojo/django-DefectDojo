@@ -2391,6 +2391,9 @@ class Finding(models.Model):
                                 null=True,
                                 blank=True,
                                 help_text=_("Text describing how to best fix the flaw."))
+    fix_available = models.BooleanField(default=True,
+                                        verbose_name=_("Fix Available"),
+                                        help_text=_("Denotes if there is a fix available for this flaw."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
