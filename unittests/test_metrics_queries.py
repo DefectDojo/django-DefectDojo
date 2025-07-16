@@ -1,9 +1,9 @@
 """Tests for metrics database queries"""
 
-from datetime import UTC, date, datetime
+import zoneinfo
+from datetime import date, datetime
 from unittest.mock import patch
 
-import pytz
 from django.test import RequestFactory
 from django.urls import reverse
 
@@ -76,7 +76,7 @@ class FindingQueriesTest(DojoTestCase):
     @patch("django.utils.timezone.now")
     def test_finding_queries(self, mock_timezone):
         self.maxDiff = None
-        mock_datetime = datetime(2020, 12, 9, tzinfo=UTC)
+        mock_datetime = datetime(2020, 12, 9, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding
@@ -188,7 +188,7 @@ class EndpointQueriesTest(DojoTestCase):
 
     @patch("dojo.filters.now")
     def test_endpoint_queries(self, mock_now):
-        fake_now = pytz.UTC.localize(datetime(2020, 7, 1))
+        fake_now = datetime(2020, 7, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_now.return_value = fake_now
 
         # Queries over Finding and Endpoint_Status
@@ -225,12 +225,12 @@ class EndpointQueriesTest(DojoTestCase):
             self.assertCountEqual(
                 endpoint_queries["all"].values(),
                 [
-                    {"id": 1, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 2, "finding_id": 2, "endpoint__product__prod_type__member": False, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
-                    {"id": 3, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": True, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 5, "finding_id": 228, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
-                    {"id": 4, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": True, "risk_accepted": False, "endpoint_id": 5, "finding_id": 229, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
-                    {"id": 5, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": True, "endpoint_id": 5, "finding_id": 230, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
-                    {"id": 7, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 7, "finding_id": 227, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
-                    {"id": 8, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 8, "finding_id": 231, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 1, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 2, "finding_id": 2, "endpoint__product__prod_type__member": False, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 3, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": True, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 5, "finding_id": 228, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 4, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": True, "risk_accepted": False, "endpoint_id": 5, "finding_id": 229, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 5, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": True, "endpoint_id": 5, "finding_id": 230, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 7, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 7, "finding_id": 227, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
+                    {"id": 8, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": False, "endpoint_id": 8, "finding_id": 231, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False},
                 ],
             )
             self.assertSequenceEqual(
@@ -239,7 +239,7 @@ class EndpointQueriesTest(DojoTestCase):
             )
             self.assertSequenceEqual(
                 endpoint_queries["accepted"].values(),
-                [{"id": 5, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": True, "endpoint_id": 5, "finding_id": 230, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False}],
+                [{"id": 5, "date": date(2020, 7, 1), "last_modified": datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated": False, "mitigated_time": None, "mitigated_by_id": None, "false_positive": False, "out_of_scope": False, "risk_accepted": True, "endpoint_id": 5, "finding_id": 230, "endpoint__product__prod_type__member": True, "endpoint__product__member": True, "endpoint__product__prod_type__authorized_group": False, "endpoint__product__authorized_group": False}],
             )
             self.assertSequenceEqual(
                 list(endpoint_queries["accepted_count"].values()),
@@ -290,5 +290,5 @@ class EndpointQueriesTest(DojoTestCase):
                 ],
             )
             self.assertEqual(endpoint_queries["weeks_between"], 2)
-            self.assertEqual(endpoint_queries["start_date"], datetime(2020, 7, 1, 0, 0, tzinfo=UTC))
-            self.assertEqual(endpoint_queries["end_date"], datetime(2020, 7, 1, 0, 0, tzinfo=UTC))
+            self.assertEqual(endpoint_queries["start_date"], datetime(2020, 7, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo("UTC")))
+            self.assertEqual(endpoint_queries["end_date"], datetime(2020, 7, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo("UTC")))
