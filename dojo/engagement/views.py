@@ -417,7 +417,7 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        return eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
+        return eng.risk_acceptance.all().annotate(accepted_findings_count=Count("accepted_findings__id")).select_related("owner")
 
     def get_filtered_tests(
         self,

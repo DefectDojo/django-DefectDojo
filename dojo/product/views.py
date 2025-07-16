@@ -828,9 +828,7 @@ def view_engagements(request, pid):
 
 
 def prefetch_for_view_engagements(engagements, recent_test_day_count):
-    engagements = engagements.select_related(
-        "lead",
-    ).prefetch_related(
+    engagements = engagements.prefetch_related(
         Prefetch("test_set", queryset=Test.objects.filter(
             id__in=Subquery(
                 Test.objects.filter(
@@ -849,6 +847,8 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         count_findings_close=Count("test__finding__id", filter=Q(test__finding__is_mitigated=True)),
         count_findings_duplicate=Count("test__finding__id", filter=Q(test__finding__duplicate=True)),
         count_findings_accepted=Count("test__finding__id", filter=Q(test__finding__risk_accepted=True)),
+    ).select_related(
+        "lead",
     )
 
     if System_Settings.objects.get().enable_jira:
