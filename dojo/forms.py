@@ -2853,13 +2853,13 @@ class SystemSettingsForm(forms.ModelForm):
         validators=[
             validators.MinValueValidator(9),
             validators.MaxValueValidator(48),
-        ]
+        ],
     )
     maximum_password_length = forms.IntegerField(
         validators=[
             validators.MinValueValidator(9),
             validators.MaxValueValidator(48),
-        ]
+        ],
     )
 
     def __init__(self, *args, **kwargs):
@@ -2880,7 +2880,7 @@ class SystemSettingsForm(forms.ModelForm):
             if minimum_password_length > maximum_password_length:
                 self.add_error(
                     "minimum_password_length",
-                    "Minimum required password length must be larger than the maximum required password length"
+                    "Minimum required password length must be larger than the maximum required password length",
                 )
 
         return cleaned_data

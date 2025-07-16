@@ -2752,17 +2752,20 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         minimum_password_length = data.get("minimum_password_length")
         maximum_password_length = data.get("maximum_password_length")
         if minimum_password_length and minimum_password_length < 9:
-            raise ValidationError("Minimum required password length must be at least 9")
+            msg = "Minimum required password length must be at least 9"
+            raise ValidationError(msg)
         
         if maximum_password_length and maximum_password_length > 48:
-            raise ValidationError("Maximum required password length must be less than or equal to 48")
+            msg = "Maximum required password length must be less than or equal to 48"
+            raise ValidationError(msg)
 
         if (
             minimum_password_length is not None and
             maximum_password_length is not None and
             minimum_password_length > maximum_password_length
         ):
-            raise ValidationError("Minimum required password length must be larger than the maximum required password length")
+            msg = "Minimum required password length must be larger than the maximum required password length"
+            raise ValidationError(msg)
 
         if self.instance is not None:
             default_group = self.instance.default_group
