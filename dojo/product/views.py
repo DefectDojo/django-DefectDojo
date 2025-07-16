@@ -701,7 +701,11 @@ def view_product_metrics(request, pid):
                 accepted_objs_by_severity[finding.get("severity")] += 1
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related("finding_set", "test_type")
-    tests = tests.annotate(verified_finding_count=Count("finding__id", filter=Q(finding__verified=True)))
+    verified_finding_subquery = build_count_subquery(
+        Finding.objects.filter(test=OuterRef("pk"), verified=True),
+        group_field="test_id",
+    )
+    tests = tests.annotate(verified_finding_count=Coalesce(verified_finding_subquery, Value(0)))
 
     test_data = {}
     for t in tests:
@@ -838,17 +842,41 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
             )),
                  ),
         "test_set__test_type",
-    ).annotate(
-        count_tests=Count("test", distinct=True),
-        count_findings_all=Count("test__finding__id"),
-        count_findings_open=Count("test__finding__id", filter=Q(test__finding__active=True)),
-        count_findings_open_verified=Count("test__finding__id",
-                                           filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
-        count_findings_close=Count("test__finding__id", filter=Q(test__finding__is_mitigated=True)),
-        count_findings_duplicate=Count("test__finding__id", filter=Q(test__finding__duplicate=True)),
-        count_findings_accepted=Count("test__finding__id", filter=Q(test__finding__risk_accepted=True)),
     ).select_related(
         "lead",
+    )
+
+    # Use subqueries to avoid GROUP BY issues
+    test_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")), group_field="engagement_id",
+    )
+    finding_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk")), group_field="test__engagement_id",
+    )
+    finding_open_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True), group_field="test__engagement_id",
+    )
+    finding_open_verified_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, verified=True), group_field="test__engagement_id",
+    )
+    finding_close_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), is_mitigated=True), group_field="test__engagement_id",
+    )
+    finding_duplicate_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), duplicate=True), group_field="test__engagement_id",
+    )
+    finding_accepted_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), risk_accepted=True), group_field="test__engagement_id",
+    )
+
+    engagements = engagements.annotate(
+        count_tests=Coalesce(test_subquery, Value(0)),
+        count_findings_all=Coalesce(finding_subquery, Value(0)),
+        count_findings_open=Coalesce(finding_open_subquery, Value(0)),
+        count_findings_open_verified=Coalesce(finding_open_verified_subquery, Value(0)),
+        count_findings_close=Coalesce(finding_close_subquery, Value(0)),
+        count_findings_duplicate=Coalesce(finding_duplicate_subquery, Value(0)),
+        count_findings_accepted=Coalesce(finding_accepted_subquery, Value(0)),
     )
 
     if System_Settings.objects.get().enable_jira:

@@ -16,7 +16,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, OuterRef, Q, Value
+from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
@@ -217,7 +217,11 @@ def engagements_all(request):
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_string_matching = get_system_setting("filter_string_matching", False)
     products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
-    engagement_query = Engagement.objects.annotate(test_count=Count("test__id"))
+    test_count_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")),
+        group_field="engagement_id",
+    )
+    engagement_query = Engagement.objects.annotate(test_count=Coalesce(test_count_subquery, Value(0)))
     filter_qs = products_with_engagements.prefetch_related(
         Prefetch("engagement_set", queryset=products_filter_class(request.GET, engagement_query).qs),
     )
@@ -417,7 +421,13 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        return eng.risk_acceptance.all().annotate(accepted_findings_count=Count("accepted_findings__id")).select_related("owner")
+        accepted_findings_subquery = build_count_subquery(
+            Finding.objects.filter(risk_acceptance=OuterRef("pk")),
+            group_field="risk_acceptance_id",
+        )
+        return eng.risk_acceptance.all().select_related("owner").annotate(
+            accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
+        )
 
     def get_filtered_tests(
         self,
