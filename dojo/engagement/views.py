@@ -423,7 +423,7 @@ class ViewEngagement(View):
     def get_risks_accepted(self, eng):
         accepted_findings_subquery = build_count_subquery(
             Finding.objects.filter(risk_acceptance=OuterRef("pk")),
-            group_field="risk_acceptance_id",
+            group_field="risk_acceptance",
         )
         return eng.risk_acceptance.all().select_related("owner").annotate(
             accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
