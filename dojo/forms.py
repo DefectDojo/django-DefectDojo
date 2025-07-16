@@ -2849,6 +2849,18 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
 class SystemSettingsForm(forms.ModelForm):
     jira_webhook_secret = forms.CharField(required=False)
+    minimum_password_length = forms.IntegerField(
+        validators=[
+            validators.MinValueValidator(9),
+            validators.MaxValueValidator(48),
+        ]
+    )
+    maximum_password_length = forms.IntegerField(
+        validators=[
+            validators.MinValueValidator(9),
+            validators.MaxValueValidator(48),
+        ]
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2861,6 +2873,15 @@ class SystemSettingsForm(forms.ModelForm):
 
         if enable_jira_value and not jira_webhook_secret_value:
             self.add_error("jira_webhook_secret", "This field is required when enable Jira Integration is True")
+
+        minimum_password_length = cleaned_data.get("minimum_password_length")
+        maximum_password_length = cleaned_data.get("maximum_password_length")
+        if minimum_password_length is not None and maximum_password_length is not None:
+            if minimum_password_length > maximum_password_length:
+                self.add_error(
+                    "minimum_password_length",
+                    "Minimum required password length must be larger than the maximum required password length"
+                )
 
         return cleaned_data
 
