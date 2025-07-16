@@ -2,7 +2,7 @@ import zoneinfo
 from datetime import datetime
 
 from dojo.models import Test
-from dojo.tools.qualys_infrascan_webgui.parser import QualysInfraScanWebGUIParser
+from dojo.tools.qualys_infrascan_webgui.parser import QualysInfrascanWebguiParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -12,7 +12,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         with (
             get_unit_tests_scans_path("qualys_infrascan_webgui") / "qualys_infrascan_webgui_0.xml").open(encoding="utf-8",
         ) as testfile:
-            parser = QualysInfraScanWebGUIParser()
+            parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
@@ -22,7 +22,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         with (
             get_unit_tests_scans_path("qualys_infrascan_webgui") / "qualys_infrascan_webgui_1.xml").open(encoding="utf-8",
         ) as testfile:
-            parser = QualysInfraScanWebGUIParser()
+            parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
@@ -39,7 +39,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         with (
             get_unit_tests_scans_path("qualys_infrascan_webgui") / "qualys_infrascan_webgui_multiple.xml").open(encoding="utf-8",
         ) as testfile:
-            parser = QualysInfraScanWebGUIParser()
+            parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
@@ -62,7 +62,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         with (
             get_unit_tests_scans_path("qualys_infrascan_webgui") / "qualys_infrascan_webgui_3.xml").open(encoding="utf-8",
         ) as testfile:
-            parser = QualysInfraScanWebGUIParser()
+            parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
