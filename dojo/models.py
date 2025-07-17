@@ -2771,6 +2771,7 @@ class Finding(models.Model):
             models.Index(fields=["title"]),
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
+            models.Index(fields=["vuln_id_from_tool"]),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
