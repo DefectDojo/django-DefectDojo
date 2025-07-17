@@ -595,29 +595,16 @@ class FindingTagFilter(DojoFilter):
 
 
 class FindingTagStringFilter(FilterSet):
-    TAG_CHOICES = [
-        ("engine_container", "engine_container"),
-        ("engine_secret", "engine_secret"),
-        ("engine_dast", "engine_dast"),
-        ("engine_dependencies", "engine_dependencies"),
-        ("engine_iac", "engine_iac"),
-    ]
     tags_contains = CharFilter(
         label="Finding Tag Contains",
         field_name="tags__name",
         lookup_expr="icontains",
         help_text="Search for tags on a Finding that contain a given pattern")
-    tag = MultipleChoiceFilter(
-        choices=TAG_CHOICES,
-        label="Practica",
+    tags = CharFilter(
+        label="Finding Tag",
         field_name="tags__name",
-        lookup_expr="iexact"
-    )
-    # tags = CharFilter(
-    #     label="Finding Tag",
-    #     field_name="tags__name",
-    #     lookup_expr="iexact",
-    #     help_text="Search for tags on a Finding that are an exact match")
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
     test__tags_contains = CharFilter(
         label="Test Tag Contains",
         field_name="test__tags__name",
