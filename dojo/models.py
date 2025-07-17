@@ -664,6 +664,9 @@ class System_Settings(models.Model):
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
 
+    from dojo.middleware import System_Settings_Manager
+    objects = System_Settings_Manager()
+
     def clean(self):
         super().clean()
 
@@ -676,9 +679,6 @@ class System_Settings(models.Model):
                 raise ValidationError({
                     "minimum_password_length": msg,
                 })
-
-    from dojo.middleware import System_Settings_Manager
-    objects = System_Settings_Manager()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
