@@ -162,7 +162,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         at import time
         """
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        self.original_items = list(self.test.finding_set.all())
+        # Only process findings with the same service value (or None)
+        # Even though the service values is used in the hash_code calculation,
+        # we need to make sure there are no side effects such as closing findings
+        # for findings with a different service value
+        # https://github.com/DefectDojo/django-DefectDojo/issues/12754
+        original_findings = self.test.finding_set.all().filter(service=self.service)
+        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        self.original_items = list(original_findings)
+        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
