@@ -618,11 +618,13 @@ class System_Settings(models.Model):
     minimum_password_length = models.IntegerField(
         default=9,
         verbose_name=_("Minimum password length"),
-        help_text=_("Requires user to set passwords greater than minimum length."))
+        help_text=_("Requires user to set passwords greater than minimum length."),
+        validators=[MinValueValidator(9), MaxValueValidator(48)])
     maximum_password_length = models.IntegerField(
         default=48,
         verbose_name=_("Maximum password length"),
-        help_text=_("Requires user to set passwords less than maximum length."))
+        help_text=_("Requires user to set passwords less than maximum length."),
+        validators=[MinValueValidator(9), MaxValueValidator(48)])
     number_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -661,6 +663,19 @@ class System_Settings(models.Model):
             "When turned on, all filter operations in the UI will require string matches rather than ID. "
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
+
+    def clean(self):
+        super().clean()
+
+        if (
+            self.minimum_password_length is not None
+            and self.maximum_password_length is not None
+        ):
+            if self.minimum_password_length > self.maximum_password_length:
+                msg = "Minimum required password length must be larger than the maximum required password length."
+                raise ValidationError({
+                    "minimum_password_length": msg,
+                })
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
