@@ -4,21 +4,26 @@ import json
 from dojo.models import Endpoint, Finding
 
 
-class WazuhParser:
+class WazuhLegacyParser:
 
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
     """
 
+    """
+    Parser used for the Wazuh Detector module used in older versions of 4.7 and below (before Vulnerability Detection refactor).
+    https://github.com/wazuh/wazuh/releases/tag/v4.8.0
+    """
+
     def get_scan_types(self):
-        return ["Wazuh"]
+        return ["Wazuh =< 4.7"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Wazuh"
+        return "Wazuh =< 4.7"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Wazuh"
+        return "Wazuh =< 4.7. See the documentation for search a script to obtain a clear output."
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -93,3 +98,4 @@ class WazuhParser:
                     dupes[dupe_key] = find
 
         return list(dupes.values())
+

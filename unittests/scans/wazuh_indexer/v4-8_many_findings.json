@@ -1,0 +1,916 @@
+{
+  "took": 8,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 125,
+      "relation": "eq"
+    },
+    "max_score": 5.596354,
+    "hits": [
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "002",
+            "name": "myhost0",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.2"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+            "detected_at": "2025-06-30T17:07:15.204Z",
+            "enumeration": "CVE",
+            "id": "CVE-0123-25511",
+            "published_at": "2025-05-21T19:16:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.1,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2024-56180",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "0201",
+            "name": "myhost0",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.2"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "CWE-502 Deserialization of Untrusted Data at theeventmesh-meta-raft plugin module in Apache EventMesh master branch withoutrelease version on windows\\linux\\mac os e.g. platforms allows attackers tosend controlled message and remote code execute via hessian deserializationrpc protocol. Users can use the code under the master branch in projectrepo or version 1.11.0 to fix this issue.",
+            "detected_at": "2025-06-30T17:07:15.217Z",
+            "enumeration": "CVE",
+            "id": "CVE-2024-56180",
+            "published_at": "2025-02-14T14:15:32Z",
+            "reference": "https://ubuntu.com/security/CVE-2024-56180, https://www.cve.org/CVERecord?id=CVE-2024-56180",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2024-56180",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "4001",
+            "name": "myhost0",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.2"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+            "detected_at": "2025-06-30T17:07:15.218Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-3773",
+            "published_at": "2022-02-16T19:15:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "0016",
+            "name": "myhost0",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.2"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-62-generic",
+            "size": 15033344,
+            "type": "deb",
+            "version": "6.8.0-62.65"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+            "detected_at": "2025-06-30T17:07:15.926Z",
+            "enumeration": "CVE",
+            "id": "CVE-2025-27558",
+            "published_at": "2025-05-21T19:16:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.1,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "0037",
+            "name": "myhost0",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.2"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-62-generic",
+            "size": 15033344,
+            "type": "deb",
+            "version": "6.8.0-62.65"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+            "detected_at": "2025-06-30T17:07:15.935Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-3773",
+            "published_at": "2022-02-16T19:15:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2022-44640",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "0012",
+            "name": "myhost1",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.1"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Heimdal Kerberos - Base library",
+            "name": "libheimbase1t64-heimdal",
+            "size": 95232,
+            "type": "deb",
+            "version": "7.8.git20221117.28daf24+dfsg-5ubuntu3"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "Heimdal before 7.7.1 allows remote attackers to execute arbitrary codebecause of an invalid free in the ASN.1 codec used by the Key DistributionCenter (KDC).",
+            "detected_at": "2025-06-30T17:07:16.011Z",
+            "enumeration": "CVE",
+            "id": "CVE-2022-44640",
+            "published_at": "2022-12-25T05:15:11Z",
+            "reference": "https://ubuntu.com/security/CVE-2022-44640, https://ubuntu.com/security/notices/USN-5800-1, https://www.cve.org/CVERecord?id=CVE-2022-44640",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2022-44640",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "002",
+            "name": "myhost1",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.1"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+            "detected_at": "2025-06-30T17:07:16.927Z",
+            "enumeration": "CVE",
+            "id": "CVE-2025-27558",
+            "published_at": "2025-05-21T19:16:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.1,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2024-56180",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "002",
+            "name": "myhost1",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.1"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "CWE-502 Deserialization of Untrusted Data at theeventmesh-meta-raft plugin module in Apache EventMesh master branch withoutrelease version on windows\\linux\\mac os e.g. platforms allows attackers tosend controlled message and remote code execute via hessian deserializationrpc protocol. Users can use the code under the master branch in projectrepo or version 1.11.0 to fix this issue.",
+            "detected_at": "2025-06-30T17:07:16.937Z",
+            "enumeration": "CVE",
+            "id": "CVE-2024-56180",
+            "published_at": "2025-02-14T14:15:32Z",
+            "reference": "https://ubuntu.com/security/CVE-2024-56180, https://www.cve.org/CVERecord?id=CVE-2024-56180",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2024-56180",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "090_7faa2acc88d6fa5392ada0ab483b9676353520c8_CVE-2021-47274",
+        "_score": 5.0883536,
+        "_source": {
+          "agent": {
+            "id": "090",
+            "name": "fsproxysmart7-modspy",
+            "type": "wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Centos Linux 7.9.2009",
+              "kernel": "3.10.0-1160.114.2.el7.x86_64",
+              "name": "Centos Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "The Linux kernel",
+            "installed": "2020-02-18T16:00:24.000Z",
+            "name": "kernel",
+            "size": 67107719,
+            "type": "rpm",
+            "version": "3.10.0-1062.12.1.el7"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "In the Linux kernel, the following vulnerability has been resolved:  tracing: Correct the length check which causes memory corruption  We've suffered from severe kernel crashes due to memory corruption on our production environment, like,  Call Trace: [1640542.554277] general protection fault: 0000 [#1] SMP PTI [1640542.554856] CPU: 17 PID: 26996 Comm: python Kdump: loaded Tainted:G [1640542.556629] RIP: 0010:kmem_cache_alloc+0x90/0x190 [1640542.559074] RSP: 0018:ffffb16faa597df8 EFLAGS: 00010286 [1640542.559587] RAX: 0000000000000000 RBX: 0000000000400200 RCX: 0000000006e931bf [1640542.560323] RDX: 0000000006e931be RSI: 0000000000400200 RDI: ffff9a45ff004300 [1640542.560996] RBP: 0000000000400200 R08: 0000000000023420 R09: 0000000000000000 [1640542.561670] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff9a20608d [1640542.562366] R13: ffff9a45ff004300 R14: ffff9a45ff004300 R15: 696c662f65636976 [1640542.563128] FS:  00007f45d7c6f740(0000) GS:ffff9a45ff840000(0000) knlGS:0000000000000000 [1640542.563937] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033 [1640542.564557] CR2: 00007f45d71311a0 CR3: 000000189d63e004 CR4: 00000000003606e0 [1640542.565279] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000 [1640542.566069] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400 [1640542.566742] Call Trace: [1640542.567009]  anon_vma_clone+0x5d/0x170 [1640542.567417]  __split_vma+0x91/0x1a0 [1640542.567777]  do_munmap+0x2c6/0x320 [1640542.568128]  vm_munmap+0x54/0x70 [1640542.569990]  __x64_sys_munmap+0x22/0x30 [1640542.572005]  do_syscall_64+0x5b/0x1b0 [1640542.573724]  entry_SYSCALL_64_after_hwframe+0x44/0xa9 [1640542.575642] RIP: 0033:0x7f45d6e61e27  James Wang has reproduced it stably on the latest 4.19 LTS. After some debugging, we finally proved that it's due to ftrace buffer out-of-bound access using a debug tool as follows: [   86.775200] BUG: Out-of-bounds write at addr 0xffff88aefe8b7000 [   86.780806]  no_context+0xdf/0x3c0 [   86.784327]  __do_page_fault+0x252/0x470 [   86.788367]  do_page_fault+0x32/0x140 [   86.792145]  page_fault+0x1e/0x30 [   86.795576]  strncpy_from_unsafe+0x66/0xb0 [   86.799789]  fetch_memory_string+0x25/0x40 [   86.804002]  fetch_deref_string+0x51/0x60 [   86.808134]  kprobe_trace_func+0x32d/0x3a0 [   86.812347]  kprobe_dispatcher+0x45/0x50 [   86.816385]  kprobe_ftrace_handler+0x90/0xf0 [   86.820779]  ftrace_ops_assist_func+0xa1/0x140 [   86.825340]  0xffffffffc00750bf [   86.828603]  do_sys_open+0x5/0x1f0 [   86.832124]  do_syscall_64+0x5b/0x1b0 [   86.835900]  entry_SYSCALL_64_after_hwframe+0x44/0xa9  commit b220c049d519 (\"tracing: Check length before giving out the filter buffer\") adds length check to protect trace data overflow introduced in 0fc1b09ff1ff, seems that this fix can't prevent overflow entirely, the length check should also take the sizeof entry->array[0] into account, since this array[0] is filled the length of trace data and occupy addtional space and risk overflow.",
+            "detected_at": "2024-08-26T08:33:32.998Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-47274",
+            "published_at": "2024-05-21T15:15:15Z",
+            "reference": "https://git.kernel.org/stable/c/2d598902799886d67947406f26ee8e5fd2ca097f, https://git.kernel.org/stable/c/31ceae385556c37e4d286cb6378696448f566883, https://git.kernel.org/stable/c/3e08a9f9760f4a70d633c328a76408e62d6f80a3, https://git.kernel.org/stable/c/43c32c22254b9328d7abb1c2b0f689dc67838e60, https://git.kernel.org/stable/c/b16a249eca2230c2cd66fa1d4b94743bd9b6ef92, https://git.kernel.org/stable/c/d63f00ec908b3be635ead5d6029cc94246e1f38d, https://git.kernel.org/stable/c/edcce01e0e50840a9aa6a70baed21477bdd2c9f9",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "090_7faa2acc88d6fa5392ada0ab483b9676353520c8_CVE-2021-47274",
+        "_score": 5.0883536,
+        "_source": {
+          "agent": {
+            "id": "090",
+            "name": "Agent090",
+            "type": "wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Centos Linux 7.9.2009",
+              "kernel": "3.10.0-1160.114.2.el7.x86_64",
+              "name": "Centos Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "The Linux kernel",
+            "installed": "2020-02-18T16:00:24.000Z",
+            "name": "kernel",
+            "size": 67107719,
+            "type": "rpm",
+            "version": "3.10.0-1062.12.1.el7"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "In the Linux kernel, the following vulnerability has been resolved:  tracing: Correct the length check which causes memory corruption  We've suffered from severe kernel crashes due to memory corruption on our production environment, like,  Call Trace: [1640542.554277] general protection fault: 0000 [#1] SMP PTI [1640542.554856] CPU: 17 PID: 26996 Comm: python Kdump: loaded Tainted:G [1640542.556629] RIP: 0010:kmem_cache_alloc+0x90/0x190 [1640542.559074] RSP: 0018:ffffb16faa597df8 EFLAGS: 00010286 [1640542.559587] RAX: 0000000000000000 RBX: 0000000000400200 RCX: 0000000006e931bf [1640542.560323] RDX: 0000000006e931be RSI: 0000000000400200 RDI: ffff9a45ff004300 [1640542.560996] RBP: 0000000000400200 R08: 0000000000023420 R09: 0000000000000000 [1640542.561670] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffff9a20608d [1640542.562366] R13: ffff9a45ff004300 R14: ffff9a45ff004300 R15: 696c662f65636976 [1640542.563128] FS:  00007f45d7c6f740(0000) GS:ffff9a45ff840000(0000) knlGS:0000000000000000 [1640542.563937] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033 [1640542.564557] CR2: 00007f45d71311a0 CR3: 000000189d63e004 CR4: 00000000003606e0 [1640542.565279] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000 [1640542.566069] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400 [1640542.566742] Call Trace: [1640542.567009]  anon_vma_clone+0x5d/0x170 [1640542.567417]  __split_vma+0x91/0x1a0 [1640542.567777]  do_munmap+0x2c6/0x320 [1640542.568128]  vm_munmap+0x54/0x70 [1640542.569990]  __x64_sys_munmap+0x22/0x30 [1640542.572005]  do_syscall_64+0x5b/0x1b0 [1640542.573724]  entry_SYSCALL_64_after_hwframe+0x44/0xa9 [1640542.575642] RIP: 0033:0x7f45d6e61e27  James Wang has reproduced it stably on the latest 4.19 LTS. After some debugging, we finally proved that it's due to ftrace buffer out-of-bound access using a debug tool as follows: [   86.775200] BUG: Out-of-bounds write at addr 0xffff88aefe8b7000 [   86.780806]  no_context+0xdf/0x3c0 [   86.784327]  __do_page_fault+0x252/0x470 [   86.788367]  do_page_fault+0x32/0x140 [   86.792145]  page_fault+0x1e/0x30 [   86.795576]  strncpy_from_unsafe+0x66/0xb0 [   86.799789]  fetch_memory_string+0x25/0x40 [   86.804002]  fetch_deref_string+0x51/0x60 [   86.808134]  kprobe_trace_func+0x32d/0x3a0 [   86.812347]  kprobe_dispatcher+0x45/0x50 [   86.816385]  kprobe_ftrace_handler+0x90/0xf0 [   86.820779]  ftrace_ops_assist_func+0xa1/0x140 [   86.825340]  0xffffffffc00750bf [   86.828603]  do_sys_open+0x5/0x1f0 [   86.832124]  do_syscall_64+0x5b/0x1b0 [   86.835900]  entry_SYSCALL_64_after_hwframe+0x44/0xa9  commit b220c049d519 (\"tracing: Check length before giving out the filter buffer\") adds length check to protect trace data overflow introduced in 0fc1b09ff1ff, seems that this fix can't prevent overflow entirely, the length check should also take the sizeof entry->array[0] into account, since this array[0] is filled the length of trace data and occupy addtional space and risk overflow.",
+            "detected_at": "2024-08-26T08:33:32.998Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-47274",
+            "published_at": "2024-05-21T15:15:15Z",
+            "reference": "https://git.kernel.org/stable/c/2d598902799886d67947406f26ee8e5fd2ca097f, https://git.kernel.org/stable/c/31ceae385556c37e4d286cb6378696448f566883, https://git.kernel.org/stable/c/3e08a9f9760f4a70d633c328a76408e62d6f80a3, https://git.kernel.org/stable/c/43c32c22254b9328d7abb1c2b0f689dc67838e60, https://git.kernel.org/stable/c/b16a249eca2230c2cd66fa1d4b94743bd9b6ef92, https://git.kernel.org/stable/c/d63f00ec908b3be635ead5d6029cc94246e1f38d, https://git.kernel.org/stable/c/edcce01e0e50840a9aa6a70baed21477bdd2c9f9",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "021_18fcfcf299defda464b9c7fea876a7732312324c_CVE-2023-28322",
+        "_score": 2.6127179,
+        "_source": {
+          "agent": {
+            "id": "021",
+            "name": "fsproxysmart1",
+            "type": "wazuh",
+            "version": "v4.7.2"
+          },
+          "host": {
+            "os": {
+              "full": "CentOS Linux 7.9.2009",
+              "kernel": "3.10.0-1160.118.1.el7.x86_64",
+              "name": "CentOS Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "Files needed for building applications with libcurl",
+            "installed": "2024-05-09T21:08:21.000Z",
+            "name": "libcurl-devel",
+            "size": 638991,
+            "type": "rpm",
+            "version": "7.29.0-59.el7_9.2"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "An information disclosure vulnerability exists in curl <v8.1.0 when doing HTTP(S) transfers, libcurl might erroneously use the read callback (`CURLOPT_READFUNCTION`) to ask for data to send, even when the `CURLOPT_POSTFIELDS` option has been set, if the same handle previously wasused to issue a `PUT` request which used that callback. This flaw may surprise the application and cause it to misbehave and either send off the wrong data or use memory after free or similar in the second transfer. The problem exists in the logic for a reused handle when it is (expected to be) changed from a PUT to a POST.",
+            "detected_at": "2024-08-26T08:30:11.260Z",
+            "enumeration": "CVE",
+            "id": "CVE-2023-28322",
+            "published_at": "2023-05-26T21:15:16Z",
+            "reference": "https://hackerone.com/reports/1954658, http://seclists.org/fulldisclosure/2023/Jul/47, http://seclists.org/fulldisclosure/2023/Jul/48, http://seclists.org/fulldisclosure/2023/Jul/52, https://security.gentoo.org/glsa/202310-12, https://security.netapp.com/advisory/ntap-20230609-0009/, https://support.apple.com/kb/HT213843, https://support.apple.com/kb/HT213844, https://support.apple.com/kb/HT213845, https://lists.debian.org/debian-lts-announce/2023/12/msg00015.html, https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/F4I75RDGX5ULSSCBE5BF3P5I5SFO7ULQ/, https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/Z2LIWHWKOVH24COGGBCVOWDXXIUPKOMK/",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 3.7,
+              "version": "3.1"
+            },
+            "severity": "Low"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "021_18fcfcf299defda464b9c7fea876a7732312324c_CVE-2018-20483",
+        "_score": 2.6127179,
+        "_source": {
+          "agent": {
+            "id": "021",
+            "name": "test",
+            "type": "wazuh",
+            "version": "v4.11.2"
+          },
+          "host": {
+            "os": {
+              "full": "CentOS Linux 7.9.2009",
+              "kernel": "3.10.0-1160.118.1.el7.x86_64",
+              "name": "CentOS Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "Files needed for building applications with libcurl",
+            "installed": "2024-05-09T21:08:21.000Z",
+            "name": "libcurl-devel",
+            "size": 638991,
+            "type": "rpm",
+            "version": "7.29.0-59.el7_9.2"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "set_file_metadata in xattr.c in GNU Wget before 1.20.1 stores a file's origin URL in the user.xdg.origin.url metadata attribute of the extended attributes of the downloaded file, which allows local users to obtain sensitive information (e.g., credentials contained in the URL) by reading this attribute, as demonstrated by getfattr. This also applies to Referer information in the user.xdg.referrer.url metadata attribute. According to 2016-07-22 in the Wget ChangeLog, user.xdg.origin.url was partially based on the behavior of fwrite_xattr in tool_xattr.c in curl.",
+            "detected_at": "2024-08-26T08:30:11.260Z",
+            "enumeration": "CVE",
+            "id": "CVE-2018-20483",
+            "published_at": "2018-12-26T18:29:00Z",
+            "reference": "https://twitter.com/marcan42/status/1077676739877232640, http://git.savannah.gnu.org/cgit/wget.git/tree/NEWS, https://security.gentoo.org/glsa/201903-08, http://www.securityfocus.com/bid/106358, https://access.redhat.com/errata/RHSA-2019:3701, https://security.netapp.com/advisory/ntap-20190321-0002/, https://usn.ubuntu.com/3943-1/",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 2.1,
+              "version": "2.0"
+            },
+            "severity": "Low"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "021_f1a96dd19134d450109f5706f6c817c35f82ee04_CVE-2021-26401",
+        "_score": 2.6127179,
+        "_source": {
+          "agent": {
+            "id": "020",
+            "name": "test",
+            "type": "wazuh",
+            "version": "v4.7.2"
+          },
+          "host": {
+            "os": {
+              "full": "CentOS Linux 7.9.2009",
+              "kernel": "3.10.0-1160.118.1.el7.x86_64",
+              "name": "CentOS Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "The Linux kernel",
+            "installed": "2021-04-15T10:48:32.000Z",
+            "name": "kernel",
+            "size": 67399074,
+            "type": "rpm",
+            "version": "3.10.0-1160.24.1.el7"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "LFENCE/JMP (mitigation V2-2) may not sufficiently mitigate CVE-2017-5715 on some AMD CPUs.",
+            "detected_at": "2024-08-26T08:30:10.453Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-26401",
+            "published_at": "2022-03-11T18:15:11Z",
+            "reference": "http://www.openwall.com/lists/oss-security/2022/03/18/2, https://www.amd.com/en/corporate/product-security/bulletin/amd-sb-1036",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 1.9,
+              "version": "2.0"
+            },
+            "severity": "Low"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "021_f1a96dd19134d450109f5706f6c817c35f82ee04_CVE-2022-24448",
+        "_score": 2.6127179,
+        "_source": {
+          "agent": {
+            "id": "021",
+            "name": "test",
+            "type": "wazuh",
+            "version": "v4.11.2"
+          },
+          "host": {
+            "os": {
+              "full": "CentOS Linux 7.9.2009",
+              "kernel": "3.10.0-1160.118.1.el7.x86_64",
+              "name": "CentOS Linux",
+              "platform": "centos",
+              "type": "centos",
+              "version": "7.9.2009"
+            }
+          },
+          "package": {
+            "architecture": "x86_64",
+            "description": "The Linux kernel",
+            "installed": "2021-04-15T10:48:32.000Z",
+            "name": "kernel",
+            "size": 67399074,
+            "type": "rpm",
+            "version": "3.10.0-1160.24.1.el7"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "CVSS",
+            "description": "An issue was discovered in fs/nfs/dir.c in the Linux kernel before 5.16.5. If an application sets the O_DIRECTORY flag, and tries to open a regular file, nfs_atomic_open() performs a regular lookup. If a regular file is found, ENOTDIR should occur, but the server instead returns uninitialized data in the file descriptor.",
+            "detected_at": "2024-08-26T08:30:10.460Z",
+            "enumeration": "CVE",
+            "id": "CVE-2022-24448",
+            "published_at": "2022-02-04T20:15:08Z",
+            "reference": "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.16.5, https://www.spinics.net/lists/stable/msg531976.html, https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ac795161c93699d600db16c1a8cc23a65a1eceaf, https://lists.debian.org/debian-lts-announce/2022/03/msg00011.html, https://lists.debian.org/debian-lts-announce/2022/03/msg00012.html, https://github.com/torvalds/linux/commit/ab0fc21bc7105b54bafd85bd8b82742f9e68898a, https://github.com/torvalds/linux/commit/ac795161c93699d600db16c1a8cc23a65a1eceaf, https://www.debian.org/security/2022/dsa-5092, https://www.debian.org/security/2022/dsa-5096, https://lore.kernel.org/all/67d6a536-9027-1928-99b6-af512a36cd1a%40huawei.com/T/",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 1.9,
+              "version": "2.0"
+            },
+            "severity": "Low"
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      },
+      {
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+        "_score": 5.596354,
+        "_source": {
+          "agent": {
+            "id": "002",
+            "name": "myhost1",
+            "type": "Wazuh",
+            "version": "v4.11.1"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.1"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "-",
+            "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+            "detected_at": "2025-06-30T17:07:16.938Z",
+            "enumeration": "CVE",
+            "id": "CVE-2021-3773",
+            "published_at": "2022-02-16T19:15:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+            "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+              "source": "Canonical Security Tracker",
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 9.8,
+              "version": "3.1"
+            },
+            "severity": "Critical",
+            "under_evaluation": false
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "wazuh-server"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
