@@ -1,8 +1,8 @@
 import logging
 import re
+import zoneinfo
 
 from django.core.management.base import BaseCommand
-from pytz import timezone
 
 from dojo.celery import app
 from dojo.models import Finding, Test_Type
@@ -10,7 +10,7 @@ from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 
-locale = timezone(get_system_setting("time_zone"))
+locale = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 """
 Author: Aaron Weaver
