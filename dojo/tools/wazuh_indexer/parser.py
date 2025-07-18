@@ -9,11 +9,14 @@ class WazuhIndexerParser:
     def get_scan_types(self):
         return ["Wazuh >= 4.8 Scan"]
 
+
     def get_label_for_scan_types(self, scan_type):
         return "Wazuh >= 4.8 Scan"
 
+
     def get_description_for_scan_types(self, scan_type):
         return "Wazuh Vulnerability Data >= 4.8 from indexer in JSON format. See the documentation for search a script to obtain a clear output."
+
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -22,7 +25,7 @@ class WazuhIndexerParser:
             return []
 
         # Detect duplications
-        dupes = {}
+        findings = []
 
         # Loop through each element in the list
         vulnerabilities = data.get("hits", {}).get("hits", [])
@@ -43,7 +46,7 @@ class WazuhIndexerParser:
                 cvss_version = vuln.get("score").get("version")
                 version = cvss_version.split('.')[0]
                 if version == "3":
-                    cvss3_score = version
+                    cvss3_score = cvss_version
 
 
             # Agent is equal to the endpoint
@@ -52,7 +55,7 @@ class WazuhIndexerParser:
             agent_id = agent.get("id")
             agent_name = agent.get("name")
             # agent_ip = agent.get("ip")  Maybe... will introduce it in the news versions of Wazuh?
-            
+
             description = (
                 f"Agent Name / ID: {agent_name} / {agent_id}\n"
                 f"{description}"
@@ -72,8 +75,8 @@ class WazuhIndexerParser:
             # This will use for
             info_os = item.get("host")
             if info_os and info_os.get("os"):
-                name_os = info_os.get("os").get("full")
-                kernel_os = info_os.get("os").get("kernel") if info_os.get("os").get("kernel") else "N/A"
+                name_os = info_os.get("os").get("full", "N/A")
+                kernel_os = info_os.get("os").get("kernel", "N/A")
 
 
             title = f"{cve} Affects {package_name} (Version: {package_version})"
@@ -88,29 +91,6 @@ class WazuhIndexerParser:
             )
 
 
-        # def get_dedupe_fields(self) -> list[str]:  
-        #     """  
-        #     Return the list of fields used for deduplication.  
-            
-        #     Fields:  
-        #     - title: Título del finding  
-        #     - description: Descripción del finding    
-        #     - severity: Severidad del finding  
-        #     """  
-        #     return [  
-        #         "title",  
-        #         "description",   
-        #         "severity",  
-        #     ]
-
-            dupe_key = severity + description + title
-            dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
-
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-            else:
-                dupes[dupe_key] = True
-
             finding = Finding(
                 title=title,
                 test=test,
@@ -121,14 +101,13 @@ class WazuhIndexerParser:
                 static_finding=True,
                 component_name=package_name,
                 component_version=package_version,
-                file_path=package_path if package_path else None,
-                publish_date=published_date, 
+                file_path=package_path,
+                publish_date=published_date,
                 cvssv3_score=cvss3_score if cvss3_score else None,
-                unique_id_from_tool=dupe_key,
             )
 
             finding.unsaved_vulnerability_ids = [cve]
             finding.unsaved_endpoints = [Endpoint(host=agent_name)]
-            dupes[dupe_key] = finding
+            findings.append(finding)
 
-        return list(dupes.values())
+        return findings

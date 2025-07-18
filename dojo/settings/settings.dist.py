@@ -1348,6 +1348,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "Wazuh =< 4.7 Scan": ["title", "description", "severity"],
+    "Wazuh >= 4.8 Scan": ["title", "description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1413,12 +1415,13 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Wpscan": True,
     "Rusty Hog Scan": True,
     "Codechecker Report native": True,
-    "Wazuh": True,
     "Nuclei Scan": True,
     "Threagile risks report": True,
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
+    "Wazuh >= 4.8 Scan": True,
+    "Wazuh =< 4.7 Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1578,7 +1581,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "kube-bench Scan": DEDUPE_ALGO_HASH_CODE,
     "Threagile risks report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Humble Json Importer": DEDUPE_ALGO_HASH_CODE,
-    "Wazuh Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "MSDefender Parser": DEDUPE_ALGO_HASH_CODE,
     "HCLAppScan XML": DEDUPE_ALGO_HASH_CODE,
     "HCL AppScan on Cloud SAST XML": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -1605,6 +1607,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
+    "Wazuh >= 4.8 Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wazuh =< 4.7 Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
