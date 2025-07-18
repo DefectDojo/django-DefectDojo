@@ -7,10 +7,10 @@ from dojo.models import Finding, Endpoint
 
 class WazuhIndexerParser:
     def get_scan_types(self):
-        return ["Wazuh48v"]
+        return ["Wazuh >= 4.8 Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Wazuh 48z"
+        return "Wazuh >= 4.8 Scan"
 
     def get_description_for_scan_types(self, scan_type):
         return "Wazuh Vulnerability Data >= 4.8 from indexer in JSON format. See the documentation for search a script to obtain a clear output."
@@ -35,13 +35,15 @@ class WazuhIndexerParser:
 
             description = vuln.get("description")
             cve = vuln.get("id")
-            detected_at = datetime.fromisoformat(vuln["detected_at"].replace("Z", "+00:00")).date()
+            published_date = datetime.fromisoformat(vuln["published_at"].replace("Z", "+00:00")).date()
             references = vuln.get("reference")
             severity = vuln.get("severity")
             if vuln.get("score"):
                 cvss_score = vuln.get("score").get("base")
                 cvss_version = vuln.get("score").get("version")
-
+                version = cvss_version.split('.')[0]
+                if version == "3":
+                    cvss3_score = version
 
 
             # Agent is equal to the endpoint
@@ -52,8 +54,7 @@ class WazuhIndexerParser:
             # agent_ip = agent.get("ip")  Maybe... will introduce it in the news versions of Wazuh?
             
             description = (
-                f"Agent Name: {agent_name}\n"
-                f"Agent ID: {agent_id}\n\n"
+                f"Agent Name / ID: {agent_name} / {agent_id}\n"
                 f"{description}"
             )
 
@@ -76,17 +77,33 @@ class WazuhIndexerParser:
 
 
             title = f"{cve} Affects {package_name} (Version: {package_version})"
-            justify_severation = (
-                f"Severity: {severity}"
-                f"CVSS Score: {cvss_score}"
-                f"CVSS Version: {cvss_version}"
-                f"\nOS: {name_os}"
-                f"Kernel: {kernel_os}\n"
-                f"Package Name: {package_name}"
+            severity_justification = (
+                f"Severity: {severity}\n"
+                f"CVSS Score: {cvss_score}\n"
+                f"CVSS Version: {cvss_version}\n"
+                f"\nOS: {name_os}\n"
+                f"Kernel: {kernel_os}\n\n"
+                f"Package Name: {package_name}\n"
                 f"Package Description: {package_description}"
             )
 
-            dupe_key = cve + severity + description
+
+        # def get_dedupe_fields(self) -> list[str]:  
+        #     """  
+        #     Return the list of fields used for deduplication.  
+            
+        #     Fields:  
+        #     - title: Título del finding  
+        #     - description: Descripción del finding    
+        #     - severity: Severidad del finding  
+        #     """  
+        #     return [  
+        #         "title",  
+        #         "description",   
+        #         "severity",  
+        #     ]
+
+            dupe_key = severity + description + title
             dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
@@ -98,14 +115,15 @@ class WazuhIndexerParser:
                 title=title,
                 test=test,
                 description=description,
-                severity_justification=severity_justification
+                severity_justification=severity_justification,
                 severity=severity,
                 references=references,
                 static_finding=True,
                 component_name=package_name,
                 component_version=package_version,
                 file_path=package_path if package_path else None,
-                publish_date=detected_at,
+                publish_date=published_date, 
+                cvssv3_score=cvss3_score if cvss3_score else None,
                 unique_id_from_tool=dupe_key,
             )
 
