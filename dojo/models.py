@@ -4,6 +4,7 @@ import hashlib
 import logging
 import re
 import warnings
+import zoneinfo
 from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -39,7 +40,6 @@ from multiselectfield import MultiSelectField
 from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
-from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
@@ -438,7 +438,7 @@ class System_Settings(models.Model):
     url_prefix = models.CharField(max_length=300, default="", blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
     team_name = models.CharField(max_length=100, default="", blank=True)
     time_zone = models.CharField(max_length=50,
-                                 choices=[(tz, tz) for tz in all_timezones],
+                                 choices=[(tz, tz) for tz in zoneinfo.available_timezones()],
                                  default="UTC", blank=False)
     enable_product_grade = models.BooleanField(default=False, verbose_name=_("Enable Product Grading"), help_text=_("Displays a grade letter next to a product to show the overall health."))
     product_grade = models.CharField(max_length=800, blank=True)
