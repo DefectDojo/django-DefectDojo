@@ -447,6 +447,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "epss_score_range",
         "epss_percentile",
         "epss_percentile_range",
+        "fix_available",
     ])
 
     if similar:
@@ -1473,6 +1474,7 @@ class ApiFindingFilter(DojoFilter):
     under_review = BooleanFilter(field_name="under_review")
     verified = BooleanFilter(field_name="verified")
     has_jira = BooleanFilter(field_name="jira_issue", lookup_expr="isnull", exclude=True)
+    fix_available = BooleanFilter(field_name="fix_available")
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
@@ -1675,6 +1677,7 @@ class FindingFilterHelper(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
+    fix_available = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
@@ -1759,6 +1762,7 @@ class FindingFilterHelper(FilterSet):
             ("numerical_severity", "numerical_severity"),
             ("date", "date"),
             ("mitigated", "mitigated"),
+            ("fix_available", "fix_available"),
             ("risk_acceptance__created__date",
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
@@ -1774,6 +1778,7 @@ class FindingFilterHelper(FilterSet):
             "date": "Date",
             "risk_acceptance__created__date": "Acceptance Date",
             "mitigated": "Mitigated Date",
+            "fix_available": "Fix Available",
             "title": "Finding Name",
             "test__engagement__product__name": "Product Name",
             "epss_score": "EPSS Score",
@@ -3063,6 +3068,7 @@ class ReportFindingFilterHelper(FilterSet):
         fields=(
             ("title", "title"),
             ("date", "date"),
+            ("fix_available", "fix_available"),
             ("numerical_severity", "numerical_severity"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
