@@ -448,6 +448,11 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "epss_score_range",
         "epss_percentile",
         "epss_percentile_range",
+        "known_exploited",
+        "ransomware_used",
+        "kev_date",
+        "kev_before",
+        "kev_after",
     ])
 
     if similar:
@@ -1757,6 +1762,9 @@ class FindingFilterHelper(FilterSet):
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
             'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
+    kev_date = DateFilter(field_name="kev_date", lookup_expr="exact", label="Added to KEV On")
+    kev_before = DateFilter(field_name="kev_date", lookup_expr="lt", label="Added to KEV Before")
+    kev_after = DateFilter(field_name="kev_date", lookup_expr="gt", label="Added to KEV After")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1773,6 +1781,9 @@ class FindingFilterHelper(FilterSet):
             ("service", "service"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
+            ("known_exploited", "known_exploited"),
+            ("ransomware_used", "ransomware_used"),
+            ("kev_date", "kev_date"),
         ),
         field_labels={
             "numerical_severity": "Severity",
@@ -1783,6 +1794,9 @@ class FindingFilterHelper(FilterSet):
             "test__engagement__product__name": "Product Name",
             "epss_score": "EPSS Score",
             "epss_percentile": "EPSS Percentile",
+            "known_exploited": "Known Exploited",
+            "ransomware_used": "Ransomware Used",
+            "kev_date": "Date added to KEV",
         },
     )
 
@@ -1794,6 +1808,9 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["on"].widget = date_input_widget
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
+        self.form.fields["kev_date"].widget = date_input_widget
+        self.form.fields["kev_before"].widget = date_input_widget
+        self.form.fields["kev_after"].widget = date_input_widget
         self.form.fields["mitigated_on"].widget = date_input_widget
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
