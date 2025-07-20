@@ -93,7 +93,7 @@ class TestApiEdgescanParser(DojoTestCase):
             self.assertEqual(finding_2.description, "Description Text 2")
             self.assertEqual(finding_2.mitigation, "Remediation Text 2")
             self.assertEqual(finding_2.active, False)
-            self.assertEqual(finding_2.unsaved_tags, [])
+            self.assertEqual(finding_2.unsaved_tags, None)
             self.assertEqual(finding_2.unique_id_from_tool, 21583)
             self.assertEqual(1, len(finding_2.unsaved_endpoints))
             self.assertEqual(finding_2.unsaved_endpoints[0].host, "example.test.com")
