@@ -2879,7 +2879,14 @@ def finding_bulk_update_all(request, pid=None):
             error_counts = defaultdict(lambda: 0)
             success_count = 0
             finding_groups = set(  # noqa: C401
-                find.finding_group for find in finds if find.has_finding_group
+                finding.finding_group
+                for finding in finds
+                if finding.has_finding_group
+                and (
+                    jira_helper.is_push_all_issues(finding)
+                    or jira_helper.is_keep_in_sync_with_jira(finding)
+                    or form.cleaned_data.get("push_to_jira")
+                )
             )
             logger.debug("finding_groups: %s", finding_groups)
             for group in finding_groups:
@@ -2926,7 +2933,11 @@ def finding_bulk_update_all(request, pid=None):
                 # the checkbox gets disabled and is always false
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding,
                 # form.cleaned_data.get('push_to_jira'))
-                if (jira_helper.is_push_all_issues(finding) or form.cleaned_data.get("push_to_jira")) and not finding.has_finding_group:
+                if (
+                    form.cleaned_data.get("push_to_jira")
+                    or jira_helper.is_push_all_issues(finding)
+                    or jira_helper.is_keep_in_sync_with_jira(finding)
+                ) and not finding.has_finding_group:
                     (
                         can_be_pushed_to_jira,
                         error_message,
