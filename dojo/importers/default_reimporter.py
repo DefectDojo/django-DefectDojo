@@ -15,6 +15,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -626,7 +627,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
         # Update finding tags
         if finding_from_report.unsaved_tags:
-            finding.tags = finding_from_report.unsaved_tags
+            finding.tags = clean_tags(finding_from_report.unsaved_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

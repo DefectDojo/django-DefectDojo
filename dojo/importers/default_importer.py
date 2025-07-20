@@ -16,6 +16,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -207,7 +208,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             self.process_endpoints(finding, self.endpoints_to_add)
             # Process any tags
             if finding.unsaved_tags:
-                finding.tags = finding.unsaved_tags
+                finding.tags = clean_tags(finding.unsaved_tags)
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
