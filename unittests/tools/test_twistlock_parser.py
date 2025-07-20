@@ -1,4 +1,5 @@
 
+
 from dojo.models import Test
 from dojo.tools.twistlock.parser import TwistlockParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -113,6 +114,33 @@ class TestTwistlockParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("PRISMA-2021-0013", finding.unsaved_vulnerability_ids[0])
                 break
+
+    def test_parse_file_with_no_cvss(self):
+        testfile = (get_unit_tests_scans_path("twistlock") / "no_cvss.json").open(encoding="utf-8")
+        parser = TwistlockParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        # Should have 4 findings: 3 vulnerabilities + 1 compliance
+        self.assertEqual(3, len(findings))
+
+        for finding in findings:
+            if finding.title.startswith("Compliance:"):
+                # Verify compliance finding exists
+                self.assertIn("CIS_Docker_v1.5.0 - 4.6", finding.title)
+                self.assertEqual("Medium", finding.severity)
+                self.assertIn("404", finding.vuln_id_from_tool)
+            else:
+                # This should be a vulnerability finding
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                finding.unsaved_vulnerability_ids[0]
+                # Findings without CVSS should have None or empty CVSS fields
+                self.assertIsNone(finding.cvssv3)
+                self.assertIsNone(finding.cvssv3_score)
+
+                # All vulnerability findings should have impact metadata
+                self.assertIn("Image ID:", finding.impact)
+                self.assertIn("Distribution:", finding.impact)
+                self.assertIn("Debian GNU/Linux 12", finding.impact)
 
     def test_parse_file_with_many_vulns(self):
         testfile = (get_unit_tests_scans_path("twistlock") / "many_vulns.json").open(encoding="utf-8")

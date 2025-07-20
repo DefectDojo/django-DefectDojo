@@ -231,18 +231,10 @@ def get_item(vulnerability, test, image_metadata=""):
         if "severity" in vulnerability
         else "Info"
     )
-    vector = (
-        vulnerability.get("vector", "CVSS vector not provided. ")
-    )
-    status = (
-        vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
-    )
-    cvss = (
-        vulnerability.get("cvss", "No CVSS score yet.")
-    )
-    riskFactors = (
-        vulnerability.get("riskFactors", "No risk factors.")
-    )
+    cvssv3 = vulnerability.get("vector")
+    status = vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
+    cvssv3_score = vulnerability.get("cvss")
+    riskFactors = vulnerability.get("riskFactors", "No risk factors.")
 
     # Build impact field combining severity and image metadata which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
     impact_parts = [severity]
@@ -269,8 +261,9 @@ def get_item(vulnerability, test, image_metadata=""):
         references=vulnerability.get("link"),
         component_name=vulnerability.get("packageName", ""),
         component_version=vulnerability.get("packageVersion", ""),
-        severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
-        cvssv3_score=cvss,
+        severity_justification=f"Vector: {cvssv3} (CVSS v3 base score: {cvssv3_score})\n\n{riskFactors}",
+        cvssv3=cvssv3,
+        cvssv3_score=cvssv3_score,
         impact=impact_text,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]] if "id" in vulnerability else None
