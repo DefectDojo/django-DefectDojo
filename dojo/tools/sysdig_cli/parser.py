@@ -136,7 +136,7 @@ class SysdigCLIParser:
             # Set some finding tags
             tags = []
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
+                tags.append("VulnId:" + row.vulnerability_id.replace(" ", "_"))
             finding.tags = tags
             finding.dynamic_finding = False
             finding.static_finding = True

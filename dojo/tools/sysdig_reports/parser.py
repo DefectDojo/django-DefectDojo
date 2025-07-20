@@ -142,20 +142,20 @@ class SysdigReportsParser:
             # Set some finding tags
             tags = []
             if row.k8s_cluster_name != "":
-                tags.append("Cluster: " + row.k8s_cluster_name)
+                tags.append("Cluster:" + row.k8s_cluster_name.replace(" ", "_"))
             if row.k8s_namespace_name != "":
-                tags.append("Namespace: " + row.k8s_namespace_name)
+                tags.append("Namespace:" + row.k8s_namespace_name.replace(" ", "_"))
             if row.k8s_workload_name != "":
-                tags.append("WorkloadName: " + row.k8s_workload_name)
+                tags.append("WorkloadName:" + row.k8s_workload_name.replace(" ", "_"))
             if row.package_name != "":
-                tags.append("PackageName: " + row.package_name)
+                tags.append("PackageName:" + row.package_name.replace(" ", "_"))
             if row.package_version != "":
-                tags.append("PackageVersion: " + row.package_version)
+                tags.append("PackageVersion:" + row.package_version.replace(" ", "_"))
             if row.k8s_cluster_name != "":
-                tags.append("InUse: " + str(row.in_use))
+                tags.append("InUse:" + str(row.in_use))
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
-            finding.tags = tags
+                tags.append("VulnId:" + row.vulnerability_id.replace(" ", "_"))
+            finding.unsaved_tags = tags
             if row.k8s_cluster_name != "":
                 finding.dynamic_finding = True
                 finding.static_finding = False
