@@ -109,11 +109,10 @@ class TwistlockCSVParser:
             date=finding_date,
             severity=convert_severity(data_severity),
             description=data_description
-            + "<p> Vulnerable Package: "
+            + "\n\nVulnerable Package: "
             + data_package_name
-            + "</p><p> Current Version: "
-            + str(data_package_version)
-            + "</p>",
+            + "\n\nCurrent Version: "
+            + str(data_package_version),
             mitigation=data_fix_status,
             component_name=textwrap.shorten(
                 data_package_name, width=200, placeholder="...",
@@ -252,11 +251,10 @@ def get_item(vulnerability, test, image_metadata=""):
         test=test,
         severity=severity,
         description=vulnerability.get("description", "")
-        + "<p> Vulnerable Package: "
+        + "\n\nVulnerable Package: "
         + vulnerability.get("packageName", "")
-        + "</p><p> Current Version: "
-        + str(vulnerability.get("packageVersion", ""))
-        + "</p>",
+        + "\n\nCurrent Version: "
+        + str(vulnerability.get("packageVersion", "")),
         mitigation=status.title() if isinstance(status, str) else "",
         references=vulnerability.get("link"),
         component_name=vulnerability.get("packageName", ""),
@@ -287,15 +285,15 @@ def get_compliance_item(compliance, test, image_metadata=""):
     layer_time = compliance.get("layerTime", "")
 
     # Build comprehensive description
-    desc_parts = [f"<p><strong>Compliance Issue:</strong> {title}</p>"]
+    desc_parts = [f"**Compliance Issue:** {title}\n\n"]
 
     if compliance_id:
-        desc_parts.append(f"<p><strong>Compliance ID:</strong> {compliance_id}</p>")
+        desc_parts.append(f"**Compliance ID:** {compliance_id}\n\n")
 
     if category:
-        desc_parts.append(f"<p><strong>Category:</strong> {category}</p>")
+        desc_parts.append(f"**Category:** {category}\n\n")
 
-    desc_parts.append(f"<p><strong>Description:</strong> {description}</p>")
+    desc_parts.append(f"**Description:** {description}\n\n")
 
     # Build impact field combining severity and image metadata
     impact_parts = [severity]
