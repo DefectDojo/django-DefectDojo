@@ -994,7 +994,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         # Get the findings and finding groups created
-        findings = Finding.objects.filter(test__id=test_id).order_by("id")
+        Finding.objects.filter(test__id=test_id).order_by("id")
         finding_groups = Finding_Group.objects.filter(test__id=test_id)
 
         # Create mixed scenario: some findings in groups, some ungrouped
@@ -1002,7 +1002,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         if finding_groups.exists():
             # Remove all findings from the first group and delete the group
             group_to_remove = finding_groups.first()
-            findings_in_group = list(group_to_remove.findings.all())
+            list(group_to_remove.findings.all())
             # Remove all findings from this group, making them ungrouped
             group_to_remove.findings.clear()
             # Delete the empty group
@@ -1013,15 +1013,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         all_findings = Finding.objects.filter(test__id=test_id)
         grouped_findings = [f for f in all_findings if f.finding_group is not None]
         ungrouped_findings = [f for f in all_findings if f.finding_group is None]
-        remaining_groups = Finding_Group.objects.filter(test__id=test_id)
-
-        print(f"DEBUG: After modifying groups:")
-        print(f"  - Total findings: {Finding.objects.filter(test__id=test_id).count()}")
-        print(f"  - Grouped findings: {len(grouped_findings)}")
-        print(f"  - Ungrouped findings: {len(ungrouped_findings)}")
-        print(f"  - Remaining groups: {remaining_groups.count()}")
-        for finding in Finding.objects.filter(test__id=test_id):
-            print(f"  - Finding {finding.id}: {finding.title[:50]}... group={finding.finding_group}")
 
         self.assertGreater(len(grouped_findings), 0, "Should have some grouped findings")
         self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
@@ -1033,10 +1024,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Get the current finding IDs after group modifications
         current_findings = Finding.objects.filter(test__id=test_id)
         all_finding_ids = [str(f.id) for f in current_findings]
-        print(f"DEBUG: Sending finding IDs to bulk edit: {all_finding_ids}")
 
         # Login as admin user who has all permissions
-        admin_user = get_user_model().objects.get(username='admin')
+        admin_user = get_user_model().objects.get(username="admin")
         self.client.force_login(admin_user)
 
         post_data = {
@@ -1054,25 +1044,11 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         }
 
         # Perform bulk edit using test client
-        response = self.client.post("/finding/bulk", post_data)
-
-        # Debug: Check what finding groups the bulk edit found
-        updated_findings = Finding.objects.filter(test__id=test_id)
-        print(f"DEBUG: Before bulk edit - checking findings and groups:")
-        for finding in updated_findings:
-            print(f"  - Finding {finding.id}: has_finding_group={finding.has_finding_group}, finding_group={finding.finding_group}")
-
-        # Debug: Check what was called
-        print(f"DEBUG: Mock call analysis:")
-        print(f"  - push_to_jira called {len(mock_push_to_jira.call_args_list)} times")
-        print(f"  - can_be_pushed_to_jira called {len(mock_can_be_pushed.call_args_list)} times")
+        self.client.post("/finding/bulk", post_data)
 
         # Analyze what was pushed to JIRA
         group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
         individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
-
-        print(f"  - Group calls: {len(group_calls)}")
-        print(f"  - Individual calls: {len(individual_calls)}")
 
         # Test expectations - both groups AND individual findings should be pushed
         self.assertGreater(len(group_calls), 0, "Finding groups should be pushed to JIRA")
