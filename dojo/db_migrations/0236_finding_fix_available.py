@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0234_finding_cvssv4_finding_cvssv4_score'),
+        ('dojo', '0235_alter_system_settings_time_zone_zoneinfo'),
     ]
 
     operations = [
