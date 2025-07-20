@@ -626,7 +626,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
         # Parsers must use unsaved_tags to store tags, so we can clean them
-        finding.tags = clean_tags(finding.unsaved_tags)
+        if finding.unsaved_tags:
+            finding.tags = clean_tags(finding.unsaved_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
