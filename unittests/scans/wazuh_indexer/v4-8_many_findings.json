@@ -21,7 +21,7 @@
         "_source": {
           "agent": {
             "id": "002",
-            "name": "myhost0",
+            "name": "myhost2",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -82,7 +82,7 @@
         "_source": {
           "agent": {
             "id": "0201",
-            "name": "myhost0",
+            "name": "myhost0201",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -143,7 +143,7 @@
         "_source": {
           "agent": {
             "id": "4001",
-            "name": "myhost0",
+            "name": "myhost4001",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -204,7 +204,7 @@
         "_source": {
           "agent": {
             "id": "0016",
-            "name": "myhost0",
+            "name": "myhost016",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -265,7 +265,7 @@
         "_source": {
           "agent": {
             "id": "0037",
-            "name": "myhost0",
+            "name": "myhost037",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -326,7 +326,7 @@
         "_source": {
           "agent": {
             "id": "0012",
-            "name": "myhost1",
+            "name": "myhost0012",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -387,7 +387,7 @@
         "_source": {
           "agent": {
             "id": "002",
-            "name": "myhost1",
+            "name": "myhost2",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -448,7 +448,7 @@
         "_source": {
           "agent": {
             "id": "002",
-            "name": "myhost1",
+            "name": "myhost2",
             "type": "Wazuh",
             "version": "v4.11.1"
           },
@@ -509,7 +509,7 @@
         "_source": {
           "agent": {
             "id": "090",
-            "name": "fsproxysmart7-modspy",
+            "name": "an-agent",
             "type": "wazuh",
             "version": "v4.11.1"
           },
@@ -567,7 +567,7 @@
         "_source": {
           "agent": {
             "id": "090",
-            "name": "Agent090",
+            "name": "an-agent",
             "type": "wazuh",
             "version": "v4.11.1"
           },
@@ -625,9 +625,9 @@
         "_source": {
           "agent": {
             "id": "021",
-            "name": "fsproxysmart1",
+            "name": "asdasdasd",
             "type": "wazuh",
-            "version": "v4.7.2"
+            "version": "v4.11.2"
           },
           "host": {
             "os": {
@@ -683,7 +683,7 @@
         "_source": {
           "agent": {
             "id": "021",
-            "name": "test",
+            "name": "asdasdasd",
             "type": "wazuh",
             "version": "v4.11.2"
           },
@@ -799,7 +799,7 @@
         "_source": {
           "agent": {
             "id": "021",
-            "name": "test",
+            "name": "asdasdasd",
             "type": "wazuh",
             "version": "v4.11.2"
           },
@@ -857,7 +857,7 @@
         "_source": {
           "agent": {
             "id": "002",
-            "name": "myhost1",
+            "name": "myhost2",
             "type": "Wazuh",
             "version": "v4.11.1"
           },

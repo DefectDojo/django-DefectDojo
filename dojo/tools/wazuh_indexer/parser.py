@@ -9,14 +9,11 @@ class WazuhIndexerParser:
     def get_scan_types(self):
         return ["Wazuh >= 4.8 Scan"]
 
-
     def get_label_for_scan_types(self, scan_type):
         return "Wazuh >= 4.8 Scan"
 
-
     def get_description_for_scan_types(self, scan_type):
         return "Wazuh Vulnerability Data >= 4.8 from indexer in JSON format. See the documentation for search a script to obtain a clear output."
-
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -41,13 +38,14 @@ class WazuhIndexerParser:
             published_date = datetime.fromisoformat(vuln["published_at"].replace("Z", "+00:00")).date()
             references = vuln.get("reference")
             severity = vuln.get("severity")
+            if severity not in ["Critical", "High", "Medium", "Low"]:
+                severity = "Info"
+
+
             if vuln.get("score"):
                 cvss_score = vuln.get("score").get("base")
                 cvss_version = vuln.get("score").get("version")
-                version = cvss_version.split('.')[0]
-                if version == "3":
-                    cvss3_score = cvss_version
-
+                cvss3 = cvss_version.split('.')[0]
 
             # Agent is equal to the endpoint
             agent = item.get("agent")
@@ -57,7 +55,7 @@ class WazuhIndexerParser:
             # agent_ip = agent.get("ip")  Maybe... will introduce it in the news versions of Wazuh?
 
             description = (
-                f"Agent Name / ID: {agent_name} / {agent_id}\n"
+                f"Agent Name/ID: {agent_name} / {agent_id}\n"
                 f"{description}"
             )
 
@@ -72,7 +70,7 @@ class WazuhIndexerParser:
             package_path = package.get("path", None)
 
             # Get information about OS from agent.
-            # This will use for
+            # This will use for severity justification
             info_os = item.get("host")
             if info_os and info_os.get("os"):
                 name_os = info_os.get("os").get("full", "N/A")
@@ -101,9 +99,9 @@ class WazuhIndexerParser:
                 static_finding=True,
                 component_name=package_name,
                 component_version=package_version,
-                file_path=package_path,
+                file_path=package_path if package_path else None,
                 publish_date=published_date,
-                cvssv3_score=cvss3_score if cvss3_score else None,
+                cvssv3_score=cvss_score if cvss3 == "3" else None,
             )
 
             finding.unsaved_vulnerability_ids = [cve]

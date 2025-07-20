@@ -1,0 +1,76 @@
+{
+  "took": 6,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": 1.7483706,
+    "hits": [
+      {
+        "_index": "wazuh-states-vulnerabilities-siem",
+        "_id": "020_4f76c17550c52d562c901f741786dd73306b8b10_CVE-2024-27282",
+        "_score": 1.7483706,
+        "_source": {
+          "agent": {
+            "id": "020",
+            "name": "my-testing",
+            "type": "wazuh",
+            "version": "v4.11.2"
+          },
+          "host": {
+            "os": {
+              "full": "Ubuntu 18.04.5 LTS (Bionic Beaver)",
+              "kernel": "4.15.0-177-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "18.04.5"
+            }
+          },
+          "package": {
+            "architecture": "amd64",
+            "description": "Interpreter of object-oriented scripting language Ruby",
+            "name": "ruby2.5",
+            "size": 130,
+            "type": "deb",
+            "version": "2.5.1-1ubuntu1.16"
+          },
+          "vulnerability": {
+            "category": "Packages",
+            "classification": "",
+            "description": "An issue was discovered in Ruby 3.x through 3.3.0. If attacker-supplied data is provided to the Ruby regex compiler, it is possible to extract arbitrary heap data relative to the start of the text, including pointers and sensitive strings. The fixed versions are 3.0.7, 3.1.5, 3.2.4, and 3.3.1.",
+            "detected_at": "2024-08-26T08:30:00.972Z",
+            "enumeration": "CVE",
+            "id": "CVE-2024-27282",
+            "published_at": "2024-05-14T15:11:57Z",
+            "reference": "https://hackerone.com/reports/2122624, https://www.ruby-lang.org/en/news/2024/04/23/arbitrary-memory-address-read-regexp-cve-2024-27282/",
+            "scanner": {
+              "vendor": "Wazuh"
+            },
+            "score": {
+              "base": 0.0,
+              "version": ""
+            },
+            "severity": ""
+          },
+          "wazuh": {
+            "cluster": {
+              "name": "SIEM"
+            },
+            "schema": {
+              "version": "1.0.0"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
