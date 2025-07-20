@@ -26,6 +26,21 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
         raise exception_class(error_messages)
 
 
+def clean_tags(value: str | list[str], exception_class: Callable = ValidationError) -> str | list[str]:
+    TAG_PATTERN = re.compile(r'[ ,\'"]')  # Matches spaces, commas, single quotes, double quotes
+
+    if isinstance(value, list):
+        # Replace ALL occurrences of problematic characters in each tag
+        return [TAG_PATTERN.sub("_", tag) for tag in value]
+
+    if isinstance(value, str):
+        # Replace ALL occurrences of problematic characters in the tag
+        return TAG_PATTERN.sub("_", value)
+
+    msg = f"Value must be a string or list of strings: {value} - {type(value)}."
+    raise exception_class(msg)
+
+
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
     logger.error("cvss3_validator called with value: %s", value)
     cvss_vectors = cvss.parser.parse_cvss_from_text(value)
