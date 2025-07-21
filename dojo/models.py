@@ -1322,12 +1322,10 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else "unknown"
 
-    # only used in APIv2 serializers.py, query should be aligned with findings_count
-    @cached_property
+    # only used in APIv2 serializers.py, should be deprecated or at least prefetched
     def open_findings_list(self):
-        findings = Finding.objects.filter(test__engagement__product=self,
-                                          active=True)
-        return [i.id for i in findings]
+        findings = Finding.objects.filter(test__engagement__product=self, active=True).values_list("id", flat=True)
+        return list(findings)
 
     @property
     def has_jira_configured(self):
