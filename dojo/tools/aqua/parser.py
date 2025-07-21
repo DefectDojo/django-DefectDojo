@@ -226,8 +226,8 @@ class AquaParser:
 
         cvss_data = parse_cvss_data(cvssv3)
         if cvss_data:
-            finding.cvssv3 = cvss_data.get("vector")
-            finding.cvssv3_score = cvss_data.get("score")
+            finding.cvssv3 = cvss_data.get("cvssv3")
+            finding.cvssv3_score = cvss_data.get("cvssv3_score")
 
         if vulnerability_id != "No CVE":
             finding.unsaved_vulnerability_ids = [vulnerability_id]
