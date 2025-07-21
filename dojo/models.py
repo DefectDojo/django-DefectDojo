@@ -1284,11 +1284,10 @@ class Product(models.Model):
         # active_endpoints is (should be) prefetched
         endpoints = getattr(self, "active_endpoints", None)
 
-        hosts = []
+        # Use set for O(1) lookup instead of list with O(n) lookup
+        hosts = set()
         for e in endpoints:
-            if e.host in hosts:
-                continue
-            hosts.append(e.host)
+            hosts.add(e.host)
 
         return len(hosts)
 
@@ -1297,7 +1296,7 @@ class Product(models.Model):
         # active_endpoints is (should be) prefetched
         endpoints = getattr(self, "active_endpoints", None)
         if endpoints:
-            return len(self.active_endpoints)
+            return len(endpoints)
         return 0
 
     def open_findings(self, start_date=None, end_date=None):
