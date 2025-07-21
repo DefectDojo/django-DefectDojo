@@ -48,7 +48,7 @@ There are two different methods to import a report from a security tool into Def
 - **Import** handles the report as a single point-in-time record.  Importing a report creates a Test within DefectDojo that holds the Findings rendered from that report.
 - **Reimport** is used to extend an existing Test.  If you have a more open-ended approach to your testing process, you continuously Reimport the latest version of your report to an existing Test.  DefectDojo will compare the results of the incoming report to your existing data, record any changes, and then adjust the Findings in the Test so that they match the latest report.
 
-Both methods also use **Deduplication** differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings, Reimport will discard duplicate Findings altogether.
+Both methods also use **Deduplication** differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings, Reimport will skip duplicates in uploaded reports as theses Findings already exist in Defect Dojo.
 
 Generally speaking - if a point-in-time report is what you need, Import is the best method to use.  If you are continuously running and ingesting reports from a tool, Reimport is the better method for keeping things organized.
 

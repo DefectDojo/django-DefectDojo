@@ -29,7 +29,7 @@ from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.db.models import Case, Count, F, IntegerField, Q, Subquery, Sum, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -2739,11 +2739,3 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         }
     logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
-
-
-def build_count_subquery(model_qs: QuerySet, group_field: str) -> Subquery:
-    """Return a Subquery that yields one aggregated count per `group_field`."""
-    return Subquery(
-        model_qs.values(group_field).annotate(c=Count("*")).values("c")[:1],  # one row per group_field
-        output_field=IntegerField(),
-    )
