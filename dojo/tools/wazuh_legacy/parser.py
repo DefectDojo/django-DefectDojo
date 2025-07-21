@@ -82,6 +82,6 @@ class WazuhLegacyParser:
                 if cve:
                     find.unsaved_vulnerability_ids = [cve]
 
-            findings.append(find)
+                findings.append(find)
 
         return findings
