@@ -24,6 +24,16 @@ class TestSysdigParsers(DojoTestCase):
             self.assertEqual("CVE-2018-19360", findings[0].unsaved_vulnerability_ids[0])
             self.assertEqual(None, findings[0].epss_score)
 
+            # Verify tags are created correctly without spaces
+            finding = findings[0]
+            tags_list = finding.unsaved_tags
+            self.assertIn("PackageName:com.fasterxml.jackson.core:jackson-databind", tags_list)
+            self.assertIn("PackageVersion:2.9.7", tags_list)
+            self.assertIn("VulnId:CVE-2018-19360", tags_list)
+            # Should not have K8s-related tags since this CSV doesn't include those fields
+            k8s_tags = [tag for tag in tags_list if tag.startswith(("Cluster:", "Namespace:", "WorkloadName:"))]
+            self.assertEqual(0, len(k8s_tags))
+
     def test_sysdig_parser_with_many_vuln_has_many_findings(self):
         with (get_unit_tests_scans_path("sysdig_reports") / "sysdig_reports_many_vul.csv").open(encoding="utf-8") as testfile:
             parser = SysdigReportsParser()

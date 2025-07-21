@@ -1902,6 +1902,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     def reimport_scan_ui(self, test, payload):
         response = self.client_ui.post(reverse("re_import_scan_results", args=(test, )), payload)
         self.assertEqual(302, response.status_code, response.content[:1000])
+        # If the response URL contains 're_import_scan_results', it means the import failed
+        if "re_import_scan_results" in response.url:
+            return {"test": test}  # Return the original test ID
+        # Otherwise, extract the new test ID from the successful redirect URL
         test = Test.objects.get(id=response.url.split("/")[-1])
         return {"test": test.id}
 
