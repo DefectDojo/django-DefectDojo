@@ -15,6 +15,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -596,6 +597,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save(dedupe_option=False)
         finding = unsaved_finding
+        # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
+        finding.tags = None
         logger.debug(
             "Reimport created new finding as no existing finding match: "
             f"{finding.id}: {finding.title} "
@@ -624,9 +627,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
-        # Update finding tags
-        if finding_from_report.unsaved_tags:
-            finding.tags = finding_from_report.unsaved_tags
+        # Parsers must use unsaved_tags to store tags, so we can clean them
+        if finding.unsaved_tags:
+            finding.tags = clean_tags(finding.unsaved_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

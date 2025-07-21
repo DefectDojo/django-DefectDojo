@@ -7,6 +7,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.validators import clean_tags
 
 
 class SysdigReportsParser:
@@ -154,20 +155,20 @@ class SysdigReportsParser:
             # Set some finding tags
             tags = []
             if row.k8s_cluster_name != "":
-                tags.append("Cluster: " + row.k8s_cluster_name)
+                tags.append(clean_tags("Cluster:" + row.k8s_cluster_name))
             if row.k8s_namespace_name != "":
-                tags.append("Namespace: " + row.k8s_namespace_name)
+                tags.append(clean_tags("Namespace:" + row.k8s_namespace_name))
             if row.k8s_workload_name != "":
-                tags.append("WorkloadName: " + row.k8s_workload_name)
+                tags.append(clean_tags("WorkloadName:" + row.k8s_workload_name))
             if row.package_name != "":
-                tags.append("PackageName: " + row.package_name)
+                tags.append(clean_tags("PackageName:" + row.package_name))
             if row.package_version != "":
-                tags.append("PackageVersion: " + row.package_version)
+                tags.append(clean_tags("PackageVersion:" + row.package_version))
             if row.k8s_cluster_name != "":
-                tags.append("InUse: " + str(row.in_use))
+                tags.append(clean_tags("InUse:" + str(row.in_use)))
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
-            finding.tags = tags
+                tags.append(clean_tags("VulnId:" + row.vulnerability_id))
+            finding.unsaved_tags = tags
             if row.k8s_cluster_name != "":
                 finding.dynamic_finding = True
                 finding.static_finding = False

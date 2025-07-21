@@ -7,6 +7,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.validators import clean_tags
 
 
 class SysdigCLIParser:
@@ -136,7 +137,7 @@ class SysdigCLIParser:
             # Set some finding tags
             tags = []
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
+                tags.append(clean_tags("VulnId:" + row.vulnerability_id))
             finding.tags = tags
             finding.dynamic_finding = False
             finding.static_finding = True
