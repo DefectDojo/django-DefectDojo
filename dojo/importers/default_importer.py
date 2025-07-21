@@ -195,6 +195,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 unsaved_finding.date = self.scan_date.date()
             if self.service is not None:
                 unsaved_finding.service = self.service
+
+            # Force parsers to use unsaved_tags (stored in below after saving)
+            unsaved_finding.tags = None
             unsaved_finding.save(dedupe_option=False)
             finding = unsaved_finding
             # Determine how the finding should be grouped

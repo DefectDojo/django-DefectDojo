@@ -597,6 +597,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save(dedupe_option=False)
         finding = unsaved_finding
+        # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
+        finding.tags = None
         logger.debug(
             "Reimport created new finding as no existing finding match: "
             f"{finding.id}: {finding.title} "
