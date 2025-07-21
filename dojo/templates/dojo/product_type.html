@@ -51,7 +51,7 @@
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
                             <th>{% trans "Product count" %}</th>
-                            <th>{% trans "Active (Verified) findings" %}</th>
+                            <th>{% trans "Active findings" %}</th>
                             <th class="text-center">{% trans "Critical product" %}</th>
                             <th class="text-center">{% trans "Key product" %}</th>
                         </tr>
@@ -104,7 +104,6 @@
                                 <td class="text-right">{{ pt.prod_count }}</td>
                                 <td class="text-right">
                                     <a rel="noopener noreferrer" href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}"><b>{{ pt.active_findings_count }}</b></a>
-                                    &nbsp;(<a rel="noopener noreferrer" href="{% url 'verified_findings' %}?test__engagement__product__prod_type={{ pt.id }}">{{ pt.active_verified_findings_count }}</a>)
                                 </td>
                                 <td class="text-center">
                                     {% if pt.critical_product %}

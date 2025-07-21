@@ -62,7 +62,7 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th>{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
+                            <th>{% dojo_sort request 'Active Findings' 'findings_count' %}</th>
                             <th> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -244,7 +244,6 @@
                                 <td class="text-right">
                                     {% if prod.findings_count %}
                                         <a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
-                                        &nbsp;(<a rel="noopener noreferrer" href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
                                     {% else %}
                                         0
                                     {% endif %}

@@ -183,11 +183,6 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count("engagement__test__finding__id",
                                                                                 filter=Q(
                                                                                     engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.annotate(
-            active_verified_finding_count=Count("engagement__test__finding__id",
-                                                filter=Q(
-                                                    engagement__test__finding__active=True,
-                                                    engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related("jira_project_set__jira_instance")
         prefetched_prods = prefetched_prods.prefetch_related("members")
         prefetched_prods = prefetched_prods.prefetch_related("prod_type__members")

@@ -125,14 +125,6 @@ def prefetch_for_product_type(prod_types):
                 filter=Q(**{f"{finding_path}__active": True}),
                 distinct=True
             ),
-            active_verified_findings_count=Count(
-                f"{finding_path}__id", 
-                filter=Q(**{
-                    f"{finding_path}__active": True,
-                    f"{finding_path}__verified": True
-                }),
-                distinct=True
-            ),
             prod_count=Count("prod_type", distinct=True)
         )
     else:
