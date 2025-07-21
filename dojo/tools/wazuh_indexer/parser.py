@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from dojo.models import EndPoint, Finding
+from dojo.models import Endpoint, Finding
 
 
 class WazuhIndexerParser:
