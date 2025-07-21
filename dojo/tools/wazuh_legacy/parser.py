@@ -1,4 +1,3 @@
-import hashlib
 import json
 
 from dojo.models import Endpoint, Finding
@@ -17,13 +16,13 @@ class WazuhLegacyParser:
     """
 
     def get_scan_types(self):
-        return ["Wazuh =< 4.7"]
+        return ["Wazuh =< 4.7 Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Wazuh =< 4.7"
+        return "Wazuh =< 4.7 Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Wazuh =< 4.7. See the documentation for search a script to obtain a clear output."
+        return "Wazuh =< 4.7 Scan. See the documentation for search a script to obtain a clear output."
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -60,12 +59,6 @@ class WazuhLegacyParser:
                     item.get("title") + " (version: " + package_version + ")"
                 )
 
-                if agent_name:
-                    dupe_key = title + cve + agent_name + package_name + package_version
-                else:
-                    dupe_key = title + cve + package_name + package_version
-                dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
-
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                 else:
@@ -98,4 +91,3 @@ class WazuhLegacyParser:
                     dupes[dupe_key] = find
 
         return list(dupes.values())
-
