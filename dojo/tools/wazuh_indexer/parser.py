@@ -20,7 +20,6 @@ class WazuhIndexerParser:
         if not data:
             return []
 
-        # Detect duplications
         findings = []
 
         # Loop through each element in the list
