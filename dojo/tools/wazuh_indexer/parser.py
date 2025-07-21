@@ -1,5 +1,5 @@
-import json
 from datetime import datetime
+import json
 
 from dojo.models import Finding, Endpoint
 
@@ -89,7 +89,8 @@ class WazuhIndexerParser:
                 severity_justification=severity_justification,
                 severity=severity,
                 references=references,
-                static_finding=True,
+                dynamic_finding=True,
+                static_finding=False,
                 component_name=package_name,
                 component_version=package_version,
                 file_path=package_path or None,

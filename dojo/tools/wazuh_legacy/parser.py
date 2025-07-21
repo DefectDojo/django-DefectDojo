@@ -30,8 +30,7 @@ class WazuhLegacyParser:
         if not data:
             return []
 
-        # Detect duplications
-        dupes = {}
+        findings = []
 
         # Loop through each element in the list
         vulnerabilities = data.get("data", {}).get("affected_items", [])
@@ -52,42 +51,36 @@ class WazuhLegacyParser:
                 agent_name = item.get("agent_name")
                 agent_ip = item.get("agent_ip")
                 detection_time = item.get("detection_time").split("T")[0]
-
                 references = "\n".join(links) if links else None
 
                 title = (
                     item.get("title") + " (version: " + package_version + ")"
                 )
 
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                else:
-                    dupes[dupe_key] = True
+                find = Finding(
+                    title=title,
+                    test=test,
+                    description=description,
+                    severity=severity,
+                    references=references,
+                    dynamic_finding=True,
+                    static_finding=False,
+                    component_name=package_name,
+                    component_version=package_version,
+                    cvssv3_score=cvssv3_score,
+                    publish_date=publish_date,
+                    date=detection_time,
+                )
 
-                    find = Finding(
-                        title=title,
-                        test=test,
-                        description=description,
-                        severity=severity,
-                        references=references,
-                        static_finding=True,
-                        component_name=package_name,
-                        component_version=package_version,
-                        cvssv3_score=cvssv3_score,
-                        publish_date=publish_date,
-                        unique_id_from_tool=dupe_key,
-                        date=detection_time,
-                    )
+                # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
+                if agent_name:
+                    find.unsaved_endpoints = [Endpoint(host=agent_name)]
+                elif agent_ip:
+                    find.unsaved_endpoints = [Endpoint(host=agent_ip)]
 
-                    # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
-                    if agent_name:
-                        find.unsaved_endpoints = [Endpoint(host=agent_name)]
-                    elif agent_ip:
-                        find.unsaved_endpoints = [Endpoint(host=agent_ip)]
+                if cve:
+                    find.unsaved_vulnerability_ids = [cve]
 
-                    if id:
-                        find.unsaved_vulnerability_ids = cve
+            findings.append(find)
 
-                    dupes[dupe_key] = find
-
-        return list(dupes.values())
+        return findings
