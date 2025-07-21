@@ -32,7 +32,6 @@ class WazuhLegacyParser:
 
         findings = []
 
-
         # Loop through each element in the list
         vulnerabilities = data.get("data", {}).get("affected_items", [])
         for item in vulnerabilities:
