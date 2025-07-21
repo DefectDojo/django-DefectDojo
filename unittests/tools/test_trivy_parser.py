@@ -68,7 +68,7 @@ class TestTrivyParser(DojoTestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.references)
             self.assertEqual("1.15.5-r1", finding.mitigation)
-            self.assertIsNone(finding.cvssv3)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
 
@@ -197,7 +197,7 @@ Number  Content
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
             finding = findings[0]
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(finding.file_path, "requirements.txt")
 
     def test_issue_9170(self):
@@ -300,3 +300,21 @@ Number  Content
                 self.assertEqual(False, finding.false_p)
                 self.assertEqual(False, finding.out_of_scope)
                 self.assertEqual(False, finding.is_mitigated)
+
+    def test_cvss_severity_sources(self):
+        """Testing with two findings - one where SeveritySource matches the CVSS entry, and one that does not"""
+        with sample_path("cvss_severity_source.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            with self.subTest("SeveritySource matches the CVSS entry"):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N", finding.cvssv3)
+                self.assertEqual(6.5, finding.cvssv3_score)
+
+            with self.subTest("SeveritySource does not match the CVSS entry"):
+                finding = findings[1]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
+                self.assertEqual(7.5, finding.cvssv3_score)
