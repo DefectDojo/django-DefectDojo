@@ -35,10 +35,10 @@ from dojo.product_type.queries import (
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.utils import (
     add_breadcrumb,
     async_delete,
-    build_count_subquery,
     get_page_items,
     get_setting,
     get_system_setting,
