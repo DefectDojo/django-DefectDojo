@@ -1,6 +1,6 @@
 import json
-
 from datetime import datetime
+
 from dojo.models import Finding, Endpoint
 
 
@@ -22,7 +22,6 @@ class WazuhIndexerParser:
 
         findings = []
 
-        # Loop through each element in the list
         vulnerabilities = data.get("hits", {}).get("hits", [])
         for item_source in vulnerabilities:
 
@@ -33,12 +32,11 @@ class WazuhIndexerParser:
 
             description = vuln.get("description")
             cve = vuln.get("id")
-            published_date = datetime.fromisoformat(vuln["published_at"].replace("Z", "+00:00")).date()
+            published_date = datetime.fromisoformat(vuln["published_at"]).date()
             references = vuln.get("reference")
             severity = vuln.get("severity")
-            if severity not in ["Critical", "High", "Medium", "Low"]:
+            if severity not in {"Critical", "High", "Medium", "Low"}:
                 severity = "Info"
-
 
             if vuln.get("score"):
                 cvss_score = vuln.get("score").get("base")
@@ -57,7 +55,6 @@ class WazuhIndexerParser:
                 f"{description}"
             )
 
-
             # Package in Wazuh is equivalent to "component" in DD
             package = item.get("package")
 
@@ -74,7 +71,6 @@ class WazuhIndexerParser:
                 name_os = info_os.get("os").get("full", "N/A")
                 kernel_os = info_os.get("os").get("kernel", "N/A")
 
-
             title = f"{cve} Affects {package_name} (Version: {package_version})"
             severity_justification = (
                 f"Severity: {severity}\n"
@@ -85,7 +81,6 @@ class WazuhIndexerParser:
                 f"Package Name: {package_name}\n"
                 f"Package Description: {package_description}"
             )
-
 
             finding = Finding(
                 title=title,
@@ -107,4 +102,3 @@ class WazuhIndexerParser:
             findings.append(finding)
 
         return findings
-
