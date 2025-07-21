@@ -1,19 +1,18 @@
+from datetime import datetime
 import json
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding, Endpoint
 
 
-class WazuhLegacyParser:
+class WazuhIndexerParser:
+    def get_scan_types(self):
+        return ["Wazuh >= 4.8 Scan"]
 
-    """
-    The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
-    https://github.com/wazuh/wazuh/issues/14560
-    """
+    def get_label_for_scan_types(self, scan_type):
+        return "Wazuh >= 4.8 Scan"
 
-    """
-    Parser used for the Wazuh Detector module used in older versions of 4.7 and below (before Vulnerability Detection refactor).
-    https://github.com/wazuh/wazuh/releases/tag/v4.8.0
-    """
+    def get_description_for_scan_types(self, scan_type):
+        return "Wazuh Vulnerability Data >= 4.8 from indexer in JSON format. See the documentation for search a script to obtain a clear output."
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -23,55 +22,84 @@ class WazuhLegacyParser:
 
         findings = []
 
-        # Loop through each element in the list
-        vulnerabilities = data.get("data", {}).get("affected_items", [])
-        for item in vulnerabilities:
-            if (
-                item["condition"] != "Package unfixed"
-                and item["severity"] != "Untriaged"
-            ):
-                cve = item.get("cve")
-                package_name = item.get("name")
-                package_version = item.get("version")
-                description = item.get("condition")
-                severity = item.get("severity").capitalize()
-                agent_ip = item.get("agent_ip")
-                links = item.get("external_references")
-                cvssv3_score = item.get("cvss3_score")
-                publish_date = item.get("published")
-                agent_name = item.get("agent_name")
-                agent_ip = item.get("agent_ip")
-                detection_time = item.get("detection_time").split("T")[0]
-                references = "\n".join(links) if links else None
+        vulnerabilities = data.get("hits", {}).get("hits", [])
+        for item_source in vulnerabilities:
 
-                title = (
-                    item.get("title") + " (version: " + package_version + ")"
-                )
+            item = item_source.get("_source")
 
-                find = Finding(
-                    title=title,
-                    test=test,
-                    description=description,
-                    severity=severity,
-                    references=references,
-                    dynamic_finding=True,
-                    static_finding=False,
-                    component_name=package_name,
-                    component_version=package_version,
-                    cvssv3_score=cvssv3_score,
-                    publish_date=publish_date,
-                    date=detection_time,
-                )
+            # Get all vulnerability data
+            vuln = item.get("vulnerability")
 
-                # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
-                if agent_name:
-                    find.unsaved_endpoints = [Endpoint(host=agent_name)]
-                elif agent_ip:
-                    find.unsaved_endpoints = [Endpoint(host=agent_ip)]
+            description = vuln.get("description")
+            cve = vuln.get("id")
+            published_date = datetime.fromisoformat(vuln["published_at"]).date()
+            references = vuln.get("reference")
+            severity = vuln.get("severity")
+            if severity not in {"Critical", "High", "Medium", "Low"}:
+                severity = "Info"
 
-                if cve:
-                    find.unsaved_vulnerability_ids = [cve]
+            if vuln.get("score"):
+                cvss_score = vuln.get("score").get("base")
+                cvss_version = vuln.get("score").get("version")
+                cvss3 = cvss_version.split(".")[0]
 
-            findings.append(find)
+            # Agent is equal to the endpoint
+            agent = item.get("agent")
+
+            agent_id = agent.get("id")
+            agent_name = agent.get("name")
+            # agent_ip = agent.get("ip")  Maybe... will introduce it in the news versions of Wazuh?
+
+            description = (
+                f"Agent Name/ID: {agent_name} / {agent_id}\n"
+                f"{description}"
+            )
+
+            # Package in Wazuh is equivalent to "component" in DD
+            package = item.get("package")
+
+            package_name = package.get("name")
+            package_version = package.get("version")
+            package_description = package.get("description")
+            # Only get this field on some Windows agents.
+            package_path = package.get("path", None)
+
+            # Get information about OS from agent.
+            # This will use for severity justification
+            info_os = item.get("host")
+            if info_os and info_os.get("os"):
+                name_os = info_os.get("os").get("full", "N/A")
+                kernel_os = info_os.get("os").get("kernel", "N/A")
+
+            title = f"{cve} Affects {package_name} (Version: {package_version})"
+            severity_justification = (
+                f"Severity: {severity}\n"
+                f"CVSS Score: {cvss_score}\n"
+                f"CVSS Version: {cvss_version}\n"
+                f"\nOS: {name_os}\n"
+                f"Kernel: {kernel_os}\n\n"
+                f"Package Name: {package_name}\n"
+                f"Package Description: {package_description}"
+            )
+
+            finding = Finding(
+                title=title,
+                test=test,
+                description=description,
+                severity_justification=severity_justification,
+                severity=severity,
+                references=references,
+                dynamic_finding=True,
+                static_finding=False,
+                component_name=package_name,
+                component_version=package_version,
+                file_path=package_path or None,
+                publish_date=published_date,
+                cvssv3_score=cvss3 or None,
+            )
+
+            finding.unsaved_vulnerability_ids = [cve]
+            finding.unsaved_endpoints = [Endpoint(host=agent_name)]
+            findings.append(finding)
 
         return findings
