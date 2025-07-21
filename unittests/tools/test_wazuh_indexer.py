@@ -34,7 +34,6 @@ class TestWazuhIndexerParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(15, len(findings))
 
-            # Verificar el primer finding
             finding = findings[0]
             self.assertEqual("CVE-0123-25511 Affects linux-image-6.8.0-60-generic (Version: 6.8.0-60.63)", finding.title)
             self.assertEqual("Critical", finding.severity)
