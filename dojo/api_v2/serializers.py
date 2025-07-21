@@ -2302,14 +2302,17 @@ class ImportScanSerializer(CommonImportScanSerializer):
     close_old_findings = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed.",
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same engagement.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same product."
+                    "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
     )
     version = serializers.CharField(
         required=False, help_text="Version that was scanned.",
@@ -2380,15 +2383,15 @@ class ReImportScanSerializer(CommonImportScanSerializer):
     # also for ReImport.
     close_old_findings = serializers.BooleanField(
         required=False,
-        default=True,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
+        default=False,
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same test.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
-        "Note that this only applies on the first call to reimport-scan.",
+        help_text="This has no effect on reimport",
     )
     version = serializers.CharField(
         required=False,

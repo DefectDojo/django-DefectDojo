@@ -13,7 +13,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
-from dojo.finding.views import prefetch_for_findings
+from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
