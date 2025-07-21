@@ -169,8 +169,8 @@ def get_item(item_node, tree, test):
     if (cvssv3 is not None) and (len(cvssv3) > 0):
         cvss_data = parse_cvss_data(cvssv3)
         if cvss_data:
-            dojo_finding.cvssv3 = cvss_data.get("vector")
-            dojo_finding.cvssv3_score = cvss_data.get("score")
+            dojo_finding.cvssv3 = cvss_data.get("cvssv3")
+            dojo_finding.cvssv3_score = cvss_data.get("cvssv3_score")
 
     return dojo_finding
 
