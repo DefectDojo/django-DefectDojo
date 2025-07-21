@@ -1,5 +1,4 @@
 import json
-import hashlib
 
 from datetime import datetime
 from dojo.models import Finding, Endpoint
@@ -45,7 +44,7 @@ class WazuhIndexerParser:
             if vuln.get("score"):
                 cvss_score = vuln.get("score").get("base")
                 cvss_version = vuln.get("score").get("version")
-                cvss3 = cvss_version.split('.')[0]
+                cvss3 = cvss_version.split(".")[0]
 
             # Agent is equal to the endpoint
             agent = item.get("agent")
@@ -99,9 +98,9 @@ class WazuhIndexerParser:
                 static_finding=True,
                 component_name=package_name,
                 component_version=package_version,
-                file_path=package_path if package_path else None,
+                file_path=package_path or None,
                 publish_date=published_date,
-                cvssv3_score=cvss_score if cvss3 == "3" else None,
+                cvssv3_score=cvss3 or None,
             )
 
             finding.unsaved_vulnerability_ids = [cve]
@@ -109,3 +108,4 @@ class WazuhIndexerParser:
             findings.append(finding)
 
         return findings
+
