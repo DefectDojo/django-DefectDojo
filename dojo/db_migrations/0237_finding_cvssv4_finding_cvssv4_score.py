@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0233_remove_test_actual_time_remove_test_estimated_time'),
+        ('dojo', '0236_clean_tags'),
     ]
 
     operations = [

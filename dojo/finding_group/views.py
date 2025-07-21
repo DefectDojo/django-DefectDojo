@@ -21,7 +21,7 @@ from dojo.filters import (
     FindingFilterWithoutObjectLookups,
     FindingGroupsFilter,
 )
-from dojo.finding.views import prefetch_for_findings
+from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.models import Dojo_Group, Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
