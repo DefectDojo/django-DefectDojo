@@ -6,11 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-<<<<<<<< HEAD:dojo/db_migrations/0238_finding_fix_available.py
         ('dojo', '0237_finding_cvssv4_finding_cvssv4_score'),
-========
-        ('dojo', '0235_alter_system_settings_time_zone_zoneinfo'),
->>>>>>>> 84c0fe5a75 (extend push conditions):dojo/db_migrations/0236_finding_fix_available.py
     ]
 
     operations = [
