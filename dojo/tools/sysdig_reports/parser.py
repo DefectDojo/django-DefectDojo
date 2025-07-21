@@ -24,10 +24,12 @@ class SysdigReportsParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return ()
+            return []
+
         if filename.name.lower().endswith(".csv"):
             arr_data = self.load_csv(filename=filename)
             return self.parse_csv(arr_data=arr_data, test=test)
+
         if filename.name.lower().endswith(".json"):
             scan_data = filename.read()
             try:
@@ -35,15 +37,23 @@ class SysdigReportsParser:
             except Exception:
                 data = json.loads(scan_data)
 
-                if "data" in data:
-                    return self.parse_json(data=data, test=test)
+            # Handle both old and new JSON formats
+            if "data" in data:
+                # Old format: data is at root level
+                return self.parse_json(data=data, test=test)
 
-                if "result" in data:
-                    msg = "JSON file is not in the expected format, it looks like a Sysdig CLI report."
-                else:
-                    msg = "JSON file is not in the expected format, expected data element"
+            if "panels" in data and len(data["panels"]) > 0 and "data" in data["panels"][0]:
+                # New 2025 format: data is nested in panels[0]
+                return self.parse_json(data=data["panels"][0], test=test)
+
+            if "result" in data:
+                msg = "JSON file is not in the expected format, it looks like a Sysdig CLI report."
                 raise ValueError(msg)
-        return ()
+            msg = "JSON file is not in the expected format, expected data element"
+            raise ValueError(msg)
+
+        msg = "Expected CSV or JSON  file"
+        raise ValueError(msg)
 
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)
@@ -51,31 +61,33 @@ class SysdigReportsParser:
             return []
         findings = []
         for item in vulnerability:
-            imageId = item.get("imageId", "")
-            imagePullString = item.get("imagePullString", "")
-            osName = item.get("osName", "")
-            k8sClusterName = item.get("k8sClusterName", "")
-            k8sNamespaceName = item.get("k8sNamespaceName", "")
-            k8sWorkloadType = item.get("k8sWorkloadType", "")
-            k8sWorkloadName = item.get("k8sWorkloadName", "")
-            k8sPodContainerName = item.get("k8sPodContainerName", "")
-            vulnName = item.get("vulnName", "")
-            vulnSeverity = item.get("vulnSeverity", "")
-            vulnLink = item.get("vulnLink", "")
-            vulnCvssVersion = item.get("vulnCvssVersion", "")
-            vulnCvssScore = item.get("vulnCvssScore", "")
-            vulnCvssVector = item.get("vulnCvssVector", "")
-            vulnDisclosureDate = item.get("vulnDisclosureDate", "")
-            vulnSolutionDate = item.get("vulnSolutionDate", "")
-            vulnExploitable = item.get("vulnExploitable", "")
-            vulnFixAvailable = item.get("vulnFixAvailable", "")
-            vulnFixVersion = item.get("vulnFixVersion", "")
-            packageName = item.get("packageName", "")
-            packageType = item.get("packageType", "")
-            packagePath = item.get("packagePath", "")
-            packageVersion = item.get("packageVersion", "")
-            packageSuggestedFix = item.get("packageSuggestedFix", "")
-            k8sPodCount = item.get("k8sPodCount", "")
+            # Handle both old and new JSON field names
+            # Old format uses camelCase, new format uses snake_case with different field names
+            imageId = item.get("imageId", "") or item.get("container_image_id", "")
+            imagePullString = item.get("imagePullString", "") or item.get("container_image", "")
+            osName = item.get("osName", "") or item.get("container_image_distro", "")
+            k8sClusterName = item.get("k8sClusterName", "") or item.get("kubernetes_cluster_name", "")
+            k8sNamespaceName = item.get("k8sNamespaceName", "") or item.get("kubernetes_namespace_name", "")
+            k8sWorkloadType = item.get("k8sWorkloadType", "") or item.get("kubernetes_workload_type", "")
+            k8sWorkloadName = item.get("k8sWorkloadName", "") or item.get("kubernetes_workload_name", "")
+            k8sPodContainerName = item.get("k8sPodContainerName", "") or item.get("kubernetes_pod_container_name", "")
+            vulnName = item.get("vulnName", "") or item.get("vuln_id", "")
+            vulnSeverity = item.get("vulnSeverity", "") or item.get("vuln_severity", "")
+            vulnLink = item.get("vulnLink", "") or ""  # Not present in new format
+            vulnCvssVersion = item.get("vulnCvssVersion", "") or item.get("vuln_cvss_version", "")
+            vulnCvssScore = item.get("vulnCvssScore", "") or item.get("vuln_cvss_score", "")
+            vulnCvssVector = item.get("vulnCvssVector", "") or item.get("vuln_cvss_vector", "")
+            vulnDisclosureDate = item.get("vulnDisclosureDate", "") or item.get("vuln_disclosure_date", "")
+            vulnSolutionDate = item.get("vulnSolutionDate", "") or item.get("vuln_fix_available_date", "")
+            vulnExploitable = item.get("vulnExploitable", "") or item.get("vuln_has_exploit", "")
+            vulnFixAvailable = item.get("vulnFixAvailable", "") or item.get("vuln_fix_available", "")
+            vulnFixVersion = item.get("vulnFixVersion", "") or item.get("vuln_fixed_in_version", "")
+            packageName = item.get("packageName", "") or item.get("scan_package_name", "")
+            packageType = item.get("packageType", "") or item.get("scan_package_type", "")
+            packagePath = item.get("packagePath", "") or item.get("scan_package_path", "")
+            packageVersion = item.get("packageVersion", "") or item.get("scan_package_version", "")
+            packageSuggestedFix = item.get("packageSuggestedFix", "") or ""  # Not present in new format
+            k8sPodCount = item.get("k8sPodCount", "") or ""  # Not present in new format
 
             description = ""
             description += "imageId: " + imageId + "\n"
@@ -266,8 +278,9 @@ class SysdigReportsParser:
             msg = "Unknown CSV format: CVE ID column found, looks like a SysDig CLI Report"
             raise ValueError(msg)
 
-        if "vulnerability id" not in reader.fieldnames:
-            msg = "Unknown CSV format: expected Vulnerability ID column"
+        # Support both old and new CSV formats
+        if "vulnerability id" not in reader.fieldnames and "vulnerability name" not in reader.fieldnames:
+            msg = "Unknown CSV format: expected either 'Vulnerability ID' or 'Vulnerability Name' column"
             raise ValueError(msg)
 
         arr_csv_data = []
@@ -275,10 +288,12 @@ class SysdigReportsParser:
         for row in csvarray:
 
             csv_data_record = SysdigData()
+
+            # Handle both old and new CSV formats
             if "vulnerability id" in reader.fieldnames:
-                # Vulnerability Engine Format
+                # Old format: Vulnerability Engine Format
                 csv_data_record.vulnerability_id = row.get("vulnerability id", "")
-                csv_data_record.severity = csv_data_record._map_severity(row.get("severity").upper())
+                csv_data_record.severity = csv_data_record._map_severity(row.get("severity", "").upper())
                 csv_data_record.package_name = row.get("package name", "")
                 csv_data_record.package_version = row.get("package version", "")
                 csv_data_record.package_type = row.get("package type", "")
@@ -310,6 +325,42 @@ class SysdigReportsParser:
                 csv_data_record.cloud_provider_region = row.get("cloud provider region", "")
                 csv_data_record.registry_vendor = row.get("registry vendor", "")
 
-                arr_csv_data.append(csv_data_record)
+            elif "vulnerability name" in reader.fieldnames:
+                # New 2025 format
+                csv_data_record.vulnerability_id = row.get("vulnerability name", "")
+                csv_data_record.severity = csv_data_record._map_severity(row.get("vulnerability severity", "").upper())
+                csv_data_record.package_name = row.get("package name", "")
+                csv_data_record.package_version = row.get("package version", "")
+                csv_data_record.package_type = row.get("package type", "")
+                csv_data_record.package_path = row.get("package path", "")
+                csv_data_record.image = row.get("image name", "")
+                csv_data_record.os_name = row.get("os name", "")
+                csv_data_record.cvss_version = row.get("cvss version", "")
+                csv_data_record.cvss_score = row.get("cvss score", "")
+                csv_data_record.cvss_vector = row.get("cvss vector", "")
+                # Map new 2025 column names to existing fields
+                csv_data_record.vuln_link = ""  # Not present in 2025 format
+                csv_data_record.vuln_publish_date = row.get("disclosure date", "")
+                csv_data_record.vuln_fix_date = row.get("fix available date", "")
+                csv_data_record.vuln_fix_version = row.get("fix version", "")
+                csv_data_record.public_exploit = row.get("public exploit", "")
+                csv_data_record.k8s_cluster_name = row.get("kubernetes cluster name", "")
+                csv_data_record.k8s_namespace_name = row.get("kubernetes namespace name", "")
+                csv_data_record.k8s_workload_type = row.get("kubernetes workload type", "")
+                csv_data_record.k8s_workload_name = row.get("kubernetes workload name", "")
+                csv_data_record.k8s_container_name = row.get("kubernetes container name", "")
+                csv_data_record.image_id = row.get("image id", "")
+                csv_data_record.k8s_pod_count = ""  # Not present in 2025 format
+                csv_data_record.package_suggested_fix = ""  # Not present in 2025 format
+                csv_data_record.in_use = row.get("package in use", "").lower() == "true"
+                csv_data_record.risk_accepted = row.get("risk accepted", "").lower() == "true"
+                csv_data_record.registry_name = ""  # Not present in 2025 format
+                csv_data_record.registry_image_repository = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_name = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_account_id = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_region = ""  # Not present in 2025 format
+                csv_data_record.registry_vendor = ""  # Not present in 2025 format
+
+            arr_csv_data.append(csv_data_record)
 
         return arr_csv_data
