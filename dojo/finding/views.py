@@ -6,7 +6,6 @@ import json
 import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
-from functools import partial
 from itertools import chain
 from pathlib import Path
 
@@ -15,8 +14,8 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import OuterRef, QuerySet, Value
-from django.db.models.functions import Coalesce, Length
+from django.db.models import QuerySet
+from django.db.models.functions import Length
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -50,7 +49,7 @@ from dojo.filters import (
     TestImportFilter,
     TestImportFindingActionFilter,
 )
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.forms import (
     ApplyFindingTemplateForm,
     ClearFindingReviewForm,
@@ -111,7 +110,6 @@ from dojo.utils import (
     add_field_errors_to_response,
     add_success_message_to_response,
     apply_cwe_to_template,
-    build_count_subquery,
     calculate_grade,
     close_external_issue,
     do_false_positive_history,
@@ -131,61 +129,6 @@ from dojo.utils import (
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
 logger = logging.getLogger(__name__)
-
-
-def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=True):
-    # old code can arrive here with prods being a list because the query was already executed
-    if not isinstance(findings, QuerySet):
-        logger.debug("unable to prefetch because query was already executed")
-        return findings
-
-    prefetched_findings = findings.prefetch_related(
-        "reviewers",
-        "reporter",
-        "jira_issue__jira_project__jira_instance",
-        "test__test_type",
-        "test__engagement__jira_project__jira_instance",
-        "test__engagement__product__jira_project_set__jira_instance",
-        "found_by",
-    )
-
-    # for open/active findings, the following 4 prefetches are not needed
-    if prefetch_type != "open":
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "risk_acceptance_set",
-            "risk_acceptance_set__accepted_findings",
-            "original_finding",
-            "duplicate_finding",
-        )
-
-    if exclude_untouched:
-        # filter out noop reimport actions from finding status history
-        prefetched_findings = prefetched_findings.prefetch_related(
-            Prefetch(
-                "test_import_finding_action_set",
-                queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING),
-            ),
-        )
-    else:
-        prefetched_findings = prefetched_findings.prefetch_related("test_import_finding_action_set")
-
-    prefetched_findings = prefetched_findings.prefetch_related(
-        "notes",
-        "tags",
-        "endpoints",
-        "status_finding",
-        "finding_group_set",
-        "test__engagement__product__members",
-        "test__engagement__product__prod_type__members",
-        "vulnerability_id_set",
-    )
-
-    base_status = Endpoint_Status.objects.filter(finding_id=OuterRef("pk"))
-    count_subquery = partial(build_count_subquery, group_field="finding_id")
-    return prefetched_findings.annotate(
-        active_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=False)), Value(0)),
-        mitigated_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=True)), Value(0)),
-    )
 
 
 def prefetch_for_similar_findings(findings):

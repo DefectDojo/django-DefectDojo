@@ -62,7 +62,7 @@ class ApiEdgescanParser:
         finding.mitigation = vulnerability["remediation"]
         finding.active = vulnerability["status"] == "open"
         if vulnerability["asset_tags"]:
-            finding.tags = vulnerability["asset_tags"].split(",")
+            finding.unsaved_tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
         finding.unsaved_endpoints = [

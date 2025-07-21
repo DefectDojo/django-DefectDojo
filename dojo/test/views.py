@@ -10,8 +10,7 @@ from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q, QuerySet
-from django.db.models.query import Prefetch
+from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
@@ -28,6 +27,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
+from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.views import find_available_notetypes
 from dojo.forms import (
     AddFindingForm,
@@ -44,7 +44,6 @@ from dojo.forms import (
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
-    IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
     Cred_Mapping,
     Endpoint,
@@ -56,7 +55,6 @@ from dojo.models import (
     Stub_Finding,
     Test,
     Test_Import,
-    Test_Import_Finding_Action,
 )
 from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
@@ -88,36 +86,6 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
-
-
-def prefetch_for_findings(findings):
-    prefetched_findings = findings
-    if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_findings = prefetched_findings.select_related("reporter")
-        prefetched_findings = prefetched_findings.prefetch_related("jira_issue__jira_project__jira_instance")
-        prefetched_findings = prefetched_findings.prefetch_related("test__test_type")
-        prefetched_findings = prefetched_findings.prefetch_related("test__engagement__jira_project__jira_instance")
-        prefetched_findings = prefetched_findings.prefetch_related("test__engagement__product__jira_project_set__jira_instance")
-        prefetched_findings = prefetched_findings.prefetch_related("found_by")
-        prefetched_findings = prefetched_findings.prefetch_related("risk_acceptance_set")
-        # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
-        prefetched_findings = prefetched_findings.prefetch_related("notes")
-        prefetched_findings = prefetched_findings.prefetch_related("tags")
-        # filter out noop reimport actions from finding status history
-        prefetched_findings = prefetched_findings.prefetch_related(Prefetch("test_import_finding_action_set",
-                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
-
-        prefetched_findings = prefetched_findings.prefetch_related("endpoints")
-        prefetched_findings = prefetched_findings.prefetch_related("status_finding")
-        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count("status_finding__id", filter=Q(status_finding__mitigated=False)))
-        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count("status_finding__id", filter=Q(status_finding__mitigated=True)))
-        prefetched_findings = prefetched_findings.prefetch_related("finding_group_set__jira_issue")
-        prefetched_findings = prefetched_findings.prefetch_related("duplicate_finding")
-        prefetched_findings = prefetched_findings.prefetch_related("vulnerability_id_set")
-    else:
-        logger.debug("unable to prefetch because query was already executed")
-
-    return prefetched_findings
 
 
 class ViewTest(View):

@@ -8,10 +8,14 @@ from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
+TAG_PATTERN = re.compile(r'[ ,\'"]')  # Matches spaces, commas, single quotes, double quotes
+
 
 def tag_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
-    TAG_PATTERN = re.compile(r'[ ,\'"]')
     error_messages = []
+
+    if not value:
+        return
 
     if isinstance(value, list):
         error_messages.extend(f"Invalid tag: '{tag}'. Tags should not contain spaces, commas, or quotes." for tag in value if TAG_PATTERN.search(tag))
@@ -24,6 +28,23 @@ def tag_validator(value: str | list[str], exception_class: Callable = Validation
     if error_messages:
         logger.debug(f"Tag validation failed: {error_messages}")
         raise exception_class(error_messages)
+
+
+def clean_tags(value: str | list[str], exception_class: Callable = ValidationError) -> str | list[str]:
+
+    if not value:
+        return value
+
+    if isinstance(value, list):
+        # Replace ALL occurrences of problematic characters in each tag
+        return [TAG_PATTERN.sub("_", tag) for tag in value]
+
+    if isinstance(value, str):
+        # Replace ALL occurrences of problematic characters in the tag
+        return TAG_PATTERN.sub("_", value)
+
+    msg = f"Value must be a string or list of strings: {value} - {type(value)}."
+    raise exception_class(msg)
 
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
