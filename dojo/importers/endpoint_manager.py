@@ -52,7 +52,7 @@ class EndpointManager:
                 finding=finding,
                 endpoint=ep,
                 defaults={"date": finding.date})
-        logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
+        logger.debug(f"IMPORT_SCAN: {len(endpoints)} endpoints imported")
         return
 
     @dojo_async_task
