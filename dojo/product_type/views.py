@@ -115,14 +115,26 @@ def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
 
     if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        active_findings_query = Q(prod_type__engagement__test__finding__active=True)
-        active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                                prod_type__engagement__test__finding__verified=True)
+        # Define the common field path once to avoid repetition
+        finding_path = "prod_type__engagement__test__finding"
+        
+        # Combine all annotations in a single call for better performance
         prefetch_prod_types = prefetch_prod_types.annotate(
-            active_findings_count=Count("prod_type__engagement__test__finding__id", filter=active_findings_query))
-        prefetch_prod_types = prefetch_prod_types.annotate(
-            active_verified_findings_count=Count("prod_type__engagement__test__finding__id", filter=active_verified_findings_query))
-        prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count("prod_type", distinct=True))
+            active_findings_count=Count(
+                f"{finding_path}__id", 
+                filter=Q(**{f"{finding_path}__active": True}),
+                distinct=True
+            ),
+            active_verified_findings_count=Count(
+                f"{finding_path}__id", 
+                filter=Q(**{
+                    f"{finding_path}__active": True,
+                    f"{finding_path}__verified": True
+                }),
+                distinct=True
+            ),
+            prod_count=Count("prod_type", distinct=True)
+        )
     else:
         logger.debug("unable to prefetch because query was already executed")
 
