@@ -4,7 +4,6 @@ import traceback
 
 class SQLTraceFilter(logging.Filter):
     def filter(self, record):
-        import traceback
         stack = traceback.extract_stack()
         for frame in reversed(stack):
             if "dojo" in frame.filename and "dojo/logfilters.py" not in frame.filename:
