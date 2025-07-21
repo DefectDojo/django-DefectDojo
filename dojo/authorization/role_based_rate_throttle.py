@@ -14,7 +14,11 @@ class RoleBasedRateThrottle(UserRateThrottle):
                 self.rate = GeneralSettings.get_value(
                     "RATE_LIMIT_SUPERUSERS",
                     "400/second")
-            elif hasattr(request.user, 'global_role') and request.user.global_role:
+            elif (
+                hasattr(request.user, 'global_role')
+                and request.user.global_role
+                and request.user.global_role.role is not None
+            ):
                 if request.user.global_role.role.name == "API_Importer":
                     self.rate = GeneralSettings.get_value(
                         "RATE_LIMIT_API_IMPORTERS",
@@ -34,7 +38,7 @@ class RoleBasedRateThrottle(UserRateThrottle):
 
             if len(self.history) >= self.num_requests:
                 logger.warning(
-                    f"RATE LIMIT: exceeded for user {request.user.username}" )
+                    f"RATE LIMIT: exceeded for user {request.user.username} -> request history: {len(self.history)} >= {self.num_requests} requests in {self.duration} seconds")
                 return self.throttle_failure()
 
             return self.throttle_success()
