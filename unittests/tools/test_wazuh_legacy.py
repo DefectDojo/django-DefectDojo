@@ -20,7 +20,7 @@ class TestWazuhLegacyParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(1, len(findings))
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("CVE-1234-123123", finding.unsaved_vulnerability_ids)
+            self.assertEqual(["CVE-1234-123123"], finding.unsaved_vulnerability_ids)
             self.assertEqual("asdf", finding.component_name)
             self.assertEqual("4.3.1", finding.component_version)
             self.assertEqual(5.5, finding.cvssv3_score)
@@ -44,7 +44,7 @@ class TestWazuhLegacyParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(1, len(findings))
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("CVE-1234-1234", finding.unsaved_vulnerability_ids)
+            self.assertEqual(["CVE-1234-1234"], finding.unsaved_vulnerability_ids)
             self.assertEqual(6.5, finding.cvssv3_score)
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual("agent-1", endpoint.host)
