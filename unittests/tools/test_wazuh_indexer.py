@@ -65,4 +65,3 @@ class TestWazuhIndexerParser(DojoTestCase):
                     self.assertTrue(len(finding.unsaved_endpoints) > 0)
                     self.assertEqual(False, finding.static_finding)
                     self.assertEqual(True, finding.dynamic_finding)
-                    
