@@ -2,9 +2,9 @@ import collections
 import decimal
 import logging
 import warnings
+import zoneinfo
 from datetime import datetime, timedelta
 
-import pytz
 import six
 import tagulous
 from auditlog.models import LogEntry
@@ -97,7 +97,7 @@ from dojo.utils import get_system_setting, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
-local_tz = pytz.timezone(get_system_setting("time_zone"))
+local_tz = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 BOOLEAN_CHOICES = (("false", "No"), ("true", "Yes"))
 EARLIEST_FINDING = None
@@ -125,7 +125,7 @@ def vulnerability_id_filter(queryset, name, value):
 
 
 def now():
-    return local_tz.localize(datetime.today())
+    return datetime.today().replace(tzinfo=local_tz)
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
@@ -199,9 +199,8 @@ class FindingStatusFilter(ChoiceFilter):
     def filter(self, qs, value):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
@@ -453,6 +452,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "kev_date",
         "kev_before",
         "kev_after",
+        "fix_available",
     ])
 
     if similar:
@@ -823,17 +823,15 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
             return qs.all()
         return None
 
     def current_month(self, qs, name):
-        self.start_date = local_tz.localize(
-            datetime(now().year, now().month, 1, 0, 0, 0))
+        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=local_tz)
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": self.start_date.year,
@@ -841,8 +839,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
-        self.start_date = local_tz.localize(
-            datetime(now().year, 1, 1, 0, 0, 0))
+        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=local_tz)
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": now().year,
@@ -892,9 +889,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
             return qs
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
@@ -1483,6 +1479,7 @@ class ApiFindingFilter(DojoFilter):
     under_review = BooleanFilter(field_name="under_review")
     verified = BooleanFilter(field_name="verified")
     has_jira = BooleanFilter(field_name="jira_issue", lookup_expr="isnull", exclude=True)
+    fix_available = BooleanFilter(field_name="fix_available")
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
@@ -1685,6 +1682,7 @@ class FindingFilterHelper(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
+    fix_available = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
@@ -1772,6 +1770,7 @@ class FindingFilterHelper(FilterSet):
             ("numerical_severity", "numerical_severity"),
             ("date", "date"),
             ("mitigated", "mitigated"),
+            ("fix_available", "fix_available"),
             ("risk_acceptance__created__date",
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
@@ -1790,6 +1789,7 @@ class FindingFilterHelper(FilterSet):
             "date": "Date",
             "risk_acceptance__created__date": "Acceptance Date",
             "mitigated": "Mitigated Date",
+            "fix_available": "Fix Available",
             "title": "Finding Name",
             "test__engagement__product__name": "Product Name",
             "epss_score": "EPSS Score",
@@ -3085,6 +3085,7 @@ class ReportFindingFilterHelper(FilterSet):
         fields=(
             ("title", "title"),
             ("date", "date"),
+            ("fix_available", "fix_available"),
             ("numerical_severity", "numerical_severity"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),

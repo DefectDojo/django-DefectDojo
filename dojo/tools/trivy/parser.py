@@ -263,8 +263,8 @@ class TrivyParser:
                     # Parse the CVSS class if it is not None
                     if cvssclass is not None:
                         if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
-                            cvssv3 = cvss_data.get("vector")
-                            cvssv3_score = cvss_data.get("score")
+                            cvssv3 = cvss_data.get("cvssv3")
+                            cvssv3_score = cvss_data.get("cvssv3_score")
                             severity = cvss_data.get("severity")
                         elif (cvss_v3_score := cvssclass.get("V3Score")) is not None:
                             cvssv3_score = cvss_v3_score

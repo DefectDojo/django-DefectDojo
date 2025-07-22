@@ -187,19 +187,19 @@ datatables.net-bs@^2:
     datatables.net "2.3.2"
     jquery ">=1.7"
 
-datatables.net-buttons-bs@^3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-3.2.3.tgz#989dfaebad1731fc72ebe1fc33bf9e94b365ec2a"
-  integrity sha512-1Td8OKEeyKB+W26pbqxUlea6NUoR0znQq2c2tqDfnCAWRBfJaNs2+xXBdYhylC5ACGmie1HieliS8kV9gAfY6w==
+datatables.net-buttons-bs@^3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-3.2.4.tgz#7a883c3ee8c6428fb99e6e6e56c39d0051386039"
+  integrity sha512-wOljUlsJ4sU5pABim+cwbO61ZFRv4aak1PkNL812i/qFwIEcsji7uz59PAx1ZoP1YdNtetj4Vn7D5oTU+Ijedw==
   dependencies:
     datatables.net-bs "^2"
-    datatables.net-buttons "3.2.3"
+    datatables.net-buttons "3.2.4"
     jquery ">=1.7"
 
-datatables.net-buttons@3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-3.2.3.tgz#26eae1f012fd5cfbfcf28dfbfd8a4b644ea8a4ae"
-  integrity sha512-K+WeQWUYVGe5c3Gwb8Gfi7YpUXbJEerik3B2vynnVKpBlYBF5AHTGbrK1Psek2q/mjxeIVNHafQ9eX2otLhJVw==
+datatables.net-buttons@3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-3.2.4.tgz#c58cc0bb518da8738bec6e64a54c1135dc257141"
+  integrity sha512-anA39/R0kpHA2DOwqEHy/ZMXD5vf4tWmyNO0BnO0kJG7AFNvGTUCWBnBifXYg3G64U6JYpYY+MuTFKIB1/ZMTQ==
   dependencies:
     datatables.net "^2"
     jquery ">=1.7"
