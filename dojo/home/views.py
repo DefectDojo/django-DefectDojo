@@ -81,7 +81,7 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
         page_name = ('Dashboard')
         role = Role.objects.get(id=Roles.Maintainer)
         user = request.user.id
-        cookie_csrftoken = get_token('csrftoken')
+        cookie_csrftoken = get_token(request)
         cookie_sessionid = request.COOKIES.get('sessionid', '')
         mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
         add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
