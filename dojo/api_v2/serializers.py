@@ -2383,7 +2383,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
     # also for ReImport.
     close_old_findings = serializers.BooleanField(
         required=False,
-        default=False,
+        default=True,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                     "If service has been set, only the findings for this service will be closed. "
                     "This only affects findings within the same test.",
