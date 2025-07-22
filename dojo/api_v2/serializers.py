@@ -2062,7 +2062,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     # TODO: maybe extend_schema_field is needed here?
     def get_findings_list(self, obj) -> list[int]:
-        return obj.open_findings_list
+        return obj.open_findings_list()
 
 
 class CommonImportScanSerializer(serializers.Serializer):
