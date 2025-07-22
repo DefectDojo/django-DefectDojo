@@ -36,6 +36,8 @@ class TestDependencyCheckParser(DojoTestCase):
             with self.subTest(i=i):
                 self.assertEqual(items[i].title, "org.owasp:library:6.7.8 | CVE-0000-0001")
                 self.assertEqual(items[i].severity, "Medium")
+                self.assertEqual(items[i].cvssv3, None)
+                self.assertEqual(items[i].cvssv3_score, None)
                 self.assertEqual(items[i].component_name, "org.owasp:library")
                 self.assertEqual(items[i].component_version, "6.7.8")
                 self.assertEqual(
@@ -73,6 +75,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[0].description,
                 )
                 self.assertEqual(items[0].severity, "High")
+                self.assertEqual(items[0].cvssv3, None)
+                self.assertEqual(items[0].cvssv3_score, None)
                 self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
                 self.assertEqual(
                     items[0].mitigation,
@@ -97,6 +101,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[1].description,
                 )
                 self.assertEqual(items[1].severity, "High")
+                self.assertEqual(items[1].cvssv3, None)
+                self.assertEqual(items[1].cvssv3_score, None)
                 self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
                 self.assertEqual(
                     items[1].mitigation,
@@ -119,6 +125,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[2].description,
                 )
                 self.assertEqual(items[2].severity, "High")
+                self.assertEqual(items[2].cvssv3, None)
+                self.assertEqual(items[2].cvssv3_score, None)
                 self.assertEqual(items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar")
                 self.assertEqual(
                     items[2].mitigation,
@@ -137,6 +145,8 @@ class TestDependencyCheckParser(DojoTestCase):
                 # assert fails due to special characters, not too important
                 # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
                 self.assertEqual(items[3].severity, "Low")
+                self.assertEqual(items[3].cvssv3, None)
+                self.assertEqual(items[3].cvssv3_score, None)
                 self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -163,6 +173,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[4].description,
                 )
                 self.assertEqual(items[4].severity, "High")
+                self.assertEqual(items[4].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N")
+                self.assertEqual(items[4].cvssv3_score, 7.5)
                 self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[4].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -187,6 +199,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[5].description,
                 )
                 self.assertEqual(items[5].severity, "High")
+                self.assertEqual(items[5].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H")
+                self.assertEqual(items[5].cvssv3_score, 7.5)
                 self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[5].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -199,6 +213,8 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[6].component_name, "org.dom4j:dom4j")
                 self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
                 self.assertEqual(items[6].severity, "High")
+                self.assertEqual(items[6].cvssv3, None)
+                self.assertEqual(items[6].cvssv3_score, None)
                 self.assertEqual(items[6].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
                 self.assertEqual(
                     items[6].mitigation,
@@ -213,6 +229,8 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[7].component_name, "dom4j")
                 self.assertEqual(items[7].component_version, "2.1.1")
                 self.assertEqual(items[7].severity, "High")
+                self.assertEqual(items[7].cvssv3, None)
+                self.assertEqual(items[7].cvssv3_score, None)
                 self.assertEqual(
                     items[7].mitigation, "Update dom4j:2.1.1 to at least the version recommended in the description",
                 )
@@ -226,6 +244,8 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[8].component_name, "jquery")
                 self.assertEqual(items[8].component_version, "3.1.1")
                 self.assertEqual(items[8].severity, "High")
+                self.assertEqual(items[8].cvssv3, None)
+                self.assertEqual(items[8].cvssv3_score, None)
                 self.assertEqual(
                     items[8].mitigation, "Update jquery:3.1.1 to at least the version recommended in the description",
                 )
@@ -239,8 +259,10 @@ class TestDependencyCheckParser(DojoTestCase):
                     "**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description",
                 )
                 self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
-                self.assertEqual(items[10].severity, "Critical")
-                self.assertEqual(items[10].is_mitigated, True)
+                self.assertEqual(items[9].severity, "Critical")
+                self.assertEqual(items[9].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+                self.assertEqual(items[9].cvssv3_score, 9.8)
+                self.assertEqual(items[9].is_mitigated, True)
 
             with self.subTest(i=10):
                 self.assertEqual(items[10].active, False)
@@ -250,6 +272,8 @@ class TestDependencyCheckParser(DojoTestCase):
                 )
                 self.assertEqual(items[10].tags, "suppressed")
                 self.assertEqual(items[10].severity, "Critical")
+                self.assertEqual(items[10].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+                self.assertEqual(items[10].cvssv3_score, 9.8)
                 self.assertEqual(items[10].is_mitigated, True)
 
     def test_parse_java_6_5_3(self):
@@ -269,6 +293,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[i].description,
                 )
                 self.assertEqual(items[i].severity, "Low")
+                self.assertEqual(items[i].cvssv3, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N")
+                self.assertEqual(items[i].cvssv3_score, 3.7)
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
                 self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=UTC))
 
@@ -295,6 +321,8 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[0].description,
                 )
                 self.assertEqual(items[0].severity, "Critical")
+                self.assertEqual(items[0].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+                self.assertEqual(items[0].cvssv3_score, 9.8)
                 self.assertEqual(items[0].file_path, "activemq-broker-5.16.5.jar")
                 self.assertIn(
                     "**This vulnerability is mitigated and/or suppressed:** Ist eine Dependency vom CXF. Der im Finding erwähnte Bug ist seit Version 1.0",

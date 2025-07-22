@@ -303,3 +303,25 @@ class TestAnchoreGrypeParser(DojoTestCase):
                 self.assertAlmostEqual(epss_score, finding.epss_score, places=5)
                 self.assertIsNotNone(finding.epss_percentile)
                 self.assertAlmostEqual(epss_percentile, finding.epss_percentile, places=5)
+
+    def test_grype_epss_problem(self):
+        """
+        This test is to check that the parser is able to handle the case where the epss score is not found in the vulnerability itself
+        and must be found in the (first) related vulnerability.
+        """
+        with (get_unit_tests_scans_path("anchore_grype") / "anchore_grype_epss_problem.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+
+            # Hardcoded expected values
+            expected = [
+                ("GHSA-4374-p667-p6c8", 0.00163, 0.37957),
+            ]
+            self.assertEqual(len(expected), len(findings))
+
+            for (cve, epss_score, epss_percentile), finding in zip(expected, findings, strict=True):
+                self.assertEqual(cve, finding.vuln_id_from_tool)
+                self.assertIsNotNone(finding.epss_score)
+                self.assertAlmostEqual(epss_score, finding.epss_score, places=5)
+                self.assertIsNotNone(finding.epss_percentile)
+                self.assertAlmostEqual(epss_percentile, finding.epss_percentile, places=5)

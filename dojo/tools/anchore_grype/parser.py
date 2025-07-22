@@ -1,9 +1,12 @@
 import json
+import logging
 
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class AnchoreGrypeParser:
@@ -27,7 +30,9 @@ class AnchoreGrypeParser:
         )
 
     def get_findings(self, file, test):
+        logger.debug(f"file: {file}")
         data = json.load(file)
+        logger.debug(f"data: {data}")
         dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
@@ -57,6 +62,7 @@ class AnchoreGrypeParser:
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
                 rel_epss = related_vulnerability.get("epss")
+                rel_vuln_id = related_vulnerability.get("id")
             vulnerability_ids = self.get_vulnerability_ids(
                 vuln_id, related_vulnerabilities,
             )
@@ -162,10 +168,15 @@ class AnchoreGrypeParser:
                 finding_cvss3 = self.get_cvss(vuln_cvss)
             if not finding_cvss3 and rel_cvss:
                 finding_cvss3 = self.get_cvss(rel_cvss)
-
+            # https://github.com/DefectDojo/django-DefectDojo/issues/12819
+            # the parser seems focues on only parsing the first related vulnerability
+            # this fixes the mentioned github issue, but a more thorough rewrite might be needed
+            # if the problem persists / we get more real world sample reports.
             finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
             if finding_epss_score is None and rel_epss:
-                finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, rel_epss)
+                finding_epss_score, finding_epss_percentile = self.get_epss_values(rel_vuln_id, rel_epss)
+                if finding_epss_score is None and rel_vuln_id:
+                    finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
 
             dupe_key = finding_title
             if dupe_key in dupes:
@@ -211,7 +222,12 @@ class AnchoreGrypeParser:
         return None
 
     def get_epss_values(self, vuln_id, epss_list):
+        if not isinstance(epss_list, list):
+            logger.debug(f"epss_list is not a list: {epss_list}")
+            return None, None
+
         if isinstance(epss_list, list):
+            logger.debug(f"epss_list: {epss_list}")
             for epss_data in epss_list:
                 if epss_data.get("cve") != vuln_id:
                     continue
@@ -219,9 +235,10 @@ class AnchoreGrypeParser:
                     epss_score = float(epss_data.get("epss"))
                     epss_percentile = float(epss_data.get("percentile"))
                 except (TypeError, ValueError):
-                    pass
+                    logger.debug(f"epss_data is not a float: {epss_data}")
                 else:
                     return epss_score, epss_percentile
+        logger.debug(f"epss not found for vuln_id: {vuln_id} in epss_list: {epss_list}")
         return None, None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
