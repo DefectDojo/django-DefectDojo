@@ -793,56 +793,59 @@
         }
       },
       {
-        "_index": "wazuh-states-vulnerabilities-siem",
-        "_id": "021_f1a96dd19134d450109f5706f6c817c35f82ee04_CVE-2022-24448",
-        "_score": 2.6127179,
+        "_index": "wazuh-states-vulnerabilities-wazuh-server",
+        "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+        "_score": 5.596354,
         "_source": {
           "agent": {
-            "id": "021",
-            "name": "asdasdasd",
-            "type": "wazuh",
-            "version": "v4.11.2"
+            "id": "002",
+            "name": "myhost2",
+            "type": "Wazuh",
+            "version": "v4.11.1"
           },
           "host": {
             "os": {
-              "full": "CentOS Linux 7.9.2009",
-              "kernel": "3.10.0-1160.118.1.el7.x86_64",
-              "name": "CentOS Linux",
-              "platform": "centos",
-              "type": "centos",
-              "version": "7.9.2009"
+              "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+              "kernel": "6.8.0-62-generic",
+              "name": "Ubuntu",
+              "platform": "ubuntu",
+              "type": "ubuntu",
+              "version": "24.04.1"
             }
           },
           "package": {
-            "architecture": "x86_64",
-            "description": "The Linux kernel",
-            "installed": "2021-04-15T10:48:32.000Z",
-            "name": "kernel",
-            "size": 67399074,
-            "type": "rpm",
-            "version": "3.10.0-1160.24.1.el7"
+            "architecture": "amd64",
+            "description": "Signed kernel image generic",
+            "name": "linux-image-6.8.0-60-generic",
+            "size": 15025152,
+            "type": "deb",
+            "version": "6.8.0-60.63"
           },
           "vulnerability": {
             "category": "Packages",
-            "classification": "CVSS",
-            "description": "An issue was discovered in fs/nfs/dir.c in the Linux kernel before 5.16.5. If an application sets the O_DIRECTORY flag, and tries to open a regular file, nfs_atomic_open() performs a regular lookup. If a regular file is found, ENOTDIR should occur, but the server instead returns uninitialized data in the file descriptor.",
-            "detected_at": "2024-08-26T08:30:10.460Z",
+            "classification": "-",
+            "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+            "detected_at": "2025-06-30T17:07:16.938Z",
             "enumeration": "CVE",
-            "id": "CVE-2022-24448",
-            "published_at": "2022-02-04T20:15:08Z",
-            "reference": "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.16.5, https://www.spinics.net/lists/stable/msg531976.html, https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ac795161c93699d600db16c1a8cc23a65a1eceaf, https://lists.debian.org/debian-lts-announce/2022/03/msg00011.html, https://lists.debian.org/debian-lts-announce/2022/03/msg00012.html, https://github.com/torvalds/linux/commit/ab0fc21bc7105b54bafd85bd8b82742f9e68898a, https://github.com/torvalds/linux/commit/ac795161c93699d600db16c1a8cc23a65a1eceaf, https://www.debian.org/security/2022/dsa-5092, https://www.debian.org/security/2022/dsa-5096, https://lore.kernel.org/all/67d6a536-9027-1928-99b6-af512a36cd1a%40huawei.com/T/",
+            "id": "CVE-2021-3773",
+            "published_at": "2022-02-16T19:15:08Z",
+            "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
             "scanner": {
+              "condition": "Package default status",
+              "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+              "source": "Canonical Security Tracker",
               "vendor": "Wazuh"
             },
             "score": {
-              "base": 1.9,
-              "version": "2.0"
+              "base": 9.8,
+              "version": "3.1"
             },
-            "severity": "Low"
+            "severity": "Critical",
+            "under_evaluation": false
           },
           "wazuh": {
             "cluster": {
-              "name": "SIEM"
+              "name": "wazuh-server"
             },
             "schema": {
               "version": "1.0.0"

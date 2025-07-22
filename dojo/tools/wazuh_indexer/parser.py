@@ -95,7 +95,7 @@ class WazuhIndexerParser:
                 component_version=package_version,
                 file_path=package_path or None,
                 publish_date=published_date,
-                cvssv3_score=cvss3 or None,
+                cvssv3_score=cvss_score if cvss3 == "3" else None,
             )
 
             finding.unsaved_vulnerability_ids = [cve]
