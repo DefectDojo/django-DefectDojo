@@ -234,8 +234,8 @@ class DependencyCheckParser:
                 version = cvssv3_node.findtext("version") or "3.1"
                 vector = f"CVSS:{version}/" + "/".join(vector_parts)
                 if cvss_data := parse_cvss_data(vector):
-                    cvssv3 = cvss_data.get("vector")
-                    cvssv3_score = cvss_data.get("score")
+                    cvssv3 = cvss_data.get("cvssv3")
+                    cvssv3_score = cvss_data.get("cvssv3_score")
                     severity = cvss_data.get("severity")
             except Exception as e:
                 # Only log the error - there is not much we can do to recover from this
