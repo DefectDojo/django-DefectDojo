@@ -1220,3 +1220,21 @@ def render_risk_acceptance_accepted_by(finding: Finding):
             accepted_by_user += "</br>"
         logger.debug(f"render_accepted_by_context is {accepted_by_user}")
     return accepted_by_user
+
+
+@register.filter()
+def permission_view_findings(user):
+    value = GeneralSettings.get_value(
+        "USERS_PERMISSION_VIEW_FINDINGS",
+        "all"
+    )
+    if value == "all" or user in value:
+        return True
+    return False
+
+@register.filter()
+def general_settings_get_value(name_key, default):
+    """
+    Returns the value of a general setting by its name key.
+    """
+    return GeneralSettings.get_value(name_key, default)

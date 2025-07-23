@@ -98,8 +98,8 @@ def product_type(request):
 
     ptl = ProductTypeFilter(request.GET, queryset=prod_types)
     pts = get_page_items(request, ptl.qs, 25)
-
-    pts.object_list = prefetch_for_product_type(pts.object_list)
+     # It is limited due to performance reasons
+    # pts.object_list = prefetch_for_product_type(pts.object_list)
 
     page_name = _("Product Type List")
     add_breadcrumb(title=page_name, top_level=True, request=request)
@@ -119,6 +119,7 @@ def prefetch_for_product_type(prod_types):
         finding_path = "prod_type__engagement__test__finding"
         
         # Combine all annotations in a single call for better performance
+       
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_findings_count=Count(
                 f"{finding_path}__id", 

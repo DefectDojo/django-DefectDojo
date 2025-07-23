@@ -94,8 +94,6 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
         'user': user,
         })
     else:
-        logger.debug("MAX_CONNECTIONS: %s", settings.MAX_CONNS)
-        logger.debug("MIM_CONNECTIONS: %s", settings.MIN_CONNS)
         dashboard_cache = None
 
         if settings.USE_CACHE_REDIS:

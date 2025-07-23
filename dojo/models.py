@@ -5109,8 +5109,13 @@ class GeneralSettings(models.Model):
             logger.error(f"Variable not found : {name_key}, {str(e)}")
             return default
         if settings.USE_CACHE_REDIS:
-            cache.set(f"GENERAL_SETTINGS:{variable_object.value}",
-                      variable_object.value, timeout=None)
+            value_dict = {
+                "name_key": variable_object.name_key, 
+                "value": variable_object.value,
+                "data_type": variable_object.data_type
+            }
+            cache.set(f"GENERAL_SETTINGS:{variable_object.name_key}",
+                      value_dict, timeout=None)
         variable_result = rule_data_type[variable_object.data_type](variable_object.value) 
         return variable_result
 
