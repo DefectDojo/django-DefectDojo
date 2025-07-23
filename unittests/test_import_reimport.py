@@ -998,9 +998,41 @@ class ImportReimportMixin:
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
+    # import 1 and then reimport 2 without closing old findings should result in old findings being closed as the default is True in serializers.py
+    # - reimport should mitigate the zap1
+    def test_import_reimport_without_close_old_findings(self):
+        # https://github.com/DefectDojo/django-DefectDojo/pull/12837
+        logger.debug("reimporting updated zap xml report and using default value for close_old_findings (True)")
+
+        import1 = self.import_scan_with_params(self.zap_sample1_filename)
+
+        test_id = import1["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, created=1, untouched=3):
+            reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+
+        test_id = reimport1["test"]
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+
+        mitigated = 0
+        not_mitigated = 0
+        for finding in findings["results"]:
+            logger.debug(finding)
+            if finding["is_mitigated"]:
+                mitigated += 1
+            else:
+                not_mitigated += 1
+        self.assertEqual(mitigated, 1)
+        self.assertEqual(not_mitigated, 4)
+
     # import 1 and then reimport 2 without closing old findings
     # - reimport should not mitigate the zap1
-    def test_import_reimport_without_closing_old_findings(self):
+    def test_import_reimport_with_close_old_findings_false(self):
         logger.debug("reimporting updated zap xml report and keep old findings open")
 
         import1 = self.import_scan_with_params(self.zap_sample1_filename)
@@ -1015,11 +1047,8 @@ class ImportReimportMixin:
         test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings_api(test_id, verified=False)
+        findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(5, findings)
-
-        findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(0, findings)
 
         mitigated = 0
         not_mitigated = 0
@@ -1030,7 +1059,7 @@ class ImportReimportMixin:
             else:
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
-        self.assertEqual(not_mitigated, 0)
+        self.assertEqual(not_mitigated, 5)
 
     # some parsers generate 1 finding for each vulnerable file for each vulnerability
     # i.e
