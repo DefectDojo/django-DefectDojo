@@ -837,6 +837,20 @@ def finding_display_status(finding, event="view"):
     html_render = template_object.render(context_object)
     return html_render
 
+@register.filter
+def priority_display_status(priority):
+    priority = float(priority)
+    if priority >= 0.90 and priority <= 1.00:
+        return "Very-Critical"
+    elif priority >= 0.46 and priority <= 0.89:
+        return "Critical"
+    elif priority >= 0.31 and priority <= 0.45:
+        return "High"
+    elif priority > 0.00 and priority <= 0.30:
+        return "Medium-Low"
+    else:
+        return "Info"
+
 
 @register.filter
 def cwe_url(cwe):

@@ -7,10 +7,12 @@ from django.conf import settings
 from datetime import timedelta
 from celery.utils.log import get_task_logger
 from enum import Enum
-from io import StringIO
+from io import BytesIO, StringIO
 from bs4 import BeautifulSoup
 import csv
 import requests
+import boto3
+# import pandas as pd
 
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes
@@ -479,12 +481,40 @@ def identify_critical_vulnerabilities(findings) -> int:
         int: Number of critical vulnerabilities
     """
     system_user = get_user(settings.SYSTEM_USER)
+
+    severity_risk_map = {
+        'Low': 0.01,
+        'Medium': 0.45,
+        'High': 0.74,
+        'Critical': 1.00
+    }
+
+    try:
+
+        # Read the risk score file from the S3 bucket with boto3
+        s3 = boto3.client('s3')
+        response = s3.get_object(Bucket=settings.BUCKET_NAME_RISK_SCORE, Key=settings.PATH_FILE_RISK_SCORE)
+        file_content = response['Body'].read().decode('utf-8')
+
+        # Get dict reader from the CSV content
+        csv_reader = csv.DictReader(StringIO(file_content))
+        dict_risk_score = {row['CVE']: float(row['Risk Score']) for row in csv_reader}
+
+        # Get the parquet content
+        #parquet_content = response['Body'].read()
+        #df_risk_score = pd.read_parquet(BytesIO(parquet_content))
+        
+
+    except Exception as e:
+        logger.error(f"Error reading risk score file: {e}")
+        dict_risk_score = {}
     
     for finding in findings:
-        priority = calculate_vulnerability_priority(finding)
+        priority = dict_risk_score.get(finding.cve, severity_risk_map.get(finding.severity, 0)) if dict_risk_score else 0
+        #priority = df_risk_score.loc[df_risk_score['CVE'] == finding.cve, 'Risk Score'].values[0] if not df_risk_score.empty else 0
         update_finding_prioritization_per_cve.apply_async(args=(finding.cve, finding.test.scan_type, priority,))
         
-        if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
+        if priority > float(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list", status="Accepted")
             
             if not finding_exclusion.exists():
@@ -519,7 +549,6 @@ def check_priorization():
     all_vulnerabilities = (
         Finding.objects.filter(active=True)
         .filter(blacklist_tag_filter)
-        .filter(epss_score__isnull=False)
         .order_by("cve", "test__scan_type")
         .distinct("cve", "test__scan_type")
     )

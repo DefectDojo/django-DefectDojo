@@ -590,12 +590,20 @@ form ul#id_accepted_findings input {
     background-color: #FBE413;
 }
 
+.severity-Medium-Low {
+    background-color: #FBE413;
+}
+
 .severity-High {
     background-color: #f09835;
 }
 
 .severity-Critical {
     background-color: #d9534f;
+}
+
+.severity-Very-Critical {
+    background-color: #f70800;
 }
 
 .age-red {
