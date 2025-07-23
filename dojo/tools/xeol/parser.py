@@ -1,6 +1,8 @@
 import json
 from datetime import datetime, timedelta
+
 from dojo.models import Finding
+
 
 class XeolParser:
     def get_scan_types(self):
@@ -14,11 +16,7 @@ class XeolParser:
 
     def get_findings(self, file, test):
         findings = []
-
-        try:
-            data = json.load(file)
-        except Exception as e:
-            raise ValueError(f"Invalid JSON file: {e}")
+        data = json.load(file)
 
         if not isinstance(data, dict) or "results" not in data:
             return findings
@@ -43,7 +41,7 @@ class XeolParser:
                 f"**Licenses:** {', '.join(artifact.get('licenses', []))}",
                 f"**Package URL:** {artifact.get('purl', 'N/A')}",
                 f"**Distro Name:** {distro.get('name', 'N/A')}",
-                f"**Distro Version:** {distro.get('version', 'N/A')}"
+                f"**Distro Version:** {distro.get('version', 'N/A')}",
             ]
 
             locations = artifact.get("locations", [])
@@ -87,7 +85,7 @@ class XeolParser:
                 dynamic_finding=False,
                 unique_id_from_tool=matches.get("ProductPermalink", None),
                 nb_occurences=1,
-                references=matches.get("ProductPermalink", "")
+                references=matches.get("ProductPermalink", ""),
             )
 
             findings.append(finding)
