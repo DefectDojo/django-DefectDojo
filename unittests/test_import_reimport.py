@@ -999,6 +999,7 @@ class ImportReimportMixin:
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
     # import 1 and then reimport 2 without closing old findings should result in old findings being closed as the default is True in serializers.py
+    # TODO: For the UI tests the close_old_findings parameter is still explicitly set to True as the default is False
     # - reimport should mitigate the zap1
     def test_import_reimport_without_close_old_findings(self):
         # https://github.com/DefectDojo/django-DefectDojo/pull/12837
