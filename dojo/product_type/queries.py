@@ -121,16 +121,19 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
         contacts_result.append(user.id)
 
     elif not contacts_result:
+        count_contacts = 0
         for contact_type in contacts_list:
-            leader = getattr(product_obj, contact_type, None) if contact_type == "team_manager" else getattr(product_type_obj, contact_type, None)
+            leader = getattr(product_obj, contact_type, None) if contact_type in settings.CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE else getattr(product_type_obj, contact_type, None)
             if leader:
                 contacts_result.append(leader.id)
-            else:
-                lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
-                dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
-                user_leader = dict_inverter.get(contact_type, "Leader")
-                message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
-                raise ValueError(message)
+                count_contacts += 1
+            
+        if not contacts_result or count_contacts < type_contacts["number_acceptors"]:
+            lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
+            dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
+            user_leader = dict_inverter.get(contact_type, "Leader")
+            message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
+            raise ValueError(message)
 
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
