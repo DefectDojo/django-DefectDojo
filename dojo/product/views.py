@@ -151,7 +151,8 @@ def product(request):
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
-    prod_list.object_list = prefetch_for_product(prod_list.object_list)
+    # It is deactivated for performance reasons
+    # prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 

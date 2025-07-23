@@ -397,7 +397,11 @@
                                         </li>
                                         {% endblock %} -->
                                         <li>
-                                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% if "DISABLE_OLD_METRICS"|general_settings_get_value:"False" %}
+                                                <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% else %}
+                                            <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Metrics">
+                                            {% endif %}
                                                 <i class="fa-solid fa-chart-column fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
