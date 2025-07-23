@@ -21,7 +21,7 @@ class WazuhV4_8:
             references = vuln.get("reference")
 
             title = (
-                cve + " (agent_id: " + agent_id + ")"
+                cve + " affects (version: " + item.get("package").get("version") + ")"
             )
 
             dupe_key = title + agent_id + description
@@ -39,6 +39,8 @@ class WazuhV4_8:
                 severity=severity,
                 references=references,
                 static_finding=True,
+                component_name=item.get("package").get("name"),
+                component_version=item.get("package").get("version"),
                 cvssv3_score=cvssv3_score,
                 publish_date=publish_date,
                 unique_id_from_tool=dupe_key,
