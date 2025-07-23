@@ -838,18 +838,26 @@ def finding_display_status(finding, event="view"):
     return html_render
 
 @register.filter
-def priority_display_status(priority):
-    priority = float(priority)
+def priority_display_status(finding):
+    if finding.tags:
+        blacklist_tags = [tag.strip() for tag in settings.BLACKLIST_FILTER_TAGS.split(",") if tag.strip()]
+        if any(tag in finding.tags for tag in blacklist_tags):
+            pass  # Tag is blacklisted, continue with priority logic below
+        else:
+            return "Unknown"
+        
+    
+    priority = float(finding.priority)
     if priority >= 0.90 and priority <= 1.00:
         return "Very-Critical"
     elif priority >= 0.46 and priority <= 0.89:
         return "Critical"
     elif priority >= 0.31 and priority <= 0.45:
         return "High"
-    elif priority > 0.00 and priority <= 0.30:
+    elif priority >= 0.00 and priority <= 0.30:
         return "Medium-Low"
     else:
-        return "Info"
+        return "Unknown"
 
 
 @register.filter
