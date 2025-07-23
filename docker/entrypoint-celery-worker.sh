@@ -3,7 +3,7 @@ umask 0002
 
 id
 
-# set -e  # needed to handle "exit" correctly
+set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh
 . /reach_database.sh
