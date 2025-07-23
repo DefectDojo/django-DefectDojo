@@ -999,7 +999,7 @@ class ImportReimportMixin:
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
     # import 1 and then reimport 2 without closing old findings should result in old findings being closed as the default is True in serializers.py
-    # TODO: For the UI tests the close_old_findings parameter is still explicitly set to True as the default is False
+    # for the UI tests this also works as the default is True in the (re)import methods in this test class
     # - reimport should mitigate the zap1
     def test_import_reimport_without_close_old_findings(self):
         # https://github.com/DefectDojo/django-DefectDojo/pull/12837
@@ -1984,7 +1984,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
             return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *, active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None, service=None):
+    # For UI tests we cannot rely on the default for close_old_findings True as when we leave out the field in the request,
+    # Django (or rathet HTML FORM spec) will interpret that as False. So we explicitly set it to True here.
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *, active=True, verified=False, push_to_jira=None, tags=None,
+            close_old_findings=True, scan_date=None, service=None):
         # Mimic old functionality for active/verified to avoid breaking tests
         activePayload = "force_to_true"
         if not active:
