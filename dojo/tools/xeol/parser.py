@@ -83,7 +83,6 @@ class XeolParser:
                 component_version=artifact.get("version", ""),
                 static_finding=True,
                 dynamic_finding=False,
-                unique_id_from_tool=matches.get("ProductPermalink", None),
                 nb_occurences=1,
                 references=matches.get("ProductPermalink", ""),
             )
