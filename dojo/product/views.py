@@ -145,9 +145,6 @@ def product(request):
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list("name", flat=True)
-    prods = prods.annotate(
-        findings_count=Count("engagement__test__finding", filter=Q(engagement__test__finding__active=True)),
-    )
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
     prod_filter = filter_class(request.GET, queryset=prods, user=request.user)

@@ -299,6 +299,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% if request.user.username|permission_view_findings %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa-solid fa-bug fa-fw"></i>
@@ -336,6 +337,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% endif %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
