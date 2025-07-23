@@ -13,8 +13,7 @@ from dojo.engine_tools.helpers import (
     send_mail_to_cybersecurity,
     has_valid_comments,
     add_findings_to_blacklist,
-    remove_findings_from_deleted_finding_exclusions,
-    check_priorization
+    remove_findings_from_deleted_finding_exclusions
 )
 
 # Utils
@@ -180,8 +179,6 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
         HttpResponse: Http response object via Django template
     """
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
-
-    check_priorization()
     
     if request.method == 'POST':
         form = FindingExclusionDiscussionForm(request.POST)

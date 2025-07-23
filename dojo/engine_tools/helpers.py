@@ -7,10 +7,7 @@ from django.conf import settings
 from datetime import timedelta
 from celery.utils.log import get_task_logger
 from enum import Enum
-from io import BytesIO, StringIO
-from bs4 import BeautifulSoup
-import csv
-import requests
+from io import BytesIO
 import boto3
 import pandas as pd
 
@@ -18,7 +15,7 @@ import pandas as pd
 from dojo.models import Finding, Dojo_Group, Notes
 from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
-from dojo.engine_tools.queries import tag_filter, blacklist_tag_filter
+from dojo.engine_tools.queries import tag_filter, priority_tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
 from dojo.notifications.helper import create_notification, EmailNotificationManger
@@ -38,6 +35,8 @@ class Constants(Enum):
     REVIEWERS_MAINTAINER_GROUP = settings.REVIEWER_GROUP_NAME
     APPROVERS_CYBERSECURITY_GROUP = settings.APPROVER_GROUP_NAME
     ENGINE_CONTAINER_TAG = settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
+    TAG_PRISMA = settings.FINDING_EXCLUSION_FILTER_TAGS.split(",")[0]
+    TAG_TENABLE = settings.FINDING_EXCLUSION_FILTER_TAGS.split(",")[1]
 
 
 def get_reviewers_members():
@@ -138,14 +137,14 @@ def check_prisma_and_tenable_cve(cve: str) -> tuple[bool, bool]:
     has_prisma_findings = (
         Finding.objects.filter(cve=cve, active=True)
         .filter(
-            Q(tags__name__icontains="prisma")
+            Q(tags__name__icontains=Constants.TAG_PRISMA.value)
             | Q(tags__name__icontains=Constants.ENGINE_CONTAINER_TAG.value)
         )
         .exists()
     )
 
     has_tenable_findings = Finding.objects.filter(
-        cve=cve, active=True, tags__name__icontains="tenable"
+        cve=cve, active=True, tags__name__icontains=Constants.TAG_TENABLE.value
     ).exists()
 
     return has_prisma_findings, has_tenable_findings
@@ -217,9 +216,9 @@ def remove_finding_from_list(finding: Finding, note: Notes, list_type: str) -> F
     if list_type == "white_list":
         if not finding.is_mitigated:
             finding.active = True
-        finding.tags.remove("white_list")
+        finding.tags.remove("white_list") if "white_list" in finding.tags else None
     elif list_type == "black_list":
-        finding.tags.remove("black_list")
+        finding.tags.remove("black_list") if "black_list" in finding.tags else None
 
     return finding
 
@@ -238,7 +237,6 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
                 f"Finding has been removed from the {expired_fex.type} as it has expired.",
             )
 
-            is_active = True if expired_fex.type == "black_list" else False
             risk_status = (
                 Constants.ON_BLACKLIST.value
                 if expired_fex.type == "black_list"
@@ -248,7 +246,6 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
             findings = Finding.objects.filter(
                 Q(cve=expired_fex.unique_id_from_tool)
                 | Q(vuln_id_from_tool=expired_fex.unique_id_from_tool),
-                active=is_active,
                 risk_status=risk_status,
             ).prefetch_related("tags", "notes")
 
@@ -325,7 +322,7 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url):
             active=True,
         )
         .exclude(risk_status=Constants.ON_BLACKLIST.value)
-        .filter(blacklist_tag_filter)
+        .filter(priority_tag_filter)
     )
 
     if findings_to_update.exists():
@@ -363,129 +360,6 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url):
         send_mail_to_cybersecurity(finding_exclusion, blacklist_message)
 
 
-def get_resource_type(finding) -> str:
-    contains_host = any("hosts" in tag.name for tag in finding.tags.all())
-    contains_ecr = any("images" in tag.name for tag in finding.tags.all())
-    contains_lambda = any("lambdas" in tag.name for tag in finding.tags.all())
-    contains_engine_container = any(
-        Constants.ENGINE_CONTAINER_TAG.value in tag.name for tag in finding.tags.all()
-    )
-
-    if contains_host:
-        return "host"
-    if contains_ecr or contains_engine_container:
-        return "image"
-    if contains_lambda:
-        return "function"
-
-    return ""
-
-
-def get_risk_score(finding) -> int:
-    auth = (settings.TWISTLOCK_ACCESS_KEY, settings.TWISTLOCK_SECRET_KEY)
-    api_url = settings.TWISTLOCK_API_URL + f"?cve={finding.cve}"
-    try:
-        vulnerabilities_response = requests.get(api_url, auth=auth, stream=True)
-        vulnerabilities_response.raise_for_status()
-
-        csv_file = StringIO(vulnerabilities_response.text)
-        reader = csv.DictReader(csv_file)
-
-        resource_type = get_resource_type(finding)
-
-        for row in reader:
-            if row.get("Impacted resource type") == resource_type:
-                try:
-                    risk_score = float(row.get("Highest risk score"))
-                    if finding.cvssv3_score == 0 or finding.cvssv3_score is None:
-                        finding.cvssv3_score = float(row.get("Highest CVSS", 0))
-                    return risk_score if risk_score else 0
-                except Exception:
-                    return 0
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error on twistlock api request: {e}")
-
-
-def get_tenable_risk_score(finding) -> int:
-    if not finding.description:
-        return 0
-
-    soup = BeautifulSoup(finding.description, "html.parser")
-
-    rating_label = soup.find("strong", string="Vulnerability Priority Rating:")
-
-    if rating_label:
-        rating_text = (
-            rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-        )
-
-        try:
-            return int(rating_text)
-        except ValueError:
-            return 0
-
-    return 0
-
-
-def calculate_vulnerability_priority(finding) -> float:
-    """
-    Calculates the prioritization of a vulnerability with specific weights.
-
-    Weights:
-    - Risk Score: 0.4
-    - EPSS: 0.4
-    - Severity: 0.1
-    - CVSS: 0.1
-
-    Args:
-        finding (Finding): Vulnerability object from the Django model
-
-    Returns:
-        float: Total prioritization score
-    """
-    # Initial validations
-    if not finding.cve:
-        return 0.0
-
-    # Severity (25-100)
-    severity_map = {"Low": 25, "Medium": 50, "High": 75, "Critical": 100}
-    severity_score = severity_map.get(finding.severity, 0)
-
-    # Risk Score (0-100)
-    if "prisma" in finding.tags or Constants.ENGINE_CONTAINER_TAG.value in finding.tags:
-        risk_score = get_risk_score(finding) or 1
-    elif "tenable" in finding.tags:
-        risk_score = get_tenable_risk_score(finding) or 1
-    else:
-        risk_score = 1
-
-    # CVSS Score (0-10 multiplied by 10)
-    cvss_score = (finding.cvssv3_score or 0) * 10
-
-    # EPSS Score (0-1 converted to 0-100)
-    epss_score = (finding.epss_score or 0) * 100
-
-    # Prioritization calculation with weights
-    priorization_field_weights = settings.PRIORIZATION_FIELD_WEIGHTS
-
-    priority = (
-        (
-            risk_score * float(priorization_field_weights.get("risk_score"))
-        )  # Risk Score with weight 0.4
-        + (
-            epss_score * float(priorization_field_weights.get("epss_score"))
-        )  # EPSS with weight 0.4
-        + (
-            severity_score * float(priorization_field_weights.get("severity_score"))
-        )  # Severity with weight 0.1
-        + (
-            cvss_score * float(priorization_field_weights.get("cvss_score"))
-        )  # CVSS with weight 0.1
-    )
-
-    return round(priority, 2)
-
-
 def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
     system_user = get_user(settings.SYSTEM_USER)
     content = "Created by the vulnerability prioritization check."
@@ -498,30 +372,34 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 @app.task
 def update_finding_prioritization_per_cve(
-    vulnerability_id, scan_type, priorization
+    vulnerability_id, severity, scan_type, priorization
 ) -> None:
+    priority_cve_severity_filter = Q()
+    if vulnerability_id:
+        priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
+            Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
+        )
+    else:
+        priority_cve_severity_filter = Q(severity=severity)
+
     findings = Finding.objects.filter(
-        (Q(cve=vulnerability_id) & ~Q(cve=None))
-        | (Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)),
+        priority_cve_severity_filter,
         test__scan_type=scan_type,
         active=True,
-    ).filter(blacklist_tag_filter)
+    ).filter(priority_tag_filter)
     for finding_update in findings:
         finding_update.priority = priorization
 
     Finding.objects.bulk_update(findings, ["priority"], 500)
-    return f"{vulnerability_id} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}"
+    return f"{vulnerability_id if vulnerability_id else severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}"
 
 
-def identify_critical_vulnerabilities(findings) -> int:
+def identify_priority_vulnerabilities(findings) -> int:
     """
-    Identifies vulnerabilities with a prioritization greater than 90 points.
+    Identifies priority vulnerabilities based on risk score and adds them to the blacklist.
 
     Args:
         findings (QuerySet): Set of vulnerabilities from the Finding model
-
-    Returns:
-        int: Number of critical vulnerabilities
     """
     system_user = get_user(settings.SYSTEM_USER)
 
@@ -544,7 +422,7 @@ def identify_critical_vulnerabilities(findings) -> int:
         df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
 
     for finding in findings:
-        if not df_risk_score.empty:
+        if not df_risk_score.empty and finding.cve:
             loc_res = df_risk_score.loc[
                 df_risk_score["cve"] == finding.cve, "prediction"
             ].values
@@ -556,11 +434,7 @@ def identify_critical_vulnerabilities(findings) -> int:
             priority = severity_risk_map.get(finding.severity, 0)
 
         update_finding_prioritization_per_cve.apply_async(
-            args=(
-                finding.cve,
-                finding.test.scan_type,
-                priority,
-            )
+            args=(finding.cve, finding.severity, finding.test.scan_type, priority)
         )
 
         if priority > float(
@@ -602,17 +476,16 @@ def identify_critical_vulnerabilities(findings) -> int:
 
 @app.task
 def check_priorization():
-    # Get all vulnerabilities
-
+    # Get all vulnerabilities with active status and priority tag
     all_vulnerabilities = (
         Finding.objects.filter(active=True)
-        .filter(blacklist_tag_filter)
+        .filter(priority_tag_filter)
         .order_by("cve", "test__scan_type")
         .distinct("cve", "test__scan_type")
     )
 
-    # Identify critical vulnerabilities
-    identify_critical_vulnerabilities(all_vulnerabilities)
+    # Identify priority vulnerabilities
+    identify_priority_vulnerabilities(all_vulnerabilities)
 
 
 @app.task

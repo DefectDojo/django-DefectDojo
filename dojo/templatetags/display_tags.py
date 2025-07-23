@@ -840,10 +840,8 @@ def finding_display_status(finding, event="view"):
 @register.filter
 def priority_display_status(finding):
     if finding.tags:
-        blacklist_tags = [tag.strip() for tag in settings.BLACKLIST_FILTER_TAGS.split(",") if tag.strip()]
-        if any(tag in finding.tags for tag in blacklist_tags):
-            pass  # Tag is blacklisted, continue with priority logic below
-        else:
+        blacklist_tags = [tag for tag in settings.PRIORITY_FILTER_TAGS.split(",") if tag]
+        if not any(tag in finding.tags for tag in blacklist_tags):
             return "Unknown"
         
     

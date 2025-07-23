@@ -476,7 +476,7 @@ env = environ.FileAwareEnv(
     
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
-    DD_BLACKLIST_FILTER_TAGS=(str, ""),
+    DD_PRIORITY_FILTER_TAGS=(str, ""),
     # User Contacts with exclusive permissions
     DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
         "product_type_manager",
@@ -509,13 +509,9 @@ env = environ.FileAwareEnv(
     DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
     DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
     
-    # Twistlock
-    DD_TWISTLOCK_API_URL=(str, ""),
-    DD_TWISTLOCK_ACCESS_KEY=(str, ""),
-    DD_TWISTLOCK_SECRET_KEY=(str, ""),
-    
     # Priorization
     DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
+
     # Host IA recommendation
     DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
     DD_LOGO_URL=(str, ""),
@@ -742,13 +738,8 @@ if USE_DB_POOL:
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
     PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
-    # Twistlock API
-    TWISTLOCK_ACCESS_KEY = secret_engine_backend["prismaAccessKey"]
-    TWISTLOCK_SECRET_KEY = secret_engine_backend["prismaSecretKey"]
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
-    TWISTLOCK_ACCESS_KEY = env("DD_TWISTLOCK_ACCESS_KEY")
-    TWISTLOCK_SECRET_KEY = env("DD_TWISTLOCK_SECRET_KEY")
     
 TWISTLOCK_API_URL = env('DD_TWISTLOCK_API_URL')
 # Track migrations through source control rather than making migrations locally
@@ -2406,7 +2397,7 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
-BLACKLIST_FILTER_TAGS = env("DD_BLACKLIST_FILTER_TAGS")
+PRIORITY_FILTER_TAGS = env("DD_PRIORITY_FILTER_TAGS")
 # exclusive permission
 CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
