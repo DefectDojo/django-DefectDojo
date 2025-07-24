@@ -98,8 +98,8 @@ def product_type(request):
 
     ptl = ProductTypeFilter(request.GET, queryset=prod_types)
     pts = get_page_items(request, ptl.qs, 25)
-
-    pts.object_list = prefetch_for_product_type(pts.object_list)
+     # It is limited due to performance reasons
+    # pts.object_list = prefetch_for_product_type(pts.object_list)
 
     page_name = _("Product Type List")
     add_breadcrumb(title=page_name, top_level=True, request=request)
@@ -115,14 +115,19 @@ def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
 
     if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        active_findings_query = Q(prod_type__engagement__test__finding__active=True)
-        active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                                prod_type__engagement__test__finding__verified=True)
+        # Define the common field path once to avoid repetition
+        finding_path = "prod_type__engagement__test__finding"
+        
+        # Combine all annotations in a single call for better performance
+       
         prefetch_prod_types = prefetch_prod_types.annotate(
-            active_findings_count=Count("prod_type__engagement__test__finding__id", filter=active_findings_query))
-        prefetch_prod_types = prefetch_prod_types.annotate(
-            active_verified_findings_count=Count("prod_type__engagement__test__finding__id", filter=active_verified_findings_query))
-        prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count("prod_type", distinct=True))
+            active_findings_count=Count(
+                f"{finding_path}__id", 
+                filter=Q(**{f"{finding_path}__active": True}),
+                distinct=True
+            ),
+            prod_count=Count("prod_type", distinct=True)
+        )
     else:
         logger.debug("unable to prefetch because query was already executed")
 

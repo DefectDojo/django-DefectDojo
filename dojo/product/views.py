@@ -145,16 +145,14 @@ def product(request):
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list("name", flat=True)
-    prods = prods.annotate(
-        findings_count=Count("engagement__test__finding", filter=Q(engagement__test__finding__active=True)),
-    )
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
     prod_filter = filter_class(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
-    prod_list.object_list = prefetch_for_product(prod_list.object_list)
+    # It is deactivated for performance reasons
+    # prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
@@ -183,11 +181,6 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count("engagement__test__finding__id",
                                                                                 filter=Q(
                                                                                     engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.annotate(
-            active_verified_finding_count=Count("engagement__test__finding__id",
-                                                filter=Q(
-                                                    engagement__test__finding__active=True,
-                                                    engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related("jira_project_set__jira_instance")
         prefetched_prods = prefetched_prods.prefetch_related("members")
         prefetched_prods = prefetched_prods.prefetch_related("prod_type__members")
@@ -331,7 +324,6 @@ def view_product_components(request, pid):
 
     component_query = component_query.order_by("-total_findings")
 
-    filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductComponentFilter
     comp_filter = filter_class(request.GET, queryset=component_query, parent_product=prod)
     result = get_page_items(request, comp_filter.qs, 25)

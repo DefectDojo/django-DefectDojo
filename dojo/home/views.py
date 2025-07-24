@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.core.cache import cache
 from django.conf import settings
+from django.middleware.csrf import get_token
 
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -80,7 +81,7 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
         page_name = ('Dashboard')
         role = Role.objects.get(id=Roles.Maintainer)
         user = request.user.id
-        cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+        cookie_csrftoken = get_token(request)
         cookie_sessionid = request.COOKIES.get('sessionid', '')
         mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
         add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -93,8 +94,6 @@ def dashboard_v2(request: HttpRequest) -> HttpResponse:
         'user': user,
         })
     else:
-        logger.debug("MAX_CONNECTIONS: %s", settings.MAX_CONNS)
-        logger.debug("MIM_CONNECTIONS: %s", settings.MIN_CONNS)
         dashboard_cache = None
 
         if settings.USE_CACHE_REDIS:

@@ -34,8 +34,6 @@
                         <th>Engagement Name</th>
                         <th>Product Name</th>
                         <th>Product Type Name</th>
-                        <th>Active Findings</th>
-                        <th>Closed Findings</th>
                         <th>Total Findings</th>
                     </tr>
                 </thead>
@@ -43,43 +41,25 @@
                     {% for item in result %}
                         <tr>
                             <td>
-                                <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
-                                    <b>{{ item.name }}</b>
-                                </a>
+                                {{ item.name }}
                             </td>
                             <td>{{ item.version }}</td>
                             <td>
-                                <a href="{% url 'view_engagement' item.engagement.id %}" data-toggle="tooltip" data-placement="bottom""> 
                                  {{ item.engagement_name }}
-                                </a>
                             </td>
                             <td>
-                                {{ item.product_name }}
+                                <a href="{% url 'view_product' item.engagement.product.id %}" data-toggle="tooltip" data-placement="bottom"> 
+                                 {{ item.product_name }}
+                                </a>
                             </td>
                             <td>
                                 {{ item.product_type_name }}
                             </td>
                             <td class="text-right">
-                                {% if item.active_findings %}
-                                    <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
-                                        <b>{{ item.active_findings }}</b>
-                                    </a>
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </td>
-                            <td class="text-right">
-                                {% if item.closed_findings %}
-                                    <a rel="noopener noreferrer" href="{% url 'closed_findings' %}?component_name={{ item.component_name }}&component_version={{ item.version }}&test__engagement__product={{ item.product_id }}">
-                                        <b>{{ item.closed_findings }}</b>
-                                    </a>
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </td>
-                            <td class="text-right">
                                 {% if item.total_findings %}
-                                    <b>{{ item.total_findings }}</b>
+                                     <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_id={{ item.id }}&test__engagement__product={{ item.engagement.product.id }}">
+                                        <b>{{ item.total_findings }}</b>
+                                    </a>
                                 {% else %}
                                     0
                                 {% endif %}
@@ -148,8 +128,6 @@
                         { "data": "Engagement_name"},
                         { "data": "Product_name" },
                         { "data": "Product_type_name" },
-                        { "data": "Active" },
-                        { "data": "Closed" },
                         { "data": "Total" },
                 ],
                 order: [],

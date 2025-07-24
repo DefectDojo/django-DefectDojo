@@ -182,8 +182,8 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             )
             graph_user_request.raise_for_status()
             graph_user_request_json = graph_user_request.json()
-            job_title = graph_user_request_json.get("jobTitle", "")
-            office_location = graph_user_request_json.get("officeLocation", "")
+            job_title = graph_user_request_json["jobTitle"]
+            office_location = graph_user_request_json["officeLocation"]
             logger.debug("detected jobTitle " + job_title + " and officeLocation " + office_location)
 
             # Assign global role

@@ -61,8 +61,6 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th>{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
-                            <th> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
@@ -228,19 +226,6 @@
                                 {% endfor %}
                                 </td>
                                 {% endif %}
-
-                                <td class="text-right">
-                                    {% if prod.findings_count %}
-                                        <a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
-                                        &nbsp;(<a rel="noopener noreferrer" href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                </td>
-                                <td class="text-right">
-                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
-                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
-                                </td>
                                 <td>
                                   {% if prod.product_manager %}
                                     {% if prod.product_manager != "0" %}
@@ -359,8 +344,6 @@
                               return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                       }},
                       {% endif %}
-                      { "data": "findings" },
-                      { "data": "endpoints" },
                       { "data": "contacts" },
                       { "data": "product_type" },
                   ],

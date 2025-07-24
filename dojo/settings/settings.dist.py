@@ -99,6 +99,8 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
+    # Every day at 3:00 AM
+    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 3),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -477,6 +479,11 @@ env = environ.FileAwareEnv(
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "tag1,tag2"),
     DD_PRIORITY_FILTER_TAGS=(str, ""),
+    
+    # contact types AUTHORIZED FOR RISK ACCEPTANCE
+    DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE=(list, [
+        "team_manager",
+        ]),
     # User Contacts with exclusive permissions
     DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
         "product_type_manager",
@@ -1607,6 +1614,7 @@ CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
+CELERY_CRON_SCHEDULE_DUPE_DELETE = env("DD_CELERY_CRON_SCHEDULE_DUPE_DELETE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
 CELERY_EXPIRING_FINDINGEXCLUSION = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION")
 CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST")
@@ -1627,8 +1635,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
-        "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
+        "schedule": crontab(hour=CELERY_CRON_SCHEDULE_DUPE_DELETE, minute=0),
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
@@ -2168,6 +2175,9 @@ LOGGING = {
         "json": {
             "()": "json_log_formatter.JSONFormatter",
         },
+        "sql_with_trace": {
+            "format": "[%(asctime)s] %(levelname)s [%(name)s] %(message)s | From: %(origin)s",
+        },
     },
     "filters": {
         "require_debug_false": {
@@ -2176,8 +2186,17 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        "sql_trace": {
+        "()": "dojo.logfilters.SQLTraceFilter",
+        },
     },
     "handlers": {
+        "console_sql": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "sql_with_trace",
+            "filters": ["sql_trace"],
+        },
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
@@ -2193,6 +2212,11 @@ LOGGING = {
         },
     },
     "loggers": {
+        "django.db.backends": {
+            'level': str(LOG_LEVEL),
+            'handlers': ['console_sql'],
+            'propagate': False,
+        },
         "django.request": {
             "handlers": ["mail_admins", "console"],
             "level": str(LOG_LEVEL),
@@ -2397,6 +2421,8 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
 PRIORITY_FILTER_TAGS = env("DD_PRIORITY_FILTER_TAGS")
+# Contacts_types_permissions
+CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE = env("DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE")
 # exclusive permission
 CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
