@@ -403,7 +403,12 @@ def identify_priority_vulnerabilities(findings) -> int:
     """
     system_user = get_user(settings.SYSTEM_USER)
 
-    severity_risk_map = {"Low": 0.01, "Medium": 0.45, "High": 0.74, "Critical": 1.00}
+    severity_risk_map = {
+        "Low": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
+        "Medium": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Medium")),
+        "High": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_High")),
+        "Critical": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Critical")),
+    }
 
     try:
 

@@ -741,7 +741,6 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
     
-TWISTLOCK_API_URL = env('DD_TWISTLOCK_API_URL')
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
     MIGRATION_MODULES = {"dojo": "dojo.db_migrations"}

@@ -840,19 +840,22 @@ def finding_display_status(finding, event="view"):
 @register.filter
 def priority_display_status(finding):
     if finding.tags:
-        blacklist_tags = [tag for tag in settings.PRIORITY_FILTER_TAGS.split(",") if tag]
-        if not any(tag in finding.tags for tag in blacklist_tags):
+        if not any(tag in finding.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
             return "Unknown"
         
-    
     priority = float(finding.priority)
-    if priority >= 0.90 and priority <= 1.00:
+    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical")
+    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical")
+    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High")
+    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low")
+
+    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
         return "Very-Critical"
-    elif priority >= 0.46 and priority <= 0.89:
+    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
         return "Critical"
-    elif priority >= 0.31 and priority <= 0.45:
+    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
         return "High"
-    elif priority >= 0.00 and priority <= 0.30:
+    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
         return "Medium-Low"
     else:
         return "Unknown"
