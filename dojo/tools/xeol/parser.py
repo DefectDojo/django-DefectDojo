@@ -87,7 +87,7 @@ class XeolParser:
                 dynamic_finding=False,
                 nb_occurences=1,
                 cwe=672,
-                references=cycle.get("ProductPermalink", "")+"\n[www.xeol.io/explorer](https://www.xeol.io/explorer)",
+                references=cycle.get("ProductPermalink", "") + "\n[www.xeol.io/explorer](https://www.xeol.io/explorer)",
             )
 
             findings.append(finding)
