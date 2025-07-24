@@ -5,7 +5,7 @@ import sys
 from django.template.loader import render_to_string
 
 # External libs
-from github import Github
+from github import Auth, Github
 
 # Dojo related imports
 from dojo.models import Engagement, GITHUB_Issue, GITHUB_PKey, Product
@@ -33,7 +33,7 @@ def reopen_external_issue_github(find, note, prod, eng):
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
     try:
-        g_ctx = Github(github_conf.api_key)
+        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
@@ -64,7 +64,7 @@ def close_external_issue_github(find, note, prod, eng):
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
     try:
-        g_ctx = Github(github_conf.api_key)
+        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
@@ -95,7 +95,7 @@ def update_external_issue_github(find, prod, eng):
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
     try:
-        g_ctx = Github(github_conf.api_key)
+        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
         issue.edit(title=find.title, body=github_body(find), labels=["defectdojo", "security / " + find.severity])
@@ -130,7 +130,7 @@ def add_external_issue_github(find, prod, eng):
         logger.info("Create issue with github profile: " + str(github_conf) + " on product: " + str(github_product_key))
 
         try:
-            g = Github(github_conf.api_key)
+            g = Github(auth=Auth.Token(github_conf.api_key))
             user = g.get_user()
             logger.debug("logged in with github user: " + user.login)
             logger.debug("Look for project: " + github_product_key.git_project)
