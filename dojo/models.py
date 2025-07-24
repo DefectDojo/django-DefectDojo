@@ -849,6 +849,9 @@ class Product_Type(models.Model):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -1212,6 +1215,9 @@ class Product(models.Model):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -1445,6 +1451,11 @@ class Product_API_Scan_Configuration(models.Model):
         if self.service_key_1 or self.service_key_2 or self.service_key_3:
             name += f" ({self.details})"
         return name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=["service_key_1", "product"]),
+        ]
 
     @property
     def details(self):
@@ -1582,6 +1593,7 @@ class Engagement(models.Model):
         ordering = ["-target_start"]
         indexes = [
             models.Index(fields=["product", "active"]),
+            models.Index(fields=["name"]),
         ]
 
     def __str__(self):
