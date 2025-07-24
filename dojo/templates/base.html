@@ -339,6 +339,31 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
+                                            <a href="{% url 'all_finding_groups' %}" aria-expanded="false" aria-label="Problems">
+                                                <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
+                                                <span>{% trans "Dashboard" %}</span>
+                                                <span class="glyphicon arrow"></span>
+                                            </a> 
+                                            <ul class="nav nav-second-level">
+                                                <li>
+                                                    <a href="{% url 'open_finding_groups' %}">
+                                                        {% trans "Open Findings Groups" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'all_finding_groups' %}">
+                                                        {% trans "All Findings Groups" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'closed_finding_groups' %}">
+                                                        {% trans "Closed Findings Groups" %}
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <!-- /.nav-second-level -->
+                                        </li>
+                                        <li>
                                             <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
                                                 <span>{% trans "Components" %}</span>
