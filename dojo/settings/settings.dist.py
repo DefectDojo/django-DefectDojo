@@ -469,10 +469,10 @@ env = environ.FileAwareEnv(
         }
     }),
     
-    # Finding exclusion - request expiration days
+    # Finding exclusion - request expiration
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
-    DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS=(int, 1),
-    DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS=(int, 1),
+    DD_CHECK_EXPIRING_FINDINGEXCLUSION=(int, 12),
+    DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST=(int, 5),
     
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "tag1,tag2"),
@@ -510,7 +510,7 @@ env = environ.FileAwareEnv(
     DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
     
     # Priorization
-    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
+    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 7 * * 0"),
 
     # Host IA recommendation
     DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
@@ -1608,8 +1608,8 @@ CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
-CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
-CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS")
+CELERY_EXPIRING_FINDINGEXCLUSION = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION")
+CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 REGEX_VALIDATION_NAME = env("DD_REGEX_VALIDATION_NAME")
 
@@ -1665,16 +1665,15 @@ CELERY_BEAT_SCHEDULE = {
         },
     "check_expiring_findingexclusions": {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
-        'schedule': timedelta(days=CELERY_EXPIRING_FINDINGEXCLUSION_DAYS),
+        'schedule': crontab(hour=CELERY_EXPIRING_FINDINGEXCLUSION, minute=0),
     },
     "check_new_findings_to_exclusion_list": {
         'task': 'dojo.engine_tools.helpers.check_new_findings_to_exclusion_list',
-        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS),
+        'schedule': crontab(hour=CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST, minute=0),
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
-
     },
     "check_finding_priorization": {
         "task": "dojo.engine_tools.helpers.check_priorization",
@@ -1682,7 +1681,8 @@ CELERY_BEAT_SCHEDULE = {
             minute=CELERY_CRON_CHECK_PRIORIZATION.split()[0],
             hour=CELERY_CRON_CHECK_PRIORIZATION.split()[1],
             day_of_month=CELERY_CRON_CHECK_PRIORIZATION.split()[2],
-            month_of_year=CELERY_CRON_CHECK_PRIORIZATION.split()[3],    
+            month_of_year=CELERY_CRON_CHECK_PRIORIZATION.split()[3],
+            day_of_week=CELERY_CRON_CHECK_PRIORIZATION.split()[4]
         )
     },
     "trigger_evaluate_pro_proposition": {
