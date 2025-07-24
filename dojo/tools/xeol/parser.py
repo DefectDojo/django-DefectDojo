@@ -18,46 +18,48 @@ class XeolParser:
         findings = []
         data = json.load(file)
 
-        if not isinstance(data, dict) or "results" not in data:
+        if not isinstance(data, dict) or "matches" not in data:
             return findings
 
-        for result in data["results"]:
-            image = result.get("image", "Unknown Image")
-            matches = result.get("Matches", {})
-            artifact = result.get("artifact", {})
-            distro = result.get("distro", {})
+        for match in data["matches"]:
+            cycle = match.get("Cycle", {})
+            artifact = match.get("artifact", {})
 
-            title = f"{matches.get('ProductName', 'Unknown Product')} EOL Information"
+            title = f"{cycle.get('ProductName', 'Unknown Product')} EOL Information"
+
             description_lines = [
-                f"**Image:** {image}",
-                f"**Product Name:** {matches.get('ProductName', 'N/A')}",
-                f"**Release Cycle:** {matches.get('ReleaseCycle', 'N/A')}",
-                f"**EOL Date:** {matches.get('Eol', 'N/A')}",
-                f"**Latest Release Date:** {matches.get('LatestReleaseDate', 'N/A')}",
-                f"**Release Date:** {matches.get('ReleaseDate', 'N/A')}",
+                f"**Product Name:** {cycle.get('ProductName', 'N/A')}",
+                f"**Release Cycle:** {cycle.get('ReleaseCycle', 'N/A')}",
+                f"**EOL Date:** {cycle.get('Eol', 'N/A')}",
+                f"**Latest Release Date:** {cycle.get('LatestReleaseDate', 'N/A')}",
+                f"**Release Date:** {cycle.get('ReleaseDate', 'N/A')}",
                 f"**Artifact Name:** {artifact.get('name', 'N/A')}",
                 f"**Artifact Version:** {artifact.get('version', 'N/A')}",
                 f"**Artifact Type:** {artifact.get('type', 'N/A')}",
-                f"**Licenses:** {', '.join(artifact.get('licenses', []))}",
+                f"**Licenses:** {', '.join(artifact.get('licenses', [])) if artifact.get('licenses') else 'N/A'}",
                 f"**Package URL:** {artifact.get('purl', 'N/A')}",
-                f"**Distro Name:** {distro.get('name', 'N/A')}",
-                f"**Distro Version:** {distro.get('version', 'N/A')}",
+                f"**CPEs:** {', '.join(artifact.get('cpes', [])) if artifact.get('cpes') else 'N/A'}",
             ]
 
             locations = artifact.get("locations", [])
-            location_info = []
-            for loc in locations:
-                path = loc.get("path", "")
-                layer_id = loc.get("layerID", "")
-                location_info.append(f"Path: {path}, LayerID: {layer_id}")
-            if location_info:
+            if locations:
+                location_info = [
+                    f"Path: {loc.get('path', '')}, LayerID: {loc.get('layerID', '')}"
+                    for loc in locations
+                ]
                 description_lines.append("**Locations:**\n" + "\n".join(location_info))
+
+            metadata = artifact.get("metadata", {})
+            if isinstance(metadata, dict) and "files" in metadata:
+                file_paths = [f.get("path", "") for f in metadata["files"] if "path" in f]
+                if file_paths:
+                    description_lines.append("**Files:**\n" + "\n".join(file_paths))
 
             description = "\n".join(description_lines)
 
             # Determine severity based on EOL date
             severity = "Info"
-            eol_str = matches.get("Eol", "")
+            eol_str = cycle.get("Eol", "")
             try:
                 eol_date = datetime.strptime(eol_str, "%Y-%m-%d")
                 now = datetime.now()
@@ -84,7 +86,8 @@ class XeolParser:
                 static_finding=True,
                 dynamic_finding=False,
                 nb_occurences=1,
-                references=matches.get("ProductPermalink", ""),
+                cwe=672,
+                references=cycle.get("ProductPermalink", ""),
             )
 
             findings.append(finding)
