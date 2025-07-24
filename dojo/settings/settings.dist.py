@@ -475,7 +475,7 @@ env = environ.FileAwareEnv(
     DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS=(int, 1),
     
     # tags for filter to finding exclusion
-    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
+    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "tag1,tag2"),
     DD_PRIORITY_FILTER_TAGS=(str, ""),
     # User Contacts with exclusive permissions
     DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
