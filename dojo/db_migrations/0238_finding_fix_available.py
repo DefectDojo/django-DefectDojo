@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='fix_available',
-            field=models.BooleanField(default=True, help_text='Denotes if there is a fix available for this flaw.', verbose_name='Fix Available'),
+            field=models.BooleanField(default=None, help_text='Denotes if there is a fix available for this flaw.', null=True, verbose_name='Fix Available'),
         ),
     ]
