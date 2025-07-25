@@ -651,11 +651,11 @@
                                                 {{ finding.epss_percentile|format_epss }}
                                             </td>
                                             <td>
-                                                {% if finding.priority %}
-                                                    {{ finding.priority }}
-                                                {% else %}
-                                                    N.A.
-                                                {% endif %}
+                                                <span class="label severity severity-{{ finding|priority_display_status }}">
+                                                    <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.priority }}">
+                                                    {{ finding|priority_display_status }}
+                                                </span>
                                             </td>
                                             {% if filter_name == 'Closed' %}
                                             <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">

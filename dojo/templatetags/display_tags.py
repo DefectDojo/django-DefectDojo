@@ -837,6 +837,29 @@ def finding_display_status(finding, event="view"):
     html_render = template_object.render(context_object)
     return html_render
 
+@register.filter
+def priority_display_status(finding):
+    if finding.tags:
+        if not any(tag in finding.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
+            return "Unknown"
+        
+    priority = float(finding.priority)
+    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical")
+    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical")
+    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High")
+    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low")
+
+    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
+        return "Very-Critical"
+    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
+        return "Critical"
+    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
+        return "High"
+    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
+        return "Medium-Low"
+    else:
+        return "Unknown"
+
 
 @register.filter
 def cwe_url(cwe):

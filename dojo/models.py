@@ -2789,6 +2789,9 @@ class Finding(models.Model):
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
+            models.Index(fields=["service"]),
+            models.Index(fields=["risk_accepted"]),
+            models.Index(fields=["risk_status"]),
         ]
 
     def __init__(self, *args, **kwargs):

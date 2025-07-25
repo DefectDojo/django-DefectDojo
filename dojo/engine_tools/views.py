@@ -180,7 +180,6 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
     """
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
-    
     if request.method == 'POST':
         form = FindingExclusionDiscussionForm(request.POST)
         if form.is_valid():
