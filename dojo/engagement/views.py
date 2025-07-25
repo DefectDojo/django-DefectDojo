@@ -121,11 +121,12 @@ from dojo.utils import (
     handle_uploaded_threat,
     redirect_to_return_url_or_else,
 )
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def engagement_calendar(request):
 
@@ -196,7 +197,8 @@ def get_test_counts(engagements):
         )
     }
 
-
+@cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def engagements(request, view):
 
     if not view:

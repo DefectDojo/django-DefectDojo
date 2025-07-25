@@ -1284,11 +1284,10 @@ class Product(models.Model):
         # active_endpoints is (should be) prefetched
         endpoints = getattr(self, "active_endpoints", None)
 
-        hosts = []
+        # Use set for O(1) lookup instead of list with O(n) lookup
+        hosts = set()
         for e in endpoints:
-            if e.host in hosts:
-                continue
-            hosts.append(e.host)
+            hosts.add(e.host)
 
         return len(hosts)
 
@@ -1297,7 +1296,7 @@ class Product(models.Model):
         # active_endpoints is (should be) prefetched
         endpoints = getattr(self, "active_endpoints", None)
         if endpoints:
-            return len(self.active_endpoints)
+            return len(endpoints)
         return 0
 
     def open_findings(self, start_date=None, end_date=None):
@@ -2122,7 +2121,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 
 class Test(models.Model):
-    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
+    engagement = models.ForeignKey(Engagement, editable=True, on_delete=models.CASCADE)
     lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
@@ -2771,12 +2770,16 @@ class Finding(models.Model):
             models.Index(fields=["title"]),
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
+            models.Index(fields=["vuln_id_from_tool"]),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
+            models.Index(fields=["service"]),
+            models.Index(fields=["risk_accepted"]),
+            models.Index(fields=["risk_status"]),
         ]
 
     def __init__(self, *args, **kwargs):
@@ -5145,8 +5148,13 @@ class GeneralSettings(models.Model):
             logger.error(f"Variable not found : {name_key}, {str(e)}")
             return default
         if settings.USE_CACHE_REDIS:
-            cache.set(f"GENERAL_SETTINGS:{variable_object.value}",
-                      variable_object.value, timeout=None)
+            value_dict = {
+                "name_key": variable_object.name_key, 
+                "value": variable_object.value,
+                "data_type": variable_object.data_type
+            }
+            cache.set(f"GENERAL_SETTINGS:{variable_object.name_key}",
+                      value_dict, timeout=None)
         variable_result = rule_data_type[variable_object.data_type](variable_object.value) 
         return variable_result
 

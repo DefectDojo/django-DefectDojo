@@ -482,6 +482,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             self.unchanged_items.append(existing_finding)
             return existing_finding, True
+        
+        if existing_finding.risk_accepted and existing_finding.is_mitigated and not unsaved_finding.is_mitigated:
+            # If the existing finding is risk accepted and mitigated, but the new finding is not mitigated,
+            # we need to update the existing finding to match the new finding
+            logger.debug(
+                f"Updating existing risk accepted finding: {existing_finding.id}: {existing_finding.title} "
+                f"({existing_finding.component_name} - {existing_finding.component_version})",
+            )
+            existing_finding.is_mitigated = unsaved_finding.is_mitigated
+            existing_finding.save(dedupe_option=False)
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
+
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
         # (Risk accepted findings are not set to mitigated by Defectdojo)

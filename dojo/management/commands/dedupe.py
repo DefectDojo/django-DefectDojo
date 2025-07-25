@@ -42,19 +42,27 @@ class Command(BaseCommand):
             action="append",
             help="""List of parsers for which hash_code needs recomputing (defaults to all parsers)""",
         )
-
+        parser.add_argument(
+            "--tag",
+            dest="tag",
+            action="append",
+            help="""List of tags for which hash_code needs recomputing""",
+        )
         parser.add_argument("--hash_code_only", action="store_true", help="Only compute hash codes")
         parser.add_argument("--dedupe_only", action="store_true", help="Only run deduplication")
         parser.add_argument("--dedupe_sync", action="store_true", help="Run dedupe in the foreground, default false")
 
     def handle(self, *args, **options):
         restrict_to_parsers = options["parser"]
+        restrict_to_tags = options["tag"]
         hash_code_only = options["hash_code_only"]
         dedupe_only = options["dedupe_only"]
         dedupe_sync = options["dedupe_sync"]
 
         if restrict_to_parsers is not None:
             findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers)
+            if restrict_to_tags is not None:
+                findings = findings.filter(tags__name__in=restrict_to_tags)
             logger.info("######## Will process only parsers %s and %d findings ########", *restrict_to_parsers, findings.count())
         else:
             # add filter on id to make counts not slow on mysql

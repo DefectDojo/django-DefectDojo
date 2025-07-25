@@ -55,15 +55,12 @@
                             <th>Tags</th>
                             <th> Criticality</th>
                             <th> Metadata</th>
-                            <th class="text-center">Eng.</th>
                             {% if system_settings.enable_jira %}
                             <th class="text-center">Jira</th>
                             {% endif %}
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th>{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
-                            <th> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
@@ -210,17 +207,6 @@
                                   {{ prod.external_audience|external_audience_icon }}
                                   {{ prod.internet_accessible|internet_accessible_icon }}
                                 </td>
-                                <td class="text-center">
-                                  {% if prod.last_engagement_date %}
-                                    <i class="fa-solid fa-calendar-days happy-green-color has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
-                                    data-content="{{ prod.active_engagement_count }} Active,
-                                    {{ prod.closed_engagement_count }} Closed<br>
-                                    <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
-                                  {% else %}
-                                    <i class="fa-solid fa-calendar-days text-danger has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
-                                    data-content="No Engagements Exist"></i>
-                                  {% endif %}
-                                </td>
                                 {% if system_settings.enable_jira %}
                                 <td class="text-center">
                                     {{ prod|jira_project_tag }}
@@ -240,19 +226,6 @@
                                 {% endfor %}
                                 </td>
                                 {% endif %}
-
-                                <td class="text-right">
-                                    {% if prod.findings_count %}
-                                        <a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
-                                        &nbsp;(<a rel="noopener noreferrer" href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                </td>
-                                <td class="text-right">
-                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
-                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
-                                </td>
                                 <td>
                                   {% if prod.product_manager %}
                                     {% if prod.product_manager != "0" %}
@@ -361,9 +334,6 @@
                       { "data": "metadata", render: function (data, type, row) {
                               return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                       } },
-                      { "data": "engagements", render: function (data, type, row) {
-                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                      }},
                       {% if system_settings.enable_jira %}
                       { "data": "jira", render: function (data, type, row) {
                               return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
@@ -374,8 +344,6 @@
                               return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                       }},
                       {% endif %}
-                      { "data": "findings" },
-                      { "data": "endpoints" },
                       { "data": "contacts" },
                       { "data": "product_type" },
                   ],
