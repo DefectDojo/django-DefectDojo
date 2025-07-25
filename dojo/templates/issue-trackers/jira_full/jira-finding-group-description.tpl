@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% url 'view_finding_group' finding_group.id as finding_group_url %}
 {% url 'view_product' finding_group.test.engagement.product.id as product_url %}
 {% url 'view_engagement' finding_group.test.engagement.id as engagement_url %}
@@ -48,8 +49,10 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
-{% for endpoint in finding.endpoints.all %}
-* {{ endpoint }}{% endfor %}
+||System/Endpoint||Status||
+{% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}
 {%endif%}
 
 {% if finding.sast_source_object %}
