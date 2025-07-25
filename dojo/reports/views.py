@@ -1064,6 +1064,7 @@ class ExcelExportView(View):
 
 def get_url_presigned(request, id):
     if value := cache.get(f"report_finding:{request.user.username}:{id}"):
+        cache.delete(f"report_finding:{request.user.username}:{id}") 
         return HttpResponseRedirect(value)
     else:
-        return "The url of the report was not found, it is possible that the report has not been generated or has expired."
+        return "The report was not found. It is possible that the report has already been downloaded or the download URL has expired."
