@@ -5,6 +5,7 @@ import logging
 import csv
 import boto3
 import botocore.exceptions
+from botocore.client import Config
 from dojo.home.helper import get_key_for_user_and_urlpath, encode_string
 from hashids import Hashids
 from abc import ABC, abstractmethod
@@ -229,7 +230,8 @@ class CSVReportManager(BaseReportManager):
             self.send_report(buffer)
             session_s3 = boto3.Session().client(
                 's3',
-                region_name=settings.AWS_REGION)
+                region_name=settings.AWS_REGION,
+                config=Config(signature_version='s3v4'))
             url = get_url_presigned(
                 session_s3,
                 key=self.url_path,

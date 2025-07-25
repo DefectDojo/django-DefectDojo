@@ -781,7 +781,6 @@ class CSVExportView(View):
             else:
                 helper_reports.async_generate_report.apply_async(
                     args=(request_data,))
-                # helper_reports.async_generate_report(request_data)
                 messages.add_message(
                     request,
                     messages.WARNING,
