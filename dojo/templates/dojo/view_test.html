@@ -946,6 +946,9 @@
                                     {% trans "EPSS Percentile" %}
                                 </th>
                                 <th>
+                                    {% trans "Priority" %}
+                                </th>
+                                <th>
                                     {% trans "Date" %}
                                 </th>
                                 <th>
@@ -1246,6 +1249,13 @@
                                     </td>
                                     <td class="nowrap">
                                         {{ finding.epss_percentile|format_epss }}
+                                    </td>
+                                    <td>
+                                        <span class="label severity severity-{{ finding|priority_display_status }}">
+                                            <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                data-content="{{ finding.priority }}">
+                                            {{ finding|priority_display_status }}
+                                        </span>
                                     </td>
                                     <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
                                         {{ finding.date }}
@@ -1646,6 +1656,7 @@
                 { "data": "cve" },
                 { "data": "epss_score", "type": "num", "render": percentSort },
                 { "data": "epss_percentile", "type": "num", "render": percentSort },
+                { "data": "priority", "type": "num"},
                 { "data": "date", render: function (data, type, row, meta) {
                     if(type === 'sort') {
                         var api = new $.fn.dataTable.Api(meta.settings);

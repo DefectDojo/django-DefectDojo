@@ -489,11 +489,12 @@
                                     <td class="text-right">{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
-                        <td>{% if finding.priority %}
-                                {{ finding.priority }}
-                            {% else %}
-                                N.A.
-                            {% endif %}
+                        <td>
+                             <span class="label severity severity-{{ finding|priority_display_status }}">
+                                <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.priority }}">
+                                {{ finding|priority_display_status }}
+                            </span>
                         </td>
                         <td>
                             {% if found_by %}
