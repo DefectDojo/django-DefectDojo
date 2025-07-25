@@ -1251,7 +1251,7 @@ def permission_view_findings(user):
         "USERS_PERMISSION_VIEW_FINDINGS",
         "all"
     )
-    if value == "all" or user in value:
+    if "all" in value or user in value:
         return True
     return False
 
