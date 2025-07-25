@@ -90,6 +90,7 @@ from dojo.models import (
     Question,
     Risk_Acceptance,
     Test,
+    TagField,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,

@@ -37,7 +37,8 @@ def get_contacts_product_type_and_product_by_serverity(
     contact_list = []
     for contact in contacts:
         if contact in get_contacts_dict.keys():
-            contact_list.append(get_contacts_dict[contact])
+            if get_contacts_dict[contact] is not None:
+                contact_list.append(get_contacts_dict[contact])
         else:
             logger.error(f"Risk_pending: key {contact} not related to a product or product_type")
             raise ValueError(f"Contact {contact} not found")

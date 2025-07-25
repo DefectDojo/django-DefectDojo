@@ -299,6 +299,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% if request.user.username|permission_view_findings %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa-solid fa-bug fa-fw"></i>
@@ -336,6 +337,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% endif %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
@@ -395,7 +397,11 @@
                                         </li>
                                         {% endblock %} -->
                                         <li>
-                                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% if "DISABLE_OLD_METRICS"|general_settings_get_value:"False" %}
+                                                <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% else %}
+                                            <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Metrics">
+                                            {% endif %}
                                                 <i class="fa-solid fa-chart-column fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -455,11 +461,6 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                <li>
-                                                    <a rel="noopener noreferrer" href="{% url 'metrics_panel_v2' %}">
-                                                        {% trans "Metrics Panel V2" %}
-                                                    </a>
-                                                </li>
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>

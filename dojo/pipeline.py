@@ -224,54 +224,58 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                 # Get user's product type for become member
                 result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
 
-                group_team_leve1 = custom_filter_group(
+                groups_team_leve1 = custom_filter_group(
                     result_memberships.additional_properties["value"],
                     graph_client,
                     settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
                 )
                 
-                if group_team_leve1 is not None:
-                    group_team_leve2 = custom_filter_group(
-                        graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],
-                        graph_client,
-                        settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1],
-                    )
+                if len(groups_team_leve1) > 0:
+                    groups_team_leve2 = []
+                    for group_team_leve1 in groups_team_leve1:
+                        logger.debug("User %s is member of group %s", user, group_team_leve1.display_name)
+                        groups_team_leve2 += custom_filter_group(
+                            graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],
+                            graph_client,
+                            settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1],
+                        )
 
                     # create a new product type or update product's type authorized_users
-                    if group_team_leve2 is not None and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM:
-                        if group_team_leve2.display_name not in user_product_types_names:
-                            try:
-                                # Check if there is a product type with the name
-                                product_type = Product_Type.objects.get(name=group_team_leve2.display_name)
-                            except Product_Type.DoesNotExist:
-                                # If not, create a product type with that name
-                                product_type = Product_Type(name=group_team_leve2.display_name)
-                                product_type.save()
-                            product_type_member, created = Product_Type_Member.objects.get_or_create(
-                                product_type=product_type, user=user, defaults=role_assigned
-                            )
-                            if not created and product_type_member.role != role_assigned["role"]:
-                                product_type_member.role = role_assigned["role"]
-                                product_type_member.save()
-                                
-                            logger.debug(
-                                "User %s become member of product type %s with the role %s",
-                                user,
-                                product_type.name,
-                                role_assigned["role"],
-                            )
-
-                        # if user is not project type member any more, remove him from list of product type members
-                        if is_cybersecurity is False:
-                            for product_type_name in user_product_types_names:
-                                if (
-                                    product_type_name != group_team_leve2.display_name
-                                ):
-                                    product_type = Product_Type.objects.get(name=product_type_name)
-                                    Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
-                                    logger.debug(
-                                        "Deleting membership of user %s from product type %s", user, product_type_name
+                    if len(groups_team_leve2) > 0 and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM:
+                        for group_team_leve2 in groups_team_leve2:
+                            if group_team_leve2.display_name not in user_product_types_names:
+                                try:
+                                    # Check if there is a product type with the name
+                                    product_type = Product_Type.objects.get(name=group_team_leve2.display_name)
+                                except Product_Type.DoesNotExist:
+                                    # If not, create a product type with that name
+                                    product_type = Product_Type(name=group_team_leve2.display_name)
+                                    product_type.save()
+                                product_type_member, created = Product_Type_Member.objects.get_or_create(
+                                    product_type=product_type, user=user, defaults=role_assigned
                                 )
+                                if not created and product_type_member.role != role_assigned["role"]:
+                                    product_type_member.role = role_assigned["role"]
+                                    product_type_member.save()
+                                    
+                                logger.debug(
+                                    "User %s become member of product type %s with the role %s",
+                                    user,
+                                    product_type.name,
+                                    role_assigned["role"],
+                                )
+
+                            # if user is not project type member any more, remove him from list of product type members
+                            if is_cybersecurity is False:
+                                for product_type_name in user_product_types_names:
+                                    if (
+                                        product_type_name != group_team_leve2.display_name
+                                    ):
+                                        product_type = Product_Type.objects.get(name=product_type_name)
+                                        Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
+                                        logger.debug(
+                                            "Deleting membership of user %s from product type %s", user, product_type_name
+                                    )
                     else:
                         clean_project_type_user(user_product_types_names, user, user_login, is_leader)
                 else:
@@ -301,13 +305,15 @@ def clean_project_type_user(user_product_types_names, user, user_login, is_leade
 
 
 def custom_filter_group(result, graph_client, regex):
+    groups = []
     for member in result:
         result_get_group = graph_client.get_group(member["containerDescriptor"])
         if (
             re.match(r"" + regex, result_get_group.display_name)
             and settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0] in result_get_group.principal_name
         ):
-            return result_get_group
+            groups.append(result_get_group)
+    return groups
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
