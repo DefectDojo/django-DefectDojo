@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
+from urllib.parse import urlencode
 from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.conf import settings
@@ -762,7 +763,7 @@ class CSVExportView(View):
                     GeneralSettings.get_value(
                         'MAXIMUM_FINDINGS_IN_REPORT', 1000)}")
             request_data = {
-                "query_dict_get": request.GET.dict(),
+                "query_dict_get": urlencode(request.GET),
                 "query_string_meta": request.META.get('QUERY_STRING', ''),
                 "post_data": request.POST.dict(),
                 "user_id": request.user.id
@@ -1067,4 +1068,4 @@ def get_url_presigned(request, id):
         cache.delete(f"report_finding:{request.user.username}:{id}") 
         return HttpResponseRedirect(value)
     else:
-        return "The report was not found. It is possible that the report has already been downloaded or the download URL has expired."
+        return render(request, "dojo/page_status.html")
