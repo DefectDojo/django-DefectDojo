@@ -160,10 +160,10 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=712,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=656,
-            expected_num_async_tasks2=22,
+            expected_num_queries1=554,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=469,
+            expected_num_async_tasks2=23,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -178,10 +178,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.import_reimport_performance(
-            expected_num_queries1=712,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=656,
-            expected_num_async_tasks2=22,
+            expected_num_queries1=554,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=469,
+            expected_num_async_tasks2=23,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -201,10 +201,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         DojoSytemSettingsMiddleware.load()
 
         self.import_reimport_performance(
-            expected_num_queries1=732,
-            expected_num_async_tasks1=15,
-            expected_num_queries2=686,
-            expected_num_async_tasks2=28,
+            expected_num_queries1=594,
+            expected_num_async_tasks1=25,
+            expected_num_queries2=503,
+            expected_num_async_tasks2=30,
             expected_num_queries3=357,
             expected_num_async_tasks3=25,
         )
