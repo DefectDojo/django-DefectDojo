@@ -100,6 +100,7 @@ class DojoTestUtilsMixin:
 
     def system_settings(self, **kwargs):
         ss = System_Settings.objects.get()
+        # only modify the any setting provided as kwargs
         for key, value in kwargs.items():
             setattr(ss, key, value)
         ss.save()
@@ -484,8 +485,9 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def setUp(self):
         super().setUp()
-        # Initialize middleware with fresh settings from db
-        DojoSytemSettingsMiddleware.load()
+        from dojo.middleware import DojoSytemSettingsMiddleware
+        from dojo.models import System_Settings
+        DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
