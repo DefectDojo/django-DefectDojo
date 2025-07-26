@@ -90,27 +90,11 @@ class DojoTestUtilsMixin:
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username="admin")
 
-    def system_settings(
-        self,
-        *,
-        enable_jira=False,
-        enable_jira_web_hook=False,
-        disable_jira_webhook_secret=False,
-        jira_webhook_secret=None,
-        enable_github=False,
-        enable_product_tag_inehritance=False,
-        enable_product_grade=True,
-        enable_webhooks_notifications=True,
-    ):
+    def system_settings(self, **kwargs):
         ss = System_Settings.objects.get()
-        ss.enable_jira = enable_jira
-        ss.enable_jira_web_hook = enable_jira_web_hook
-        ss.disable_jira_webhook_secret = disable_jira_webhook_secret
-        ss.jira_webhook_secret = jira_webhook_secret
-        ss.enable_github = enable_github
-        ss.enable_product_tag_inheritance = enable_product_tag_inehritance
-        ss.enable_product_grade = enable_product_grade
-        ss.enable_webhooks_notifications = enable_webhooks_notifications
+        # only modify the any setting provided as kwargs
+        for key, value in kwargs.items():
+            setattr(ss, key, value)
         ss.save()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):
@@ -488,6 +472,12 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        super().setUp()
+        from dojo.middleware import DojoSytemSettingsMiddleware
+        from dojo.models import System_Settings
+        DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
