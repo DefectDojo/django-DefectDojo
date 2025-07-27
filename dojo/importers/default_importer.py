@@ -218,11 +218,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
+            # by this time the finding has been processed and saved to the database.
+            # since the save above no changes have been made to the finding, only to related objects such as endpoints.
+            # we don't have to save the finding again and can trigger postprocessing directly
+            # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
+
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if self.findings_groups_enabled and self.group_by:
-                finding.save()
-            else:
-                finding.save(push_to_jira=self.push_to_jira)
+            push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
