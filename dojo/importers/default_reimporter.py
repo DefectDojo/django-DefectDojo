@@ -236,12 +236,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # finding = new finding or existing finding still in the upload report
+                # by this time the finding has been processed and saved to the database.
+                # since the save above no changes have been made to the finding, only to related objects such as endpoints.
+                # we don't have to save the finding again and can trigger postprocessing directly
+                # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
+
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if self.findings_groups_enabled and self.group_by:
-                    finding.save()
-                else:
-                    finding.save(push_to_jira=self.push_to_jira)
+                push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -551,6 +553,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding.save_no_options()
+
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 logger.debug(
@@ -563,6 +567,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding.save_no_options()
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding)
