@@ -198,7 +198,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Force parsers to use unsaved_tags (stored in below after saving)
             unsaved_finding.tags = None
-            unsaved_finding.save(dedupe_option=False)
+            # unsaved_finding.save(dedupe_option=False)
+            # postprocessing will be done on next save.
+            unsaved_finding.save_no_options()
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
