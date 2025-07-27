@@ -183,7 +183,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_findings: active from report: %s, verified from report: %s", unsaved_finding.active, unsaved_finding.verified)
+            logger.debug("process_parsed_findings: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:
                 unsaved_finding.active = self.active
@@ -198,8 +198,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Force parsers to use unsaved_tags (stored in below after saving)
             unsaved_finding.tags = None
-            # postprocessing will be done on next save.
+            # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
             unsaved_finding.save_no_options()
+
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
@@ -208,8 +209,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            # Process any endpoints on the endpoint, or added on the form
-            self.process_endpoints(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them
             finding.tags = clean_tags(finding.unsaved_tags)
             # Process any files
@@ -222,6 +221,15 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # since the save above no changes have been made to the finding, only to related objects such as endpoints.
             # we don't have to save the finding again and can trigger postprocessing directly
             # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
+
+            # all data is already saved on the finding, we only need to generate as store the hash_code
+            # this is an optimization to avoid a full UDPATE statement of the finding which is a quite a big object with lots of fields
+            # after that we tirgger the post processing directly
+            # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
+            # this would do a full UDPATE statement for the finding
+
+            finding.set_hash_code(True)
+            finding.save(update_fields=["hash_code"])
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
