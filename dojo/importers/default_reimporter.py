@@ -236,7 +236,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # all data is already saved on the finding, we only need to trigger post processing
+                # by this time the finding has been processed and saved to the database.
+                # since the save above no changes have been made to the finding, only to related objects such as endpoints.
+                # we don't have to save the finding again and can trigger postprocessing directly
+                # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
