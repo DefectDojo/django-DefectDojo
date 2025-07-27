@@ -16,6 +16,7 @@ from vcr_unittest import VCRTestCase
 
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
+from dojo.middleware import DojoSytemSettingsMiddleware
 from dojo.models import (
     SEVERITIES,
     DojoMeta,
@@ -54,12 +55,15 @@ def toggle_system_setting_boolean(flag_name, value):
         def wrapper(*args, **kwargs):
             # Set the flag to the specified value
             System_Settings.objects.update(**{flag_name: value})
+            # Reinitialize middleware with updated settings
+            DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{flag_name: not value})
-
+                # Reinitialize middleware with updated settings
+                DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
         return wrapper
 
     return decorator
@@ -74,11 +78,15 @@ def with_system_setting(field, value):
             old_value = getattr(System_Settings.objects.get(), field)
             # Set the flag to the specified value
             System_Settings.objects.update(**{field: value})
+            # Reinitialize middleware with updated settings
+            DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{field: old_value})
+                # Reinitialize middleware with updated settings
+                DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
         return wrapper
 
@@ -92,10 +100,11 @@ class DojoTestUtilsMixin:
 
     def system_settings(self, **kwargs):
         ss = System_Settings.objects.get()
-        # only modify the any setting provided as kwargs
         for key, value in kwargs.items():
             setattr(ss, key, value)
         ss.save()
+        # Refresh the cache with the new settings
+        DojoSytemSettingsMiddleware.load()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):
         product_type = Product_Type(name=name, description=description)
@@ -475,6 +484,8 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def setUp(self):
         super().setUp()
+        # Initialize middleware with fresh settings from db
+        DojoSytemSettingsMiddleware.load()
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
