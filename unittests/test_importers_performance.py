@@ -163,7 +163,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_queries1=712,
             expected_num_async_tasks1=10,
             expected_num_queries2=656,
-            expected_num_async_tasks2=23,
+            expected_num_async_tasks2=22,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -181,7 +181,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_queries1=712,
             expected_num_async_tasks1=10,
             expected_num_queries2=656,
-            expected_num_async_tasks2=23,
+            expected_num_async_tasks2=22,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -204,7 +204,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_queries1=732,
             expected_num_async_tasks1=15,
             expected_num_queries2=690,
-            expected_num_async_tasks2=30,
+            expected_num_async_tasks2=28,
             expected_num_queries3=357,
             expected_num_async_tasks3=25,
         )
