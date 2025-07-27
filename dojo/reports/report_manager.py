@@ -116,7 +116,6 @@ class CSVReportManager(BaseReportManager):
         allowed_attributes = self.get_attributes()
         allowed_foreign_keys = self.get_attributes()
         self.multipart_uploader.start_upload()
-        counter = 0
         if self.findigns_all_counter <= self.chunk_size:
             logger.info(f"REPORT FINDING: Using SINGLE upload for {self.findigns_all_counter} findings")
             self._generate_single_upload(findings, excludes_list, allowed_attributes, allowed_foreign_keys)

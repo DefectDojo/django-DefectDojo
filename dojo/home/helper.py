@@ -41,6 +41,6 @@ def get_key_for_user_and_urlpath(
     Generate a cache key based on the user and the URL path query.
     """
     key = encode_string(request.META.get("QUERY_STRING", ""))
-    logger.debug(f"REPORT FINDING: calculate key url path {key}")
     key = f"{base_key}:{request.user.username}:{key}"
+    logger.debug(f"REPORT FINDING: calculate key url path {key}")
     return key
