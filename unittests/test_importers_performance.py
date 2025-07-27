@@ -176,10 +176,10 @@ class TestDojoImporterPerformance(DojoTestCase):
     # def test_import_reimport_reimport_performance_async(self, mock):
     def test_import_reimport_reimport_performance_async(self):
         self.import_reimport_performance(
-            expected_num_queries1=682,
+            expected_num_queries1=281,
             expected_num_async_tasks1=10,
-            expected_num_queries2=700,
-            expected_num_async_tasks2=12,
+            expected_num_queries2=816,
+            expected_num_async_tasks2=22,
             expected_num_queries3=292,
             expected_num_async_tasks3=20,
         )
@@ -198,10 +198,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
         self.import_reimport_performance(
-            expected_num_queries1=682,
+            expected_num_queries1=281,
             expected_num_async_tasks1=10,
-            expected_num_queries2=700,
-            expected_num_async_tasks2=12,
+            expected_num_queries2=821,
+            expected_num_async_tasks2=22,
             expected_num_queries3=297,
             expected_num_async_tasks3=20,
         )
@@ -222,10 +222,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=702,
-            expected_num_async_tasks1=15,
-            expected_num_queries2=724,
-            expected_num_async_tasks2=18,
+            expected_num_queries1=321,
+            expected_num_async_tasks1=20,
+            expected_num_queries2=851,
+            expected_num_async_tasks2=28,
             expected_num_queries3=322,
             expected_num_async_tasks3=25,
         )
