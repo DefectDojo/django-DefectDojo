@@ -658,7 +658,8 @@ class ImportReimportMixin:
     def test_import_veracode_reimport_veracode_same_unique_id_different_hash_code(self):
         logger.debug("reimporting report with one finding having same unique_id_from_tool but different hash_code, verified=False")
 
-        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+        with assertTestImportModelsCreated(self, imports=1, created=4, affected_findings=4, closed=0, reactivated=0, untouched=0):
+            import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
         test_id = import_veracode_many_findings["test"]
 
