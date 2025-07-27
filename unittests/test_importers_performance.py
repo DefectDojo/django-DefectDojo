@@ -9,6 +9,7 @@ from django.utils import timezone
 from dojo.decorators import dojo_async_task_counter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.middleware import DojoSytemSettingsMiddleware
 from dojo.models import (
     Development_Environment,
     Dojo_User,
@@ -18,6 +19,7 @@ from dojo.models import (
     Finding,
     Product,
     Product_Type,
+    System_Settings,
     Test,
     User,
 )
@@ -43,6 +45,16 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)
         # from dojo.models import System_Settings
+
+        # # Configure system settings directly
+        # from dojo.middleware import DojoSytemSettingsMiddleware
+        # from dojo.models import System_Settings
+        # system_settings = System_Settings.objects.get()
+        # system_settings.enable_product_tag_inheritance = True
+        # system_settings.save()
+
+        # Initialize middleware with modified settings
+        DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
         # Warm up ContentType cache for relevant models. This is needed if we want to be able to run the test in isolation
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.

@@ -475,9 +475,6 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def setUp(self):
         super().setUp()
-        from dojo.middleware import DojoSytemSettingsMiddleware
-        from dojo.models import System_Settings
-        DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
