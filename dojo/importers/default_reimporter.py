@@ -338,11 +338,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 hash_code=unsaved_finding.hash_code,
             ).exclude(hash_code=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
+            deduplicationLogger.debug(f"hash_code: {unsaved_finding.hash_code}")
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
@@ -581,7 +584,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save_no_options()
         # Return False here to make sure further processing happens
         return existing_finding, False
 
