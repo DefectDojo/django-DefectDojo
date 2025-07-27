@@ -236,10 +236,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # by this time the finding has been processed and saved to the database.
-                # since the save above no changes have been made to the finding, only to related objects such as endpoints.
-                # we don't have to save the finding again and can trigger postprocessing directly
-                # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
+                # all data is already saved on the finding, we only need to generate as store the hash_code
+                # this is an optimization to avoid a full UDPATE statement of the finding which is a quite a big object with lots of fields
+                # after that we tirgger the post processing directly
+                # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
+                # this would do a full UDPATE statement for the finding
+                finding.set_hash_code(True)
+                finding.save(update_fields=["hash_code"])
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
@@ -583,6 +586,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
+            existing_finding.save_no_options()
         # Return False here to make sure further processing happens
         return existing_finding, False
 
