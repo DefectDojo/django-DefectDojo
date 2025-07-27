@@ -588,7 +588,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save_no_options()
         # Return False here to make sure further processing happens
         return existing_finding, False
 

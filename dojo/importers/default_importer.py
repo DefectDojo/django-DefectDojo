@@ -198,14 +198,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Force parsers to use unsaved_tags (stored in below after saving)
             unsaved_finding.tags = None
+            finding = unsaved_finding
             finding = self.process_cve(unsaved_finding)
             # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
             finding.set_hash_code(True)
 
             # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
-            unsaved_finding.save_no_options()
+            finding.save_no_options()
 
-            finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
                 finding,
@@ -213,8 +213,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            # Process any endpoints on the endpoint, or added on the form
-            self.process_endpoints(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them
             finding.tags = clean_tags(finding.unsaved_tags)
             # Process any files
