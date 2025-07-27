@@ -55,15 +55,15 @@ def toggle_system_setting_boolean(flag_name, value):
         def wrapper(*args, **kwargs):
             # Set the flag to the specified value
             System_Settings.objects.update(**{flag_name: value})
-            # Reinitialize middleware with updated settings
-            DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
+            # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+            DojoSytemSettingsMiddleware.load()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{flag_name: not value})
-                # Reinitialize middleware with updated settings
-                DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
+                # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+                DojoSytemSettingsMiddleware.load()
         return wrapper
 
     return decorator
@@ -78,15 +78,15 @@ def with_system_setting(field, value):
             old_value = getattr(System_Settings.objects.get(), field)
             # Set the flag to the specified value
             System_Settings.objects.update(**{field: value})
-            # Reinitialize middleware with updated settings
-            DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
+            # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+            DojoSytemSettingsMiddleware.load()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{field: old_value})
-                # Reinitialize middleware with updated settings
-                DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
+                # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+                DojoSytemSettingsMiddleware.load()
 
         return wrapper
 
