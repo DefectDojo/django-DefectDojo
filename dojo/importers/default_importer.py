@@ -217,11 +217,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
-            # by this time the finding has been processed and saved to the database.
-            # since the save above no changes have been made to the finding, only to related objects such as endpoints.
-            # we don't have to save the finding again and can trigger postprocessing directly
-            # this saves a database UDPATE which is costly (and may trigger extra processing via signals such as audit logging)
-
             # all data is already saved on the finding, we only need to generate as store the hash_code
             # this is an optimization to avoid a full UDPATE statement of the finding which is a quite a big object with lots of fields
             # after that we tirgger the post processing directly
