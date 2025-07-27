@@ -280,14 +280,13 @@ class CSVReportManager(BaseReportManager):
         try:
             self.multipart_uploader.start_upload()
             self.first_row = True
-            counter = 0
             for counter, finding in enumerate(findings.iterator(chunk_size=self.chunk_size), start=1):
+                logger.info(f"REPORT FINDING: Processing finding {counter} of {self.findigns_all_counter}")
                 self._add_finding_in_buffer(finding, excludes_list, allowed_attributes, allowed_foreign_keys)
 
                 if counter % self.chunk_size == 0:
                     current_buffer_size = len(self.buffer.getvalue().encode('utf-8'))
                     current_size_mb = current_buffer_size / (1024 * 1024)
-                    self.multipart_uploader.upload_part(self.buffer.getvalue())
                     if current_buffer_size >= MIN_PART_SIZE:
                         logger.info(f"REPORT FINDING: Uploading part with {current_size_mb:.2f}MB ({counter} findings)")
                         self.multipart_uploader.upload_part(self.buffer.getvalue())
