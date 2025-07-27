@@ -115,6 +115,8 @@ class DojoSytemSettingsMiddleware:
     @classmethod
     def initialize_for_testing(cls, system_settings):
         """Initialize system settings for test scenarios where middleware may not be processed normally"""
+        # cleanup any existing settings first to ensure fresh state
+        cls.cleanup()
         cls._thread_local.system_settings = system_settings
 
 
