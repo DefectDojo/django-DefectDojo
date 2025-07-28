@@ -998,9 +998,42 @@ class ImportReimportMixin:
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
+    # import 1 and then reimport 2 without closing old findings should result in old findings being closed as the default is True in serializers.py
+    # for the UI tests this also works as the default is True in the (re)import methods in this test class
+    # - reimport should mitigate the zap1
+    def test_import_reimport_without_close_old_findings(self):
+        # https://github.com/DefectDojo/django-DefectDojo/pull/12837
+        logger.debug("reimporting updated zap xml report and using default value for close_old_findings (True)")
+
+        import1 = self.import_scan_with_params(self.zap_sample1_filename)
+
+        test_id = import1["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, created=1, untouched=3):
+            reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+
+        test_id = reimport1["test"]
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+
+        mitigated = 0
+        not_mitigated = 0
+        for finding in findings["results"]:
+            logger.debug(finding)
+            if finding["is_mitigated"]:
+                mitigated += 1
+            else:
+                not_mitigated += 1
+        self.assertEqual(mitigated, 1)
+        self.assertEqual(not_mitigated, 4)
+
     # import 1 and then reimport 2 without closing old findings
     # - reimport should not mitigate the zap1
-    def test_import_reimport_without_closing_old_findings(self):
+    def test_import_reimport_with_close_old_findings_false(self):
         logger.debug("reimporting updated zap xml report and keep old findings open")
 
         import1 = self.import_scan_with_params(self.zap_sample1_filename)
@@ -1015,11 +1048,8 @@ class ImportReimportMixin:
         test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings_api(test_id, verified=False)
+        findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(5, findings)
-
-        findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(0, findings)
 
         mitigated = 0
         not_mitigated = 0
@@ -1030,7 +1060,7 @@ class ImportReimportMixin:
             else:
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
-        self.assertEqual(not_mitigated, 0)
+        self.assertEqual(not_mitigated, 5)
 
     # some parsers generate 1 finding for each vulnerable file for each vulnerability
     # i.e
@@ -1211,7 +1241,7 @@ class ImportReimportMixin:
     def test_import_param_close_old_findings_with_additional_endpoint(self):
         logger.debug("importing clair report with additional endpoint")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, endpoint_to_add=1)
 
         test_id = import0["test"]
         test = self.get_test(test_id)
@@ -1229,7 +1259,7 @@ class ImportReimportMixin:
             self.assertEqual(finding.endpoints.count(), 1)
             self.assertEqual(finding.endpoints.first().id, 1)
 
-        # reimport empty report
+        # reimport empty report to close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
 
@@ -1237,11 +1267,13 @@ class ImportReimportMixin:
         engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
         self.assertEqual(engagement_findings_count, 0)
 
-    # close_old_findings functionality: second (empty) import should close all findings from the first import when setting the same service
-    def test_import_param_close_old_findings_with_same_service(self):
-        logger.debug("importing clair report with same service")
+    # import clair scan, testing:
+    # parameter endpoint_to_add: each imported finding should be related to endpoint with id=1
+    # close_old_findings functionality: secony (empty) import should not close all findings from the first import as we rely on the default value of close_old_findings=False
+    def test_import_param_close_old_findings_default_with_additional_endpoint(self):
+        logger.debug("importing clair report with additional endpoint")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, endpoint_to_add=1)
 
         test_id = import0["test"]
         test = self.get_test(test_id)
@@ -1254,7 +1286,37 @@ class ImportReimportMixin:
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement_findings.count(), 4)
 
-        # reimport empty report
+        # findings should have only one endpoint, added with endpoint_to_add
+        for finding in engagement_findings:
+            self.assertEqual(finding.endpoints.count(), 1)
+            self.assertEqual(finding.endpoints.first().id, 1)
+
+        # reimport empty report with no explicit close_old_findings parameter should not close old findings
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, endpoint_to_add=1)
+
+        # all findings from import0 should be closed now
+        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
+        self.assertEqual(engagement_findings_count, 4)
+
+    # close_old_findings functionality: second (empty) import should close all findings from the first import when setting the same service
+    def test_import_param_close_old_findings_with_same_service(self):
+        logger.debug("importing clair report with same service")
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, service="service_1")
+
+        test_id = import0["test"]
+        test = self.get_test(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        # imported count must match count in the report
+        self.assert_finding_count_json(4, findings)
+
+        # imported findings should be active in the engagement
+        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
+        self.assertEqual(engagement_findings.count(), 4)
+
+        # reimport empty report to close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
 
@@ -1266,7 +1328,7 @@ class ImportReimportMixin:
     def test_import_param_close_old_findings_with_different_services(self):
         logger.debug("importing clair report with different services")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, service="service_1")
 
         test_id = import0["test"]
         test = self.get_test(test_id)
@@ -1279,7 +1341,7 @@ class ImportReimportMixin:
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement_findings.count(), 4)
 
-        # reimport empty report
+        # reimport empty report to close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_2")
 
@@ -1290,7 +1352,7 @@ class ImportReimportMixin:
     # close_old_findings functionality: second (empty) import should not close findings from the first import when setting a service in the first import but none in the second import
     def test_import_param_close_old_findings_with_and_without_service_1(self):
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, service="service_1")
 
         test_id = import0["test"]
         test = self.get_test(test_id)
@@ -1303,7 +1365,7 @@ class ImportReimportMixin:
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement_findings.count(), 4)
 
-        # reimport empty report
+        # reimport empty report to close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service=None)
 
@@ -1339,7 +1401,7 @@ class ImportReimportMixin:
     def test_reimport_close_old_findings_different_engagements_different_services(self):
         logger.debug("importing clair report with service A into engagement 1")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import1 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, engagement=1, close_old_findings=True, service="service_A")
+            import1 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, engagement=1, service="service_A")
 
         test_id = import1["test"]
         test = self.get_test(test_id)
@@ -1353,7 +1415,7 @@ class ImportReimportMixin:
         self.assertEqual(engagement1_findings.count(), 4)
 
         # reimporting the same report into the same test with a different service should not close any findings and create 4 new findings
-        self.reimport_scan_with_params(test_id, self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_B")
+        self.reimport_scan_with_params(test_id, self.clair_few_findings, scan_type=self.scan_type_clair, service="service_B")
 
         engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement1_active_finding_count.count(), 8)
@@ -1365,7 +1427,7 @@ class ImportReimportMixin:
             self.assertFalse(finding.is_mitigated)
 
         # reimporting an empty report with service A should close all findings from the first import, but not the reimported ones with service B
-        self.reimport_scan_with_params(test_id, self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_A")
+        self.reimport_scan_with_params(test_id, self.clair_empty, scan_type=self.scan_type_clair, service="service_A")
 
         engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement1_active_finding_count.count(), 4)
@@ -1383,7 +1445,7 @@ class ImportReimportMixin:
             self.assertEqual(finding.service, "service_A")
 
         # reimporting an empty report with service B should close all findings from the second  import, and not reopen any findings
-        self.reimport_scan_with_params(test_id, self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_B")
+        self.reimport_scan_with_params(test_id, self.clair_empty, scan_type=self.scan_type_clair, service="service_B")
 
         engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement1_active_finding_count.count(), 0)
@@ -1395,7 +1457,7 @@ class ImportReimportMixin:
             self.assertTrue(finding.is_mitigated)
 
         # reimporting a report with findings and service A should reopen the 4findings with service_A but leave the findings with service_B closed.
-        self.reimport_scan_with_params(test_id, self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_A")
+        self.reimport_scan_with_params(test_id, self.clair_few_findings, scan_type=self.scan_type_clair, service="service_A")
 
         engagement1_active_finding_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement1_active_finding_count.count(), 4)
@@ -1954,7 +2016,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
             return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *, active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None, service=None):
+    # For UI tests we cannot rely on the default for close_old_findings True as when we leave out the field in the request,
+    # Django (or rathet HTML FORM spec) will interpret that as False. So we explicitly set it to True here.
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *, active=True, verified=False, push_to_jira=None, tags=None,
+            close_old_findings=True, scan_date=None, service=None):
         # Mimic old functionality for active/verified to avoid breaking tests
         activePayload = "force_to_true"
         if not active:
