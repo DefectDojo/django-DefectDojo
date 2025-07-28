@@ -1,4 +1,5 @@
 import contextlib
+
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType

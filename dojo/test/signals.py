@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.models import Finding, Test, Engagement, Product
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
 
