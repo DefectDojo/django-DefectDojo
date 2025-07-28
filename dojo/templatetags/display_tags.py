@@ -1,7 +1,6 @@
 from enum import Enum
 import re
 import base64
-import json
 import contextlib
 import datetime
 import logging
@@ -43,7 +42,7 @@ from dojo.models import (
     ExclusivePermission,
     GeneralSettings)
 
-from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, calculate_severity_priority
 
 logger = logging.getLogger(__name__)
 
@@ -302,7 +301,9 @@ def finding_sla(finding):
     if not enforce_sla:
         return ""
 
-    severity = finding.severity
+    severity = calculate_severity_priority(finding.tags, finding.priority)
+    if severity == "Unknown":
+        severity = finding.severity
     find_sla = finding.sla_days_remaining()
     status = "green"
 
@@ -839,26 +840,7 @@ def finding_display_status(finding, event="view"):
 
 @register.filter
 def priority_display_status(finding):
-    if finding.tags:
-        if not any(tag in finding.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-            return "Unknown"
-        
-    priority = float(finding.priority)
-    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical")
-    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical")
-    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High")
-    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low")
-
-    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
-        return "Very-Critical"
-    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
-        return "Critical"
-    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
-        return "High"
-    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
-        return "Medium-Low"
-    else:
-        return "Unknown"
+    return calculate_severity_priority(finding.tags, finding.priority)
 
 
 @register.filter

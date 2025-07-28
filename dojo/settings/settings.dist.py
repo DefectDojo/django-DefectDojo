@@ -99,8 +99,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
-    # Every day at 3:00 AM
-    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 3),
+    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 1),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -1638,7 +1637,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
-        "schedule": crontab(hour=CELERY_CRON_SCHEDULE_DUPE_DELETE, minute=0),
+        "schedule": timedelta(minutes=CELERY_CRON_SCHEDULE_DUPE_DELETE),
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",

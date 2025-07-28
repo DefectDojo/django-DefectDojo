@@ -3200,8 +3200,37 @@ class Finding(models.Model):
 
     def get_sla_period(self):
         sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        sla_period = getattr(sla_configuration, self.severity.lower(), None)
-        enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
+        
+        severity = self.severity.lower()
+        severity_mapping = {
+            "Very-Critical": "critical",
+            "Critical": "high",
+            "High": "medium",
+            "Medium-Low": "low",
+        }
+
+        if self.tags:
+            if any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
+                # If the finding has a tag that matches the priority filter tags, use the priority field    
+                priority = float(self.priority)
+                RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical", None)
+                RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
+                RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
+                RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low", None)
+
+                if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
+
+                    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
+                        severity = "Very-Critical"
+                    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
+                        severity = "Critical"
+                    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
+                        severity = "High"
+                    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
+                        severity = "Medium-Low"
+
+        sla_period = getattr(sla_configuration, severity_mapping.get(severity, severity), None)
+        enforce_period = getattr(sla_configuration, str("enforce_" + severity_mapping.get(severity, severity)), None)
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
