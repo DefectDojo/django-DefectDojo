@@ -4,15 +4,20 @@ import re
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
+from urllib.parse import urlencode
 from dateutil.relativedelta import relativedelta
+from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from django.http import Http404, HttpRequest, HttpResponse, QueryDict, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views import View
+from django.core.cache import cache
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from django.contrib import messages
+
 
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -25,10 +30,22 @@ from dojo.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
+from dojo.notifications.helper import create_notification
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
-from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Test,
+    GeneralSettings)
+from dojo.reports import helper as helper_reports
+from dojo.home.helper import get_key_for_user_and_urlpath
+from dojo.reports.helper import get_findings
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -42,6 +59,7 @@ from dojo.reports.widgets import (
     report_widget_factory,
 )
 from dojo.utils import (
+    redirect_to_return_url_or_else,
     Product_Tab,
     add_breadcrumb,
     get_page_items,
@@ -655,100 +673,6 @@ def prefetch_related_endpoints_for_report(endpoints):
                                       "tags",
                                      )
 
-
-def get_list_index(full_list, index):
-    try:
-        element = full_list[index]
-    except Exception:
-        element = None
-    return element
-
-
-def get_findings(request):
-    url = request.META.get("QUERY_STRING")
-    if not url:
-        msg = "Please use the report button when viewing findings"
-        raise Http404(msg)
-    url = url.removeprefix("url=")
-
-    views = ["all", "open", "inactive", "verified",
-             "closed", "accepted", "out_of_scope",
-             "false_positive", "inactive"]
-    # request.path = url
-    obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split(r"/|\?", url)))
-
-    try:
-        finding_index = path_items.index("finding")
-    except ValueError:
-        finding_index = -1
-    # There is a engagement or product here
-    if finding_index > 0:
-        # path_items ['product', '1', 'finding', 'closed', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        view = get_list_index(path_items, 3)
-        query = get_list_index(path_items, 4)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is findings only. Accomodate view and query
-    elif finding_index == 0:
-        # path_items ['finding', 'closed', 'title=blah']
-        obj_name = get_list_index(path_items, 0)
-        view = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is a test or engagement only
-    elif finding_index == -1:
-        # path_items ['test', '1', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-
-    filter_name = None
-    if view:
-        if view == "open":
-            filter_name = "Open"
-        elif view == "inactive":
-            filter_name = "Inactive"
-        elif view == "verified":
-            filter_name = "Verified"
-        elif view == "closed":
-            filter_name = "Closed"
-        elif view == "accepted":
-            filter_name = "Accepted"
-        elif view == "out_of_scope":
-            filter_name = "Out of Scope"
-        elif view == "false_positive":
-            filter_name = "False Positive"
-
-    obj = pid = eid = tid = None
-    if obj_id:
-        if "product" in obj_name:
-            pid = obj_id
-            obj = get_object_or_404(Product, id=pid)
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        elif "engagement" in obj_name:
-            eid = obj_id
-            obj = get_object_or_404(Engagement, id=eid)
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif "test" in obj_name:
-            tid = obj_id
-            obj = get_object_or_404(Test, id=tid)
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-
-    request.GET = QueryDict(query)
-    list_findings = BaseListFindings(
-        filter_name=filter_name,
-        product_id=pid,
-        engagement_id=eid,
-        test_id=tid)
-    findings = list_findings.get_fully_filtered_findings(request).qs
-
-    return findings, obj
-
-
 class QuickReportView(View):
     def add_findings_data(self):
         return self.findings
@@ -757,7 +681,7 @@ class QuickReportView(View):
         return "dojo/finding_pdf_report.html"
 
     def get(self, request):
-        findings, obj = get_findings(request)
+        findings, obj, _url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
@@ -818,12 +742,56 @@ class CSVExportView(View):
         pass
 
     def get(self, request):
-        findings, _obj = get_findings(request)
+        findings, _obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
                                                         user=request.user)
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            logger.debug(
+                f"REPORT FINDING: Asynchronous report generation "
+                "enabled and findings count exceeds the limit. "
+                f"{self.findings.count()} >= {
+                    GeneralSettings.get_value(
+                        'MAXIMUM_FINDINGS_IN_REPORT', 1000)}")
+            request_data = {
+                "query_dict_get": urlencode(request.GET),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "user_id": request.user.id
+            }
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                helper_reports.async_generate_report.apply_async(
+                    args=(request_data,))
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
@@ -942,7 +910,7 @@ class ExcelExportView(View):
         pass
 
     def get(self, request):
-        findings, _obj = get_findings(request)
+        findings, _obj, _url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(
                 objs=findings,
@@ -1093,3 +1061,11 @@ class ExcelExportView(View):
         )
         response["Content-Disposition"] = "attachment; filename=findings.xlsx"
         return response
+
+
+def get_url_presigned(request, id):
+    if value := cache.get(f"report_finding:{request.user.username}:{id}"):
+        cache.delete(f"report_finding:{request.user.username}:{id}") 
+        return HttpResponseRedirect(value)
+    else:
+        return render(request, "dojo/page_status.html")

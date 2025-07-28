@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load i18n %} {% load static %}
+{% block add_styles %}
+    .embed-responsive .embed-responsive-item,
+    .embed-responsive iframe { height: 100%;}
+{% endblock %}
+{% block content %}
+{{block.super }}
+    <div class="container">
+        <div class="alert alert-warning" role="alert">
+            🔒 <strong>This report is no longer available.</strong><br>
+            It may have already been downloaded or the secure link has expired.
+        </div>
+    </div>
+{% endblock %}

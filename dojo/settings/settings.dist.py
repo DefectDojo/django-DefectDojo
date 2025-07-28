@@ -269,6 +269,7 @@ env = environ.FileAwareEnv(
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, "console"),
+    DD_ENABLE_SQL_LOGGING=(bool, False),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
@@ -575,12 +576,14 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     return "".join(result_list)
 
 
+AWS_REGION = env("AWS_REGION", default="us-east-1")
+
+
 def get_secret(secret_name):
-    region_name = env("AWS_REGION")
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
+    client = session.client(service_name="secretsmanager", region_name=AWS_REGION)
 
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
@@ -2156,6 +2159,7 @@ JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GRO
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING_HANDLER = env("DD_LOGGING_HANDLER")
+ENABLE_SQL_LOGGING = env("DD_ENABLE_SQL_LOGGING")
 
 LOG_LEVEL = env("DD_LOG_LEVEL")
 if not LOG_LEVEL:
@@ -2191,12 +2195,14 @@ LOGGING = {
         },
     },
     "handlers": {
-        "console_sql": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "sql_with_trace",
-            "filters": ["sql_trace"],
-        },
+        **({
+            "console_sql": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+                "formatter": "sql_with_trace",
+                "filters": ["sql_trace"],
+            }
+        } if ENABLE_SQL_LOGGING else {}),
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
@@ -2212,11 +2218,13 @@ LOGGING = {
         },
     },
     "loggers": {
+      **({
         "django.db.backends": {
             'level': str(LOG_LEVEL),
             'handlers': ['console_sql'],
             'propagate': False,
-        },
+        }
+        } if ENABLE_SQL_LOGGING else {}),
         "django.request": {
             "handlers": ["mail_admins", "console"],
             "level": str(LOG_LEVEL),
