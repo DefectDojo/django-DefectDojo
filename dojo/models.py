@@ -1631,7 +1631,7 @@ class Engagement(models.Model):
         from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        with suppress(Product.DoesNotExist):
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.product)
@@ -2239,7 +2239,7 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.engagement.product)
@@ -2820,7 +2820,7 @@ class Finding(models.Model):
         from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.test.engagement.product)
