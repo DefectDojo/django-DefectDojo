@@ -256,6 +256,73 @@ class FindingStatusFilter(ChoiceFilter):
             value = None
         return self.options[value][1](self, qs, self.field_name)
 
+class FindingPriorityFilter(ChoiceFilter):
+
+    tags_priority = settings.PRIORITY_FILTER_TAGS.split(",")
+    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+                "RP_Very_Critical", None
+            )
+    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
+    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
+    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+        "RP_Medium_Low", None
+    )
+
+    if RP_VERY_CRITICAL is None and RP_CRITICAL is None and RP_HIGH is None and RP_MEDIUM_LOW is None:
+        warnings.warn(
+            "No RP_VERY_CRITICAL, RP_CRITICAL, RP_HIGH or RP_MEDIUM_LOW settings found. "
+            "Please set them in your settings.py file to use the FindingPriorityFilter.",
+            RuntimeWarning,
+        )
+
+    def any(self, qs, name):
+        return qs
+
+    def unknown(self, qs, name):
+        return qs.filter(priority=0.0).exclude(tags__name__in=self.tags_priority)
+
+    def medium_low(self, qs, name):
+        lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
+        return qs.filter(priority__gte=lower, priority__lte=upper, 
+                         tags__name__in=self.tags_priority)
+
+    def high(self, qs, name):
+        lower, upper = map(float, self.RP_HIGH.split("-"))
+        return qs.filter(priority__gte=lower, priority__lte=upper, 
+                         tags__name__in=self.tags_priority)
+
+    def critical(self, qs, name):
+        lower, upper = map(float, self.RP_CRITICAL.split("-"))
+        return qs.filter(priority__gte=lower, priority__lte=upper, 
+                         tags__name__in=self.tags_priority)
+
+    def very_critical(self, qs, name):
+        lower, upper = map(float, self.RP_VERY_CRITICAL.split("-"))
+        return qs.filter(priority__gte=lower, priority__lte=upper,
+                         tags__name__in=self.tags_priority)
+
+    options = {
+        None: (_("Any"), any),
+        0: (_("Unknown"), unknown),
+        1: (_("Medium-Low"), medium_low),
+        2: (_("High"), high),
+        3: (_("Critical"), critical),
+        4: (_("Very Critical"), very_critical),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs["choices"] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
+
+        return self.options[value][1](self, qs, self.field_name)
+
 
 class FindingSLAFilter(ChoiceFilter):
     def any(self, qs, name):
@@ -278,11 +345,18 @@ class FindingSLAFilter(ChoiceFilter):
                 mitigated=None,
             ) & Q(sla_expiration_date__lt=timezone.now().date()),
         )
+    
+    def sla_left_seven_days(self, qs, name):
+        return qs.filter(
+            Q(sla_expiration_date__gte=timezone.now().date()) & 
+            Q(sla_expiration_date__lt=timezone.now().date() + timedelta(days=7))
+        )
 
     options = {
         None: (_("Any"), any),
         0: (_("False"), sla_satisfied),
         1: (_("True"), sla_violated),
+        2: (_("SLA left in next 7 days"), sla_left_seven_days),
     }
 
     def __init__(self, *args, **kwargs):
@@ -545,7 +619,14 @@ class FindingTagFilter(DojoFilter):
         field_name="tags__name",
         to_field_name="name",
         queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        label="Finding Tags",
         help_text="Filter Findings by the selected tags")
+    practice = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        label="Practice",
+        help_text="Filter Findings by the selected practices (tags)")
     test__tags = ModelMultipleChoiceFilter(
         field_name="test__tags__name",
         to_field_name="name",
@@ -605,6 +686,12 @@ class FindingTagStringFilter(FilterSet):
         field_name="tags__name",
         lookup_expr="iexact",
         help_text="Search for tags on a Finding that are an exact match")
+    practice = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        label="Practice",
+        help_text="Filter Findings by the selected practices (tags)")
     test__tags_contains = CharFilter(
         label="Test Tag Contains",
         field_name="test__tags__name",
@@ -1757,6 +1844,7 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    priority = FindingPriorityFilter(label="Priority")
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -1875,11 +1963,10 @@ class FindingFilterHelper(FilterSet):
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
     test__engagement__product = NumberFilter(widget=HiddenInput())
-    reporter = CharFilter(
-        field_name="reporter__username",
-        lookup_expr="iexact",
-        label="Reporter Username",
-        help_text="Search for Reporter names that are an exact match")
+    reporter = ModelMultipleChoiceFilter(
+        queryset=Dojo_User.objects.filter(global_role__role__name="API_Importer").distinct(),
+        label="Reporter"
+    )
     reporter_contains = CharFilter(
         field_name="reporter__username",
         lookup_expr="icontains",
@@ -1983,7 +2070,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
-    reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
+    reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.filter(global_role__role__name="API_Importer").distinct())
     reviewers = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -2051,7 +2138,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get("finding_group", None):
             self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
-        self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
 
