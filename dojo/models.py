@@ -4,6 +4,7 @@ import hashlib
 import logging
 import re
 import warnings
+import zoneinfo
 from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -39,11 +40,10 @@ from multiselectfield import MultiSelectField
 from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
-from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
-from dojo.validators import cvss3_validator
+from dojo.validators import cvss3_validator, cvss4_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -438,7 +438,7 @@ class System_Settings(models.Model):
     url_prefix = models.CharField(max_length=300, default="", blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
     team_name = models.CharField(max_length=100, default="", blank=True)
     time_zone = models.CharField(max_length=50,
-                                 choices=[(tz, tz) for tz in all_timezones],
+                                 choices=[(tz, tz) for tz in zoneinfo.available_timezones()],
                                  default="UTC", blank=False)
     enable_product_grade = models.BooleanField(default=False, verbose_name=_("Enable Product Grading"), help_text=_("Displays a grade letter next to a product to show the overall health."))
     product_grade = models.CharField(max_length=800, blank=True)
@@ -598,6 +598,16 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable Calendar"),
         help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
+    enable_cvss3_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS3 Display"),
+        help_text=_("With this setting turned off, CVSS3 fields will be hidden in the user interface."))
+    enable_cvss4_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS4 Display"),
+        help_text=_("With this setting turned off, CVSS4 fields will be hidden in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -831,7 +841,7 @@ class FileUpload(models.Model):
 class Product_Type(models.Model):
 
     """
-    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing "types" of products.
     `
        Examples:
          * IAM Team
@@ -2361,12 +2371,23 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3 vector"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."))
+                              verbose_name=_("CVSS3 Vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSS3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
-                                        verbose_name=_("CVSSv3 score"),
+                                        verbose_name=_("CVSS3 Score"),
                                         help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+
+    cvssv4 = models.TextField(validators=[cvss4_validator],
+                              max_length=255,
+                              null=True,
+                              verbose_name=_("CVSS4 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."))
+    cvssv4_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name=_("CVSSv4 Score"),
+                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     url = models.TextField(null=True,
@@ -2383,6 +2404,9 @@ class Finding(models.Model):
                                 null=True,
                                 blank=True,
                                 help_text=_("Text describing how to best fix the flaw."))
+    fix_available = models.BooleanField(default=True,
+                                        verbose_name=_("Fix Available"),
+                                        help_text=_("Denotes if there is a fix available for this flaw."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
@@ -2725,19 +2749,31 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         # Synchronize cvssv3 score using cvssv3 vector
+
         if self.cvssv3:
             try:
-
                 cvss_data = parse_cvss_data(self.cvssv3)
                 if cvss_data:
-                    self.cvssv3 = cvss_data.get("vector")
-                    self.cvssv3_score = cvss_data.get("score")
+                    self.cvssv3 = cvss_data.get("cvssv3")
+                    self.cvssv3_score = cvss_data.get("cvssv3_score")
 
             except Exception as ex:
                 logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
                 # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
                 if self.pk is None:
                     self.cvssv3 = None
+
+        # behaviour for CVVS4 is slightly different. Extracting this into a method would lead to probably hard to read code
+        if self.cvssv4:
+            try:
+                cvss_data = parse_cvss_data(self.cvssv4)
+                if cvss_data:
+                    self.cvssv4 = cvss_data.get("cvssv4")
+                    self.cvssv4_score = cvss_data.get("cvssv4_score")
+
+            except Exception as ex:
+                logger.warning("Can't compute cvssv4 score for finding id %i. Invalid cvssv4 vector found: '%s'. Exception: %s.", self.id, self.cvssv4, ex)
+                self.cvssv4 = None
 
         self.set_hash_code(dedupe_option)
 
