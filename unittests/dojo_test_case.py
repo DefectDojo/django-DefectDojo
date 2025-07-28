@@ -536,7 +536,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return None
 
     def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
-                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
+                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=None, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
                                 scan_date=None, service=None, force_active=True, force_verified=True):
 
@@ -546,8 +546,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                     "scan_type": scan_type,
                     "file": testfile,
                     "version": "1.0.1",
-                    "close_old_findings": close_old_findings,
             }
+
+            if close_old_findings is not None:
+                payload["close_old_findings"] = close_old_findings
 
             if active is not None:
                 payload["active"] = active
@@ -594,7 +596,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False, push_to_jira=None,
-                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None, service=None,
+                                  tags=None, close_old_findings=None, group_by=None, engagement_name=None, scan_date=None, service=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
@@ -604,8 +606,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                     "scan_type": scan_type,
                     "file": testfile,
                     "version": "1.0.1",
-                    "close_old_findings": close_old_findings,
             }
+
+            if close_old_findings is not None:
+                payload["close_old_findings"] = close_old_findings
 
             if test_id is not None:
                 payload["test"] = test_id
