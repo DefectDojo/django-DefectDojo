@@ -1,19 +1,46 @@
 /* work-sans-regular - latin */
 @font-face {
-    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-    font-family: 'Worksans';
-    font-style: normal;
-    font-weight: 400;
-    src: url('/fonts/worksans/work-sans-v19-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  font-display: swap;
+  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/worksans/work-sans-v19-latin-regular.woff2') format('woff2');
+  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* work-sans-500 - latin */
+@font-face {
+  font-display: swap;
+  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/worksans/work-sans-v19-latin-500.woff2') format('woff2');
+  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+.container-lg {
+  max-width: 100%;
+}
+
+// DocSearch
+
+.DocSearch-Container {
+  z-index: 2000 !important;
+}
+
+.DocSearch-Hit-icon {
+  display: flex;
+  align-items: center;
+}
+
+.DocSearch-Hits mark {
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .DocSearch-Modal {
+    position: fixed !important;
   }
-  /* work-sans-500 - latin */
-  @font-face {
-    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-    font-family: 'Worksans';
-    font-style: normal;
-    font-weight: 500;
-    src: url('/fonts/worksans/work-sans-v19-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-  }
-  .container-lg {
-    max-width: 100%;
-  }
+}
