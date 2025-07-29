@@ -2687,7 +2687,7 @@
           {
             "name": "CVE-2024-49766",
             "severity": {
-              "value": "Low",
+              "value": "Negligible",
               "sourceName": "vulndb"
             },
             "cvssScore": {
@@ -2710,7 +2710,7 @@
           {
             "name": "CVE-2024-49767",
             "severity": {
-              "value": "High",
+              "value": "Other",
               "sourceName": "nvd"
             },
             "cvssScore": {
