@@ -83,9 +83,11 @@ class DojoSytemSettingsMiddleware:
 
     def __call__(self, request):
         self.load()
-        response = self.get_response(request)
-        self.cleanup()
-        return response
+        try:
+            return self.get_response(request)
+        finally:
+            # ensure cleanup happens even if an exception occurs
+            self.cleanup()
 
     def process_exception(self, request, exception):
         self.cleanup()
@@ -94,7 +96,6 @@ class DojoSytemSettingsMiddleware:
     def get_system_settings(cls):
         if hasattr(cls._thread_local, "system_settings"):
             return cls._thread_local.system_settings
-
         return None
 
     @classmethod
@@ -104,6 +105,8 @@ class DojoSytemSettingsMiddleware:
 
     @classmethod
     def load(cls):
+        # cleanup any existing settings first to ensure fresh state
+        cls.cleanup()
         from dojo.models import System_Settings
         system_settings = System_Settings.objects.get(no_cache=True)
         cls._thread_local.system_settings = system_settings
