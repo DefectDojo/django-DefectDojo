@@ -73,7 +73,7 @@ class SysdigReportsParser:
             k8sWorkloadName = item.get("k8sWorkloadName", "") or item.get("kubernetes_workload_name", "")
             k8sPodContainerName = item.get("k8sPodContainerName", "") or item.get("kubernetes_pod_container_name", "")
             vulnName = item.get("vulnName", "") or item.get("vuln_id", "")
-            vulnSeverity = item.get("vulnSeverity", "") or item.get("vuln_severity", "")
+            vulnSeverity = SysdigData._map_severity(item.get("vulnSeverity", "") or item.get("vuln_severity", ""))
             vulnLink = item.get("vulnLink", "") or ""  # Not present in new format
             vulnCvssVersion = item.get("vulnCvssVersion", "") or item.get("vuln_cvss_version", "")
             vulnCvssScore = item.get("vulnCvssScore", "") or item.get("vuln_cvss_score", "")
@@ -294,7 +294,7 @@ class SysdigReportsParser:
             if "vulnerability id" in reader.fieldnames:
                 # Old format: Vulnerability Engine Format
                 csv_data_record.vulnerability_id = row.get("vulnerability id", "")
-                csv_data_record.severity = csv_data_record._map_severity(row.get("severity", "").upper())
+                csv_data_record.severity = SysdigData._map_severity(row.get("severity", "").upper())
                 csv_data_record.package_name = row.get("package name", "")
                 csv_data_record.package_version = row.get("package version", "")
                 csv_data_record.package_type = row.get("package type", "")
@@ -329,7 +329,7 @@ class SysdigReportsParser:
             elif "vulnerability name" in reader.fieldnames:
                 # New 2025 format
                 csv_data_record.vulnerability_id = row.get("vulnerability name", "")
-                csv_data_record.severity = csv_data_record._map_severity(row.get("vulnerability severity", "").upper())
+                csv_data_record.severity = SysdigData._map_severity(row.get("vulnerability severity", "").upper())
                 csv_data_record.package_name = row.get("package name", "")
                 csv_data_record.package_version = row.get("package version", "")
                 csv_data_record.package_type = row.get("package type", "")

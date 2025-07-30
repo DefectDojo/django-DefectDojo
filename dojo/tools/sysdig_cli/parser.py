@@ -64,7 +64,7 @@ class SysdigCLIParser:
             for item in vulns:
                 # print("item: %s" % item)
                 vulnName = item.get("name", "")
-                vulnSeverity = item.get("severity", {}).get("value", "")
+                vulnSeverity = SysdigData._map_severity(item.get("severity", {}).get("value", ""))
                 vulnCvssScore = item.get("cvssScore", {}).get("value", {}).get("score", "")
                 vulnCvssVersion = item.get("cvssScore", {}).get("value", {}).get("version", "")
                 vulnCvssVector = item.get("cvssScore", {}).get("value", {}).get("vector", "")
@@ -130,7 +130,7 @@ class SysdigCLIParser:
             finding.vuln_id_from_tool = row.vulnerability_id
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(row.vulnerability_id)
-            finding.severity = row.severity
+            finding.severity = SysdigData._map_severity(row.severity)
             # Set Component Version
             finding.component_name = row.package_name
             finding.component_version = row.package_version
@@ -221,7 +221,7 @@ class SysdigCLIParser:
             msg = ""
             # Sydig CLI format
             csv_data_record.vulnerability_id = row.get("cve id", "")
-            csv_data_record.severity = csv_data_record._map_severity(row.get("cve severity").upper())
+            csv_data_record.severity = SysdigData._map_severity(row.get("cve severity").upper())
             csv_data_record.cvss_score = row.get("cvss score", "")
             csv_data_record.cvss_version = row.get("cvss score version", "")
             csv_data_record.package_name = row.get("package name", "")
