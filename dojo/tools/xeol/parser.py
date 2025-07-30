@@ -41,7 +41,7 @@ class XeolParser:
                 f"**Package URL:** {artifact.get('purl', 'N/A')}",
                 f"**CPEs:** {', '.join(artifact.get('cpes', [])) if artifact.get('cpes') else 'N/A'}",
                 f"**Distro Name:** {distro.get('name', 'N/A')}",
-                f"**Distro Version:** {distro.get('version', 'N/A')}"
+                f"**Distro Version:** {distro.get('version', 'N/A')}",
             ]
 
             locations = artifact.get("locations", [])
