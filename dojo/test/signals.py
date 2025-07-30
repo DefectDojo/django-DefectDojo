@@ -27,7 +27,7 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
                 ).order_by("-id").first():
                     description = _('The test "%(name)s" was deleted by %(user)s') % {
                                     "name": str(instance), "user": le.actor}
-            create_notification(event="test_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+            create_notification(event="test_deleted",  # Template does not exist, it will default to "other" but this event name needs to stay because of unit testing
                                 title=_("Deletion of %(name)s") % {"name": str(instance)},
                                 description=description,
                                 product=instance.engagement.product,

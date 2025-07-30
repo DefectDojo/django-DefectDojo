@@ -2367,7 +2367,7 @@ class async_delete:
             model = model_info[0]
             model_query = model_info[1]
             filter_dict = {model_query: obj}
-            # Oly fetch the IDs since we will make a list of IDs in the following function call
+            # Only fetch the IDs since we will make a list of IDs in the following function call
             objects_to_delete = model.objects.only("id").filter(**filter_dict)
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
