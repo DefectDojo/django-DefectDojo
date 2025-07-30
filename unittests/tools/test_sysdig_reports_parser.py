@@ -82,9 +82,19 @@ class TestSysdigParsers(DojoTestCase):
         with (get_unit_tests_scans_path("sysdig_reports") / "sysdig-2025.csv").open(encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
+            # Verify each CVE appears exactly once
+            all_vuln_ids = [vid for f in findings for vid in f.unsaved_vulnerability_ids]
+            self.assertEqual(1, all_vuln_ids.count("CVE-2025-6021"), "CVE-2025-6021 should appear exactly once")
+            self.assertEqual(1, all_vuln_ids.count("CVE-2011-10007"), "CVE-2011-10007 should appear exactly once")
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
+
+                if "CVE-2025-6021" in finding.unsaved_vulnerability_ids:
+                    self.assertEqual(finding.severity, "Informational")  # Other maps to Informational
+                if "CVE-2011-10007" in finding.unsaved_vulnerability_ids:
+                    self.assertEqual(finding.severity, "Informational")  # Negligible maps to Informational
+
             self.assertEqual(6, len(findings))
 
             # Test specific finding details from the 2025 format
@@ -105,9 +115,18 @@ class TestSysdigParsers(DojoTestCase):
         with (get_unit_tests_scans_path("sysdig_reports") / "sysdig-2025.json").open(encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
+            # Verify each CVE appears exactly once
+            all_vuln_ids = [vid for f in findings for vid in f.unsaved_vulnerability_ids]
+            self.assertEqual(1, all_vuln_ids.count("CVE-2023-45322"), "CVE-2023-45322 should appear exactly once")
+            self.assertEqual(1, all_vuln_ids.count("CVE-2025-48379"), "CVE-2025-48379 should appear exactly once")
+
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
+                if "CVE-2023-45322" in finding.unsaved_vulnerability_ids:
+                    self.assertEqual(finding.severity, "Informational")  # Negligible maps to Informational
+                if "CVE-2025-48379" in finding.unsaved_vulnerability_ids:
+                    self.assertEqual(finding.severity, "Informational")  # Other maps to Informational
 
             # Should parse successfully even with metadata before data section
             self.assertGreater(len(findings), 0)
