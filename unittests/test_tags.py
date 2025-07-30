@@ -292,7 +292,7 @@ class InheritedTagsTests(DojoAPITestCase):
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
-        self.system_settings(enable_product_tag_inehritance=True)
+        self.system_settings(enable_product_tag_inheritance=True)
         self.product = self.create_product("Inherited Tags Test", tags=["inherit", "these", "tags"])
         self.scans_path = get_unit_tests_scans_path("zap")
         self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
