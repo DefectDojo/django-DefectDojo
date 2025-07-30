@@ -21,6 +21,7 @@ class XeolParser:
         if not isinstance(data, dict) or "matches" not in data:
             return findings
 
+        distro = data.get("distro", {})
         for match in data["matches"]:
             cycle = match.get("Cycle", {})
             artifact = match.get("artifact", {})
@@ -39,6 +40,8 @@ class XeolParser:
                 f"**Licenses:** {', '.join(artifact.get('licenses', [])) if artifact.get('licenses') else 'N/A'}",
                 f"**Package URL:** {artifact.get('purl', 'N/A')}",
                 f"**CPEs:** {', '.join(artifact.get('cpes', [])) if artifact.get('cpes') else 'N/A'}",
+                f"**Distro Name:** {distro.get('name', 'N/A')}",
+                f"**Distro Version:** {distro.get('version', 'N/A')}"
             ]
 
             locations = artifact.get("locations", [])
