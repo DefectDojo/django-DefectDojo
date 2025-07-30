@@ -36,6 +36,9 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
+            kev_date = None
+            ransomware_used = None
+            component_path = None
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
