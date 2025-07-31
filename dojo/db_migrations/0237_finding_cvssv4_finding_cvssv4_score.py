@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0236_clean_tags'),
+        ('dojo', '0236_alter_system_settings_time_zone_zoneinfo'),
     ]
 
     operations = [

@@ -114,7 +114,7 @@ def cannot_turn_back_time(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0235_alter_system_settings_time_zone_zoneinfo'),
+        ('dojo', '0234_alter_system_settings_maximum_password_length_and_more'),
     ]
 
     operations = [
