@@ -53,9 +53,15 @@ class KiuwanSCAParser:
                 finding.description = row["description"]
                 finding.severity = self.SEVERITY[row["securityRisk"]]
 
-                finding.component_name = component.get("artifact", "Unknown")
-                finding.component_version = component.get("version", "Unknown")
-                finding.title = f"{finding.component_name} v{finding.component_version}"
+                if "artifact" in component:
+                    finding.component_name = component["artifact"]
+                if "version" in component:
+                    finding.component_version = component["version"]
+
+                if finding.component_name and finding.component_version:
+                    finding.title = f"{finding.component_name} v{finding.component_version}"
+                else:
+                    finding.title = finding.cve or "Unnamed Finding"
 
                 if "cwe" in row and "CWE-" in row["cwe"]:
                     finding.cwe = int(row["cwe"].replace("CWE-", ""))
