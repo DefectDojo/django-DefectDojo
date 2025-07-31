@@ -2,7 +2,7 @@
 title: "🌐 Universal Parser (Pro)"
 description: ""
 draft: "false"
-weight: 1
+weight: 2
 pro-feature: true
 ---
 

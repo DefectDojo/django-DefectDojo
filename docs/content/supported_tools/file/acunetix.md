@@ -1,6 +1,6 @@
 ---
 title: "Acunetix Scanner"
-toc_hide: true
+toc_hide: false
 ---
 This parser imports the Acunetix Scanner with xml output or Acunetix 360 Scanner with JSON output.
 

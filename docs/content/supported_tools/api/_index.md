@@ -1,10 +1,19 @@
 ---
 title: "API Pull"
 description: "Report pulled to DefectDojo via API exposed by scanning service"
-weight: 4
+weight: 0
+exclude_search: true
+type: docs
 chapter: true
-sidebar:
-  collapsed: true
+cascade:
+- type: "blog"
+  # set to false to include a blog section in the section nav along with docs
+  toc_root: true
+  _target:
+    path: "/blog/**"
+- type: "docs"
+  _target:
+    path: "/**"
 exclude_search: true
 ---
 All parsers that use API pull have common basic configuration steps, but with different values.

@@ -1,6 +1,6 @@
 ---
 title: "Blackduck API"
-toc_hide: true
+weight: 0
 ---
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 
