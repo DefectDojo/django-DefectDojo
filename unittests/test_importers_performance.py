@@ -42,17 +42,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_webhooks_notifications=False)
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)
-        # from dojo.models import System_Settings
-
-        # # Configure system settings directly
-        # from dojo.middleware import DojoSytemSettingsMiddleware
-        # from dojo.models import System_Settings
-        # system_settings = System_Settings.objects.get()
-        # system_settings.enable_product_tag_inheritance = True
-        # system_settings.save()
-
-        # Initialize middleware with modified settings
-        # DojoSytemSettingsMiddleware.initialize_for_testing(System_Settings.objects.get())
 
         # Warm up ContentType cache for relevant models. This is needed if we want to be able to run the test in isolation
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
@@ -172,9 +161,9 @@ class TestDojoImporterPerformance(DojoTestCase):
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
             expected_num_queries1=712,
-            expected_num_async_tasks1=15,
+            expected_num_async_tasks1=10,
             expected_num_queries2=656,
-            expected_num_async_tasks2=23,
+            expected_num_async_tasks2=22,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -190,9 +179,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         """
         self.import_reimport_performance(
             expected_num_queries1=712,
-            expected_num_async_tasks1=15,
+            expected_num_async_tasks1=10,
             expected_num_queries2=656,
-            expected_num_async_tasks2=23,
+            expected_num_async_tasks2=22,
             expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
@@ -207,12 +196,15 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.system_settings(enable_product_grade=True)
+        # Refresh the cache with the new settings
+        from dojo.middleware import DojoSytemSettingsMiddleware
+        DojoSytemSettingsMiddleware.load()
 
         self.import_reimport_performance(
-            expected_num_queries1=752,
-            expected_num_async_tasks1=25,
-            expected_num_queries2=690,
-            expected_num_async_tasks2=30,
+            expected_num_queries1=732,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=686,
+            expected_num_async_tasks2=28,
             expected_num_queries3=357,
             expected_num_async_tasks3=25,
         )

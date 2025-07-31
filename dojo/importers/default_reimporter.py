@@ -480,7 +480,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 note.save()
                 existing_finding.notes.add(note)
-                existing_finding.save(dedupe_option=False)
+                existing_finding.save_no_options()
             # Return True here to force the loop to continue
             return existing_finding, True
         logger.debug(
@@ -498,9 +498,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         component_version = getattr(unsaved_finding, "component_version", None)
         existing_finding.component_name = existing_finding.component_name or component_name
         existing_finding.component_version = existing_finding.component_version or component_version
-        existing_finding.save(dedupe_option=False)
-        # don't dedupe before endpoints are added
-        existing_finding.save(dedupe_option=False)
+        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
+        existing_finding.save_no_options()
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
@@ -572,7 +571,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save(dedupe_option=False)
+            existing_finding.save_no_options()
         # Return False here to make sure further processing happens
         return existing_finding, False
 
@@ -595,7 +594,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
         # Save it. Don't dedupe before endpoints are added.
-        unsaved_finding.save(dedupe_option=False)
+        unsaved_finding.save_no_options()
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
         finding.tags = None
