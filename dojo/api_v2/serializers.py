@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
@@ -2090,7 +2091,27 @@ class CommonImportScanSerializer(serializers.Serializer):
         default=None,
         help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
-    file = serializers.FileField(allow_empty_file=True, required=False)
+    file = serializers.FileField(
+        allow_empty_file=True,
+        required=False,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "xml",
+                    "csv",
+                    "nessus",
+                    "json",
+                    "jsonl",
+                    "html",
+                    "js",
+                    "zip",
+                    "xlsx",
+                    "txt",
+                    "sarif",
+                ],
+            ),
+        ],
+    )
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
