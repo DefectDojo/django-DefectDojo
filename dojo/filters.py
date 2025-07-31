@@ -90,12 +90,12 @@ from dojo.models import (
     Question,
     Risk_Acceptance,
     Test,
-    TagField,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
     TextQuestion,
     Vulnerability_Id,
+    GeneralSettings
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -256,8 +256,8 @@ class FindingStatusFilter(ChoiceFilter):
             value = None
         return self.options[value][1](self, qs, self.field_name)
 
-class FindingPriorityFilter(ChoiceFilter):
-
+class FindingPriorityFilter(MultipleChoiceFilter):
+    
     tags_priority = settings.PRIORITY_FILTER_TAGS.split(",")
     RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
                 "RP_Very_Critical", None
@@ -275,53 +275,69 @@ class FindingPriorityFilter(ChoiceFilter):
             RuntimeWarning,
         )
 
-    def any(self, qs, name):
-        return qs
-
-    def unknown(self, qs, name):
-        return qs.filter(priority=0.0).exclude(tags__name__in=self.tags_priority)
-
-    def medium_low(self, qs, name):
-        lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
-        return qs.filter(priority__gte=lower, priority__lte=upper, 
-                         tags__name__in=self.tags_priority)
-
-    def high(self, qs, name):
-        lower, upper = map(float, self.RP_HIGH.split("-"))
-        return qs.filter(priority__gte=lower, priority__lte=upper, 
-                         tags__name__in=self.tags_priority)
-
-    def critical(self, qs, name):
-        lower, upper = map(float, self.RP_CRITICAL.split("-"))
-        return qs.filter(priority__gte=lower, priority__lte=upper, 
-                         tags__name__in=self.tags_priority)
-
-    def very_critical(self, qs, name):
-        lower, upper = map(float, self.RP_VERY_CRITICAL.split("-"))
-        return qs.filter(priority__gte=lower, priority__lte=upper,
-                         tags__name__in=self.tags_priority)
-
-    options = {
-        None: (_("Any"), any),
-        0: (_("Unknown"), unknown),
-        1: (_("Medium-Low"), medium_low),
-        2: (_("High"), high),
-        3: (_("Critical"), critical),
-        4: (_("Very Critical"), very_critical),
-    }
-
     def __init__(self, *args, **kwargs):
-        kwargs["choices"] = [
-            (key, value[0]) for key, value in six.iteritems(self.options)]
+        choices = [
+            (0, _("Unknown")),
+            (1, _("Medium-Low")),
+            (2, _("High")),
+            (3, _("Critical")),
+            (4, _("Very Critical")),
+        ]
+        kwargs["choices"] = choices
         super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
-        try:
-            value = int(value)
-        except (ValueError, TypeError):
-            value = None
-
-        return self.options[value][1](self, qs, self.field_name)
+        if not value:
+            return qs
+        
+        # Crear una Q query para combinar múltiples filtros con OR
+        combined_query = Q()
+        
+        for priority_value in value:
+            try:
+                priority_int = int(priority_value)
+                
+                if priority_int == 0:  # Unknown
+                    combined_query |= Q(priority=0.0) & ~Q(tags__name__in=self.tags_priority)
+                elif priority_int == 1:  # Medium-Low
+                    if self.RP_MEDIUM_LOW:
+                        lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
+                        combined_query |= Q(
+                            priority__gte=lower, 
+                            priority__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 2:  # High
+                    if self.RP_HIGH:
+                        lower, upper = map(float, self.RP_HIGH.split("-"))
+                        combined_query |= Q(
+                            priority__gte=lower, 
+                            priority__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 3:  # Critical
+                    if self.RP_CRITICAL:
+                        lower, upper = map(float, self.RP_CRITICAL.split("-"))
+                        combined_query |= Q(
+                            priority__gte=lower, 
+                            priority__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 4:  # Very Critical
+                    if self.RP_VERY_CRITICAL:
+                        lower, upper = map(float, self.RP_VERY_CRITICAL.split("-"))
+                        combined_query |= Q(
+                            priority__gte=lower, 
+                            priority__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+            except (ValueError, TypeError):
+                continue
+        
+        if combined_query:
+            return qs.filter(combined_query).distinct()
+        
+        return qs
 
 
 class FindingSLAFilter(ChoiceFilter):
@@ -624,7 +640,7 @@ class FindingTagFilter(DojoFilter):
     practice = ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",
-        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=GeneralSettings.get_value("TAGS_EXCLUDE_PRACTICE_FILTER", "")),
         label="Practice",
         help_text="Filter Findings by the selected practices (tags)")
     test__tags = ModelMultipleChoiceFilter(
@@ -689,7 +705,7 @@ class FindingTagStringFilter(FilterSet):
     practice = ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",
-        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=GeneralSettings.get_value("TAGS_EXCLUDE_PRACTICE_FILTER", "")),
         label="Practice",
         help_text="Filter Findings by the selected practices (tags)")
     test__tags_contains = CharFilter(

@@ -3211,8 +3211,8 @@ class Finding(models.Model):
 
         if self.tags:
             if any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-                # If the finding has a tag that matches the priority filter tags, use the priority field    
-                priority = float(self.priority)
+                # If the finding has a tag that matches the priority filter tags, use the priority field
+                priority = round(float(self.priority), 2)
                 RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical", None)
                 RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
                 RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
