@@ -1,6 +1,6 @@
 import csv
 import logging
-import re
+from bs4 import BeautifulSoup
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, QueryDict, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views import View
@@ -30,9 +30,7 @@ from dojo.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.notifications.helper import create_notification
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.models import (
     Dojo_User,
@@ -66,6 +64,7 @@ from dojo.utils import (
     get_period_counts_legacy,
     get_system_setting,
     get_words_for_field,
+    calculate_severity_priority
 )
 
 logger = logging.getLogger(__name__)
@@ -714,14 +713,6 @@ class QuickReportView(View):
                   })
 
 
-def get_excludes():
-    return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
-    "test__engagement__product__authorized_group", "test__engagement__product__member",
-    "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
-    "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
-    "unsaved_tags", "vulnerability_ids", "cve", "transferfindingfinding", "transfer_finding"]
-
-
 def get_foreign_keys():
     return ["defect_review_requested_by", "duplicate_finding", "finding_group", "last_reviewed_by",
         "mitigated_by", "reporter", "review_requested_by", "sonarqube_issue", "test"]
@@ -797,7 +788,7 @@ class CSVExportView(View):
         response["Content-Disposition"] = "attachment; filename=findings.csv"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
-        excludes_list = get_excludes()
+        excludes_list = helper_reports.get_excludes()
         allowed_foreign_keys = get_attributes()
         first_row = True
 
@@ -817,12 +808,11 @@ class CSVExportView(View):
                         fields.append(key)
                         continue
                 fields.extend((
-                    "test",
+                    "custom_id",
                     "found_by",
-                    "engagement_id",
                     "engagement",
-                    "product_id",
                     "product",
+                    "product_type",
                     "endpoints",
                     "vulnerability_ids",
                     "tags",
@@ -849,17 +839,23 @@ class CSVExportView(View):
                                     value = str(getattr(finding, key))
                             if value and isinstance(value, str):
                                 value = value.replace("\n", " NEWLINE ").replace("\r", "")
+                            if key == "priority":
+                                value = calculate_severity_priority(finding.tags, value)
                             fields.append(value)
                     except Exception as exc:
                         logger.error("Error in attribute: " + str(exc))
                         fields.append("Value not supported")
                         continue
-                fields.append(finding.test.title)
+                soup = BeautifulSoup(finding.description, "html.parser")
+                rating_label = soup.find("strong", string="Custom Id:")
+                rating_text = ""
+                if rating_label:
+                    rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                fields.append(rating_text)
                 fields.append(finding.test.test_type.name)
-                fields.append(finding.test.engagement.id)
                 fields.append(finding.test.engagement.name)
-                fields.append(finding.test.engagement.product.id)
                 fields.append(finding.test.engagement.product.name)
+                fields.append(finding.test.engagement.product.prod_type.name)
 
                 endpoint_value = ""
                 for endpoint in finding.endpoints.all():
@@ -927,7 +923,7 @@ class ExcelExportView(View):
         font_bold = Font(bold=True)
         self.font_bold = font_bold
         allowed_attributes = get_attributes()
-        excludes_list = get_excludes()
+        excludes_list = helper_reports.get_excludes()
         allowed_foreign_keys = get_attributes()
 
         row_num = 1
@@ -947,19 +943,19 @@ class ExcelExportView(View):
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
                         col_num += 1
                         continue
-                cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
+                cell = worksheet.cell(row=row_num, column=col_num, value="custom_id")
                 cell.font = font_bold
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value="engagement_id")
-                cell = cell.font = font_bold
+                cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
+                cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="engagement")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value="product_id")
+                cell = worksheet.cell(row=row_num, column=col_num, value="product")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value="product")
+                cell = worksheet.cell(row=row_num, column=col_num, value="product_type")
                 cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="endpoints")
@@ -995,6 +991,8 @@ class ExcelExportView(View):
                                     value = str(getattr(finding, key))
                             if value and isinstance(value, datetime):
                                 value = value.replace(tzinfo=None)
+                            if key == "priority":
+                                value = calculate_severity_priority(finding.tags, value)
                             worksheet.cell(row=row_num, column=col_num, value=value)
                             col_num += 1
                     except Exception as exc:
@@ -1002,15 +1000,20 @@ class ExcelExportView(View):
                         worksheet.cell(row=row_num, column=col_num, value="Value not supported")
                         col_num += 1
                         continue
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
+                soup = BeautifulSoup(finding.description, "html.parser")
+                rating_label = soup.find("strong", string="Custom Id:")
+                rating_text = ""
+                if rating_label:
+                    rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                worksheet.cell(row=row_num, column=col_num, value=rating_text)
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
                 col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
-                col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.prod_type.name)
                 col_num += 1
 
                 endpoint_value = ""

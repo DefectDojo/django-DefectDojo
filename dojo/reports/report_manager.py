@@ -1,4 +1,4 @@
-import re
+from bs4 import BeautifulSoup
 import sys
 import io
 import logging
@@ -7,17 +7,15 @@ import boto3
 import botocore.exceptions
 from botocore.client import Config
 from dojo.home.helper import get_key_for_user_and_urlpath, encode_string
-from hashids import Hashids
 from abc import ABC, abstractmethod
 from django.core.cache import cache
-from django.utils import timezone
 from django.conf import settings
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
-from django.http import HttpResponse
 from dojo.reports.multipart_uploder import S3MultipartUploader
 from dojo.models import GeneralSettings
 from dojo.reports.utils import get_url_presigned, upload_s3
 from dojo.notifications.helper import create_notification
+from dojo.reports import helper as helper_reports
+from dojo.utils import calculate_severity_priority
 logger = logging.getLogger(__name__)
 
 
@@ -32,13 +30,6 @@ class BaseReportManager(ABC):
 
     def get_url_encode(self):
         return encode_string(self.request.META.get("QUERY_STRING", ""))
-
-    def get_excludes(self):
-        return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
-        "test__engagement__product__authorized_group", "test__engagement__product__member",
-        "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
-        "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
-        "unsaved_tags", "vulnerability_ids", "cve", "transferfindingfinding", "transfer_finding"]
 
     def get_foreign_keys(self):
         return ["defect_review_requested_by", "duplicate_finding", "finding_group", "last_reviewed_by",
@@ -112,7 +103,7 @@ class CSVReportManager(BaseReportManager):
 
     def generate_report(self, *args, **kwargs):
         findings = self.add_findings_data()
-        excludes_list = self.get_excludes()
+        excludes_list = helper_reports.get_excludes()
         allowed_attributes = self.get_attributes()
         allowed_foreign_keys = self.get_attributes()
         self.multipart_uploader.start_upload()
@@ -185,12 +176,11 @@ class CSVReportManager(BaseReportManager):
                     fields.append(key)
                     continue
             fields.extend((
-                "test",
+                "custom_id",
                 "found_by",
-                "engagement_id",
                 "engagement",
-                "product_id",
                 "product",
+                "product_type",
                 "endpoints",
                 "vulnerability_ids",
                 "tags",
@@ -217,17 +207,23 @@ class CSVReportManager(BaseReportManager):
                                 value = str(getattr(finding, key))
                         if value and isinstance(value, str):
                             value = value.replace("\n", " NEWLINE ").replace("\r", "")
+                        if key == "priority":
+                            value = calculate_severity_priority(finding.tags, value)
                         fields.append(value)
                 except Exception as exc:
                     logger.error("Error in attribute: " + str(exc))
                     fields.append("Value not supported")
                     continue
-            fields.append(finding.test.title)
+            soup = BeautifulSoup(finding.description, "html.parser")
+            rating_label = soup.find("strong", string="Custom Id:")
+            rating_text = ""
+            if rating_label:
+                rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+            fields.append(rating_text)
             fields.append(finding.test.test_type.name)
-            fields.append(finding.test.engagement.id)
             fields.append(finding.test.engagement.name)
-            fields.append(finding.test.engagement.product.id)
             fields.append(finding.test.engagement.product.name)
+            fields.append(finding.test.engagement.product.prod_type.name)
 
             endpoint_value = ""
             for endpoint in finding.endpoints.all():
