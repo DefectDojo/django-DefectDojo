@@ -163,6 +163,9 @@ class TenableXMLParser:
                     nessus_severity_id = int(item.attrib.get("severity", 0))
                     severity = self.get_text_severity(nessus_severity_id)
 
+		    # Determine the pluginID
+		    plugin_id = item.attrib.get("pluginID")
+
                     # Build up the impact
                     impact = ""
                     description_element_text = self.safely_get_element_text(
@@ -289,7 +292,8 @@ class TenableXMLParser:
                             references=references,
                             cwe=cwe,
                             cvssv3=cvssv3,
-                            cvssv3_score=cvssv3_score,
+                 	    cvssv3_score=cvssv3_score,
+                            unique_id_from_tool=plugin_id,
                         )
                         find.unsaved_endpoints = []
                         find.unsaved_vulnerability_ids = []
