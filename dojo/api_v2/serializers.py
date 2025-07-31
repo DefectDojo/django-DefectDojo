@@ -2836,6 +2836,10 @@ class ReportGenerateOptionSerializer(serializers.Serializer):
     include_table_of_contents = serializers.BooleanField(default=False)
 
 
+class FindingBulkUpdateSLAStartDate(serializers.Serializer):
+    tags = serializers.CharField(max_length=200)
+    date = serializers.DateTimeField(required=True)
+
 class ExecutiveSummarySerializer(serializers.Serializer):
     engagement_name = serializers.CharField(max_length=200)
     engagement_target_start = serializers.DateField()

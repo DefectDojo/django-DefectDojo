@@ -1,5 +1,3 @@
-import copy
-import time
 import base64
 import logging
 import mimetypes
@@ -7,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 
 import tagulous
-from django.core.exceptions import PermissionDenied 
 from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -38,7 +35,6 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
-from dojo import engagement
 from dojo.api_v2.api_error import ApiError
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
@@ -55,7 +51,7 @@ from dojo.transfer_findings.serializers import (
     TransferFindingCreateSerializer,
     TransferFindingSerializer,
     TransferFindingFindingCreateSerializer,)
-from dojo.finding.serializer import IARecommendationSerializer
+from dojo.finding.serializer import IARecommendationSerializer, FindingBulkUpdateSLAStartDateSerializer
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -200,6 +196,7 @@ from dojo.utils import (
     generate_file_response,
     get_setting,
     get_system_setting,
+    async_bulk_update_sla_start_date
 )
 from rest_framework.throttling import UserRateThrottle
 
@@ -1617,6 +1614,27 @@ class FindingViewSet(
         data = report_generate(request, findings, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+    
+    @extend_schema(
+        request=FindingBulkUpdateSLAStartDateSerializer,
+        responses={status.HTTP_202_ACCEPTED: ""},
+    )
+    @action(
+        detail=False, methods=["post"], permission_classes=[permissions.IsSuperUser],
+    )
+    def bulk_update_sla_start_date(self, request):
+        """
+        Bulk update the SLA start date for multiple findings.
+        """
+        serializer = FindingBulkUpdateSLAStartDateSerializer(data=request.data)
+        if serializer.is_valid():
+            async_bulk_update_sla_start_date.apply_async(args=(serializer.validated_data["tags"], serializer.validated_data["date"]))
+            return Response(
+                {"Success": "SLA start date updated successfully."},
+                status=status.HTTP_202_ACCEPTED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def _get_metadata(self, request, finding):
         metadata = DojoMeta.objects.filter(finding=finding)
