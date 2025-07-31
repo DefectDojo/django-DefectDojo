@@ -33,7 +33,8 @@ for **Jira Cloud**, you will need:
 for **Jira Data Center (or Server)**, you will need:
 * a Jira URL, i.e. https://jira.yourcompany.com
 * an account with permissions to create and update issues in your Jira instance.  This can be:
-    * A **emailaddress / Personal Access Token** combination
+    * A standard **username / password** combination
+    * A **emailaddress / Personal Access Token** combination (not supported in Defect Dojo Open-Source)
 
 Optionally, you can map:
 * Jira Transitions to trigger Re-Opening and Closing Findings
@@ -102,7 +103,7 @@ The Express method allows for a quicker method of linking a Project. Use the Exp
 3. Enter an appropriate authetication method in the Username / Password fields for Jira:
     * For standard **username / password Jira authentication**, enter a Jira Username and corresponding Password in these fields.
     * For authentication with a **user's API token (Jira Cloud)** enter the Username with the corresponding **API token** in the password field.
-    * For authentication with a Jira **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**, enter the PAT in the password field.  Username is not used for authentication with a Jira PAT, but the field is still required in this form, so you can use a placeholder value here to identify your PAT.
+    * For authentication with a Jira **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**, enter the PAT in the password field.  Username is not used for authentication with a Jira PAT, but the field is still required in this form, so you can use a placeholder value here to identify your PAT. Defect Dojo Open-Source doesn't support PAT authentication.
 ​
 4. Select the Default issue type which you want to create Issues as in Jira. The options for this are **Bug, Task, Story** and **Epic** (which are standard Jira issue types) as well as **Spike** and **Security**, which are custom issue types. If you have a different Issue Type which you want to use, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
 ​
@@ -178,13 +179,13 @@ This is the key of the Project that you want to use with DefectDojo.  The Projec
 
 Here you can determine how much DefectDojo metadata you want to send to Jira. Select one of two options:
 
-* **jira\_full**: Issues will track all of the parameters from DefectDojo \- a full Description, CVE, Severity, etc. Useful if you need complete Finding context in Jira (for example, if someone is working on this Issue who doesn't have access to DefectDojo).   
+* **jira\_full**: Issues will track all of the parameters from DefectDojo \- a full Description, CVE, Severity, etc. Useful if you need complete Finding context in Jira (for example, if someone is working on this Issue who doesn't have access to DefectDojo).
 
-Here is an example of a **jira\_full** Issue:  
+Here is an example of a **jira\_full** Issue:
 ​
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_4.png)
 
-* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)  
+* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)
 
 ​Here is an example of a **jira\_limited** Issue:
 
@@ -196,7 +197,7 @@ If you manage your Jira project using Components, you can assign the appropriate
 
 **Custom fields**
 
-If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’. 
+If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
 
 However, if your Jira Project Settings **require you** to use Custom Fields on new Issues, you will need to hard-code these mappings.
 
@@ -242,13 +243,13 @@ This is the key of the Project that you want to use with DefectDojo.  The Projec
 
 Here you can determine how much DefectDojo metadata you want to send to Jira. Select one of two options:
 
-* **jira\_full**: Issues will track all of the parameters from DefectDojo \- a full Description, CVE, Severity, etc. Useful if you need complete Finding context in Jira (for example, if someone is working on this Issue who doesn't have access to DefectDojo).   
+* **jira\_full**: Issues will track all of the parameters from DefectDojo \- a full Description, CVE, Severity, etc. Useful if you need complete Finding context in Jira (for example, if someone is working on this Issue who doesn't have access to DefectDojo).
 
-Here is an example of a **jira\_full** Issue:  
+Here is an example of a **jira\_full** Issue:
 ​
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_4.png)
 
-* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)  
+* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)
 
 ​Here is an example of a **jira\_limited** Issue:​
 
@@ -260,7 +261,7 @@ If you manage your Jira project using Components, you can assign the appropriate
 
 **Custom fields**
 
-If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’. 
+If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
 
 However, if your Jira Project Settings **require you** to use Custom Fields on new Issues, you will need to hard\-code these mappings.
 
@@ -290,13 +291,13 @@ However, you can disable your Jira integration by disabling it at the Product le
 
 #### Add Vulnerability Id as a Jira label
 
-This allows you to add the Vulnerability ID data as a Jira Label automatically. Vulnerability IDs are added to Findings from individual security tools \- these may be Common Vulnerabilities and Exposures (CVE) IDs or a different format, specific to the tool reporting the Finding. 
+This allows you to add the Vulnerability ID data as a Jira Label automatically. Vulnerability IDs are added to Findings from individual security tools \- these may be Common Vulnerabilities and Exposures (CVE) IDs or a different format, specific to the tool reporting the Finding.
 
 #### Enable Engagement Epic Mapping (For Products)
 
 In DefectDojo, Engagements represent a collection of work. Each Engagement contains one or more tests, which contain one or more Findings which need to be mitigated. Epics in Jira work in a similar way, and this checkbox allows you to push Engagements to Jira as Epics.
 
-* An Engagement in DefectDojo \- note the three findings listed at the bottom.  
+* An Engagement in DefectDojo \- note the three findings listed at the bottom.
 ​
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_8.png)
 * How the same Engagement becomes an Epic when pushed to JIRA \- the Engagement's Findings are also pushed, and live inside the Engagement as Child Issues.
@@ -309,7 +310,7 @@ If checked, DefectDojo will automatically push any Active and Verified Findings 
 
 #### Push Notes
 
-If enabled, Jira comments will populate on the associated Finding in DefectDojo, under Notes on the issue(screenshot), and vice versa; Notes on Findings will be added to the associated Jira Issue as Comments. 
+If enabled, Jira comments will populate on the associated Finding in DefectDojo, under Notes on the issue(screenshot), and vice versa; Notes on Findings will be added to the associated Jira Issue as Comments.
 
 #### Send SLA Notifications As Comments
 
@@ -379,9 +380,9 @@ If Jira Issues are not being created correctly, check your Notifications for err
 
 In order to test the Jira webhooks, add a Note to a Finding which also exists in JIRA as an Issue (for example, the test issue in the section above).
 
-If the webhooks are configured correctly, you should see the Note in Jira as a Comment on the issue. 
+If the webhooks are configured correctly, you should see the Note in Jira as a Comment on the issue.
 
-If this doesn’t work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook. 
+If this doesn’t work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
 
 * DefectDojo's Firewall Rules include a checkbox for **Jira Cloud,** which needs to be enabled before DefectDojo can receive Webhook messages from Jira.
 
@@ -403,13 +404,13 @@ Additionally, you have the option to push Finding Groups to Jira instead of indi
 
 ### Pushing a Finding Manually
 
-1. From a Finding page in DefectDojo, navigate to the **JIRA** heading. If the Finding does not already exist in JIRA as an Issue, the JIRA header will have a value of '**None**'.  
+1. From a Finding page in DefectDojo, navigate to the **JIRA** heading. If the Finding does not already exist in JIRA as an Issue, the JIRA header will have a value of '**None**'.
 ​
-2. Clicking on the arrow next to the **None** value will create a new Jira issue. The State the issue is created in will depend on your team's workflow and Jira configuration with DefectDojo. If the Finding does not appear, refresh the page.   
+2. Clicking on the arrow next to the **None** value will create a new Jira issue. The State the issue is created in will depend on your team's workflow and Jira configuration with DefectDojo. If the Finding does not appear, refresh the page.
 ​
 ![image](images/Creating_Issues_in_Jira.png)
 
-3. Once the Issue is created, DefectDojo will create a link to the issue made up of the Jira key and the Issue ID. This link will also have a red trash can next to it, to allow you to delete the Issue from Jira.  
+3. Once the Issue is created, DefectDojo will create a link to the issue made up of the Jira key and the Issue ID. This link will also have a red trash can next to it, to allow you to delete the Issue from Jira.
 ​
 ![image](images/Creating_Issues_in_Jira_2.png)
 
@@ -424,7 +425,7 @@ Additionally, you have the option to push Finding Groups to Jira instead of indi
 
 The Jira Configuration on DefectDojo has entries for two Jira Transitions which will trigger a status change on a Finding.
 
-* When the **'Close' Transition** is performed on Jira, the associated Finding will also Close, and become marked as **Inactive** and **Mitigated** on DefectDojo. DefectDojo will record this change on the Finding page under the **Mitigated By** heading.  
+* When the **'Close' Transition** is performed on Jira, the associated Finding will also Close, and become marked as **Inactive** and **Mitigated** on DefectDojo. DefectDojo will record this change on the Finding page under the **Mitigated By** heading.
 ​
 ![image](images/Creating_Issues_in_Jira_3.png)
 
@@ -510,7 +511,7 @@ As before, API output will contain lots of `customfield_##` object parameters wi
 
 ![image](images/Using_Custom_Fields_2.png)
 
-**Example:**  
+**Example:**
 We know that `customfield_10050` represents the DefectDojo Custom URL Field because we recorded it in Step 2\. We can now see that `customfield_10050` contains a value of `“https://google.com”` in the `EXAMPLE-123` issue.
 
 #### Step 4 \- Creating a JSON Field Reference from each Jira Custom Field Key
@@ -523,14 +524,14 @@ This JSON object will contain all of the default values for new Jira Issues. We 
 
 From step 3, we now know that Jira expects a URL string for "`customfield_10050`”. We can use this to build our example JSON object.
 
-Say we had also located a DefectDojo\-related short text field, which we identified as "`customfield_67890`”. We would look at this field in our second API output, look at the associated value, and reference the stored value in our example JSON object as well.  
-​  
+Say we had also located a DefectDojo\-related short text field, which we identified as "`customfield_67890`”. We would look at this field in our second API output, look at the associated value, and reference the stored value in our example JSON object as well.
+​
 Your JSON object will start to look like this as you add more Custom Fields to it.
 
 ```
-{  
-	"customfield_10050": "https://change-me.com",  
-	"customfield_67890": "This is the short text custom field."  
+{
+	"customfield_10050": "https://change-me.com",
+	"customfield_67890": "This is the short text custom field."
 }
 ```
 
@@ -541,18 +542,18 @@ Repeat this process until all of the DefectDojo\-relevant custom fields from Jir
 Some fields, such as Date fields, may relate to multiple custom fields in Jira. If that is the case, you’ll need to add both fields to your JSON Field Reference.
 
 ```
-  "customfield_10040": "1970-01-01",  
+  "customfield_10040": "1970-01-01",
   "customfield_10041": "1970-01-01T03:30:00.000+0200",
 ```
 
 Other fields, such as the Label field, may be tracked as a list of strings \- please make sure your JSON Field Reference uses a format that matches API output from Jira.
 
 ```
-// a list of custom labels on a Jira object  
-  "customfield_10042": [  
-    "custom-label-one",  
-    "this-is-default",  
-    "change-me-please"  
+// a list of custom labels on a Jira object
+  "customfield_10042": [
+    "custom-label-one",
+    "this-is-default",
+    "change-me-please"
   ],
 ```
 
@@ -561,25 +562,25 @@ Other custom fields may contain additional, contextual information that should b
 * you should remove the extra object from this field:
 
 ```
-"customfield_10047": [  
-    {  
-      "value": "A"  
-    },  
-    {  
-      "self": "example.url...",  
-      "value": "C",  
-      "id": "example ID"  
-    }  
+"customfield_10047": [
+    {
+      "value": "A"
+    },
+    {
+      "self": "example.url...",
+      "value": "C",
+      "id": "example ID"
+    }
 ]
 ```
-* instead, you can shorten this to the following and disregard the second part: 
+* instead, you can shorten this to the following and disregard the second part:
 
 ```
-"customfield_10047": [      
-   {        
-      "value": "A"  
-   }  
-] 
+"customfield_10047": [
+   {
+      "value": "A"
+   }
+]
 ```
 
 #### Example Completed Field Reference
@@ -587,51 +588,51 @@ Other custom fields may contain additional, contextual information that should b
 Here is a complete JSON Field Reference, with in\-line comments explaining what each custom field pertains to. This is meant as an all\-encompassing example. Your JSON will contain different key values and data points depending on the Custom Values you want to use during issue creation.
 
 ```
-{  
-  "customfield_10050": "https://change-me.com",  
-   
-  "customfield_10049": "This is a short text custom field",  
-   
-// two different fields, but both correspond to the same custom date attribute  
-  "customfield_10040": "1970-01-01",  
-  "customfield_10041": "1970-01-01T03:30:00.000+0200",  
-   
-// a list of custom labels on a Jira object  
-  "customfield_10042": [  
-    "custom-label-one",  
-    "this-is-default",  
-    "change-me-please"  
-  ],  
-   
-// custom number field  
-  "customfield_10043": 0,  
-   
-// custom paragraph field  
-  "customfield_10044": "This is a very long winded way to say CHANGE ME PLEASE",  
-   
-// custom radio button field  
-  "customfield_10045": {  
-    "value": "radio button option"  
-  },  
-   
-// custom multichoice field   
-  "customfield_10047": [  
-    {  
-      "value": "A"  
-    }  
-  ],  
-   
-// custom checkbox field  
-  "customfield_10039": [  
-    {  
-      "value": "A"  
-    }  
-  ],  
-   
-// custom select list (singlechoice) field  
-  "customfield_10048": {  
-    "value": "1"  
-  }  
+{
+  "customfield_10050": "https://change-me.com",
+
+  "customfield_10049": "This is a short text custom field",
+
+// two different fields, but both correspond to the same custom date attribute
+  "customfield_10040": "1970-01-01",
+  "customfield_10041": "1970-01-01T03:30:00.000+0200",
+
+// a list of custom labels on a Jira object
+  "customfield_10042": [
+    "custom-label-one",
+    "this-is-default",
+    "change-me-please"
+  ],
+
+// custom number field
+  "customfield_10043": 0,
+
+// custom paragraph field
+  "customfield_10044": "This is a very long winded way to say CHANGE ME PLEASE",
+
+// custom radio button field
+  "customfield_10045": {
+    "value": "radio button option"
+  },
+
+// custom multichoice field
+  "customfield_10047": [
+    {
+      "value": "A"
+    }
+  ],
+
+// custom checkbox field
+  "customfield_10039": [
+    {
+      "value": "A"
+    }
+  ],
+
+// custom select list (singlechoice) field
+  "customfield_10048": {
+    "value": "1"
+  }
 }
 ```
 
