@@ -1,0 +1,5107 @@
+{
+ "matches": [
+  {
+   "Cycle": {
+    "ProductName": "Perl",
+    "ProductPermalink": "pkg.xeol.io/component/c_HTQsm6WYs3mELoo2g98E3FRT8JGDozjVpceUztCbMJCJ",
+    "ReleaseCycle": "5.38",
+    "Eol": "2026-07-02",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2023-11-25",
+    "ReleaseDate": "2023-11-25"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "perl",
+    "version": "5.38.2-r0",
+    "type": "apk",
+    "locations": [
+     {
+      "path": "/lib/apk/db/installed",
+      "layerID": "sha256:9a7757f1d3302a649e8a9cd79b2e7697648b80f27358365ec4b6042c7758e6d1"
+     }
+    ],
+    "language": "",
+    "licenses": [
+     "Artistic-1.0-Perl OR GPL-1.0-or-later"
+    ],
+    "cpes": [
+     "cpe:2.3:a:perl:perl:5.38.2-r0:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:apk/alpine/perl@5.38.2-r0?arch=x86_64&distro=alpine-3.20.3",
+    "upstreams": [
+     {
+      "name": "perl"
+     }
+    ],
+    "metadata": {
+     "files": [
+      {
+       "path": "/usr"
+      },
+      {
+       "path": "/usr/bin"
+      },
+      {
+       "path": "/usr/bin/perl"
+      },
+      {
+       "path": "/usr/bin/perl5.38.2"
+      },
+      {
+       "path": "/usr/bin/perldoc"
+      },
+      {
+       "path": "/usr/bin/pod2html"
+      },
+      {
+       "path": "/usr/bin/pod2man"
+      },
+      {
+       "path": "/usr/bin/pod2text"
+      },
+      {
+       "path": "/usr/bin/pod2usage"
+      },
+      {
+       "path": "/usr/bin/podchecker"
+      },
+      {
+       "path": "/usr/bin/streamzip"
+      },
+      {
+       "path": "/usr/lib"
+      },
+      {
+       "path": "/usr/lib/perl5"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Config.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Config_git.pl"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Config_heavy.pl"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Cwd.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/DynaLoader.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Errno.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Fcntl.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/O.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Opcode.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/POSIX.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/SDBM_File.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Socket.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Storable.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/attributes.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/encoding.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/lib.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/mro.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/ops.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/re.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/threads.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B/Concise.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B/Showlex.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B/Terse.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/B/Xref.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/CORE"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/CORE/libperl.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Compress"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Compress/Raw"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Compress/Raw/Bzip2.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Compress/Raw/Zlib.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Data"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Data/Dumper.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Digest"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Digest/MD5.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Digest/SHA.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Alias.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Byte.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/CJKConstants.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/CN.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Config.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/EBCDIC.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Encoder.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Encoding.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/GSM0338.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Guess.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/JP.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/KR.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Symbol.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/TW.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Unicode.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/CN"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/CN/HZ.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/JP"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/JP/H2Z.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/JP/JIS7.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/KR"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/KR/2022_KR.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/MIME"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/MIME/Header.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/MIME/Name.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/MIME/Header"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/MIME/Header/ISO_2022_JP.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Unicode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Encode/Unicode/UTF7.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/DosGlob.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Glob.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/AmigaOS.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Cygwin.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Epoc.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Functions.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Mac.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/OS2.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Unix.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/VMS.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/File/Spec/Win32.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Filter"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Filter/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Filter/Util/Call.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Hash"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Hash/Util.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Hash/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Hash/Util/FieldHash.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/I18N"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/I18N/Langinfo.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Dir.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/File.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Handle.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Pipe.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Poll.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Seekable.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Select.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Socket.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Socket"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Socket/INET.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IO/Socket/UNIX.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IPC"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IPC/Msg.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IPC/Semaphore.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IPC/SharedMem.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/IPC/SysV.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/List"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/List/Util.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/List/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/List/Util/XS.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/MIME"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/MIME/Base64.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/MIME/QuotedPrint.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Math"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Math/BigInt"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Math/BigInt/FastCalc.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/PerlIO"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/PerlIO/encoding.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/PerlIO/mmap.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/PerlIO/scalar.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/PerlIO/via.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Scalar"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Scalar/Util.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Sub"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Sub/Util.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Sys"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Sys/Hostname.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Sys/Syslog.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Time"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Time/HiRes.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Time/Piece.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Time/Seconds.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Unicode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Unicode/Collate.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Unicode/Normalize.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Unicode/Collate"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/Unicode/Collate/Locale.pm"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/B"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/B/B.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress/Raw"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress/Raw/Bzip2"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress/Raw/Bzip2/Bzip2.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress/Raw/Zlib"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Compress/Raw/Zlib/Zlib.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Cwd"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Cwd/Cwd.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Data"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Data/Dumper"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Data/Dumper/Dumper.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Devel"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Devel/Peek"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Devel/Peek/Peek.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Digest"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Digest/MD5"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Digest/MD5/MD5.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Digest/SHA"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Digest/SHA/SHA.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Encode.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Byte"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Byte/Byte.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/CN"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/CN/CN.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/EBCDIC"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/EBCDIC/EBCDIC.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/JP"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/JP/JP.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/KR"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/KR/KR.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Symbol"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Symbol/Symbol.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/TW"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/TW/TW.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Unicode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Encode/Unicode/Unicode.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Fcntl"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Fcntl/Fcntl.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/File"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/File/DosGlob"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/File/DosGlob/DosGlob.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/File/Glob"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/File/Glob/Glob.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Filter"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Filter/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Filter/Util/Call"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Filter/Util/Call/Call.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Hash"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Hash/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Hash/Util/Util.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Hash/Util/FieldHash"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Hash/Util/FieldHash/FieldHash.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/I18N"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/I18N/Langinfo"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/I18N/Langinfo/Langinfo.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/IO"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/IO/IO.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/IPC"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/IPC/SysV"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/IPC/SysV/SysV.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/List"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/List/Util"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/List/Util/Util.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/MIME"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/MIME/Base64"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/MIME/Base64/Base64.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Math"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Math/BigInt"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Math/BigInt/FastCalc"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Math/BigInt/FastCalc/FastCalc.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Opcode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Opcode/Opcode.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/POSIX"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/POSIX/POSIX.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/encoding"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/encoding/encoding.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/mmap"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/mmap/mmap.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/scalar"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/scalar/scalar.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/via"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/PerlIO/via/via.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/SDBM_File"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/SDBM_File/SDBM_File.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Socket"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Socket/Socket.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Storable"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Storable/Storable.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Sys"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Sys/Hostname"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Sys/Hostname/Hostname.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Sys/Syslog"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Sys/Syslog/Syslog.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Time"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Time/HiRes"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Time/HiRes/HiRes.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Time/Piece"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Time/Piece/Piece.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Unicode"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Unicode/Collate"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Unicode/Collate/Collate.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Unicode/Normalize"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/Unicode/Normalize/Normalize.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/attributes"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/attributes/attributes.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/mro"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/mro/mro.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/re"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/re/re.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/threads"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/threads/threads.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/threads/shared"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/auto/threads/shared/shared.so"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/threads"
+      },
+      {
+       "path": "/usr/lib/perl5/core_perl/threads/shared.pm"
+      },
+      {
+       "path": "/usr/local"
+      },
+      {
+       "path": "/usr/local/lib"
+      },
+      {
+       "path": "/usr/local/lib/perl5"
+      },
+      {
+       "path": "/usr/local/lib/perl5/site_perl"
+      },
+      {
+       "path": "/usr/local/share"
+      },
+      {
+       "path": "/usr/local/share/perl5"
+      },
+      {
+       "path": "/usr/local/share/perl5/site_perl"
+      },
+      {
+       "path": "/usr/share"
+      },
+      {
+       "path": "/usr/share/perl5"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/AnyDBM_File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/AutoLoader.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/AutoSplit.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Benchmark.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Carp.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DB.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Digest.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DirHandle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Dumpvalue.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/English.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Env.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Exporter.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Fatal.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/FileCache.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/FileHandle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/FindBin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/NEXT.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/PerlIO.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Safe.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/SelectSaver.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/SelfLoader.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Symbol.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Thread.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/UNIVERSAL.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/XSLoader.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/_charnames.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autouse.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bigfloat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bigint.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bignum.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bigrat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/blib.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/builtin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bytes.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/bytes_heavy.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/charnames.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/constant.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/deprecate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/diagnostics.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/dumpvar.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/experimental.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/feature.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/fields.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/filetest.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/if.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/integer.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/less.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/locale.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/meta_notation.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ok.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/open.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/overload.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/overloading.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/parent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/perl5db.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/perlfaq.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/sigtrap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/sort.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/stable.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/strict.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/subs.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/utf8.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/vars.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/version.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/vmsish.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/warnings.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Cpan.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove/State.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove/State"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove/State/Result.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove/State/Result"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/App/Prove/State/Result/Test.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Archive"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Archive/Tar.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Archive/Tar"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Archive/Tar/Constant.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Archive/Tar/File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Attribute"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Attribute/Handlers.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/B"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/B/Deparse.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/B/Op_private.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Author.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Bundle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/CacheMgr.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Complete.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Debug.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/DeferredCode.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Distribution.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Distroprefs.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Distrostatus.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/FTP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/FirstTime.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/HandleConfig.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Index.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/InfoObj.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Kwalify.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Mirrors.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Module.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Nox.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Plugin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Prompt.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Queue.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Shell.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Tarzip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/URL.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Version.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Exception"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Exception/RecursiveDependency.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Exception/blocked_urllist.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Exception/yaml_not_installed.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Exception/yaml_process_error.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/FTP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/FTP/netrc.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/HTTP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/HTTP/Client.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/HTTP/Credentials.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Kwalify"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Kwalify/distroprefs.dd"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Kwalify/distroprefs.yml"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/LWP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/LWP/UserAgent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Converter.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Feature.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/History.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Merge.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Prereqs.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Requirements.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Spec.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/Validator.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Meta/YAML.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Plugin"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/CPAN/Plugin/Specfile.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Carp"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Carp/Heavy.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Class"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Class/Struct.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Compress"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Compress/Zlib.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Config"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Config/Extensions.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Config/Perl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Config/Perl/V.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter/compress.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter/encode.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter/int32.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter/null.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/DBM_Filter/utf8.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Devel"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Devel/SelfStubber.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Digest"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Digest/base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Digest/file.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Exporter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Exporter/Heavy.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Command.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Embed.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Install.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Installed.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Liblist.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MANIFEST.SKIP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_AIX.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Any.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_BeOS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Cygwin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_DOS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Darwin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_MacOS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_NW5.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_OS2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_OS390.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_QNX.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_UWIN.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Unix.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_VMS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_VOS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Win32.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MM_Win95.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MY.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MakeMaker.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Manifest.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Miniperl.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Mkbootstrap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Mksymlists.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/PL2Bat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Packlist.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/testlib.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/typemap"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/xsubpp"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Unix.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/VMS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Windows.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/aix.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/android.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/cygwin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/darwin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/dec_osf.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/os2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Windows"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Windows/BCC.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Windows/GCC.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/CBuilder/Platform/Windows/MSVC.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Command"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Command/MM.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant/ProxySubs.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant/Utils.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Constant/XS.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Liblist"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Liblist/Kid.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MakeMaker"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MakeMaker/Config.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MakeMaker/Locale.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/MakeMaker/version.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS/Constants.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS/CountLines.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS/Eval.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/ParseXS/Utilities.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps/Cmd.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps/InputMap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps/OutputMap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/ExtUtils/Typemaps/Type.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Basename.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Compare.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Copy.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Fetch.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Find.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/GlobMapper.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Path.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/Temp.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/File/stat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Filter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Filter/Simple.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Getopt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Getopt/Long.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Getopt/Std.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/HTTP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/HTTP/Tiny.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N/Collate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N/LangTags.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N/LangTags"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N/LangTags/Detect.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/I18N/LangTags/List.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Zlib.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Bzip2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Deflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Gzip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/RawDeflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Adapter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Adapter/Bzip2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Adapter/Deflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Adapter/Identity.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Base"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Base/Common.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Gzip"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Gzip/Constants.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zip"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zip/Constants.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zlib"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zlib/Constants.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Compress/Zlib/Extra.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Socket"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Socket/IP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/AnyInflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/AnyUncompress.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Bunzip2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Gunzip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Inflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/RawInflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Unzip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Adapter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Adapter/Bunzip2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Adapter/Identity.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IO/Uncompress/Adapter/Inflate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IPC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IPC/Cmd.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IPC/Open2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/IPC/Open3.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/JSON"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/JSON/PP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/JSON/PP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/JSON/PP/Boolean.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale/Maketext.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale/Maketext"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale/Maketext/Guts.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale/Maketext/GutsLoader.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Locale/Maketext/Simple.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigFloat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigInt.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigRat.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/Complex.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/Trig.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigFloat"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigFloat/Trace.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigInt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigInt/Calc.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigInt/Lib.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigInt/Trace.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigRat"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Math/BigRat/Trace.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize/AnyDBM_File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize/Expire.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize/NDBM_File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize/SDBM_File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Memoize/Storable.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/CoreList.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/Load.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/Loaded.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/Metadata.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/CoreList"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/CoreList/Utils.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/Load"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Module/Load/Conditional.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Cmd.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Config.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Domain.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/NNTP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Netrc.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/POP3.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Ping.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/SMTP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/Time.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/hostent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/netent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/protoent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/servent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP/A.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP/E.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP/I.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP/L.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Net/FTP/dataconn.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Params"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Params/Check.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Parse"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Parse/CPAN"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Parse/CPAN/Meta.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Perl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Perl/OSType.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/PerlIO"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/PerlIO/via"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/PerlIO/via/QuotedPrint.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Checker.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Escapes.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Functions.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Html.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Man.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/ParseLink.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Text.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Usage.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Html"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Html/Util.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/BaseTo.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/GetOptsOO.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToANSI.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToChecker.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToMan.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToNroff.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToPod.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToRtf.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToTerm.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToText.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToTk.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Perldoc/ToXml.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/BlackBox.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Checker.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Debug.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/DumpAsText.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/DumpAsXML.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/HTML.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/HTMLBatch.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/HTMLLegacy.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/JustPod.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/LinkSection.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Methody.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Progress.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/PullParser.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/PullParserEndToken.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/PullParserStartToken.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/PullParserTextToken.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/PullParserToken.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/RTF.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Search.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/SimpleTree.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Text.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/TextContent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/TiedOutFH.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/Transcode.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/TranscodeDumb.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/TranscodeSmart.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/XHTML.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Simple/XMLOutStream.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Text"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Text/Color.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Text/Overstrike.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Pod/Text/Termcap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Search"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Search/Dict.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Harness.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Object.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Base.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Color.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Console.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Session.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Console"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Console/ParallelSession.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/Console/Session.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/File"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Formatter/File/Session.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Harness"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Harness/Env.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Aggregator.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Grammar.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Iterator.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/IteratorFactory.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Multiplexer.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/ResultFactory.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Scheduler.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Source.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Iterator"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Iterator/Array.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Iterator/Process.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Iterator/Stream.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Bailout.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Comment.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Plan.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Pragma.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Test.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Unknown.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/Version.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Result/YAML.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Scheduler"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Scheduler/Job.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/Scheduler/Spinner.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler/Executable.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler/File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler/Handle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler/Perl.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/SourceHandler/RawTAP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/YAMLish"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/YAMLish/Reader.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/TAP/Parser/YAMLish/Writer.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Term"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Term/ANSIColor.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Term/Cap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Term/Complete.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Term/ReadLine.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Harness.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/More.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Simple.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Tester.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/Formatter.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/Module.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/Tester.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/TodoDiag.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/IO"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/IO/Scalar.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/Tester"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Builder/Tester/Color.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Tester"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Tester/Capture.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Tester/CaptureRunner.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/Tester/Delegate.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/use"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test/use/ok.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Formatter.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/IPC.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/Breakage.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/Context.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/Instance.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/Stack.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult/Event.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult/Facet.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult/Hub.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/API/InterceptResult/Squasher.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Bail.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Diag.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Encoding.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Exception.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Fail.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Generic.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Note.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Ok.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Pass.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Plan.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Skip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Subtest.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/V2.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/Waiting.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/TAP"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Event/TAP/Version.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/About.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Amnesty.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Assert.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Control.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Error.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Hub.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Info.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Meta.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Parent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Plan.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Render.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Trace.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Info"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/EventFacet/Info/Table.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Formatter"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Formatter/TAP.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub/Interceptor.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub/Subtest.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub/Interceptor"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Hub/Interceptor/Terminator.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/IPC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/IPC/Driver.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/IPC/Driver"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/IPC/Driver/Files.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Tools"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Tools/Tiny.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util/ExternalMeta.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util/Facets2Legacy.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util/HashBase.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Test2/Util/Trace.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text/Abbrev.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text/Balanced.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text/ParseWords.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text/Tabs.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Text/Wrap.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Thread"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Thread/Queue.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Thread/Semaphore.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Array.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/File.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Handle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Hash.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Memoize.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/RefHash.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Scalar.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/StdHandle.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/SubstrHash.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Hash"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Tie/Hash/NamedCapture.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Time"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Time/Local.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Time/gmtime.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Time/localtime.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Time/tm.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/UCD.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/allkeys.txt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/keys.txt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/Big5.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/GB2312.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/JISX0208.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/Korean.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/Pinyin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/Stroke.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/CJK/Zhuyin.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/af.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ar.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/as.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/az.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/be.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/bn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ca.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/cs.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/cu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/cy.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/da.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/de_at_ph.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/de_phone.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/dsb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ee.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/eo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/es.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/es_trad.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/et.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fa.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fi_phone.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fil.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/fr_ca.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/gu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ha.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/haw.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/he.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/hi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/hr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/hu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/hy.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ig.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/is.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ja.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/kk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/kl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/kn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ko.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/kok.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/lkt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ln.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/lt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/lv.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/mk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ml.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/mr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/mt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/nb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/nn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/nso.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/om.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/or.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/pa.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/pl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ro.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sa.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/se.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/si.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/si_dict.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sq.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sv.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/sv_refo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ta.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/te.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/th.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/tn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/to.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/tr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ug_cyrl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/uk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/ur.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/vi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/vo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/wae.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/wo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/yo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh_big5.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh_gb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh_pin.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh_strk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/Unicode/Collate/Locale/zh_zhu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/User"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/User/grent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/User/pwent.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/Util.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/exception.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/hints.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/skip.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/Scope"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/Scope/Guard.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/Scope/GuardStack.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/exception"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/autodie/exception/system.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/encoding"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/encoding/warnings.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/overload"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/overload/numbers.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/Blocks.txt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/CombiningClass.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/Decomposition.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/Name.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/Name.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/NamedSequences.txt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/SpecialCasing.txt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/TestNorm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/UCD.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/uni_keywords.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/version"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Age.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Bc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Bmg.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Bpb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Bpt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Cf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Ea.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/EqUIdeo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/GCB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Gc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Hst.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Identif2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Identifi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/InPC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/InSC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Isc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Jg.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Jt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Lb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Lc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NFCQC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NFDQC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NFKCCF.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NFKCQC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NFKDQC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Na1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/NameAlia.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Nt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Nv.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/PerlDeci.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/SB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Sc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Scx.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Tc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Uc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/Vo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/WB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/_PerlLB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/To/_PerlSCX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/NA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V100.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V11.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V110.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V120.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V130.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V140.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V150.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V20.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V30.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V31.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V32.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V40.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V41.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V50.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V51.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V52.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V60.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V61.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V70.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V80.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Age/V90.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Alpha"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Alpha/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/AL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/AN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/B.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/BN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/CS.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/EN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/ES.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/ET.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/L.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/NSM.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/ON.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/R.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bc/WS.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/BidiC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/BidiC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/BidiM"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/BidiM/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Blk"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Blk/NB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bpt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bpt/C.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bpt/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Bpt/O.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CE"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CE/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CI"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CI/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWCF"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWCF/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWCM"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWCM/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWKCF"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWKCF/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWL"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWL/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWT"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWT/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWU"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CWU/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Cased"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Cased/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/A.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/AL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/AR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/ATAR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/B.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/BR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/DB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/NK.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/NR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/OV.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ccc/VR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CompEx"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/CompEx/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/DI"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/DI/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dash"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dash/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dep"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dep/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dia"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dia/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Com.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Enc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Fin.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Font.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Init.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Iso.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Med.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Nar.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Nb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/NonCanon.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Sqr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Sub.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Sup.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Dt/Vert.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EBase"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EBase/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EComp"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EComp/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EPres"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/EPres/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea/A.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea/H.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea/Na.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ea/W.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Emoji"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Emoji/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ext"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ext/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/ExtPict"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/ExtPict/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/CN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/EX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/LV.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/LVT.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/PP.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/SM.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GCB/XX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/C.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Cf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Cn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/L.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/LC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Ll.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Lm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Lo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Lu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/M.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Mc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Me.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Mn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Nd.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Nl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/No.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/P.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Pc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Pd.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Pe.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Pf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Pi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Po.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Ps.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/S.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Sc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Sk.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Sm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/So.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Z.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Gc/Zs.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GrBase"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GrBase/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GrExt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/GrExt/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hex"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hex/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hst"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hst/NA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hyphen"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Hyphen/T.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IDC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IDC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IDS"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IDS/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdStatus"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdStatus/Allowed.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdStatus/Restrict.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/DefaultI.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Exclusio.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Inclusio.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/LimitedU.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/NotChara.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/NotNFKC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/NotXID.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Obsolete.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Recommen.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Technica.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/IdType/Uncommon.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ideo"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Ideo/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/10_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/11_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/12_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/12_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/13_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/14_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/15_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/2_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/2_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/3_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/3_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/3_2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/4_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/4_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/5_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/5_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/5_2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/6_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/6_1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/6_2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/6_3.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/7_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/8_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/In/9_0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/Bottom.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/BottomAn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/Left.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/LeftAndR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/NA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/Overstru.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/Right.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/Top.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/TopAndBo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/TopAndL2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/TopAndLe.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/TopAndRi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InPC/VisualOr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Avagraha.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Bindu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Cantilla.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona3.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona4.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona5.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona6.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona7.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona8.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consona9.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Consonan.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Geminati.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Invisibl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Nukta.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Number.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Other.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/PureKill.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Syllable.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/ToneMark.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Virama.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Visarga.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/Vowel.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/VowelDep.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/InSC/VowelInd.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Ain.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Alef.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Beh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Dal.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/FarsiYeh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Feh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Gaf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Hah.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/HanifiRo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Kaf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Lam.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/NoJoinin.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Noon.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Qaf.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Reh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Sad.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Seen.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Tah.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Waw.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jg/Yeh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/C.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/D.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/L.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/R.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/T.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Jt/U.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/AI.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/AL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/BA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/BB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/CJ.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/CL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/CM.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/EX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/GL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/ID.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/IN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/IS.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/NS.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/NU.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/OP.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/PO.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/PR.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/QU.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/SA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lb/XX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lower"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Lower/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Math"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Math/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFCQC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFCQC/M.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFCQC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFDQC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFDQC/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFDQC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKCQC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKCQC/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKCQC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKDQC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKDQC/N.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/NFKDQC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nt"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nt/Di.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nt/None.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nt/Nu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/0.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/10.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/100.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/10000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/100000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/11.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/12.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/13.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/14.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/15.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/16.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/17.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/18.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/19.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_16.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_3.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_4.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_6.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/1_8.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/20.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/200.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/2000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/20000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/2_3.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/3.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/30.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/300.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/3000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/30000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/3_16.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/3_4.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/4.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/40.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/400.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/4000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/40000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/5.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/50.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/500.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/5000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/50000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/6.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/60.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/600.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/6000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/60000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/7.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/70.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/700.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/7000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/70000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/8.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/80.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/800.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/8000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/80000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/9.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/90.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/900.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/9000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Nv/90000.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/PCM"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/PCM/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/PatSyn"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/PatSyn/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Alnum.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Assigned.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Blank.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Graph.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/PerlWord.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/PosixPun.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Print.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/SpacePer.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Title.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/Word.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/XPosixPu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlAny.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlCh2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlCha.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlFol.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlIDC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlIDS.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlIsI.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlNch.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlPat.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlPr2.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlPro.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Perl/_PerlQuo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/QMark"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/QMark/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/AT.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/CL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/EX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/FO.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/LE.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/LO.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/NU.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/SC.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/ST.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/Sp.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/UP.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SB/XX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SD"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/SD/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/STerm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/STerm/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Arab.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Beng.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Cprt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Cyrl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Deva.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Dupl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Geor.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Glag.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Gong.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Gonm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Gran.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Grek.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Gujr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Guru.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Han.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Hang.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Hira.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Kana.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Knda.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Latn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Limb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Linb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Mlym.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Mong.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Mult.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Orya.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Sinh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Syrc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Taml.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Telu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Zinh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Sc/Zyyy.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Adlm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Arab.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Armn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Beng.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Bhks.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Bopo.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Cakm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Cham.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Copt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Cprt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Cyrl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Deva.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Diak.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Dupl.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Ethi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Geor.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Glag.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Gong.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Gonm.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Gran.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Grek.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Gujr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Guru.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Han.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Hang.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Hebr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Hira.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Hmng.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Hmnp.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Kana.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Khar.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Khmr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Khoj.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Knda.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Kthi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Lana.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Lao.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Latn.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Limb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Lina.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Linb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Mlym.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Mong.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Mult.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Mymr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Nand.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Nko.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Orya.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Phlp.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Rohg.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Shrd.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Sind.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Sinh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Syrc.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Tagb.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Takr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Talu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Taml.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Tang.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Telu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Thaa.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Tibt.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Tirh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Vith.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Xsux.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Yezi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Yi.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Zinh.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Zyyy.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Scx/Zzzz.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Term"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Term/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/UIdeo"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/UIdeo/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Upper"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Upper/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/VS"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/VS/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Vo"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Vo/R.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Vo/Tr.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Vo/Tu.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/Vo/U.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/EX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/Extend.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/FO.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/HL.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/KA.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/LE.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/MB.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/ML.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/MN.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/NU.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/WSegSpac.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/WB/XX.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/XIDC"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/XIDC/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/XIDS"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/unicore/lib/XIDS/Y.pl"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/version"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/version/regex.pm"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/warnings"
+      },
+      {
+       "path": "/usr/share/perl5/core_perl/warnings/register.pm"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "source": {
+  "type": "image",
+  "target": {
+   "userInput": "docker.io/alpine/mysql:15.1",
+   "imageID": "sha256:4536a585a4470ded6e4bc7ee4cbea92c9509ee8034be1e9d598a83836da77088",
+   "manifestDigest": "sha256:6615ba1a15f08d3d2d94c500cb35716ecfc9dacff2d4f06a0c84bda3a0b454eb",
+   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+   "tags": [
+    "alpine/mysql:15.1"
+   ],
+   "imageSize": 88798763,
+   "layers": [
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:63ca1fbb43ae5034640e5e6cb3e083e05c290072c5366fcaa9d62435a4cced85",
+     "size": 7792915
+    },
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:9a7757f1d3302a649e8a9cd79b2e7697648b80f27358365ec4b6042c7758e6d1",
+     "size": 81005848
+    }
+   ],
+   "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjoxMTQ4LCJkaWdlc3QiOiJzaGEyNTY6NDUzNmE1ODVhNDQ3MGRlZDZlNGJjN2VlNGNiZWE5MmM5NTA5ZWU4MDM0YmUxZTlkNTk4YTgzODM2ZGE3NzA4OCJ9LCJsYXllcnMiOlt7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLCJzaXplIjo4MDgxOTIwLCJkaWdlc3QiOiJzaGEyNTY6NjNjYTFmYmI0M2FlNTAzNDY0MGU1ZTZjYjNlMDgzZTA1YzI5MDA3MmM1MzY2ZmNhYTlkNjI0MzVhNGNjZWQ4NSJ9LHsibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmRvY2tlci5pbWFnZS5yb290ZnMuZGlmZi50YXIuZ3ppcCIsInNpemUiOjgyMzQ4NTQ0LCJkaWdlc3QiOiJzaGEyNTY6OWE3NzU3ZjFkMzMwMmE2NDllOGE5Y2Q3OWIyZTc2OTc2NDhiODBmMjczNTgzNjVlYzRiNjA0MmM3NzU4ZTZkMSJ9XX0=",
+   "config": "eyJhcmNoaXRlY3R1cmUiOiJhbWQ2NCIsImNvbmZpZyI6eyJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iXSwiRW50cnlwb2ludCI6WyIvdXNyL2Jpbi9teXNxbCJdLCJDbWQiOlsiLS1oZWxwIl0sIkFyZ3NFc2NhcGVkIjp0cnVlfSwiY3JlYXRlZCI6IjIwMjQtMDktMjhUMDM6MDY6MDcuNDcwNjc3NDA4WiIsImhpc3RvcnkiOlt7ImNyZWF0ZWQiOiIyMDI0LTA5LTA2VDIyOjIwOjA3Ljc0MDU2NDkwMVoiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyAjKG5vcCkgQUREIGZpbGU6NTc1OGI5N2Q4MzAxYzg0YTIwNGE2ZTUxNjI0MTI3NWQ3ODVhN2NhZGU0MGIyZmI5OWYwMWZlMTIyNDgyZTI4MyBpbiAvICJ9LHsiY3JlYXRlZCI6IjIwMjQtMDktMDZUMjI6MjA6MDcuOTcyMzgxNzcxWiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgQ01EIFtcIi9iaW4vc2hcIl0iLCJlbXB0eV9sYXllciI6dHJ1ZX0seyJjcmVhdGVkIjoiMjAyNC0wOS0yOFQwMzowNjowNy40NzA2Nzc0MDhaIiwiY3JlYXRlZF9ieSI6IlJVTiAvYmluL3NoIC1jIGFwayBhZGQgLS11cGRhdGUgLS1uby1jYWNoZSBteXNxbC1jbGllbnQgIyBidWlsZGtpdCIsImNvbW1lbnQiOiJidWlsZGtpdC5kb2NrZXJmaWxlLnYwIn0seyJjcmVhdGVkIjoiMjAyNC0wOS0yOFQwMzowNjowNy40NzA2Nzc0MDhaIiwiY3JlYXRlZF9ieSI6IkVOVFJZUE9JTlQgW1wiL3Vzci9iaW4vbXlzcWxcIl0iLCJjb21tZW50IjoiYnVpbGRraXQuZG9ja2VyZmlsZS52MCIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDI0LTA5LTI4VDAzOjA2OjA3LjQ3MDY3NzQwOFoiLCJjcmVhdGVkX2J5IjoiQ01EIFtcIi0taGVscFwiXSIsImNvbW1lbnQiOiJidWlsZGtpdC5kb2NrZXJmaWxlLnYwIiwiZW1wdHlfbGF5ZXIiOnRydWV9XSwib3MiOiJsaW51eCIsInJvb3RmcyI6eyJ0eXBlIjoibGF5ZXJzIiwiZGlmZl9pZHMiOlsic2hhMjU2OjYzY2ExZmJiNDNhZTUwMzQ2NDBlNWU2Y2IzZTA4M2UwNWMyOTAwNzJjNTM2NmZjYWE5ZDYyNDM1YTRjY2VkODUiLCJzaGEyNTY6OWE3NzU3ZjFkMzMwMmE2NDllOGE5Y2Q3OWIyZTc2OTc2NDhiODBmMjczNTgzNjVlYzRiNjA0MmM3NzU4ZTZkMSJdfX0=",
+   "repoDigests": [
+    "alpine/mysql@sha256:8aaee7566ebe4a15a9b6d06aab905710a6e8de8c7b234cdf86f487c6e04ffec5"
+   ],
+   "architecture": "amd64",
+   "os": "linux"
+  }
+ },
+ "distro": {
+  "name": "alpine",
+  "version": "3.20.3",
+  "idLike": []
+ },
+ "descriptor": {
+  "name": "xeol",
+  "version": "[not provided]",
+  "configuration": {
+   "output": [
+    "json"
+   ],
+   "file": "",
+   "distro": "",
+   "check-for-app-update": true,
+   "platform": "",
+   "search": {
+    "scope": "squashed",
+    "unindexed-archives": false,
+    "indexed-archives": true
+   },
+   "db": {
+    "cache-dir": "/home/ub/.cache/xeol/db",
+    "update-url": "https://data.xeol.io/xeol/databases/listing.json",
+    "ca-cert": "",
+    "auto-update": true,
+    "validate-by-hash-on-start": false,
+    "validate-age": true,
+    "max-allowed-built-age": 7776000000000000
+   },
+   "lookahead": "1y",
+   "fail-on-eol-found": false,
+   "api-key": "",
+   "project-name": "",
+   "image-path": "Dockerfile",
+   "commit-hash": "",
+   "match": {
+    "Packages": {
+     "using-purls": true
+    },
+    "Distro": {
+     "using-cpes": true
+    }
+   },
+   "registry": {
+    "insecure-skip-tls-verify": false,
+    "insecure-use-http": false,
+    "auth": null,
+    "ca-cert": ""
+   },
+   "name": "",
+   "default-image-pull-source": "",
+   "show-vuln-count": false
+  },
+  "db": {
+   "built": "2025-07-23T00:00:45.408675Z",
+   "schemaVersion": 1,
+   "location": "/home/ub/.cache/xeol/db/1",
+   "checksum": "sha256:55c592c6f9d35d2b5c5e040a5f0950e0ec6002959ad99c54c984b9802309919c",
+   "error": null
+  }
+ }
+}
