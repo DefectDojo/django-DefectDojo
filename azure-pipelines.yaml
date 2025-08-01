@@ -61,7 +61,6 @@ steps:
       export DD_PROVIDER_TOKEN='.'
       export DD_CUSTOM_TAG_PARSER="asff_regex=."
 
-      python manage.py migrate
       python manage.py makemigrations dojo
       python manage.py migrate
 

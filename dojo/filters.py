@@ -640,7 +640,7 @@ class FindingTagFilter(DojoFilter):
     practice = ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",
-        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=GeneralSettings.get_value("TAGS_EXCLUDE_PRACTICE_FILTER", "")),
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=settings.TAGS_EXCLUDE_PRACTICE_FILTER),
         label="Practice",
         help_text="Filter Findings by the selected practices (tags)")
     test__tags = ModelMultipleChoiceFilter(
@@ -705,7 +705,7 @@ class FindingTagStringFilter(FilterSet):
     practice = ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",
-        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=GeneralSettings.get_value("TAGS_EXCLUDE_PRACTICE_FILTER", "")),
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=settings.TAGS_EXCLUDE_PRACTICE_FILTER),
         label="Practice",
         help_text="Filter Findings by the selected practices (tags)")
     test__tags_contains = CharFilter(
