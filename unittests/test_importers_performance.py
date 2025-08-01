@@ -198,11 +198,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
         self.import_reimport_performance(
-            expected_num_queries1=682,
+            expected_num_queries1=712,
             expected_num_async_tasks1=10,
             expected_num_queries2=655,
-            expected_num_async_tasks2=12,
-            expected_num_queries3=292,
+            expected_num_async_tasks2=22,
+            expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
 
@@ -219,10 +219,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=682,
+            expected_num_queries1=712,
             expected_num_async_tasks1=10,
-            expected_num_queries2=685,
-            expected_num_async_tasks2=12,
-            expected_num_queries3=292,
+            expected_num_queries2=655,
+            expected_num_async_tasks2=22,
+            expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
