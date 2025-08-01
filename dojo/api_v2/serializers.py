@@ -12,7 +12,6 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.validators import FileExtensionValidator
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
@@ -125,7 +124,7 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
-from dojo.validators import tag_validator
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2094,23 +2093,7 @@ class CommonImportScanSerializer(serializers.Serializer):
     file = serializers.FileField(
         allow_empty_file=True,
         required=False,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "xml",
-                    "csv",
-                    "nessus",
-                    "json",
-                    "jsonl",
-                    "html",
-                    "js",
-                    "zip",
-                    "xlsx",
-                    "txt",
-                    "sarif",
-                ],
-            ),
-        ],
+        validators=[ImporterFileExtensionValidator()],
     )
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)

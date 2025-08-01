@@ -18,7 +18,6 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
 from django.db.models import Count, Q
 from django.forms import modelformset_factory
 from django.forms.widgets import Select, Widget
@@ -113,7 +112,7 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
-from dojo.validators import tag_validator
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -533,23 +532,7 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         allow_empty_file=True,
         required=False,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "xml",
-                    "csv",
-                    "nessus",
-                    "json",
-                    "jsonl",
-                    "html",
-                    "js",
-                    "zip",
-                    "xlsx",
-                    "txt",
-                    "sarif",
-                ],
-            ),
-        ],
+        validators=[ImporterFileExtensionValidator()],
     )
 
     # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
@@ -674,23 +657,7 @@ class ReImportScanForm(forms.Form):
         label="Choose report file",
         allow_empty_file=True,
         required=False,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "xml",
-                    "csv",
-                    "nessus",
-                    "json",
-                    "jsonl",
-                    "html",
-                    "js",
-                    "zip",
-                    "xlsx",
-                    "txt",
-                    "sarif",
-                ],
-            ),
-        ],
+        validators=[ImporterFileExtensionValidator()],
     )
     close_old_findings = forms.BooleanField(help_text="Select if old findings in the same test that are no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
