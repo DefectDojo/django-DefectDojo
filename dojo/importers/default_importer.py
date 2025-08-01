@@ -199,6 +199,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Force parsers to use unsaved_tags (stored in below after saving)
             unsaved_finding.tags = None
             finding = self.process_cve(unsaved_finding)
+            # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
+            finding.set_hash_code(True)
+
             # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
             unsaved_finding.save_no_options()
 
@@ -220,14 +223,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
-            # all data is already saved on the finding, we only need to generate as store the hash_code
-            # this is an optimization to avoid a full UDPATE statement of the finding which is a quite a big object with lots of fields
-            # after that we tirgger the post processing directly
-            # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
-            # this would do a full UDPATE statement for the finding
-
-            finding.set_hash_code(True)
-            finding.save_no_options(update_fields=["hash_code"])
+            # all data is already saved on the finding, we only need to trigger post processing
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
