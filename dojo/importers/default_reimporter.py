@@ -611,8 +611,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Hash code is already calculated earlier as it's the primary matching criteria for reimport
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding = self.process_cve(unsaved_finding)
-        # Hash code is already calculated earlier as it's the primary matching criteria for reimport
-        # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save_no_options()
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
