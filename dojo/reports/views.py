@@ -756,12 +756,7 @@ class CSVExportView(View):
                 "MAXIMUM_FINDINGS_IN_REPORT",
                 1000)
         ):
-            logger.debug(
-                f"REPORT FINDING: Asynchronous report generation "
-                "enabled and findings count exceeds the limit. "
-                f"{self.findings.count()} >= {
-                    GeneralSettings.get_value(
-                        'MAXIMUM_FINDINGS_IN_REPORT', 1000)}")
+            
             request_data = {
                 "query_dict_get": urlencode(request.GET),
                 "query_string_meta": request.META.get('QUERY_STRING', ''),

@@ -96,7 +96,7 @@ class CSVReportManager(BaseReportManager):
         self.bucket = GeneralSettings.get_value("BUCKET_NAME_REPORT", "")
         self.expiration_time = GeneralSettings.get_value("EXPIRATION_URL_REPORT", 3600)
         self.key_cache = get_key_for_user_and_urlpath(self.request, base_key="report_finding")
-        self.url_path = f"{GeneralSettings.get_value("URL_FILE_BUKECT_REPORT_FINDINGS", 'report/')}{self.request.user.username}_{self.get_url_encode()}.csv"
+        self.url_path = f"{GeneralSettings.get_value('URL_FILE_BUKECT_REPORT_FINDINGS', 'report/')}{self.request.user.username}_{self.get_url_encode()}.csv"
         self.chunk_size = GeneralSettings.get_value("CHUNK_SIZE_REPORT", 8000)
         self.session_s3 = boto3.Session().client('s3', region_name=settings.AWS_REGION, config=Config(signature_version='s3v4'))
         self.buffer = io.StringIO()
