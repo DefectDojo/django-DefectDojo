@@ -1033,6 +1033,10 @@ class SLA_Configuration(models.Model):
         default=True,
         verbose_name=_("Enforce Low Finding SLA Days"),
         help_text=_("When enabled, low findings will be assigned an SLA expiration date based on the low finding SLA days within this SLA configuration."))
+    restart_sla_on_reactivation = models.BooleanField(
+        default=False,
+        verbose_name=_("Restart SLA when findings are reactivated"),
+        help_text=_("When enabled, findings that were previously mitigated but are reactivated durign reimport will have their SLA period restarted."))
     async_updating = models.BooleanField(
         default=False,
         help_text=_("Findings under this SLA configuration are asynchronously being updated"))
@@ -3105,8 +3109,11 @@ class Finding(models.Model):
             return self.sla_start_date
         return self.date
 
+    def get_sla_configuration(self):
+        return self.test.engagement.product.sla_configuration
+
     def get_sla_period(self):
-        sla_configuration = self.test.engagement.product.sla_configuration
+        sla_configuration = self.get_sla_configuration()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period

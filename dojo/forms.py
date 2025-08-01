@@ -2793,10 +2793,12 @@ class SLAConfigForm(forms.ModelForm):
             self.fields["low"].disabled = True
             self.fields["enforce_low"].disabled = True
             self.fields["low"].widget.attrs["message"] = msg
+            self.fields["restart_sla_on_reactivation"].disabled = True
+            self.fields["restart_sla_on_reactivation"].widget.attrs["message"] = msg
 
     class Meta:
         model = SLA_Configuration
-        fields = ["name", "description", "critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low"]
+        fields = ["name", "description", "critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low", "restart_sla_on_reactivation"]
 
 
 class DeleteSLAConfigForm(forms.ModelForm):
