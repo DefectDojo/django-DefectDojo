@@ -1749,6 +1749,9 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
     def setUp(self):
         testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
@@ -2024,6 +2027,9 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     def setUp(self):
         # still using the API to verify results
         testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
