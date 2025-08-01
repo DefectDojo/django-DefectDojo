@@ -453,7 +453,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         "have different dates, not taking action"
                     )
                 logger.debug(msg)
-                # Return True here to force the loop to continue
+                # Return True here to force the loop to continue to the next finding
                 return existing_finding, True
             # even if there is no mitigation time, skip it, because both the current finding and
             # the reimported finding are is_mitigated
@@ -480,8 +480,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 note.save()
                 existing_finding.notes.add(note)
-                existing_finding.save_no_options()
-            # Return True here to force the loop to continue
+            # Return True here to force the loop to continue to the next finding
             return existing_finding, True
         logger.debug(
             f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
