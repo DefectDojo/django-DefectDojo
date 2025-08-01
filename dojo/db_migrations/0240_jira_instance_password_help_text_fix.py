@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0238_finding_fix_available'),
+        ('dojo', '0239_sla_configuration_restart_sla_on_reactivation'),
     ]
 
     operations = [
