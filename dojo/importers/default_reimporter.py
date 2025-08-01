@@ -508,10 +508,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
-
-        existing_finding.save(dedupe_option=False)
-        # don't dedupe before endpoints are added
-        existing_finding.save(dedupe_option=False)
+        existing_finding = self.process_cve(existing_finding)
+        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
+        existing_finding.save_no_options()
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
@@ -559,6 +558,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
 
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
@@ -573,6 +573,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
@@ -608,8 +609,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # scan_date was provided, override value from parser
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
-        # Save it. Don't dedupe before endpoints are added.
         unsaved_finding = self.process_cve(unsaved_finding)
+        # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save_no_options()
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
@@ -652,8 +653,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process vulnerability IDs
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
-
-        return self.process_vulnerability_ids(self.process_cve(finding))
+        # legacy cve field has already been processed/set earlier
+        return self.process_vulnerability_ids(finding)
 
     def process_groups_for_all_findings(
         self,
