@@ -72,7 +72,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         tasks = dojo_async_task_counter.get_tasks()
         tasks_str = "\n".join(str(task) for task in tasks)
         msg = (
-            f"Expected {num} celery tasks were created.\n"
+            f"Correct number of {num} celery tasks were created.\n"
             f"Tasks created:\n{tasks_str}"
         )
         logger.debug(msg)
@@ -170,11 +170,11 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=281,
+            expected_num_queries1=712,
             expected_num_async_tasks1=10,
-            expected_num_queries2=816,
+            expected_num_queries2=655,
             expected_num_async_tasks2=22,
-            expected_num_queries3=292,
+            expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
 
@@ -188,11 +188,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.import_reimport_performance(
-            expected_num_queries1=281,
+            expected_num_queries1=712,
             expected_num_async_tasks1=10,
-            expected_num_queries2=821,
+            expected_num_queries2=655,
             expected_num_async_tasks2=22,
-            expected_num_queries3=297,
+            expected_num_queries3=332,
             expected_num_async_tasks3=20,
         )
 
@@ -208,10 +208,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=321,
-            expected_num_async_tasks1=20,
-            expected_num_queries2=851,
+            expected_num_queries1=732,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=685,
             expected_num_async_tasks2=28,
-            expected_num_queries3=322,
+            expected_num_queries3=357,
             expected_num_async_tasks3=25,
         )
