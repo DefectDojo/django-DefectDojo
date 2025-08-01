@@ -363,6 +363,8 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
 
     # STEP 1 run all status changing tasks sequentially to avoid race conditions
     if dedupe_option:
+        finding.set_hash_code(dedupe_option)
+        finding.save_no_options(update_fields=["hash_code"])
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
                 from dojo.utils import do_dedupe_finding
