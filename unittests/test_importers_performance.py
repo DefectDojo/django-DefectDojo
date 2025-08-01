@@ -168,7 +168,9 @@ class TestDojoImporterPerformance(DojoTestCase):
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
-    def test_import_reimport_reimport_performance(self):
+    # patch the we_want_async decorator to always return True so we don't depend on block_execution flag shenanigans
+    @patch("dojo.decorators.we_want_async", return_value=True)
+    def test_import_reimport_reimport_performance_async(self, mock):
         self.import_reimport_performance(
             expected_num_queries1=712,
             expected_num_async_tasks1=10,
