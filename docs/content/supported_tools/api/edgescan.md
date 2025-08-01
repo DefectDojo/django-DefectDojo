@@ -1,6 +1,6 @@
 ---
 title: "Edgescan"
-toc_hide: true
+weight: 0
 ---
 Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan).
 

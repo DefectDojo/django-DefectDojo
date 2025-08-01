@@ -1,7 +1,6 @@
 ---
-title: "Cobalt.io API Import
-"
-toc_hide: true
+title: "Cobalt.io API Import"
+weight: 0
 ---
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 
