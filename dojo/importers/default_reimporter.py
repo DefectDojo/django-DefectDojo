@@ -242,7 +242,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
                 # this would do a full UDPATE statement for the finding
                 finding.set_hash_code(True)
-                finding.save(update_fields=["hash_code"])
+                finding.save(update_fields=["hash_code", "cve"])
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
@@ -610,6 +610,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
         # Save it. Don't dedupe before endpoints are added.
+        unsaved_finding = self.process_cve(unsaved_finding)
         unsaved_finding.save_no_options()
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
@@ -653,7 +654,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
 
-        return self.process_vulnerability_ids(finding)
+        return self.process_vulnerability_ids(self.process_cve(finding))
 
     def process_groups_for_all_findings(
         self,
