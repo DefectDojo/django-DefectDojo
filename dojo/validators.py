@@ -5,6 +5,7 @@ from collections.abc import Callable
 import cvss.parser
 from cvss import CVSS2, CVSS3, CVSS4
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 logger = logging.getLogger(__name__)
 
@@ -72,3 +73,12 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
     # to avoid 'NoneType' errors during severity processing later.
     msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
     raise exception_class(msg)
+
+
+class ImporterFileExtensionValidator(FileExtensionValidator):
+    default_allowed_extensions = ["xml", "csv", "nessus", "json", "jsonl", "html", "js", "zip", "xlsx", "txt", "sarif"]
+
+    def __init__(self, *args: list, **kwargs: dict):
+        if "allowed_extensions" not in kwargs:
+            kwargs["allowed_extensions"] = self.default_allowed_extensions
+        super().__init__(*args, **kwargs)

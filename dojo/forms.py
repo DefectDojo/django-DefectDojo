@@ -112,7 +112,7 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
-from dojo.validators import tag_validator
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -525,11 +525,15 @@ class ImportScanForm(forms.Form):
     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+    file = forms.FileField(
+        widget=forms.widgets.FileInput(
+            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
+        ),
         label="Choose report file",
         allow_empty_file=True,
-        required=False)
+        required=False,
+        validators=[ImporterFileExtensionValidator()],
+    )
 
     # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
     # Exposing the choice as two different check boxes.
@@ -646,11 +650,15 @@ class ReImportScanForm(forms.Form):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label="Systems / Endpoints")
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+    file = forms.FileField(
+        widget=forms.widgets.FileInput(
+            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
+        ),
         label="Choose report file",
         allow_empty_file=True,
-        required=False)
+        required=False,
+        validators=[ImporterFileExtensionValidator()],
+    )
     close_old_findings = forms.BooleanField(help_text="Select if old findings in the same test that are no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")

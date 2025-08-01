@@ -124,7 +124,7 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
-from dojo.validators import tag_validator
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2090,7 +2090,11 @@ class CommonImportScanSerializer(serializers.Serializer):
         default=None,
         help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
-    file = serializers.FileField(allow_empty_file=True, required=False)
+    file = serializers.FileField(
+        allow_empty_file=True,
+        required=False,
+        validators=[ImporterFileExtensionValidator()],
+    )
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
