@@ -42,7 +42,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         super().setUp()
 
         testuser = User.objects.create(username="admin")
-        UserContactInfo.objects.create(user=testuser, block_execution=True)
+        UserContactInfo.objects.create(user=testuser, block_execution=False)
 
         self.system_settings(enable_webhooks_notifications=False)
         self.system_settings(enable_product_grade=False)
