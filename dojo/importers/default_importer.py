@@ -226,8 +226,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
             # this would do a full UDPATE statement for the finding
 
+            logger.debug("setting hash_code and cve for finding %s", finding.id)
             finding.set_hash_code(True)
-            finding.save(update_fields=["hash_code", "cve"])
+            finding.save_no_options(update_fields=["hash_code"])
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)

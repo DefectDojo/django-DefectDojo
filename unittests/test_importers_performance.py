@@ -24,7 +24,9 @@ from dojo.models import (
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings.json"
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
@@ -66,6 +68,14 @@ class TestDojoImporterPerformance(DojoTestCase):
                 f"Tasks created:\n{tasks_str}"
             )
             raise self.failureException(msg)
+
+        tasks = dojo_async_task_counter.get_tasks()
+        tasks_str = "\n".join(str(task) for task in tasks)
+        msg = (
+            f"Expected {num} celery tasks were created.\n"
+            f"Tasks created:\n{tasks_str}"
+        )
+        logger.debug(msg)
 
     def import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
         """
