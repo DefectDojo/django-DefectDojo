@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from time import strftime
 
 from django.conf import settings
@@ -446,8 +447,10 @@ def finding_delete(instance, **kwargs):
 
 @receiver(post_delete, sender=Finding)
 def finding_post_delete(sender, instance, **kwargs):
-    logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    # calculate_grade(instance.test.engagement.product)
+    # Catch instances in async delete where a single object is deleted more than once
+    with suppress(Finding.DoesNotExist):
+        logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
+        # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):
