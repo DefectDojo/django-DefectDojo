@@ -237,7 +237,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # the alternative is to not trigger the post processing or generate the hash_code on the finding, but just call finding.save()
             # this would do a full UDPATE statement for the finding
 
-            logger.debug("setting hash_code and cve for finding %s", finding.id)
             finding.set_hash_code(True)
             finding.save_no_options(update_fields=["hash_code"])
 
