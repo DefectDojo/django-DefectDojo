@@ -4,5 +4,5 @@ register = template.Library()
 
 
 @register.filter
-def multiply(value, arg):
+def multiply(value, arg):  # noqa: FURB118
     return value * arg
