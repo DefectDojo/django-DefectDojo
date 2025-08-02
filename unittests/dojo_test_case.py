@@ -6,6 +6,7 @@ from itertools import chain
 from pathlib import Path
 from pprint import pformat
 
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -19,6 +20,8 @@ from dojo.jira_link.views import get_custom_field
 from dojo.middleware import DojoSytemSettingsMiddleware
 from dojo.models import (
     SEVERITIES,
+    Development_Environment,
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -486,6 +489,13 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
         super().setUp()
         # Initialize middleware with fresh settings from db
         DojoSytemSettingsMiddleware.load()
+
+        # Warm up ContentType cache for relevant models. This is needed if we want to be able to run the test in isolation
+        # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
+        # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
+        # By warming up the cache here, these queries are executed before we start counting queries
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
+            ContentType.objects.get_for_model(model)
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)

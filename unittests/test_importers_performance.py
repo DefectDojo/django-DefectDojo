@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 from crum import impersonate
-from django.contrib.contenttypes.models import ContentType
+from django.test import tag as test_tag
 from django.utils import timezone
 
 from dojo.decorators import dojo_async_task_counter
@@ -12,13 +12,9 @@ from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     Development_Environment,
     Dojo_User,
-    Endpoint,
-    Endpoint_Status,
     Engagement,
-    Finding,
     Product,
     Product_Type,
-    Test,
     User,
 )
 
@@ -43,13 +39,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)
 
-        # Warm up ContentType cache for relevant models. This is needed if we want to be able to run the test in isolation
-        # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
-        # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
-        # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
-            ContentType.objects.get_for_model(model)
-
     @contextmanager
     def assertNumAsyncTask(self, num):
         dojo_async_task_counter.start()
@@ -67,6 +56,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             )
             raise self.failureException(msg)
 
+    @test_tag("non-parallel")
     def import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
         """
         Log output can be quite large as when the assertNumQueries fails, all queries are printed.
@@ -158,6 +148,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
+    @test_tag("non-parallel")
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
             expected_num_queries1=712,
@@ -168,6 +159,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_async_tasks3=20,
         )
 
+    @test_tag("non-parallel")
     @patch("dojo.decorators.we_want_async", return_value=False)
     def test_import_reimport_reimport_performance_no_async(self, mock):
         """
@@ -186,6 +178,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_async_tasks3=20,
         )
 
+    @test_tag("non-parallel")
     @patch("dojo.decorators.we_want_async", return_value=False)
     def test_import_reimport_reimport_performance_no_async_with_product_grading(self, mock):
         """

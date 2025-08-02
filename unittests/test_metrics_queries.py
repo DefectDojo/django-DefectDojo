@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytz
 from django.test import RequestFactory
+from django.test import tag as test_tag
 from django.urls import reverse
 
 from dojo.metrics import utils
@@ -74,6 +75,7 @@ class FindingQueriesTest(DojoTestCase):
         )
 
     @patch("django.utils.timezone.now")
+    @test_tag("non-parallel")
     def test_finding_queries(self, mock_timezone):
         mock_datetime = datetime(2020, 12, 9, tzinfo=UTC)
         mock_timezone.return_value = mock_datetime
@@ -185,6 +187,7 @@ class EndpointQueriesTest(DojoTestCase):
         )
 
     @patch("dojo.filters.now")
+    @test_tag("non-parallel")
     def test_endpoint_queries(self, mock_now):
         fake_now = pytz.UTC.localize(datetime(2020, 7, 1))
         mock_now.return_value = fake_now
