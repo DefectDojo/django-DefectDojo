@@ -34,6 +34,9 @@ class TestSnykIssueApiParser(TestCase):
             self.assertEqual(True, finding.static_finding)
             self.assertEqual(False, finding.dynamic_finding)
             self.assertIn("Risk Score: 829", finding.severity_justification)
+            # Check fix_available if the field exists
+            if hasattr(finding, "fix_available"):
+                self.assertEqual(False, finding.fix_available)
 
             # Verify second finding
             finding = findings[1]
@@ -41,6 +44,9 @@ class TestSnykIssueApiParser(TestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(79, finding.cwe)
             self.assertEqual(True, finding.out_of_scope)  # This one is ignored
+            # Check fix_available if the field exists
+            if hasattr(finding, "fix_available"):
+                self.assertEqual(False, finding.fix_available)
 
             # Verify third finding
             finding = findings[2]
@@ -48,3 +54,6 @@ class TestSnykIssueApiParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(259, finding.cwe)
             self.assertEqual("Additional CWEs: CWE-798", finding.references)  # Has multiple CWEs
+            # Check fix_available if the field exists
+            if hasattr(finding, "fix_available"):
+                self.assertEqual(False, finding.fix_available)

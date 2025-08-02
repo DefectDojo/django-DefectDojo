@@ -134,9 +134,12 @@ class SnykIssueApiParser:
             active=attributes.get("status") == "open" and not attributes.get("ignored", False),
             verified=True,
             cwe=cwes[0] if cwes else None,
-            fix_available=fix_available,
             date=created,
         )
+
+        # Set fix_available if the field exists in the model
+        if hasattr(finding, "fix_available"):
+            finding.fix_available = fix_available
 
         # Add risk score if available
         risk = attributes.get("risk", {})

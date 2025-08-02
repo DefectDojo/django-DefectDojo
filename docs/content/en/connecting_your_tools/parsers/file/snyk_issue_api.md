@@ -35,7 +35,7 @@ The parser maps fields from the Snyk Issue API response to DefectDojo's Finding 
 | static_finding | true | Always set to true |
 | dynamic_finding | false | Always set to false |
 | out_of_scope | attributes.ignored | Set to true if issue is ignored |
-| fix_available | coordinates[].is_fixable_* | True if any fixability flag is true |
+| fix_available* | coordinates[].is_fixable_* | True if any fixability flag is true.  |
 
 #### Impact Field
 The impact field combines multiple pieces of information:
