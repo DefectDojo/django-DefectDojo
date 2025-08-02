@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from auditlog.context import set_actor
 from crum import impersonate
 from django.test import override_settings
+from django.test import tag as test_tag
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -43,6 +44,7 @@ from .dojo_test_case import DojoTestCase
 logger = logging.getLogger(__name__)
 
 
+@test_tag("non-parallel")
 class TestNotifications(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -201,6 +203,7 @@ class TestNotifications(DojoTestCase):
             self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
 
+@test_tag("non-parallel")
 class TestNotificationTriggers(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -397,6 +400,7 @@ class TestNotificationTriggers(DojoTestCase):
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted')
 
 
+@test_tag("non-parallel")
 class TestNotificationTriggersApi(APITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -413,6 +417,7 @@ class TestNotificationTriggersApi(APITestCase):
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type API" was deleted by admin')
 
 
+@test_tag("non-parallel")
 class TestNotificationWebhooks(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

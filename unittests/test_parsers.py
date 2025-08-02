@@ -8,8 +8,9 @@ from .dojo_test_case import DojoTestCase, get_unit_tests_path
 basedir = get_unit_tests_path().parent
 
 
-@test_tag("parser-supplement-tests")
+@test_tag("parser-supplement-tests", "non-parallel")
 class TestParsers(DojoTestCase):
+    @test_tag("non-parallel")
     def test_file_existence(self):
         for parser_dir in os.scandir(Path(basedir) / "dojo" / "tools"):
 
@@ -105,6 +106,7 @@ class TestParsers(DojoTestCase):
                                 read_true = True
                                 i = 0
 
+    @test_tag("non-parallel")
     def test_parser_existence(self):
         for docs in os.scandir(Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / "file"):
             if docs.name not in {
