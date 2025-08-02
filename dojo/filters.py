@@ -2017,7 +2017,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
 
 
 class FindingGroupsFilter(FilterSet):
-    name = CharFilter(method="filter_name", label="Name")
+    name = CharFilter(lookup_expr="icontains", label="Name")
     severity = ChoiceFilter(
         choices=[
             ("Low", "Low"),
@@ -2025,7 +2025,6 @@ class FindingGroupsFilter(FilterSet):
             ("High", "High"),
             ("Critical", "Critical"),
         ],
-        method="filter_min_severity",
         label="Min Severity",
     )
     engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")

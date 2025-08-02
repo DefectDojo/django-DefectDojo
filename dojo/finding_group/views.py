@@ -23,7 +23,8 @@ from dojo.filters import (
 )
 from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
-from dojo.models import Dojo_Group, Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
+from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
+from dojo.product.queries import get_authorized_products
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
@@ -290,8 +291,7 @@ class ListFindingGroups(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         global_role = Global_Role.objects.filter(user=request.user).first()
-        user_groups = Dojo_Group.objects.filter(users=request.user)
-        products = Product.objects.filter(Q(members=request.user) | Q(authorization_groups__in=user_groups)).distinct()
+        products = get_authorized_products(Permissions.Product_View)
         if request.user.is_superuser or (global_role and global_role.role):
             finding_groups = self.get_finding_groups(request)
         elif products.exists():
