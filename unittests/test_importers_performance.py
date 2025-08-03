@@ -217,12 +217,15 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.system_settings(enable_product_grade=True)
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
 
         self.import_reimport_performance(
-            expected_num_queries1=682,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=700,
-            expected_num_async_tasks2=12,
-            expected_num_queries3=292,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=732,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=685,
+            expected_num_async_tasks2=28,
+            expected_num_queries3=357,
+            expected_num_async_tasks3=25,
         )
