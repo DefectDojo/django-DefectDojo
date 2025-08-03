@@ -1439,6 +1439,10 @@ div.dt-buttons {
     margin: 10px!important;
 }
 
+div.dt-search {
+    display: inline-block!important;
+}
+
 table#product_types .btn-success{
 	background-color: #546474;
 	border-color: #546474;
