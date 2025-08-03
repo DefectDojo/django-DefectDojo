@@ -15,6 +15,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.decorators import we_want_async
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -159,7 +160,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         from dojo.finding import helper as finding_helper
         from dojo.models import Dojo_User
         from dojo.utils import calculate_grade, calculate_grade_signature
-        task_signatures = []
+        post_processing_task_signatures = []
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -240,29 +241,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Collect finding for parallel processing - we'll process them all at once after the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            # Process finding - either sync or async based on block_execution
-            if Dojo_User.wants_block_execution(self.user):
-                # This will run synchronously, but we still call the dojo_async decorated function to count the task
-                finding_helper.post_process_finding_save(
+            # Always create signatures - we'll execute them sync or async later
+            post_processing_task_signatures.append(
+                finding_helper.post_process_finding_save_signature(
                     finding,
                     dedupe_option=True,
                     rules_option=True,
                     product_grading_option=False,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
-                )
-            else:
-                # Add to task signatures for async execution
-                task_signatures.append(
-                    finding_helper.post_process_finding_save_signature(
-                        finding,
-                        dedupe_option=True,
-                        rules_option=True,
-                        product_grading_option=False,
-                        issue_updater_option=True,
-                        push_to_jira=push_to_jira,
-                    ),
-                )
+                ),
+            )
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -280,19 +269,18 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         # Calculate product grade after all findings are processed
         product = self.test.engagement.product
-        if task_signatures:
+        if post_processing_task_signatures:
             # If we have async tasks, use chord to wait for them before calculating grade
-            if Dojo_User.wants_block_execution(self.user):
-                # Run the chord synchronously by passing sync=True to each task
-                for task_sig in task_signatures:
-                    task_sig.apply_async(sync=True).get()
-                calculate_grade(product, sync=True)
+            if we_want_async(async_user=self.user):
+                # Run the chord asynchronously and after completing post processing tasks, calculate grade ONCE
+                chord(post_processing_task_signatures)(calculate_grade_signature(product))
             else:
-                # Run the chord asynchronously
-                chord(task_signatures)(calculate_grade_signature(product))
-        else:
-            # If everything was sync, calculate grade now as post processing is done
-            calculate_grade(product)
+                # Execute each task synchronously
+                for task_sig in post_processing_task_signatures:
+                    task_sig()
+
+        # Calculate grade, which can be prelimary calculated before the async tasks have finished
+        calculate_grade(product)
 
         sync = kwargs.get("sync", True)
         if not sync:

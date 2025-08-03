@@ -93,11 +93,12 @@ def dojo_async_task(func=None, *, signature=False):
                 kwargs=kwargs,
             )
 
+            if signature:
+                return func.si(*args, **kwargs)
+
             countdown = kwargs.pop("countdown", 0)
             if we_want_async(*args, func=func, **kwargs):
                 # Return a signature for use in chord/group if requested
-                if signature:
-                    return func.si(*args, **kwargs)
                 # Execute the task
                 return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
             return func(*args, **kwargs)
