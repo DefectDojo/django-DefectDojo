@@ -5,7 +5,7 @@ from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-import dojo.finding.helper as finding_helper
+
 import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
@@ -155,6 +155,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
+        from celery import chord
+        from dojo.finding import helper as finding_helper
+        from dojo.models import Dojo_User
+        from dojo.utils import calculate_grade, calculate_grade_signature
+        task_signatures = []
+
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -232,9 +238,31 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing
 
-            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            # Collect finding for parallel processing - we'll process them all at once after the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
+            # Process finding - either sync or async based on block_execution
+            if Dojo_User.wants_block_execution(self.user):
+                # This will run synchronously, but we still call the dojo_async decorated function to count the task
+                finding_helper.post_process_finding_save(
+                    finding,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=False,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira,
+                )
+            else:
+                # Add to task signatures for async execution
+                task_signatures.append(
+                    finding_helper.post_process_finding_save_signature(
+                        finding,
+                        dedupe_option=True,
+                        rules_option=True,
+                        product_grading_option=False,
+                        issue_updater_option=True,
+                        push_to_jira=push_to_jira,
+                    ),
+                )
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -249,6 +277,22 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+
+        # Calculate product grade after all findings are processed
+        product = self.test.engagement.product
+        if task_signatures:
+            # If we have async tasks, use chord to wait for them before calculating grade
+            if Dojo_User.wants_block_execution(self.user):
+                # Run the chord synchronously by passing sync=True to each task
+                for task_sig in task_signatures:
+                    task_sig.apply_async(sync=True).get()
+                calculate_grade(product, sync=True)
+            else:
+                # Run the chord asynchronously
+                chord(task_signatures)(calculate_grade_signature(product))
+        else:
+            # If everything was sync, calculate grade now as post processing is done
+            calculate_grade(product)
 
         sync = kwargs.get("sync", True)
         if not sync:
