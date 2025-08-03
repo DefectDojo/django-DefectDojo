@@ -370,6 +370,7 @@ def post_process_finding_save_signature(finding, dedupe_option=True, rules_optio
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
                                    issue_updater_option, push_to_jira, user, *args, **kwargs)
 
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
