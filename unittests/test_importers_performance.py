@@ -216,13 +216,16 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=682,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=610,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=292,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=702,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=645,
+            expected_num_async_tasks2=28,
+            expected_num_queries3=322,
+            expected_num_async_tasks3=25,
         )
