@@ -5,7 +5,6 @@ from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-
 import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
@@ -156,6 +155,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         **kwargs: dict,
     ) -> list[Finding]:
         from celery import chord
+
         from dojo.finding import helper as finding_helper
         from dojo.models import Dojo_User
         from dojo.utils import calculate_grade, calculate_grade_signature
