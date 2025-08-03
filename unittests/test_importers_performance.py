@@ -127,57 +127,57 @@ class TestDojoImporterPerformance(DojoTestCase):
             importer = DefaultImporter(**import_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
 
-        # # use reimport with the full report so it add a finding and some endpoints
-        # with (
-        #     self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
-        #     self.assertNumQueries(expected_num_queries2),
-        #     self.assertNumAsyncTask(expected_num_async_tasks2),
-        #     STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
-        # ):
-        #     reimport_options = {
-        #         "test": test,
-        #         "user": lead,
-        #         "lead": lead,
-        #         "scan_date": None,
-        #         "minimum_severity": "Info",
-        #         "active": True,
-        #         "verified": True,
-        #         "sync": True,
-        #         "scan_type": STACK_HAWK_SCAN_TYPE,
-        #         "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
-        #         "apply_tags_to_findings": True,
-        #     }
-        #     reimporter = DefaultReImporter(**reimport_options)
-        #     test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+        # use reimport with the full report so it add a finding and some endpoints
+        with (
+            self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
+            self.assertNumQueries(expected_num_queries2),
+            self.assertNumAsyncTask(expected_num_async_tasks2),
+            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+        ):
+            reimport_options = {
+                "test": test,
+                "user": lead,
+                "lead": lead,
+                "scan_date": None,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "sync": True,
+                "scan_type": STACK_HAWK_SCAN_TYPE,
+                "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
+                "apply_tags_to_findings": True,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
-        # # use reimport with the subset again to close a finding and mitigate some endpoints
-        # with (
-        #     self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
-        #     self.assertNumQueries(expected_num_queries3),
-        #     self.assertNumAsyncTask(expected_num_async_tasks3),
-        #     STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
-        # ):
-        #     reimport_options = {
-        #         "test": test,
-        #         "user": lead,
-        #         "lead": lead,
-        #         "scan_date": None,
-        #         "minimum_severity": "Info",
-        #         "active": True,
-        #         "verified": True,
-        #         "sync": True,
-        #         "scan_type": STACK_HAWK_SCAN_TYPE,
-        #     }
-        #     reimporter = DefaultReImporter(**reimport_options)
-        #     test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+        # use reimport with the subset again to close a finding and mitigate some endpoints
+        with (
+            self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
+            self.assertNumQueries(expected_num_queries3),
+            self.assertNumAsyncTask(expected_num_async_tasks3),
+            STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
+        ):
+            reimport_options = {
+                "test": test,
+                "user": lead,
+                "lead": lead,
+                "scan_date": None,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "sync": True,
+                "scan_type": STACK_HAWK_SCAN_TYPE,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
     # patch the we_want_async decorator to always return True so we don't depend on block_execution flag shenanigans
     # @patch("dojo.decorators.we_want_async", return_value=True)
     # def test_import_reimport_reimport_performance_async(self, mock):
     def test_import_reimport_reimport_performance_async(self):
         self.import_reimport_performance(
-            expected_num_queries1=682,
-            expected_num_async_tasks1=10,
+            expected_num_queries1=684,
+            expected_num_async_tasks1=11,
             expected_num_queries2=610,
             expected_num_async_tasks2=22,
             expected_num_queries3=292,
@@ -198,8 +198,8 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
         self.import_reimport_performance(
-            expected_num_queries1=682,
-            expected_num_async_tasks1=10,
+            expected_num_queries1=683,
+            expected_num_async_tasks1=11,
             expected_num_queries2=615,
             expected_num_async_tasks2=22,
             expected_num_queries3=297,
@@ -222,8 +222,8 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=702,
-            expected_num_async_tasks1=15,
+            expected_num_queries1=687,
+            expected_num_async_tasks1=11,
             expected_num_queries2=645,
             expected_num_async_tasks2=28,
             expected_num_queries3=322,
