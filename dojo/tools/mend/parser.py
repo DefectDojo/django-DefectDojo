@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime
+from contextlib import suppress
 
 from dojo.models import Finding
 
@@ -71,11 +72,8 @@ class MendParser:
                 kev_date_str = node["vulnerability"].get("publishDate", None)
                 kev_date = None
                 if kev_date_str:
-                    try:
-                        # Parses ISO 8601 format with Zulu time (Z)
+                    with suppress(ValueError):
                         kev_date = datetime.strptime(kev_date_str, "%Y-%m-%dT%H:%M:%SZ").date()
-                    except ValueError:
-                        pass
                 ransomware_used = node.get("malicious", None)
                 known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
