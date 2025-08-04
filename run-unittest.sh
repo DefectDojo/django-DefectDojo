@@ -15,9 +15,11 @@ usage() {
   echo "  --help -h - prints this dialogue."
   echo
   echo "You must specify a test case (arg)!"
+  echo "Any additional arguments will be passed to the test command."
   echo
-  echo "Example command:"
+  echo "Example commands:"
   echo "./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
+  echo "./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser -v3 --failfast"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -35,18 +37,12 @@ while [[ $# -gt 0 ]]; do
       usage
       exit 0
       ;;
-    -*)
-      echo "Unknown option $1"
-      usage
-      exit 1
-      ;;
     *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
+      EXTRA_ARGS+=("$1") # save extra arg
       shift # past argument
       ;;
   esac
 done
-
 
 if [ -z "$TEST_CASE" ]
 then

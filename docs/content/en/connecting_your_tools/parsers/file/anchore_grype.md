@@ -12,6 +12,11 @@ Anchore Grype JSON files are created using the Grype CLI, using the '--output=js
 grype yourApp/example-page --output=json=example_vulns.json
 {{< /highlight >}}
 
+It's possible to instruct Anchore to organize all findings by CVE (vs GHSA, RHSA, etc) using the `--by-cve` parameter.
+Considerations:
+- Using `--by-cve` could lead to more, or different Findings being created as some advisories fix multiple CVEs at once.
+- We recommend you consistently choose whether to use this flag or not in your report generation.  Mixing reports generated with `--by-cve` and without (via Reimport, for example) can lead to unpredictable results, such as mismatched Hash Codes.
+
 ### Acceptable JSON Format
 All properties are expected as strings and are required by the parser.
 

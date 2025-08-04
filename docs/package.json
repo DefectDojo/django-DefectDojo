@@ -12,6 +12,8 @@
     "preview": "vite preview --outDir public"
   },
   "dependencies": {
+    "@docsearch/css": "^3.9.0",
+    "@docsearch/js": "^3.9.0",
     "@thulite/doks-core": "1.8.0",
     "@thulite/images": "3.3.0",
     "@thulite/inline-svg": "1.2.0",
@@ -24,6 +26,6 @@
     "vite": "7.0.6"
   },
   "engines": {
-    "node": "22.17.1"
+    "node": "22.18.0"
   }
 }
