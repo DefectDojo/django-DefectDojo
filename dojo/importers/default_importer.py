@@ -6,6 +6,7 @@ from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -15,7 +16,6 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
-from dojo.decorators import we_want_async
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -158,7 +158,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         from celery import chord
 
         from dojo.finding import helper as finding_helper
-        from dojo.models import Dojo_User
         from dojo.utils import calculate_grade, calculate_grade_signature
         post_processing_task_signatures = []
 
