@@ -2,9 +2,9 @@ import logging
 import re
 from collections.abc import Callable
 
-import cvss.parser
 from cvss import CVSS2, CVSS3, CVSS4
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,9 @@ def clean_tags(value: str | list[str], exception_class: Callable = ValidationErr
 
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
-    logger.error("cvss3_validator called with value: %s", value)
-    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
+    logger.debug("cvss3_validator called with value: %s", value)
+    from dojo.utils import parse_cvss_from_text
+    cvss_vectors = parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
 
@@ -58,11 +59,10 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
             return
 
         if isinstance(vector_obj, CVSS4):
-            # CVSS4 is not supported yet by the parse_cvss_from_text function, but let's prepare for it anyway: https://github.com/RedHatProductSecurity/cvss/issues/53
-            msg = "Unsupported CVSS(4) version detected."
+            msg = "CVSS4 vector cannot be stored in the cvssv3 field. Use the cvssv4 field."
             raise exception_class(msg)
         if isinstance(vector_obj, CVSS2):
-            msg = "Unsupported CVSS(2) version detected."
+            msg = "Unsupported CVSS2 version detected."
             raise exception_class(msg)
 
         msg = "Unsupported CVSS version detected."
@@ -70,5 +70,41 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
 
     # Explicitly raise an error if no CVSS vectors are found,
     # to avoid 'NoneType' errors during severity processing later.
-    msg = "No valid CVSS vectors found by cvss.parse_cvss_from_text()"
+    msg = "No valid CVSS3 vectors found by cvss.parse_cvss_from_text()"
     raise exception_class(msg)
+
+
+def cvss4_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
+    logger.debug("cvss4_validator called with value: %s", value)
+    from dojo.utils import parse_cvss_from_text
+    cvss_vectors = parse_cvss_from_text(value)
+    if len(cvss_vectors) > 0:
+        vector_obj = cvss_vectors[0]
+
+        if isinstance(vector_obj, CVSS4):
+            # all is good
+            return
+
+        if isinstance(vector_obj, CVSS3):
+            msg = "CVSS3 vector cannot be stored in the cvssv4 field. Use the cvssv3 field."
+            raise exception_class(msg)
+        if isinstance(vector_obj, CVSS2):
+            msg = "Unsupported CVSS2 version detected."
+            raise exception_class(msg)
+
+        msg = "Unsupported CVSS version detected."
+        raise exception_class(msg)
+
+    # Explicitly raise an error if no CVSS vectors are found,
+    # to avoid 'NoneType' errors during severity processing later.
+    msg = "No valid CVSS4 vectors found by cvss.parse_cvss_from_text()"
+    raise exception_class(msg)
+
+
+class ImporterFileExtensionValidator(FileExtensionValidator):
+    default_allowed_extensions = ["xml", "csv", "nessus", "json", "jsonl", "html", "js", "zip", "xlsx", "txt", "sarif"]
+
+    def __init__(self, *args: list, **kwargs: dict):
+        if "allowed_extensions" not in kwargs:
+            kwargs["allowed_extensions"] = self.default_allowed_extensions
+        super().__init__(*args, **kwargs)

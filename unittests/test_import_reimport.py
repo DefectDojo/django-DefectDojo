@@ -1,9 +1,11 @@
-import datetime
-
 # from unittest import skip
 import logging
+import zoneinfo
+from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
+from dateutil.relativedelta import relativedelta
 from django.test import override_settings
 from django.test.client import Client
 from django.urls import reverse
@@ -777,13 +779,20 @@ class ImportReimportMixin:
     # - active findings count should be 4
     # - total  findings count should be 5
     # - zap1 active, zap4 inactive
-    def test_import_0_reimport_1_active_verified_reimport_0_active_verified(self):
+    # - zap1 is reactivated but should not have a new sla start date and expiration date
+    def test_import_0_reimport_1_active_verified_reimport_0_active_verified_sla_no_restart(self):
         logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
+
+        for finding in findings["results"]:
+            if "Zap1" in finding["title"]:
+                zap1_initial_sla_start_date = finding["sla_start_date"]
+                zap1_initial_sla_expiration_date = finding["sla_expiration_date"]
+
         self.log_finding_summary_json_api(findings)
 
         self.db_finding_count()
@@ -820,6 +829,8 @@ class ImportReimportMixin:
         for finding in findings["results"]:
             if "Zap1" in finding["title"]:
                 self.assertTrue(finding["active"])
+                self.assertEqual(finding["sla_start_date"], zap1_initial_sla_start_date)
+                self.assertEqual(finding["sla_expiration_date"], zap1_initial_sla_expiration_date)
                 zap1_ok = True
             if "Zap4" in finding["title"]:
                 self.assertFalse(finding["active"])
@@ -827,6 +838,90 @@ class ImportReimportMixin:
 
         self.assertTrue(zap1_ok)
         self.assertTrue(zap4_ok)
+
+        # verified findings must be equal to those in report 0
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(0, findings)
+
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(5, findings)
+
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+
+        # zap4 should be closed again so 2 mitigated eps, zap1 should be open again so 3 active extra
+        self.assertEqual(endpoint_status_count_before_active + 3 - 2, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated - 3 + 2, self.db_endpoint_status_count(mitigated=True))
+
+        # zap1 was closed and then opened -> 2 notes
+        # zap4 was created and then closed -> only 1 note
+        self.assertEqual(notes_count_before + 2 + 1, self.db_notes_count())
+
+    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed and then reimport 0 again
+    # - active findings count should be 4
+    # - total  findings count should be 5
+    # - zap1 active, zap4 inactive
+    # - zap1 is reactivated and should have a new sla start date and expiration date since we enabled that flag in the test case
+    @patch("django.utils.timezone.now")
+    def test_import_0_reimport_1_active_verified_reimport_0_active_verified_sla_restart(self, mock_now):
+        fake_now = datetime(2025, 7, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
+        mock_now.return_value = fake_now
+        logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again")
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0["test"]
+        findings = self.get_test_findings_api(test_id)
+
+        for finding in findings["results"]:
+            if "Zap1" in finding["title"]:
+                finding["sla_start_date"]
+                finding["sla_expiration_date"]
+                zap1 = Finding.objects.get(id=finding["id"])
+                sla_configuration = zap1.get_sla_configuration()
+                sla_configuration.restart_sla_on_reactivation = True
+                sla_configuration.save()
+
+        self.log_finding_summary_json_api(findings)
+
+        self.db_finding_count()
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+        notes_count_before = self.db_notes_count()
+
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
+
+        # zap1 should be closed 2 endpoint statuses less, but 2 extra for zap4
+        self.assertEqual(endpoint_status_count_before_active - 3 + 2, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated + 2, self.db_endpoint_status_count(mitigated=True))
+
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
+            self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        test_id = reimport1["test"]
+        self.assertEqual(test_id, test_id)
+
+        self.get_test_api(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # active findings must be equal to those in both reports
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4 + 1, findings)
+
+        for finding in findings["results"]:
+            if "Zap1" in finding["title"]:
+                self.assertTrue(finding["active"])
+                self.assertEqual(finding["sla_start_date"], fake_now.date().isoformat())
+                sla_days = finding["severity"].lower()
+                sla_config = Finding.objects.get(id=finding["id"]).test.engagement.product.sla_configuration
+                sla_expiration_date = fake_now.date() + relativedelta(days=getattr(sla_config, sla_days))
+                self.assertEqual(finding["sla_expiration_date"], sla_expiration_date.isoformat())
+            else:
+                self.assertIsNone(finding["sla_start_date"])
 
         # verified findings must be equal to those in report 0
         findings = self.get_test_findings_api(test_id, verified=True)
@@ -1584,8 +1679,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.UTC),
-            target_end=datetime.datetime.now(datetime.UTC),
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
         )
         reimport_test.save()
 
