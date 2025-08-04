@@ -1645,7 +1645,7 @@ class Engagement(models.Model):
         from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        with suppress(Product.DoesNotExist):
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.product)
@@ -2253,7 +2253,7 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.engagement.product)
@@ -2814,7 +2814,8 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+        system_settings = System_Settings.objects.get()
+        if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
@@ -2861,7 +2862,7 @@ class Finding(models.Model):
         from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.test.engagement.product)
