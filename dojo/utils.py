@@ -1485,6 +1485,17 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(find, note, prod, eng)
 
 
+@app.task
+def async_bulk_update_sla_start_date(tags, sla_start_date):
+    findings = Finding.objects.filter(active=True, tags__name__icontains=tags)
+    for finding in findings:
+        finding.sla_start_date = sla_start_date
+        finding.set_sla_expiration_date()
+
+    logger.info("Bulk updating SLA start date for %s findings with tag: %s", findings.count(), tags)
+    Finding.objects.bulk_update(findings, ["sla_start_date", "sla_expiration_date"], 1000)
+    logger.info("Bulk update completed for %s findings with tag: %s", findings.count(), tags)
+
 def process_tag_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r"(?:\A|\s)@(\w+)\b")
 
@@ -2793,7 +2804,7 @@ def calculate_severity_priority(tags, priority) -> int:
     """
     if tags:
         if any(tag in tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-            priority = float(priority)
+            priority = round(float(priority), 2)
             RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
                 "RP_Very_Critical", None
             )

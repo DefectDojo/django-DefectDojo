@@ -1,21 +1,16 @@
 import re
 import logging
-from dojo.api_v2.api_error import ApiError
-from time import sleep
 from dojo.authorization.roles_permissions import Permissions
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from dojo.finding.views import BaseListFindings
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.models import Product, Engagement, Test
-from django.utils import timezone
 from dojo.reports.custom_request import CustomRequest
 from dojo.celery import app
-from dojo.models import Dojo_User
 from dojo.models import GeneralSettings
 from dojo.reports.report_manager import CSVReportManager
-from django.http import Http404, HttpRequest, HttpResponse, QueryDict
-from django.urls import reverse
-from django.conf import settings
+from django.http import Http404, QueryDict
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,9 +29,17 @@ def get_findings(request):
         raise Http404(msg)
     url = url.removeprefix("url=")
 
-    views = ["all", "open", "inactive", "verified",
-             "closed", "accepted", "out_of_scope",
-             "false_positive", "inactive"]
+    views = [
+        "all",
+        "open",
+        "inactive",
+        "verified",
+        "closed",
+        "accepted",
+        "out_of_scope",
+        "false_positive",
+        "inactive",
+    ]
     obj_name = obj_id = view = query = None
     path_items = list(filter(None, re.split(r"/|\?", url)))
 
@@ -102,10 +105,8 @@ def get_findings(request):
 
     request.GET = QueryDict(query)
     list_findings = BaseListFindings(
-        filter_name=filter_name,
-        product_id=pid,
-        engagement_id=eid,
-        test_id=tid)
+        filter_name=filter_name, product_id=pid, engagement_id=eid, test_id=tid
+    )
     findings = list_findings.get_fully_filtered_findings(request).qs
 
     return findings, obj, url
@@ -117,7 +118,7 @@ def get_name_key(user, product):
     """
     url = GeneralSettings.get_value("URL_FILE_BUKECT_REPORT_FINDINGS", "")
     key = f"{url}/{product}_{user.username}.csv"
-    return key 
+    return key
 
 
 @app.task
@@ -127,33 +128,50 @@ def async_generate_report(request_data: dict):
     findings, _obj, _url = get_findings(request)
     if findings.count() == 0:
         raise Exception(500, "No findings found for the report.")
-    csv_report_manager = CSVReportManager(
-       findings, request
-    )
+    csv_report_manager = CSVReportManager(findings, request)
     csv_report_manager.generate_report()
-    
+
 
 def get_excludes():
-    return [
-        "SEVERITIES", "age", "github_issue", "jira_issue",
-        "objects", "risk_acceptance",
-        "test__engagement__product__authorized_group",
-        "test__engagement__product__member",
-        "test__engagement__product__prod_type__authorized_group",
-        "test__engagement__product__prod_type__member",
-        "unsaved_endpoints", "unsaved_vulnerability_ids",
-        "unsaved_files", "unsaved_request", "unsaved_response",
-        "unsaved_tags", "vulnerability_ids", "cve",
-        "transferfindingfinding", "transfer_finding"]
+    return GeneralSettings.get_value(
+        "EXCLUDE_FIELDS_REPORT",
+        [
+            "SEVERITIES",
+            "age",
+            "github_issue",
+            "jira_issue",
+            "objects",
+            "risk_acceptance",
+            "test__engagement__product__authorized_group",
+            "test__engagement__product__member",
+            "test__engagement__product__prod_type__authorized_group",
+            "test__engagement__product__prod_type__member",
+            "unsaved_endpoints",
+            "unsaved_vulnerability_ids",
+            "unsaved_files",
+            "unsaved_request",
+            "unsaved_response",
+            "unsaved_tags",
+            "vulnerability_ids",
+            "cve",
+            "transferfindingfinding",
+            "transfer_finding",
+        ],
+    )
 
 
 def get_foreign_keys():
     return [
         "defect_review_requested_by",
-        "duplicate_finding", "finding_group",
-        "last_reviewed_by", "mitigated_by",
-        "reporter", "review_requested_by",
-        "sonarqube_issue", "test"]
+        "duplicate_finding",
+        "finding_group",
+        "last_reviewed_by",
+        "mitigated_by",
+        "reporter",
+        "review_requested_by",
+        "sonarqube_issue",
+        "test",
+    ]
 
 
 def get_attributes():
