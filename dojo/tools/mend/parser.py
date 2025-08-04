@@ -1,8 +1,8 @@
 import hashlib
 import json
 import logging
-from datetime import datetime
 from contextlib import suppress
+from datetime import datetime
 
 from dojo.models import Finding
 
