@@ -505,8 +505,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
         existing_finding = self.process_cve(existing_finding)
+        if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
+            # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
+            existing_finding.sla_start_date = self.now
         # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
         existing_finding.save_no_options()
+
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
