@@ -498,8 +498,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         component_version = getattr(unsaved_finding, "component_version", None)
         existing_finding.component_name = existing_finding.component_name or component_name
         existing_finding.component_version = existing_finding.component_version or component_version
-        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
-        existing_finding.save_no_options()
+        if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
+            # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
+            existing_finding.sla_start_date = self.now
+
+        existing_finding.save(dedupe_option=False)
+        # don't dedupe before endpoints are added
+        existing_finding.save(dedupe_option=False)
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(

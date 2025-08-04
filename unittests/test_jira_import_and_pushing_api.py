@@ -1,5 +1,6 @@
 # from unittest import skip
 import logging
+from unittest.mock import patch
 
 from crum import impersonate
 from django.urls import reverse
@@ -70,7 +71,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.testuser = User.objects.get(username="admin")
         self.testuser.usercontactinfo.block_execution = True
         self.testuser.usercontactinfo.save()
-
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
@@ -321,7 +321,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
 
-    def test_import_grouped_reopen_expired_sla(self):
+    def test_import_grouped_reopen_expired_risk_acceptance(self):
         # steps
         # import scan, make sure they are in grouped JIRA
         # risk acceptance all the grouped findings, make sure they are closed in JIRA
@@ -367,6 +367,59 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # We do this to update the JIRA
         for finding in ra_data["accepted_findings"]:
             self.patch_finding_api(finding, {"push_to_jira": True})
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @patch("dojo.decorators.we_want_async", return_value=False)
+    def test_import_grouped_reopen_expired_risk_acceptance_with_finding_sync(self, mock):
+        # steps
+        # import scan, make sure they are in grouped JIRA
+        # risk acceptance all the grouped findings, make sure they are closed in JIRA
+        # expire risk acceptance on all grouped findings, make sure they are open in JIRA
+        JIRA_Instance.objects.update(finding_jira_sync=True)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        findings = self.get_test_findings_api(test_id)
+        finding_id = findings["results"][0]["id"]
+
+        ra_data = {
+            "name": "Accept: Unit test",
+            "accepted_findings": [],
+            "recommendation": "A",
+            "recommendation_details": "recommendation 1",
+            "decision": "A",
+            "decision_details": "it has been decided!",
+            "accepted_by": "pointy haired boss",
+            "owner": 1,
+            "expiration_date": "2024-12-31",
+            "reactivate_expired": True,
+            }
+
+        for finding in findings["results"]:
+            ra_data["accepted_findings"].append(finding["id"])
+
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+
+        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        self.assertEqual("/engagement/1", response.url)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        pre_jira_status = post_jira_status
+        ra = Risk_Acceptance.objects.last()
+        ra_helper.expire_now(ra)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
 
         post_jira_status = self.get_jira_issue_status(finding_id)
         self.assertNotEqual(pre_jira_status, post_jira_status)
@@ -911,6 +964,99 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=False)
 
         self.assert_cassette_played()
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_mixed_findings_and_groups_jira_push_bug(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
+        """
+        Test the bug in bulk edit: when bulk editing findings where some are in groups
+        and some are not, individual findings should still be pushed to JIRA even if
+        groups are also pushed.
+
+        Bug: If finding groups are pushed to JIRA (groups_pushed_to_jira=True),
+        then individual findings are skipped due to the condition:
+        `if not groups_pushed_to_jira and (...)`
+        """
+        # Import scan with groups but don't push to JIRA initially
+        import0 = self.import_scan_with_params(
+            self.npm_groups_sample_filename,
+            scan_type="NPM Audit Scan",
+            group_by="component_name+component_version",
+            push_to_jira=False,
+            verified=True,
+        )
+        test_id = import0["test"]
+
+        # Verify no JIRA issues were created during import
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Get the findings and finding groups created
+        Finding.objects.filter(test__id=test_id).order_by("id")
+        finding_groups = Finding_Group.objects.filter(test__id=test_id)
+
+        # Create mixed scenario: some findings in groups, some ungrouped
+        # Remove one entire group to create ungrouped findings
+        if finding_groups.exists():
+            # Remove all findings from the first group and delete the group
+            group_to_remove = finding_groups.first()
+            list(group_to_remove.findings.all())
+            # Remove all findings from this group, making them ungrouped
+            group_to_remove.findings.clear()
+            # Delete the empty group
+            group_to_remove.delete()
+
+        # Verify we now have both grouped and ungrouped findings
+        # Note: finding_group is a cached property, so we need to check if findings are in any group
+        all_findings = Finding.objects.filter(test__id=test_id)
+        grouped_findings = [f for f in all_findings if f.finding_group is not None]
+        ungrouped_findings = [f for f in all_findings if f.finding_group is None]
+
+        self.assertGreater(len(grouped_findings), 0, "Should have some grouped findings")
+        self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
+
+        # Use Django test client instead of RequestFactory for proper auth
+        from django.contrib.auth import get_user_model
+
+        # Prepare bulk edit request data
+        # Get the current finding IDs after group modifications
+        current_findings = Finding.objects.filter(test__id=test_id)
+        all_finding_ids = [str(f.id) for f in current_findings]
+
+        # Login as admin user who has all permissions
+        admin_user = get_user_model().objects.get(username="admin")
+        self.client.force_login(admin_user)
+
+        post_data = {
+            "finding_to_update": all_finding_ids,
+            "push_to_jira": "on",  # Checkbox value when checked
+            # Form validation fields - all optional but need to be present
+            "severity": "",
+            "active": "",
+            "verified": "",
+            "false_p": "",
+            "duplicate": "",
+            "out_of_scope": "",
+            "is_mitigated": "",
+            "status": "",  # Required for form structure
+        }
+
+        # Perform bulk edit using test client
+        self.client.post("/finding/bulk", post_data)
+
+        # Analyze what was pushed to JIRA
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        # Test expectations - both groups AND individual findings should be pushed
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed to JIRA")
+        self.assertGreater(len(individual_calls), 0, "Individual findings should also be pushed to JIRA despite groups being pushed")
+
+        # Verify the fix: we should have exactly 2 groups + 2 individual findings pushed
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
 
     # creation of epic via the UI is already tested in test_jira_config_engagement_epic, so
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet
