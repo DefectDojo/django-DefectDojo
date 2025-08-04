@@ -1,0 +1,762 @@
+{
+ "matches": [
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-06-14",
+    "ReleaseDate": "2018-06-14"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:org.springframework.boot:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "c8619c5b06d4dcdb4cac1e5e9c839e6e8b1c8574"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-actuator-autoconfigure",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-actuator-autoconfigure",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-06-14",
+    "ReleaseDate": "2018-06-14"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-actuator-autoconfigure",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:spring-boot-actuator-autoconfigure:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-actuator-autoconfigure:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator_autoconfigure:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator_autoconfigure:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-actuator:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-actuator:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-actuator-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_actuator_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-actuator-autoconfigure:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator_autoconfigure:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-actuator:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_actuator:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-actuator-autoconfigure@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-actuator-autoconfigure-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "2cadc1d20a1f9ee667a608cfee154138e954f5f2"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-autoconfigure",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-autoconfigure",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-05-09",
+    "ReleaseDate": "2018-05-09"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-autoconfigure",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:spring-boot-autoconfigure:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-autoconfigure:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_autoconfigure:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_autoconfigure:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_autoconfigure:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-autoconfigure:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_autoconfigure:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-autoconfigure@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-autoconfigure-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "65cd1244d606acc02ab7bfc47a203a3fe2400dda"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-starter",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-09-12",
+    "ReleaseDate": "2018-09-12"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-starter",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:org.springframework.boot:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_starter:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-starter-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "ec46c63a2adeee40058eff1a6baefca13975dc94"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-starter-actuator",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-actuator",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-07-30",
+    "ReleaseDate": "2018-07-30"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-starter-actuator",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:spring-boot-starter-actuator:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-actuator:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_actuator:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_actuator:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-starter-actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_starter_actuator:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-actuator:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_actuator:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-actuator@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-starter-actuator-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "24e901473279d9c18e0a0f8037d58b18c8297dca"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-starter-data-jpa",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-09-12",
+    "ReleaseDate": "2018-09-12"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-starter-data-jpa",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:spring-boot-starter-data-jpa:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-data-jpa:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data_jpa:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data_jpa:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-data:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-data:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-starter-data-jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_starter_data_jpa:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-data-jpa:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data_jpa:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-data:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_data:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-data-jpa@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-starter-data-jpa-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "69970d3a7c353d8e727e2c6b2a9e621114f5e089"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-starter-tomcat",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-tomcat",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-06-14",
+    "ReleaseDate": "2018-06-14"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-starter-tomcat",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:spring-boot-starter-tomcat:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-tomcat:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_tomcat:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_tomcat:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-starter-tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_starter_tomcat:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-tomcat:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_tomcat:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-tomcat@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-starter-tomcat-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "dcf28989a34b0801fea0e810c371fb9dab1e7784"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "Cycle": {
+    "ProductName": "org.springframework.boot:spring-boot-starter-web",
+    "ProductPermalink": "https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-web",
+    "ReleaseCycle": "2.0",
+    "Eol": "2019-03-01",
+    "LatestRelease": "",
+    "LatestReleaseDate": "2018-04-05",
+    "ReleaseDate": "2018-04-05"
+   },
+   "Package": {
+    "ID": "",
+    "Name": "",
+    "Version": "",
+    "Locations": {},
+    "Language": "",
+    "Licenses": null,
+    "Type": "",
+    "CPEs": null,
+    "PURL": "",
+    "Upstreams": null,
+    "MetadataType": "",
+    "Metadata": null
+   },
+   "artifact": {
+    "name": "spring-boot-starter-web",
+    "version": "2.0.4.RELEASE",
+    "type": "java-archive",
+    "locations": [
+     {
+      "path": "/app.jar",
+      "layerID": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4"
+     }
+    ],
+    "language": "java",
+    "licenses": [],
+    "cpes": [
+     "cpe:2.3:a:org.springframework.boot:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-web:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-web:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_web:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_web:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:org.springframework.boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring-boot-starter-web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:spring_boot_starter_web:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter-web:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter_web:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot-starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot_starter:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:springframework:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring-boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring_boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:spring:boot:2.0.4.RELEASE:*:*:*:*:*:*:*",
+     "cpe:2.3:a:boot:boot:2.0.4.RELEASE:*:*:*:*:*:*:*"
+    ],
+    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-web@2.0.4.RELEASE",
+    "upstreams": [],
+    "metadata": {
+     "virtualPath": "/app.jar:BOOT-INF/lib/spring-boot-starter-web-2.0.4.RELEASE.jar",
+     "pomArtifactID": "",
+     "pomGroupID": "",
+     "manifestName": "",
+     "archiveDigests": [
+      {
+       "algorithm": "sha1",
+       "value": "98d49e981ecf804da877d84259b7b0d1ec2fb6f6"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "source": {
+  "type": "image",
+  "target": {
+   "userInput": "kimb88/hello-world-spring-boot",
+   "imageID": "sha256:dd3ba74a78b43d9a634cfafbc264ebd452ff7d20e304d1084f77f2051d350fff",
+   "manifestDigest": "sha256:3df9c6eac1923810ecfdb147127c84b6062aedff12dbd984083027c97945ef88",
+   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+   "tags": [
+    "kimb88/hello-world-spring-boot:latest"
+   ],
+   "imageSize": 143051780,
+   "layers": [
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:73046094a9b835e443af1a9d736fcfc11a994107500e474d0abf399499ed280c",
+     "size": 4408974
+    },
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:298c3bb2664fb7f8514ecdde8b76c0ca95c7c7b82eaa326a7e9661e017488164",
+     "size": 87
+    },
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:93351e248e6ec58df222fb8b12690ba552273ff307712e78251d3635e3aefedd",
+     "size": 98165940
+    },
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:685fbb8263cc2cfc2726f5792619c65d2e9f73585d7b45e5cc9dce576ca957a4",
+     "size": 40476779
+    }
+   ],
+   "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjo0NTQ0LCJkaWdlc3QiOiJzaGEyNTY6ZGQzYmE3NGE3OGI0M2Q5YTYzNGNmYWZiYzI2NGViZDQ1MmZmN2QyMGUzMDRkMTA4NGY3N2YyMDUxZDM1MGZmZiJ9LCJsYXllcnMiOlt7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLCJzaXplIjo0NjcyMDAwLCJkaWdlc3QiOiJzaGEyNTY6NzMwNDYwOTRhOWI4MzVlNDQzYWYxYTlkNzM2ZmNmYzExYTk5NDEwNzUwMGU0NzRkMGFiZjM5OTQ5OWVkMjgwYyJ9LHsibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmRvY2tlci5pbWFnZS5yb290ZnMuZGlmZi50YXIuZ3ppcCIsInNpemUiOjM1ODQsImRpZ2VzdCI6InNoYTI1NjoyOThjM2JiMjY2NGZiN2Y4NTE0ZWNkZGU4Yjc2YzBjYTk1YzdjN2I4MmVhYTMyNmE3ZTk2NjFlMDE3NDg4MTY0In0seyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmltYWdlLnJvb3Rmcy5kaWZmLnRhci5nemlwIiwic2l6ZSI6OTkwNDIzMDQsImRpZ2VzdCI6InNoYTI1Njo5MzM1MWUyNDhlNmVjNThkZjIyMmZiOGIxMjY5MGJhNTUyMjczZmYzMDc3MTJlNzgyNTFkMzYzNWUzYWVmZWRkIn0seyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmltYWdlLnJvb3Rmcy5kaWZmLnRhci5nemlwIiwic2l6ZSI6NDA0Nzg3MjAsImRpZ2VzdCI6InNoYTI1Njo2ODVmYmI4MjYzY2MyY2ZjMjcyNmY1NzkyNjE5YzY1ZDJlOWY3MzU4NWQ3YjQ1ZTVjYzlkY2U1NzZjYTk1N2E0In1dfQ==",
+   "config": "eyJhcmNoaXRlY3R1cmUiOiJhbWQ2NCIsImNvbmZpZyI6eyJIb3N0bmFtZSI6IiIsIkRvbWFpbm5hbWUiOiIiLCJVc2VyIjoiIiwiQXR0YWNoU3RkaW4iOmZhbHNlLCJBdHRhY2hTdGRvdXQiOmZhbHNlLCJBdHRhY2hTdGRlcnIiOmZhbHNlLCJUdHkiOmZhbHNlLCJPcGVuU3RkaW4iOmZhbHNlLCJTdGRpbk9uY2UiOmZhbHNlLCJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW46L3Vzci9saWIvanZtL2phdmEtMS44LW9wZW5qZGsvanJlL2JpbjovdXNyL2xpYi9qdm0vamF2YS0xLjgtb3Blbmpkay9iaW4iLCJMQU5HPUMuVVRGLTgiLCJKQVZBX0hPTUU9L3Vzci9saWIvanZtL2phdmEtMS44LW9wZW5qZGsiLCJKQVZBX1ZFUlNJT049OHUxNzEiLCJKQVZBX0FMUElORV9WRVJTSU9OPTguMTcxLjExLXIwIiwiSkFSX09QVFM9IiwiSkFWQV9PUFRTPSJdLCJDbWQiOm51bGwsIkFyZ3NFc2NhcGVkIjp0cnVlLCJJbWFnZSI6InNoYTI1NjpjOWQwYzQxMmVhODhmNmY5NTNkODU5ZmYxZWVmYTUzZDEzYTY5OTcyNDQ2Y2ZhMmNmM2JkNmRlMTYxNWJmMzZlIiwiVm9sdW1lcyI6eyIvdG1wIjp7fX0sIldvcmtpbmdEaXIiOiIiLCJFbnRyeXBvaW50IjpbIi9iaW4vc2giLCItYyIsImV4ZWMgamF2YSAkSkFWQV9PUFRTIC1EamF2YS5zZWN1cml0eS5lZ2Q9ZmlsZTovZGV2Ly4vdXJhbmRvbSAtamFyIC9hcHAuamFyICRKQVJfT1BUUyJdLCJPbkJ1aWxkIjpbXSwiTGFiZWxzIjpudWxsfSwiY29udGFpbmVyIjoiOTZmMWY5NDFiODFlMjJmZWJhMDUzYmNiMjYyMGE5YjljYmU3ZDZiOTdlZWQ3MDNhYTc2ZWU4NDFmMzA3NDY1NiIsImNvbnRhaW5lcl9jb25maWciOnsiSG9zdG5hbWUiOiI5NmYxZjk0MWI4MWUiLCJEb21haW5uYW1lIjoiIiwiVXNlciI6IiIsIkF0dGFjaFN0ZGluIjpmYWxzZSwiQXR0YWNoU3Rkb3V0IjpmYWxzZSwiQXR0YWNoU3RkZXJyIjpmYWxzZSwiVHR5IjpmYWxzZSwiT3BlblN0ZGluIjpmYWxzZSwiU3RkaW5PbmNlIjpmYWxzZSwiRW52IjpbIlBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluOi91c3IvbGliL2p2bS9qYXZhLTEuOC1vcGVuamRrL2pyZS9iaW46L3Vzci9saWIvanZtL2phdmEtMS44LW9wZW5qZGsvYmluIiwiTEFORz1DLlVURi04IiwiSkFWQV9IT01FPS91c3IvbGliL2p2bS9qYXZhLTEuOC1vcGVuamRrIiwiSkFWQV9WRVJTSU9OPTh1MTcxIiwiSkFWQV9BTFBJTkVfVkVSU0lPTj04LjE3MS4xMS1yMCIsIkpBUl9PUFRTPSIsIkpBVkFfT1BUUz0iXSwiQ21kIjpbIi9iaW4vc2giLCItYyIsIiMobm9wKSAiLCJFTlRSWVBPSU5UIFtcIi9iaW4vc2hcIiBcIi1jXCIgXCJleGVjIGphdmEgJEpBVkFfT1BUUyAtRGphdmEuc2VjdXJpdHkuZWdkPWZpbGU6L2Rldi8uL3VyYW5kb20gLWphciAvYXBwLmphciAkSkFSX09QVFNcIl0iXSwiQXJnc0VzY2FwZWQiOnRydWUsIkltYWdlIjoic2hhMjU2OmM5ZDBjNDEyZWE4OGY2Zjk1M2Q4NTlmZjFlZWZhNTNkMTNhNjk5NzI0NDZjZmEyY2YzYmQ2ZGUxNjE1YmYzNmUiLCJWb2x1bWVzIjp7Ii90bXAiOnt9fSwiV29ya2luZ0RpciI6IiIsIkVudHJ5cG9pbnQiOlsiL2Jpbi9zaCIsIi1jIiwiZXhlYyBqYXZhICRKQVZBX09QVFMgLURqYXZhLnNlY3VyaXR5LmVnZD1maWxlOi9kZXYvLi91cmFuZG9tIC1qYXIgL2FwcC5qYXIgJEpBUl9PUFRTIl0sIk9uQnVpbGQiOltdLCJMYWJlbHMiOnt9fSwiY3JlYXRlZCI6IjIwMTgtMTAtMDZUMDU6MTA6MzYuMjQwMDM5M1oiLCJkb2NrZXJfdmVyc2lvbiI6IjE4LjA2LjEtY2UiLCJoaXN0b3J5IjpbeyJjcmVhdGVkIjoiMjAxOC0wNy0wNlQxNDoxNDowNi4xNjU1NDY3ODNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApIEFERCBmaWxlOjI1ZjYxZDcwMjU0Yjk4MDdhNDBjZDNlOGQ4MjBmNmE1ZWMwZTFlNTk2ZGUwNGUzMjVmNmEzMzgxMDM5M2U5NWEgaW4gLyAifSx7ImNyZWF0ZWQiOiIyMDE4LTA3LTA2VDE0OjE0OjA2LjM5MzM1NTkxNFoiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyAjKG5vcCkgIENNRCBbXCIvYmluL3NoXCJdIiwiZW1wdHlfbGF5ZXIiOnRydWV9LHsiY3JlYXRlZCI6IjIwMTgtMDctMTFUMDA6MzQ6NTMuNDk2NDYxMzYxWiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgRU5WIExBTkc9Qy5VVEYtOCIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDE4LTA3LTExVDAwOjM0OjU0LjIyNDgxNjM1M1oiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyB7IFx0XHRlY2hvICcjIS9iaW4vc2gnOyBcdFx0ZWNobyAnc2V0IC1lJzsgXHRcdGVjaG87IFx0XHRlY2hvICdkaXJuYW1lIFwiJChkaXJuYW1lIFwiJChyZWFkbGluayAtZiBcIiQod2hpY2ggamF2YWMgfHwgd2hpY2ggamF2YSlcIilcIilcIic7IFx0fSBcdTAwM2UgL3Vzci9sb2NhbC9iaW4vZG9ja2VyLWphdmEtaG9tZSBcdFx1MDAyNlx1MDAyNiBjaG1vZCAreCAvdXNyL2xvY2FsL2Jpbi9kb2NrZXItamF2YS1ob21lIn0seyJjcmVhdGVkIjoiMjAxOC0wNy0xMVQwMDozNDo1NC40NDQ1ODg3ODdaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApICBFTlYgSkFWQV9IT01FPS91c3IvbGliL2p2bS9qYXZhLTEuOC1vcGVuamRrIiwiZW1wdHlfbGF5ZXIiOnRydWV9LHsiY3JlYXRlZCI6IjIwMTgtMDctMTFUMDA6MzQ6NTQuNzQ4MjY4NzA0WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgRU5WIFBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluOi91c3IvbGliL2p2bS9qYXZhLTEuOC1vcGVuamRrL2pyZS9iaW46L3Vzci9saWIvanZtL2phdmEtMS44LW9wZW5qZGsvYmluIiwiZW1wdHlfbGF5ZXIiOnRydWV9LHsiY3JlYXRlZCI6IjIwMTgtMDctMTFUMDA6MzQ6NTQuOTUxNjgwODE5WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgRU5WIEpBVkFfVkVSU0lPTj04dTE3MSIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDE4LTA3LTExVDAwOjM0OjU1LjE4ODEyODA4WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgRU5WIEpBVkFfQUxQSU5FX1ZFUlNJT049OC4xNzEuMTEtcjAiLCJlbXB0eV9sYXllciI6dHJ1ZX0seyJjcmVhdGVkIjoiMjAxOC0wNy0xMVQwMDozNTowMC43MDc0NjIyNDNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgc2V0IC14IFx0XHUwMDI2XHUwMDI2IGFwayBhZGQgLS1uby1jYWNoZSBcdFx0b3Blbmpkazg9XCIkSkFWQV9BTFBJTkVfVkVSU0lPTlwiIFx0XHUwMDI2XHUwMDI2IFsgXCIkSkFWQV9IT01FXCIgPSBcIiQoZG9ja2VyLWphdmEtaG9tZSlcIiBdIn0seyJjcmVhdGVkIjoiMjAxOC0wOC0zMVQwMjo0MzoyNC41MTU4ODgzWiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgVk9MVU1FIFsvdG1wXSIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDE4LTA4LTMxVDAyOjQzOjI0LjgyNzkwMTlaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApICBBUkcgSkFSX0ZJTEUiLCJlbXB0eV9sYXllciI6dHJ1ZX0seyJjcmVhdGVkIjoiMjAxOC0xMC0wNlQwNToxMDozNS4zMTgzMDk2WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSBBREQgZmlsZTpmZmIzYTNmZDUzYjFmOGVhY2Y4NjdmMGMxZWFjZWMzZTIzMzE0M2Q2MzdmMmIxNWRhMzA2OTlkNDEwMTYxYjM4IGluIGFwcC5qYXIgIn0seyJjcmVhdGVkIjoiMjAxOC0xMC0wNlQwNToxMDozNS42Mzk0Mzc1WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgRU5WIEpBUl9PUFRTPSIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDE4LTEwLTA2VDA1OjEwOjM1LjkyODY2NjNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApICBFTlYgSkFWQV9PUFRTPSIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDE4LTEwLTA2VDA1OjEwOjM2LjI0MDAzOTNaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApICBFTlRSWVBPSU5UIFtcIi9iaW4vc2hcIiBcIi1jXCIgXCJleGVjIGphdmEgJEpBVkFfT1BUUyAtRGphdmEuc2VjdXJpdHkuZWdkPWZpbGU6L2Rldi8uL3VyYW5kb20gLWphciAvYXBwLmphciAkSkFSX09QVFNcIl0iLCJlbXB0eV9sYXllciI6dHJ1ZX1dLCJvcyI6ImxpbnV4Iiwicm9vdGZzIjp7InR5cGUiOiJsYXllcnMiLCJkaWZmX2lkcyI6WyJzaGEyNTY6NzMwNDYwOTRhOWI4MzVlNDQzYWYxYTlkNzM2ZmNmYzExYTk5NDEwNzUwMGU0NzRkMGFiZjM5OTQ5OWVkMjgwYyIsInNoYTI1NjoyOThjM2JiMjY2NGZiN2Y4NTE0ZWNkZGU4Yjc2YzBjYTk1YzdjN2I4MmVhYTMyNmE3ZTk2NjFlMDE3NDg4MTY0Iiwic2hhMjU2OjkzMzUxZTI0OGU2ZWM1OGRmMjIyZmI4YjEyNjkwYmE1NTIyNzNmZjMwNzcxMmU3ODI1MWQzNjM1ZTNhZWZlZGQiLCJzaGEyNTY6Njg1ZmJiODI2M2NjMmNmYzI3MjZmNTc5MjYxOWM2NWQyZTlmNzM1ODVkN2I0NWU1Y2M5ZGNlNTc2Y2E5NTdhNCJdfX0=",
+   "repoDigests": [
+    "kimb88/hello-world-spring-boot@sha256:0639155241cbbd60ee2d9cfe246a084c11fc87fc36ed2c97cb9c526f7868c793"
+   ],
+   "architecture": "amd64",
+   "os": "linux"
+  }
+ },
+ "distro": {
+  "name": "alpine",
+  "version": "3.8.0",
+  "idLike": []
+ },
+ "descriptor": {
+  "name": "xeol",
+  "version": "[not provided]",
+  "configuration": {
+   "output": [
+    "json"
+   ],
+   "file": "",
+   "distro": "",
+   "check-for-app-update": true,
+   "platform": "",
+   "search": {
+    "scope": "squashed",
+    "unindexed-archives": false,
+    "indexed-archives": true
+   },
+   "db": {
+    "cache-dir": "/home/ub/.cache/xeol/db",
+    "update-url": "https://data.xeol.io/xeol/databases/listing.json",
+    "ca-cert": "",
+    "auto-update": true,
+    "validate-by-hash-on-start": false,
+    "validate-age": true,
+    "max-allowed-built-age": 7776000000000000
+   },
+   "lookahead": "1y",
+   "fail-on-eol-found": false,
+   "api-key": "",
+   "project-name": "",
+   "image-path": "Dockerfile",
+   "commit-hash": "",
+   "match": {
+    "Packages": {
+     "using-purls": true
+    },
+    "Distro": {
+     "using-cpes": true
+    }
+   },
+   "registry": {
+    "insecure-skip-tls-verify": false,
+    "insecure-use-http": false,
+    "auth": null,
+    "ca-cert": ""
+   },
+   "name": "",
+   "default-image-pull-source": "",
+   "show-vuln-count": false
+  },
+  "db": {
+   "built": "2025-07-23T00:00:45.408675Z",
+   "schemaVersion": 1,
+   "location": "/home/ub/.cache/xeol/db/1",
+   "checksum": "sha256:55c592c6f9d35d2b5c5e040a5f0950e0ec6002959ad99c54c984b9802309919c",
+   "error": null
+  }
+ }
+}

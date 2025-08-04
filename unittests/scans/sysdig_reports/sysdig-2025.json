@@ -183,7 +183,7 @@
           "vuln_has_exploit": false,
           "vuln_id": "CVE-2025-48379",
           "vuln_risk_accepted": false,
-          "vuln_severity": "Critical"
+          "vuln_severity": "Other"
         },
         {
           "container_image": "defectdojo/defectdojo-django:latest",

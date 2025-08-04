@@ -112,7 +112,7 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
-from dojo.validators import tag_validator
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -124,6 +124,13 @@ FINDING_STATUS = (("verified", "Verified"),
                   ("duplicate", "Duplicate"),
                   ("out_of_scope", "Out of Scope"))
 
+CVSS_CALCULATOR_URLS = {
+        "https://www.first.org/cvss/calculator/3-0": "CVSS3 Calculator by FIRST",
+        "https://www.first.org/cvss/calculator/4-0": "CVSS4 Calculator by FIRST",
+        "https://www.metaeffekt.com/security/cvss/calculator/": "CVSS2/3/4 Calculator by Metaeffekt",
+    }
+
+
 vulnerability_ids_field = forms.CharField(max_length=5000,
     required=False,
     label="Vulnerability Ids",
@@ -132,6 +139,22 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
     widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
 
 EFFORT_FOR_FIXING_INVALID_CHOICE = _("Select valid choice: Low,Medium,High")
+
+
+class BulletListDisplayWidget(forms.Widget):
+    def __init__(self, urls_dict=None, *args, **kwargs):
+        self.urls_dict = urls_dict or {}
+        super().__init__(*args, **kwargs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if not self.urls_dict:
+            return ""
+
+        html = '<ul style="margin: 0; padding-left: 20px;">'
+        for url, text in self.urls_dict.items():
+            html += f'<li style="list-style-type: disc;"><a href="{url}" target="_blank"><i class="fa fa-arrow-up-right-from-square" style="margin-right: 5px;"></i>{text}</a></li>'
+        html += "</ul>"
+        return mark_safe(html)
 
 
 class MultipleSelectWithPop(forms.SelectMultiple):
@@ -525,24 +548,28 @@ class ImportScanForm(forms.Form):
     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+    file = forms.FileField(
+        widget=forms.widgets.FileInput(
+            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
+        ),
         label="Choose report file",
         allow_empty_file=True,
-        required=False)
+        required=False,
+        validators=[ImporterFileExtensionValidator()],
+    )
 
     # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
     # Exposing the choice as two different check boxes.
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
     close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This only affects findings within the same engagement.",
-                                            label="Close old findings within this engagement",
+                                                        "This affects findings within the same engagement by default.",
+                                            label="Close old findings",
                                             required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This only affects findings within the same product.",
+                                                        "This affects findings within the same product.",
                                             label="Close old findings within this product",
                                             required=False,
                                             initial=False)
@@ -646,11 +673,15 @@ class ReImportScanForm(forms.Form):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label="Systems / Endpoints")
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+    file = forms.FileField(
+        widget=forms.widgets.FileInput(
+            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
+        ),
         label="Choose report file",
         allow_empty_file=True,
-        required=False)
+        required=False,
+        validators=[ImporterFileExtensionValidator()],
+    )
     close_old_findings = forms.BooleanField(help_text="Select if old findings in the same test that are no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
@@ -1126,7 +1157,10 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1153,7 +1187,7 @@ class AddFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
+    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
                    "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "verified", "false_p", "duplicate", "out_of_scope",
                    "risk_accepted", "under_defect_review")
 
@@ -1174,6 +1208,9 @@ class AddFindingForm(forms.ModelForm):
             self.fields["response"].initial = req_resp[1]
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1210,7 +1247,17 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
+        required=False,
+        disabled=True)
+
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1237,9 +1284,9 @@ class AdHocFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
-                   "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                   "risk_accepted", "under_defect_review", "sla_start_date", "sla_expiration_date")
+    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation",
+                   "impact", "request", "response", "steps_to_reproduce", "severity_justification", "endpoints", "endpoints_to_add", "references",
+                   "active", "verified", "false_p", "duplicate", "out_of_scope", "risk_accepted", "under_defect_review", "sla_start_date", "sla_expiration_date")
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop("req_resp")
@@ -1258,6 +1305,9 @@ class AdHocFindingForm(forms.ModelForm):
             self.fields["response"].initial = req_resp[1]
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1292,7 +1342,17 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
+        required=False,
+        disabled=True)
+
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1309,10 +1369,10 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvssv3",
-                   "cvssv3_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
-                   "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified", "false_p", "duplicate",
-                   "out_of_scope", "risk_accept", "under_defect_review")
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
+                   "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
+                    "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified",
+                    "false_p", "duplicate", "out_of_scope", "risk_accept", "under_defect_review")
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -1325,6 +1385,9 @@ class PromoteFindingForm(forms.ModelForm):
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=product)
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1353,8 +1416,18 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
+
+    cvss_info = forms.CharField(
+        label="CVSS",
+        widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
+        required=False,
+        disabled=True)
+
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1385,8 +1458,8 @@ class FindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvssv3",
-                   "cvssv3_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
+                   "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
                    "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified", "false_p", "duplicate",
                    "out_of_scope", "risk_accept", "under_defect_review")
 
@@ -1441,6 +1514,9 @@ class FindingForm(forms.ModelForm):
             self.fields["group"].initial = self.instance.finding_group
 
         self.endpoints_to_add_list = []
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1512,6 +1588,7 @@ class ApplyFindingTemplateForm(forms.Form):
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv4 = forms.CharField(label="CVSSv3", max_length=117, required=False)
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={"required": "Select valid choice: In Progress, On Hold, Completed", "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
 
@@ -1528,6 +1605,9 @@ class ApplyFindingTemplateForm(forms.Form):
         self.template = template
         if template:
             self.template.vulnerability_ids = "\n".join(template.vulnerability_ids)
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1547,8 +1627,8 @@ class ApplyFindingTemplateForm(forms.Form):
         return self.cleaned_data.get("tags")
 
     class Meta:
-        fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "mitigation", "impact", "references", "tags"]
-        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact", "is_mitigated")
+        fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "cvssv4", "severity", "description", "mitigation", "impact", "references", "tags"]
+        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "cvssv4", "severity", "description", "impact", "is_mitigated")
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1557,7 +1637,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1570,6 +1650,9 @@ class FindingTemplateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["tags"].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by("name")
+
+        # Hide CVSS fields based on system settings
+        hide_cvss_fields_if_disabled(self)
 
     class Meta:
         model = Finding_Template
@@ -2718,10 +2801,12 @@ class SLAConfigForm(forms.ModelForm):
             self.fields["low"].disabled = True
             self.fields["enforce_low"].disabled = True
             self.fields["low"].widget.attrs["message"] = msg
+            self.fields["restart_sla_on_reactivation"].disabled = True
+            self.fields["restart_sla_on_reactivation"].widget.attrs["message"] = msg
 
     class Meta:
         model = SLA_Configuration
-        fields = ["name", "description", "critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low"]
+        fields = ["name", "description", "critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low", "restart_sla_on_reactivation"]
 
 
 class DeleteSLAConfigForm(forms.ModelForm):
@@ -3743,3 +3828,28 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             msg = "Neither user or group are set"
             raise Exception(msg)
+
+
+def hide_cvss_fields_if_disabled(form_instance):
+    """Hide CVSS fields based on system settings."""
+    enable_cvss3 = get_system_setting("enable_cvss3_display", True)
+    enable_cvss4 = get_system_setting("enable_cvss4_display", True)
+
+    # Hide CVSS3 fields if disabled
+    if not enable_cvss3:
+        if "cvssv3" in form_instance.fields:
+            del form_instance.fields["cvssv3"]
+        if "cvssv3_score" in form_instance.fields:
+            del form_instance.fields["cvssv3_score"]
+
+    # Hide CVSS4 fields if disabled
+    if not enable_cvss4:
+        if "cvssv4" in form_instance.fields:
+            del form_instance.fields["cvssv4"]
+        if "cvssv4_score" in form_instance.fields:
+            del form_instance.fields["cvssv4_score"]
+
+    # If both are disabled, hide all CVSS related fields
+    if not enable_cvss3 and not enable_cvss4:
+        if "cvss_info" in form_instance.fields:
+            del form_instance.fields["cvss_info"]
