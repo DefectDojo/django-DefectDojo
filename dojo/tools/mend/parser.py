@@ -41,6 +41,7 @@ class MendParser:
             ransomware_used = None
             known_exploited = None
             component_path = None
+            kev_date = None
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
@@ -70,7 +71,6 @@ class MendParser:
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
                 kev_date_str = node["vulnerability"].get("publishDate", None)
-                kev_date = None
                 if kev_date_str:
                     with suppress(ValueError):
                         kev_date = datetime.strptime(kev_date_str, "%Y-%m-%dT%H:%M:%SZ").date()
