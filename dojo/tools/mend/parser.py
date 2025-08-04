@@ -74,6 +74,8 @@ class MendParser:
                     try:
                         # Parses ISO 8601 format with Zulu time (Z)
                         kev_date = datetime.strptime(kev_date_str, "%Y-%m-%dT%H:%M:%SZ").date()
+                    except ValueError:
+                        pass
                 ransomware_used = node.get("malicious", None)
                 known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
