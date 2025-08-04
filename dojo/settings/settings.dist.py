@@ -29,6 +29,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -356,6 +357,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
+DJANGO_DEBUG_TOOLBAR_ENABLED = env("DD_DJANGO_DEBUG_TOOLBAR_ENABLED")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -1940,3 +1942,45 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+if DEBUG:
+    # adding DEBUG logging for all of Django.
+    LOGGING["loggers"]["root"] = {
+                "handlers": ["console"],
+                "level": "DEBUG",
+           }
+
+if DJANGO_DEBUG_TOOLBAR_ENABLED:
+
+    INSTALLED_APPS += (
+    "debug_toolbar",
+    )
+
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+    def show_toolbar(request):
+        return True
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+        "INTERCEPT_REDIRECTS": False,
+        "SHOW_COLLAPSED": True,
+    }
+
+    DEBUG_TOOLBAR_PANELS = [
+        # 'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        # 'debug_toolbar.panels.logging.LoggingPanel',
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+        # 'cachalot.panels.CachalotPanel',
+    ]
