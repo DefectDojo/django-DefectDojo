@@ -140,7 +140,7 @@ interactions:
       X-Amz-Cf-Id:
       - UTaOh6mXhl4ih9OT_6cI8vK40wwKxlgaK-DcSV8SJfvoIQ-mRbVwAQ==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD3-P1
       X-Arequestid:
       - b9febb4258bfd40504fbc982a2f224d0
       X-Cache:
@@ -154,7 +154,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\nA
+      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
       Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/366]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -249,7 +249,7 @@ interactions:
       X-Amz-Cf-Id:
       - emAruhPxqhXwD6m9bQVp-RFoFHD_H9kmWtO8t_QiuJ7Amcj3c13Q3Q==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD62-P1
       X-Arequestid:
       - fc01cf4ea98000a8d0944648a032e2df
       X-Cache:
@@ -1271,7 +1271,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\nA group
+      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\n\nA group
       of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2. Group\n*Group*:
       [Findings in: fresh:0.3.0|http://localhost:8080/finding_group/368] in [Security
       How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -2233,7 +2233,7 @@ interactions:
       X-Amz-Cf-Id:
       - _WDIZK2tt952VOls5IZbjxQGarMqaUxrVwn-rnpcGtqt0rdFRlnZyA==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD62-P2
       X-Arequestid:
       - 6a1ec7f9c22d25964a94b5976ab3979f
       X-Cache:
@@ -2247,7 +2247,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\nA
+      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
       Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/366]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -2804,7 +2804,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\nA
+      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
       Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/366]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -3010,7 +3010,7 @@ interactions:
       X-Amz-Cf-Id:
       - du5YFjLmZmOubiKfPqC9jHb9TQh4av-nZFFotan10aQoacuWoeu4yg==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD3-P1
       X-Arequestid:
       - d3e3998eb1864498fb29393204dde9ba
       X-Cache:
@@ -3082,7 +3082,7 @@ interactions:
       X-Amz-Cf-Id:
       - x7XcBEOPpy9GAdnEr2JGbjC99qylwDFVj3COaXHsP9G-xe58vPENyw==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD62-P3
       X-Arequestid:
       - 99257c33220f78f5ea4b3069687a6239
       X-Cache:
@@ -3971,7 +3971,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\nA group
+      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\n\nA group
       of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2. Group\n*Group*:
       [Findings in: fresh:0.3.0|http://localhost:8080/finding_group/368] in [Security
       How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -5306,7 +5306,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\nA
+      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
       Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/366]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -5863,7 +5863,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\nA
+      "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
       Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/366]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
@@ -6534,7 +6534,7 @@ interactions:
       X-Amz-Cf-Id:
       - 0_iJgiFZs0Knuv1jtvEUjTG9SPNiXl2gHzt3frHGTGzfRDRswMiFUQ==
       X-Amz-Cf-Pop:
-      - AMS1-P1
+      - SYD62-P3
       X-Arequestid:
       - a7d303042ac367f9cc414a577f271af7
       X-Cache:
@@ -7028,7 +7028,7 @@ interactions:
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
-      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\nA group
+      "summary": "Findings in: fresh:0.3.0", "description": "\n\n\n\n\n\n\n\nA group
       of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2. Group\n*Group*:
       [Findings in: fresh:0.3.0|http://localhost:8080/finding_group/368] in [Security
       How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
