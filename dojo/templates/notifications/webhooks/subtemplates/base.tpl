@@ -3,7 +3,7 @@
 ---
 description: {{ description | as_json_no_html_esc }}
 title: {{ title | as_json_no_html_esc }}
-user: {{ user | as_json_no_html_esc }}
+{% include 'notifications/webhooks/subtemplates/user.tpl' %}
 {% if url %}
 url_ui:  {{ url | full_url | as_json_no_html_esc }}
 {% endif %}
