@@ -265,17 +265,17 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                     role_assigned["role"],
                                 )
 
-                            # if user is not project type member any more, remove him from list of product type members
-                            if is_cybersecurity is False:
-                                for product_type_name in user_product_types_names:
-                                    if (
-                                        product_type_name != group_team_leve2.display_name
-                                    ):
-                                        product_type = Product_Type.objects.get(name=product_type_name)
-                                        Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
-                                        logger.debug(
-                                            "Deleting membership of user %s from product type %s", user, product_type_name
-                                    )
+                        # if user is not project type member any more, remove him from list of product type members
+                        if is_cybersecurity is False:
+                            for product_type_name in user_product_types_names:
+                                if (
+                                    product_type_name not in [group.display_name for group in groups_team_leve2]
+                                ):
+                                    product_type = Product_Type.objects.get(name=product_type_name)
+                                    Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
+                                    logger.debug(
+                                        "Deleting membership of user %s from product type %s", user, product_type_name
+                                )
                     else:
                         clean_project_type_user(user_product_types_names, user, user_login, is_leader)
                 else:

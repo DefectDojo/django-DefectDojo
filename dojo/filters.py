@@ -33,6 +33,9 @@ from django_filters import (
 )
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import Case, When, Value, DecimalField
+from decimal import Decimal
+from django.db.models.functions import Round
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from polymorphic.base import ManagerInheritanceWarning
@@ -257,7 +260,6 @@ class FindingStatusFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.field_name)
 
 class FindingPriorityFilter(MultipleChoiceFilter):
-    
     tags_priority = settings.PRIORITY_FILTER_TAGS.split(",")
     RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
                 "RP_Very_Critical", None
@@ -289,54 +291,64 @@ class FindingPriorityFilter(MultipleChoiceFilter):
     def filter(self, qs, value):
         if not value:
             return qs
-        
+
         # Crear una Q query para combinar múltiples filtros con OR
         combined_query = Q()
-        
+
         for priority_value in value:
             try:
                 priority_int = int(priority_value)
-                
+
                 if priority_int == 0:  # Unknown
                     combined_query |= Q(priority=0.0) & ~Q(tags__name__in=self.tags_priority)
                 elif priority_int == 1:  # Medium-Low
                     if self.RP_MEDIUM_LOW:
                         lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
                         combined_query |= Q(
-                            priority__gte=lower, 
-                            priority__lte=upper, 
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
                             tags__name__in=self.tags_priority
                         )
                 elif priority_int == 2:  # High
                     if self.RP_HIGH:
                         lower, upper = map(float, self.RP_HIGH.split("-"))
                         combined_query |= Q(
-                            priority__gte=lower, 
-                            priority__lte=upper, 
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
                             tags__name__in=self.tags_priority
                         )
                 elif priority_int == 3:  # Critical
                     if self.RP_CRITICAL:
                         lower, upper = map(float, self.RP_CRITICAL.split("-"))
                         combined_query |= Q(
-                            priority__gte=lower, 
-                            priority__lte=upper, 
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
                             tags__name__in=self.tags_priority
                         )
                 elif priority_int == 4:  # Very Critical
                     if self.RP_VERY_CRITICAL:
                         lower, upper = map(float, self.RP_VERY_CRITICAL.split("-"))
                         combined_query |= Q(
-                            priority__gte=lower, 
-                            priority__lte=upper, 
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper,
                             tags__name__in=self.tags_priority
                         )
             except (ValueError, TypeError):
                 continue
-        
+
         if combined_query:
-            return qs.filter(combined_query).distinct()
-        
+            return (
+                qs.annotate(
+                    priority_rounded=Case(
+                        When(priority__isnull=False, then=Round("priority", 2)),
+                        default=Value(Decimal("0.00")),
+                        output_field=DecimalField(max_digits=10, decimal_places=2),
+                    )
+                )
+                .filter(combined_query)
+                .distinct()
+            )
+
         return qs
 
 
@@ -2146,12 +2158,12 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
         else:
             self.form.fields[
-                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View, self.user)
             self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
             del self.form.fields["test"]
 
         if self.form.fields.get("test__engagement__product"):
-            self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+            self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View, self.user)
         if self.form.fields.get("finding_group", None):
             self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
