@@ -1,4 +1,4 @@
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
+from django.http import HttpRequest
 from django.http import QueryDict
 from dojo.models import Dojo_User
 
