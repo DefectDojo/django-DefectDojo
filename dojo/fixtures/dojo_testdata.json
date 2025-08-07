@@ -113,6 +113,29 @@
     }
   },
   {
+    "pk": 7,
+    "model": "auth.user",
+    "fields": {
+      "username": "AtticusFinch",
+      "first_name": "Atticus",
+      "last_name": "Finch",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [
+        218,
+        220,
+        26,
+        28
+      ],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "afinch@legal.com",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -3070,7 +3093,7 @@
       "first_error": null,
       "last_error": null,
       "note": null,
-      "owner": 2
+      "owner": 7
     }
   }
 ]
