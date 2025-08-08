@@ -482,7 +482,7 @@ def identify_priority_vulnerabilities(findings) -> int:
 
 @app.task
 def check_priorization():
-    # Get all vulnerabilities with active status and priority tag
+    # Get all vulnerabilities with priority tag filter
     all_vulnerabilities = (
         Finding.objects
         .filter(priority_tag_filter)
