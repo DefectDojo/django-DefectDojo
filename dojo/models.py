@@ -3257,7 +3257,7 @@ class Finding(models.Model):
                     mitigated_date = self.mitigated.date()
                 self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
             else:
-                if any(tag in list(self.tags.all()) for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:2]):
+                if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:2]):
                     self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining) + timedelta(days=settings.SLA_FREEZE_DAYS)
                 else:
                     self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
