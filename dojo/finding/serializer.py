@@ -16,4 +16,5 @@ class RecommendationSerializer(serializers.Serializer):
 
 class FindingBulkUpdateSLAStartDateSerializer(serializers.Serializer):
     tags = serializers.CharField(max_length=200)
-    date = serializers.DateField(required=False)
+    priority = serializers.FloatField()
+    date = serializers.DateField()

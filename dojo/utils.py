@@ -37,6 +37,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.db import transaction
+from django.db.models.functions import Round
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
@@ -1486,52 +1487,57 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 
 
 @app.task
-def async_bulk_update_sla_start_date(tags, sla_start_date):
+def async_bulk_update_sla_start_date(tags, priority, sla_start_date):
     """
-    bulk update of SLA start dates for findings with specific tags.
+    bulk update of SLA start dates for findings with specific tags and priority.
     Uses the existing set_sla_expiration_date method from the Finding model.
     
     Args:
         tags (str): Comma-separated tags or single tag to filter findings
+        priority (float): Priority value to filter findings
         sla_start_date (date): New SLA start date to set
     
     Returns:
         int: Number of findings updated
     """
-    
-    # Validar parámetros de entrada
-    if not tags or not sla_start_date:
-        logger.error("Invalid parameters: tags=%s, sla_start_date=%s", tags, sla_start_date)
-        return 0
-    
+
     # Convertir tags a lista para optimización de query
     tags_list = [tag.strip() for tag in tags.split(',') if tag.strip()] if ',' in tags else [tags.strip()]
-    
-    logger.info("Starting bulk SLA update for tags: %s", tags_list)
-    
+
+    logger.info("Starting bulk SLA update for tags: %s and priority gte: %s with new SLA start date: %s", tags_list, priority, sla_start_date)
+
     # Optimización 1: Query más eficiente con prefetch y select_related
-    findings_queryset = Finding.objects.filter(
-        active=True,
-        tags__name__in=tags_list  # Usar __in en lugar de __icontains para mejor performance
-    ).select_related(
-        'test__engagement__product__prod_type',  # Prefetch relaciones necesarias para SLA
-        'test__test_type'
-    ).prefetch_related(
-        'tags'
-    ).distinct()  # Evitar duplicados por múltiples tags
-    
+    findings_queryset = (
+        Finding.objects.filter(
+            active=True,
+            tags__name__in=tags_list,  # Usar __in en lugar de __icontains para mejor performance
+        )
+        .annotate(
+            priority_rounded=Round("priority", 2)  # Redondear priority a 2 decimales
+        )
+        .filter(
+            priority_rounded__gte=priority,  # Usar el campo redondeado para la comparación
+        )
+        .select_related(
+            "test__engagement__product__prod_type",  # Prefetch relaciones necesarias para SLA
+            "test__test_type",
+        )
+        .prefetch_related("tags")
+        .distinct()
+    )  # Evitar duplicados por múltiples tags
+
     findings_count = findings_queryset.count()
-    
+
     if findings_count == 0:
         logger.info("No findings found with tags: %s", tags_list)
         return 0
-    
+
     logger.info("Found %s findings to update SLA start date", findings_count)
-    
+
     # Optimización 2: Procesar en chunks para mejor manejo de memoria
-    CHUNK_SIZE = 1000
+    CHUNK_SIZE = 10000
     total_updated = 0
-    
+
     try:
         # Usar transacción para consistencia de datos
         with transaction.atomic():
@@ -1540,19 +1546,19 @@ def async_bulk_update_sla_start_date(tags, sla_start_date):
                 chunk_findings = list(
                     findings_queryset[chunk_start:chunk_start + CHUNK_SIZE].iterator(chunk_size=CHUNK_SIZE)
                 )
-                
+
                 findings_to_update = []
-                
+
                 # Optimización 4: Procesar findings en lotes usando el método del modelo
                 for finding in chunk_findings:
                     # Actualizar la fecha de inicio del SLA
                     finding.sla_start_date = sla_start_date
-                    
+
                     # Usar la función existente del modelo Finding para calcular la fecha de expiración
                     finding.set_sla_expiration_date()
-                    
+
                     findings_to_update.append(finding)
-                
+
                 # Optimización 5: Bulk update con campos específicos
                 if findings_to_update:
                     Finding.objects.bulk_update(
@@ -1560,9 +1566,9 @@ def async_bulk_update_sla_start_date(tags, sla_start_date):
                         ["sla_start_date", "sla_expiration_date"], 
                         batch_size=CHUNK_SIZE
                     )
-                    
+
                     total_updated += len(findings_to_update)
-                    
+
                     # Log de progreso cada chunk
                     progress_percentage = (total_updated / findings_count) * 100
                     logger.info(
@@ -1571,12 +1577,12 @@ def async_bulk_update_sla_start_date(tags, sla_start_date):
                         findings_count,
                         progress_percentage
                     )
-        
-        logger.info("Bulk SLA update completed successfully: %s findings updated with tags: %s", 
-                   total_updated, tags_list)
-        
+
+        logger.info("Bulk SLA update completed successfully: %s findings updated with tags: %s and priority gte: %s", 
+                   total_updated, tags_list, priority)
+
         return total_updated
-        
+
     except Exception as e:
         logger.error("Error during bulk SLA update: %s", str(e))
         # Rollback automático por transaction.atomic()

@@ -1628,7 +1628,7 @@ class FindingViewSet(
         """
         serializer = FindingBulkUpdateSLAStartDateSerializer(data=request.data)
         if serializer.is_valid():
-            async_bulk_update_sla_start_date.apply_async(args=(serializer.validated_data["tags"], serializer.validated_data["date"]))
+            async_bulk_update_sla_start_date.apply_async(args=(serializer.validated_data["tags"], serializer.validated_data["priority"], serializer.validated_data["date"]))
             return Response(
                 {"Success": "SLA start date updated successfully."},
                 status=status.HTTP_202_ACCEPTED,
