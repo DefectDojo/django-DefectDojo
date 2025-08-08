@@ -176,6 +176,7 @@ class CSVReportManager(BaseReportManager):
                     fields.append(key)
                     continue
             fields.extend((
+                "namespace",
                 "custom_id",
                 "found_by",
                 "engagement",
@@ -215,11 +216,16 @@ class CSVReportManager(BaseReportManager):
                     fields.append("Value not supported")
                     continue
             soup = BeautifulSoup(finding.description, "html.parser")
-            rating_label = soup.find("strong", string="Custom Id:")
-            rating_text = ""
-            if rating_label:
-                rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-            fields.append(rating_text)
+            namespace_value = ""
+            customid_value = ""
+            namespace_label = soup.find("strong", string="Namespaces:")
+            customid_label = soup.find("strong", string="Custom Id:")
+            if namespace_label:
+                namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+            if customid_label:
+                customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+            fields.append(namespace_value)
+            fields.append(customid_value)
             fields.append(finding.test.test_type.name)
             fields.append(finding.test.engagement.name)
             fields.append(finding.test.engagement.product.name)
@@ -265,7 +271,7 @@ class CSVReportManager(BaseReportManager):
     def _generate_single_upload(self, findings, excludes_list, allowed_attributes, allowed_foreign_keys):
         buffer_size_mb = sys.getsizeof(findings) / (1024 * 1024) 
         logger.info(f"REPORT FINDING: size of findings: {buffer_size_mb:.2f} MB")
-        for finding in findings.iterator(chunk_size=500):
+        for finding in findings.iterator(chunk_size=1000):
             self._add_finding_in_buffer(finding, excludes_list, allowed_attributes, allowed_foreign_keys)
         return True
 

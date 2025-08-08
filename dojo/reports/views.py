@@ -803,6 +803,7 @@ class CSVExportView(View):
                         fields.append(key)
                         continue
                 fields.extend((
+                    "namespace",
                     "custom_id",
                     "found_by",
                     "engagement",
@@ -842,11 +843,16 @@ class CSVExportView(View):
                         fields.append("Value not supported")
                         continue
                 soup = BeautifulSoup(finding.description, "html.parser")
-                rating_label = soup.find("strong", string="Custom Id:")
-                rating_text = ""
-                if rating_label:
-                    rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-                fields.append(rating_text)
+                namespace_value = ""
+                customid_value = ""
+                namespace_label = soup.find("strong", string="Namespaces:")
+                customid_label = soup.find("strong", string="Custom Id:")
+                if namespace_label:
+                    namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                if customid_label:
+                    customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                fields.append(namespace_value)
+                fields.append(customid_value)
                 fields.append(finding.test.test_type.name)
                 fields.append(finding.test.engagement.name)
                 fields.append(finding.test.engagement.product.name)
@@ -938,6 +944,9 @@ class ExcelExportView(View):
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
                         col_num += 1
                         continue
+                cell = worksheet.cell(row=row_num, column=col_num, value="namespace")
+                cell.font = font_bold
+                col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="custom_id")
                 cell.font = font_bold
                 col_num += 1
@@ -996,11 +1005,17 @@ class ExcelExportView(View):
                         col_num += 1
                         continue
                 soup = BeautifulSoup(finding.description, "html.parser")
-                rating_label = soup.find("strong", string="Custom Id:")
-                rating_text = ""
-                if rating_label:
-                    rating_text = rating_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-                worksheet.cell(row=row_num, column=col_num, value=rating_text)
+                namespace_value = ""
+                customid_value = ""
+                namespace_label = soup.find("strong", string="Namespaces:")
+                customid_label = soup.find("strong", string="Custom Id:")
+                if namespace_label:
+                    namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                if customid_label:
+                    customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                worksheet.cell(row=row_num, column=col_num, value=namespace_value)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=customid_value)
                 col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
                 col_num += 1

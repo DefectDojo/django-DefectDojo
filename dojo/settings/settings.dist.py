@@ -254,6 +254,7 @@ env = environ.FileAwareEnv(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
     DD_SLA_BUSINESS_DAYS=(bool, False),
+    DD_SLA_FREEZE_DAYS=(int, 0),  # Number of days to freeze SLA's
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -1010,6 +1011,7 @@ SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")
 SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")
 # Use business days to calculate SLA's and age of a finding instead of calendar days
 SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")
+SLA_FREEZE_DAYS = env("DD_SLA_FREEZE_DAYS")
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")

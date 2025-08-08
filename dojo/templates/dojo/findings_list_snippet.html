@@ -336,7 +336,7 @@
                                     <th scope="col">
                                         {% trans "EPSS Percentile" %}
                                     </th>
-                                    <th>
+                                    <th class="nowrap centered severity-sort" scope="col">
                                         {% trans "Priority" %}
                                     </th>
                                     <th class="nowrap" scope="col">
@@ -650,7 +650,7 @@
                                             <td class="nowrap">
                                                 {{ finding.epss_percentile|format_epss }}
                                             </td>
-                                            <td>
+                                            <td class="centered severity-sort" data-severity="{{ finding|priority_display_status }}">
                                                 <span class="label severity severity-{{ finding|priority_display_status }}">
                                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                         data-content="{{ finding.priority }}">
@@ -860,10 +860,14 @@
                         return 2;
                     case 'Medium':
                         return 3;
-                    case 'High':
+                    case 'Medium-Low':
                         return 4;
-                    case 'Critical':
+                    case 'High':
                         return 5;
+                    case 'Critical':
+                        return 6;
+                    case 'Very-Critical':
+                        return 7;
                     default:
                         return 1;
                 }
