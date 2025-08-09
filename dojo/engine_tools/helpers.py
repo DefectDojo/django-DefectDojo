@@ -383,9 +383,7 @@ def update_finding_prioritization_per_cve(
         priority_cve_severity_filter = Q(severity=severity) & Q(cve=None)
 
     findings = Finding.objects.filter(
-        priority_cve_severity_filter,
-        test__scan_type=scan_type,
-        active=True,
+        priority_cve_severity_filter, test__scan_type=scan_type
     ).filter(priority_tag_filter)
     for finding_update in findings:
         finding_update.priority = priorization
