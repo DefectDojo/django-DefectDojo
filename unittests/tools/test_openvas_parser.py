@@ -83,6 +83,18 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(finding.unsaved_vulnerability_ids, [])
 
+    def test_openvas_csv_report_combined_findings(self):
+        with (get_unit_tests_scans_path("openvas") / "report_using_openVAS_findings_to_combine.csv").open(encoding="utf-8") as f:
+            test = Test()
+            test.engagement = Engagement()
+            test.engagement.product = Product()
+            parser = OpenVASParser()
+            findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(1, len(findings))
+
     def test_openvas_xml_no_vuln(self):
         with (get_unit_tests_scans_path("openvas") / "no_vuln.xml").open(encoding="utf-8") as f:
             test = Test()
@@ -105,7 +117,7 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Mozilla Firefox Security Update (mfsa_2023-32_2023-36) - Windows_10.0.101.2_general/tcp", finding.title)
+                self.assertEqual("Mozilla Firefox Security Update (mfsa_2023-32_2023-36) - Windows", finding.title)
                 self.assertEqual("High", finding.severity)
 
     def test_openvas_xml_many_vuln(self):
