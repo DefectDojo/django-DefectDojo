@@ -201,7 +201,7 @@ defectdojo-cli import \
 #### Options
 
 `--active, -a` 
-* Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. (default: unset) `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_CLI_API_SCAN_CONFIGURATION]`
@@ -215,6 +215,12 @@ defectdojo-cli import \
 
 `--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_CLI_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -250,7 +256,7 @@ defectdojo-cli import \
 * The version of the test. `[$DD_CLI_TEST_VERSION]`
 
 `--verified, -v`
-* Dictates whether findings should be verified on import. (default: false) `[$DD_CLI_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified. If no value is set, Verified status will instead rely on the incoming report file. `[$DD_CLI_VERIFIED]`
 
 **Settings:**
 
@@ -320,7 +326,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 #### Options
 
 `--active, -a`                                    
-* Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 
@@ -334,6 +340,12 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 `--auto-create-context, --acc`                 
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed.[$DD_CLI_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -369,7 +381,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 * The version of the test. `[$DD_CLI_TEST_VERSION]`
 
 `--verified, -v`                                   
-* Dictates whether findings should be set to Verified on import. (default: false) `[$DD_CLI_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified.  If no value is set, Verified status will instead rely on the incoming report file. `[$DD_CLI_VERIFIED]`
 
 **Settings:**
 
@@ -687,7 +699,7 @@ universal-importer import \
 #### Options
 
 `--active, -a` 
-* Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
@@ -701,6 +713,12 @@ universal-importer import \
 
 `--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -736,7 +754,7 @@ universal-importer import \
 * The version of the test. `[$DD_IMPORTER_TEST_VERSION]`
 
 `--verified, -v`
-* Dictates whether findings should be verified on import. (default: false) `[$DD_IMPORTER_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified.  If no value is set, Verified status will instead rely on the incoming report file. `[$DD_IMPORTER_VERIFIED]`
 
 **Settings:**
 
@@ -806,7 +824,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 #### Options
 
 `--active, -a`                                    
-* Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
@@ -819,6 +837,12 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 `--auto-create-context, --acc`                 
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -854,7 +878,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 * The version of the test. `[$DD_IMPORTER_TEST_VERSION]`
 
 `--verified, -v`                                   
-* Dictates whether findings should be set to Verified on import. (default: false) `[$DD_IMPORTER_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified. If no value is set, Verified status will instead rely on the incoming report file. (default: unset) `[$DD_IMPORTER_VERIFIED]`
 
 **Settings:**
 

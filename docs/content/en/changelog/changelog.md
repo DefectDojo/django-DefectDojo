@@ -8,6 +8,32 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## July 2025: v2.48
+
+### July 21/22/28, 2025: v2.48.3 / v2.48.4 / v2.48.5
+
+- No significant UI/UX changes.
+
+### July 14, 2025: v2.48.2
+
+- **(Findings)** KEV ([Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)) related data can now be added as metadata to Findings. 
+![image](images/findings_kev.png)
+
+### July 8, 2025: v2.48.1
+
+- **(Permissions)** Users with "Edit Users" configuration permission can now force password resets for other users.
+- **(Pro UI)** The Users listing now includes pre-filtered views for All, Active, Inactive, Superuser, and Global Owner users. The default view has been set to Active.
+- **(Pro UI)** Request/Response pairs are now displayed on Finding View.
+- **(Pro UI)** Product Technologies are now visible and can be created, edited and deleted from the View Product page, within the Product Overview’s “Technologies” section.
+- **(Pro UI)** Finding peer-review now supports the assignment of both Users and Groups, as well as an “Allow All Eligible Reviewers” (all users with access to the Finding) option.
+
+### July 1, 2025: v2.48
+
+- **(Pro UI)** Helptext has been added to the Private Note checkbox to better explain this feature.  Private Notes are Notes that will not appear in Generated Reports - only in the DefectDojo UI.  This feature can be used for internal communication that you don't want to include in a Report.
+
+- **(Pro UI)** Pro UI is now set as the default user interface. All new and existing users/instances will be directed to the Pro UI by default. Users can still opt-out of this UI by unchecking this checkbox:
+
+![image](images/pro_ui_default.png)
 
 ## June 2025: v2.47
 
