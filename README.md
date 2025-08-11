@@ -87,6 +87,7 @@ Navigate to `http://localhost:8080` to see your new instance!
     * [OAuth2/SAML2](https://docs.defectdojo.com/en/open_source/archived_docs/integrations/social-authentication/)
     * [LDAP](https://docs.defectdojo.com/en/open_source/ldap-authentication/)
 * [Supported tools](https://docs.defectdojo.com/en/connecting_your_tools/parsers/)
+* [How to Write Documentation Locally](/docs/README.md)
 
 ## Supported Installation Options
 
