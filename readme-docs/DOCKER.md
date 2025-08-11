@@ -152,6 +152,11 @@ Make sure you write down the first password generated as you'll need it when re-
 docker compose exec -it uwsgi ./manage.py changepassword admin
 ```
 
+Alternatively, you can run the command below to change the admin password in a single command. Useful for automation.
+```zsh
+docker compose exec uwsgi ./manage.py shell -c 'from django.contrib.auth.models import User; u = User.objects.get(username="admin"); u.set_password("Password123!"); u.save()'
+```
+
 # Logging
 For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](../dojo/settings/template-local_settings)). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
