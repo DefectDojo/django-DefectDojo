@@ -20,6 +20,10 @@ else
   NGINX_CONFIG="/etc/nginx/nginx.conf"
 fi
 
+if ! ip -6 addr show dev lo | grep -q 'inet6 ::1'; then
+    sed -i '/listen \[::\]:/d' "$NGINX_CONFIG"
+fi
+
 if [ "${NGINX_METRICS_ENABLED}" = true ]; then
   sed -i "s/#stub_status/stub_status/g;" $NGINX_CONFIG
   echo "Nginx metrics are enabled"
