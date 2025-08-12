@@ -113,7 +113,7 @@ Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for detail
 
 ## Pro Edition
 
-[Upgrade to DefectDojo Pro](https://defectdojo.com/pricing) Pro provides what open-source Dojo lacks: A new UI, incredibile scalability, API connectors, automatic data enrichment and prioritization. See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro provides what open-source Dojo lacks: A new UI, incredibile scalability, API connectors, automatic data enrichment and prioritization. See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
 
 Alternatively, for information please email hello@defectdojo.com
 
