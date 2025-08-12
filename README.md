@@ -91,7 +91,7 @@ Navigate to `http://localhost:8080` to see your new instance!
 
 ## Supported Installation Options
 
-* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes Support & supports the project
+* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes support & supports the project
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
 
 
