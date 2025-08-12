@@ -35,7 +35,7 @@ Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
-and reset every hour. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
+and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
 ## Quick Start for Compose V2
 
@@ -113,7 +113,7 @@ Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for detail
 
 ## Pro Edition
 
-[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro provides what open-source Dojo lacks: A new UI, incredibile scalability, API connectors, automatic data enrichment and prioritization. See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, incredibile scalability, API connectors, automatic data enrichment and prioritization. See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
 
 Alternatively, for information please email hello@defectdojo.com
 
