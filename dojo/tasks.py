@@ -1,5 +1,6 @@
 import logging
-from datetime import date, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
@@ -13,7 +14,7 @@ from django.utils import timezone
 from dojo.celery import app
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
-from dojo.utils import calculate_grade, sla_compute_and_notify
+from dojo.utils import calculate_grade, get_system_setting, sla_compute_and_notify
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -98,7 +99,8 @@ def flush_auditlog(*args, **kwargs):
         return
 
     logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
-    retention_date = date.today() - relativedelta(months=retention_period)
+    local_tz = ZoneInfo(get_system_setting("time_zone"))
+    retention_date = datetime.now(tz=local_tz).date() - relativedelta(months=retention_period)
     subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
     event_count = subset.count()
     logger.debug("Initially received %d Logentries", event_count)
