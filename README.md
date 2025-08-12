@@ -92,7 +92,7 @@ Navigate to `http://localhost:8080` to see your new instance!
 ## Supported Installation Options
 
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
-* [SaaS](https://www.defectdojo.com/) - Includes Support & Supports the Project
+* [SaaS](https://www.defectdojo.com/) - New UI, addittional features, includes Support & supports the project
 
 ## Community, Getting Involved, and Updates
 
