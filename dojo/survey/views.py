@@ -1,5 +1,6 @@
 import pickle
-from datetime import date, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -51,7 +52,7 @@ from dojo.models import (
     System_Settings,
     TextQuestion,
 )
-from dojo.utils import add_breadcrumb, get_page_items, get_setting
+from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -136,7 +137,8 @@ def answer_questionnaire(request, eid, sid):
         if questions_are_valid:
             survey.completed = True
             survey.responder = request.user
-            survey.answered_on = date.today()
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
+            survey.answered_on = datetime.now(tz=local_tz).date()
             survey.save()
             messages.add_message(
                 request,
@@ -788,7 +790,8 @@ def answer_empty_survey(request, esid):
         if questions_are_valid:
             survey.completed = True
             survey.responder = request.user if not request.user.is_anonymous else None
-            survey.answered_on = date.today()
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
+            survey.answered_on = datetime.now(tz=local_tz).date()
             survey.save()
             general_survey.num_responses += 1
             general_survey.save()

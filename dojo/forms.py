@@ -3,8 +3,9 @@ import os
 import pickle
 import re
 import warnings
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -188,7 +189,8 @@ class MonthYearWidget(Widget):
         if years:
             self.years = years
         else:
-            this_year = date.today().year
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
+            this_year = datetime.now(tz=local_tz).year
             self.years = list(range(this_year - 10, this_year + 1))
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -642,7 +644,8 @@ class ImportScanForm(forms.Form):
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data.get("scan_date", None)
-        if date and date.date() > datetime.today().date():
+        local_tz = ZoneInfo(get_system_setting("time_zone"))
+        if date and date.date() > datetime.now(tz=local_tz).date():
             msg = "The date cannot be in the future!"
             raise forms.ValidationError(msg)
         return date
@@ -3582,7 +3585,8 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
     def clean_expiration(self):
         expiration = self.cleaned_data.get("expiration", None)
         if expiration:
-            today = datetime.today().date()
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
+            today = datetime.now(tz=local_tz).date()
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)

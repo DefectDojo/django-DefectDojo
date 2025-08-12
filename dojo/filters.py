@@ -2,8 +2,8 @@ import collections
 import decimal
 import logging
 import warnings
-import zoneinfo
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import six
 import tagulous
@@ -97,8 +97,6 @@ from dojo.utils import get_system_setting, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
-local_tz = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
-
 BOOLEAN_CHOICES = (("false", "No"), ("true", "Yes"))
 EARLIEST_FINDING = None
 
@@ -125,7 +123,8 @@ def vulnerability_id_filter(queryset, name, value):
 
 
 def now():
-    return datetime.today().replace(tzinfo=local_tz)
+    local_tz = ZoneInfo(get_system_setting("time_zone"))
+    return datetime.now(tz=local_tz)
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
@@ -199,6 +198,7 @@ class FindingStatusFilter(ChoiceFilter):
     def filter(self, qs, value):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
@@ -823,6 +823,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
@@ -831,6 +832,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         return None
 
     def current_month(self, qs, name):
+        local_tz = ZoneInfo(get_system_setting("time_zone"))
         self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=local_tz)
         self.end_date = now()
         return qs.filter(**{
@@ -839,6 +841,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
+        local_tz = ZoneInfo(get_system_setting("time_zone"))
         self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=local_tz)
         self.end_date = now()
         return qs.filter(**{
@@ -889,6 +892,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
             return qs
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
             self.start_date = _truncate(start_date - timedelta(days=1))
