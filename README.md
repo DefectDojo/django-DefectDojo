@@ -35,7 +35,7 @@ Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
-and regularly reset. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
+and reset every hour. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
 ## Quick Start for Compose V2
 
