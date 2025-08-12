@@ -24,18 +24,18 @@
     </tr>
  </table>
 
-![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/screenshot1.png)
-
 [DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and
 vulnerability management tool.  DefectDojo orchestrates end-to-end security testing, vulnerability tracking,
 deduplication, remediation, and reporting.
 
 ## Demo
 
-Try out DefectDojo on our demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
+Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
-Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible
-and regularly reset. Do not put sensitive data in the demo. An easy way to test Defect Dojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
+Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
+and regularly reset. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
 ## Quick Start for Compose V2
 
