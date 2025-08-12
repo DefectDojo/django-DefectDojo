@@ -91,8 +91,9 @@ Navigate to `http://localhost:8080` to see your new instance!
 
 ## Supported Installation Options
 
+* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes Support & supports the project
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
-* [SaaS](https://www.defectdojo.com/) - New UI, addittional features, includes Support & supports the project
+
 
 ## Community, Getting Involved, and Updates
 
@@ -108,15 +109,13 @@ our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). F
 
 ## Contributing
 
-Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
-information.
+Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for details and standards on contributing __before__ considering or submitting a pull request.
 
 ## Pro Edition
-[Upgrade to DefectDojo Pro](https://www.defectdojo.com/) today to take your DevSecOps to 11. DefectDojo Pro is
-designed to meet you wherever you are on your security journey and help you scale, with enhanced dashboards, additional
-smart features, tunable deduplication, and support from DevSecOps experts.
 
-Alternatively, for information please email info@defectdojo.com
+[Upgrade to DefectDojo Pro](https://defectdojo.com/pricing) Pro provides what open-source Dojo lacks: A new UI, incredibile scalability, API connectors, automatic data enrichment and prioritization. See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+
+Alternatively, for information please email hello@defectdojo.com
 
 ## About Us
 
