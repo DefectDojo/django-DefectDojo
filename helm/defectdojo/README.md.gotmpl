@@ -51,6 +51,11 @@ minikube addons enable ingress
 
 Helm >= v3
 
+```zsh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+```
+
 Then pull the dependent charts:
 
 ```zsh
@@ -393,8 +398,8 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 ```YAML
 apiversion: v1
 kind: Secret
-metadata: 
-  name: defectdojo-postgresql-specific 
+metadata:  
+  name: defectdojo-postgresql-specific  
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
   password: <user-password>
@@ -405,7 +410,7 @@ stringData:  # I chose stringData for better visualization of the credentials fo
 If you need to simulate a PostgreSQL database external to DefectDojo, you can install PostgreSQL using the following Helm command:
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add bitnami https://charts.bitnami.com/bitnami 
 helm repo update
 helm install defectdojo-postgresql bitnami/postgresql -n defectdojo -f postgresql/values.yaml
 ```
@@ -434,7 +439,7 @@ postgresql:
   auth:
     username: defectdojo # your database user
     database: defectdojo # your database name
-    secretKeys:
+    secretKeys: 
       adminPasswordKey: password # the name of the field containing the password value
       userPasswordKey: password # the name of the field containing the password value
       replicationPasswordKey: password # the name of the field containing the password value
@@ -457,7 +462,9 @@ After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. 
 helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
 ```
 
+
 **NOTE**: It is important to highlight that this setup can also be utilized for achieving high availability (HA) in PostgreSQL. By placing a load balancer in front of the PostgreSQL cluster, read and write requests can be efficiently routed to the appropriate primary or standby servers as needed.
+
 
 ### kubectl commands
 
@@ -496,205 +503,20 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.6.202-dev](https://img.shields.io/badge/Version-1.6.202--dev-informational?style=flat-square) ![AppVersion: 2.50.0-dev](https://img.shields.io/badge/AppVersion-2.50.0--dev-informational?style=flat-square)
+{{ template "chart.deprecationWarning" . }}
 
-A Helm chart for Kubernetes to install DefectDojo
+{{ template "chart.badgesSection" . }}
 
-## Maintainers
+{{ template "chart.description" . }}
 
-| Name | Email | Url |
-| ---- | ------ | --- |
-| madchap | <defectdojo-project@owasp.org> | <https://github.com/DefectDojo/django-DefectDojo> |
+{{ template "chart.homepageLine" . }}
 
-## Requirements
+{{ template "chart.maintainersSection" . }}
 
-| Repository | Name | Version |
-|------------|------|---------|
-| https://charts.bitnami.com/bitnami | postgresql | ~16.7.0 |
-| https://charts.bitnami.com/bitnami | redis | ~19.6.0 |
+{{ template "chart.sourcesSection" . }}
 
-## Values
+{{ template "chart.requirementsSection" . }}
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| admin.credentialAes256Key | string | `nil` |  |
-| admin.firstName | string | `"Administrator"` |  |
-| admin.lastName | string | `"User"` |  |
-| admin.mail | string | `"admin@defectdojo.local"` |  |
-| admin.metricsHttpAuthPassword | string | `nil` |  |
-| admin.password | string | `nil` |  |
-| admin.secretKey | string | `nil` |  |
-| admin.user | string | `"admin"` |  |
-| annotations | object | `{}` |  |
-| celery.annotations | object | `{}` |  |
-| celery.beat.affinity | object | `{}` |  |
-| celery.beat.annotations | object | `{}` |  |
-| celery.beat.nodeSelector | object | `{}` |  |
-| celery.beat.replicas | int | `1` |  |
-| celery.beat.resources.limits.cpu | string | `"2000m"` |  |
-| celery.beat.resources.limits.memory | string | `"256Mi"` |  |
-| celery.beat.resources.requests.cpu | string | `"100m"` |  |
-| celery.beat.resources.requests.memory | string | `"128Mi"` |  |
-| celery.beat.tolerations | list | `[]` |  |
-| celery.broker | string | `"redis"` |  |
-| celery.brokerHost | string | `""` |  |
-| celery.extraVolumes | list | `[]` |  |
-| celery.logLevel | string | `"INFO"` |  |
-| celery.worker.affinity | object | `{}` |  |
-| celery.worker.annotations | object | `{}` |  |
-| celery.worker.appSettings.poolType | string | `"solo"` |  |
-| celery.worker.nodeSelector | object | `{}` |  |
-| celery.worker.replicas | int | `1` |  |
-| celery.worker.resources.limits.cpu | string | `"2000m"` |  |
-| celery.worker.resources.limits.memory | string | `"512Mi"` |  |
-| celery.worker.resources.requests.cpu | string | `"100m"` |  |
-| celery.worker.resources.requests.memory | string | `"128Mi"` |  |
-| celery.worker.tolerations | list | `[]` |  |
-| cloudsql.enable_iam_login | bool | `false` |  |
-| cloudsql.enabled | bool | `false` |  |
-| cloudsql.image.pullPolicy | string | `"IfNotPresent"` |  |
-| cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` |  |
-| cloudsql.image.tag | string | `"1.37.8"` |  |
-| cloudsql.instance | string | `""` |  |
-| cloudsql.use_private_ip | bool | `false` |  |
-| cloudsql.verbose | bool | `true` |  |
-| createPostgresqlSecret | bool | `false` |  |
-| createRedisSecret | bool | `false` |  |
-| createSecret | bool | `false` |  |
-| dbMigrationChecker.enabled | bool | `true` |  |
-| dbMigrationChecker.resources.limits.cpu | string | `"200m"` |  |
-| dbMigrationChecker.resources.limits.memory | string | `"200Mi"` |  |
-| dbMigrationChecker.resources.requests.cpu | string | `"100m"` |  |
-| dbMigrationChecker.resources.requests.memory | string | `"100Mi"` |  |
-| django.affinity | object | `{}` |  |
-| django.annotations | object | `{}` |  |
-| django.extraVolumes | list | `[]` |  |
-| django.ingress.activateTLS | bool | `true` |  |
-| django.ingress.annotations | object | `{}` |  |
-| django.ingress.enabled | bool | `true` |  |
-| django.ingress.ingressClassName | string | `""` |  |
-| django.ingress.secretName | string | `"defectdojo-tls"` |  |
-| django.mediaPersistentVolume.enabled | bool | `true` |  |
-| django.mediaPersistentVolume.fsGroup | int | `1001` |  |
-| django.mediaPersistentVolume.name | string | `"media"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.accessModes[0] | string | `"ReadWriteMany"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.create | bool | `false` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.name | string | `nil` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.size | string | `"5Gi"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.storageClassName | string | `nil` |  |
-| django.mediaPersistentVolume.type | string | `"emptyDir"` |  |
-| django.nginx.resources.limits.cpu | string | `"2000m"` |  |
-| django.nginx.resources.limits.memory | string | `"256Mi"` |  |
-| django.nginx.resources.requests.cpu | string | `"100m"` |  |
-| django.nginx.resources.requests.memory | string | `"128Mi"` |  |
-| django.nginx.tls.enabled | bool | `false` |  |
-| django.nginx.tls.generateCertificate | bool | `false` |  |
-| django.nodeSelector | object | `{}` |  |
-| django.replicas | int | `1` |  |
-| django.service.annotations | object | `{}` |  |
-| django.service.type | string | `""` |  |
-| django.strategy | object | `{}` |  |
-| django.tolerations | list | `[]` |  |
-| django.uwsgi.appSettings.processes | int | `2` |  |
-| django.uwsgi.appSettings.threads | int | `2` |  |
-| django.uwsgi.certificates.certFileName | string | `"ca.crt"` |  |
-| django.uwsgi.certificates.certMountPath | string | `"/certs/"` |  |
-| django.uwsgi.certificates.configName | string | `"defectdojo-ca-certs"` |  |
-| django.uwsgi.certificates.enabled | bool | `false` |  |
-| django.uwsgi.enableDebug | bool | `false` |  |
-| django.uwsgi.livenessProbe.enabled | bool | `true` |  |
-| django.uwsgi.livenessProbe.failureThreshold | int | `6` |  |
-| django.uwsgi.livenessProbe.initialDelaySeconds | int | `0` |  |
-| django.uwsgi.livenessProbe.periodSeconds | int | `10` |  |
-| django.uwsgi.livenessProbe.successThreshold | int | `1` |  |
-| django.uwsgi.livenessProbe.timeoutSeconds | int | `5` |  |
-| django.uwsgi.readinessProbe.enabled | bool | `true` |  |
-| django.uwsgi.readinessProbe.failureThreshold | int | `6` |  |
-| django.uwsgi.readinessProbe.initialDelaySeconds | int | `0` |  |
-| django.uwsgi.readinessProbe.periodSeconds | int | `10` |  |
-| django.uwsgi.readinessProbe.successThreshold | int | `1` |  |
-| django.uwsgi.readinessProbe.timeoutSeconds | int | `5` |  |
-| django.uwsgi.resources.limits.cpu | string | `"2000m"` |  |
-| django.uwsgi.resources.limits.memory | string | `"512Mi"` |  |
-| django.uwsgi.resources.requests.cpu | string | `"100m"` |  |
-| django.uwsgi.resources.requests.memory | string | `"256Mi"` |  |
-| django.uwsgi.startupProbe.enabled | bool | `true` |  |
-| django.uwsgi.startupProbe.failureThreshold | int | `30` |  |
-| django.uwsgi.startupProbe.initialDelaySeconds | int | `0` |  |
-| django.uwsgi.startupProbe.periodSeconds | int | `5` |  |
-| django.uwsgi.startupProbe.successThreshold | int | `1` |  |
-| django.uwsgi.startupProbe.timeoutSeconds | int | `1` |  |
-| extraConfigs | object | `{}` |  |
-| gke.useGKEIngress | bool | `false` |  |
-| gke.useManagedCertificate | bool | `false` |  |
-| gke.workloadIdentityEmail | string | `""` |  |
-| host | string | `"defectdojo.default.minikube.local"` |  |
-| imagePullPolicy | string | `"Always"` |  |
-| initializer.affinity | object | `{}` |  |
-| initializer.annotations | object | `{}` |  |
-| initializer.extraVolumes | list | `[]` |  |
-| initializer.jobAnnotations | object | `{}` |  |
-| initializer.keepSeconds | int | `60` |  |
-| initializer.labels | object | `{}` |  |
-| initializer.nodeSelector | object | `{}` |  |
-| initializer.resources.limits.cpu | string | `"2000m"` |  |
-| initializer.resources.limits.memory | string | `"512Mi"` |  |
-| initializer.resources.requests.cpu | string | `"100m"` |  |
-| initializer.resources.requests.memory | string | `"256Mi"` |  |
-| initializer.run | bool | `true` |  |
-| initializer.staticName | bool | `false` |  |
-| monitoring.enabled | bool | `false` | You can also specify value comments like this |
-| monitoring.prometheus.enabled | bool | `false` |  |
-| monitoring.prometheus.image | string | `"nginx/nginx-prometheus-exporter:1.4.2"` |  |
-| monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
-| networkPolicy.annotations | object | `{}` |  |
-| networkPolicy.egress | list | `[]` |  |
-| networkPolicy.enabled | bool | `false` |  |
-| networkPolicy.ingress | list | `[]` |  |
-| networkPolicy.ingressExtend | list | `[]` |  |
-| podLabels | object | `{}` |  |
-| postgresql.architecture | string | `"standalone"` |  |
-| postgresql.auth.database | string | `"defectdojo"` |  |
-| postgresql.auth.existingSecret | string | `"defectdojo-postgresql-specific"` |  |
-| postgresql.auth.password | string | `""` |  |
-| postgresql.auth.secretKeys.adminPasswordKey | string | `"postgresql-postgres-password"` |  |
-| postgresql.auth.secretKeys.replicationPasswordKey | string | `"postgresql-replication-password"` |  |
-| postgresql.auth.secretKeys.userPasswordKey | string | `"postgresql-password"` |  |
-| postgresql.auth.username | string | `"defectdojo"` |  |
-| postgresql.enabled | bool | `true` |  |
-| postgresql.primary.affinity | object | `{}` |  |
-| postgresql.primary.containerSecurityContext.enabled | bool | `true` |  |
-| postgresql.primary.containerSecurityContext.runAsUser | int | `1001` |  |
-| postgresql.primary.name | string | `"primary"` |  |
-| postgresql.primary.nodeSelector | object | `{}` |  |
-| postgresql.primary.persistence.enabled | bool | `true` |  |
-| postgresql.primary.podSecurityContext.enabled | bool | `true` |  |
-| postgresql.primary.podSecurityContext.fsGroup | int | `1001` |  |
-| postgresql.primary.service.ports.postgresql | int | `5432` |  |
-| postgresql.shmVolume.chmod.enabled | bool | `false` |  |
-| postgresql.volumePermissions.containerSecurityContext.runAsUser | int | `1001` |  |
-| postgresql.volumePermissions.enabled | bool | `false` |  |
-| redis.architecture | string | `"standalone"` |  |
-| redis.auth.existingSecret | string | `"defectdojo-redis-specific"` |  |
-| redis.auth.existingSecretPasswordKey | string | `"redis-password"` |  |
-| redis.auth.password | string | `""` |  |
-| redis.enabled | bool | `true` |  |
-| redis.scheme | string | `"redis"` |  |
-| redis.transportEncryption.enabled | bool | `false` |  |
-| redis.transportEncryption.params | string | `""` |  |
-| repositoryPrefix | string | `"defectdojo"` |  |
-| secrets.annotations | object | `{}` |  |
-| securityContext.djangoSecurityContext.runAsUser | int | `1001` |  |
-| securityContext.enabled | bool | `true` |  |
-| securityContext.nginxSecurityContext.runAsUser | int | `1001` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.labels | object | `{}` |  |
-| tag | string | `"latest"` |  |
-| tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
-| tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
-| tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
-| tests.unitTests.resources.requests.memory | string | `"128Mi"` |  |
+{{ template "chart.valuesSection" . }}
 
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
+{{ template "helm-docs.versionFooter" . }}
