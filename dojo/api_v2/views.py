@@ -965,6 +965,25 @@ class FindingViewSet(
         permissions.UserHasFindingPermission,
     )
 
+    def get_serializer(self, *args, **kwargs):
+        fields = self.request.query_params.get("fields")
+        serializer_class = self.get_serializer_class()
+        if fields:
+            field_list = [f.strip() for f in fields.split(",")]
+
+            class Meta(serializer_class.Meta):
+                fields = field_list
+                exclude = None
+
+            DynamicFindingSerializer = type(
+                "DynamicFindingSerializer",
+                (serializer_class,),
+                {"Meta": Meta}
+            )
+            kwargs['context'] = self.get_serializer_context()
+            return DynamicFindingSerializer(*args, **kwargs)
+        return super().get_serializer(*args, **kwargs)
+
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):

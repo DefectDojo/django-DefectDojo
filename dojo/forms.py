@@ -2262,8 +2262,12 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            role = Roles(int(settings.DD_REVIEWERS_ROLE_TAG.get(finding.tags.first().name)))
-            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}')
+            role = None
+            for tag in finding.tags.all():
+                if tag.name in settings.DD_REVIEWERS_ROLE_TAG:
+                    role = Roles(int(settings.DD_REVIEWERS_ROLE_TAG[tag.name]))
+                    break
+            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}') if role else get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True

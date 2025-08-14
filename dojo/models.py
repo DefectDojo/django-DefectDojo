@@ -3257,7 +3257,7 @@ class Finding(models.Model):
                     mitigated_date = self.mitigated.date()
                 self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
             else:
-                if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:2]):
+                if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:3]):
                     self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining) + timedelta(days=settings.SLA_FREEZE_DAYS)
                 else:
                     self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
@@ -3431,7 +3431,26 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
+        if self.test.engagement.source_code_management_server:
+            st = self.test.engagement.source_code_management_server.name
+            if st:
+                return st.lower()
+            
         return ""
+    
+    def clean_file_path(self):
+        """
+        Clean file path according to specific rules.
+        """
+
+        idx = self.file_path.find(":")
+        mr_idx = self.file_path.find("_MR_")
+        path = self.file_path[idx+1:] if idx != -1 and mr_idx == -1 else self.file_path
+
+        if mr_idx != -1:
+            path_mr = path[mr_idx+4:]
+            return path_mr.replace(":", "/") if idx != -1 else path_mr
+        return path
 
     def scm_public_prepare_base_link(self, uri):
         # scm public (https://scm-domain.org) url template for browse is:
@@ -3448,17 +3467,19 @@ class Finding(models.Model):
         # hash or branch/tag should be appended to base browser link
         intermediate_path = "/blob/" if scm_type in {"github", "gitlab"} else "/src/"
 
+        clean_file_path = self.clean_file_path()
+
         link = self.scm_public_prepare_base_link(uri)
-        if self.test.commit_hash:
-            link += intermediate_path + self.test.commit_hash + "/" + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += intermediate_path + self.test.engagement.commit_hash + "/" + self.file_path
-        elif self.test.branch_tag:
-            link += intermediate_path + self.test.branch_tag + "/" + self.file_path
+        if self.test.branch_tag:
+            link += intermediate_path + self.test.branch_tag + "/" + clean_file_path
         elif self.test.engagement.branch_tag:
-            link += intermediate_path + self.test.engagement.branch_tag + "/" + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + "/" + clean_file_path
+        elif self.test.commit_hash:
+            link += intermediate_path + self.test.commit_hash + "/" + clean_file_path
+        elif self.test.engagement.commit_hash:
+            link += intermediate_path + self.test.engagement.commit_hash + "/" + clean_file_path
         else:
-            link += intermediate_path + "master/" + self.file_path
+            link += intermediate_path + "master/" + clean_file_path
 
         return link
 
@@ -3499,6 +3520,13 @@ class Finding(models.Model):
 
         return link
 
+    def azuredevops_scm_link(self, uri):
+        # azure devops url template for browse is:
+        # uri?path=%2F<file_path>&version=GB<branch>
+        # so to create browser url - git url should be recomposed like below:
+        clean_file_path = self.clean_file_path()
+        return uri + "?path=%2F" + clean_file_path + "&version=GB" + self.test.branch_tag
+
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3508,6 +3536,8 @@ class Finding(models.Model):
         if (self.test.engagement.source_code_management_uri is not None):
             if scm_type == "bitbucket-standalone":
                 link = self.bitbucket_standalone_prepare_scm_link(link)
+            elif scm_type == "azure devops":
+                link = self.azuredevops_scm_link(link)
             elif scm_type in {"github", "gitlab", "gitea", "codeberg", "bitbucket"}:
                 link = self.git_public_prepare_scm_link(link, scm_type)
             elif "https://github.com/" in self.test.engagement.source_code_management_uri:
