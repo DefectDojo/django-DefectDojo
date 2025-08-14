@@ -12,7 +12,7 @@ import boto3
 import pandas as pd
 
 # Dojo
-from dojo.models import Finding, Dojo_Group, Notes
+from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id
 from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.queries import tag_filter, priority_tag_filter
@@ -372,13 +372,27 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 @app.task
 def update_finding_prioritization_per_cve(
-    vulnerability_id, severity, scan_type, priorization
+    vulnerability_id, cve_greater, severity, scan_type, priorization
 ) -> None:
     priority_cve_severity_filter = Q()
     if vulnerability_id:
-        priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
-            Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
-        )
+        if scan_type == "Tenable Scan":
+            ids = (
+                Vulnerability_Id.objects.filter(
+                    vulnerability_id=cve_greater
+                ).values_list("finding_id", flat=True)
+                if cve_greater != vulnerability_id
+                else []
+            )
+            priority_cve_severity_filter = (
+                (Q(id__in=ids) & Q(cve=vulnerability_id) & ~Q(cve=None))
+                if ids
+                else (Q(cve=vulnerability_id) & ~Q(cve=None))
+            )
+        else:
+            priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
+                Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
+            )
     else:
         priority_cve_severity_filter = Q(severity=severity) & Q(cve=None)
 
@@ -426,19 +440,35 @@ def identify_priority_vulnerabilities(findings) -> int:
         df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
 
     for finding in findings:
+        cve_greater = None
         if not df_risk_score.empty and finding.cve:
-            loc_res = df_risk_score.loc[
-                df_risk_score["cve"] == finding.cve, "prediction"
-            ].values
-            if loc_res.size > 0:
-                priority = float(loc_res[0])
+            cve_greater = finding.cve
+            if Constants.TAG_TENABLE.value in finding.tags:
+                vulnerabilities_id = finding.vulnerability_ids
+                priority = 0
+                for vuln_id in vulnerabilities_id:
+                    loc_res = df_risk_score.loc[
+                        df_risk_score["cve"] == vuln_id, "prediction"
+                    ].values
+                    if loc_res.size > 0:
+                        if float(loc_res[0]) > priority:
+                            cve_greater = vuln_id
+                            priority = float(loc_res[0])
+                    else:
+                        priority = severity_risk_map.get(finding.severity, 0)
             else:
-                priority = severity_risk_map.get(finding.severity, 0)
+                loc_res = df_risk_score.loc[
+                    df_risk_score["cve"] == finding.cve, "prediction"
+                ].values
+                if loc_res.size > 0:
+                    priority = float(loc_res[0])
+                else:
+                    priority = severity_risk_map.get(finding.severity, 0)
         else:
             priority = severity_risk_map.get(finding.severity, 0)
 
         update_finding_prioritization_per_cve.apply_async(
-            args=(finding.cve, finding.severity, finding.test.scan_type, priority)
+            args=(finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority)
         )
 
         if priority >= float(
@@ -482,11 +512,12 @@ def identify_priority_vulnerabilities(findings) -> int:
 def check_priorization():
     # Get all vulnerabilities with priority tag filter
     all_vulnerabilities = (
-        Finding.objects
-        .filter(priority_tag_filter)
-        .order_by("cve", "test__scan_type")
-        .distinct("cve", "test__scan_type")
+        Finding.objects.filter(priority_tag_filter)
+        .order_by("cve", "test__scan_type", "severity")
+        .distinct("cve", "test__scan_type", "severity")
     )
+
+    logger.info(f"Identified {len(all_vulnerabilities)} vulnerabilities for prioritization.")
 
     # Identify priority vulnerabilities
     identify_priority_vulnerabilities(all_vulnerabilities)
