@@ -21,7 +21,8 @@ def is_valid_severity(severity):
 
 
 def update_description(finding: Finding, aux_info: OpenVASFindingAuxData):
-    finding.description += f"\n**QoD**: {aux_info.qod}"
+    if aux_info.qod:
+        finding.description += f"\n**QoD**: {aux_info.qod}"
 
 
 def deduplicate(dupes: dict[str, Finding], finding: Finding):

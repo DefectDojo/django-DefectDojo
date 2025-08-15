@@ -16,6 +16,7 @@ class OpenVASXMLParser:
         if "report" not in root.tag:
             msg = "This doesn't seem to be a valid Greenbone/ OpenVAS XML file."
             raise NamespaceErr(msg)
+
         report = root.find("report")
         results = report.find("results")
 
@@ -39,17 +40,45 @@ class OpenVASXMLParser:
 
         return list(dupes.values())
 
+    def parse_nvt_tags(self, text):
+        parts = text.strip().split("|")
+        tags = {}
+
+        for part in parts:
+            idx = part.find("=")
+            if idx == -1 or (len(part) < idx + 2):
+                continue
+
+            key = part[0:idx]
+            val = part[idx + 1:]
+            tags[key] = val
+        return tags
+
     def process_field_element(self, field, finding: Finding, aux_info: OpenVASFindingAuxData):
+        if field.tag == "nvt":
+            finding.script_id = field.get("oid")
+            nvt_name = field.find("name").text
+            if nvt_name:
+                finding.title = nvt_name
+
+            # parse tags field
+            tag_field = field.find("tags")
+            tags = self.parse_nvt_tags(tag_field.text)
+            summary = tags.get("summary", None)
+            if summary:
+                finding.description = summary
+
+            impact = tags.get("impact", None)
+            if impact:
+                finding.impact = impact
+        elif field.tag == "qod":
+            aux_info.qod = field.find("value").text
+
         if not field.text:
             return
 
         if field.tag == "name":
             finding.title = field.text
-        elif field.tag == "nvt":
-            finding.script_id = field.get("oid")
-            nvt_name = field.find("name").text
-            if nvt_name:
-                finding.title = nvt_name
         elif field.tag == "hostname":
             # strip due to https://github.com/greenbone/gvmd/issues/2378
             finding.unsaved_endpoints[0].host = field.text.strip()
@@ -67,7 +96,7 @@ class OpenVASXMLParser:
         elif field.tag == "threat":
             if is_valid_severity(field.text):
                 finding.severity = field.text
-        elif field.tag == "qod":
-            aux_info.qod = field.text
         elif field.tag == "description":
-            finding.description = field.text
+            finding.references = field.text.strip()
+        elif field.tag == "solution":
+            finding.mitigation = field.text
