@@ -102,7 +102,7 @@ def cvss4_validator(value: str | list[str], exception_class: Callable = Validati
 
 
 class ImporterFileExtensionValidator(FileExtensionValidator):
-    default_allowed_extensions = ["xml", "csv", "nessus", "json", "jsonl", "html", "js", "zip", "xlsx", "txt", "sarif"]
+    default_allowed_extensions = ["xml", "csv", "nessus", "json", "jsonl", "html", "js", "zip", "xlsx", "txt", "sarif", "fpr"]
 
     def __init__(self, *args: list, **kwargs: dict):
         if "allowed_extensions" not in kwargs:
