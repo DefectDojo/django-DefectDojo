@@ -9,9 +9,10 @@ from dojo.tools.openvas.common import OpenVASFindingAuxData, deduplicate, is_val
 
 
 def evaluate_bool_value(column_value):
-    if column_value.lower() == "true":
+    value = column_value.lower()
+    if value == "true":
         return True
-    if column_value.lower() == "false":
+    if value == "false":
         return False
     return None
 
