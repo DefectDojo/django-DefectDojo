@@ -9,6 +9,7 @@ OPENVAS_SEVERITY_OVERWRITE = os.environ.get("OPENVAS_SEVERITY_OVERWRITE", "False
 
 @dataclass
 class OpenVASFindingAuxData:
+
     """Dataclass to contain all information added later to description"""
 
     qod: str = ""
