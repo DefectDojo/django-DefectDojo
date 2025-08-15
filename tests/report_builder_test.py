@@ -1,8 +1,8 @@
 import sys
 import unittest
 
+from asset_test import AssetTest
 from base_test_class import BaseTestCase
-from product_test import ProductTest
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -64,7 +64,7 @@ class ReportBuilderTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Product Report").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Asset Report").click()
 
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))
         my_select.select_by_index(1)
@@ -167,9 +167,9 @@ def add_report_tests_to_suite(suite):
     # success and failure is output by the test
     suite.addTest(BaseTestCase("test_login"))
     suite.addTest(BaseTestCase("disable_block_execution"))
-    suite.addTest(ProductTest("test_create_product"))
-    suite.addTest(ProductTest("test_add_product_finding"))
-    suite.addTest(ProductTest("test_add_product_endpoints"))
+    suite.addTest(AssetTest("test_create_product"))
+    suite.addTest(AssetTest("test_add_product_finding"))
+    suite.addTest(AssetTest("test_add_product_endpoints"))
     suite.addTest(ReportBuilderTest("generate_HTML_report"))
     # we add reports here as we now have a product that triggers some logic inside reports
     suite.addTest(ReportBuilderTest("test_product_type_report"))
@@ -178,7 +178,7 @@ def add_report_tests_to_suite(suite):
     suite.addTest(ReportBuilderTest("test_test_report"))
     suite.addTest(ReportBuilderTest("test_product_endpoint_report"))
 
-    suite.addTest(ProductTest("test_delete_product"))
+    suite.addTest(AssetTest("test_delete_product"))
     return suite
 
 

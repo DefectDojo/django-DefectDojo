@@ -50,6 +50,7 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -74,6 +75,8 @@ from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 WEEKDAY_FRIDAY = 4  # date.weekday() starts with 0
+
+labels = get_labels()
 
 """
 Helper functions for DefectDojo
@@ -1949,7 +1952,7 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): product type '{prodtype}', product '{prod}'"
+                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
                     product = comb_notif_kind[0].finding.test.engagement.product
                     create_notification(
                         event="sla_breach_combined",

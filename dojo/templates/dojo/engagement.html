@@ -55,9 +55,9 @@
                             <th>{% dojo_sort request 'Period' 'target_start' 'asc' %}</th>
                             <th>Status</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                            <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request labels.ASSET_LABEL 'product__name' 'asc' %}</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                            <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
+                            <th class="prod_name">{% dojo_sort request labels.ORG_LABEL 'product__prod_type__name' %}</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
                             <th>Tests</th>

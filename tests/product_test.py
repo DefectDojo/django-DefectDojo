@@ -43,7 +43,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown button to see options
         driver.find_element(By.ID, "dropdownMenu1").click()
         # "Click" the add prodcut button
-        driver.find_element(By.LINK_TEXT, "Add Product").click()
+        driver.find_element(By.LINK_TEXT, "Add Asset").click()
         # Fill in th product name
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("QA Test")
@@ -59,8 +59,8 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text="Product added successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+        self.assertTrue(self.is_success_message_present(text="Asset added successfully")
+            or self.is_success_message_present(text="Asset with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -102,8 +102,8 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product updated successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+        self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
+            or self.is_success_message_present(text="Asset with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     # For product consistency sake, We won't be editting the product title
@@ -130,8 +130,8 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product updated successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+        self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
+            or self.is_success_message_present(text="Asset with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -392,7 +392,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # 'click' the Add Product Tracking Files
-        driver.find_element(By.LINK_TEXT, "Add Product Tracking Files").click()
+        driver.find_element(By.LINK_TEXT, "Add Tracked Files").click()
         # Keep a good practice of clearing field before entering value
         # Just fill up to main required fields: 'File path' nd 'review status'
         # Full File path
@@ -405,7 +405,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Added Tracked File to a Product"))
+        self.assertTrue(self.is_success_message_present(text="Added Tracked File to an Asset"))
 
     @on_exception_html_source_logger
     def test_edit_product_tracking_files(self):
@@ -419,7 +419,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # 'click' the Edit Product Tracking Files
-        driver.find_element(By.LINK_TEXT, "View Product Tracking Files").click()
+        driver.find_element(By.LINK_TEXT, "View Tracked Files").click()
         # Keep a good practice of clearing field before entering value
         # Edit Custom Value of First field
         driver.find_element(By.LINK_TEXT, "Edit").click()
@@ -431,7 +431,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the Tracking file has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Tool Product Configuration Successfully Updated"))
+        self.assertTrue(self.is_success_message_present(text="Tracked File Successfully Updated."))
 
     def test_product_metrics(self):
         # Test To Edit Product Tracking Files
@@ -462,7 +462,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to determine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product and relationships removed."))
+        self.assertTrue(self.is_success_message_present(text="Asset and relationships removed."))
 
     @on_exception_html_source_logger
     def test_product_notifications_change(self):
@@ -502,14 +502,14 @@ class ProductTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.driver
         # Navigate to the product page
-        driver.get(self.base_url + "metrics/product/type")
+        driver.get(self.base_url + "metrics/organization")
 
     def test_product_type_counts_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
         driver = self.driver
         # Navigate to the product page
-        driver.get(self.base_url + "metrics/product/type/counts")
+        driver.get(self.base_url + "metrics/organization/counts")
 
         my_select = Select(driver.find_element(By.ID, "id_product_type"))
         my_select.select_by_index(1)

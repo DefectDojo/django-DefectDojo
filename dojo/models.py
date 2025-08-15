@@ -672,6 +672,12 @@ class System_Settings(models.Model):
             "When turned on, all filter operations in the UI will require string matches rather than ID. "
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
+    enable_v3_migration = models.BooleanField(
+        null=False,
+        blank=False,
+        default=True,
+        verbose_name=_("Enable V3 Migration"),
+        help_text=_("Whether to use features and labels associated with V3."))
 
     from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()

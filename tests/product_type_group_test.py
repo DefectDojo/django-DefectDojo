@@ -30,7 +30,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type groups added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization groups added successfully."))
         # Query the site to determine if the member has been added
         self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
         self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Reader")
@@ -45,7 +45,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type group updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization group updated successfully."))
         # Query the site to determine if the member has been edited
         self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
         self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Owner")
@@ -58,7 +58,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type group deleted successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization group deleted successfully."))
         # Query the site to determine if the member has been deleted
         self.assertFalse(driver.find_elements(By.NAME, "member_product_type"))
 
@@ -87,7 +87,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type groups added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization groups added successfully."))
         # Query the site to determine if the member has been added
         self.assertEqual(driver.find_elements(By.NAME, "product_type_group_group")[0].text, "Group Name")
         self.assertEqual(driver.find_elements(By.NAME, "product_type_group_role")[0].text, "Reader")
@@ -109,7 +109,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type group updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization group updated successfully."))
         # Query the site to determine if the member has been edited
         self.assertEqual(driver.find_elements(By.NAME, "product_type_group_group")[0].text, "Group Name")
         self.assertEqual(driver.find_elements(By.NAME, "product_type_group_role")[0].text, "Maintainer")
@@ -129,7 +129,7 @@ class ProductTypeGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product type group deleted successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization group deleted successfully."))
         # Query the site to determine if the member has been deleted
         self.assertFalse(driver.find_elements(By.NAME, "product_type_group_group"))
 

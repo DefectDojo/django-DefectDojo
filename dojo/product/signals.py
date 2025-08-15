@@ -8,34 +8,36 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.labels import get_labels
 from dojo.models import Product
 from dojo.notifications.helper import create_notification
+
+labels = get_labels()
 
 
 @receiver(post_save, sender=Product)
 def product_post_save(sender, instance, created, **kwargs):
     if created:
         create_notification(event="product_added",
-                            title=instance.name,
-                            product=instance,
-                            url=reverse("view_product", args=(instance.id,)),
-                            url_api=reverse("product-detail", args=(instance.id,)),
-                        )
+                                title=instance.name,
+                                product=instance,
+                                url=reverse("view_product", args=(instance.id,)),
+                                url_api=reverse("product-detail", args=(instance.id,)),
+                            )
 
 
 @receiver(post_delete, sender=Product)
 def product_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with contextlib.suppress(sender.DoesNotExist):
-        description = _('The product "%(name)s" was deleted') % {"name": instance.name}
+        description = labels.ASSET_DELETE_WITH_NAME_SUCCESS_MESSAGE % {"name": instance.name}
         if settings.ENABLE_AUDITLOG:
             if le := LogEntry.objects.filter(
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label="dojo", model="product"),
                 object_id=instance.id,
             ).order_by("-id").first():
-                description = _('The product "%(name)s" was deleted by %(user)s') % {
-                                "name": instance.name, "user": le.actor}
+                description = labels.ASSET_DELETE_WITH_NAME_WITH_USER_SUCCESS_MESSAGE % {"name": instance.name, "user": le.actor}
         create_notification(event="product_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                             title=_("Deletion of %(name)s") % {"name": instance.name},
                             description=description,

@@ -1,15 +1,9 @@
 from django.urls import re_path
 
 from dojo.reports import views
+from dojo.v3_migration import redirect_view
 
-urlpatterns = [
-    #  reports
-    re_path(r"^product/type/(?P<ptid>\d+)/report$",
-        views.product_type_report, name="product_type_report"),
-    re_path(r"^product/(?P<pid>\d+)/report$",
-        views.product_report, name="product_report"),
-    re_path(r"^product/(?P<pid>\d+)/endpoint/report$",
-        views.product_endpoint_report, name="product_endpoint_report"),
+common_urlpatterns = [
     re_path(r"^engagement/(?P<eid>\d+)/report$", views.engagement_report,
         name="engagement_report"),
     re_path(r"^test/(?P<tid>\d+)/report$", views.test_report,
@@ -18,8 +12,6 @@ urlpatterns = [
         name="endpoint_report"),
     re_path(r"^endpoint/host/(?P<eid>\d+)/report$", views.endpoint_host_report,
         name="endpoint_host_report"),
-    re_path(r"^product/report$",
-        views.product_findings_report, name="product_findings_report"),
     re_path(r"^reports/cover$",
         views.report_cover_page, name="report_cover_page"),
     re_path(r"^reports/builder$",
@@ -37,3 +29,25 @@ urlpatterns = [
     re_path(r"^reports/excel_export$",
         views.ExcelExportView.as_view(), name="excel_export"),
 ]
+
+v2_urlpatterns = [
+    #  reports
+    re_path(r"^product/type/(?P<ptid>\d+)/report$",
+        views.product_type_report, name="product_type_report"),
+    re_path(r"^product/(?P<pid>\d+)/report$",
+        views.product_report, name="product_report"),
+    re_path(r"^product/(?P<pid>\d+)/endpoint/report$",
+        views.product_endpoint_report, name="product_endpoint_report"),
+    re_path(r"^product/report$",
+        views.product_findings_report, name="product_findings_report"),
+]
+
+v3_forward_urlpatterns = [
+    #  reports
+    re_path(r"^organization/(?P<ptid>\d+)/report$", redirect_view("product_type_report")),
+    re_path(r"^asset/(?P<pid>\d+)/report$", redirect_view("product_report")),
+    re_path(r"^asset/(?P<pid>\d+)/endpoint/report$", redirect_view("product_endpoint_report")),
+    re_path(r"^asset/report$", redirect_view("product_findings_report")),
+]
+
+urlpatterns = common_urlpatterns + v2_urlpatterns + v3_forward_urlpatterns
