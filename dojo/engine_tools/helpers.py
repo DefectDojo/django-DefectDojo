@@ -385,9 +385,9 @@ def update_finding_prioritization_per_cve(
                 else []
             )
             priority_cve_severity_filter = (
-                (Q(id__in=ids) & Q(cve=vulnerability_id) & ~Q(cve=None))
+                (Q(id__in=ids) & Q(severity=severity) & Q(cve=vulnerability_id) & ~Q(cve=None))
                 if ids
-                else (Q(cve=vulnerability_id) & ~Q(cve=None))
+                else (Q(severity=severity) & Q(cve=vulnerability_id) & ~Q(cve=None))
             )
         else:
             priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
@@ -404,7 +404,7 @@ def update_finding_prioritization_per_cve(
         finding_update.set_sla_expiration_date()
 
     Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date"], 1000)
-    return f"{vulnerability_id if vulnerability_id else severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}"
+    return f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}"
 
 
 def identify_priority_vulnerabilities(findings) -> int:
