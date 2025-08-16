@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from dateutil.tz import UTC
 from django.test import override_settings
@@ -33,7 +33,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVE-2022-31159", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(6.4, finding.cvssv3_score)
             self.assertEqual("127637430", finding.unique_id_from_tool)
-            self.assertEqual(datetime.datetime(2022, 7, 7, 9, 15, 0), finding.date)
+            self.assertEqual(datetime(2022, 7, 7, 9, 15, 0), finding.date)
 
             finding = findings[1]
             self.assertEqual("Medium", finding.severity)
@@ -45,7 +45,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVE-2022-22979", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(5, finding.cvssv3_score)
             self.assertEqual("122648496", finding.unique_id_from_tool)
-            self.assertEqual(datetime.datetime(2022, 6, 14, 11, 34, 0), finding.date)
+            self.assertEqual(datetime(2022, 6, 14, 11, 34, 0), finding.date)
 
             finding = findings[2]
             self.assertEqual("High", finding.severity)
@@ -57,7 +57,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVE-2022-33980", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(7.5, finding.cvssv3_score)
             self.assertEqual("126041205", finding.unique_id_from_tool)
-            self.assertEqual(datetime.datetime(2022, 7, 2, 23, 19, 0), finding.date)
+            self.assertEqual(datetime(2022, 7, 2, 23, 19, 0), finding.date)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_json_first_seen(self):
@@ -83,7 +83,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual(665, finding.cwe)
             self.assertEqual("ddcc6e1b-3ed9-45c8-b77a-ead759fb5e2c", finding.unique_id_from_tool)
-            self.assertEqual(datetime.datetime(2022, 7, 29, 5, 13, 0, 924000).astimezone(UTC), finding.date)
+            self.assertEqual(datetime(2022, 7, 29, 5, 13, 0, 924000).astimezone(UTC), finding.date)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_json_fixed_first_seen(self):
@@ -108,4 +108,4 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVE-2022-31159", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
             self.assertEqual(22, finding.cwe)
-            self.assertEqual(datetime.date.today(), finding.mitigated.date())
+            self.assertEqual(datetime.now(tz=UTC).date(), finding.mitigated.date())

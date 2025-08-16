@@ -1,8 +1,10 @@
 import hashlib
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from dojo.models import Finding
+from dojo.utils import get_system_setting
 
 
 class NoseyParkerParser:
@@ -82,6 +84,7 @@ class NoseyParkerParser:
                 self.dupes[key] = finding
             else:
                 self.dupes[key] = True
+                local_tz = ZoneInfo(get_system_setting("time_zone"))
                 # Create Finding object
                 finding = Finding(
                     test=test,
@@ -90,7 +93,7 @@ class NoseyParkerParser:
                     description=description,
                     severity="High",
                     mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
-                    date=datetime.today().strftime("%Y-%m-%d"),
+                    date=datetime.now(tz=local_tz).strftime("%Y-%m-%d"),
                     verified=False,
                     active=True,
                     is_mitigated=False,
@@ -142,6 +145,7 @@ class NoseyParkerParser:
                 self.dupes[key] = finding
             else:
                 self.dupes[key] = True
+                local_tz = ZoneInfo(get_system_setting("time_zone"))
                 # Create Finding object
                 finding = Finding(
                     test=test,
@@ -150,7 +154,7 @@ class NoseyParkerParser:
                     description=description,
                     severity="High",
                     mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
-                    date=datetime.today().strftime("%Y-%m-%d"),
+                    date=datetime.now(tz=local_tz).strftime("%Y-%m-%d"),
                     verified=False,
                     active=True,
                     is_mitigated=False,
