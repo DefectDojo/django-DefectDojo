@@ -2,7 +2,6 @@ import collections
 import decimal
 import logging
 import warnings
-import zoneinfo
 from datetime import datetime, timedelta
 
 import six
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
-from django.utils import timezone
+from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
     BooleanFilter,
@@ -97,8 +96,6 @@ from dojo.utils import get_system_setting, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
-local_tz = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
-
 BOOLEAN_CHOICES = (("false", "No"), ("true", "Yes"))
 EARLIEST_FINDING = None
 
@@ -122,10 +119,6 @@ def vulnerability_id_filter(queryset, name, value):
         .filter(vulnerability_id=value) \
         .values_list("finding_id", flat=True)
     return queryset.filter(id__in=ids)
-
-
-def now():
-    return datetime.today().replace(tzinfo=local_tz)
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
@@ -200,7 +193,7 @@ class FindingStatusFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
@@ -216,7 +209,7 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_satisfied(self, qs, name):
         # return findings that have an sla expiration date after today or no sla expiration date
-        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
+        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=now().date()))
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
@@ -229,7 +222,7 @@ class FindingSLAFilter(ChoiceFilter):
                 risk_accepted=False,
                 is_mitigated=False,
                 mitigated=None,
-            ) & Q(sla_expiration_date__lt=timezone.now().date()),
+            ) & Q(sla_expiration_date__lt=now().date()),
         )
 
     options = {
@@ -824,14 +817,14 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
             return qs.all()
         return None
 
     def current_month(self, qs, name):
-        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=local_tz)
+        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": self.start_date.year,
@@ -839,7 +832,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
-        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=local_tz)
+        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": now().year,
@@ -890,7 +883,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
