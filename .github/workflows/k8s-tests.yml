@@ -125,7 +125,7 @@ jobs:
              while :
                do
                DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
-               OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+               OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
                   --overrides='{ "apiVersion": "v1" }' \
                   --restart=Never -i --rm -- \
                     --silent \
@@ -156,7 +156,7 @@ jobs:
              ADMIN_PASS=$(kubectl get secret/defectdojo -o jsonpath='{.data.DD_ADMIN_PASSWORD}' | base64 -d)
              echo "Simple API check"
              DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
-             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
                --overrides='{ "apiVersion": "v1" }' \
                --restart=Never -i --rm -- \
                  --silent \
