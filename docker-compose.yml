@@ -10,7 +10,7 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
+      dockerfile: "Dockerfile.nginx-alpine"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     depends_on:
       uwsgi:

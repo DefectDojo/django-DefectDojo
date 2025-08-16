@@ -31,7 +31,9 @@ jobs:
         matrix:
             docker-image: [django, nginx]
             os: [alpine, debian]
-
+            exclude:
+                - docker-image: nginx
+                  os: debian
     steps:
       # deduce docker org name from git repo to make the build also work in forks
     - id: Set-docker-org
@@ -69,7 +71,7 @@ jobs:
 
       # debian images are the default / official ones, so these get the os-less tag
     - name: Tag Debian with os-less tags
-      if: ${{ matrix.os  == 'debian' }}
+      if: ${{ (matrix.docker-image == 'django' && matrix.os == 'debian') || (matrix.docker-image == 'nginx' && matrix.os == 'alpine') }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
@@ -77,6 +79,6 @@ jobs:
 
       # just for logging
     - name: Inspect default images
-      if: ${{ matrix.os  == 'debian' }}
+      if: ${{ (matrix.docker-image == 'django' && matrix.os == 'debian') || (matrix.docker-image == 'nginx' && matrix.os == 'alpine') }}
       run: |
           docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}

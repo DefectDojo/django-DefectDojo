@@ -40,7 +40,6 @@ jobs:
       - name: Load docker images
         timeout-minutes: 10
         run: |-
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-${{ env.PLATFORM }}_img
              docker load -i built-docker-image/django-${{ matrix.os }}-${{ env.PLATFORM }}_img
              docker images
 

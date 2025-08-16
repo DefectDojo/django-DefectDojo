@@ -24,6 +24,8 @@ jobs:
         os: [alpine, debian]
         platform: ["${{ inputs.platform }}"]
         exclude:
+            - docker-image: nginx
+              os: debian
             - docker-image: integration-tests
               os: alpine
             - docker-image: integration-tests
