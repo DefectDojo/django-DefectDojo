@@ -1915,6 +1915,9 @@ REQUESTS_TIMEOUT = env("DD_REQUESTS_TIMEOUT")
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
+# TODO: - remove these lines, they are here only for testing that following error is the only stopper for upgrade to py3.12
+warnings.filterwarnings("ignore", module="polymorphic")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/10334, specially https://github.com/pypi/support/issues/4164
+warnings.filterwarnings("ignore", module="github")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/9948 but it might pop-up somewhere else again. pygithub is just first known location.
 
 # The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
 # TODO: - Remove this setting in Django 6.0
