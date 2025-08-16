@@ -1,13 +1,9 @@
 import csv
-import zoneinfo
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
 from dojo.models import Finding
-from dojo.utils import get_system_setting
-
-locale = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 """
 Author: Aaron Weaver
