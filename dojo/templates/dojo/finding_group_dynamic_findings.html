@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load display_tags %}
+{% load static %}
+{% block content %}
+    {% comment %} Findings from Dynamic Finding Group {% endcomment %}
+    {% include "dojo/finding_group_dynamic_findings_list_snippet.html" %}
+{% endblock %}
