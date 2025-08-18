@@ -3327,10 +3327,7 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         )
 
-        if (
-            similar_finding.duplicate_finding == finding
-            or similar_finding.duplicate_finding == finding.duplicate_finding
-        ):
+        if similar_finding.duplicate_finding in {finding, finding.duplicate_finding}:
             # duplicate inside the same cluster
             actions.append(
                 {

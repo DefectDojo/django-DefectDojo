@@ -225,8 +225,7 @@ class ApiBugcrowdParser:
             self.is_mitigated(bugcrowd_state)
             or self.is_false_p(bugcrowd_state)
             or self.is_out_of_scope(bugcrowd_state)
-            or bugcrowd_state == "not_reproducible"
-            or bugcrowd_state == "informational"
+            or bugcrowd_state in {"not_reproducible", "informational"}
         )
 
     # From https://docs.bugcrowd.com/customers/submission-management/submission-status/
@@ -265,5 +264,5 @@ class ApiBugcrowdParser:
 
     def is_verified(self, bugcrowd_state):
         return bugcrowd_state == "triaged" or (
-            bugcrowd_state != "new" and bugcrowd_state != "triaging"
+            bugcrowd_state not in {"new", "triaging"}
         )
