@@ -409,6 +409,10 @@ postgresql:
   # and uncomment the line below:
   # postgresServer: "127.0.0.1"
   enabled: true
+  image:
+    repository: postgresql
+    tag: 17.6-alpine
+    digest: a283fb08619d3517039ae2106413cad68918934025640696a966f4fa468fe376
   auth:
     username: defectdojo
     password: ""
@@ -480,6 +484,10 @@ gke:
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: true
+  image:  # do not use original bitnami image 
+    repository: redis
+    tag: 7.2.10-alpine
+    digest: 395ccd7ee4db0867de0d0410f4712a9e0331cff9fdbd864f71ec0f7982d3ffe6
   scheme: "redis"
   transportEncryption:
     enabled: false
