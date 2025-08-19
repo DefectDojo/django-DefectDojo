@@ -406,6 +406,11 @@ initializer:
 
 postgresql:
   enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamisecure/postgresql
+    tag: latest
+    digest: 05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f
   auth:
     username: defectdojo
     password: ""
@@ -481,6 +486,11 @@ gke:
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamisecure/redis
+    tag: latest
+    digest: c1488898b422846bc113788507c425786c652f3b39dfa46bfd7ad39a5881d36d
   scheme: "redis"
   transportEncryption:
     enabled: false
