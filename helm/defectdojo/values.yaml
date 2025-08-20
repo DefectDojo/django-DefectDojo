@@ -409,6 +409,9 @@ postgresql:
   # and uncomment the line below:
   # postgresServer: "127.0.0.1"
   enabled: true
+  global: 
+    security: 
+      allowInsecureImages: true
   image:
     repository: postgresql
     tag: 17.6-alpine
@@ -484,6 +487,9 @@ gke:
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: true
+  global: 
+    security: 
+      allowInsecureImages: true
   image:  # do not use original bitnami image 
     repository: redis
     tag: 7.2.10-alpine
