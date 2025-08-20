@@ -976,3 +976,30 @@ class TestNotificationWebhooks(DojoTestCase):
                     "url_ui": "http://localhost:8080/finding/239",
                 }],
             })
+
+    @patch("requests.request", **{"return_value.status_code": 200})
+    def test_ping_with_owner_assigned(self, mock):
+        """
+        We only need to test one event because the user is serialized in the base sub template. This allows to]
+        assert that if the test passes for one event, it will pass for all events.
+        """
+        manager = WebhookNotificationManger()
+        manager._test_webhooks_notification(Notification_Webhooks.objects.filter(owner__isnull=False).first())
+        self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "ping")
+        self.maxDiff = None
+        self.assertEqual(
+            mock.call_args.kwargs["json"],
+            {
+                "description": "Test webhook notification",
+                "title": "",
+                "user": {
+                    "id": 6,
+                    "username": "user5",
+                    "first_name": "User",
+                    "last_name": "Five",
+                    "email": "user5@email.com",
+                    "url_api": "http://localhost:8080/api/v2/users/6/",
+                    "url_ui": "http://localhost:8080/user/6",
+                },
+            },
+        )

@@ -11,6 +11,7 @@ services:
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celeryworker:
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker-dev.sh']
     volumes:
       - '.:/app:z'
     environment:
@@ -54,4 +55,4 @@ services:
         protocol: tcp
         mode: host
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:2.18.2@sha256:e66c2a2bf53b1ab68f26c68ac9499ad98b4722d2fff5807fc11f8a2213c053be
+    image: mccutchen/go-httpbin:2.18.3@sha256:3992f3763e9ce5a4307eae0a869a78b4df3931dc8feba74ab823dd2444af6a6b

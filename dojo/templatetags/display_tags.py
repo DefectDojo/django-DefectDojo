@@ -185,10 +185,13 @@ def percentage(fraction, value):
 
 @register.filter
 def format_epss(value):
+    if value is None:
+        return "N.A."
+
     try:
         return f"{value:.2%}"
     except (ValueError, TypeError):
-        return "N.A."
+        return "error"
 
 
 def asvs_calc_level(benchmark_score):
@@ -340,6 +343,9 @@ def action_log_entry(value, autoescape=None):
 
 @register.simple_tag(takes_context=True)
 def dojo_body_class(context):
+    if "request" not in context:
+        return ""
+
     request = context["request"]
     return request.COOKIES.get("dojo-sidebar", "min")
 
@@ -793,6 +799,8 @@ def vulnerability_url(vulnerability_id):
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
+            if key == "JVNDB-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.split("-")[1]) + "/" + str(vulnerability_id) + ".html"
             if "&&" in settings.VULNERABILITY_URLS[key]:
                 # Process specific keys specially if need
                 if key in {"CAPEC", "CWE"}:
@@ -868,6 +876,26 @@ def jira_creation(obj):
 @register.filter
 def jira_change(obj):
     return jira_helper.get_jira_change(obj)
+
+
+@register.filter
+def jira_qualified_findings(finding_group):
+    return jira_helper.get_qualified_findings(finding_group)
+
+
+@register.filter
+def jira_non_qualified_findings(finding_group):
+    return jira_helper.get_non_qualified_findings(finding_group)
+
+
+@register.filter
+def jira_sla_deadline(obj):
+    return jira_helper.get_sla_deadline(obj)
+
+
+@register.filter
+def jira_severity(findings):
+    return jira_helper.get_severity(findings)
 
 
 @register.filter

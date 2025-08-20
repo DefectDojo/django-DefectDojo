@@ -4,8 +4,9 @@ import hashlib
 import logging
 import re
 import warnings
+import zoneinfo
 from contextlib import suppress
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
@@ -14,7 +15,6 @@ import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
-from cvss import CVSS3
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -40,9 +40,10 @@ from multiselectfield import MultiSelectField
 from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
-from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+
+from dojo.validators import cvss3_validator, cvss4_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -135,6 +136,11 @@ def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None)
         if field.name not in {"id", *exclude_fields}:
             setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
     return new_model_instance
+
+
+def tomorrow():
+    """Returns a date representing the day after today."""
+    return timezone.now().date() + timedelta(days=1)
 
 
 @deconstructible
@@ -432,7 +438,7 @@ class System_Settings(models.Model):
     url_prefix = models.CharField(max_length=300, default="", blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
     team_name = models.CharField(max_length=100, default="", blank=True)
     time_zone = models.CharField(max_length=50,
-                                 choices=[(tz, tz) for tz in all_timezones],
+                                 choices=[(tz, tz) for tz in zoneinfo.available_timezones()],
                                  default="UTC", blank=False)
     enable_product_grade = models.BooleanField(default=False, verbose_name=_("Enable Product Grading"), help_text=_("Displays a grade letter next to a product to show the overall health."))
     product_grade = models.CharField(max_length=800, blank=True)
@@ -592,6 +598,16 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable Calendar"),
         help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
+    enable_cvss3_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS3 Display"),
+        help_text=_("With this setting turned off, CVSS3 fields will be hidden in the user interface."))
+    enable_cvss4_display = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable CVSS4 Display"),
+        help_text=_("With this setting turned off, CVSS4 fields will be hidden in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -612,11 +628,13 @@ class System_Settings(models.Model):
     minimum_password_length = models.IntegerField(
         default=9,
         verbose_name=_("Minimum password length"),
-        help_text=_("Requires user to set passwords greater than minimum length."))
+        help_text=_("Requires user to set passwords greater than minimum length."),
+        validators=[MinValueValidator(9), MaxValueValidator(48)])
     maximum_password_length = models.IntegerField(
         default=48,
         verbose_name=_("Maximum password length"),
-        help_text=_("Requires user to set passwords less than maximum length."))
+        help_text=_("Requires user to set passwords less than maximum length."),
+        validators=[MinValueValidator(9), MaxValueValidator(48)])
     number_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -658,6 +676,19 @@ class System_Settings(models.Model):
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
+
+    def clean(self):
+        super().clean()
+
+        if (
+            self.minimum_password_length is not None
+            and self.maximum_password_length is not None
+        ):
+            if self.minimum_password_length > self.maximum_password_length:
+                msg = "Minimum required password length must be larger than the maximum required password length."
+                raise ValidationError({
+                    "minimum_password_length": msg,
+                })
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -810,7 +841,7 @@ class FileUpload(models.Model):
 class Product_Type(models.Model):
 
     """
-    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing "types" of products.
     `
        Examples:
          * IAM Team
@@ -1002,6 +1033,10 @@ class SLA_Configuration(models.Model):
         default=True,
         verbose_name=_("Enforce Low Finding SLA Days"),
         help_text=_("When enabled, low findings will be assigned an SLA expiration date based on the low finding SLA days within this SLA configuration."))
+    restart_sla_on_reactivation = models.BooleanField(
+        default=False,
+        verbose_name=_("Restart SLA when findings are reactivated"),
+        help_text=_("When enabled, findings that were previously mitigated but are reactivated durign reimport will have their SLA period restarted."))
     async_updating = models.BooleanField(
         default=False,
         help_text=_("Findings under this SLA configuration are asynchronously being updated"))
@@ -1301,12 +1336,10 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else "unknown"
 
-    # only used in APIv2 serializers.py, query should be aligned with findings_count
-    @cached_property
+    # only used in APIv2 serializers.py, should be deprecated or at least prefetched
     def open_findings_list(self):
-        findings = Finding.objects.filter(test__engagement__product=self,
-                                          active=True)
-        return [i.id for i in findings]
+        findings = Finding.objects.filter(test__engagement__product=self, active=True).values_list("id", flat=True)
+        return list(findings)
 
     @property
     def has_jira_configured(self):
@@ -1612,7 +1645,7 @@ class Engagement(models.Model):
         from dojo.finding import helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        with suppress(Product.DoesNotExist):
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.product)
@@ -2079,8 +2112,6 @@ class Test(models.Model):
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
-    estimated_time = models.TimeField(null=True, blank=True, editable=False)
-    actual_time = models.TimeField(null=True, blank=True, editable=False)
     percent_complete = models.IntegerField(null=True, blank=True,
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
@@ -2222,7 +2253,7 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.engagement.product)
@@ -2331,16 +2362,36 @@ class Finding(models.Model):
                               verbose_name=_("EPSS percentile"),
                               help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
                               validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex],
+    known_exploited = models.BooleanField(default=False,
+                                          verbose_name=_("Known Exploited"),
+                                          help_text=_("Whether this vulnerability is known to have been exploited in the wild."))
+    ransomware_used = models.BooleanField(default=False,
+                                          verbose_name=_("Used in Ransomware"),
+                                          help_text=_("Whether this vulnerability is known to have been leveraged as part of a ransomware campaign."))
+    kev_date = models.DateField(null=True, blank=True,
+                                verbose_name=_("KEV Date Added"),
+                                help_text=_("The date the vulnerability was added to the KEV catalog."),
+                                validators=[MaxValueValidator(tomorrow)])
+    cvssv3 = models.TextField(validators=[cvss3_validator],
                               max_length=117,
                               null=True,
-                              verbose_name=_("CVSS v3"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw."))
+                              verbose_name=_("CVSS3 Vector"),
+                              help_text=_("Common Vulnerability Scoring System version 3 (CVSS3) score associated with this finding."))
     cvssv3_score = models.FloatField(null=True,
                                         blank=True,
-                                        verbose_name=_("CVSSv3 score"),
+                                        verbose_name=_("CVSS3 Score"),
                                         help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+
+    cvssv4 = models.TextField(validators=[cvss4_validator],
+                              max_length=255,
+                              null=True,
+                              verbose_name=_("CVSS4 vector"),
+                              help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."))
+    cvssv4_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name=_("CVSSv4 Score"),
+                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
                                         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
 
     url = models.TextField(null=True,
@@ -2357,6 +2408,10 @@ class Finding(models.Model):
                                 null=True,
                                 blank=True,
                                 help_text=_("Text describing how to best fix the flaw."))
+    fix_available = models.BooleanField(null=True,
+                                        default=None,
+                                        verbose_name=_("Fix Available"),
+                                        help_text=_("Denotes if there is a fix available for this flaw."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
@@ -2660,6 +2715,9 @@ class Finding(models.Model):
             models.Index(fields=["duplicate"]),
             models.Index(fields=["is_mitigated"]),
             models.Index(fields=["duplicate_finding", "id"]),
+            models.Index(fields=["known_exploited"]),
+            models.Index(fields=["ransomware_used"]),
+            models.Index(fields=["kev_date"]),
         ]
 
     def __init__(self, *args, **kwargs):
@@ -2678,7 +2736,6 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-
         from dojo.finding import helper as finding_helper
 
         # if not isinstance(self.date, (datetime, date)):
@@ -2697,13 +2754,31 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         # Synchronize cvssv3 score using cvssv3 vector
+
         if self.cvssv3:
             try:
-                cvss_object = CVSS3(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_object.scores()[2]
+                cvss_data = parse_cvss_data(self.cvssv3)
+                if cvss_data:
+                    self.cvssv3 = cvss_data.get("cvssv3")
+                    self.cvssv3_score = cvss_data.get("cvssv3_score")
+
             except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+                logger.warning("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s.", self.id, self.cvssv3, ex)
+                # remove invalid cvssv3 vector for new findings, or should we just throw a ValidationError?
+                if self.pk is None:
+                    self.cvssv3 = None
+
+        # behaviour for CVVS4 is slightly different. Extracting this into a method would lead to probably hard to read code
+        if self.cvssv4:
+            try:
+                cvss_data = parse_cvss_data(self.cvssv4)
+                if cvss_data:
+                    self.cvssv4 = cvss_data.get("cvssv4")
+                    self.cvssv4_score = cvss_data.get("cvssv4_score")
+
+            except Exception as ex:
+                logger.warning("Can't compute cvssv4 score for finding id %i. Invalid cvssv4 vector found: '%s'. Exception: %s.", self.id, self.cvssv4, ex)
+                self.cvssv4 = None
 
         self.set_hash_code(dedupe_option)
 
@@ -2739,7 +2814,8 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+        system_settings = System_Settings.objects.get()
+        if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
@@ -2786,7 +2862,7 @@ class Finding(models.Model):
         from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             calculate_grade(self.test.engagement.product)
@@ -3034,8 +3110,11 @@ class Finding(models.Model):
             return self.sla_start_date
         return self.date
 
+    def get_sla_configuration(self):
+        return self.test.engagement.product.sla_configuration
+
     def get_sla_period(self):
-        sla_configuration = self.test.engagement.product.sla_configuration
+        sla_configuration = self.get_sla_configuration()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
@@ -3428,7 +3507,8 @@ class Finding_Group(TimeStampedModel):
     GROUP_BY_OPTIONS = [("component_name", "Component Name"),
                         ("component_name+component_version", "Component Name + Version"),
                         ("file_path", "File path"),
-                        ("finding_title", "Finding Title")]
+                        ("finding_title", "Finding Title"),
+                        ("vuln_id_from_tool", "Vulnerability ID from Tool")]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -3516,8 +3596,8 @@ class Finding_Template(models.Model):
                            blank=False,
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
+    cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
@@ -3843,7 +3923,7 @@ class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
     url = models.URLField(max_length=2000, verbose_name=_("JIRA URL"), help_text=_("For more information how to configure Jira, read the DefectDojo documentation."))
     username = models.CharField(max_length=2000, verbose_name=_("Username/Email"), help_text=_("Username or Email Address, see DefectDojo documentation for more information."))
-    password = models.CharField(max_length=2000, verbose_name=_("Password/Token"), help_text=_("Password, API Token, or Personal Access Token, see DefectDojo documentation for more information."))
+    password = models.CharField(max_length=2000, verbose_name=_("Password/Token"), help_text=_("Password or API Token, see DefectDojo documentation for more information."))
 
     if hasattr(settings, "JIRA_ISSUE_TYPE_CHOICES_CONFIG"):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
@@ -4633,7 +4713,11 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 
-from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
+from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
+    calculate_grade,
+    parse_cvss_data,
+    to_str_typed,
+)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)

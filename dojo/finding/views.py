@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import Count, Q, QuerySet
+from django.db.models import QuerySet
 from django.db.models.functions import Length
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -49,7 +49,7 @@ from dojo.filters import (
     TestImportFilter,
     TestImportFindingActionFilter,
 )
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.forms import (
     ApplyFindingTemplateForm,
     ClearFindingReviewForm,
@@ -129,90 +129,6 @@ from dojo.utils import (
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
 logger = logging.getLogger(__name__)
-
-
-def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=True):
-    prefetched_findings = findings
-    if isinstance(
-        findings, QuerySet,
-    ):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "reviewers",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related("reporter")
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "jira_issue__jira_project__jira_instance",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related("test__test_type")
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "test__engagement__jira_project__jira_instance",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "test__engagement__product__jira_project_set__jira_instance",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related("found_by")
-
-        # for open/active findings the following 4 prefetches are not needed
-        if prefetch_type != "open":
-            prefetched_findings = prefetched_findings.prefetch_related(
-                "risk_acceptance_set",
-            )
-            prefetched_findings = prefetched_findings.prefetch_related(
-                "risk_acceptance_set__accepted_findings",
-            )
-            prefetched_findings = prefetched_findings.prefetch_related(
-                "original_finding",
-            )
-            prefetched_findings = prefetched_findings.prefetch_related(
-                "duplicate_finding",
-            )
-
-        if exclude_untouched:
-            # filter out noop reimport actions from finding status history
-            prefetched_findings = prefetched_findings.prefetch_related(
-                Prefetch(
-                    "test_import_finding_action_set",
-                    queryset=Test_Import_Finding_Action.objects.exclude(
-                        action=IMPORT_UNTOUCHED_FINDING,
-                    ),
-                ),
-            )
-        else:
-            prefetched_findings = prefetched_findings.prefetch_related(
-                "test_import_finding_action_set",
-            )
-        """
-        we could try to prefetch only the latest note with SubQuery and OuterRef,
-        but I'm getting that MySql doesn't support limits in subqueries.
-        """
-        prefetched_findings = prefetched_findings.prefetch_related("notes")
-        prefetched_findings = prefetched_findings.prefetch_related("tags")
-        prefetched_findings = prefetched_findings.prefetch_related("endpoints")
-        prefetched_findings = prefetched_findings.prefetch_related("status_finding")
-        prefetched_findings = prefetched_findings.annotate(
-            active_endpoint_count=Count(
-                "status_finding__id", filter=Q(status_finding__mitigated=False),
-            ),
-        )
-        prefetched_findings = prefetched_findings.annotate(
-            mitigated_endpoint_count=Count(
-                "status_finding__id", filter=Q(status_finding__mitigated=True),
-            ),
-        )
-        prefetched_findings = prefetched_findings.prefetch_related("finding_group_set")
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "test__engagement__product__members",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "test__engagement__product__prod_type__members",
-        )
-        prefetched_findings = prefetched_findings.prefetch_related(
-            "vulnerability_id_set",
-        )
-    else:
-        logger.debug("unable to prefetch because query was already executed")
-
-    return prefetched_findings
 
 
 def prefetch_for_similar_findings(findings):
@@ -1437,7 +1353,9 @@ def reopen_finding(request, fid):
         status.save()
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
-    jira_helper.save_and_push_to_jira(finding)
+    finding.save(dedupe_option=False, push_to_jira=False)
+    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+        jira_helper.push_to_jira(finding)
 
     reopen_external_issue(finding, "re-opened by defectdojo", "github")
 
@@ -2961,10 +2879,16 @@ def finding_bulk_update_all(request, pid=None):
             error_counts = defaultdict(lambda: 0)
             success_count = 0
             finding_groups = set(  # noqa: C401
-                find.finding_group for find in finds if find.has_finding_group
+                finding.finding_group
+                for finding in finds
+                if finding.has_finding_group
+                and (
+                    jira_helper.is_push_all_issues(finding)
+                    or jira_helper.is_keep_in_sync_with_jira(finding)
+                    or form.cleaned_data.get("push_to_jira")
+                )
             )
             logger.debug("finding_groups: %s", finding_groups)
-            groups_pushed_to_jira = False
             for group in finding_groups:
                 if form.cleaned_data.get("push_to_jira"):
                     (
@@ -2987,7 +2911,6 @@ def finding_bulk_update_all(request, pid=None):
 
             if success_count > 0:
                 add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
-                groups_pushed_to_jira = True
 
             # refresh from db
             finds = finds.all()
@@ -3010,10 +2933,11 @@ def finding_bulk_update_all(request, pid=None):
                 # the checkbox gets disabled and is always false
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding,
                 # form.cleaned_data.get('push_to_jira'))
-                if not groups_pushed_to_jira and (
-                    jira_helper.is_push_all_issues(finding)
-                    or form.cleaned_data.get("push_to_jira")
-                ):
+                if (
+                    form.cleaned_data.get("push_to_jira")
+                    or jira_helper.is_push_all_issues(finding)
+                    or jira_helper.is_keep_in_sync_with_jira(finding)
+                ) and not finding.has_finding_group:
                     (
                         can_be_pushed_to_jira,
                         error_message,

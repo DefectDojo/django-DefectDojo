@@ -590,14 +590,12 @@
   },
   {
     "fields": {
-      "estimated_time": null,
       "test_type": 9,
       "engagement": 1,
       "environment": 1,
       "target_start": "2016-08-26T05:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": null,
       "target_end": "2016-08-26T05:00:00Z"
     },
     "model": "dojo.test",

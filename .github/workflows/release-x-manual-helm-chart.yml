@@ -43,7 +43,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ inputs.release_number }}
           fetch-depth: 0
@@ -71,7 +71,7 @@ jobs:
              helm dependency update ./helm/defectdojo
 
       - name: Add yq
-        uses: mikefarah/yq@b534aa9ee5d38001fba3cd8fe254a037e4847b37 # v4.45.4
+        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
 
       - name: Pin version docker version
         id: pin_image

@@ -28,5 +28,5 @@ CVE-2024-22195,Medium,6.1,3.1,Jinja2,2.11.2,/usr/local/lib/python2.7/dist-packag
 CVE-2024-34064,Medium,6.1,3.0,Jinja2,2.11.2,/usr/local/lib/python2.7/dist-packages/Jinja2-2.11.2.dist-info/METADATA,python,v3.1.5,,2024-01-11T00:00:00Z,2024-05-06T00:00:00Z,false,0.00044
 CVE-2014-1624,Low,3.3,2.0,pyxdg,0.25,/usr/share/pyshared/pyxdg-0.25.egg-info,python,v0.26.0,https://nvd.nist.gov/vuln/detail/CVE-2014-1624,2013-01-21T06:00:00Z,,false,0.00042
 CVE-2023-23934,Low,3.5,3.1,Werkzeug,1.0.1,/usr/local/lib/python2.7/dist-packages/Werkzeug-1.0.1.dist-info/METADATA,python,v2.1.1,https://nvd.nist.gov/vuln/detail/CVE-2023-23934,2023-02-14T00:00:00Z,2023-02-14T00:00:00Z,false,0.00064
-CVE-2023-5752,Low,3.3,3.1,pip,9.0.1,/usr/lib/python2.7/dist-packages/pip-9.0.1.egg-info/PKG-INFO,python,v19.2.0,https://nvd.nist.gov/vuln/detail/CVE-2023-5752,2023-10-01T00:00:00Z,2023-10-15T00:00:00Z,false,0.00048
-CVE-2024-49766,Low,3.7,3.0,Werkzeug,1.0.1,/usr/local/lib/python2.7/dist-packages/Werkzeug-1.0.1.dist-info/METADATA,python,v2.1.1,,2024-10-25T00:00:00Z,2024-10-25T00:00:00Z,false,0.00045
+CVE-2023-5752,Negligible,3.3,3.1,pip,9.0.1,/usr/lib/python2.7/dist-packages/pip-9.0.1.egg-info/PKG-INFO,python,v19.2.0,https://nvd.nist.gov/vuln/detail/CVE-2023-5752,2023-10-01T00:00:00Z,2023-10-15T00:00:00Z,false,0.00048
+CVE-2024-49766,Other,3.7,3.0,Werkzeug,1.0.1,/usr/local/lib/python2.7/dist-packages/Werkzeug-1.0.1.dist-info/METADATA,python,v2.1.1,,2024-10-25T00:00:00Z,2024-10-25T00:00:00Z,false,0.00045
