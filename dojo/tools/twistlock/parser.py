@@ -57,6 +57,7 @@ class TwistlockCSVParser:
         data_discovered = row.get("Discovered", "")
         data_unique_id = row.get("Custom Id", "")
         data_ami_id = row.get("Ami Id", "")
+        data_labels = row.get("Labels", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -109,7 +110,8 @@ class TwistlockCSVParser:
                 data_account_id,
                 data_discovered,
                 data_unique_id,
-                data_ami_id
+                data_ami_id,
+                data_labels,
             ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
@@ -143,9 +145,9 @@ class TwistlockCSVParser:
 
     def get_tags(self, row):
         tags = row.get("Custom Tag", None)
-        if (tags is not None) and ',' in str(tags):
-            return str(tags).split(',')
-        elif (tags is not None):
+        if (tags is not None) and "," in str(tags):
+            return str(tags).split(",")
+        elif tags is not None:
             return [tags]
         else:
             return [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
@@ -180,9 +182,10 @@ class TwistlockCSVParser:
         data_account_id,
         data_discovered,
         data_unique_id,
-        data_ami_id
+        data_ami_id,
+        data_labels,
     ):
-        return (
+        description = (
             "<p><strong>Description:</strong> "
             + data_description
             + "</p><p><strong>Type:</strong> "
@@ -268,6 +271,19 @@ class TwistlockCSVParser:
             + "</p>"
         )
 
+        labels_list = [
+            label.strip() for label in str(data_labels).split(",") if label.strip()
+        ]
+        if labels_list:
+            description += "<p><strong>Labels:</strong><ul>"
+            for label in labels_list:
+                description += f"<li>{label.replace('\"', '')}</li>"
+            description += "</ul></p>"
+        else:
+            description += "<p><strong>Labels:</strong> </p>"
+
+        return description
+
     def procces_executor(self, row, test):
         finding = self.parse_issue(row, test)
         if finding is not None:
@@ -299,8 +315,8 @@ class TwistlockCSVParser:
 
         first_line = self.validate_content(content)
         if first_line is None:
-            first_line = ''
-        delimiter = ';' if ';' in first_line else ','
+            first_line = ""
+        delimiter = ";" if ";" in first_line else ","
         reader = csv.DictReader(
             io.StringIO(content),
             delimiter=delimiter,
@@ -343,7 +359,7 @@ class TwistlockJsonParser:
         if "results" in tree:
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
             packageTree = tree["results"][0].get("packages", [])
-            
+
             for node in vulnerabilityTree:
                 item = get_item(node, test, packageTree)
                 unique_key = node["id"] + str(
@@ -361,20 +377,17 @@ def get_item(vulnerability, test, packageTree):
         if "severity" in vulnerability
         else "Info"
     )
-    vector = (
-        vulnerability.get("vector", "CVSS vector not provided. ")
+    vector = vulnerability.get("vector", "CVSS vector not provided. ")
+    status = vulnerability.get(
+        "status", "There seems to be no fix yet. Please check description field."
     )
-    status = (
-        vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
-    )
-    cvss = (
-        vulnerability.get("cvss", "No CVSS score yet.")
-    )
-    riskFactors = (
-        vulnerability.get("riskFactors", "No risk factors.")
-    )
+    cvss = vulnerability.get("cvss", "No CVSS score yet.")
+    riskFactors = vulnerability.get("riskFactors", "No risk factors.")
     for package in packageTree:
-        if package["name"] == vulnerability["packageName"] and package["version"] == vulnerability["packageVersion"]:
+        if (
+            package["name"] == vulnerability["packageName"]
+            and package["version"] == vulnerability["packageVersion"]
+        ):
             vulnerability["type"] = package["type"]
             break
     description = (
@@ -440,7 +453,12 @@ def convert_severity(severity):
         return "High"
     if severity.lower() == "moderate":
         return "Medium"
-    if severity.lower() in ["unimportant", "unassigned", "negligible", "not yet assigned"]:
+    if severity.lower() in [
+        "unimportant",
+        "unassigned",
+        "negligible",
+        "not yet assigned",
+    ]:
         return "Low"
     if severity.lower() in ["information", "informational", ""]:
         return "Info"
