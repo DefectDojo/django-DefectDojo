@@ -2,13 +2,14 @@ import re
 import logging
 from dojo.authorization.roles_permissions import Permissions
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 from dojo.finding.views import BaseListFindings
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.models import Product, Engagement, Test
 from dojo.reports.custom_request import CustomRequest
 from dojo.celery import app
 from dojo.models import GeneralSettings
-from dojo.reports.report_manager import CSVReportManager
+from dojo.reports.report_manager import CSVReportManager, ExcelReportManager, HtmlReportManager
 from django.http import Http404, QueryDict
 
 logger = logging.getLogger(__name__)
@@ -121,15 +122,27 @@ def get_name_key(user, product):
     return key
 
 
-@app.task
+@app.task()
 def async_generate_report(request_data: dict):
     logger.debug(f"REPORT FINDING: async_generate_report {request_data}")
     request = CustomRequest(**request_data)
     findings, _obj, _url = get_findings(request)
     if findings.count() == 0:
         raise Exception(500, "No findings found for the report.")
-    csv_report_manager = CSVReportManager(findings, request)
-    csv_report_manager.generate_report()
+    
+    format_type = request_data.get("format")
+    
+    if format_type == "csv":
+        report_class = CSVReportManager(findings, request)
+    elif format_type == "excel":
+        report_class = ExcelReportManager(findings, request)
+    elif format_type == "html":
+        report_class = HtmlReportManager(findings, request)
+    else:
+        logger.error(f"REPORT FINDING: Unsupported format: {format_type}")
+        raise Exception(400, f"Unsupported report format: {format_type}")
+    
+    report_class.generate_report()
 
 
 def get_excludes():
