@@ -408,6 +408,7 @@ class ExcelReportManager(BaseReportManager):
             cell.font = self.font_bold
             col_num += 1
             self.col_num = col_num
+            self.row_num += 1
             self.add_extra_headers()
         self.first_row = False
         if not self.first_row:
