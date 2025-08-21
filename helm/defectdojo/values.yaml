@@ -383,9 +383,9 @@ initializer:
       memory: 512Mi
   # Additional environment variables injected to the initializer job pods.
   extraEnv: []
-  # Array of additional volume mount points for the initializer job pods.
+  # Array of additional volume mount points for the initializer job (init)containers.
   extraVolumeMounts: []
-  # A list of extra volumes to mount.
+  # A list of extra volumes to attach to the initializer job pods.
   extraVolumes: []
 
   # staticName defines whether name of the job will be the same (e.g., "defectdojo-initializer")
