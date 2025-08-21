@@ -794,6 +794,14 @@ class FileUpload(models.Model):
     title = models.CharField(max_length=100, unique=True)
     file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
 
+    def delete(self, *args, **kwargs):
+        """Delete the model and remove the file from storage."""
+        storage = self.file.storage
+        path = self.file.path
+        super().delete(*args, **kwargs)
+        if path and storage.exists(path):
+            storage.delete(path)
+
     def copy(self):
         copy = _copy_model_util(self)
         # Add unique modifier to file name
