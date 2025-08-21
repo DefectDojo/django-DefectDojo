@@ -93,6 +93,11 @@ class BaseReportManager(ABC):
         except botocore.exceptions.ClientError as e:
             logger.error(f"Failed to upload report to S3: {e}")
             raise
+    
+    @abstractmethod
+    def save_report(self):
+        pass
+
 
     def generate_report(self, *args, **kwargs):
         findings = self.add_findings_data()
@@ -102,6 +107,7 @@ class BaseReportManager(ABC):
         if self.findigns_all_counter <= self.chunk_size:
             logger.info(f"REPORT FINDING: Using SINGLE upload for {self.findigns_all_counter} findings")
             self._generate_single_upload(findings, excludes_list, allowed_attributes, allowed_foreign_keys)
+            self.save_report()
             self.send_report()
         else:
             logger.info(f"REPORT FINDING: Using MULTIPART upload for {self.findigns_all_counter} findings")
@@ -164,6 +170,7 @@ class BaseReportManager(ABC):
                     current_size_mb = current_buffer_size / (1024 * 1024)
                     logger.info(f"REPORT FINDING: Size report with {current_size_mb:.2f}MB ({counter} findings)")
                     if current_buffer_size >= self.MIN_PART_SIZE:
+                        self.save_report()
                         logger.info(f"REPORT FINDING: Uploading part with {current_size_mb:.2f}MB ({counter} findings)")
                         self.multipart_uploader.upload_part(self.buffer.getvalue())
                         self.buffer.seek(0)
@@ -171,6 +178,7 @@ class BaseReportManager(ABC):
                         logger.info("REPORT FINDING: cleand buffer after upload")
             if counter % self.chunk_size != 0:
                 logger.info("report finding: sending report at the end of the loop")
+                self.save_report()
                 self.multipart_uploader.upload_part(self.buffer.getvalue())
                 self.multipart_uploader.complete_upload()
 
@@ -206,6 +214,9 @@ class CSVReportManager(BaseReportManager):
         self.url_path = f"{GeneralSettings.get_value('URL_FILE_BUCKET_REPORT_FINDINGS', 'report/')}{self.request.user.username}_{self.get_url_encode()}.csv"
         self.multipart_uploader = S3MultipartUploader(self.session_s3, self.bucket, self.url_path)
         self.writer = csv.writer(self.buffer)
+    
+    def save_report(self):
+        pass
     
     def _add_finding_in_buffer(
             self,
@@ -335,6 +346,14 @@ class ExcelReportManager(BaseReportManager):
         self.multipart_uploader = S3MultipartUploader(self.session_s3, self.bucket, self.url_path)
         self.font_bold = Font(bold=True)
         self.buffer = io.BytesIO()
+        self.row_num = 1 
+        self.col_num = 1
+    
+    def save_report(self):
+        """
+        Save the Excel report to the buffer.
+        """
+        self.workbook.save(self.buffer)
 
     def _add_finding_in_buffer(
             self,
@@ -345,10 +364,10 @@ class ExcelReportManager(BaseReportManager):
         ):
         if self.first_row:
             col_num = 1
-            for key in dir(self.findings):
+            for key in dir(finding):
                 try:
-                    if key not in excludes_list and (not callable(getattr(self.findings, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if callable(getattr(self.findings, key)) and key not in allowed_attributes:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
+                        if callable(getattr(finding, key)) and key not in allowed_attributes:
                             continue
                         cell = self.worksheet.cell(row=self.row_num, column=col_num, value=key)
                         cell.font = self.font_bold
@@ -393,22 +412,22 @@ class ExcelReportManager(BaseReportManager):
         self.first_row = False
         if not self.first_row:
             col_num = 1
-            for key in dir(self.findings):
+            for key in dir(finding):
                 try:
-                    if key not in excludes_list and (not callable(getattr(self.findings, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if not callable(getattr(self.findings, key)):
-                            value = self.findings.__dict__.get(key)
-                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(self.findings, key):
-                            if callable(getattr(self.findings, key)):
-                                func = getattr(self.findings, key)
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
                                 result = func()
                                 value = result
                             else:
-                                value = str(getattr(self.findings, key))
+                                value = str(getattr(finding, key))
                         if value and isinstance(value, datetime):
                             value = value.replace(tzinfo=None)
                         if key == "priority":
-                            value = calculate_severity_priority(self.findings.tags, value)
+                            value = calculate_severity_priority(finding.tags, value)
                         self.worksheet.cell(row=self.row_num, column=col_num, value=value)
                         col_num += 1
                 except Exception as exc:
@@ -475,7 +494,6 @@ class ExcelReportManager(BaseReportManager):
             self.add_extra_values()
         self.row_num += 1
 
-        self.workbook.save(self.buffer)
         self.buffer.seek(0)
     
         return True
