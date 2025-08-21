@@ -15,6 +15,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -162,7 +163,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         at import time
         """
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        self.original_items = list(self.test.finding_set.all())
+        # Only process findings with the same service value (or None)
+        # Even though the service values is used in the hash_code calculation,
+        # we need to make sure there are no side effects such as closing findings
+        # for findings with a different service value
+        # https://github.com/DefectDojo/django-DefectDojo/issues/12754
+        original_findings = self.test.finding_set.all().filter(service=self.service)
+        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        self.original_items = list(original_findings)
+        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
@@ -444,7 +453,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         "have different dates, not taking action"
                     )
                 logger.debug(msg)
-                # Return True here to force the loop to continue
+                # Return True here to force the loop to continue to the next finding
                 return existing_finding, True
             # even if there is no mitigation time, skip it, because both the current finding and
             # the reimported finding are is_mitigated
@@ -471,8 +480,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 note.save()
                 existing_finding.notes.add(note)
-                existing_finding.save(dedupe_option=False)
-            # Return True here to force the loop to continue
+            # Return True here to force the loop to continue to the next finding
             return existing_finding, True
         logger.debug(
             f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
@@ -489,6 +497,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         component_version = getattr(unsaved_finding, "component_version", None)
         existing_finding.component_name = existing_finding.component_name or component_name
         existing_finding.component_version = existing_finding.component_version or component_version
+        if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
+            # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
+            existing_finding.sla_start_date = self.now
+
         existing_finding.save(dedupe_option=False)
         # don't dedupe before endpoints are added
         existing_finding.save(dedupe_option=False)
@@ -563,7 +575,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             existing_finding.component_name = existing_finding.component_name or component_name
             existing_finding.component_version = existing_finding.component_version or component_version
-            existing_finding.save(dedupe_option=False)
+            existing_finding.save_no_options()
         # Return False here to make sure further processing happens
         return existing_finding, False
 
@@ -586,8 +598,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
         # Save it. Don't dedupe before endpoints are added.
-        unsaved_finding.save(dedupe_option=False)
+        unsaved_finding.save_no_options()
         finding = unsaved_finding
+        # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
+        finding.tags = None
         logger.debug(
             "Reimport created new finding as no existing finding match: "
             f"{finding.id}: {finding.title} "
@@ -616,9 +630,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
-        # Update finding tags
-        if finding_from_report.unsaved_tags:
-            finding.tags = finding_from_report.unsaved_tags
+        # Parsers must use unsaved_tags to store tags, so we can clean them
+        if finding.unsaved_tags:
+            finding.tags = clean_tags(finding.unsaved_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

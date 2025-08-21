@@ -16,6 +16,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -194,7 +195,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 unsaved_finding.date = self.scan_date.date()
             if self.service is not None:
                 unsaved_finding.service = self.service
-            unsaved_finding.save(dedupe_option=False)
+
+            # Force parsers to use unsaved_tags (stored in below after saving)
+            unsaved_finding.tags = None
+            # postprocessing will be done on next save.
+            unsaved_finding.save_no_options()
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
@@ -205,9 +210,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             self.process_request_response_pairs(finding)
             # Process any endpoints on the endpoint, or added on the form
             self.process_endpoints(finding, self.endpoints_to_add)
-            # Process any tags
-            if finding.unsaved_tags:
-                finding.tags = finding.unsaved_tags
+            # Parsers must use unsaved_tags to store tags, so we can clean them
+            finding.tags = clean_tags(finding.unsaved_tags)
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs

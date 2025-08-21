@@ -23,9 +23,16 @@ class MSDefenderParser:
     def get_findings(self, file, test):
         findings = []
         if str(file.name).endswith(".json"):
-            vulnerabilityfile = json.load(file)
-            vulnerabilitydata = vulnerabilityfile["value"]
-            findings.extend(self.process_json(vulnerability) for vulnerability in vulnerabilitydata)
+            try:
+                vulnerabilityfile = json.load(file)
+                if "value" not in vulnerabilityfile:
+                    logger.debug("JSON file missing 'value' key: %s", file.name)
+                    return []
+                vulnerabilitydata = vulnerabilityfile["value"]
+                findings.extend(self.process_json(vulnerability) for vulnerability in vulnerabilitydata)
+            except (json.JSONDecodeError, KeyError) as e:
+                logger.warning("Error parsing JSON file %s: %s", file.name, str(e))
+                return []
         elif str(file.name).endswith(".zip"):
             if str(file.__class__) == "<class '_io.TextIOWrapper'>":
                 input_zip = zipfile.ZipFile(file.name, "r")
@@ -49,14 +56,43 @@ class MSDefenderParser:
             machines = {}
             for vulnerabilityfile in vulnerabilityfiles:
                 logger.debug("Loading vulnerabilitiy file: %s", vulnerabilityfile)
-                output = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
-                for data in output:
-                    vulnerabilities.append(data)
+                try:
+                    file_content = zipdata[vulnerabilityfile].decode("ascii")
+                    if not file_content.strip():
+                        logger.debug("Skipping empty vulnerability file: %s", vulnerabilityfile)
+                        continue
+
+                    parsed_json = json.loads(file_content)
+                    if "value" not in parsed_json:
+                        logger.debug("Skipping vulnerability file without 'value' key: %s", vulnerabilityfile)
+                        continue
+
+                    output = parsed_json["value"]
+                    for data in output:
+                        vulnerabilities.append(data)
+                except (json.JSONDecodeError, KeyError, UnicodeDecodeError) as e:
+                    logger.warning("Error parsing vulnerability file %s: %s", vulnerabilityfile, str(e))
+                    continue
+
             for machinefile in machinefiles:
-                logger.debug("Loading machine file: %s", vulnerabilityfile)
-                output = json.loads(zipdata[machinefile].decode("ascii"))["value"]
-                for data in output:
-                    machines[data.get("id")] = data
+                logger.debug("Loading machine file: %s", machinefile)
+                try:
+                    file_content = zipdata[machinefile].decode("ascii")
+                    if not file_content.strip():
+                        logger.debug("Skipping empty machine file: %s", machinefile)
+                        continue
+
+                    parsed_json = json.loads(file_content)
+                    if "value" not in parsed_json:
+                        logger.debug("Skipping machine file without 'value' key: %s", machinefile)
+                        continue
+
+                    output = parsed_json["value"]
+                    for data in output:
+                        machines[data.get("id")] = data
+                except (json.JSONDecodeError, KeyError, UnicodeDecodeError) as e:
+                    logger.warning("Error parsing machine file %s: %s", machinefile, str(e))
+                    continue
             for vulnerability in vulnerabilities:
                 try:
                     machine = machines.get(vulnerability["machineId"], None)

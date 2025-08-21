@@ -119,6 +119,18 @@ def get_item(vuln, test, check_type):
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
+    if "description" in vuln:
+        description += f"\n{vuln['description']}\n"
+    mitigation = ""
+    if "benchmarks" in vuln and vuln["benchmarks"] is not None:
+        bms = vuln["benchmarks"].keys()
+        if len(bms) > 0:
+            mitigation += "\nBenchmarks:\n"
+            for bm in bms:
+                if vuln["benchmarks"][bm] is not None:
+                    for gl in vuln["benchmarks"][bm]:
+                        mitigation += f"- {bm} # {gl['name']} : {gl['description']}\n"
+
     file_path = vuln.get("file_path", None)
     source_line = None
     if "file_line_range" in vuln:
@@ -132,8 +144,6 @@ def get_item(vuln, test, check_type):
     severity = "Medium"
     if "severity" in vuln and vuln["severity"] is not None:
         severity = vuln["severity"].capitalize()
-
-    mitigation = ""
 
     references = vuln.get("guideline", "")
     return Finding(

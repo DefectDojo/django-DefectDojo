@@ -109,7 +109,8 @@ This will run the application based on merged configurations from docker-compose
     *  python code (uwsgi and celeryworker containers).
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
-* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
+*  Hot-reloading for the **celeryworker** container is implemented via `watchmedo` from the `watchdog` package.
+*  Changes in `.html` and `.tpl` files will also trigger a roload.
 
 ```
 docker compose restart celeryworker
@@ -149,6 +150,11 @@ Make sure you write down the first password generated as you'll need it when re-
 
 ```zsh
 docker compose exec -it uwsgi ./manage.py changepassword admin
+```
+
+Alternatively, you can run the command below to change the admin password in a single command. Useful for automation.
+```zsh
+docker compose exec uwsgi ./manage.py shell -c 'from django.contrib.auth.models import User; u = User.objects.get(username="admin"); u.set_password("Password123!"); u.save()'
 ```
 
 # Logging

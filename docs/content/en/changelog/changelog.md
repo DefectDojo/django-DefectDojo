@@ -8,8 +8,75 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## July 2025: v2.48
+
+### July 21/22/28, 2025: v2.48.3 / v2.48.4 / v2.48.5
+
+- No significant UI/UX changes.
+
+### July 14, 2025: v2.48.2
+
+- **(Findings)** KEV ([Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)) related data can now be added as metadata to Findings. 
+![image](images/findings_kev.png)
+
+### July 8, 2025: v2.48.1
+
+- **(Permissions)** Users with "Edit Users" configuration permission can now force password resets for other users.
+- **(Pro UI)** The Users listing now includes pre-filtered views for All, Active, Inactive, Superuser, and Global Owner users. The default view has been set to Active.
+- **(Pro UI)** Request/Response pairs are now displayed on Finding View.
+- **(Pro UI)** Product Technologies are now visible and can be created, edited and deleted from the View Product page, within the Product Overview’s “Technologies” section.
+- **(Pro UI)** Finding peer-review now supports the assignment of both Users and Groups, as well as an “Allow All Eligible Reviewers” (all users with access to the Finding) option.
+
+### July 1, 2025: v2.48
+
+- **(Pro UI)** Helptext has been added to the Private Note checkbox to better explain this feature.  Private Notes are Notes that will not appear in Generated Reports - only in the DefectDojo UI.  This feature can be used for internal communication that you don't want to include in a Report.
+
+- **(Pro UI)** Pro UI is now set as the default user interface. All new and existing users/instances will be directed to the Pro UI by default. Users can still opt-out of this UI by unchecking this checkbox:
+
+![image](images/pro_ui_default.png)
 
 ## June 2025: v2.47
+
+### July 1, 2025: v2.47.4
+
+- **(Pro UI)** Products, Engagements, Tests, Findings and Endpoints can be edited directly from their respective tables via a modal.
+- **(Pro UI)** Calendar view now supports additional query parameters for filtering Tests or Engagements.
+- **(Pro UI)** Engagements, Tests and the entire Calendar can be exported as .ics files.
+
+![image](images/pro_ics_export.png)
+
+### June 23, 2025: v2.47.3
+
+- **(Pro UI)** Finding Templates can now be added in the Pro UI, from **Findings > Finding Templates** on the sidebar.
+- **(Pro UI)** A better error message is displayed when Jira Instance deletion is unsuccessful.
+- **(Pro UI)** Product Types can now be edited through a modal: **"⋮" > Edit Product Type** will open a pop-up modal window instead of taking a user to a new page.
+
+![image](images/pro_product_type_modal.png)
+
+### June 16, 2025: v2.47.2
+
+- **(Pro UI)** Endpoint Metadata can now be uploaded to Products.  You can now import a .csv list of all endpoints associated with a Product, from **View Product > Endpoints > Import Endpoint Metadata**
+
+![image](images/pro_endpoint_metadata.png)
+
+- **(Pro UI)** Pie Charts for Metrics now dynamically update based on selected categories.
+- **(Pro UI)** Finding metadata (specifically notes, endpoints, and file path/line number) are now visible from the Findings table if present.
+- **(Pro UI)** Findings table now uses icons to identify linked Endpoints, Notes or Files.  Clicking the Endpoints or Notes icon opens a window which lists all Endpoints or Notes.
+
+![image](images/pro_finding_icons.png)
+
+- **(Pro UI)** Login page has been redesigned.
+
+![image](images/pro_login.png)
+
+### June 9, 2025: v2.47.1
+
+- **(Pro UI)** Vulnerable Endpoints table has now been added to Finding pages.
+
+![image](images/pro_vulnerable_endpoints.png)
+
+- **(Pro UI)** "Original Finding" link has been added to Finding Metadata table for Duplicate Findings.
+- **(Pro UI)** CI/CD Metadata has been added to Engagement view.
 
 ### June 2, 2025: v2.47.0
 
@@ -45,7 +112,7 @@ This update improves consistency, enhances DefectDojo's search capabilities, and
 
 We recommend reviewing your current tags to ensure they align with the new format.  Following the deployment of these new behaviors, requests sent to the API or through the UI with any of the violations listed above will result in an error, with the details of the error raised in the response.
 
-### May 26, 2025: v2.46.4
+#### May 26, 2025: v2.46.4
 
 - **(Pro Metrics)** Rework of filter menu within insights dashboards to remove cross Product Type and Product filtering capabilities.
 - **(Pro UI)** Clickable links within insights dashboards.
@@ -61,7 +128,7 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 
 - **(Pro UI)** More detailed messages in Bulk Edit provide a better explanation of why some Findings may have been skipped.
 
-### May 19, 2025: v2.46.3
+#### May 19, 2025: v2.46.3
 
 - **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
 - **(Dashboard)** Added Finding Status filter for Dashboard tiles.
@@ -71,17 +138,17 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 ![image](images/pro_dashboard_priority.png)
 - **(Universal Parser)** Added a 'SOC Alerts' flag to Universal Parser, to indicate whether the Findings from the parser originate from a Security Operations Center.
 
-### May 12, 2025: v2.46.2
+#### May 12, 2025: v2.46.2
 
 - **(Findings)** Component Name and Version have been added to the metadata table on a Finding View.
 - **(Metrics)** Pro Insights Dashboards can now be filtered by Tag.
 - **(Users)** The Users table can now be exported as a .csv file.
 
-### May 7, 2025: v2.46.1
+#### May 7, 2025: v2.46.1
 
 Hotfix release - no significant feature changes.
 
-### May 5, 2025: v2.46.0
+#### May 5, 2025: v2.46.0
 
 
 - **(Import)** Mitigated timestamp in reports are no longer ignored/overwritten on Reimport.

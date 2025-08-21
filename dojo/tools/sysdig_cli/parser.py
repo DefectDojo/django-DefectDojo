@@ -7,6 +7,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.validators import clean_tags
 
 
 class SysdigCLIParser:
@@ -63,7 +64,7 @@ class SysdigCLIParser:
             for item in vulns:
                 # print("item: %s" % item)
                 vulnName = item.get("name", "")
-                vulnSeverity = item.get("severity", {}).get("value", "")
+                vulnSeverity = SysdigData._map_severity(item.get("severity", {}).get("value", ""))
                 vulnCvssScore = item.get("cvssScore", {}).get("value", {}).get("score", "")
                 vulnCvssVersion = item.get("cvssScore", {}).get("value", {}).get("version", "")
                 vulnCvssVector = item.get("cvssScore", {}).get("value", {}).get("vector", "")
@@ -108,7 +109,7 @@ class SysdigCLIParser:
                         finding.cvssv3_score = vulnCvssScore
                         vectors = cvss.parser.parse_cvss_from_text(vulnCvssVector)
                         if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
-                            finding.cvss = vectors[0].clean_vector()
+                            finding.cvssv3 = vectors[0].clean_vector()
                 except ValueError:
                     continue
 
@@ -129,14 +130,14 @@ class SysdigCLIParser:
             finding.vuln_id_from_tool = row.vulnerability_id
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(row.vulnerability_id)
-            finding.severity = row.severity
+            finding.severity = SysdigData._map_severity(row.severity)
             # Set Component Version
             finding.component_name = row.package_name
             finding.component_version = row.package_version
             # Set some finding tags
             tags = []
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
+                tags.append(clean_tags("VulnId:" + row.vulnerability_id))
             finding.tags = tags
             finding.dynamic_finding = False
             finding.static_finding = True
@@ -164,7 +165,7 @@ class SysdigCLIParser:
                     finding.cvssv3_score = float(row.cvss_score)
                     vectors = cvss.parser.parse_cvss_from_text(row.cvss_vector)
                     if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
-                        finding.cvss = vectors[0].clean_vector()
+                        finding.cvssv3 = vectors[0].clean_vector()
             except ValueError:
                 continue
             finding.risk_accepted = row.risk_accepted
@@ -220,7 +221,7 @@ class SysdigCLIParser:
             msg = ""
             # Sydig CLI format
             csv_data_record.vulnerability_id = row.get("cve id", "")
-            csv_data_record.severity = csv_data_record._map_severity(row.get("cve severity").upper())
+            csv_data_record.severity = SysdigData._map_severity(row.get("cve severity").upper())
             csv_data_record.cvss_score = row.get("cvss score", "")
             csv_data_record.cvss_version = row.get("cvss score version", "")
             csv_data_record.package_name = row.get("package name", "")

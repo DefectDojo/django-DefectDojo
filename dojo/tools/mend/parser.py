@@ -36,6 +36,10 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
+            kev_date = None
+            ransomware_used = None
+            known_exploited = None
+            component_path = None
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
@@ -51,9 +55,6 @@ class MendParser:
                     + "**Component Type**: "
                     + node["component"].get("componentType", "")
                     + "\n"
-                    + "**Root Library**: "
-                    + str(node["component"].get("rootLibrary", ""))
-                    + "\n"
                     + "**Library Type**: "
                     + node["component"].get("libraryType", "")
                     + "\n"
@@ -67,6 +68,9 @@ class MendParser:
                     + "\n"
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
+                kev_date = node["vulnerability"].get("publishDate", None)
+                ransomware_used = node.get("malicious", None)
+                known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
                 if component_path:
                     locations.append(component_path)
@@ -198,6 +202,9 @@ class MendParser:
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
                 impact=impact if impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
+                kev_date=kev_date if kev_date is not None else None,
+                known_exploited=known_exploited if known_exploited is not None else None,
+                ransomware_used=ransomware_used if ransomware_used is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]

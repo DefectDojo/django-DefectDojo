@@ -226,6 +226,7 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    DD_JIRA_DESCRIPTION_MAX_LENGTH=(int, 32767),
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
@@ -1346,6 +1347,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
+    "Cycognito Scan": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1643,6 +1645,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
@@ -1835,11 +1838,15 @@ VULNERABILITY_URLS = {
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "GO-": "https://pkg.go.dev/vuln/",  # e.g. https://pkg.go.dev/vuln/GO-2025-3703
+    "GSD-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/gsd-2021-34715
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
+    "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
+    "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
@@ -1855,12 +1862,14 @@ VULNERABILITY_URLS = {
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
+    "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
     "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
     "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103
     "TEMP-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
+    "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
     "VNS": "https://vulners.com/",

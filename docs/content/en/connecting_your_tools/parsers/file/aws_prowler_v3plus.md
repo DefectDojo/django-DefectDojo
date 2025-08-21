@@ -5,7 +5,7 @@ toc_hide: true
 
 ### File Types
 DefectDojo parser accepts a native `json` file produced by prowler v3 with file extension `.json` or a `ocsf-json` file produced by prowler v4 with file extension `.ocsf.json`. 
-Please note: earlier versions of AWS Prowler create output data in a different format. See our other [prowler parser documentation](https://documentation.defectdojo.com/integrations/parsers/file/aws_prowler/) if you are using an earlier version of AWS Prowler. 
+Please note: earlier versions of AWS Prowler create output data in a different format. See our other [prowler parser documentation](https://docs.defectdojo.com/en/connecting_your_tools/parsers/file/aws_prowler/) if you are using an earlier version of AWS Prowler. 
 
 JSON reports can be created from the [AWS Prowler v3 CLI](https://docs.prowler.com/projects/prowler-open-source/en/v3/tutorials/reporting/#json) using the following command: `prowler <provider> -M json`
 
@@ -161,3 +161,12 @@ The parser expects an array of assessments. All properties are strings and are r
 
 ### Sample Scan Data
 Unit tests of AWS Prowler v3 JSON and Prowler v4 JSON-OCSF can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/aws_prowler_v3.
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- cwe
+- line
+- file path
+- description
