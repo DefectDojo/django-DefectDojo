@@ -13,14 +13,14 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.celery.worker.annotations }}
+  {{- with mergeOverwrite .Values.celery.annotations .Values.celery.worker.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.celery.worker.replicas }}
-  {{- if .Values.revisionHistoryLimit }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- with .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ . }}
   {{- end }}
   selector:
     matchLabels:
@@ -42,7 +42,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-      {{- with .Values.celery.worker.annotations }}
+      {{- with mergeOverwrite .Values.celery.annotations .Values.celery.worker.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
@@ -52,9 +52,9 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
-      {{- if .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      - name: {{ .Values.imagePullSecrets }}
+      - name: {{ . }}
       {{- end }}
       volumes:
       {{- if  .Values.localsettingspy }}
@@ -67,7 +67,7 @@ spec:
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
       {{- end }}
-      {{- with .Values.celery.beat.extraVolumes }}
+      {{- with .Values.celery.worker.extraVolumes }}
         {{- . | toYaml | nindent 6 }}
       {{- end }}
       {{- if coalesce .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled .Values.celery.worker.extraInitContainers }}

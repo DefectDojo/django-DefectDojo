@@ -39,9 +39,9 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
-      {{- if .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      - name: {{ .Values.imagePullSecrets }}
+      - name: {{ . }}
       {{- end }}
       volumes:
       {{- if  .Values.localsettingspy }}
@@ -129,6 +129,9 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}
+            optional: true
         - secretRef:
             name: {{ $fullName }}-extrasecrets
             optional: true

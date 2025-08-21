@@ -153,8 +153,10 @@ celery:
   # Parameters attached to the broker URL, defaults to "ssl_cert_reqs=optional" if redis.tls.enabled
   brokerParams: ""
   logLevel: INFO
+  # Common annotations to worker and beat deployments and pods.
   annotations: {}
   beat:
+    # Annotations for the Celery beat deployment.
     annotations: {}
     affinity: {}
     # Additional environment variables injected to Celery beat containers.
@@ -177,6 +179,10 @@ celery:
       # periodSeconds: 60
       # timeoutSeconds: 10
     nodeSelector: {}
+    # Annotations for the Celery beat pods.
+    podAnnotations: {}
+    # Enable readiness probe for Celery beat container.
+    readinessProbe: {}
     replicas: 1
     resources:
       requests:
@@ -185,8 +191,11 @@ celery:
       limits:
         cpu: 2000m
         memory: 256Mi
+    # Enable startup probe for Celery beat container.
+    startupProbe: {}
     tolerations: []
   worker:
+    # Annotations for the Celery worker deployment.
     annotations: {}
     affinity: {}
     # Additional environment variables injected to Celery worker containers.
@@ -209,6 +218,10 @@ celery:
       # periodSeconds: 60
       # timeoutSeconds: 10
     nodeSelector: {}
+    # Annotations for the Celery beat pods.
+    podAnnotations: {}
+    # Enable readiness probe for Celery worker container.
+    readinessProbe: {}
     replicas: 1
     resources:
       requests:
@@ -217,6 +230,8 @@ celery:
       limits:
         cpu: 2000m
         memory: 512Mi
+    # Enable startup probe for Celery worker container.
+    startupProbe: {}
     tolerations: []
     appSettings:
       poolType: solo

@@ -12,9 +12,9 @@ metadata:
     helm.sh/hook: test-success
 spec:
   serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
-  {{- if .Values.imagePullSecrets }}
+  {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
-  - name: {{ .Values.imagePullSecrets }}
+    - name: {{ . }}
   {{- end }}
   containers:
     - name: unit-tests
