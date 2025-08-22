@@ -706,7 +706,7 @@ def get_severity_count(elem_id, table_type):
 
     if table_type == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table_type == "engagement" or table_type == "product":
+    elif table_type in {"engagement", "product"}:
         display_counts.append("Total: " + str(total) + " Active Findings")
 
     return ", ".join([str(item) for item in display_counts])
