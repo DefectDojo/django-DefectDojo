@@ -1250,8 +1250,8 @@ def general_settings_get_value(name_key, default):
 def has_user_permission_view(permission_render_view, product):
 
     if GeneralSettings.get_status(
-        name_key="TAGS_IA_RECOMMENDATION") is False:
-        return True
+        name_key=permission_render_view, default=False) is False:
+        return False
 
     roles_with_permission = GeneralSettings.get_value(permission_render_view, None)
 
@@ -1274,4 +1274,3 @@ def has_user_permission_view(permission_render_view, product):
         return True
     
     return False
-    
