@@ -6,6 +6,7 @@ import datetime
 import logging
 import mimetypes
 import pytz
+import crum
 from ast import literal_eval
 from itertools import chain
 
@@ -28,6 +29,7 @@ from django.utils.translation import gettext as _
 from django.template import Context, Template
 
 from dojo.engine_tools.models import FindingExclusion
+from dojo.user.queries import get_role_members
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
 from dojo.finding.helper import parser_ia_recommendation
@@ -1243,3 +1245,32 @@ def general_settings_get_value(name_key, default):
     Returns the value of a general setting by its name key.
     """
     return GeneralSettings.get_value(name_key, default)
+
+@register.filter()
+def has_user_permission_view(permission_render_view, product):
+
+    if GeneralSettings.get_status(
+        name_key="TAGS_IA_RECOMMENDATION") is False:
+        return True
+
+    roles_with_permission = GeneralSettings.get_value(permission_render_view, None)
+
+    if roles_with_permission is None:
+        return False
+
+    user = crum.get_current_user()
+
+    if user.is_superuser:
+        return True
+
+
+    if hasattr(user, 'global_role'):
+        if user.global_role:
+            if user.global_role.role.name in roles_with_permission:
+                return True
+        
+    roles_allowed = get_role_members(user, product, product.prod_type)
+    if roles_allowed in roles_with_permission:
+        return True
+    
+    return False

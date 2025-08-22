@@ -5,6 +5,11 @@ from dojo.finding import views
 urlpatterns = [
     # CRUD operations
     re_path(
+        r"^all/findings/v2/(?P<product_id>\d+)$",
+        views.all_findings_v2,
+        name="all_findings_frontend"
+        ),
+    re_path(
         r"^finding/(?P<finding_id>\d+)$",
         views.ViewFinding.as_view(),
         name="view_finding"

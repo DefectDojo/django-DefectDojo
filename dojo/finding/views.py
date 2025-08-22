@@ -11,6 +11,7 @@ from itertools import chain
 from pathlib import Path
 
 from django.conf import settings
+from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.core import serializers
@@ -48,7 +49,7 @@ from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
     user_is_authorized,
 )
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -103,6 +104,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
     Product,
+    Role,
     Stub_Finding,
     System_Settings,
     Test,
@@ -3645,3 +3647,19 @@ def generate_token_generative_ia(request, fid):
     contex = finding_helper.parser_ia_recommendation(
         response.json())
     return JsonResponse(contex, status=200)
+
+
+def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
+    page_name = ('all_findings_frontend')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    base_params += f"&product={product_id}" if product_id else ""
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/all_findings_v2.html', {
+        'name': page_name,
+        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
+        'mf_frontend_defect_dojo_params': base_params,
+        'user': user,
+    })
