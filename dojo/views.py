@@ -198,9 +198,7 @@ def manage_files(request, oid, obj_type):
 @login_required
 def protected_serve(request, path, document_root=None, *, show_indexes=False):
     """Serve the file only after verifying the user is supposed to see the file."""
-    file = FileUpload.objects.get(file=path)
-    if not file:
-        raise Http404
+    file = get_object_or_404(FileUpload, file=path)
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
     # Determine if there is an object to query permission checks from
     if len(object_set) == 0:
