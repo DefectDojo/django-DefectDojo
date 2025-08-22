@@ -1274,3 +1274,4 @@ def has_user_permission_view(permission_render_view, product):
         return True
     
     return False
+    
