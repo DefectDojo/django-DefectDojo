@@ -280,7 +280,7 @@ def edit_engagement(request, eid):
             new_status = form.cleaned_data.get("status")
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
-            if (new_status == "Cancelled" or new_status == "Completed"):
+            if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
             else:
                 engagement.active = True
