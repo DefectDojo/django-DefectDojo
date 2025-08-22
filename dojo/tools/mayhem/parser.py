@@ -84,7 +84,7 @@ class MayhemParser(SarifParser):
                 fullDescription = self._get_message_from_multiformatMessageString(
                     rule["fullDescription"], rule,
                 )
-                if (fullDescription != message) and (fullDescription != shortDescription):
+                if fullDescription not in {message, shortDescription}:
                     description += f"**{_('Rule full description')}:** {fullDescription}\n"
         if "markdown" in result["message"]:
             markdown = self._get_message_from_multiformatMessageString(
