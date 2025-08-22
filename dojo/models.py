@@ -5161,8 +5161,12 @@ class GeneralSettings(models.Model):
         return cls.status if cls.status else False
 
     @classmethod
-    def get_status(cls, name_key: str):
-        return GeneralSettings.objects.get(name_key=name_key).status
+    def get_status(cls, name_key: str, default=False):
+        try:
+            return GeneralSettings.objects.get(name_key=name_key).status
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}, {str(e)}")
+            return default
 
     @classmethod
     def get_value(cls, name_key: str, default=None):
