@@ -21,7 +21,8 @@ from asteval import Interpreter
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cvss import CVSS2, CVSS3, CVSS4, CVSSError
+from cvss import CVSS2, CVSS3, CVSS4
+from cvss import parse_cvss_from_text as cvss_parse_cvss_from_text
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
@@ -2660,42 +2661,9 @@ def generate_file_response_from_file_path(
     return response
 
 
-# TEMPORARY: Local implementation until the upstream PR is merged & released: https://github.com/RedHatProductSecurity/cvss/pull/75
+# used to add some custom logic, but that's now present in cvss 3.6. might be good to retain our own wrapper just in case/for now
 def parse_cvss_from_text(text):
-    """
-    Parses CVSS2, CVSS3, and CVSS4 vectors from arbitrary text and returns a list of CVSS objects.
-
-    Parses text for substrings that look similar to CVSS vector
-    and feeds these matches to CVSS constructor.
-
-    Args:
-        text (str): arbitrary text
-
-    Returns:
-        A list of CVSS objects.
-
-    """
-    # Looks for substrings that resemble CVSS2, CVSS3, or CVSS4 vectors.
-    # CVSS3 and CVSS4 vectors start with a 'CVSS:x.x/' prefix and are matched by the optional non-capturing group.
-    # CVSS2 vectors do not include a prefix and are matched by raw vector pattern only.
-    # Minimum total match length is 26 characters to reduce false positives.
-    matches = re.compile(r"(?:CVSS:[3-4]\.\d/)?[A-Za-z:/]{26,}").findall(text)
-
-    cvsss = set()
-    for match in matches:
-        try:
-            if match.startswith("CVSS:4."):
-                cvss = CVSS4(match)
-            elif match.startswith("CVSS:3."):
-                cvss = CVSS3(match)
-            else:
-                cvss = CVSS2(match)
-
-            cvsss.add(cvss)
-        except (CVSSError, KeyError):
-            pass
-
-    return list(cvsss)
+    return cvss_parse_cvss_from_text(text)
 
 
 def parse_cvss_data(cvss_vector_string: str) -> dict:
