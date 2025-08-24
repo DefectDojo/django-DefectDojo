@@ -236,7 +236,6 @@
       "max_dupes": 1,
       "slack_username": "",
       "enable_msteams_notifications": false,
-      "time_zone": "UTC",
       "enable_deduplication": true,
       "delete_duplicates": false,
       "slack_channel": "",
