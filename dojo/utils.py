@@ -15,6 +15,7 @@ from pathlib import Path
 
 import bleach
 import crum
+import cvss
 import hyperlink
 import vobject
 from asteval import Interpreter
@@ -22,7 +23,6 @@ from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cvss import CVSS2, CVSS3, CVSS4
-from cvss import parse_cvss_from_text as cvss_parse_cvss_from_text
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
@@ -2661,16 +2661,11 @@ def generate_file_response_from_file_path(
     return response
 
 
-# used to add some custom logic, but that's now present in cvss 3.6. might be good to retain our own wrapper just in case/for now
-def parse_cvss_from_text(text):
-    return cvss_parse_cvss_from_text(text)
-
-
 def parse_cvss_data(cvss_vector_string: str) -> dict:
     if not cvss_vector_string:
         return {}
 
-    vectors = parse_cvss_from_text(cvss_vector_string)
+    vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
     if len(vectors) > 0:
         vector = vectors[0]
         # For CVSS2, environmental score is at index 2
