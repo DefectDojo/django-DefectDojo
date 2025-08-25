@@ -675,7 +675,7 @@ class ReImportScanForm(forms.Form):
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
         widget=forms.widgets.FileInput(
-            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif, .fpr"},
+            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif, .fpr, .md, .log, .fvdl"},
         ),
         label="Choose report file",
         allow_empty_file=True,
