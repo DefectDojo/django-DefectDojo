@@ -1,4 +1,5 @@
 import csv
+import io
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
@@ -17,24 +18,18 @@ class Importer(ABC):
 class BlackduckBinaryAnalysisImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckBinaryAnalysisFinding]:
         orig_report_name = Path(report.name)
-        if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
+        content = report.read()
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
 
-        return self._process_csvfile(report, orig_report_name)
-
-    def _process_csvfile(self, report: Path, orig_report_name):
-        """If passed a CSV file, process."""
-        vulnerabilities = {}
-        with report.open(encoding="utf-8") as f:
-            vulnerabilities = self.__partition_by_key(f)
-
+        vulnerabilities = self.__partition_by_key(io.StringIO(content))
         sha1_hash_keys = set(vulnerabilities.keys())
         return self._process_vuln_results(
-            sha1_hash_keys, report, orig_report_name, vulnerabilities,
+            sha1_hash_keys, orig_report_name, vulnerabilities,
         )
 
     def _process_vuln_results(
-        self, sha1_hash_keys, report, orig_report_name, vulnerabilities,
+        self, sha1_hash_keys, orig_report_name, vulnerabilities,
     ):
         """Process findings for each project."""
         for sha1_hash_key in sha1_hash_keys:
