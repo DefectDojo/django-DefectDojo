@@ -76,6 +76,7 @@ class DojoAppConfig(AppConfig):
         import dojo.cred.signals
         import dojo.endpoint.signals
         import dojo.engagement.signals
+        import dojo.file_uploads.signals
         import dojo.finding_group.signals
         import dojo.notes.signals
         import dojo.product.signals
