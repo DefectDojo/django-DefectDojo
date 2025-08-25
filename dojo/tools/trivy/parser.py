@@ -275,7 +275,7 @@ class TrivyParser:
                             severity = self.convert_cvss_score(None)
                     else:
                         severity = TRIVY_SEVERITIES[vuln["Severity"]]
-                    if target_class == "os-pkgs" or target_class == "lang-pkgs":
+                    if target_class in {"os-pkgs", "lang-pkgs"}:
                         file_path = vuln.get("PkgPath")
                         if file_path is None:
                             file_path = target_target
