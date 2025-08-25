@@ -1,6 +1,8 @@
 import hashlib
 import json
 import logging
+from contextlib import suppress
+from datetime import datetime
 
 from dojo.models import Finding
 
@@ -36,10 +38,10 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
-            kev_date = None
             ransomware_used = None
             known_exploited = None
             component_path = None
+            kev_date = None
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
@@ -68,7 +70,10 @@ class MendParser:
                     + "\n"
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
-                kev_date = node["vulnerability"].get("publishDate", None)
+                kev_date_str = node["vulnerability"].get("publishDate", None)
+                if kev_date_str:
+                    with suppress(ValueError):
+                        kev_date = datetime.strptime(kev_date_str, "%Y-%m-%dT%H:%M:%SZ").date()
                 ransomware_used = node.get("malicious", None)
                 known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
