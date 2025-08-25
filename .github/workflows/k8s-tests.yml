@@ -85,6 +85,8 @@ jobs:
                --set django.ingress.enabled=true \
                --set imagePullPolicy=IfNotPresent \
                --set initializer.keepSeconds="-1" \
+               --set postgresql.volumePermissions.enabled=true \
+               --set redis.volumePermissions.enabled=true \
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
