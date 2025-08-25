@@ -83,7 +83,7 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
-               --set imagePullPolicy=Never \
+               --set imagePullPolicy=IfNotPresent \
                --set initializer.keepSeconds="-1" \
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
