@@ -1265,7 +1265,7 @@ def has_user_permission_view(permission_render_view, product):
 
 
     if hasattr(user, 'global_role'):
-        if user.global_role:
+        if user.global_role.role:
             if user.global_role.role.name in roles_with_permission:
                 return True
         
