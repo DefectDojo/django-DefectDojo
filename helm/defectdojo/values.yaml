@@ -405,6 +405,9 @@ initializer:
   staticName: false
 
 postgresql:
+  # To use an external PostgreSQL instance (like CloudSQL), set enabled to false, set items in auth part for authentication,
+  # and uncomment the line below:
+  # postgresServer: "127.0.0.1"
   enabled: true
   auth:
     username: defectdojo
@@ -443,10 +446,6 @@ postgresql:
   shmVolume:
     chmod:
       enabled: false
-
-  # To use an external PostgreSQL instance, set enabled to false and uncomment
-  # the line below:
-  # postgresServer: "127.0.0.1"
 
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
