@@ -1,7 +1,9 @@
-from datetime import date, datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from dojo.models import Finding, Test
 from dojo.tools.hydra.parser import HydraParser
+from dojo.utils import get_system_setting
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -53,9 +55,10 @@ class TestHydraParser(DojoTestCase):
 
             finding = findings[0]
 
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
             self.__assertFindingEquals(
                 finding,
-                date.today(),
+                datetime.now(tz=local_tz).date(),
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",

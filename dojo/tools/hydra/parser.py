@@ -1,10 +1,12 @@
 import json
 import logging
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Endpoint, Finding
+from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,7 @@ class HydraParser:
             title="Weak username / password combination found for " + host,
             date=parse_datetime(metadata.date)
             if metadata.date
-            else date.today(),
+            else datetime.now(tz=ZoneInfo(get_system_setting("time_zone"))).date(),
             severity="High",
             description=host
             + " on port "

@@ -5,6 +5,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
+from zoneinfo import ZoneInfo
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -692,7 +693,8 @@ def add_temp_finding(request, tid, fid):
 
             new_finding.tags = form.cleaned_data["tags"]
             new_finding.cvssv3 = finding.cvssv3
-            new_finding.date = form.cleaned_data["date"] or datetime.today()
+            local_tz = ZoneInfo(get_system_setting("time_zone"))
+            new_finding.date = form.cleaned_data["date"] or datetime.now(tz=local_tz).date()
 
             finding_helper.update_finding_status(new_finding, request.user)
 

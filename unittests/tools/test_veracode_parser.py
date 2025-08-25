@@ -1,9 +1,11 @@
 import datetime
+from zoneinfo import ZoneInfo
 
 from django.test import override_settings
 
 from dojo.models import Endpoint, Engagement, Product, Product_Type, Test
 from dojo.tools.veracode.parser import VeracodeParser
+from dojo.utils import get_system_setting
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -110,7 +112,8 @@ class TestVeracodeScannerParser(DojoTestCase):
 
     def test_parse_file_with_multiple_finding2(self):
         finding = self.parse_file_with_multiple_finding2()
-        self.assertEqual(datetime.datetime.today().date(), finding.date)
+        local_tz = ZoneInfo(get_system_setting("time_zone"))
+        self.assertEqual(datetime.datetime.now(tz=local_tz).date(), finding.date)
 
     def parse_file_with_multiple_finding2(self):
         with (get_unit_tests_scans_path("veracode") / "veracode_scan.xml").open(encoding="utf-8") as testfile:
@@ -199,7 +202,8 @@ class TestVeracodeScannerParser(DojoTestCase):
 
     def test_parse_file_with_dynamic_finding(self):
         finding = self.parse_file_with_dynamic_finding()
-        self.assertEqual(datetime.datetime.today().date(), finding.date)
+        local_tz = ZoneInfo(get_system_setting("time_zone"))
+        self.assertEqual(datetime.datetime.now(tz=local_tz).date(), finding.date)
 
     def parse_file_with_dynamic_finding(self):
         with (get_unit_tests_scans_path("veracode") / "dynamic_finding.xml").open(encoding="utf-8") as testfile:
