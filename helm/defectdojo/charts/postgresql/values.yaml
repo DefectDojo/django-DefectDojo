@@ -1597,8 +1597,8 @@ volumePermissions:
   ## @param volumePermissions.image.pullSecrets Init container volume-permissions image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/os-shell
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/os-shell
     tag: 12-debian-12-r50
     digest: ""
     pullPolicy: IfNotPresent
@@ -1706,8 +1706,8 @@ metrics:
   ## @param metrics.image.pullSecrets Specify image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/postgres-exporter
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/postgres-exporter
     tag: 0.17.1-debian-12-r15
     digest: ""
     pullPolicy: IfNotPresent

@@ -1138,8 +1138,8 @@ sentinel:
   ## @param sentinel.image.debug Enable image debug mode
   ##
   image:
-    registry: docker.io
-    repository: bitnami/redis-sentinel
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/redis-sentinel
     tag: 7.2.5-debian-12-r4
     digest: ""
     ## Specify a imagePullPolicy
@@ -1689,8 +1689,8 @@ metrics:
   ## @param metrics.image.pullSecrets Redis&reg; Exporter image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/redis-exporter
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/redis-exporter
     tag: 1.62.0-debian-12-r2
     digest: ""
     pullPolicy: IfNotPresent
@@ -2061,8 +2061,8 @@ volumePermissions:
   ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/os-shell
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/os-shell
     tag: 12-debian-12-r27
     digest: ""
     pullPolicy: IfNotPresent
@@ -2117,8 +2117,8 @@ kubectl:
   ## @param kubectl.image.pullSecrets Kubectl pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/kubectl
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/kubectl
     tag: 1.30.3-debian-12-r4
     digest: ""
     ## Specify a imagePullPolicy
@@ -2187,8 +2187,8 @@ sysctl:
   ## @param sysctl.image.pullSecrets OS Shell + Utility image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/os-shell
+    registry: us-docker.pkg.dev
+    repository: os-public-container-registry/defectdojo/images/os-shell
     tag: 12-debian-12-r27
     digest: ""
     pullPolicy: IfNotPresent
