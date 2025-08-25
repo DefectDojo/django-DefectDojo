@@ -96,6 +96,9 @@ jobs:
              kubectl get all,ingress  # all = pods, services, deployments, replicasets, statefulsets, jobs
              helm status defectdojo
              helm history defectdojo
+             kubectl get pods -A
+             kubectl describe pod -l app.kubernetes.io/instance=defectdojo
+             kubectl get events --sort-by=.metadata.creationTimestamp
 
       - name: Check Application
         timeout-minutes: 10
