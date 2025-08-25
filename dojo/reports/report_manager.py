@@ -17,8 +17,9 @@ from dojo.home.helper import get_key_for_user_and_urlpath, encode_string
 from abc import ABC, abstractmethod
 from django.core.cache import cache
 from django.conf import settings
+from django.template.loader import render_to_string
 from dojo.reports.multipart_uploder import S3MultipartUploader
-from dojo.models import GeneralSettings
+from dojo.models import GeneralSettings, Product, Test, Engagement
 from dojo.reports.utils import get_url_presigned, upload_s3
 from dojo.notifications.helper import create_notification
 from dojo.reports import helper as helper_reports
@@ -97,8 +98,8 @@ class BaseReportManager(ABC):
     @abstractmethod
     def save_report(self):
         pass
-
-
+    
+    @abstractmethod
     def generate_report(self, *args, **kwargs):
         findings = self.add_findings_data()
         excludes_list = helper_reports.get_excludes()
@@ -217,6 +218,9 @@ class CSVReportManager(BaseReportManager):
     
     def save_report(self):
         pass
+
+    def generate_report(self, *args, **kwargs):
+        super().generate_report(*args, **kwargs)
     
     def _add_finding_in_buffer(
             self,
@@ -354,6 +358,9 @@ class ExcelReportManager(BaseReportManager):
         Save the Excel report to the buffer.
         """
         self.workbook.save(self.buffer)
+    
+    def generate_report(self, *args, **kwargs):
+        super().generate_report(*args, **kwargs)
 
     def _add_finding_in_buffer(
             self,
@@ -501,5 +508,73 @@ class ExcelReportManager(BaseReportManager):
 
     
 class HtmlReportManager(BaseReportManager):
-    def __init__(self, findings, request):
+
+    def __init__(self, findings, request, obj):
         super().__init__(findings, request)
+        self.url_path = f"{GeneralSettings.get_value('URL_FILE_BUCKET_REPORT_FINDINGS', 'report/')}{self.request.user.username}_{self.get_url_encode()}.html"
+        self.multipart_uploader = S3MultipartUploader(self.session_s3, self.bucket, self.url_path)
+        self.buffer = io.BytesIO()
+        self.obj = obj
+    
+    def _add_finding_in_buffer(
+            self,
+            finding,
+            excludes_list,
+            allowed_attributes,
+            allowed_foreign_keys,
+        ):
+        pass
+    def save_report(self):
+        pass
+
+    def generate_report(self, *args, **kwargs):
+        product = engagement = test = None
+
+        if self.obj:
+            if type(self.obj).__name__ == "Product":
+                product = self.obj
+            elif type(self.obj).__name__ == "Engagement":
+                engagement = self.obj
+            elif type(self.obj).__name__ == "Test":
+                test = self.obj
+        self.buffer =  render_to_string('dojo/finding_pdf_report.html', {
+                        "report_name": "Finding Report",
+                        "product": product,
+                        "engagement": engagement,
+                        "test": test,
+                        "findings": self.findings,
+                        "user": self.request.user,
+                        "team_name": settings.TEAM_NAME,
+                        "title": "Finding Report",
+                        "user_id": self.request.user.id 
+                  })
+        findings = self.add_findings_data()
+        if self.findigns_all_counter <= self.chunk_size:
+            logger.info(f"REPORT FINDING: Using SINGLE upload for {self.findigns_all_counter} findings")
+            self.send_report()
+        # else:
+        #     logger.info(f"REPORT FINDING: Using MULTIPART upload for {self.findigns_all_counter} findings")
+        #     self._generate_multipart_upload(findings, excludes_list, allowed_attributes, allowed_foreign_keys)
+        
+        url = get_url_presigned(
+            self.session_s3,
+            key=self.url_path,
+            bucket=self.bucket,
+            expires_in=self.expiration_time
+        )
+        cache.set(
+            self.key_cache,
+            url,
+            self.expiration_time
+        )
+
+        create_notification(
+            event="url_report_finding",
+            subject="Reporte Finding is ready📄",
+            title="Reporte is ready",
+            description="Your report is ready. Click the <strong>Download Report</strong> ⬇️ button to get it.",
+            url=f"{settings.SITE_URL}/url_presigned/{self.get_url_encode()}",
+            recipients=[self.request.user.username],
+            icon="download",
+            color_icon="#096C11",
+            expiration_time=f"{int(self.expiration_time / 60)} minutes") 

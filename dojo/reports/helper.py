@@ -126,7 +126,7 @@ def get_name_key(user, product):
 def async_generate_report(request_data: dict):
     logger.debug(f"REPORT FINDING: async_generate_report {request_data}")
     request = CustomRequest(**request_data)
-    findings, _obj, _url = get_findings(request)
+    findings, obj, _url = get_findings(request)
     if findings.count() == 0:
         raise Exception(500, "No findings found for the report.")
     
@@ -137,7 +137,7 @@ def async_generate_report(request_data: dict):
     elif format_type == "excel":
         report_class = ExcelReportManager(findings, request)
     elif format_type == "html":
-        report_class = HtmlReportManager(findings, request)
+        report_class = HtmlReportManager(findings, request, obj)
     else:
         logger.error(f"REPORT FINDING: Unsupported format: {format_type}")
         raise Exception(400, f"Unsupported report format: {format_type}")

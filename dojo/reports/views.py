@@ -680,12 +680,53 @@ class QuickReportView(View):
         return "dojo/finding_pdf_report.html"
 
     def get(self, request):
-        findings, obj, _url = get_findings(request)
+        findings, obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
                                                         user=request.user)
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            
+            request_data = {
+                "query_dict_get": urlencode(request.GET),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "format": "html",
+                "user_id": request.user.id
+            }
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                # helper_reports.async_generate_report.apply_async(
+                #     args=(request_data,))
+                helper_reports.async_generate_report(request_data)
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         return self.generate_quick_report(request, findings, obj)
 
