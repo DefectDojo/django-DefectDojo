@@ -129,8 +129,6 @@ docker/extra_settings/*
 !docker/extra_settings/README.md
 
 
-# Helm dependencies
-helm/defectdojo/charts
 
 # generates files for github pages
 docs/public
