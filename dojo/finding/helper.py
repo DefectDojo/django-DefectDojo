@@ -14,6 +14,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.finding_group.redis import DynamicFindingGroups
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -414,6 +415,8 @@ def finding_pre_delete(sender, instance, **kwargs):
     instance.found_by.clear()
     delete_related_notes(instance)
 
+    DynamicFindingGroups.set_last_finding_change()
+
 
 def finding_delete(instance, **kwargs):
     logger.debug("finding delete, instance: %s", instance.id)
@@ -443,6 +446,8 @@ def finding_delete(instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug("finding delete: clearing found by")
     instance.found_by.clear()
+
+    DynamicFindingGroups.set_last_finding_change()
 
 
 @receiver(post_delete, sender=Finding)

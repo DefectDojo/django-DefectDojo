@@ -2817,6 +2817,9 @@ class Finding(models.Model):
         else:
             logger.debug("no options selected that require finding post processing")
 
+        from dojo.finding_group.redis import DynamicFindingGroups
+        DynamicFindingGroups.set_last_finding_change()
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
@@ -3471,6 +3474,11 @@ class Vulnerability_Id(models.Model):
 
     def __str__(self):
         return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        from dojo.finding_group.redis import DynamicFindingGroups
+        DynamicFindingGroups.set_last_finding_change()
 
     def get_absolute_url(self):
         from django.urls import reverse
