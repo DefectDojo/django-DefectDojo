@@ -1055,9 +1055,14 @@ class ImportScanResultsView(View):
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
         ErrorPageProductAnnouncement(request=request)
+        if obj := context.get("engagement"):
+            url = "import_scan_results"
+        else:
+            obj = context.get("product")
+            url = "import_scan_results_prod"
         return HttpResponseRedirect(reverse(
-            "import_scan_results",
-            args=(context.get("engagement", context.get("product")).id, ),
+            url,
+            args=(obj.id, ),
         ))
 
     def get(
