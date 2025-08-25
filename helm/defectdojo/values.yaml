@@ -406,6 +406,15 @@ initializer:
 
 postgresql:
   enabled: true
+  # Following is needed because of "⚠ ERROR: Original containers have been substituted for unrecognized ones. Deploying this chart with non-standard containers is likely to cause degraded security and performance, broken chart features, and missing environment variables."
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: docker.io
+    repository: bitnamisecure/postgresql
+    tag: latest
+    digest: sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f
   auth:
     username: defectdojo
     password: ""
@@ -481,6 +490,15 @@ gke:
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: true
+  # Following is needed because of "⚠ ERROR: Original containers have been substituted for unrecognized ones. Deploying this chart with non-standard containers is likely to cause degraded security and performance, broken chart features, and missing environment variables."
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    registry: docker.io
+    repository: bitnamisecure/redis
+    tag: latest
+    digest: sha256:1513e2b6b8290282706e1f9fbae8e85d7535dd1700564df24de4d2d0800ca07b
   scheme: "redis"
   transportEncryption:
     enabled: false
