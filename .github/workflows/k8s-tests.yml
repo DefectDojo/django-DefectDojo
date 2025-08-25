@@ -83,8 +83,10 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
-               --set imagePullPolicy=Never \
+               --set imagePullPolicy=IfNotPresent \
                --set initializer.keepSeconds="-1" \
+               --set postgresql.volumePermissions.enabled=true \
+               --set redis.volumePermissions.enabled=true \
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
@@ -96,6 +98,9 @@ jobs:
              kubectl get all,ingress  # all = pods, services, deployments, replicasets, statefulsets, jobs
              helm status defectdojo
              helm history defectdojo
+             kubectl get events --sort-by=.metadata.creationTimestamp
+             kubectl describe pvc data-defectdojo-postgresql-0 
+             kubectl logs pod/defectdojo-postgresql-0 --all-containers --tail=100 --prefix
 
       - name: Check Application
         timeout-minutes: 10
