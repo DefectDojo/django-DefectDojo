@@ -99,7 +99,7 @@ jobs:
              helm status defectdojo
              helm history defectdojo
              kubectl get events --sort-by=.metadata.creationTimestamp
-             kubectl describe pvc persistentvolumeclaim/data-defectdojo-postgresql-0 
+             kubectl describe pvc data-defectdojo-postgresql-0 
              kubectl logs pod/defectdojo-postgresql-0 --all-containers --tail=100 --prefix
 
       - name: Check Application
