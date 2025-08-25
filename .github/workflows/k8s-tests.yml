@@ -99,10 +99,13 @@ jobs:
              helm status defectdojo
              helm history defectdojo
              kubectl get events --sort-by=.metadata.creationTimestamp
-             kubectl get pvc
-             kubectl get pv
-             kubectl logs statefulset/defectdojo-postgresql -c postgresql --tail=100
-             kubectl logs statefulset/defectdojo-redis-master -c redis --tail=100
+             kubectl logs pod/defectdojo-postgresql-0 -c init-chmod-data --previous --tail=200
+             echo "Inspect what the init container thinks the path is"
+             kubectl get sts defectdojo-postgresql -o jsonpath='{.spec.template.spec.initContainers[?(@.name=="init-chmod-data")].command}{" "}{.spec.template.spec.initContainers[?(@.name=="init-chmod-data")].args}{"\n"}'
+             echo "Where is the PVC mounted for the main container?"
+             kubectl get sts defectdojo-postgresql -o jsonpath='{range .spec.template.spec.containers[?(@.name=="postgresql")].volumeMounts[*]}{.name} {.mountPath}{"\n"}{end}'
+             echo "And for the init container specifically"
+             kubectl get sts defectdojo-postgresql -o jsonpath='{range .spec.template.spec.initContainers[?(@.name=="init-chmod-data")].volumeMounts[*]}{.name} {.mountPath}{"\n"}{end}'
 
       - name: Check Application
         timeout-minutes: 10
