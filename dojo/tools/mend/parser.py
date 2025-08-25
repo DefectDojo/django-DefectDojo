@@ -203,9 +203,12 @@ class MendParser:
                 impact=impact if impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
                 kev_date=kev_date if kev_date is not None else None,
-                known_exploited=known_exploited if known_exploited is not None else None,
-                ransomware_used=ransomware_used if ransomware_used is not None else None,
             )
+            # only overwrite default values if they are not None #12989
+            if known_exploited is not None:
+                new_finding.known_exploited = known_exploited
+            if ransomware_used is not None:
+                new_finding.ransomware_used = ransomware_used
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
 

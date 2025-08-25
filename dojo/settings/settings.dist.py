@@ -815,8 +815,8 @@ if API_TOKENS_ENABLED:
     REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("rest_framework.authentication.TokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Defect Dojo API v2",
-    "DESCRIPTION": "Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.",
+    "TITLE": "DefectDojo API v2",
+    "DESCRIPTION": "DefectDojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.",
     "VERSION": __version__,
     "SCHEMA_PATH_PREFIX": "/api/v2",
     # OTHER SETTINGS
