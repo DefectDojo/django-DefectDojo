@@ -4,6 +4,7 @@ import io
 import logging
 import csv
 import boto3
+from itertools import islice
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from django.conf import settings
 from openpyxl import Workbook
@@ -83,11 +84,12 @@ class BaseReportManager(ABC):
         if value := cache.get(self.key_cache):
             logger.debug(f"REPORT FINDING: Cache get for key {self.key_cache} value {value}")
             return value
-    
+
+    @abstractmethod 
     def send_report(self):
         try:
             upload_s3(self.session_s3,
-                      self.buffer,
+                      self.buffer.getvalue(),
                       self.bucket,
                       self.url_path)
 
@@ -218,6 +220,9 @@ class CSVReportManager(BaseReportManager):
     
     def save_report(self):
         pass
+
+    def send_report(self):
+        super().send_report()
 
     def generate_report(self, *args, **kwargs):
         super().generate_report(*args, **kwargs)
@@ -358,6 +363,9 @@ class ExcelReportManager(BaseReportManager):
         Save the Excel report to the buffer.
         """
         self.workbook.save(self.buffer)
+    
+    def send_report(self):
+        super().send_report()
     
     def generate_report(self, *args, **kwargs):
         super().generate_report(*args, **kwargs)
@@ -524,9 +532,31 @@ class HtmlReportManager(BaseReportManager):
             allowed_foreign_keys,
         ):
         pass
+
     def save_report(self):
         pass
 
+    def send_report(self):
+        try:
+            upload_s3(self.session_s3,
+                      self.buffer,
+                      self.bucket,
+                      self.url_path)
+
+        except botocore.exceptions.ClientError as e:
+            logger.error(f"Failed to upload report html to S3: {e}")
+            raise
+    
+
+    def chunked_iterator(self, queryset, chunk_size):
+        it = queryset.iterator()
+        while True:
+            chunk = list(islice(it, chunk_size))
+            if not chunk:
+                break
+            yield chunk
+
+    
     def generate_report(self, *args, **kwargs):
         product = engagement = test = None
 
@@ -537,7 +567,9 @@ class HtmlReportManager(BaseReportManager):
                 engagement = self.obj
             elif type(self.obj).__name__ == "Test":
                 test = self.obj
-        self.buffer =  render_to_string('dojo/finding_pdf_report.html', {
+        
+        if self.findigns_all_counter <= self.chunk_size:
+            self.buffer =  render_to_string('dojo/finding_pdf_report.html', {
                         "report_name": "Finding Report",
                         "product": product,
                         "engagement": engagement,
@@ -548,13 +580,49 @@ class HtmlReportManager(BaseReportManager):
                         "title": "Finding Report",
                         "user_id": self.request.user.id 
                   })
-        findings = self.add_findings_data()
-        if self.findigns_all_counter <= self.chunk_size:
             logger.info(f"REPORT FINDING: Using SINGLE upload for {self.findigns_all_counter} findings")
             self.send_report()
-        # else:
-        #     logger.info(f"REPORT FINDING: Using MULTIPART upload for {self.findigns_all_counter} findings")
-        #     self._generate_multipart_upload(findings, excludes_list, allowed_attributes, allowed_foreign_keys)
+        else:
+            logger.info(f"REPORT FINDING: Using MULTIPART upload for {self.findigns_all_counter} findings")
+            try:
+                current_buffer_size = 0
+                self.multipart_uploader.start_upload()
+                self.first_row = True
+                for counter, finding_chunk in enumerate(self.chunked_iterator(self.findings, self.chunk_size), start=1):
+                    logger.debug(f"REPORT FINDING: Processing chunk html {counter} of {self.findigns_all_counter // self.chunk_size + 1}")
+                    self.buffer =  render_to_string('dojo/finding_pdf_report.html', {
+                        "report_name": "Finding Report",
+                        "product": product,
+                        "engagement": engagement,
+                        "test": test,
+                        "findings": finding_chunk,
+                        "user": self.request.user,
+                        "team_name": settings.TEAM_NAME,
+                        "title": "Finding Report",
+                        "user_id": self.request.user.id 
+                    })
+
+                    logger.info(f"REPORT FINDING: Processing finding {counter} of {self.findigns_all_counter}")
+                    if counter % self.chunk_size == 0:
+                        logger.error(f"REPORT FINDING: Unknown buffer type: {type(self.buffer)}")
+                        current_size_mb = current_buffer_size / (1024 * 1024)
+                        logger.info(f"REPORT FINDING: Size report with {current_size_mb:.2f}MB ({counter} findings)")
+                        if current_buffer_size >= self.MIN_PART_SIZE:
+                            logger.info(f"REPORT FINDING: Uploading part with {current_size_mb:.2f}MB ({counter} findings)")
+                            self.multipart_uploader.upload_part(self.buffer.getvalue())
+                            self.buffer.seek(0)
+                            self.buffer.truncate(0)
+                            logger.info("REPORT FINDING: cleand buffer after upload")
+                if counter % self.chunk_size != 0:
+                    logger.info("report finding: sending report at the end of the loop")
+                    self.multipart_uploader.upload_part(self.buffer)
+                    self.multipart_uploader.complete_upload()
+            except Exception as e:
+                if self.multipart_uploader:
+                    self.multipart_uploader.abort_upload()
+                logger.error(f"Error during multipart upload: {e}")
+                raise
+
         
         url = get_url_presigned(
             self.session_s3,

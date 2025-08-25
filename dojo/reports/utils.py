@@ -17,7 +17,7 @@ def get_url_presigned(session,
 
 def upload_s3(session_s3, buffer, bucket, key):
     try:
-        response = session_s3.put_object(Bucket=bucket, Key=key, Body=buffer.getvalue())
+        response = session_s3.put_object(Bucket=bucket, Key=key, Body=buffer)
         logger.info(f"REPORT FINDING: Upload successful: {response}")
         if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
             return response
