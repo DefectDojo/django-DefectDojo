@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
 if os.environ.get("DD_UWSGI_DEBUG") == "True":
-    logger.info('Debugger is enabled on port 5678')
+    print("!!!!! Debugger is enabled on port 5678 !!!!!")
     # The default port for debugpy is 5678, you can change this if needed.
     debugpy.listen(("0.0.0.0", 5678))
     # You can also add --wait-for-client to the command line to wait for the client to attach
