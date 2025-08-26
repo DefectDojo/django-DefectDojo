@@ -42,7 +42,7 @@ class KiuwanSCAParser:
 
             components = row.get("components", [])
             if not components:
-                logger.warning("WARNING: Insights Finding from kiuwan does not have a related component - Skipping.")
+                logger.debug("Insights Finding from Kiuwan does not have a related component - Skipping.")
                 continue
 
             # We want one unique finding in DD for each component affected:
