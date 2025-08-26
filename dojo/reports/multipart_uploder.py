@@ -11,7 +11,7 @@ class S3MultipartUploader:
         self.part_number = 1
     
     def start_upload(self):
-        """Iniciar multipart upload"""
+        """Init multipart upload"""
         response = self.session_s3.create_multipart_upload(
             Bucket=self.bucket,
             Key=self.key
@@ -21,7 +21,7 @@ class S3MultipartUploader:
         return self.upload_id
     
     def upload_part(self, buffer_content):
-        """Subir una parte del archivo"""
+        """upload a part to S3"""
         if not self.upload_id:
             raise Exception("Multipart upload not started")
         
@@ -43,7 +43,7 @@ class S3MultipartUploader:
         return response
     
     def complete_upload(self):
-        """Completar multipart upload"""
+        """Complete multipart upload"""
         if not self.upload_id:
             raise Exception("Multipart upload not started")
         
@@ -58,7 +58,7 @@ class S3MultipartUploader:
         return response
     
     def abort_upload(self):
-        """Abortar multipart upload en caso de error"""
+        """Abort multipart upload in case of error"""
         if self.upload_id:
             self.session_s3.abort_multipart_upload(
                 Bucket=self.bucket,
