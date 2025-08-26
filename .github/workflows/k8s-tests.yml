@@ -27,7 +27,7 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.30.3'
+            k8s: 'v1.33.4'
             os: debian
     steps:
       - name: Checkout

@@ -26,9 +26,8 @@ class BlackduckCRImporter:
         :param report: Path to zip file
         :return: ( {component_id:details} , {component_id:[vulns]}, {component_id:[source]} )
         """
-        if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
-        if zipfile.is_zipfile(str(report)):
+        if zipfile.is_zipfile(report):
+            report.seek(0)  # rewind after the check
             return self._process_zipfile(report)
         msg = f"File {report} not a zip!"
         raise ValueError(msg)
@@ -43,7 +42,7 @@ class BlackduckCRImporter:
         components = {}
         source = {}
         try:
-            with zipfile.ZipFile(str(report)) as zipf:
+            with zipfile.ZipFile(report) as zipf:
                 c_file = False
                 s_file = False
                 for full_file_name in zipf.namelist():

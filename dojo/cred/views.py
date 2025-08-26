@@ -616,7 +616,7 @@ def delete_cred_controller(request, destination_url, elem_id, ttid):
                     cred_id=cred.cred_id).exclude(finding__isnull=True)
                 message = "Credential is associated with finding(s). Remove the finding(s) before this credential can be deleted."
                 delete_cred = True
-        elif destination_url == "view_test" or destination_url == "view_finding":
+        elif destination_url in {"view_test", "view_finding"}:
             delete_cred = True
 
         # Allow deletion if no credentials are associated
