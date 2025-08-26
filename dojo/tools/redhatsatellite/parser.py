@@ -69,6 +69,9 @@ class RedHatSatelliteParser:
             if module_streams != []:
                 description += "**module_streams:** " + str(module_streams) + "\n"
             description += "**packages:** " + ", ".join(packages)
+            fix_available = True
+            if installable is not True:
+                fix_available = False
             find = Finding(
                 title=title,
                 test=test,
@@ -76,6 +79,7 @@ class RedHatSatelliteParser:
                 severity=self.severity_mapping(severity_input=severity),
                 mitigation=solution,
                 dynamic_finding=True,
+                fix_available=fix_available,
             )
             if errata_id is not None:
                 find.unsaved_vulnerability_ids = []
