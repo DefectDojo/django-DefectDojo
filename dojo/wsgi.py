@@ -15,6 +15,7 @@ framework.
 """
 import logging
 import os
+import debugpy
 
 from django.core.wsgi import get_wsgi_application
 
@@ -25,6 +26,14 @@ logger = logging.getLogger(__name__)
 # mod_wsgi daemon mode with each site in its own daemon process, or use
 # os.environ["DJANGO_SETTINGS_MODULE"] = "dojo.settings"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+
+if os.environ.get("DD_UWSGI_DEBUG") == "True":
+    logger.info('Debugger is enabled on port 5678')
+    # The default port for debugpy is 5678, you can change this if needed.
+    debugpy.listen(("0.0.0.0", 5678))
+    # You can also add --wait-for-client to the command line to wait for the client to attach
+    # before the script continues. This is useful for debugging the startup process.
+    # debugpy.wait_for_client()
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
