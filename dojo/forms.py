@@ -3,7 +3,7 @@ import os
 import pickle
 import re
 import warnings
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 import tagulous
@@ -192,7 +192,7 @@ class MonthYearWidget(Widget):
         if years:
             self.years = years
         else:
-            this_year = date.today().year
+            this_year = timezone.now().year
             self.years = list(range(this_year - 10, this_year + 1))
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -657,7 +657,7 @@ class ImportScanForm(forms.Form):
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data.get("scan_date", None)
-        if date and date.date() > datetime.today().date():
+        if date and date.date() > timezone.now().date():
             msg = "The date cannot be in the future!"
             raise forms.ValidationError(msg)
         return date
@@ -3616,7 +3616,7 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
     def clean_expiration(self):
         expiration = self.cleaned_data.get("expiration", None)
         if expiration:
-            today = datetime.today().date()
+            today = timezone.now().date()
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
