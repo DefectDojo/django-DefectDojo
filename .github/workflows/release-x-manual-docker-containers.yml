@@ -36,6 +36,9 @@ jobs:
       matrix:
           docker-image: [django, nginx]
           os: [alpine, debian]
+          exclude:
+              - docker-image: nginx
+                os: debian
     steps:
       # Replace slashes so we can use this in filenames
       - name: Set-platform
