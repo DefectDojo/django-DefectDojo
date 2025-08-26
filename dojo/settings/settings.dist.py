@@ -1343,7 +1343,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Invicti Scan": ["title", "description", "severity"],
     "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"],
     "HackerOne Cases": ["title", "severity"],
-    "KrakenD Audit Scan": ["description", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
