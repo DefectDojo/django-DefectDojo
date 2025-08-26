@@ -3,7 +3,17 @@
 # This extends docker-compose.override.dev.yml with debugpy support
 services:
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi-debug.sh']
+    # Override entrypoint and command to start Django with debugpy
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--']
+    command: >
+      sh -c "
+      cd /app &&
+      echo 'Debug mode enabled with debugpy support' &&
+      echo 'Debugpy server will listen on 0.0.0.0:5678' &&
+      echo 'Connect your VS Code debugger to localhost:5678' &&
+      echo 'Application will start after debugger connects...' &&
+      python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000
+      "
     volumes:
       - '.:/app:z'
     environment:
