@@ -5,6 +5,7 @@
 target_dir="${0%/*}/.."
 override_link='docker-compose.override.yml'
 override_file_dev='docker-compose.override.dev.yml'
+override_file_debug='docker-compose.override.debug.yml'
 override_file_unit_tests='docker-compose.override.unit_tests.yml'
 override_file_unit_tests_cicd='docker-compose.override.unit_tests_cicd.yml'
 override_file_integration_tests='docker-compose.override.integration_tests.yml'
@@ -40,7 +41,7 @@ function get_current {
 # Tell to which environments we can switch
 function say_switch {
     echo "Using '${current_env}' configuration."
-    for one_env in dev unit_tests integration_tests release
+    for one_env in dev debug unit_tests integration_tests release
     do
         if [ "${current_env}" != ${one_env} ]; then
             echo "-> You can switch to '${one_env}' with '${0} ${one_env}'"
@@ -73,6 +74,21 @@ function set_dev {
         echo "Now using 'dev' configuration."
     else
         echo "Already using 'dev' configuration."
+    fi
+}
+
+function set_debug {
+    get_current
+    if [ "${current_env}" != debug ]
+    then
+        docker compose down
+        rm -f ${override_link}
+        ln -s ${override_file_debug} ${override_link}
+        echo "Now using 'debug' configuration for VS Code debugging."
+        echo "The application will wait for a debugger to connect on port 5678."
+        echo "See readme-docs/VSCODE-DEBUGGING.md for setup instructions."
+    else
+        echo "Already using 'debug' configuration."
     fi
 }
 
@@ -118,7 +134,7 @@ function set_integration_tests {
 # Change directory to allow working with relative paths.
 cd "${target_dir}" || exit
 
-if [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release' =~ ${1} ]]
+if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ ${1} ]]
 then
     set_"${1}"
 else

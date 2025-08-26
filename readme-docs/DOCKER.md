@@ -131,7 +131,18 @@ id -u
 
 ## Run with Docker Compose in development mode with debugpy (remote debug)
 
-Some users have found value in using debugpy. A short guide to setting this up can be found [here](https://testdriven.io/blog/django-debugging-vs-code/)
+Some users have found value in using debugpy. For comprehensive VS Code debugging setup instructions, see [VSCODE-DEBUGGING.md](VSCODE-DEBUGGING.md).
+
+Quick setup:
+```bash
+# Set debug environment 
+./docker/setEnv.sh debug
+
+# Start in debug mode (waits for debugger)
+docker compose up -d
+
+# Connect VS Code debugger to localhost:5678
+```
 
 ## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
