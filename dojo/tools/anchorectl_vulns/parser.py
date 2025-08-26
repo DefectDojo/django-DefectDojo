@@ -58,10 +58,12 @@ class AnchoreCTLVulnsParser:
                 mitigation = (
                     "Upgrade to " + item["packageName"] + " " + item["fix"] + "\n"
                 )
+                fix_available = True
             else:
                 mitigation = (
                     "No fix available" + "\n"
                 )
+                fix_available = False
 
             cvssv3_base_score = None
             if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
@@ -124,6 +126,7 @@ class AnchoreCTLVulnsParser:
                     component_version=item["packageVersion"],
                     url=item.get("url"),
                     static_finding=True,
+                    fix_available=fix_available,
                     dynamic_finding=False,
                     vuln_id_from_tool=item.get("vuln"),
                 )
