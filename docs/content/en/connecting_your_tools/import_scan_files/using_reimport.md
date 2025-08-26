@@ -34,7 +34,7 @@ If any incoming Findings match Findings that already exist, the incoming Finding
 
 ### Field fix_available
 
-If any incoming Findings match Findings that already exist, the incoming Finding is checked if a fix is available `fix_available` and updated. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.
+If any incoming Findings match Findings that already exist, the incoming Finding is checked if the field `fix_available` differs and is updated if yes. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.
 
 ### Close Findings
 
