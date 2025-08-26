@@ -26,6 +26,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from github import Github
 
+from dojo.decorators import dojo_ratelimit_view
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import (
@@ -212,6 +213,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 @user_is_authorized(Product, Permissions.Product_View, "pid")
+@dojo_ratelimit_view(block=True)
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related("product_manager", "technical_contact", "team_manager", "sla_configuration") \
                                       .prefetch_related("members") \

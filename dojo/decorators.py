@@ -166,3 +166,28 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
             return fn(request, *args, **kw)
         return _wrapped
     return decorator
+
+
+def dojo_ratelimit_view(key="username", rate=None, method=['DELETE', 'PATCH', 'POST', 'PUT', 'GET'], *, block=False):
+    def decorator(fn):
+        @wraps(fn)
+        def _wrapped(request, *args, **kw):
+            limiter_block = getattr(settings, "RATE_LIMITER_BLOCK_VIEW", block)
+            limiter_rate = getattr(settings, "RATE_LIMITER_RATE_VIEW", rate)
+            limiter_lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT_VIEW", False)
+            old_limited = getattr(request, "lusernameited", False)
+            ratelimited = is_ratelimited(request=request, fn=fn,
+                                         key=request.user.username, rate=limiter_rate, method=method,
+                                         increment=True)
+            request.limited = ratelimited or old_limited
+            if ratelimited and limiter_block:
+                if limiter_lockout:
+                    username = request.POST.get("username", None)
+                    if username:
+                        dojo_user = Dojo_User.objects.filter(username=username).first()
+                        if dojo_user:
+                            Dojo_User.enable_force_password_reset(dojo_user)
+                raise Ratelimited
+            return fn(request, *args, **kw)
+        return _wrapped
+    return decorator

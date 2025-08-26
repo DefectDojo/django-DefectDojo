@@ -12,6 +12,7 @@ from time import strftime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django_ratelimit.decorators import ratelimit
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
