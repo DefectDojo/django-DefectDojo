@@ -4,6 +4,6 @@ dependencies:
   version: 16.7.27
 - name: redis
   repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
-  version: 22.0.6
-digest: sha256:3a18ca95f09d93b0a1a79c06c612d74d9d5450f39ac6da5cd63a992f14efa215
-generated: "2025-08-26T12:26:49.084678-05:00"
+  version: 19.6.4
+digest: sha256:b22ad615baaa104a188c735f74ddddaec83b698315bb82f722679f762be64b50
+generated: "2025-08-27T11:22:22.13669-05:00"
