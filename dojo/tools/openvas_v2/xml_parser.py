@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.openvas.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_description
 
 
-class OpenVASXMLParser:
+class OpenVASXMLParserV2:
     def get_findings(self, filename, test):
         dupes = {}
         tree = ElementTree.parse(filename)
