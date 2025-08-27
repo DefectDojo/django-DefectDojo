@@ -640,7 +640,7 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp] = {"closed": 0, "open": 1, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
 
-            if view == "Finding" or view == "Endpoint":
+            if view in {"Finding", "Endpoint"}:
                 severity = finding.get("severity")
 
             finding_age = calculate_finding_age(finding)

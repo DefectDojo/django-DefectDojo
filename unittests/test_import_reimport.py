@@ -2049,7 +2049,13 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
 
-        test = Test.objects.get(id=response.url.split("/")[-1])
+        url_split = response.url.split("/")
+        self.assertEqual(url_split[1], "test", response.url)
+        try:
+            test_id = int(url_split[-1])
+        except ValueError:
+            self.fail(f"'{url_split[-1]}' in {response.url} is not a number")
+        test = Test.objects.get(id=test_id)
         # f = Path('response.html').open('w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()

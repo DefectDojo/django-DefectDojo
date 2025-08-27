@@ -14,6 +14,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.file_uploads.helper import delete_related_files
 from dojo.finding_group.redis import DynamicFindingGroups
 from dojo.models import (
     Endpoint,
@@ -414,6 +415,7 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     instance.found_by.clear()
     delete_related_notes(instance)
+    delete_related_files(instance)
 
     DynamicFindingGroups.set_last_finding_change()
 

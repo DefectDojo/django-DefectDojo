@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from pathlib import Path
 
 from auditlog.models import LogEntry
@@ -157,7 +158,8 @@ def manage_files(request, oid, obj_type):
 
             for o in files_formset.deleted_objects:
                 logger.debug("removing file: %s", o.file.name)
-                (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+                with suppress(FileNotFoundError):
+                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
 
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)
@@ -168,7 +170,8 @@ def manage_files(request, oid, obj_type):
                                                      finding__isnull=True)
             for o in orphan_files:
                 logger.debug("purging orphan file: %s", o.file.name)
-                (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+                with suppress(FileNotFoundError):
+                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
                 o.delete()
 
             messages.add_message(
@@ -198,9 +201,7 @@ def manage_files(request, oid, obj_type):
 @login_required
 def protected_serve(request, path, document_root=None, *, show_indexes=False):
     """Serve the file only after verifying the user is supposed to see the file."""
-    file = FileUpload.objects.get(file=path)
-    if not file:
-        raise Http404
+    file = get_object_or_404(FileUpload, file=path)
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
     # Determine if there is an object to query permission checks from
     if len(object_set) == 0:
