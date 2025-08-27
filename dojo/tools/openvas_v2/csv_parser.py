@@ -17,7 +17,7 @@ def evaluate_bool_value(column_value):
     return None
 
 
-class OpenVASCSVParser:
+class OpenVASCSVParserV2:
     def get_findings(self, filename, test):
         dupes = {}
         content = filename.read()

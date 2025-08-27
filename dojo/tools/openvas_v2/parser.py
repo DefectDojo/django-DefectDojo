@@ -1,10 +1,10 @@
-from dojo.tools.openvas.csv_parser import OpenVASCSVParser
-from dojo.tools.openvas.xml_parser import OpenVASXMLParser
+from dojo.tools.openvas_v2.csv_parser import OpenVASCSVParserV2
+from dojo.tools.openvas_v2.xml_parser import OpenVASXMLParserV2
 
 
-class OpenVASParser:
+class OpenVASParserV2:
     def get_scan_types(self):
-        return ["OpenVAS Parser"]
+        return ["OpenVAS Parser V2"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
