@@ -27,7 +27,7 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.30.3'
+            k8s: 'v1.33.4'
             os: debian
     steps:
       - name: Checkout
@@ -57,8 +57,10 @@ jobs:
         timeout-minutes: 15
         run: |-
              eval $(minikube docker-env)
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/nginx-alpine-linux-amd64_img
              docker load -i built-docker-image/django-${{ matrix.os }}-linux-amd64_img
+             docker tag defectdojo/defectdojo-nginx:alpine defectdojo/defectdojo-nginx:latest
+             docker tag defectdojo/defectdojo-django:${{ matrix.os }} defectdojo/defectdojo-django:latest
              docker images
 
       - name: Configure HELM repos
@@ -87,8 +89,7 @@ jobs:
                --set initializer.keepSeconds="-1" \
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
-               --set createSecret=true \
-               --set tag=${{ matrix.os }}
+               --set createSecret=true
 
       - name: Check deployment status
         if: always()

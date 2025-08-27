@@ -114,11 +114,7 @@ class CycloneDXJSONParser:
                 if analysis:
                     state = analysis.get("state")
                     if state:
-                        if (
-                            state == "resolved"
-                            or state == "resolved_with_pedigree"
-                            or state == "not_affected"
-                        ):
+                        if state in {"resolved", "resolved_with_pedigree", "not_affected"}:
                             finding.is_mitigated = True
                             finding.active = False
                         elif state == "false_positive":
@@ -141,4 +137,3 @@ class CycloneDXJSONParser:
             # tools don't provide it
             if "bom-ref" in component:
                 flatted_components[component["bom-ref"]] = component
-        return
