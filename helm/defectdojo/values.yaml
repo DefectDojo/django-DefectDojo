@@ -148,10 +148,6 @@ secrets:
 # Components
 celery:
   broker: redis
-  # To use an external celery broker, set the hostname here
-  brokerHost: ""
-  # Parameters attached to the broker URL, defaults to "ssl_cert_reqs=optional" if redis.tls.enabled
-  brokerParams: ""
   logLevel: INFO
   # Common annotations to worker and beat deployments and pods.
   annotations: {}
@@ -395,9 +391,7 @@ initializer:
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
 postgresql:
-  # To use an external PostgreSQL instance (like CloudSQL), set enabled to false, set items in auth part for authentication,
-  # and uncomment the line below:
-  # postgresServer: "127.0.0.1"
+  # To use an external instance, switch enabled to `false` and set the address in `postgresServer` below
   enabled: true
   auth:
     username: defectdojo
@@ -469,7 +463,7 @@ gke:
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
 redis:
-  # To use an external Redis instance, switch enabled to false and set the address in .Values.celery.brokerHost
+  # To use an external instance, switch enabled to `false`` and set the address in `redisServer` below
   enabled: true
   auth:
     existingSecret: defectdojo-redis-specific
@@ -526,3 +520,14 @@ extraConfigs: {}
 #   MIDDLEWARE = [
 #       'debug_toolbar.middleware.DebugToolbarMiddleware',
 #   ] + MIDDLEWARE
+#
+# External database support.
+#
+# To use an external Redis instance, set `redis.enabled` to false and set the address here:
+redisServer: ~
+# Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redis.tls.enabled`
+redisParams: ""
+#
+# To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false,
+# set items in `postgresql.auth` part for authentication, and set the address here:
+postgresServer: ~
