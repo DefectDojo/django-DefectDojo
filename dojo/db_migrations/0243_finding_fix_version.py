@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0241_remove_system_settings_time_zone'),
+        ('dojo', '0242_file_upload_cleanup'),
     ]
 
     operations = [
