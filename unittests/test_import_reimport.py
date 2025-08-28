@@ -1702,6 +1702,8 @@ class ImportReimportMixin:
         findings = Finding.objects.filter(test=test)
         self.assertEqual(1, len(findings))
         self.assertEqual(False, findings[0].fix_available)
+        self.assertEqual(None, findings[0].fix_version)
+        
         test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
         reimport_test = Test(
             engagement=test.engagement,
@@ -1715,6 +1717,7 @@ class ImportReimportMixin:
         findings = Finding.objects.filter(test=reimport_test)
         self.assertEqual(1, len(findings))
         self.assertEqual(True, findings[0].fix_available)
+        self.assertEqual("1.2.3", findings[0].fix_version)
 
     def test_import_history_reactivated_and_untouched_findings_do_not_mix(self):
         import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
