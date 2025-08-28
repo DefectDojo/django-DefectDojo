@@ -121,7 +121,9 @@ class AnchoreGrypeParser:
                 finding_description += f"\n**Package URL:** {artifact_purl}"
 
             finding_mitigation = None
+            fix_available = False
             if vuln_fix_versions:
+                fix_available = True
                 finding_mitigation = "Upgrade to version:"
                 if len(vuln_fix_versions) == 1:
                     finding_mitigation += f" {vuln_fix_versions[0]}"
@@ -200,6 +202,7 @@ class AnchoreGrypeParser:
                     dynamic_finding=False,
                     nb_occurences=1,
                     file_path=file_path,
+                    fix_available=fix_available,
                 )
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
 
