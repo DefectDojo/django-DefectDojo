@@ -1,0 +1,72 @@
+name: DAST
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  TARGET_URL: ${{ secrets.TARGET_URL }}
+  DD_URL: ${{ secrets.DD_URL }}
+  DD_API_KEY: ${{ secrets.DD_API_KEY }}
+  DD_ENGAGEMENT_ID: ${{ secrets.DD_ENGAGEMENT_ID }}
+
+jobs:
+  zap-baseline:
+    name: ZAP Baseline (site)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Пассивный скан сайта, генерируем XML для Dojo
+      - name: Run ZAP Baseline
+        uses: zaproxy/action-baseline@v0.13.0
+        continue-on-error: true
+        with:
+          target: ${{ env.TARGET_URL }}
+          cmd_options: -a -x zap_report.xml   # -a: агрессивные пассивные проверки, -x: XML отчёт
+          allow_issue_writing: false
+          fail_action: false                  # не валим сборку — отчёт всё равно загрузим
+
+      # Сохраним отчёт как артефакт на всякий случай
+      - name: Upload ZAP report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap_baseline_report
+          path: zap_report.xml
+          if-no-files-found: ignore
+
+      # Выгрузка в DefectDojo: сначала reimport, если теста нет — import
+      - name: Upload to DefectDojo (reimport → import)
+        if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
+        run: |
+          set -e
+          test -f zap_report.xml || { echo "ZAP XML report not found, skip Dojo upload"; exit 0; }
+
+          curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=ZAP Scan" \
+            -F "file=@zap_report.xml" \
+            -F "test_title=ZAP Baseline" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "close_old_findings=True" \
+          || curl -sS -X POST "$DD_URL/api/v2/import-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=ZAP Scan" \
+            -F "file=@zap_report.xml" \
+            -F "test_title=ZAP Baseline" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "active=True" -F "verified=False"
