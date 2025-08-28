@@ -1703,7 +1703,7 @@ class ImportReimportMixin:
         self.assertEqual(1, len(findings))
         self.assertEqual(False, findings[0].fix_available)
         self.assertEqual(None, findings[0].fix_version)
-        
+
         test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
         reimport_test = Test(
             engagement=test.engagement,
