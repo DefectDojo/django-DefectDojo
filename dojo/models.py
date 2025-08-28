@@ -2419,7 +2419,7 @@ class Finding(models.Model):
                                          blank=True,
                                          max_length=100,
                                          verbose_name=_("Fix version"),
-                                         help_text=_("Version of the affected component where the flaw will be fixed."))
+                                         help_text=_("Version of the affected component in which the flaw is fixed."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
