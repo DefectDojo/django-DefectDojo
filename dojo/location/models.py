@@ -1,0 +1,288 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Self
+
+from django.db import transaction
+from django.db.models import (
+    CASCADE,
+    RESTRICT,
+    CharField,
+    DateTimeField,
+    ForeignKey,
+    Index,
+    OneToOneField,
+    TextChoices,
+    UniqueConstraint,
+)
+from django.utils.translation import gettext_lazy as _
+from tagulous.models import TagField
+
+from dojo.base_models.base import BaseModel, BaseModelWithoutTimeMeta
+from dojo.base_models.validators import validate_not_empty
+from dojo.location.manager import LocationFindingReferenceManager, LocationManager, LocationProductReferenceManager
+from dojo.models import Dojo_User, Finding, Product
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+
+class Location(BaseModel):
+
+    """Internal metadata for a location. Managed automatically by subclasses."""
+
+    location_type = CharField(
+        verbose_name=_("Location type"),
+        max_length=12,
+        null=False,
+        blank=False,
+        editable=False,
+        validators=[validate_not_empty],
+        help_text=_("The type of location that is stored"),
+    )
+    location_value = CharField(
+        verbose_name=_("Location Value"),
+        max_length=2048,
+        null=False,
+        blank=False,
+        editable=False,
+        validators=[validate_not_empty],
+        help_text=_("The string representation of a given location. This field is automatically managed"),
+    )
+    tags = TagField(
+        verbose_name=_("Tags"),
+        blank=True,
+        force_lowercase=True,
+        related_name="location_tags",
+        help_text=_("A tag that can be used to differentiate a Location"),
+    )
+
+    objects = LocationManager()
+
+    def __str__(self):
+        return self.location_value
+
+    def status_from_finding(self, finding: Finding) -> str:
+        """Determine the status the reference should carry based on the status of the finding"""
+        # Set the default status to Active to be on the safe side
+        status = LocationFindingReference.LocationStatus.Active
+        # First determine the status based on the finding status
+        finding_status = finding.status()
+        if any(f_status in finding_status for f_status in ["Mitigated", "Inactive", "Duplicate"]):
+            status = LocationFindingReference.LocationStatus.Mitigated
+        elif "False Positive" in finding_status:
+            status = LocationFindingReference.LocationStatus.FalsePositive
+        elif "Risk Accepted" in finding_status:
+            status = LocationFindingReference.LocationStatus.RiskExcepted
+        return status
+
+    def status_from_product(self, product: Product) -> str:
+        """Determine the status the reference should carry based on the status of the product"""
+        # Set the default status to non vulnerable by default
+        status = LocationProductReference.LocationStatus.NotVulnerable
+        # First determine the status based on the number of findings present
+        if self.finding_locations.exists():
+            status = LocationProductReference.LocationStatus.Vulnerable
+        return status
+
+    def associate_with_finding(
+        self,
+        finding: Finding,
+        status: LocationFindingReference.LocationStatus | None = None,
+        auditor: Dojo_User | None = None,
+        audit_time: datetime | None = None,
+    ) -> None:
+        """
+        Get or create a LocationFindingReference for this location and finding,
+        updating the status each time. Also associates the related product.
+        """
+        # Determine the status
+        if status is None:
+            status = self.status_from_finding(finding)
+        # Setup some context aware updated fields
+        context_fields = {"status": status}
+        # Check for an auditor
+        if auditor is not None:
+            context_fields["auditor"] = auditor
+        # Check for an audit timestamp
+        if audit_time is not None:
+            context_fields["audit_time"] = audit_time
+        # Determine if we need to update
+        # Ensure atomicity to prevent race conditions
+        with transaction.atomic():
+            LocationFindingReference.objects.update_or_create(
+                location=self,
+                finding=finding,
+                defaults=context_fields,
+            )
+        # Associate the product for this finding (already uses update_or_create)
+        self.associate_with_product(finding.test.engagement.product)
+
+    def associate_with_product(
+        self,
+        product: Product,
+        status: LocationProductReference.LocationStatus | None = None,
+    ) -> None:
+        """
+        Get or create a LocationProductReference for this location and product,
+        updating the status each time.
+        """
+        if status is None:
+            status = self.status_from_product(product)
+        # Use a transaction for safety in concurrent scenarios
+        with transaction.atomic():
+            LocationProductReference.objects.update_or_create(
+                location=self,
+                product=product,
+                defaults={"status": status},
+            )
+
+    class Meta:
+        verbose_name = "Locations - Location"
+        verbose_name_plural = "Locations - Locations"
+        indexes = [
+            Index(fields=["location_type"]),
+            Index(fields=["location_value"]),
+        ]
+
+
+class AbstractLocation(BaseModelWithoutTimeMeta):
+    location = OneToOneField(
+        Location,
+        on_delete=CASCADE,
+        editable=False,
+        null=False,
+        related_name="%(class)s",
+    )
+
+    class Meta:
+        abstract = True
+
+    def get_location_type(self) -> str:
+        """Return the type of location (e.g., 'url')."""
+        msg = "Subclasses must implement get_location_type"
+        raise NotImplementedError(msg)
+
+    def get_location_value(self) -> str:
+        """Return the string representation of this location."""
+        msg = "Subclasses must implement get_location_value"
+        raise NotImplementedError(msg)
+
+    @staticmethod
+    def create_location_from_value(value: str) -> Self:
+        """
+        Dynamically create a Location and subclass instance based on location_type
+        and location_value. Uses parse_string_value from the correct subclass.
+        """
+        msg = "Subclasses must implement create_location_from_value"
+        raise NotImplementedError(msg)
+
+    def pre_save_logic(self):
+        """Automatically create or update the associated Location."""
+        location_value = self.get_location_value()
+        location_type = self.get_location_type()
+
+        if not hasattr(self, "location"):
+            self.location = Location.objects.create(
+                location_type=location_type,
+                location_value=location_value,
+            )
+        else:
+            self.location.location_type = location_type
+            self.location.location_value = location_value
+
+
+class LocationFindingReference(BaseModel):
+
+    """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
+
+    class LocationStatus(TextChoices):
+
+        """Types of supported Location Statuses."""
+
+        Active = "Active", _("Active")
+        Mitigated = "Mitigated", _("Mitigated")
+        FalsePositive = "FalsePositive", _("False Positive")
+        RiskExcepted = "RiskExcepted", _("Risk Excepted")
+        OutOfScope = "OutOfScope", _("Out Of Scope")
+
+    location = ForeignKey(Location, on_delete=CASCADE, related_name="finding_locations")
+    finding = ForeignKey(Finding, on_delete=CASCADE, related_name="findings")
+    auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT)
+    audit_time = DateTimeField(editable=False, null=True, blank=True)
+    status = CharField(
+        verbose_name=_("Status"),
+        choices=LocationStatus.choices,
+        max_length=16,
+        null=False,
+        blank=False,
+        default=LocationStatus.Active,
+        editable=True,
+        validators=[validate_not_empty],
+        help_text=_("The status of the the given Location"),
+    )
+
+    objects = LocationFindingReferenceManager()
+
+    def __str__(self) -> str:
+        """Return the string representation of a LocationProductReference."""
+        return f"{self.location} - {self.finding} ({self.status})"
+
+    class Meta:
+        verbose_name = "Locations - FindingReference"
+        verbose_name_plural = "Locations - FindingReferences"
+        constraints = [
+            UniqueConstraint(
+                fields=["location", "finding"],
+                name="unique_location_and_finding",
+            ),
+        ]
+        indexes = [
+            Index(fields=["location"]),
+            Index(fields=["finding"]),
+        ]
+
+
+class LocationProductReference(BaseModel):
+
+    """Manually managed One-2-Many field to represent the relationship of a product and a location."""
+
+    class LocationStatus(TextChoices):
+
+        """Types of supported Location Statuses."""
+
+        Vulnerable = "Vulnerable", _("Vulnerable")
+        NotVulnerable = "NotVulnerable", _("Not Vulnerable")
+
+    location = ForeignKey(Location, on_delete=CASCADE, related_name="product_locations")
+    product = ForeignKey(Product, on_delete=CASCADE, related_name="products")
+    status = CharField(
+        verbose_name=_("Status"),
+        choices=LocationStatus.choices,
+        max_length=16,
+        null=False,
+        blank=False,
+        default=LocationStatus.NotVulnerable,
+        editable=True,
+        validators=[validate_not_empty],
+        help_text=_("The status of the the given Location"),
+    )
+
+    objects = LocationProductReferenceManager()
+
+    def __str__(self) -> str:
+        """Return the string representation of a LocationProductReference."""
+        return f"{self.location} - {self.product} ({self.status})"
+
+    class Meta:
+        verbose_name = "Locations - ProductReference"
+        verbose_name_plural = "Locations - ProductReferences"
+        constraints = [
+            UniqueConstraint(
+                fields=["location", "product"],
+                name="unique_location_and_product",
+            ),
+        ]
+        indexes = [
+            Index(fields=["location"]),
+            Index(fields=["product"]),
+        ]
