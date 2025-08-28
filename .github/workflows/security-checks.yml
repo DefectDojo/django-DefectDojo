@@ -1,0 +1,89 @@
+jobs:
+  gitleaks:
+    name: Gitleaks (secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for better detection)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks
+        run: |
+          set -e
+          ver="8.18.4"
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${ver}/gitleaks_${ver}_linux_x64.tar.gz"
+          curl -fsSL "$url" -o gitleaks.tgz
+          tar -xzf gitleaks.tgz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks → SARIF
+        run: |
+          set -e
+          gitleaks detect \
+            --source . \
+            --report-format sarif \
+            --report-path gitleaks.sarif \
+            --redact || true
+
+      - name: Fix SARIF for GitHub (normalize regions)
+        run: |
+          jq '
+            .runs |= (map(
+              .results |= (map(
+                .locations |= (map(
+                  if (.physicalLocation.region? != null) then
+                    # заполнить отсутствующие значения
+                    (.physicalLocation.region.startLine     |= (. // 1)) |
+                    (.physicalLocation.region.startColumn   |= (. // 1)) |
+                    (.physicalLocation.region.endLine       |= (. // .physicalLocation.region.startLine)) |
+                    (.physicalLocation.region.endColumn     |= (. // .physicalLocation.region.startColumn)) |
+                    # выровнять endColumn, если меньше startColumn
+                    (if (.physicalLocation.region.endColumn < .physicalLocation.region.startColumn)
+                     then (.physicalLocation.region.endColumn = .physicalLocation.region.startColumn)
+                     else . end)
+                  else . end
+                ))
+              ))
+            ))
+          ' gitleaks.sarif > gitleaks.fixed.sarif
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.fixed.sarif
+          category: gitleaks
+
+      - name: Upload artifact (Gitleaks SARIF)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-results
+          path: gitleaks.fixed.sarif
+          if-no-files-found: ignore
+
+      - name: Import to DefectDojo (reimport → import)
+        if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
+        run: |
+          set -e
+          test -f gitleaks.fixed.sarif || exit 0
+          curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@gitleaks.fixed.sarif" \
+            -F "test_title=Gitleaks (Secrets)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "close_old_findings=True" \
+          || curl -sS -X POST "$DD_URL/api/v2/import-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@gitleaks.fixed.sarif" \
+            -F "test_title=Gitleaks (Secrets)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "active=True" -F "verified=False"
