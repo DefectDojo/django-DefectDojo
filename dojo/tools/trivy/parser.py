@@ -227,7 +227,7 @@ class TrivyParser:
                 if custom_tag:
                     finding.unsaved_tags = [custom_tag]
                 else:
-                    finding.unsaved_tags = [vul_type, target_class]
+                    finding.tags = [vul_type, target_class]
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
