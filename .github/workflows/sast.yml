@@ -1,0 +1,172 @@
+name: SAST
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    env:
+      DD_URL: ${{ secrets.DD_URL }}
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_ENGAGEMENT_ID: ${{ secrets.DD_ENGAGEMENT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep → SARIF
+        run: semgrep --config p/ci --sarif --output semgrep.sarif || true
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+      - name: Reimport/Import Semgrep to DefectDojo (optional)
+        if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
+        run: |
+          set -e
+          curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@semgrep.sarif" \
+            -F "test_title=Semgrep OSS Scan (SARIF)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "close_old_findings=True" \
+          || curl -sS -X POST "$DD_URL/api/v2/import-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@semgrep.sarif" \
+            -F "test_title=Semgrep OSS Scan (SARIF)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "active=True" -F "verified=False"
+
+  bandit:
+    name: Bandit (Python)
+    runs-on: ubuntu-latest
+    env:
+      DD_URL: ${{ secrets.DD_URL }}
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_ENGAGEMENT_ID: ${{ secrets.DD_ENGAGEMENT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit (JSON + fail on HIGH)
+        run: |
+          bandit -r . -f json -o bandit.json || true
+          python - <<'PY'
+          import json, sys
+          with open("bandit.json") as f:
+              data = json.load(f)
+          high = sum(1 for r in data.get("results", []) if r.get("issue_severity","").upper()=="HIGH")
+          print(f"Bandit HIGH findings: {high}")
+          sys.exit(1 if high > 0 else 0)
+          PY
+
+      - name: Reimport/Import Bandit JSON to DefectDojo (optional)
+        if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
+        run: |
+          set -e
+          curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=Bandit Scan" \
+            -F "file=@bandit.json" \
+            -F "test_title=Bandit Scan" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "close_old_findings=True" \
+          || curl -sS -X POST "$DD_URL/api/v2/import-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=Bandit Scan" \
+            -F "file=@bandit.json" \
+            -F "test_title=Bandit Scan" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "active=True" -F "verified=False"
+
+  trivy-fs:
+    name: Trivy FS (deps/misconfig/secrets)
+    runs-on: ubuntu-latest
+    env:
+      DD_URL: ${{ secrets.DD_URL }}
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DD_ENGAGEMENT_ID: ${{ secrets.DD_ENGAGEMENT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy FS → SARIF (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+      - name: Reimport/Import Trivy to DefectDojo (optional)
+        if: ${{ always() && env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
+        run: |
+          set -e
+          test -f trivy-fs.sarif || exit 0
+          curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@trivy-fs.sarif" \
+            -F "test_title=Trivy Scan (SARIF)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "close_old_findings=True" \
+          || curl -sS -X POST "$DD_URL/api/v2/import-scan/" \
+            -H "Authorization: Token $DD_API_KEY" \
+            -F "engagement=$DD_ENGAGEMENT_ID" \
+            -F "scan_type=SARIF" \
+            -F "file=@trivy-fs.sarif" \
+            -F "test_title=Trivy Scan (SARIF)" \
+            -F "build_id=$GITHUB_RUN_NUMBER" \
+            -F "commit_hash=$GITHUB_SHA" \
+            -F "branch_tag=$GITHUB_REF_NAME" \
+            -F "active=True" -F "verified=False"
