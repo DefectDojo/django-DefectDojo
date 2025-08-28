@@ -42,6 +42,7 @@ from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 
+from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
 
 logger = logging.getLogger(__name__)
@@ -842,7 +843,7 @@ class FileUpload(models.Model):
             raise ValidationError(msg)
 
 
-class Product_Type(models.Model):
+class Product_Type(BaseModel):
 
     """
     Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing "types" of products.
@@ -858,8 +859,6 @@ class Product_Type(models.Model):
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
     members = models.ManyToManyField(Dojo_User, through="Product_Type_Member", related_name="prod_type_members", blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Type_Group", related_name="product_type_groups", blank=True)
 
@@ -1116,7 +1115,7 @@ class SLA_Configuration(models.Model):
         return f"{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}"
 
 
-class Product(models.Model):
+class Product(BaseModel):
     WEB_PLATFORM = "web"
     IOT = "iot"
     DESKTOP_PLATFORM = "desktop"
@@ -1179,10 +1178,8 @@ class Product(models.Model):
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name="team_manager", on_delete=models.RESTRICT)
 
-    created = models.DateTimeField(auto_now_add=True, null=True)
     prod_type = models.ForeignKey(Product_Type, related_name="prod_type",
                                   null=False, blank=False, on_delete=models.CASCADE)
-    updated = models.DateTimeField(auto_now=True, null=True)
     sla_configuration = models.ForeignKey(SLA_Configuration,
                                           related_name="sla_config",
                                           null=False,
@@ -1511,7 +1508,7 @@ ENGAGEMENT_STATUS_CHOICES = (("Not Started", "Not Started"),
                              ("Waiting for Resource", "Waiting for Resource"))
 
 
-class Engagement(models.Model):
+class Engagement(BaseModel):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Version of the product the engagement tested."))
@@ -1524,8 +1521,6 @@ class Engagement(models.Model):
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
     tracker = models.URLField(max_length=200, help_text=_("Link to epic or ticket system with changes to version."), editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
@@ -1535,7 +1530,7 @@ class Engagement(models.Model):
     check_list = models.BooleanField(default=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
-    status = models.CharField(editable=True, max_length=2000, default="",
+    status = models.CharField(editable=True, max_length=2000, default="Not Started",
                               null=True,
                               choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
@@ -2333,7 +2328,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return f"{self.finding.id}: {self.action}"
 
 
-class Finding(models.Model):
+class Finding(BaseModel):
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
@@ -2598,10 +2593,6 @@ class Finding(models.Model):
     dynamic_finding = models.BooleanField(default=True,
                                           verbose_name=_("Dynamic finding (DAST)"),
                                           help_text=_("Flaw has been detected from a Dynamic Application Security Testing tool (DAST)."))
-    created = models.DateTimeField(auto_now_add=True,
-                                   null=True,
-                                   verbose_name=_("Created"),
-                                   help_text=_("The date the finding was created inside DefectDojo."))
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
@@ -2813,7 +2804,8 @@ class Finding(models.Model):
         self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        super().save(*args, **kwargs)
+        # We cannot run the full_clean method here without issue, so we specify skip_validation
+        super().save(*args, **kwargs, skip_validation=True)
 
         self.found_by.add(self.test.test_type)
 

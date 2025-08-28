@@ -87,6 +87,7 @@ from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
+from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
@@ -180,6 +181,8 @@ v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredS
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
+# Add the location routes
+v2_api = add_locations_urls(v2_api)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
