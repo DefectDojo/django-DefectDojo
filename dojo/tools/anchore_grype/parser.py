@@ -122,12 +122,15 @@ class AnchoreGrypeParser:
 
             finding_mitigation = None
             fix_available = False
+            fix_version = None
             if vuln_fix_versions:
                 fix_available = True
                 finding_mitigation = "Upgrade to version:"
                 if len(vuln_fix_versions) == 1:
                     finding_mitigation += f" {vuln_fix_versions[0]}"
+                    fix_version = vuln_fix_versions[0]
                 else:
+                    fix_version = ", ".join(vuln_fix_versions)
                     for fix_version in vuln_fix_versions:
                         finding_mitigation += f"\n- {fix_version}"
 
@@ -203,6 +206,7 @@ class AnchoreGrypeParser:
                     nb_occurences=1,
                     file_path=file_path,
                     fix_available=fix_available,
+                    fix_version=fix_version,
                 )
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
 

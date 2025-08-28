@@ -265,7 +265,22 @@ class TestAnchoreGrypeParser(DojoTestCase):
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(35, len(findings))
+
+    def test_grype_fix_not_available(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "fix_not_available.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertEqual(findings[0].fix_available, False)
+            self.assertEqual(findings[0].fix_version, None)
+
+    def test_grype_fix_available(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "fix_available.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
             self.assertEqual(findings[0].fix_available, True)
+            self.assertEqual(findings[0].fix_version, "1.2.3")
 
     def test_grype_issue_9942(self):
         with (get_unit_tests_scans_path("anchore_grype") / "issue_9942.json").open(encoding="utf-8") as testfile:
