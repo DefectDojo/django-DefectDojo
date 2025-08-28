@@ -1,0 +1,85 @@
+name: Deploy DefectDojo
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "DefectDojo version (tag), e.g. 2.49.2"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  # Фиксируем версию релиза DefectDojo (можно переопределить через dispatch input или секрет DD_VERSION)
+  DD_VERSION: ${{ inputs.version != '' && inputs.version || secrets.DD_VERSION != '' && secrets.DD_VERSION || '2.49.2' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (for context)
+        uses: actions/checkout@v4
+
+      - name: Install ssh client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Remote deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} /bin/bash << 'EOF'
+          set -Eeuo pipefail
+
+          # --- Vars
+          APP_DIR=/srv/defectdojo
+          REPO_URL=https://github.com/DefectDojo/django-DefectDojo
+          DD_VERSION="${{ env.DD_VERSION }}"
+
+          # --- Ensure docker & compose
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "Docker missing. Installing..."
+            curl -fsSL https://get.docker.com | sudo sh
+            sudo usermod -aG docker "$USER" || true
+          fi
+
+          # --- Prepare app dir
+          mkdir -p "$APP_DIR"
+          cd "$APP_DIR"
+
+          # --- Clone or update repo at exact tag
+          if [ -d django-DefectDojo/.git ]; then
+            cd django-DefectDojo
+            git fetch --all --tags
+            git checkout "$DD_VERSION"
+            git pull --ff-only || true
+          else
+            git clone "$REPO_URL"
+            cd django-DefectDojo
+            git checkout "$DD_VERSION"
+          fi
+
+          # --- Pull images & start with postgres+redis profile
+          docker compose pull
+          docker compose --profile postgres-redis up -d
+
+          # --- Basic health info & admin password hint
+          echo "==== docker compose ps ===="
+          docker compose ps
+          echo "==== Initializer admin password (if ready) ===="
+          (docker compose logs initializer 2>/dev/null | grep -m1 "Admin password:" ) || true
+
+          echo "Done. Access on http://$(curl -s ifconfig.me):8080/"
+          EOF
