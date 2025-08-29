@@ -1240,7 +1240,7 @@ def permission_view_findings(user):
     return False
 
 @register.filter()
-def general_settings_get_value(name_key, default):
+def general_settings_get_value(name_key, default=None):
     """
     Returns the value of a general setting by its name key.
     """
