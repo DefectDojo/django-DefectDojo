@@ -12,6 +12,8 @@ class WazuhV4_8:
             vuln = item.get("vulnerability")
             cve = vuln.get("id")
             description = vuln.get("description")
+            description += "\nAgent id:" + item.get("agent").get("id")
+            description += "\nAgent name:" + item.get("agent").get("name")
             severity = vuln.get("severity")
             cvssv3_score = vuln.get("score").get("base")
             publish_date = vuln.get("published_at").split("T")[0]
