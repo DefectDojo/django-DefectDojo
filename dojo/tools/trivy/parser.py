@@ -4,6 +4,7 @@ import json
 import logging
 
 from dojo.models import Finding
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -218,9 +219,15 @@ class TrivyParser:
                     cvssv3=cvssv3,
                     static_finding=True,
                     dynamic_finding=False,
-                    tags=[vul_type, target_class],
+                    tags=[],
                     service=service_name,
                 )
+                
+                custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("trivy")
+                if custom_tag:
+                    finding.unsaved_tags = [custom_tag]
+                else:
+                    finding.tags = [vul_type, target_class]
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
