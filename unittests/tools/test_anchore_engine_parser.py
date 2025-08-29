@@ -21,6 +21,8 @@ class TestAnchoreEngineParser(DojoTestCase):
             parser = AnchoreEngineParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(23, len(findings))
+            finding = findings[5]
+            self.assertEqual(finding.fix_available, True)
 
     def test_anchore_engine_parser_has_many_findings_2_4_1(self):
         with (get_unit_tests_scans_path("anchore_engine") / "many_vulns_2.4.1.json").open(encoding="utf-8") as testfile:
@@ -34,6 +36,7 @@ class TestAnchoreEngineParser(DojoTestCase):
             self.assertEqual(6.7, finding.cvssv3_score)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-13776", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual(finding.fix_available, False)
 
     def test_anchore_engine_parser_new_fomrat_issue_11552(self):
         with (get_unit_tests_scans_path("anchore_engine") / "new_format_issue_11552.json").open(encoding="utf-8") as testfile:
