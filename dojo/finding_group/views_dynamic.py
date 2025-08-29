@@ -8,7 +8,6 @@ from django.views import View
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import DynamicFindingGroupsFilter, DynamicFindingGroupsFindingsFilter
 from dojo.finding_group.redis import (
-    SEVERITY_ORDER,
     GroupMode,
     get_user_mode,
     load_or_rebuild_finding_groups,
@@ -68,7 +67,7 @@ class ListDynamicFindingGroups(View):
         finding_group.reconfig_finding_group()
         if name_filter and name_filter not in finding_group.name.lower():
             add_finding_group = False
-        if min_severity_filter and SEVERITY_ORDER.get(finding_group.severity) < SEVERITY_ORDER[min_severity_filter]:
+        if min_severity_filter and Finding.get_number_severity(finding_group.severity) < Finding.get_number_severity(min_severity_filter):
             add_finding_group = False
         if not finding_group.finding_ids:
             add_finding_group = False
@@ -89,6 +88,19 @@ class ListDynamicFindingGroups(View):
         return user_fids, active_fids
 
     def get_finding_groups(self, request: HttpRequest, products=None):
+        """
+        Retrieve all dynamic finding groups for the current user.
+
+        Steps:
+        1. Retrieve finding IDs relevant for the user (optionally filtered by products).
+        2. Iterate over all finding groups in self.finding_groups_map.
+        3. For each group:
+        - Restrict the group's findings to those the user can see.
+        - Apply additional filters based on the request.
+        - No additional filtering for active findings.
+        4. Append groups that pass all filters to the result list.
+        5. Order the resulting list according to the request via order_field and return.
+        """
         user_fids, _ = self.get_findings(products)
         list_finding_group = []
         for finding_group in self.finding_groups_map.values():
@@ -134,6 +146,19 @@ class ListOpenDynamicFindingGroups(ListDynamicFindingGroups):
     filter_name = "Open"
 
     def get_finding_groups(self, request: HttpRequest, products=None):
+        """
+        Retrieve dynamic finding groups containing at least one active finding.
+
+        Steps:
+        1. Retrieve finding IDs relevant for the user and the active subset.
+        2. Iterate over all finding groups in self.finding_groups_map.
+        3. For each group:
+        - Restrict the group's findings to those the user can see.
+        - Apply additional filters based on the request.
+        - Keep only groups with at least one active finding.
+        4. Append groups that pass all filters to the result list.
+        5. Order the resulting list according to the request via order_field and return.
+        """
         user_fids, active_fids = self.get_findings(products)
         list_finding_group = []
         for finding_group in self.finding_groups_map.values():
@@ -148,6 +173,19 @@ class ListClosedDynamicFindingGroups(ListDynamicFindingGroups):
     filter_name = "Closed"
 
     def get_finding_groups(self, request: HttpRequest, products=None):
+        """
+        Retrieve dynamic finding groups containing no active findings.
+
+        Steps:
+        1. Retrieve finding IDs relevant for the user and the active subset.
+        2. Iterate over all finding groups in self.finding_groups_map.
+        3. For each group:
+        - Restrict the group's findings to those the user can see.
+        - Apply additional filters based on the request.
+        - Keep only groups with no active findings.
+        4. Append groups that pass all filters to the result list.
+        5. Order the resulting list according to the request via order_field and return.
+        """
         user_fids, active_fids = self.get_findings(products)
         list_finding_group = []
         for finding_group in self.finding_groups_map.values():
@@ -177,26 +215,26 @@ class DynamicFindingGroupsFindings(View):
     def filters(self, request: HttpRequest):
         name_filter = request.GET.get("name", "").lower()
         severity_filter = request.GET.getlist("severity")
-        script_id_filter = request.GET.get("script_id")
+        vuln_id_from_tool_filter = request.GET.get("vuln_id_from_tool")
         reporter_filter = request.GET.getlist("reporter")
-        status_filter = request.GET.get("status")
+        active_filter = request.GET.get("active")
         engagement_filter = request.GET.getlist("engagement")
         product_filter = request.GET.getlist("product")
-        return name_filter, severity_filter, script_id_filter, reporter_filter, status_filter, engagement_filter, product_filter
+        return name_filter, severity_filter, vuln_id_from_tool_filter, reporter_filter, active_filter, engagement_filter, product_filter
 
     def filter_findings(self, findings, request: HttpRequest):
-        name_filter, severity_filter, script_id_filter, reporter_filter, status_filter, engagement_filter, product_filter = self.filters(request)
+        name_filter, severity_filter, vuln_id_from_tool_filter, reporter_filter, active_filter, engagement_filter, product_filter = self.filters(request)
         filter_kwargs = {}
         if name_filter:
             filter_kwargs["title__icontains"] = name_filter
         if severity_filter:
             filter_kwargs["severity__in"] = severity_filter
-        if script_id_filter:
-            filter_kwargs["vuln_id_from_tool__icontains"] = script_id_filter
+        if vuln_id_from_tool_filter:
+            filter_kwargs["vuln_id_from_tool__icontains"] = vuln_id_from_tool_filter
         if reporter_filter:
             filter_kwargs["reporter__id__in"] = reporter_filter
-        if status_filter:
-            filter_kwargs["active"] = (status_filter == "Yes")
+        if active_filter:
+            filter_kwargs["active"] = (active_filter == "Yes")
         if engagement_filter:
             filter_kwargs["test__engagement__id__in"] = engagement_filter
         if product_filter:

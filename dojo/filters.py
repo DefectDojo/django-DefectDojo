@@ -2088,15 +2088,15 @@ class DynamicFindingGroupsFindingsFilter(FilterSet):
         ],
         label="Severity",
     )
-    script_id = CharFilter(lookup_expr="icontains", label="Script ID")
+    vuln_id_from_tool = CharFilter(lookup_expr="icontains", label="Vulnerability Id From Tool")
     reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none(), label="Reporter")
-    status = ChoiceFilter(choices=[("Yes", "Yes"), ("No", "No")], label="Active")
+    active = ChoiceFilter(choices=[("Yes", "Yes"), ("No", "No")], label="Active")
     engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     product = ModelMultipleChoiceFilter(queryset=Product.objects.none(), label="Product")
 
     class Meta:
         model = Finding
-        fields = ["name", "severity", "script_id", "reporter", "status", "engagement", "product"]
+        fields = ["name", "severity", "vuln_id_from_tool", "reporter", "active", "engagement", "product"]
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)

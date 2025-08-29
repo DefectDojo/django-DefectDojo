@@ -10,23 +10,16 @@ from typing import Self
 
 import redis
 from django.conf import settings
-from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 DD_TEST = os.getenv("DD_TEST", "False").lower() == "true"
-SEVERITY_ORDER = {
-    "Critical": 5,
-    "High": 4,
-    "Medium": 3,
-    "Low": 2,
-    "Info": 1,
-}
 USER_MODES_KEY = "finding_groups_user_modes"
-SYSTEM_CHANGE = "finding_groups_last_finding_change"
-LAST_UPDATE = "finding_groups_last_update"
+LAST_FINDING_CHANGE = "finding_groups_last_finding_change"
+LAST_FINDING_UPDATE = "finding_groups_last_update"
 
 
 class GroupMode(StrEnum):
@@ -41,7 +34,6 @@ class DynamicFindingGroups:
     name: str = ""
     severity: str = "Info"
     main_finding_id: int | None = None
-    sla_finding_id: int | None = None
     finding_ids: set[int] = field(default_factory=set)
 
     def to_dict(self) -> dict:
@@ -63,12 +55,9 @@ class DynamicFindingGroups:
         return None
 
     def update_sev_sla(self, finding: Finding) -> None:
-        if SEVERITY_ORDER[finding.severity] > SEVERITY_ORDER[self.severity]:
+        if Finding.get_number_severity(finding.severity) > Finding.get_number_severity(self.severity):
             self.severity = finding.severity
             self.main_finding_id = finding.id
-        if finding.active and finding.sla_days_remaining():
-            if not self.sla_finding_id or finding.sla_days_remaining() < Finding.objects.get(id=self.sla_finding_id).sla_days_remaining():
-                self.sla_finding_id = finding.id
 
     def add(self, finding: Finding) -> None:
         self.update_sev_sla(finding)
@@ -77,7 +66,6 @@ class DynamicFindingGroups:
     # This method is used when we filter findings in a finding group
     def reconfig_finding_group(self) -> None:
         self.severity = "Info"
-        self.sla_finding_id = None
         findings = Finding.objects.filter(id__in=self.finding_ids)
         for finding in findings:
             self.update_sev_sla(finding)
@@ -85,13 +73,16 @@ class DynamicFindingGroups:
     @staticmethod
     def get_group_names(finding: Finding, mode: GroupMode) -> list[str] | None:
         if mode == GroupMode.VULN_ID_FROM_TOOL:
-            return [finding.vuln_id_from_tool]
+            if finding.vuln_id_from_tool:
+                return [finding.vuln_id_from_tool]
         if mode == GroupMode.TITLE:
-            return [finding.title]
+            if finding.title:
+                return [finding.title]
         if mode == GroupMode.CVE:
-            cves = list(
-                finding.vulnerability_id_set.values_list("vulnerability_id", flat=True),
-            )
+            cves = [
+                cve for cve in finding.vulnerability_id_set.values_list("vulnerability_id", flat=True)
+                if cve
+            ]
             if cves:
                 return cves
         return None
@@ -110,14 +101,14 @@ class DynamicFindingGroups:
             logger.info("Redis is not used in test environment, skipping.")
             return
         redis_client = get_redis_client()
-        redis_client.set(SYSTEM_CHANGE, datetime.now().isoformat())
+        redis_client.set(LAST_FINDING_CHANGE, datetime.now().isoformat())
 
     @staticmethod
     def set_last_update(mode: GroupMode, timestamp: datetime | None = None) -> None:
         if timestamp is None:
             return
         redis_client = get_redis_client()
-        redis_client.hset(LAST_UPDATE, mode.value, timestamp.isoformat())
+        redis_client.hset(LAST_FINDING_UPDATE, mode.value, timestamp.isoformat())
 
     @staticmethod
     def add_finding(finding: Finding, mode: GroupMode) -> None:
@@ -147,37 +138,16 @@ class DynamicFindingGroups:
                 group_ids.append(finding_group_id)
             redis_client.hset(id_map_key, finding.id, json.dumps(group_ids))
 
-    # This method is used in finding_groups table to show SLA
-    def get_days_remaining(self) -> str:
-        if self.sla_finding_id:
-            finding = Finding.objects.filter(id=self.sla_finding_id).first()
-            days_remaining = finding.sla_days_remaining()
-            severity = finding.severity
-            sla_start_date = finding.get_sla_start_date().strftime("%b %d, %Y")
-            status = "age-green"
-            status_text = f"Remediation for {severity.lower()} findings due in {days_remaining} days or less (started {sla_start_date})"
-            if days_remaining and days_remaining < 0:
-                status = "age-red"
-                status_text = f"Overdue: Remediation for {severity.lower()} findings overdue {days_remaining} days (started {sla_start_date})"
-                days_remaining = abs(days_remaining)
-        elif any(
-            Finding.objects.filter(
-                id__in=self.finding_ids,
-                active=True,
-            ),
-        ):
-            status = "severity-Info"
-            status_text = "No SLA set, but at least one finding is active"
-            days_remaining = "No SLA"
-        else:
-            status = "age-blue"
-            status_text = "No active finding"
-            days_remaining = "Concluded"
-        title = (
-            f'<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="{status_text}">'
-            f'<span class="label severity {status}">{days_remaining}</span></a>'
-        )
-        return mark_safe(title)
+    @cached_property
+    def sla_days_remaining_internal(self):
+        findings = Finding.objects.filter(id__in=self.finding_ids, active=True)
+        if not findings:
+            return None
+        return min([find.sla_days_remaining() for find in findings if find.sla_days_remaining()], default=None)
+
+    @property
+    def sla_days_remaining(self) -> int | None:
+        return self.sla_days_remaining_internal
 
 
 @lru_cache(maxsize=1)
@@ -208,22 +178,22 @@ def load_or_rebuild_finding_groups(mode: GroupMode) -> dict[str, DynamicFindingG
     fg_key = DynamicFindingGroups.get_fg_key(mode)
     id_map_key = DynamicFindingGroups.get_id_map_key(mode)
 
-    if not redis_client.exists(SYSTEM_CHANGE):
+    if not redis_client.exists(LAST_FINDING_CHANGE):
         DynamicFindingGroups.set_last_finding_change()
-    last_finding_change_raw = redis_client.get(SYSTEM_CHANGE)
+    last_finding_change_raw = redis_client.get(LAST_FINDING_CHANGE)
     try:
         last_finding_change_time = datetime.fromisoformat(last_finding_change_raw)
     except ValueError:
-        logger.warning(f"Invalid datetime format in Redis for {SYSTEM_CHANGE}: {last_finding_change_raw}, resetting last finding change.")
+        logger.warning(f"Invalid datetime format in Redis for {LAST_FINDING_CHANGE}: {last_finding_change_raw}, resetting last finding change.")
         DynamicFindingGroups.set_last_finding_change()
-        last_finding_change_raw = redis_client.get(SYSTEM_CHANGE)
+        last_finding_change_raw = redis_client.get(LAST_FINDING_CHANGE)
         last_finding_change_time = datetime.fromisoformat(last_finding_change_raw) if last_finding_change_raw else None
 
     try:
-        last_groups_update_time = redis_client.hget(LAST_UPDATE, mode.value)
+        last_groups_update_time = redis_client.hget(LAST_FINDING_UPDATE, mode.value)
         last_groups_update_time = datetime.fromisoformat(last_groups_update_time) if last_groups_update_time else None
     except ValueError:
-        logger.warning(f"Invalid datetime format in Redis for {LAST_UPDATE}: {last_groups_update_time}")
+        logger.warning(f"Invalid datetime format in Redis for {LAST_FINDING_UPDATE}: {last_groups_update_time}")
         last_groups_update_time = None
 
     # Check if finding_groups and id_map exist in Redis
