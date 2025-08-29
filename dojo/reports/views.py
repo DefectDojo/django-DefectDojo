@@ -1159,7 +1159,6 @@ class ExcelExportView(View):
 
 def get_url_presigned(request, id):
     if value := cache.get(f"report_finding:{request.user.username}:{id}"):
-        cache.delete(f"report_finding:{request.user.username}:{id}") 
         return HttpResponseRedirect(value)
     else:
         return render(request, "dojo/page_status.html")
