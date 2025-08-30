@@ -1864,9 +1864,10 @@ VULNERABILITY_URLS = {
     "RLSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "SCA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/sca-2020-0002
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
     "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
-    "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
+    "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
