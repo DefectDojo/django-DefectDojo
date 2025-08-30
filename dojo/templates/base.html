@@ -339,12 +339,13 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="{% url 'all_finding_groups' %}" aria-expanded="false" aria-label="Problems">
+                                            <a href="{% url 'all_finding_groups' %}" aria-expanded="false" aria-label="Finding_Groups">
                                                 <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
                                                 <span>{% trans "Dashboard" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a> 
                                             <ul class="nav nav-second-level">
+                                                <li class="submenu-header">Static Groups</li>
                                                 <li>
                                                     <a href="{% url 'open_finding_groups' %}">
                                                         {% trans "Open Findings Groups" %}
@@ -357,6 +358,25 @@
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'closed_finding_groups' %}">
+                                                        {% trans "Closed Findings Groups" %}
+                                                    </a>
+                                                </li>
+
+                                                <li class="submenu-divider"></li>
+
+                                                <li class="submenu-header">Dynamic Groups</li>
+                                                <li>
+                                                    <a href="{% url 'open_dynamic_finding_groups' %}">
+                                                        {% trans "Open Findings Groups" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'all_dynamic_finding_groups' %}">
+                                                        {% trans "All Findings Groups" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'closed_dynamic_finding_groups' %}">
                                                         {% trans "Closed Findings Groups" %}
                                                     </a>
                                                 </li>
