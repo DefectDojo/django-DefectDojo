@@ -4,7 +4,13 @@ import io
 from dateutil.parser import parse
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding, cleanup_openvas_text
+from dojo.tools.openvas_v2.common import (
+    OpenVASFindingAuxData,
+    cleanup_openvas_text,
+    deduplicate,
+    is_valid_severity,
+    update_finding,
+)
 
 
 def evaluate_bool_value(column_value):
