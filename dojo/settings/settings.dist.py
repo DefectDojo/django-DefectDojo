@@ -1356,6 +1356,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "OpenVAS Parser v2": ["title", "unique_id_from_tool", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1427,6 +1428,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
+    "OpenVAS Parser v2": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1613,7 +1615,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
-    "OpenVAS Parser": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

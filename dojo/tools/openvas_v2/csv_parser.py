@@ -4,7 +4,7 @@ import io
 from dateutil.parser import parse
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding
+from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding, cleanup_openvas_text
 
 
 def evaluate_bool_value(column_value):
@@ -84,11 +84,11 @@ class OpenVASCSVParserV2:
         elif column_name == "cvss":
             finding.cvssv3_score = float(column_value)
         elif column_name == "summary":
-            finding.description = column_value
+            aux_info.summary = column_value
         elif column_name == "solution":
-            finding.mitigation = column_value
+            finding.mitigation = cleanup_openvas_text(column_value)
         elif column_name == "vulnerability insight":
-            finding.impact = column_value
+            finding.impact = cleanup_openvas_text(column_value)
         elif column_name == "specific result":
             aux_info.openvas_result = column_value
         elif column_name == "qod":

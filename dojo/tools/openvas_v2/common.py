@@ -1,14 +1,12 @@
 import hashlib
-import os
 from dataclasses import dataclass
 
 from dojo.models import Finding
 
-OPENVAS_SEVERITY_OVERWRITE = os.environ.get("OPENVAS_SEVERITY_OVERWRITE", "False").lower() in {"true", 1}
-
 
 @dataclass
 class OpenVASFindingAuxData:
+
     """Dataclass to contain all information added later to fields"""
 
     summary: str = ""
@@ -21,12 +19,16 @@ def is_valid_severity(severity):
     return severity in valid_severity
 
 
+def cleanup_openvas_text(text: str):
+    return text.replace("\n  ", " ")
+
+
 def update_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
     """Update finding description"""
     if aux_info.openvas_result:
         finding.steps_to_reproduce = aux_info.openvas_result
     if aux_info.summary:
-        finding.description += f"\n**Summary**: {aux_info.summary}"
+        finding.description += f"\n**Summary**: {cleanup_openvas_text(aux_info.summary)}"
     if aux_info.qod:
         finding.description += f"\n**QoD**: {aux_info.qod}"
 
