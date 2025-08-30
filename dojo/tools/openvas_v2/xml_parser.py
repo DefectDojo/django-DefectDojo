@@ -4,7 +4,7 @@ from xml.dom import NamespaceErr
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_description
+from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding
 
 
 class OpenVASXMLParserV2:
@@ -35,7 +35,7 @@ class OpenVASXMLParserV2:
             for field in result:
                 self.process_field_element(field, finding, aux_info)
 
-            update_description(finding, aux_info)
+            update_finding(finding, aux_info)
             deduplicate(dupes, finding)
 
         return list(dupes.values())
@@ -50,13 +50,14 @@ class OpenVASXMLParserV2:
                 continue
 
             key = part[0:idx]
-            val = part[idx + 1:]
+            val = part[idx + 1 :]
             tags[key] = val
         return tags
 
     def process_field_element(self, field, finding: Finding, aux_info: OpenVASFindingAuxData):
         if field.tag == "nvt":
-            finding.script_id = field.get("oid")
+            # parse general field
+            finding.vuln_id_from_tool = field.get("oid")
             nvt_name = field.find("name").text
             if nvt_name:
                 finding.title = nvt_name
@@ -71,6 +72,12 @@ class OpenVASXMLParserV2:
             impact = tags.get("impact", None)
             if impact:
                 finding.impact = impact
+
+            # parse cves
+            refs_node = field.find("refs")
+            if refs_node is not None:
+                refs = refs_node.findall(".//ref[@type='cve']")
+                finding.unsaved_vulnerability_ids = [ref.get("id") for ref in refs]
         elif field.tag == "qod":
             aux_info.qod = field.find("value").text
 
@@ -79,24 +86,26 @@ class OpenVASXMLParserV2:
 
         if field.tag == "name":
             finding.title = field.text
-        elif field.tag == "hostname":
-            # strip due to https://github.com/greenbone/gvmd/issues/2378
-            finding.unsaved_endpoints[0].host = field.text.strip()
         elif field.tag == "host":
-            if not finding.unsaved_endpoints[0].host:
+            hostname_field = field.find("hostname")
+            # default to hostname else ip
+            if hostname_field is not None and hostname_field.text:
+                # strip due to https://github.com/greenbone/gvmd/issues/2378
+                finding.unsaved_endpoints[0].host = hostname_field.text.strip()
+            else:
                 # strip due to https://github.com/greenbone/gvmd/issues/2378
                 finding.unsaved_endpoints[0].host = field.text.strip()
         elif field.tag == "port":
             port_str, protocol = field.text.split("/")
+            finding.unsaved_endpoints[0].protocol = protocol
             with contextlib.suppress(ValueError):
                 finding.unsaved_endpoints[0].port = int(port_str)
-            finding.unsaved_endpoints[0].protocol = protocol
         elif field.tag == "severity":
             finding.cvssv3_score = float(field.text)
         elif field.tag == "threat":
             if is_valid_severity(field.text):
                 finding.severity = field.text
         elif field.tag == "description":
-            finding.references = field.text.strip()
+            aux_info.openvas_result = field.text.strip()
         elif field.tag == "solution":
             finding.mitigation = field.text

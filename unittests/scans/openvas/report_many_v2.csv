@@ -1,0 +1,614 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References,Max Severity EPSS score,Max Severity EPSS percentile
+      10.63.152.16,l-1ansr01.bzdtst.XX.de,8443,tcp,5.8,Medium,99,"Mitigation","HTTP Debugging Methods (TRACE/TRACK) Enabled","The remote web server supports the TRACE and/or TRACK
+  methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.","The web server has the following HTTP methods enabled: TRACE
+",1.3.6.1.4.1.25623.1.0.11213,"CVE-2003-1567,CVE-2004-2320,CVE-2004-2763,CVE-2005-3398,CVE-2006-4683,CVE-2007-3008,CVE-2008-7253,CVE-2009-2823,CVE-2010-0386,CVE-2012-2223,CVE-2014-7883",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:37+02:00,d766a82b-8765-4a23-8a1-89846bf6cbd4,"An attacker may use this flaw to trick your legitimate web
+  users to give him their credentials.","Disable the TRACE and TRACK methods in your web server
+  configuration.
+
+  Please see the manual of your web server or the references for more information.","Web servers with enabled TRACE and/or TRACK methods.","It has been shown that web servers supporting this methods
+  are subject to cross-site-scripting attacks, dubbed XST for Cross-Site-Tracing, when used in
+  conjunction with various weaknesses in browsers.","Checks if HTTP methods such as TRACE and TRACK are
+  enabled and can be used.
+Details:
+HTTP Debugging Methods (TRACE/TRACK) Enabled
+(OID: 1.3.6.1.4.1.25623.1.0.11213)
+Version used: 2023-08-01T15:29:10+02:00
+","","","DFN-CERT-2021-1825,DFN-CERT-2014-1018,DFN-CERT-2010-0020,CB-K14/0981","",0.82689,0.99199
+10.63.152.16,l-1ansr01.bzdtst.XX.de,8443,tcp,5.8,Medium,99,"Mitigation","HTTP Debugging Methods (TRACE/TRACK) Enabled","The remote web server supports the TRACE and/or TRACK
+  methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.","The web server has the following HTTP methods enabled: TRACE
+",1.3.6.1.4.1.25623.1.0.11213,"CVE-2003-1567,CVE-2004-2320,CVE-2004-2763,CVE-2005-3398,CVE-2006-4683,CVE-2007-3008,CVE-2008-7253,CVE-2009-2823,CVE-2010-0386,CVE-2012-2223,CVE-2014-7883",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:37+02:00,a8b81531-f2b7-4dd5-ad11-245141e96676,"An attacker may use this flaw to trick your legitimate web
+  users to give him their credentials.","Disable the TRACE and TRACK methods in your web server
+  configuration.
+
+  Please see the manual of your web server or the references for more information.","Web servers with enabled TRACE and/or TRACK methods.","It has been shown that web servers supporting this methods
+  are subject to cross-site-scripting attacks, dubbed XST for Cross-Site-Tracing, when used in
+  conjunction with various weaknesses in browsers.","Checks if HTTP methods such as TRACE and TRACK are
+  enabled and can be used.
+Details:
+HTTP Debugging Methods (TRACE/TRACK) Enabled
+(OID: 1.3.6.1.4.1.25623.1.0.11213)
+Version used: 2023-08-01T15:29:10+02:00
+","","","DFN-CERT-2021-1825,DFN-CERT-2014-1018,DFN-CERT-2010-0020,CB-K14/0981","",0.82689,0.99199
+10.63.152.41,l-1bcksrv1.bzdtst.XX.de,80,tcp,5.8,Medium,99,"Mitigation","HTTP Debugging Methods (TRACE/TRACK) Enabled","The remote web server supports the TRACE and/or TRACK
+  methods. TRACE and TRACK are HTTP methods which are used to debug web server connections.","The web server has the following HTTP methods enabled: TRACE
+",1.3.6.1.4.1.25623.1.0.11213,"CVE-2003-1567,CVE-2004-2320,CVE-2004-2763,CVE-2005-3398,CVE-2006-4683,CVE-2007-3008,CVE-2008-7253,CVE-2009-2823,CVE-2010-0386,CVE-2012-2223,CVE-2014-7883",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:40+02:00,c921a4d-bb34-4c80-8b88-0fbfa9a51cbb,"An attacker may use this flaw to trick your legitimate web
+  users to give him their credentials.","Disable the TRACE and TRACK methods in your web server
+  configuration.
+
+  Please see the manual of your web server or the references for more information.","Web servers with enabled TRACE and/or TRACK methods.","It has been shown that web servers supporting this methods
+  are subject to cross-site-scripting attacks, dubbed XST for Cross-Site-Tracing, when used in
+  conjunction with various weaknesses in browsers.","Checks if HTTP methods such as TRACE and TRACK are
+  enabled and can be used.
+Details:
+HTTP Debugging Methods (TRACE/TRACK) Enabled
+(OID: 1.3.6.1.4.1.25623.1.0.11213)
+Version used: 2023-08-01T15:29:10+02:00
+","","","DFN-CERT-2021-1825,DFN-CERT-2014-1018,DFN-CERT-2010-0020,CB-K14/0981","",0.82689,0.99199
+10.63.152.9,l-1ssms01.bzdtst.XX.de,8443,tcp,5.0,Medium,99,"Mitigation","SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection","The service is using an SSL/TLS certificate from a known
+  untrusted and/or dangerous certificate authority (CA).","The certificate of the remote service is signed by the following untrusted and/or dangerous CA:
+
+Issuer: CN=localhost,OU=ELO,O=Cisco,L=Cary,ST=NC,C=US
+
+Certificate details:
+fingerABCnt (SHA-1)             | 60222AD577271604EFEA8E31FD765F20BB71B72B
+fingerABCnt (SHA-256)           | E456E1F908F6C27F77B06310F797E34A081172A1CD4FA029D141B099EC429340
+issued by                       | CN=localhost,OU=ELO,O=Cisco,L=Cary,ST=NC,C=US
+public key algorithm            | RSA
+public key size (bits)          | 2048
+serial                          | 2A7EE654F54609A5
+signature algorithm             | sha256WithRSAEncryption
+subject                         | CN=localhost,OU=ELO,O=Cisco,L=Cary,ST=NC,C=US
+subject alternative names (SAN) | localhost
+valid from                      | 2025-02-10 07:23:18 UTC
+valid until                     | 2026-02-10 07:23:18 UTC
+",1.3.6.1.4.1.25623.1.0.113054,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:44:56+02:00,053e6331-484c-4d45-ba14-6c11422fc588,"An attacker could use this for man-in-the-middle (MITM) attacks,
+  accessing sensible data and other attacks.","Replace the SSL/TLS certificate with one signed by a trusted
+  CA.","","","The script reads the certificate used by the target host and
+  checks if it was signed by a known untrusted and/or dangerous CA.
+Details:
+SSL/TLS: Known Untrusted / Dangerous Certificate Authority (CA) Detection
+(OID: 1.3.6.1.4.1.25623.1.0.113054)
+Version used: 2024-06-14T07:05:48+02:00
+","Product: cpe:/a:ietf:transport_layer_security
+Method: SSL/TLS: Collect and Report Certificate Details
+(OID: 1.3.6.1.4.1.25623.1.0.103692)
+","","","",,
+10.63.152.21,l-1cmXX01.bzdtst.XX.de,135,tcp,5.0,Medium,80,"Mitigation","DCE/RPC and MSRPC Services Enumeration Reporting","Distributed Computing Environment / Remote Procedure Calls (DCE/RPC) or MSRPC services running
+  on the remote host can be enumerated by connecting on port 135 and doing the approABCate queries.","Here is the list of DCE/RPC or MSRPC services running on this host via the TCP protocol:
+
+Port: 49664/tcp
+
+     UUID: 12345778-1234-abcd-ef00-0123456789ac, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49664]
+     Named pipe : lsass
+     Win32 service or process : lsass.exe
+     Description : SAM access
+
+     UUID: 51a227ae-825b-41f2-b4a9-1ac9557a1018, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: 8fb74744-b2ff-4c00-be0d-9ef9a191fe1b, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49664]
+     Annotation: Ngc Pop Key Service
+
+     UUID: b25a52bf-e5dd-4f4a-aea6-8ca7272a0e86, version 2
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49664]
+     Annotation: KeyIso
+
+Port: 49665/tcp
+
+     UUID: d95afe70-a6d5-4259-822e-2c84da1dXX0d, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49665]
+
+Port: 49666/tcp
+
+     UUID: f6beaff7-1e19-4fbb-9f8f-b89e2018337c, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49666]
+     Annotation: Event log TCPIP
+
+Port: 49667/tcp
+
+     UUID: 3a9ef155-691d-4449-8d05-09ad57031823, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49667]
+
+     UUID: 8615949-83c9-4044-b424-XX363231fd0c, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49667]
+
+Port: 49668/tcp
+
+     UUID: 0b6eXXfa-4a24-4fc6-8a23-942b1eca65d1, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49668]
+
+     UUID: 12345678-1234-abcd-ef00-0123456789ab, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49668]
+     Named pipe : spoolss
+     Win32 service or process : spoolsv.exe
+     Description : Spooler service
+
+     UUID: 4a452661-8290-4b36-8fbe-7f4093a94978, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49668]
+
+     UUID: 76f03f96-cdfd-44fc-a22c-64950a001209, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49668]
+
+     UUID: ae33069b-a2a8-46ee-a235-ddf139be281, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[49668]
+
+Port: 59492/tcp
+
+     UUID: 6b5bdd1e-528c-422c-af8c-a4079be4fe48, version 1
+     Endpoint: ncacn_ip_tcp:10.63.152.21[59492]
+     Annotation: Remote Fw APIs
+
+Port: 59494/tcp
+
+     UUID: 367abb81-9844-35f1-a12-98f038001003, version 2
+     Endpoint: ncacn_ip_tcp:10.63.152.21[59494]
+
+Note: DCE/RPC or MSRPC services running on this host locally were identified. Reporting this list is not enabled by default due to the possible large size of this list. See the script preferences to enable this reporting.
+",1.3.6.1.4.1.25623.1.0.10736,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:08:49+02:00,5e84cc6e-df7e-4beb-981f-5f9c22f6482e,"An attacker may use this fact to gain more knowledge
+  about the remote host.","Filter incoming traffic to this ports.","","","
+Details:
+DCE/RPC and MSRPC Services Enumeration Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.10736)
+Version used: 2022-06-03T12:17:07+02:00
+","","","","",,
+10.63.152.41,l-1bcksrv1.bzdtst.XX.de,80,tcp,4.8,Medium,80,"Workaround","Cleartext Transmission of Sensitive Information via HTTP","The host / application transmits sensitive information (username, passwords) in
+  cleartext via HTTP.","The following URLs requires Basic Authentication (URL:realm name):
+
+http://l-1bcksrv1.bzdtst.XX.de/:""Protected""
+",1.3.6.1.4.1.25623.1.0.108440,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:40+02:00,12e0104e-a1da-4819-8c11-ef4c57d0e561,"An attacker could use this situation to compromise or eavesdrop on the
+  HTTP communication between the client and the server using a man-in-the-middle attack to get access to
+  sensitive data like usernames or passwords.","Enforce the transmission of sensitive data via an encrypted SSL/TLS connection.
+  Additionally make sure the host / application is redirecting all users to the secured SSL/TLS connection before
+  allowing to input sensitive data into the mentioned functions.","Hosts / applications which doesn't enforce the transmission of sensitive data via an
+  encrypted SSL/TLS connection.","","Evaluate previous collected information and check if the host / application is not
+  enforcing the transmission of sensitive data via an encrypted SSL/TLS connection.
+
+  The script is currently checking the following:
+
+  - HTTP Basic Authentication (Basic Auth)
+
+  - HTTP Forms (e.g. Login) with input field of type 'password'
+Details:
+Cleartext Transmission of Sensitive Information via HTTP
+(OID: 1.3.6.1.4.1.25623.1.0.108440)
+Version used: 2023-09-07T07:05:21+02:00
+","","","","",,
+10.63.152.202,l-1esx02-b.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:46+02:00,5c04507c-1d00-4327-b50f-8f7fb23d6de9,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.203,l-1esx03-b.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:49:35+02:00,38a2f8a7-c098-4ac7-af84-85f0fbf206f9,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.204,l-1esx04-b.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:10:24+02:00,66cf2b76-6441-4ece-b2af-6761e387df0c,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.102,l-1esx02.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:01:32+02:00,ff414d86-3478-415a-a349-bc91910e51b9,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.103,l-1esx03.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:06:08+02:00,e040081f-bab5-470e-8e50-f7f63a61b1c2,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.104,l-1esx04.bzdtst.XX.de,2379,tcp,4.3,Medium,80,"VendorFix","etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g-rcw5-8298)","etcd is prone to an information disclosure vulnerability.","Installed version: 3.4.25
+Fixed version:     3.4.26
+
+",1.3.6.1.4.1.25623.1.0.149673,"CVE-2023-32082",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:59:13+02:00,1188c31e-8e34-4520-b4cb-cc1b5ef62e21,"","Update to version 3.4.26, 3.5.9 or later.","etcd ABCor to version 3.4.26 and version 3.5.x through 3.5.8.","LeaseTimeToLive API allows access to key names (not value)
+  associated to a lease when Keys parameter is true, even a user doesn't have read permission to
+  the keys. The impact is limited to a cluster which enables auth (RBAC).","Checks if a vulnerable version is present on the target host.
+Details:
+etcd < 3.4.26, 3.5.x < 3.5.9 Information Disclosure Vulnerability (GHSA-3p4g...
+(OID: 1.3.6.1.4.1.25623.1.0.149673)
+Version used: 2023-10-12T07:05:32+02:00
+","","","DFN-CERT-2023-1298,WID-SEC-2023-1373","",0.00293,0.49789
+10.63.152.100,l-1vcsa01.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1497783025
+Packet 2: 1497784105
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:46:45+02:00,2eb74ccf-bfb8-4e9a-8df3-67b70bd52ba1,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.102,l-1esx02.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 2895610065
+Packet 2: 405332881
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:01:32+02:00,54dc8d63-eb80-4196-89b4-fa9d6387ee2c,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.103,l-1esx03.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 2934590030
+Packet 2: 1131840991
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:06:08+02:00,b1581415-59e2-4847-b867-39d1878c233e,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.202,l-1esx02-b.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1740125501
+Packet 2: 2510433761
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:46+02:00,73fa94c7-5b05-4196-8c7f-ade387379867,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.203,l-1esx03-b.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 54910807
+Packet 2: 820590328
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:49:35+02:00,a6734c0d-1fd1-49ce-8b00-0271a7b8cb62,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.104,l-1esx04.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 2684704561
+Packet 2: 2831912580
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:59:13+02:00,590XX466-856e-43b7-931e-05648f01942d,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.204,l-1esx04-b.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 2272643113
+Packet 2: 1342986068
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:10:24+02:00,70e1a404-4ed0-4823-8d8e-d277560123e7,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.201,l-1esx01-b.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 4279311885
+Packet 2: 120745172
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:43+02:00,24aa905b-b8d4-4a49-9b1d-7d6797c4cee2,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.101,l-1esx01.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 3630835335
+Packet 2: 2057814760
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T04:02:37+02:00,2b9ffca6-7134-467e-8c95-a385b8cfd20e,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.21,l-1cmXX01.bzdtst.XX.de,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 762318062
+Packet 2: 762319141
+",1.3.6.1.4.1.25623.1.0.80091,"",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:08:49+02:00,423b0e90-7407-4d6e-b0fc-3a4039635000,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T17:10:08+02:00
+","","","","",,
+10.63.152.16,l-1ansr01.bzdtst.XX.de,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:37+02:00,c670f102-1614-40fd-b1e1-9df7751a98d8,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T06:37:33+02:00
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632","",0.00460,0.61398
+10.63.152.199,l-1moni04.bzdtst.XX.de,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:06:22+02:00,7fd03e88-91c5-493f-a5dd-21f1b424c309,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T06:37:33+02:00
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632","",0.00460,0.61398
+10.63.152.41,l-1bcksrv1.bzdtst.XX.de,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T02:02:40+02:00,23e24245-749e-4c1d-a7c9-1eb14XXbb550,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T06:37:33+02:00
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632","",0.00460,0.61398
+10.63.152.9,l-1ssms01.bzdtst.XX.de,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T03:44:56+02:00,76cb06b0-29a2-493a-a895-add4b3bbd5bb,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T06:37:33+02:00
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632","",0.00460,0.61398
+10.63.152.21,l-1cmXX01.bzdtst.XX.de,,,2.1,Low,80,"Mitigation","ICMP Timestamp Reply Information Disclosure","The remote host responded to an ICMP timestamp request.","The following response / ICMP packet has been received:
+- ICMP Type: 14
+- ICMP Code: 0
+",1.3.6.1.4.1.25623.1.0.103190,"CVE-1999-0524",821703bb-9f4d-4a98-ab67-1849b918166c,"ABC-l-1_ABC-Server",2025-04-13T05:08:49+02:00,6e8e6ab2-5ae1-44e8-b6bf-f23a50674671,"This information could theoretically be used to exploit weak
+  time-based random number generators in other services.","Various mitigations are possible:
+
+  - Disable the support for ICMP timestamp on the remote host completely
+
+  - Protect the remote host by a firewall, and block ICMP packets passing through the firewall in
+  either direction (either completely or only for untrusted networks)","","The Timestamp Reply is an ICMP message which replies to a
+  Timestamp message. It consists of the originating timestamp sent by the sender of the Timestamp as
+  well as a receive timestamp and a transmit timestamp.","Sends an ICMP Timestamp (Type 13) request and checks if a
+  Timestamp Reply (Type 14) is received.
+Details:
+ICMP Timestamp Reply Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.103190)
+Version used: 2025-01-21T06:37:33+02:00
+","","","DFN-CERT-2014-0658,CB-K15/1514,CB-K14/0632","",0.00460,0.61398

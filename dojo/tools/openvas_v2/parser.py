@@ -14,7 +14,7 @@ class OpenVASParserV2:
 
     def get_findings(self, filename, test):
         if str(filename.name).endswith(".csv"):
-            return OpenVASCSVParser().get_findings(filename, test)
+            return OpenVASCSVParserV2().get_findings(filename, test)
         if str(filename.name).endswith(".xml"):
-            return OpenVASXMLParser().get_findings(filename, test)
+            return OpenVASXMLParserV2().get_findings(filename, test)
         return None
