@@ -1,11 +1,10 @@
 import csv
 import io
-import re
 
 from dateutil.parser import parse
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_description
+from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding
 
 
 def evaluate_bool_value(column_value):
@@ -27,6 +26,9 @@ class OpenVASCSVParserV2:
         csv_reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
         column_names = [column_name.lower() for column_name in next(csv_reader) if column_name]
 
+        if "nvt name" not in column_names:
+            raise "This doesn't seem to be a valid Greenbone/ OpenVAS csv file."
+
         for row in csv_reader:
             finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info")
             finding.unsaved_vulnerability_ids = []
@@ -36,7 +38,7 @@ class OpenVASCSVParserV2:
             for value, name in zip(row, column_names, strict=False):
                 self.process_column_element(value, name, finding, aux_info)
 
-            update_description(finding, aux_info)
+            update_finding(finding, aux_info)
             deduplicate(dupes, finding)
 
         return list(dupes.values())
@@ -62,12 +64,7 @@ class OpenVASCSVParserV2:
             for cve in column_value.split(","):
                 finding.unsaved_vulnerability_ids.append(cve)
         elif column_name == "nvt oid":
-            cve_pattern = r"CVE-\d{4}-\d{4,7}"  # legacy import
-            cves = re.findall(cve_pattern, column_value)
-            for cve in cves:
-                finding.unsaved_vulnerability_ids.append(cve)
-            if len(cves) == 0:
-                finding.script_id = column_value
+            finding.vuln_id_from_tool = column_value
         elif column_name == "hostname":
             # strip due to https://github.com/greenbone/gvmd/issues/2378
             finding.unsaved_endpoints[0].host = column_value.strip()
@@ -93,7 +90,7 @@ class OpenVASCSVParserV2:
         elif column_name == "vulnerability insight":
             finding.impact = column_value
         elif column_name == "specific result":
-            finding.references = column_value
+            aux_info.openvas_result = column_value
         elif column_name == "qod":
             aux_info.qod = column_value
         # columns not part of default openvas csv export
