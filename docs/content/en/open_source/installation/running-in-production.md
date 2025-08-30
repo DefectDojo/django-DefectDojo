@@ -58,9 +58,9 @@ handle 4 concurrent connections.
 Based on your resource settings, you can tweak:
 
 -   `DD_UWSGI_NUM_OF_PROCESSES` for the number of spawned processes.
-    (default 2)
+    (default 4)
 -   `DD_UWSGI_NUM_OF_THREADS` for the number of threads in these
-    processes. (default 2)
+    processes. (default 4)
 
 For example, you may have 4 processes with 6 threads each, yielding 24
 concurrent connections.
