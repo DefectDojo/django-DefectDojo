@@ -111,7 +111,7 @@ class EndpointManager:
             try:
                 endpoint.clean()
             except ValidationError as e:
-                logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
+                logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: %s", e)
 
     def chunk_endpoints_and_reactivate(
         self,

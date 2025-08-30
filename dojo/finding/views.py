@@ -486,7 +486,7 @@ class ViewFinding(View):
                 burp_request = base64.b64decode(request_response.burpRequestBase64)
                 burp_response = base64.b64decode(request_response.burpResponseBase64)
         except Exception as e:
-            logger.debug(f"unsuspected error: {e}")
+            logger.debug("unsuspected error: %s", e)
 
         return {
             "burp_request": burp_request,
@@ -1597,7 +1597,7 @@ def request_finding_review(request, fid):
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
-            logger.debug(f"Asking {reviewers_string} for review")
+            logger.debug("Asking %s for review", reviewers_string)
 
             create_notification(
                 event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces

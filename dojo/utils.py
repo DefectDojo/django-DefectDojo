@@ -1956,7 +1956,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             elif system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            logger.debug(f"My query: {query}")
+            logger.debug("My query: %s", query)
 
             no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
@@ -2011,19 +2011,19 @@ def sla_compute_and_notify(*args, **kwargs):
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
-                        logger.debug(f"JIRA config for finding is {jira_instance}")
+                        logger.debug("JIRA config for finding is %s", jira_instance)
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
                             product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error(f"Error is: {e}")
+                            logger.error("Error is: %s", e)
 
                         jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug(f"Global setting {jiraconfig_sla_notification_enabled} -- Product setting {product_jira_sla_comment_enabled}")
+                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
                             do_jira_sla_comment = True
                             logger.debug(f"JIRA issue is {jira_issue.jira_key}")
 
@@ -2048,7 +2048,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     _add_notification(finding, "breaching")
 
             _create_notifications()
-            logger.info(f"SLA run results: Pre-breach: {pre_breach_count}, at-breach: {at_breach_count}, post-breach: {post_breach_count}, post-breach-no-notify: {post_breach_no_notify_count}, with-jira: {jira_count}, TOTAL: {total_count}")
+            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")

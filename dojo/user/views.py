@@ -650,7 +650,7 @@ class DojoPasswordResetForm(PasswordResetForm):
                 connection.open()
                 connection.close()
         except Exception as e:
-            logger.error(f"SMTP Server Connection Failure: {e}")
+            logger.error("SMTP Server Connection Failure: %s", e)
             msg = "SMTP server is not configured correctly..."
             raise ValidationError(msg)
 

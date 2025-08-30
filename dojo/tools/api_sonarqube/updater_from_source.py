@@ -42,14 +42,14 @@ class SonarQubeApiUpdaterFromSource:
             current_status = issue.get("resolution") or issue.get("status")
             current_finding_status = self.get_sonarqube_status_for(finding)
             logger.debug(
-                f"--> SQ Current status: {current_status}. Finding status: {current_finding_status}",
+                "--> SQ Current status: %s. Finding status: %s", current_status, current_finding_status,
             )
 
             if (
                 current_status not in {"OPEN", current_finding_status}
             ):
                 logger.info(
-                    f"Original SonarQube issue '{sonarqube_issue}' has changed. Updating DefectDojo finding '{finding}'...",
+                    "Original SonarQube issue '%s' has changed. Updating DefectDojo finding '%s'...", sonarqube_issue, finding,
                 )
                 self.update_finding_status(finding, current_status)
 

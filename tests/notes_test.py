@@ -51,7 +51,7 @@ class NoteTest(BaseTestCase):
         private_status = "(will not appear in report)" in text
         pass_test = note_present and private_status
         if not pass_test:
-            logger.info(f"Private note note created at the {level} level")
+            logger.info("Private note note created at the %s level", level)
         self.assertTrue(pass_test)
 
     def test_finding_note(self):

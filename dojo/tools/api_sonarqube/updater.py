@@ -120,7 +120,7 @@ class SonarQubeApiUpdater:
             return
 
         logger.debug(
-            f"Checking if finding '{finding}' needs to be updated in SonarQube",
+            "Checking if finding '%s' needs to be updated in SonarQube", finding,
         )
 
         client, _ = SonarQubeApiImporter.prepare_client(finding.test)
@@ -141,7 +141,7 @@ class SonarQubeApiUpdater:
                 current_status = issue.get("status")
 
             logger.debug(
-                f"--> SQ Current status: {current_status}. Current target status: {target_status}",
+                "--> SQ Current status: %s. Current target status: %s", current_status, target_status,
             )
 
             transitions = self.get_sonarqube_required_transitions_for(
@@ -149,7 +149,7 @@ class SonarQubeApiUpdater:
             )
             if transitions:
                 logger.info(
-                    f"Updating finding '{finding}' in SonarQube",
+                    "Updating finding '%s' in SonarQube", finding,
                 )
 
                 for transition in transitions:

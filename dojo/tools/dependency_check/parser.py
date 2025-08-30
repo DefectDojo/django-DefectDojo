@@ -248,7 +248,7 @@ class DependencyCheckParser:
         if severity:
             if severity.strip().lower() not in self.SEVERITY_MAPPING:
                 logger.warning(
-                    f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value",
+                    "Warning: Unknow severity value detected '%s'. Bypass to 'Medium' value", severity,
                 )
                 severity = "Medium"
             else:
@@ -329,7 +329,7 @@ class DependencyCheckParser:
 
         if component_name is None:
             logger.warning(
-                f"component_name was None for File: {dependency_filename}, using dependency file name instead.",
+                "component_name was None for File: %s, using dependency file name instead.", dependency_filename,
             )
             component_name = dependency_filename
 

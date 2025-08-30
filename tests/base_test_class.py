@@ -331,7 +331,7 @@ class BaseTestCase(unittest.TestCase):
     def set_block_execution(self, *, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        logger.info(f"setting block execution to: {block_execution}")
+        logger.info("setting block execution to: %s", block_execution)
         driver = self.driver
         driver.get(self.base_url + "profile")
         if (

@@ -21,7 +21,7 @@ def update_sla_expiration_dates_product_async(product, sla_config, *args, **kwar
 
 
 def update_sla_expiration_dates_sla_config_sync(sla_config, products, severities=None):
-    logger.info(f"Updating finding SLA expiration dates within the {sla_config} SLA configuration")
+    logger.info("Updating finding SLA expiration dates within the %s SLA configuration", sla_config)
     # update each finding that is within the SLA configuration that was saved
     findings = Finding.objects.filter(test__engagement__product__sla_configuration_id=sla_config.id)
     if products:
@@ -49,4 +49,4 @@ def update_sla_expiration_dates_sla_config_sync(sla_config, products, severities
     # reset the async updating flag to false for this sla config
     sla_config.async_updating = False
     super(SLA_Configuration, sla_config).save()
-    logger.info(f"DONE Updating finding SLA expiration dates within the {sla_config} SLA configuration")
+    logger.info("DONE Updating finding SLA expiration dates within the %s SLA configuration", sla_config)
