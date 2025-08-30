@@ -608,6 +608,9 @@ def prefetch_for_view_tests(tests):
         count_findings_test_active_verified=Coalesce(
             count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
         ),
+        count_findings_test_active_fix_available=Coalesce(
+            count_subquery(base_findings.filter(active=True, fix_available=True)), Value(0),
+        ),
         count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
         count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
         total_reimport_count=Coalesce(

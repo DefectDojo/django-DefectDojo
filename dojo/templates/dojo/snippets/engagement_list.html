@@ -48,7 +48,7 @@
                     <th class="text-center">JIRA</th>
                     {% endif %}
                     <th class="text-center">Tests</th>
-                    <th class="text-center">Active (Verified)</th>
+                    <th class="text-center">Active (Verified / Fixable)</th>
                     <th class="text-center">Mitigated</th>
                     <th class="text-center">Accepted</th>
                     <th class="text-center">All</th>
@@ -244,7 +244,7 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td class="text-center" data-order="{{ eng.count_findings_open }}">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}})</td>
+                    <td class="text-center" data-order="{{ eng.count_findings_open }}">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}}/{{ eng.count_findings_fix_available}})</td>
                     <td class="text-center">{{ eng.count_findings_close }}</td>
                     <td class="text-center">{{ eng.count_findings_accepted }}</td>
                     <td class="text-center">{{ eng.count_findings_all }}</td>
