@@ -230,7 +230,7 @@ def view_profile(request):
     group_members = get_authorized_group_members_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-    contact_form = UserContactInfoForm() if user_contact is None else UserContactInfoForm(instance=user_contact)
+    contact_form = UserContactInfoForm(user=user) if user_contact is None else UserContactInfoForm(instance=user_contact, user=user)
 
     global_role = user.global_role if hasattr(user, "global_role") else None
     if global_role is None:
@@ -242,7 +242,7 @@ def view_profile(request):
 
     if request.method == "POST":
         form = DojoUserForm(request.POST, instance=user)
-        contact_form = UserContactInfoForm(request.POST, instance=user_contact)
+        contact_form = UserContactInfoForm(request.POST, instance=user_contact, user=user)
         global_role_form = GlobalRoleForm(request.POST, instance=global_role)
         if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
@@ -393,7 +393,7 @@ def edit_user(request, uid):
     form = EditDojoUserForm(instance=user)
 
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-    contact_form = UserContactInfoForm() if user_contact is None else UserContactInfoForm(instance=user_contact)
+    contact_form = UserContactInfoForm(user=user) if user_contact is None else UserContactInfoForm(instance=user_contact, user=user)
 
     global_role = user.global_role if hasattr(user, "global_role") else None
     global_role_form = GlobalRoleForm() if global_role is None else GlobalRoleForm(instance=global_role)
@@ -401,9 +401,9 @@ def edit_user(request, uid):
     if request.method == "POST":
         form = EditDojoUserForm(request.POST, instance=user)
         if user_contact is None:
-            contact_form = UserContactInfoForm(request.POST)
+            contact_form = UserContactInfoForm(request.POST, user=user)
         else:
-            contact_form = UserContactInfoForm(request.POST, instance=user_contact)
+            contact_form = UserContactInfoForm(request.POST, instance=user_contact, user=user)
 
         if global_role is None:
             global_role_form = GlobalRoleForm(request.POST)
