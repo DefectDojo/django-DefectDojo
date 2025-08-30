@@ -1,5 +1,3 @@
-import io
-
 from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas_v2.parser import OpenVASV2Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
