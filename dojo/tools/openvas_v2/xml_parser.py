@@ -4,7 +4,13 @@ from xml.dom import NamespaceErr
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding, cleanup_openvas_text
+from dojo.tools.openvas_v2.common import (
+    OpenVASFindingAuxData,
+    cleanup_openvas_text,
+    deduplicate,
+    is_valid_severity,
+    update_finding,
+)
 
 
 class OpenVASXMLParserV2:
