@@ -33,7 +33,8 @@ class OpenVASCSVParserV2:
         column_names = [column_name.lower() for column_name in next(csv_reader) if column_name]
 
         if "nvt name" not in column_names:
-            raise Exception("Not a valid Greenbone/ OpenVAS csv file.")
+            msg = "Invalid OpenVAS csv file"
+            raise ValueError(msg)
 
         for row in csv_reader:
             finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info")
