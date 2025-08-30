@@ -4,7 +4,7 @@ from xml.dom import NamespaceErr
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding
+from dojo.tools.openvas_v2.common import OpenVASFindingAuxData, deduplicate, is_valid_severity, update_finding, cleanup_openvas_text
 
 
 class OpenVASXMLParserV2:
@@ -67,11 +67,11 @@ class OpenVASXMLParserV2:
             tags = self.parse_nvt_tags(tag_field.text)
             summary = tags.get("summary", None)
             if summary:
-                finding.description = summary
+                aux_info.summary = summary
 
             impact = tags.get("impact", None)
             if impact:
-                finding.impact = impact
+                finding.impact = cleanup_openvas_text(impact)
 
             # parse cves
             refs_node = field.find("refs")
@@ -108,4 +108,4 @@ class OpenVASXMLParserV2:
         elif field.tag == "description":
             aux_info.openvas_result = field.text.strip()
         elif field.tag == "solution":
-            finding.mitigation = field.text
+            finding.mitigation = cleanup_openvas_text(field.text)

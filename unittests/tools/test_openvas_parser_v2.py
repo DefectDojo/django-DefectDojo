@@ -1,7 +1,7 @@
 import io
 
 from dojo.models import Engagement, Product, Test
-from dojo.tools.openvas_v2.parser import OpenVASParserV2
+from dojo.tools.openvas_v2.parser import OpenVASV2Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -15,7 +15,7 @@ def setup_openvas_v2_test(f):
     test = Test()
     test.engagement = Engagement()
     test.engagement.product = Product()
-    parser = OpenVASParserV2()
+    parser = OpenVASV2Parser()
     findings = parser.get_findings(f, test)
     for finding in findings:
         for endpoint in finding.unsaved_endpoints:
