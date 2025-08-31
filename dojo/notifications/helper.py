@@ -335,9 +335,10 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
                             "msteams",
                             kwargs,
                         ),
+                        headers={"Content-Type": "application/json"},
                         timeout=settings.REQUESTS_TIMEOUT,
                     )
-                    if res.status_code != 200:
+                    if not (200 <= res.status_code < 300):
                         logger.error("Error when sending message to Microsoft Teams")
                         logger.error(res.status_code)
                         logger.error(res.text)
