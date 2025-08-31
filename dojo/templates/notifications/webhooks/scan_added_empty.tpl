@@ -1,1 +1,1 @@
-{% include "notifications/webhooks/scan_added.tpl" %}
+scan_added.tpl
