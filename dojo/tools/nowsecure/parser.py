@@ -34,7 +34,7 @@ class NowSecureParser(object):
                     cvssv3 = content['check']['issue']['cvssVector']
                     cvssv3_score = content['check']['issue']['cvss']
                     mitigation = content['check']['issue']['recommendation']
-                    if len(mitigation) > 0:
+                    if mitigation:
                         fix_available=True
                     else:
                         fix_available=False
