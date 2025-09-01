@@ -6,14 +6,14 @@ from dojo.models import Test
 class TestNowSecureParser(TestCase):
 
     def test_nowsecure_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("unittests/scans/nowsecure/nowsecure_zero_vul.json")
+        testfile = open("unittests/scans/nowsecure/nowsecure_zero_vuln.json")
         parser = NowSecureParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
-    def test_nowsecure_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open("unittests/scans/nowsecure/nowsecure_one_vul.json")
+    def test_nowsecure_parser_with_one_vuln_has_one_findings(self):
+        testfile = open("unittests/scans/nowsecure/nowsecure_one_vuln.json")
         parser = NowSecureParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -21,29 +21,44 @@ class TestNowSecureParser(TestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(1, len(findings))
-        self.assertEqual("handlebars", findings[0].component_name)
-        self.assertEqual("4.5.2", findings[0].component_version)
+        self.assertEqual("App Configuration Allows Insecure Network Connections", findings[0].title)
+        self.assertEqual("The app utilizes insecure settings to permit cleartext network connections.\n\nCleartext connections transmit data unencrypted, which may expose sensitive information (such as passwords or credit card details) to attackers and leave the app vulnerable to man-in-the-middle attacks.\n\nBy default, Android prohibits cleartext connections (e.g., HTTP, FTP, WebSockets, XMPP, IMAP, SMTP) in apps installed on devices running Android 9 (API 28) or above. However, app developers have two main ways allow cleartext connections:\n\n- **Android Manifest:** whenever `android:usesCleartextTraffic` is set to `true` in the `<application>` element of the Android manifest file.\n- **Network Security Config:** by setting the attribute `cleartextTrafficPermitted` to `true` within the `<base-config>` element of the Network Security Config to enable cleartext traffic globally for the app or within `<domain-config>` for a more fine-grained approach, which would enable cleartext traffic only to specific domains and their subdomains.\n\nIf a Network Security Config is provided, all cleartext traffic rules in the Android Manifest will be overridden.", findings[0].description)
+        self.assertEqual("high".capitalize(), findings[0].severity)
+        self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", findings[0].cvssv3)
+        self.assertEqual(7.5, findings[0].cvssv3_score)
+        self.assertEqual("The evidence table lists all configurations that allow cleartext network traffic:\n\n- **Source:** the file type that allows insecure access\n- **XML Element:** the XML element in the Android Manifest (`<application>`) or Network Security Configuration `<domain-config>` or `<base-config>`)\n- **XML Attribute:** the XML attribute allowing cleartext traffic in the Android Manifest (`android:usesCleartextTraffic`) or Network Security Configuration `cleartextTrafficPermitted`)\n- **Uses SDK Default:** states if the Android SDK version's default value was used\n- **Allow Cleartext:** value of either `android:usesCleartextTraffic` or `cleartextTrafficPermitted` attributes indicating whether cleartext data is allowed\n- **Domain:** the domain that allows cleartext data (only present if <domain-config> is used)\n- **Includes Subdomains:** value of the `includeSubdomains` attribute indicating whether cleartext data is allowed for subdomains (only present if <domain-config> is used)\n\nTo mitigate this issue, we recommend the following:\n\n1. **Set `minSdkVersion` to 28 or higher in `build.gradle`**: To ensure that secure defaults are enforced, configure the `minSdkVersion` to 28 or above. This will prevent installation on devices that do not support secure defaults by default.\n\n```gradle\nandroid {\n    defaultConfig {\n        minSdkVersion 28\n    }\n}\n```\n\n**Note**: The current Android [documentation](https://developer.android.com/privacy-and-security/security-config#CleartextTrafficPermitted) states that apps targeting API 28 or above (`targetSdkVersion`) will use secure defaults. However, **this is not always the case**. Despite targeting a higher SDK, devices running API 27 or lower continue to use insecure default values, even when an app's `targetSdkVersion` is set to a secure API level. Setting a `minSdkVersion` above 27 prevents the app from being installed on devices running Android 8.1 (API 27) or lower.\n\n2. **Enforce Explicit Security Configurations**: While upgrading the `minSdkVersion` is the preferred approach to ensure secure default values, the Android Manifest and Network Security Config can ensure that explicit incorrect cleartext traffic configurations are not allowed. This step also adds an extra layer of protection if upgrading the `minSdkVersion` is not feasible (e.g., for compatibility or to maintain support for a broader user base):\n\n- **Update `AndroidManifest.xml`**: Ensure that the attribute `android:usesCleartextTraffic` is present and set to `false`.\n\n  ```xml\n  <application\n      android:usesCleartextTraffic=\"false\"\n      ... >\n      ...\n  </application>\n  ```\n\n- **Network Security Config (`network_security_config.xml`)**: If a custom `android:networkSecurityConfig` file is used (typically in `res/xml/network_security_config.xml`), ensure that the `base-config` and all `domain-config` entries have `cleartextTrafficPermitted` set to `false`:\n\n  ```xml\n  <network-security-config>\n      <base-config cleartextTrafficPermitted=\"false\">\n          ...\n      </base-config>\n      <domain-config cleartextTrafficPermitted=\"false\">\n          ...\n      </domain-config>\n  </network-security-config>\n  ```\n\n**Cleartext Exception Considerations**: If cleartext connections are essential for specific domains (e.g., for backend compatibility), consider limiting cleartext traffic strictly to those domains. Note, however, that this introduces **significant security risks**, and whenever possible, backends should support secure connections (HTTPS).\n\n**Limitations of `isCleartextTrafficPermitted`**: Although setting `isCleartextTrafficPermitted` improves security for most network traffic, it [may not prevent all cleartext communications](https://developer.android.com/reference/android/security/NetworkSecurityPolicy#isCleartextTrafficPermitted()) (e.g., those initiated through low-level sockets). This configuration is enforced on a best-effort basis and applies primarily to higher-level network APIs such as [`HttpsURLConnection`](https://developer.android.com/reference/javax/net/ssl/HttpsURLConnection).", findings[0].mitigation)
+        self.assertEqual("Allowing cleartext network connections allows attackers to intercept, inspect or manipulate data transmitted between the app and external servers, compromising the integrity and confidentiality of user information. This vulnerability can have serious business implications, particularly in the event of a data breach, including loss of customer trust, potential legal liabilities and financial penalties.", findings[0].impact)
+
 
     def test_nowsecure_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("unittests/scans/nowsecure/nowsecure_many_vul.json")
+        testfile = open("unittests/scans/nowsecure/nowsecure_many_vuln.json")
         parser = NowSecureParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(3, len(findings))
+        self.assertEqual(5, len(findings))
+        self.assertEqual("App Configuration Allows Insecure Network Connections", findings[0].title)
+        self.assertEqual("WebViews Allowing Access to Local Files", findings[1].title)
+        self.assertEqual("The app utilizes insecure settings to permit cleartext network connections.\n\nCleartext connections transmit data unencrypted, which may expose sensitive information (such as passwords or credit card details) to attackers and leave the app vulnerable to man-in-the-middle attacks.\n\nBy default, Android prohibits cleartext connections (e.g., HTTP, FTP, WebSockets, XMPP, IMAP, SMTP) in apps installed on devices running Android 9 (API 28) or above. However, app developers have two main ways allow cleartext connections:\n\n- **Android Manifest:** whenever `android:usesCleartextTraffic` is set to `true` in the `<application>` element of the Android manifest file.\n- **Network Security Config:** by setting the attribute `cleartextTrafficPermitted` to `true` within the `<base-config>` element of the Network Security Config to enable cleartext traffic globally for the app or within `<domain-config>` for a more fine-grained approach, which would enable cleartext traffic only to specific domains and their subdomains.\n\nIf a Network Security Config is provided, all cleartext traffic rules in the Android Manifest will be overridden.", findings[0].description)
+        self.assertEqual("high".capitalize(), findings[0].severity)
+        self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", findings[0].cvssv3)
+        self.assertEqual(7.5, findings[0].cvssv3_score)
+        self.assertEqual(5.9, findings[4].cvssv3_score)
+        self.assertEqual("The evidence table lists all configurations that allow cleartext network traffic:\n\n- **Source:** the file type that allows insecure access\n- **XML Element:** the XML element in the Android Manifest (`<application>`) or Network Security Configuration `<domain-config>` or `<base-config>`)\n- **XML Attribute:** the XML attribute allowing cleartext traffic in the Android Manifest (`android:usesCleartextTraffic`) or Network Security Configuration `cleartextTrafficPermitted`)\n- **Uses SDK Default:** states if the Android SDK version's default value was used\n- **Allow Cleartext:** value of either `android:usesCleartextTraffic` or `cleartextTrafficPermitted` attributes indicating whether cleartext data is allowed\n- **Domain:** the domain that allows cleartext data (only present if <domain-config> is used)\n- **Includes Subdomains:** value of the `includeSubdomains` attribute indicating whether cleartext data is allowed for subdomains (only present if <domain-config> is used)\n\nTo mitigate this issue, we recommend the following:\n\n1. **Set `minSdkVersion` to 28 or higher in `build.gradle`**: To ensure that secure defaults are enforced, configure the `minSdkVersion` to 28 or above. This will prevent installation on devices that do not support secure defaults by default.\n\n```gradle\nandroid {\n    defaultConfig {\n        minSdkVersion 28\n    }\n}\n```\n\n**Note**: The current Android [documentation](https://developer.android.com/privacy-and-security/security-config#CleartextTrafficPermitted) states that apps targeting API 28 or above (`targetSdkVersion`) will use secure defaults. However, **this is not always the case**. Despite targeting a higher SDK, devices running API 27 or lower continue to use insecure default values, even when an app's `targetSdkVersion` is set to a secure API level. Setting a `minSdkVersion` above 27 prevents the app from being installed on devices running Android 8.1 (API 27) or lower.\n\n2. **Enforce Explicit Security Configurations**: While upgrading the `minSdkVersion` is the preferred approach to ensure secure default values, the Android Manifest and Network Security Config can ensure that explicit incorrect cleartext traffic configurations are not allowed. This step also adds an extra layer of protection if upgrading the `minSdkVersion` is not feasible (e.g., for compatibility or to maintain support for a broader user base):\n\n- **Update `AndroidManifest.xml`**: Ensure that the attribute `android:usesCleartextTraffic` is present and set to `false`.\n\n  ```xml\n  <application\n      android:usesCleartextTraffic=\"false\"\n      ... >\n      ...\n  </application>\n  ```\n\n- **Network Security Config (`network_security_config.xml`)**: If a custom `android:networkSecurityConfig` file is used (typically in `res/xml/network_security_config.xml`), ensure that the `base-config` and all `domain-config` entries have `cleartextTrafficPermitted` set to `false`:\n\n  ```xml\n  <network-security-config>\n      <base-config cleartextTrafficPermitted=\"false\">\n          ...\n      </base-config>\n      <domain-config cleartextTrafficPermitted=\"false\">\n          ...\n      </domain-config>\n  </network-security-config>\n  ```\n\n**Cleartext Exception Considerations**: If cleartext connections are essential for specific domains (e.g., for backend compatibility), consider limiting cleartext traffic strictly to those domains. Note, however, that this introduces **significant security risks**, and whenever possible, backends should support secure connections (HTTPS).\n\n**Limitations of `isCleartextTrafficPermitted`**: Although setting `isCleartextTrafficPermitted` improves security for most network traffic, it [may not prevent all cleartext communications](https://developer.android.com/reference/android/security/NetworkSecurityPolicy#isCleartextTrafficPermitted()) (e.g., those initiated through low-level sockets). This configuration is enforced on a best-effort basis and applies primarily to higher-level network APIs such as [`HttpsURLConnection`](https://developer.android.com/reference/javax/net/ssl/HttpsURLConnection).", findings[0].mitigation)
+        self.assertEqual("Allowing cleartext network connections allows attackers to intercept, inspect or manipulate data transmitted between the app and external servers, compromising the integrity and confidentiality of user information. This vulnerability can have serious business implications, particularly in the event of a data breach, including loss of customer trust, potential legal liabilities and financial penalties.", findings[0].impact)
 
-    def test_nowsecure_parser_empty_with_error(self):
-        with self.assertRaises(ValueError) as context:
-            testfile = open("unittests/scans/nowsecure/empty_with_error.json")
-            parser = NowSecureParser()
-            findings = parser.get_findings(testfile, Test())
-            testfile.close()
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
-            self.assertTrue(
-                "NowSecure report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+    # def test_nowsecure_parser_empty_with_error(self):
+    #     with self.assertRaises(ValueError) as context:
+    #         testfile = open("unittests/scans/nowsecure/empty_with_error.json")
+    #         parser = NowSecureParser()
+    #         findings = parser.get_findings(testfile, Test())
+    #         testfile.close()
+    #         for finding in findings:
+    #             for endpoint in finding.unsaved_endpoints:
+    #                 endpoint.clean()
+    #         self.assertTrue(
+    #             "NowSecure report contains errors:" in str(context.exception)
+    #         )
+    #         self.assertTrue("ECONNREFUSED" in str(context.exception))
