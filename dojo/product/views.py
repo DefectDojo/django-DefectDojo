@@ -730,6 +730,7 @@ def view_product_metrics(request, pid):
         "test_data": test_data,
         "user": request.user})
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def async_burndown_metrics(request, pid):
@@ -920,6 +921,7 @@ def new_product(request, ptid=None):
                    "jform": jira_project_form,
                    "gform": gform})
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_product(request, pid):
@@ -1006,6 +1008,7 @@ def edit_product(request, pid):
                    "product": product,
                    })
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Delete, "pid")
 def delete_product(request, pid):
@@ -1051,6 +1054,7 @@ def delete_product(request, pid):
         "form": form,
         "product_tab": product_tab,
         "rels": rels})
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Engagement_Add, "pid")
@@ -1132,6 +1136,7 @@ def new_eng_for_app(request, pid, *, cicd=False):
         "jira_epic_form": jira_epic_form,
         "jira_project_form": jira_project_form})
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Technology_Add, "pid")
 def new_tech_for_prod(request, pid):
@@ -1154,6 +1159,7 @@ def new_tech_for_prod(request, pid):
                    "product_tab": product_tab,
                    "pid": pid})
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(App_Analysis, Permissions.Technology_Edit, "tid")
 def edit_technology(request, tid):
@@ -1174,6 +1180,7 @@ def edit_technology(request, tid):
                   {"form": form,
                    "product_tab": product_tab,
                    "technology": technology})
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(App_Analysis, Permissions.Technology_Delete, "tid")
@@ -1228,6 +1235,7 @@ def add_meta_data(request, pid):
                    "product_tab": product_tab,
                    "product": prod,
                    })
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
@@ -1545,6 +1553,7 @@ def engagement_presets(request, pid):
                    "presets": presets,
                    "prod": prod})
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_engagement_presets(request, pid, eid):
@@ -1570,6 +1579,7 @@ def edit_engagement_presets(request, pid, eid):
                   {"product_tab": product_tab,
                    "tform": tform,
                    "prod": prod})
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
@@ -1627,6 +1637,7 @@ def delete_engagement_presets(request, pid, eid):
                    "rels": rels,
                    })
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def edit_notifications(request, pid):
@@ -1649,6 +1660,7 @@ def edit_notifications(request, pid):
                                  extra_tags="alert-success")
 
     return HttpResponseRedirect(reverse("view_product", args=(pid,)))
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
@@ -1704,6 +1716,7 @@ def add_product_member(request, pid):
         "product_tab": product_tab,
     })
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
@@ -1744,6 +1757,7 @@ def edit_product_member(request, memberid):
         "form": memberform,
         "product_tab": product_tab,
     })
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Product_Member, Permissions.Product_Member_Delete, "memberid")

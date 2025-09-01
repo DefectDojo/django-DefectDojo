@@ -118,6 +118,7 @@ def prefetch_for_findings(findings):
 
     return prefetched_findings
 
+
 @method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewTest(View):
     def get_test(self, test_id: int):
@@ -692,6 +693,7 @@ class AddFindingView(View):
         # Render the form
         return render(request, self.get_template(), context)
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Finding_Add, "tid")
 def add_temp_finding(request, tid, fid):
@@ -803,6 +805,7 @@ def add_temp_finding(request, tid, fid):
                    "tid": test.id,
                    "test": test,
                    })
+
 
 @dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_View, "tid")

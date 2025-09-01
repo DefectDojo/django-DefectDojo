@@ -350,6 +350,7 @@ def edit_engagement(request, eid):
         "engagement": engagement,
     })
 
+
 @dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Delete, "eid")
 def delete_engagement(request, eid):
