@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='fix_version',
-            field=models.CharField(blank=True, help_text='Version of the affected component where the flaw will be fixed.', max_length=100, null=True, verbose_name='Fix version'),
+            field=models.CharField(blank=True, help_text='Version of the affected component in which the flaw is fixed.', max_length=100, null=True, verbose_name='Fix version'),
         ),
     ]
