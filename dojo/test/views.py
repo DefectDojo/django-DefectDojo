@@ -23,6 +23,8 @@ from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import dojo_ratelimit_view
+from django.utils.decorators import method_decorator
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product_or_404
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
@@ -117,6 +119,7 @@ def prefetch_for_findings(findings):
     return prefetched_findings
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewTest(View):
     def get_test(self, test_id: int):
         test_prefetched = get_authorized_tests(Permissions.Test_View)
@@ -295,6 +298,7 @@ class ViewTest(View):
 #     return prefetch_for_test_imports
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -322,6 +326,7 @@ def edit_test(request, tid):
                    })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_Delete, "tid")
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -363,6 +368,7 @@ def delete_test(request, tid):
                    })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def copy_test(request, tid):
     test = get_object_or_404(Test, id=tid)
@@ -406,6 +412,7 @@ def copy_test(request, tid):
     })
 
 
+@dojo_ratelimit_view()
 @cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def test_calendar(request):
@@ -434,6 +441,7 @@ def test_calendar(request):
         "users": get_authorized_users(Permissions.Test_View)})
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
@@ -464,6 +472,7 @@ def test_ics(request, tid):
     return response
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class AddFindingView(View):
     def get_test(self, test_id: int):
         return get_object_or_404(Test, id=test_id)
@@ -685,6 +694,7 @@ class AddFindingView(View):
         return render(request, self.get_template(), context)
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Finding_Add, "tid")
 def add_temp_finding(request, tid, fid):
     jform = None
@@ -797,6 +807,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Test, Permissions.Test_View, "tid")
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
@@ -816,6 +827,7 @@ def search(request, tid):
                    })
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ReImportScanResultsView(View):
     def get_template(self) -> str:
         """Returns the template that will be presented to the user"""

@@ -32,6 +32,8 @@ from openpyxl.styles import Font
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.risk_acceptance.risk_pending as rp_helper
+from django.utils.decorators import method_decorator
+from dojo.decorators import dojo_ratelimit_view
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -125,6 +127,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+@dojo_ratelimit_view()
 @cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def engagement_calendar(request):
@@ -196,6 +199,7 @@ def get_test_counts(engagements):
         )
     }
 
+@dojo_ratelimit_view()
 @cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def engagements(request, view):
@@ -225,6 +229,7 @@ def engagements(request, view):
         })
 
 
+@dojo_ratelimit_view()
 def engagements_all(request):
 
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
@@ -275,6 +280,7 @@ def engagements_all(request):
         })
 
 
+dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
@@ -345,6 +351,7 @@ def edit_engagement(request, eid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Delete, "eid")
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
@@ -387,6 +394,7 @@ def delete_engagement(request, eid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def copy_engagement(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
@@ -427,6 +435,7 @@ def copy_engagement(request, eid):
     })
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewEngagement(View):
 
     def get_template(self):
@@ -626,6 +635,7 @@ def prefetch_for_view_tests(tests):
     return prefetched
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Test_Add, "eid")
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -710,7 +720,7 @@ def add_tests(request, eid):
         "eng": eng,
     })
 
-
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ImportScanResultsView(View):
     def get_template(self) -> str:
         """Returns the template that will be presented to the user"""
@@ -1115,6 +1125,7 @@ class ImportScanResultsView(View):
         return self.success_redirect(context)
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -1127,6 +1138,7 @@ def close_eng(request, eid):
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -1146,6 +1158,7 @@ method to complete checklists from the engagement view
 """
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -1342,6 +1355,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
 
+@dojo_ratelimit_view()
 def add_risk_acceptance_pending(request, eid, fid):
     eng = get_object_or_404(Engagement, id=eid)
     product = get_product(eng)
@@ -1401,6 +1415,7 @@ def add_risk_acceptance_pending(request, eid, fid):
         })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def add_risk_acceptance(request, eid, fid=None):
     if settings.RISK_PENDING:
@@ -1478,6 +1493,7 @@ def add_risk_acceptance(request, eid, fid=None):
                   "form": form,
                   })
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
 def add_transfer_finding(request, eid, fid=None):
     origin_engagement = get_object_or_404(Engagement, id=eid)
@@ -1564,17 +1580,20 @@ def add_transfer_finding(request, eid, fid=None):
                   })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance_Edit, "eid")
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
 
 # will only be called by view_risk_acceptance and edit_risk_acceptance
+@dojo_ratelimit_view()
 def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     response = None
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1816,6 +1835,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
@@ -1826,6 +1846,7 @@ def expire_risk_acceptance(request, eid, raid):
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def accept_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
@@ -1835,6 +1856,7 @@ def accept_risk_acceptance(request, eid, raid):
     rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type, action="accept", permission_key=None)
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
@@ -1848,6 +1870,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1865,6 +1888,7 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def risk_acceptance_pending(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1878,6 +1902,7 @@ def risk_acceptance_pending(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def download_risk_acceptance(request, eid, raid):
     mimetypes.init()
@@ -1902,6 +1927,7 @@ under media folder
 """
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -1935,12 +1961,14 @@ def upload_threatmodel(request, eid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     return generate_file_response_from_file_path(eng.tmodel_path)
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
