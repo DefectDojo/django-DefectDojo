@@ -34,6 +34,10 @@ class NowSecureParser(object):
                     cvssv3 = content['check']['issue']['cvssVector']
                     cvssv3_score = content['check']['issue']['cvss']
                     mitigation = content['check']['issue']['recommendation']
+                    if len(mitigation) > 0:
+                        fix_available=True
+                    else:
+                        fix_available=False
                     impact = content['check']['issue']['impactSummary']
                     url = f"https://app.nowsecure.com/app/{data['data']['auto']['assessment']['applicationRef']}/assessment/{data['data']['auto']['assessment']['ref']}?viewObservationsBy=categories&viewFindingsBy=policyCategory#{content['checkId']}"
                     steps_to_reproduce = (content['check']['issue']['stepsToReproduce'] or '''''')
@@ -77,6 +81,7 @@ class NowSecureParser(object):
                     references = references,
                     cwe = cwe,
                     cve = cve,
+                    fix_available = fix_available,
 
                     static_finding=True,
                     dynamic_finding=False, 
