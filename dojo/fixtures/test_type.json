@@ -47,5 +47,26 @@
         },
         "model": "dojo.test_type",
         "pk": 7
+    },
+    {
+        "fields": {
+            "name": "NowSecure"
+        },
+        "model": "dojo.test_type",
+        "pk": 8
+    },
+    {
+        "fields": {
+            "name": "NowSecure"
+        },
+        "model": "dojo.test_type",
+        "pk": 9
+    },
+    {
+        "fields": {
+            "name": "NowSecure"
+        },
+        "model": "dojo.test_type",
+        "pk": 10
     }
 ]
