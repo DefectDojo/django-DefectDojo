@@ -7,7 +7,7 @@ from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited
 
-from dojo.models import Dojo_User, Finding
+from dojo.models import Dojo_User, Finding, GeneralSettings
 
 logger = logging.getLogger(__name__)
 
@@ -168,16 +168,16 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     return decorator
 
 
-def dojo_ratelimit_view(key="username", rate=None, method=['DELETE', 'PATCH', 'POST', 'PUT', 'GET'], *, block=False):
+def dojo_ratelimit_view(key="user", rate=None, method=['DELETE', 'PATCH', 'POST', 'PUT', 'GET'], *, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
-            limiter_block = getattr(settings, "RATE_LIMITER_BLOCK_VIEW", block)
-            limiter_rate = getattr(settings, "RATE_LIMITER_RATE_VIEW", rate)
-            limiter_lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT_VIEW", False)
+            limiter_block = GeneralSettings.get_value('RATE_LIMITER_BLOCK_VIEW', block)
+            limiter_rate = GeneralSettings.get_value('RATE_LIMITER_RATE_VIEW', rate)
+            limiter_lockout = GeneralSettings.get_value('RATE_LIMITER_ACCOUNT_LOCKOUT_VIEW', False)
             old_limited = getattr(request, "lusernameited", False)
             ratelimited = is_ratelimited(request=request, fn=fn,
-                                         key=request.user.username, rate=limiter_rate, method=method,
+                                         key=key, rate=limiter_rate, method=method,
                                          increment=True)
             request.limited = ratelimited or old_limited
             if ratelimited and limiter_block:
@@ -187,6 +187,7 @@ def dojo_ratelimit_view(key="username", rate=None, method=['DELETE', 'PATCH', 'P
                         dojo_user = Dojo_User.objects.filter(username=username).first()
                         if dojo_user:
                             Dojo_User.enable_force_password_reset(dojo_user)
+                logger.error("RATE LIMIT: user %s has been rate limited", request.user)
                 raise Ratelimited
             return fn(request, *args, **kw)
         return _wrapped

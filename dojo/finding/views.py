@@ -32,6 +32,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from dojo.decorators import dojo_ratelimit_view
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -386,6 +387,7 @@ class BaseListFindings:
         findings = self.get_filtered_findings(request)
         return self.filter_findings_by_form(request, findings)
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 @method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListFindings(View, BaseListFindings):
     def get_initial_context(self, request: HttpRequest):
@@ -540,7 +542,7 @@ class ListBlacklistedFindings(ListFindings):
         self.filter_name = "Blacklisted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFindingRender(View):
     
     def get_template(self):
@@ -580,6 +582,7 @@ class ViewFindingRender(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
         finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
@@ -895,6 +898,7 @@ class ViewFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class EditFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -1244,6 +1248,7 @@ class EditFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class DeleteFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -3600,6 +3605,7 @@ def calculate_possible_related_actions_for_similar_finding(
 
     return actions
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def generate_token_generative_ia(request, fid):
     error_response = {
@@ -3649,6 +3655,7 @@ def generate_token_generative_ia(request, fid):
     return JsonResponse(contex, status=200)
 
 
+@dojo_ratelimit_view()
 def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     page_name = ('all_findings_frontend')
     user = request.user.id

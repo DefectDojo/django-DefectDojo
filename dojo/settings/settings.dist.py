@@ -301,13 +301,8 @@ env = environ.FileAwareEnv(
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
     DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
-    # Rate Limit all View
-    DD_RATE_LIMITER_ENABLED_VIEW=(bool, True),
-    DD_RATE_LIMITER_RATE_VIEW=(str, "1/m"),
-    DD_RATE_LIMITER_BLOCK_VIEW=(bool, True),
-    DD_RATE_LIMITER_ACCOUNT_LOCKOUT_VIEW=(bool, False),
     # Enable Rate Limiting for the login page
-    DD_RATE_LIMITER_ENABLED=(bool, True),
+    DD_RATE_LIMITER_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded

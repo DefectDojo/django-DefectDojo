@@ -138,6 +138,7 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+@dojo_ratelimit_view()
 @cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def product(request):
@@ -212,8 +213,8 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
-@dojo_ratelimit_view(block=True)
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related("product_manager", "technical_contact", "team_manager", "sla_configuration") \
                                       .prefetch_related("members") \
@@ -310,6 +311,7 @@ def view_product(request, pid):
         "sla": sla})
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Component_View, "pid")
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -519,6 +521,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -727,7 +730,7 @@ def view_product_metrics(request, pid):
         "test_data": test_data,
         "user": request.user})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def async_burndown_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -744,7 +747,7 @@ def async_burndown_metrics(request, pid):
     })
 
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Engagement_View, "pid")
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -917,7 +920,7 @@ def new_product(request, ptid=None):
                    "jform": jira_project_form,
                    "gform": gform})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
@@ -1003,7 +1006,7 @@ def edit_product(request, pid):
                    "product": product,
                    })
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Delete, "pid")
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
@@ -1049,7 +1052,7 @@ def delete_product(request, pid):
         "product_tab": product_tab,
         "rels": rels})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Engagement_Add, "pid")
 def new_eng_for_app(request, pid, *, cicd=False):
     jira_project_form = None
@@ -1129,7 +1132,7 @@ def new_eng_for_app(request, pid, *, cicd=False):
         "jira_epic_form": jira_epic_form,
         "jira_project_form": jira_project_form})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Technology_Add, "pid")
 def new_tech_for_prod(request, pid):
     if request.method == "POST":
@@ -1151,7 +1154,7 @@ def new_tech_for_prod(request, pid):
                    "product_tab": product_tab,
                    "pid": pid})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(App_Analysis, Permissions.Technology_Edit, "tid")
 def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
@@ -1172,7 +1175,7 @@ def edit_technology(request, tid):
                    "product_tab": product_tab,
                    "technology": technology})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(App_Analysis, Permissions.Technology_Delete, "tid")
 def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
@@ -1226,7 +1229,7 @@ def add_meta_data(request, pid):
                    "product": prod,
                    })
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
@@ -1529,7 +1532,7 @@ class AdHocFindingView(View):
         # Render the form
         return render(request, self.get_template(), context)
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -1542,7 +1545,7 @@ def engagement_presets(request, pid):
                    "presets": presets,
                    "prod": prod})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
@@ -1568,7 +1571,7 @@ def edit_engagement_presets(request, pid, eid):
                    "tform": tform,
                    "prod": prod})
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -1624,7 +1627,7 @@ def delete_engagement_presets(request, pid, eid):
                    "rels": rels,
                    })
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -1647,7 +1650,7 @@ def edit_notifications(request, pid):
 
     return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
@@ -1701,7 +1704,7 @@ def add_product_member(request, pid):
         "product_tab": product_tab,
     })
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
@@ -1742,7 +1745,7 @@ def edit_product_member(request, memberid):
         "product_tab": product_tab,
     })
 
-
+@dojo_ratelimit_view()
 @user_is_authorized(Product_Member, Permissions.Product_Member_Delete, "memberid")
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
@@ -1769,6 +1772,7 @@ def delete_product_member(request, memberid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, "pid")
 def add_api_scan_configuration(request, pid):
     product = get_object_or_404(Product, id=pid)
@@ -1813,6 +1817,7 @@ def add_api_scan_configuration(request, pid):
                    })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def view_api_scan_configurations(request, pid):
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
@@ -1827,6 +1832,7 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, "pascid")
 def edit_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
@@ -1873,6 +1879,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, "pascid")
 def delete_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
@@ -1900,6 +1907,7 @@ def delete_api_scan_configuration(request, pid, pascid):
                   })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product_Group, Permissions.Product_Group_Edit, "groupid")
 def edit_product_group(request, groupid):
     logger.error(groupid)
@@ -1933,6 +1941,7 @@ def edit_product_group(request, groupid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product_Group, Permissions.Product_Group_Delete, "groupid")
 def delete_product_group(request, groupid):
     group = get_object_or_404(Product_Group, pk=groupid)
@@ -1960,6 +1969,7 @@ def delete_product_group(request, groupid):
     })
 
 
+@dojo_ratelimit_view()
 @user_is_authorized(Product, Permissions.Product_Group_Add, "pid")
 def add_product_group(request, pid):
     product = get_object_or_404(Product, pk=pid)
@@ -1997,6 +2007,7 @@ def add_product_group(request, pid):
     })
 
 
+@dojo_ratelimit_view()
 def view_transfer_finding(request, pid=None):
     pt = get_object_or_404(Product, id=pid)
     transfer_finding = TransferFinding.objects.filter(origin_product=pt) | TransferFinding.objects.filter(destination_product=pt).order_by('-id')
