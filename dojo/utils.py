@@ -8,6 +8,7 @@ import os
 import pathlib
 import re
 from calendar import monthrange
+from werkzeug.utils import secure_filename
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
@@ -1363,8 +1364,14 @@ def get_page_items_and_count(request, items, page_size, prefix="", *, do_count=T
 
 
 def handle_uploaded_threat(f, eng):
-    path = Path(f.name)
+    # Sanitize the file extension
+    original_name = secure_filename(f.name)
+    path = Path(original_name)
     extension = path.suffix
+    # Optional: limit to a whitelist of allowed extensions
+    allowed_extensions = {'.zip', '.pdf', '.docx', '.xlsx', '.png', '.jpg', '.jpeg', '.svg', '.txt'}
+    if extension.lower() not in allowed_extensions:
+        extension = '.bin'
     # Check if threat folder exist.
     threat_dir = Path(settings.MEDIA_ROOT) / "threat"
     if not threat_dir.is_dir():
