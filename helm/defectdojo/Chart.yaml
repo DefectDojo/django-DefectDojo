@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "2.50.0-dev"
+appVersion: "2.51.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
 version: 1.7.0-dev
@@ -11,9 +11,9 @@ maintainers:
 dependencies:
   - name: postgresql
     version: ~16.7.0
-    repository: oci://registry-1.docker.io/bitnamicharts
+    repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: redis
-    version: ~19.6.0
-    repository: oci://registry-1.docker.io/bitnamicharts
+    version: ~19.6.4
+    repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled

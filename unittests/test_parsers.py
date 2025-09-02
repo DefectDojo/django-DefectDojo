@@ -96,7 +96,7 @@ class TestParsers(DojoTestCase):
                                     read_true = False
                                     i = 0
                                 elif i > 4:
-                                    self.assertTrue(expr=False, msg=f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
+                                    self.fail(f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
                                     i = 0
                                     read_true = False
                                 else:

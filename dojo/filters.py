@@ -1695,6 +1695,9 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle")
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -1940,9 +1943,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
-        label="Product lifecycle")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")

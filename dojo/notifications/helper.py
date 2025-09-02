@@ -234,7 +234,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
             elif self.system_settings.slack_channel is not None:
                 channel = self.system_settings.slack_channel
                 logger.info(
-                    f"Sending system notification to system channel {channel}.",
+                    "Sending system notification to system channel %s.", channel,
                 )
                 self._post_slack_message(event, user, channel, **kwargs)
             else:
@@ -272,11 +272,11 @@ class SlackNotificationManger(NotificationManagerHelpers):
                 if user_email == user["user"]["profile"]["email"]:
                     if "id" in user["user"]:
                         user_id = user["user"]["id"]
-                        logger.debug(f"Slack user ID is {user_id}")
+                        logger.debug("Slack user ID is %s", user_id)
                         slack_user_is_found = True
                 else:
                     logger.warning(
-                        f"A user with email {user_email} could not be found in this Slack workspace.",
+                        "A user with email %s could not be found in this Slack workspace.", user_email,
                     )
 
             if not slack_user_is_found:
@@ -496,7 +496,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         if not endpoints.exists():
             if user:
                 logger.info(
-                    f"URLs for Webhooks not configured for user '{user}': skipping user notification",
+                    "URLs for Webhooks not configured for user '%s': skipping user notification", user,
                 )
             else:
                 logger.info(

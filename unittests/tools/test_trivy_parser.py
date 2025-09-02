@@ -71,6 +71,7 @@ class TestTrivyParser(DojoTestCase):
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
+            self.assertTrue(finding.fix_available)
 
     def test_misconfigurations_and_secrets(self):
         with sample_path("misconfigurations_and_secrets.json").open(encoding="utf-8") as test_file:

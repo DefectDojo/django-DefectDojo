@@ -65,7 +65,6 @@ jobs:
 
       - name: Configure HELM repos
         run: |-
-             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 

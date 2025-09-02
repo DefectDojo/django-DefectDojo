@@ -286,6 +286,9 @@ env = environ.FileAwareEnv(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
+    # List of acceptable file types that can be (re)imported
+    DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -1364,7 +1367,7 @@ if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
         if key not in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info(f"Adding {key} with value {value} from env var DD_HASHCODE_FIELDS_PER_SCANNER")
+            logger.info("Adding %s with value %s from env var DD_HASHCODE_FIELDS_PER_SCANNER", key, value)
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 
@@ -1618,7 +1621,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
         if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info(f"Adding {key} with value {value} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
+            logger.info("Adding %s with value %s from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER", key, value)
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
@@ -1861,9 +1864,10 @@ VULNERABILITY_URLS = {
     "RLSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "SCA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/sca-2020-0002
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
     "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
-    "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
+    "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
@@ -1873,9 +1877,12 @@ VULNERABILITY_URLS = {
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
     "VNS": "https://vulners.com/",
+    "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
+# List of acceptable file types that can be (re)imported
+FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
