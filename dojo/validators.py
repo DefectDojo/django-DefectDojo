@@ -2,6 +2,7 @@ import logging
 import re
 from collections.abc import Callable
 
+import cvss
 from cvss import CVSS2, CVSS3, CVSS4
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -50,8 +51,7 @@ def clean_tags(value: str | list[str], exception_class: Callable = ValidationErr
 
 def cvss3_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
     logger.debug("cvss3_validator called with value: %s", value)
-    from dojo.utils import parse_cvss_from_text
-    cvss_vectors = parse_cvss_from_text(value)
+    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
 
@@ -77,8 +77,7 @@ def cvss3_validator(value: str | list[str], exception_class: Callable = Validati
 
 def cvss4_validator(value: str | list[str], exception_class: Callable = ValidationError) -> None:
     logger.debug("cvss4_validator called with value: %s", value)
-    from dojo.utils import parse_cvss_from_text
-    cvss_vectors = parse_cvss_from_text(value)
+    cvss_vectors = cvss.parser.parse_cvss_from_text(value)
     if len(cvss_vectors) > 0:
         vector_obj = cvss_vectors[0]
 

@@ -136,7 +136,7 @@ class AnchoreEngineParser:
             )
 
             sev = item["severity"]
-            if sev == "Negligible" or sev == "Unknown":
+            if sev in {"Negligible", "Unknown"}:
                 sev = "Info"
 
             mitigation = (

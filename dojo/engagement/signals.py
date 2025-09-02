@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Product
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -65,3 +66,4 @@ def engagement_post_delete(sender, instance, using, origin, **kwargs):
 def engagement_pre_delete(sender, instance, **kwargs):
     with contextlib.suppress(sender.DoesNotExist):
         delete_related_notes(instance)
+        delete_related_files(instance)

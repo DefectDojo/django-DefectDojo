@@ -157,10 +157,10 @@ class ScoutSuiteParser:
         def tabs(n):
             return " " * n * 2
         if isinstance(src, dict):
-            for key, value in src.items():
+            for _key, value in src.items():
                 if isinstance(src, str):
-                    self.item_data = self.item_data + key + "\n"
-                self.recursive_print(value, depth + 1, key)
+                    self.item_data = self.item_data + _key + "\n"
+                self.recursive_print(value, depth + 1, _key)
         elif isinstance(src, list):
             for litem in src:
                 self.recursive_print(litem, depth + 2)

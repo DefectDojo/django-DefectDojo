@@ -1,7 +1,7 @@
 ---
 services:
   nginx:
-    image: busybox:1.37.0-musl
+    image: busybox:1.37.0-musl@sha256:254e6134b1bf813b34e920bc4235864a54079057d51ae6db9a4f2328f261c2ad
     entrypoint: ['echo', 'skipping', 'nginx']
     volumes:
       - defectdojo_media_unit_tests:/usr/share/nginx/html/media
@@ -31,13 +31,13 @@ services:
       DD_CELERY_BROKER_PARAMS: ''
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
   celerybeat:
-    image: busybox:1.37.0-musl
+    image: busybox:1.37.0-musl@sha256:254e6134b1bf813b34e920bc4235864a54079057d51ae6db9a4f2328f261c2ad
     entrypoint: ['echo', 'skipping', 'celery beat']
   celeryworker:
-    image: busybox:1.37.0-musl
+    image: busybox:1.37.0-musl@sha256:254e6134b1bf813b34e920bc4235864a54079057d51ae6db9a4f2328f261c2ad
     entrypoint: ['echo', 'skipping', 'celery worker']
   initializer:
-    image: busybox:1.37.0-musl
+    image: busybox:1.37.0-musl@sha256:254e6134b1bf813b34e920bc4235864a54079057d51ae6db9a4f2328f261c2ad
     entrypoint: ['echo', 'skipping', 'initializer']
   postgres:
     ports:
@@ -50,7 +50,7 @@ services:
     volumes:
       - defectdojo_postgres_unit_tests:/var/lib/postgresql/data
   redis:
-    image: busybox:1.37.0-musl
+    image: busybox:1.37.0-musl@sha256:254e6134b1bf813b34e920bc4235864a54079057d51ae6db9a4f2328f261c2ad
     entrypoint: ['echo', 'skipping', 'redis']
   "webhook.endpoint":
     image: mccutchen/go-httpbin:2.18.3@sha256:3992f3763e9ce5a4307eae0a869a78b4df3931dc8feba74ab823dd2444af6a6b
