@@ -34,7 +34,7 @@ services:
     build:
       context: ./
       dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
-      target: django
+      target: release
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       initializer:

@@ -30,7 +30,7 @@ COPY requirements.txt ./
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM base AS django
+FROM base AS release
 WORKDIR /app
 ARG uid=1001
 ARG gid=1337
@@ -139,5 +139,11 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
-FROM django AS django-unittests
+FROM release AS development
+USER root
+COPY requirements-dev.txt ./
+RUN pip3 install --no-cache-dir -r requirements-dev.txt
+USER ${uid}
+
+FROM development AS django-unittests
 COPY unittests/ ./unittests/
