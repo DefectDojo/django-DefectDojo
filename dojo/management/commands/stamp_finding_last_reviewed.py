@@ -1,13 +1,9 @@
-import zoneinfo
 
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from dojo.models import Finding
-from dojo.utils import get_system_setting
-
-locale = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 """
 Authors: Jay Paz

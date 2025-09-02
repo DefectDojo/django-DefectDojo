@@ -27,11 +27,11 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.30.3'
+            k8s: 'v1.33.4'
             os: debian
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
@@ -47,7 +47,7 @@ jobs:
           minikube status
 
       - name: Load images from artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           path: built-docker-image
           pattern: built-docker-image-*
@@ -57,13 +57,14 @@ jobs:
         timeout-minutes: 15
         run: |-
              eval $(minikube docker-env)
-             docker load -i built-docker-image/nginx-${{ matrix.os }}-linux-amd64_img
+             docker load -i built-docker-image/nginx-alpine-linux-amd64_img
              docker load -i built-docker-image/django-${{ matrix.os }}-linux-amd64_img
+             docker tag defectdojo/defectdojo-nginx:alpine defectdojo/defectdojo-nginx:latest
+             docker tag defectdojo/defectdojo-django:${{ matrix.os }} defectdojo/defectdojo-django:latest
              docker images
 
       - name: Configure HELM repos
         run: |-
-             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 
@@ -87,8 +88,7 @@ jobs:
                --set initializer.keepSeconds="-1" \
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
-               --set createSecret=true \
-               --set tag=${{ matrix.os }}
+               --set createSecret=true
 
       - name: Check deployment status
         if: always()
@@ -125,7 +125,7 @@ jobs:
              while :
                do
                DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
-               OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+               OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
                   --overrides='{ "apiVersion": "v1" }' \
                   --restart=Never -i --rm -- \
                     --silent \
@@ -156,7 +156,7 @@ jobs:
              ADMIN_PASS=$(kubectl get secret/defectdojo -o jsonpath='{.data.DD_ADMIN_PASSWORD}' | base64 -d)
              echo "Simple API check"
              DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
-             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
                --overrides='{ "apiVersion": "v1" }' \
                --restart=Never -i --rm -- \
                  --silent \

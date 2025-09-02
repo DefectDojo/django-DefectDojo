@@ -32,3 +32,5 @@ class TestRedHatSatelliteParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             self.assertEqual("RHBA-1999:5678", findings[0].unsaved_vulnerability_ids[0])
+            self.assertEqual("glibc bug fix update", findings[0].title)
+            self.assertEqual(True, findings[0].fix_available)
