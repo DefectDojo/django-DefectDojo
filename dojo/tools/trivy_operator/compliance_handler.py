@@ -53,6 +53,7 @@ class TrivyComplianceHandler:
                         description=description,
                         static_finding=False,
                         dynamic_finding=True,
+                        fix_available=True,
                     )
                     if check_checkID:
                         finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_checkID)]

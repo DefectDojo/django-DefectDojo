@@ -25,3 +25,7 @@ class TestAnchoreCTLVulnsParser(DojoTestCase):
             parser = AnchoreCTLVulnsParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(23, len(findings))
+            singleFinding = findings[0]
+            self.assertEqual(singleFinding.fix_available, False)
+            singleFinding = findings[3]
+            self.assertEqual(singleFinding.fix_available, True)

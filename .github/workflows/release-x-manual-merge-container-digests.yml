@@ -31,7 +31,9 @@ jobs:
         matrix:
             docker-image: [django, nginx]
             os: [alpine, debian]
-
+            exclude:
+                - docker-image: nginx
+                  os: debian
     steps:
       # deduce docker org name from git repo to make the build also work in forks
     - id: Set-docker-org
@@ -39,20 +41,20 @@ jobs:
 
       # only download digests for this image and this os
     - name: Download digests
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         path: ${{ runner.temp }}/digests
         pattern: digests-${{ matrix.docker-image}}-${{ matrix.os }}-*
         merge-multiple: true
 
     - name: Login to DockerHub
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
       # the alpine and debian images are tagged with the os name
     - name: Create OS specific manifest list and push
@@ -69,7 +71,7 @@ jobs:
 
       # debian images are the default / official ones, so these get the os-less tag
     - name: Tag Debian with os-less tags
-      if: ${{ matrix.os  == 'debian' }}
+      if: ${{ (matrix.docker-image == 'django' && matrix.os == 'debian') || (matrix.docker-image == 'nginx' && matrix.os == 'alpine') }}
       working-directory: ${{ runner.temp }}/digests
       run: |
         set -x
@@ -77,6 +79,6 @@ jobs:
 
       # just for logging
     - name: Inspect default images
-      if: ${{ matrix.os  == 'debian' }}
+      if: ${{ (matrix.docker-image == 'django' && matrix.os == 'debian') || (matrix.docker-image == 'nginx' && matrix.os == 'alpine') }}
       run: |
           docker buildx imagetools inspect ${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ inputs.release_number }}

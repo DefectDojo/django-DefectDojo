@@ -32,3 +32,6 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 - vulnerability ids
 - cwe
 - description
+
+### Field fix_available
+In case a mitigation is available, then field 'fix_available' is set to True. 
