@@ -2,7 +2,9 @@ import hashlib
 import json
 from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
+from dojo.utils import parse_cvss_data
 import re
+
 
 class NowSecureParser(object):
     """
@@ -22,41 +24,50 @@ class NowSecureParser(object):
         data = json.load(file)
 
         dupes = dict()
-        for content in data['data']['auto']['assessment']['report']['findings']:
+        for content in data.get('data', {}).get('auto', {}).get('assessment', {}).get('report', {}).get('findings', []):
             if  content['affected']:
                 if content['check']['issue']:
+                    # If the issue exist, it always has a title
                     title = content['check']['issue']['title']
-                    for regulation in content['check']['issue']['regulations']:
+                    for regulation in content.get('check',{}).get('issue',{}).get('regulations',[]):
                         if regulation['type'] == "cwe":
                             cwe = regulation['links'][0]['title']
-                    description = content['check']['issue']['description']
-                    severity = content['check']['issue']['severity'].capitalize()
-                    cvssv3 = content['check']['issue']['cvssVector']
-                    cvssv3_score = content['check']['issue']['cvss']
-                    mitigation = content['check']['issue']['recommendation']
-                    if mitigation:
+                    description = content['check']['issue']['description'] or ''''''
+                    # https://docs.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/#parsing-of-cvss-vectors
+                    if content['check']['issue']['cvssVector']:
+                        cvss_vector = content['check']['issue']['cvssVector']
+                        cvss_data = parse_cvss_data(cvss_vector)
+                        if cvss_data:
+                            severity = cvss_data["severity"]
+                            cvssv3 = cvss_data["cvssv3"]
+                            cvssv4 = cvss_data["cvssv4"]
+                        # we don't set any score fields as those will be overwritten by Defect Dojo
+                    if content['check']['issue']['recommendation']:
+                        mitigation = content['check']['issue']['recommendation']
                         fix_available=True
                     else:
                         fix_available=False
-                    impact = content['check']['issue']['impactSummary']
-                    url = f"https://app.nowsecure.com/app/{data['data']['auto']['assessment']['applicationRef']}/assessment/{data['data']['auto']['assessment']['ref']}?viewObservationsBy=categories&viewFindingsBy=policyCategory#{content['checkId']}"
+                    
+                    impact = content['check']['issue']['impactSummary'] or ''''''
+                    if data['data']['auto']['assessment']['applicationRef'] and data['data']['auto']['assessment']['ref'] and content['checkId']:
+                        url = f"https://app.nowsecure.com/app/{data['data']['auto']['assessment']['applicationRef']}/assessment/{data['data']['auto']['assessment']['ref']}?viewObservationsBy=categories&viewFindingsBy=policyCategory#{content['checkId']}"
                     steps_to_reproduce = (content['check']['issue']['stepsToReproduce'] or '''''')
                     if content['check']['issue']['codeSamples']:
                         code_samples = ''''''
-                        for code_sample in content['check']['issue']['codeSamples']:
+                        for code_sample in content.get('check',{}).get('issue',{}).get('codeSamples',[]):
                             code_samples += f'''**{code_sample['platform']}**: {code_sample['caption']}\n```{code_sample['syntax']}\n{code_sample['block']}\n```\n'''
                         if code_samples:
                             steps_to_reproduce += code_samples
                     references = ''''''
                     if content['check']['issue']['guidanceLinks']:
                         references+="### Guidance Links\n"
-                        for reference in content['check']['issue']['guidanceLinks']:
+                        for reference in content.get('check',{}).get('issue',{}).get('guidanceLinks',[]):
                             references+=f'''* [{reference['caption']}]({reference['url']})\n'''
 
                     cwe = None
                     if content['check']['issue']['regulations']:
                         references+="### Regulations\n"
-                        for regulation in content['check']['issue']['regulations']:
+                        for regulation in content.get('check',{}).get('issue',{}).get('regulations',[]):
                             if regulation['type'] == 'cwe':
                                 cwe = regulation['links'][0]['title']
                             for link in regulation['links']:
@@ -73,7 +84,7 @@ class NowSecureParser(object):
                     description=description,
                     severity=severity,
                     cvssv3 = cvssv3,
-                    cvssv3_score = cvssv3_score,
+                    cvssv4 = cvssv4,
                     mitigation = mitigation,
                     url = url,
                     steps_to_reproduce = steps_to_reproduce,
