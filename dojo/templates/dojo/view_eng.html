@@ -248,7 +248,7 @@
                                         <th>Date</th>
                                         <th>Lead</th>
                                         <th>Total Findings</th>
-                                        <th>Active (Verified)</th>
+                                        <th>Active (Verified / Fixable)</th>
                                         <th>Mitigated</th>
                                         <th>Duplicates</th>
                                         <th>Notes</th>
@@ -336,7 +336,8 @@
                                             <td><a href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
                                             <td>
                                                 <a href="{% url 'view_test' test.id %}?active=true">{{ test.count_findings_test_active }}</a>&nbsp;
-                                                (<a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>)
+                                                (<a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>
+                                                / <a href="{% url 'view_test' test.id %}?active=true&fix_available=true">{{ test.count_findings_test_active_fix_available }}</a>)
                                             </td>
                                             <td><a href="{% url 'view_test' test.id %}?is_mitigated=1">{{ test.count_findings_test_mitigated }}</a></td>
                                             <td><a href="{% url 'view_test' test.id %}?duplicate=1">{{ test.count_findings_test_dups }}</a></td>
