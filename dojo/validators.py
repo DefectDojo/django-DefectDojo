@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 import cvss
 from cvss import CVSS2, CVSS3, CVSS4
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 
@@ -101,7 +102,7 @@ def cvss4_validator(value: str | list[str], exception_class: Callable = Validati
 
 
 class ImporterFileExtensionValidator(FileExtensionValidator):
-    default_allowed_extensions = ["xml", "csv", "nessus", "json", "jsonl", "html", "js", "zip", "xlsx", "txt", "sarif", "fpr"]
+    default_allowed_extensions = [ext[1:] for ext in settings.FILE_IMPORT_TYPES]
 
     def __init__(self, *args: list, **kwargs: dict):
         if "allowed_extensions" not in kwargs:

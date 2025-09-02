@@ -45,6 +45,7 @@ class TrivyChecksHandler:
                 static_finding=True,
                 dynamic_finding=False,
                 service=service,
+                fix_available=True,
             )
             if resource_namespace != "":
                 finding.tags = resource_namespace
