@@ -10,7 +10,7 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
+      dockerfile: "Dockerfile.nginx-alpine"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     depends_on:
       uwsgi:
@@ -120,7 +120,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:17.5-alpine@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa
+    image: postgres:17.6-alpine@sha256:3406990b6e4c7192317b6fdc5680498744f6142f01f0287f4ee0420d8c74063c
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}

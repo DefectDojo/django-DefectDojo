@@ -85,7 +85,7 @@ class TestParsers(DojoTestCase):
                             f"Unittest of importer '{importer_test_file}' is missing or using different name",
                         )
             for file in os.scandir(Path(basedir) / "dojo" / "tools" / parser_dir.name):
-                if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
+                if file.is_file() and file.name not in {"__pycache__", "__init__.py"}:
                     f_path = Path(basedir) / "dojo" / "tools" / parser_dir.name / file.name
                     read_true = False
                     with f_path.open(encoding="utf-8") as f:
@@ -96,7 +96,7 @@ class TestParsers(DojoTestCase):
                                     read_true = False
                                     i = 0
                                 elif i > 4:
-                                    self.assertTrue(expr=False, msg=f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
+                                    self.fail(f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
                                     i = 0
                                     read_true = False
                                 else:
