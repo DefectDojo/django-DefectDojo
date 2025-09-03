@@ -106,6 +106,7 @@ from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
+from dojo.url.api.urls import add_url_urls
 from dojo.user.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -183,6 +184,8 @@ v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSur
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
 # Add the location routes
 v2_api = add_locations_urls(v2_api)
+v2_api = add_url_urls(v2_api)
+
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls

@@ -8,8 +8,8 @@ from django.db.models import BooleanField, CharField, Index, PositiveIntegerFiel
 
 from dojo.base_models.validators import validate_not_empty
 from dojo.location.models import AbstractLocation
-from dojo.location.types.url.manager import URLManager, URLQueryset
-from dojo.location.types.url.validators import (
+from dojo.url.manager import URLManager, URLQueryset
+from dojo.url.validators import (
     DEFAULT_PORTS,
     validate_fragment,
     validate_protocol,
