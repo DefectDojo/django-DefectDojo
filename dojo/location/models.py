@@ -11,7 +11,6 @@ from django.db.models import (
     ForeignKey,
     Index,
     OneToOneField,
-    TextChoices,
     UniqueConstraint,
 )
 from django.utils.translation import gettext_lazy as _
@@ -19,7 +18,15 @@ from tagulous.models import TagField
 
 from dojo.base_models.base import BaseModel, BaseModelWithoutTimeMeta
 from dojo.base_models.validators import validate_not_empty
-from dojo.location.manager import LocationFindingReferenceManager, LocationManager, LocationProductReferenceManager
+from dojo.location.manager import (
+    LocationFindingReferenceManager,
+    LocationFindingReferenceQueryset,
+    LocationManager,
+    LocationProductReferenceManager,
+    LocationProductReferenceQueryset,
+    LocationQueryset,
+)
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Dojo_User, Finding, Product
 
 if TYPE_CHECKING:
@@ -56,7 +63,7 @@ class Location(BaseModel):
         help_text=_("A tag that can be used to differentiate a Location"),
     )
 
-    objects = LocationManager()
+    objects = LocationManager().from_queryset(LocationQueryset)()
 
     def __str__(self):
         return self.location_value
@@ -64,30 +71,30 @@ class Location(BaseModel):
     def status_from_finding(self, finding: Finding) -> str:
         """Determine the status the reference should carry based on the status of the finding"""
         # Set the default status to Active to be on the safe side
-        status = LocationFindingReference.LocationStatus.Active
+        status = FindingLocationStatus.Active
         # First determine the status based on the finding status
         finding_status = finding.status()
         if any(f_status in finding_status for f_status in ["Mitigated", "Inactive", "Duplicate"]):
-            status = LocationFindingReference.LocationStatus.Mitigated
+            status = FindingLocationStatus.Mitigated
         elif "False Positive" in finding_status:
-            status = LocationFindingReference.LocationStatus.FalsePositive
+            status = FindingLocationStatus.FalsePositive
         elif "Risk Accepted" in finding_status:
-            status = LocationFindingReference.LocationStatus.RiskExcepted
+            status = FindingLocationStatus.RiskExcepted
         return status
 
     def status_from_product(self, product: Product) -> str:
         """Determine the status the reference should carry based on the status of the product"""
         # Set the default status to non vulnerable by default
-        status = LocationProductReference.LocationStatus.NotVulnerable
+        status = ProductLocationStatus.Mitigated
         # First determine the status based on the number of findings present
         if self.finding_locations.exists():
-            status = LocationProductReference.LocationStatus.Vulnerable
+            status = ProductLocationStatus.Active
         return status
 
     def associate_with_finding(
         self,
         finding: Finding,
-        status: LocationFindingReference.LocationStatus | None = None,
+        status: FindingLocationStatus | None = None,
         auditor: Dojo_User | None = None,
         audit_time: datetime | None = None,
     ) -> None:
@@ -120,7 +127,7 @@ class Location(BaseModel):
     def associate_with_product(
         self,
         product: Product,
-        status: LocationProductReference.LocationStatus | None = None,
+        status: ProductLocationStatus | None = None,
     ) -> None:
         """
         Get or create a LocationProductReference for this location and product,
@@ -195,33 +202,23 @@ class LocationFindingReference(BaseModel):
 
     """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
 
-    class LocationStatus(TextChoices):
-
-        """Types of supported Location Statuses."""
-
-        Active = "Active", _("Active")
-        Mitigated = "Mitigated", _("Mitigated")
-        FalsePositive = "FalsePositive", _("False Positive")
-        RiskExcepted = "RiskExcepted", _("Risk Excepted")
-        OutOfScope = "OutOfScope", _("Out Of Scope")
-
     location = ForeignKey(Location, on_delete=CASCADE, related_name="finding_locations")
     finding = ForeignKey(Finding, on_delete=CASCADE, related_name="findings")
     auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT)
     audit_time = DateTimeField(editable=False, null=True, blank=True)
     status = CharField(
         verbose_name=_("Status"),
-        choices=LocationStatus.choices,
+        choices=FindingLocationStatus.choices,
         max_length=16,
         null=False,
         blank=False,
-        default=LocationStatus.Active,
+        default=FindingLocationStatus.Active,
         editable=True,
         validators=[validate_not_empty],
         help_text=_("The status of the the given Location"),
     )
 
-    objects = LocationFindingReferenceManager()
+    objects = LocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
 
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
@@ -246,28 +243,21 @@ class LocationProductReference(BaseModel):
 
     """Manually managed One-2-Many field to represent the relationship of a product and a location."""
 
-    class LocationStatus(TextChoices):
-
-        """Types of supported Location Statuses."""
-
-        Vulnerable = "Vulnerable", _("Vulnerable")
-        NotVulnerable = "NotVulnerable", _("Not Vulnerable")
-
     location = ForeignKey(Location, on_delete=CASCADE, related_name="product_locations")
     product = ForeignKey(Product, on_delete=CASCADE, related_name="products")
     status = CharField(
         verbose_name=_("Status"),
-        choices=LocationStatus.choices,
+        choices=ProductLocationStatus.choices,
         max_length=16,
         null=False,
         blank=False,
-        default=LocationStatus.NotVulnerable,
+        default=ProductLocationStatus.Mitigated,
         editable=True,
         validators=[validate_not_empty],
         help_text=_("The status of the the given Location"),
     )
 
-    objects = LocationProductReferenceManager()
+    objects = LocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
 
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""

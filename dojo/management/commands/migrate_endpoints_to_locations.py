@@ -3,7 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 
-from dojo.location.models import LocationFindingReference
+from dojo.location.status import FindingLocationStatus
 from dojo.location.types.url.models import URL
 from dojo.location.types.url.validators import validate_host_or_ip
 from dojo.models import Endpoint, Endpoint_Status, Finding
@@ -54,15 +54,15 @@ class Command(BaseCommand):
         of having a single status possible rather than a combo of many
         """
         if endpoint_status.risk_accepted:
-            return LocationFindingReference.LocationStatus.RiskExcepted
+            return FindingLocationStatus.RiskExcepted
         if endpoint_status.false_positive:
-            return LocationFindingReference.LocationStatus.FalsePositive
+            return FindingLocationStatus.FalsePositive
         if endpoint_status.out_of_scope:
-            return LocationFindingReference.LocationStatus.OutOfScope
+            return FindingLocationStatus.OutOfScope
         if endpoint_status.mitigated:
-            return LocationFindingReference.LocationStatus.Mitigated
+            return FindingLocationStatus.Mitigated
         # Default to Active
-        return LocationFindingReference.LocationStatus.Active
+        return FindingLocationStatus.Active
 
     def _associate_url_with_findings(self, endpoint: Endpoint, url: URL) -> None:
         # Type hinting to make auto complete a bit easier
