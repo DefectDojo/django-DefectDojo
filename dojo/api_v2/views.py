@@ -318,7 +318,7 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
+        return get_authorized_endpoints(Permissions.Location_View).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -384,7 +384,7 @@ class EndpointStatusViewSet(
 
     def get_queryset(self):
         return get_authorized_endpoint_status(
-            Permissions.Endpoint_View,
+            Permissions.Location_View,
         ).distinct()
 
 
@@ -2536,7 +2536,7 @@ class EndpointMetaImporterView(
         serializer.save()
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Endpoint_Edit)
+        return get_authorized_products(Permissions.Location_Edit)
 
 
 # Authorization: configuration

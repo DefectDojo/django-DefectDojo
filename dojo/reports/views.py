@@ -258,13 +258,13 @@ def test_report(request, tid):
     return generate_report(request, test)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_host_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=True)
@@ -354,7 +354,7 @@ def generate_report(request, obj, *, host_view=False):
     elif type(obj).__name__ == "Test":
         user_has_permission_or_403(request.user, obj, Permissions.Test_View)
     elif type(obj).__name__ == "Endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
     elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet" or type(obj).__name__ == "TagulousCastTaggedQuerySet":
         # authorization taken care of by only selecting findings from product user is authed to see
         pass

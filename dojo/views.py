@@ -78,7 +78,7 @@ def action_history(request, cid, oid):
         active_tab = "findings"
         finding = object_value
     elif ct.model == "endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
         object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "endpoints"

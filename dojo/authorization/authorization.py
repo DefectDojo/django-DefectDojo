@@ -6,6 +6,7 @@ from dojo.authorization.roles_permissions import (
     get_global_roles_with_permissions,
     get_roles_with_permissions,
 )
+from dojo.location.models import Location
 from dojo.models import (
     App_Analysis,
     Cred_Mapping,
@@ -107,8 +108,8 @@ def user_has_permission(user, obj, permission):
             user, obj.test.engagement.product, permission,
         )
     if (
-        isinstance(obj, Endpoint)
-        and permission in Permissions.get_endpoint_permissions()
+        isinstance(obj, (Location, Endpoint))
+        and permission in Permissions.get_location_permissions()
     ) or (
         isinstance(obj, Languages)
         and permission in Permissions.get_language_permissions()
