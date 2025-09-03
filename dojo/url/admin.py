@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from dojo.location.types.url.models import URL
+from dojo.url.models import URL
 
 
 @admin.register(URL)

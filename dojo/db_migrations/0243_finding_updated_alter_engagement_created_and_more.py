@@ -3,7 +3,7 @@
 import django.core.validators
 import django.db.models.deletion
 import dojo.base_models.validators
-import dojo.location.types.url.validators
+import dojo.url.validators
 import tagulous.models.fields
 import tagulous.models.models
 from django.db import migrations, models
@@ -96,13 +96,13 @@ class Migration(migrations.Migration):
             name='URL',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('protocol', models.CharField(blank=True, default='tcp', help_text='The protocol of the URL (e.g., http, https, ftp, etc.)', max_length=10, validators=[dojo.location.types.url.validators.validate_protocol])),
-                ('user_info', models.CharField(blank=True, help_text='Connection details for a given user', max_length=512, validators=[dojo.location.types.url.validators.validate_user_info])),
+                ('protocol', models.CharField(blank=True, default='tcp', help_text='The protocol of the URL (e.g., http, https, ftp, etc.)', max_length=10, validators=[dojo.url.validators.validate_protocol])),
+                ('user_info', models.CharField(blank=True, help_text='Connection details for a given user', max_length=512, validators=[dojo.url.validators.validate_user_info])),
                 ('host', models.CharField(help_text='The host of the URL, which can be a domain name or an IP address', max_length=256, validators=[dojo.base_models.validators.validate_not_empty])),
                 ('port', models.PositiveIntegerField(blank=True, help_text='The port number of the URL (optional)', null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)])),
                 ('path', models.CharField(blank=True, default='/', help_text='The path of the URL (optional),', max_length=2048)),
-                ('query', models.CharField(blank=True, help_text='The query string of the URL (optional)', max_length=2048, validators=[dojo.location.types.url.validators.validate_query])),
-                ('fragment', models.CharField(blank=True, help_text='The fragment identifier of the URL (optional)', max_length=2048, validators=[dojo.location.types.url.validators.validate_fragment])),
+                ('query', models.CharField(blank=True, help_text='The query string of the URL (optional)', max_length=2048, validators=[dojo.url.validators.validate_query])),
+                ('fragment', models.CharField(blank=True, help_text='The fragment identifier of the URL (optional)', max_length=2048, validators=[dojo.url.validators.validate_fragment])),
                 ('host_validation_failure', models.BooleanField(default=False, help_text='Dictates whether the endpoint was found to have host validation issues during creation')),
                 ('location', models.OneToOneField(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='dojo.location')),
             ],

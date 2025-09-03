@@ -4,9 +4,9 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.viewsets import ModelViewSet
 
 from dojo.api_v2.permissions import IsSuperUser
-from dojo.location.types.url.api.filters import URLFilter
-from dojo.location.types.url.api.serializer import URLSerializer
-from dojo.location.types.url.models import URL
+from dojo.url.api.filters import URLFilter
+from dojo.url.api.serializer import URLSerializer
+from dojo.url.models import URL
 
 
 class URLViewSet(ModelViewSet):

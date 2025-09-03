@@ -1,5 +1,5 @@
 from dojo.location.api.serializers import AbstractedLocationSerializer
-from dojo.location.types.url.models import URL
+from dojo.url.models import URL
 
 
 class URLSerializer(AbstractedLocationSerializer):
