@@ -2657,7 +2657,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint
@@ -2798,7 +2798,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint

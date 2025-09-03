@@ -125,7 +125,7 @@ def simple_search(request):
             authorized_tests = get_authorized_tests(Permissions.Test_View)
             authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
             authorized_products = get_authorized_products(Permissions.Product_View)
-            authorized_endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
+            authorized_endpoints = get_authorized_endpoints(Permissions.Location_View)
             authorized_finding_templates = Finding_Template.objects.all()
             authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
             authorized_vulnerability_ids = get_authorized_vulnerability_ids(Permissions.Finding_View)

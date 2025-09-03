@@ -52,7 +52,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         endpoints = Endpoint.objects.all()
 
     endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
+    endpoints = get_authorized_endpoints(Permissions.Location_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
@@ -167,17 +167,17 @@ def process_endpoint_view(request, eid, *, host_view=False):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint(request, eid):
     return process_endpoint_view(request, eid, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -205,7 +205,7 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Delete, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Delete, "eid")
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -240,7 +240,7 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_Add, "pid")
+@user_is_authorized(Product, Permissions.Location_Add, "pid")
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = "dojo/add_endpoint.html"
@@ -273,7 +273,7 @@ def add_product_endpoint(request):
     if request.method == "POST":
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
+            user_has_permission_or_403(request.user, form.product, Permissions.Location_Add)
             endpoints = form.save()
             tags = request.POST.get("tags")
             for e in endpoints:
@@ -292,7 +292,7 @@ def add_product_endpoint(request):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == "POST":
@@ -319,7 +319,7 @@ def add_meta_data(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
@@ -363,9 +363,9 @@ def endpoint_bulk_update_all(request, pid=None):
 
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
-                user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
+                user_has_permission_or_403(request.user, product, Permissions.Location_Delete)
 
-            endpoints = get_authorized_endpoints(Permissions.Endpoint_Delete, endpoints, request.user)
+            endpoints = get_authorized_endpoints(Permissions.Location_Delete, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             deleted_endpoint_count = endpoints.count()
@@ -389,7 +389,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-            endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints(Permissions.Location_Edit, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             updated_endpoint_count = endpoints.count()
@@ -484,7 +484,7 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_Edit, "pid")
+@user_is_authorized(Product, Permissions.Location_Edit, "pid")
 def import_endpoint_meta(request, pid):
     product = get_object_or_404(Product, id=pid)
     form = ImportEndpointMetaForm()

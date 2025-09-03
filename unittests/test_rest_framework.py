@@ -870,9 +870,9 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
         self.update_fields = {"mitigated": True}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_create = Permissions.Endpoint_Edit
-        self.permission_update = Permissions.Endpoint_Edit
-        self.permission_delete = Permissions.Endpoint_Edit
+        self.permission_create = Permissions.Location_Edit
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Edit
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -961,9 +961,9 @@ class EndpointTest(BaseClass.BaseClassTest):
         self.update_fields = {"protocol": "ftp", "tags": ["one_new_tag"]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_create = Permissions.Endpoint_Add
-        self.permission_update = Permissions.Endpoint_Edit
-        self.permission_delete = Permissions.Endpoint_Delete
+        self.permission_create = Permissions.Location_Add
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Delete
         self.deleted_objects = 2
         self.delete_id = 6
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

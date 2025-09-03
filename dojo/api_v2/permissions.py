@@ -180,7 +180,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, obj, Permissions.Endpoint_Edit,
+                        request.user, obj, Permissions.Location_Edit,
                     )
                 )
             return has_permission_result
@@ -219,9 +219,9 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 and check_object_permission(
                     request,
                     endpoint,
-                    Permissions.Endpoint_View,
-                    Permissions.Endpoint_Edit,
-                    Permissions.Endpoint_Edit,
+                    Permissions.Location_View,
+                    Permissions.Location_Edit,
+                    Permissions.Location_Edit,
                 )
             )
         return has_permission_result
@@ -246,32 +246,32 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Endpoint_Add,
+            request, Product, "product", Permissions.Location_Add,
         )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
             request,
             obj,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
+            Permissions.Location_View,
+            Permissions.Location_Edit,
+            Permissions.Location_Delete,
         )
 
 
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Endpoint, "endpoint", Permissions.Endpoint_Edit,
+            request, Endpoint, "endpoint", Permissions.Location_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
             request,
             obj.endpoint,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Edit,
+            Permissions.Location_View,
+            Permissions.Location_Edit,
+            Permissions.Location_Edit,
         )
 
 

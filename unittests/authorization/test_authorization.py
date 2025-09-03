@@ -372,7 +372,7 @@ class TestAuthorization(DojoTestCase):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.product_member_reader]
 
-        result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Edit)
+        result = user_has_permission(self.user, self.endpoint, Permissions.Location_Edit)
 
         self.assertFalse(result)
         mock_foo.filter.assert_called_with(user=self.user)
@@ -383,7 +383,7 @@ class TestAuthorization(DojoTestCase):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.product_member_owner]
 
-        result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Delete)
+        result = user_has_permission(self.user, self.endpoint, Permissions.Location_Delete)
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)
