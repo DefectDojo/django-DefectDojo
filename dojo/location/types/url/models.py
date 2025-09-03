@@ -8,7 +8,7 @@ from django.db.models import BooleanField, CharField, Index, PositiveIntegerFiel
 
 from dojo.base_models.validators import validate_not_empty
 from dojo.location.models import AbstractLocation
-from dojo.location.types.url.manager import URLManager
+from dojo.location.types.url.manager import URLManager, URLQueryset
 from dojo.location.types.url.validators import (
     DEFAULT_PORTS,
     validate_fragment,
@@ -21,6 +21,8 @@ from dojo.location.types.url.validators import (
 class URL(AbstractLocation):
 
     """Meta class for the URL model."""
+
+    LOCATION_TYPE = "url"
 
     protocol = CharField(
         max_length=10,
@@ -80,7 +82,7 @@ class URL(AbstractLocation):
         blank=False,
         help_text="Dictates whether the endpoint was found to have host validation issues during creation")
 
-    objects = URLManager()
+    objects = URLManager().from_queryset(URLQueryset)()
 
     class Meta:
 
@@ -112,7 +114,7 @@ class URL(AbstractLocation):
         return value
 
     def get_location_type(self) -> str:
-        return "url"
+        return self.LOCATION_TYPE
 
     def get_location_value(self) -> str:
         return str(self)

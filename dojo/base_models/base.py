@@ -26,13 +26,7 @@ class BaseManager(Manager):
     QUERY_SET_CLASS = BaseQuerySet
 
     def get_queryset(self) -> QuerySet[T]:
-        # Ensure the base manager returns our custom queryset class
-        qs = super().get_queryset()
-        # Make sure it is an instance of the custom queryset
-        if not isinstance(qs, BaseQuerySet):
-            qs = self.QUERY_SET_CLASS(qs.model, using=qs._db)
-        # Apply the forced annotation
-        return qs.order_by_id()
+        return self.QUERY_SET_CLASS(self.model, using=self._db).order_by_id()
 
 
 class BaseModelWithoutTimeMeta(Model):
