@@ -87,6 +87,14 @@ class DojoAppConfig(AppConfig):
         import dojo.test.signals  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.tool_product.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
 
+        # Configure audit system after all models are loaded
+        # This must be done in ready() to avoid "Models aren't loaded yet" errors
+        # Note: pghistory models are registered here (no database access), but trigger
+        # enabling is handled via management command to avoid database access warnings
+        from dojo.auditlog import configure_audit_system, register_django_pghistory_models
+        register_django_pghistory_models()
+        configure_audit_system()
+
 
 def get_model_fields_with_extra(model, extra_fields=()):
     return get_model_fields(get_model_default_fields(model), extra_fields)

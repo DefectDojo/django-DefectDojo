@@ -3488,6 +3488,74 @@ class LogEntryFilter(DojoFilter):
         }
 
 
+class PgHistoryFilter(DojoFilter):
+
+    """
+    Filter for django-pghistory audit entries.
+
+    This filter works with pghistory event tables that have:
+    - pgh_created_at: timestamp of the event
+    - pgh_label: event type (insert/update/delete)
+    - user: user ID from context
+    - url: URL from context
+    - remote_addr: IP address from context
+    """
+
+    # Filter by event creation time (equivalent to auditlog timestamp)
+    pgh_created_at = DateRangeFilter(field_name="pgh_created_at", label="Timestamp")
+
+    # Filter by event type/label
+    pgh_label = ChoiceFilter(
+        field_name="pgh_label",
+        label="Event Type",
+        choices=[
+            ("", "All"),
+            ("insert", "Insert"),
+            ("update", "Update"),
+            ("delete", "Delete"),
+            ("initial_import", "Initial Import"),
+        ],
+    )
+
+    # Filter by user (from context)
+    user = ModelChoiceFilter(
+        field_name="user",
+        queryset=Dojo_User.objects.none(),
+        label="User",
+        empty_label="All Users",
+    )
+
+    # Filter by URL (from context)
+    url = CharFilter(
+        field_name="url",
+        lookup_expr="icontains",
+        label="URL Contains",
+    )
+
+    # Filter by IP address (from context)
+    remote_addr = CharFilter(
+        field_name="remote_addr",
+        lookup_expr="icontains",
+        label="IP Address Contains",
+    )
+
+    # Filter by changes/diff field (JSON field containing what changed)
+    pgh_diff = CharFilter(
+        field_name="pgh_diff",
+        lookup_expr="icontains",
+        label="Changes Contains",
+        help_text="Search for field names or values in the changes",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields["user"].queryset = get_authorized_users(Permissions.Product_View)
+
+    class Meta:
+        fields = ["pgh_created_at", "pgh_label", "user", "url", "remote_addr", "pgh_diff"]
+        exclude = []
+
+
 class ProductTypeFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains")
 
