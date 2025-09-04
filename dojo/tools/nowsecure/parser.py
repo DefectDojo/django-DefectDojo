@@ -22,56 +22,58 @@ class NowSecureParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-
         dupes = dict()
         for content in data.get('data', {}).get('auto', {}).get('assessment', {}).get('report', {}).get('findings', []):
-            if  content['affected']:
-                if content['check']['issue']:
+            if  content.get('affected',[]):
+                if content.get('check',{}).get('issue',[]):
                     # If the issue exist, it always has a title
-                    title = content['check']['issue']['title']
+                    title = content.get('check',{}).get('issue',{}).get('title',[])
                     for regulation in content.get('check',{}).get('issue',{}).get('regulations',[]):
-                        if regulation['type'] == "cwe":
-                            cwe = regulation['links'][0]['title']
-                    description = content['check']['issue']['description'] or ''''''
+                        if regulation.get('type',[]) == "cwe":
+                            cwe = regulation.get('links',[])[0].get('title',[])
+                    if content.get('check',{}).get('issue',{}).get('description',[]):
+                        description = content.get('check',{}).get('issue',{}).get('description',[])
+                    else:
+                        description = ''''''
                     # https://docs.defectdojo.com/en/open_source/contributing/how-to-write-a-parser/#parsing-of-cvss-vectors
-                    if content['check']['issue']['cvssVector']:
-                        cvss_vector = content['check']['issue']['cvssVector']
+                    if content.get('check',{}).get('issue',{}).get('cvssVector',[]):
+                        cvss_vector = content.get('check',{}).get('issue',{}).get('cvssVector',[])
                         cvss_data = parse_cvss_data(cvss_vector)
                         if cvss_data:
-                            severity = cvss_data["severity"]
-                            cvssv3 = cvss_data["cvssv3"]
-                            cvssv4 = cvss_data["cvssv4"]
+                            severity = cvss_data.get('severity',[]) 
+                            cvssv3 = cvss_data.get('cvssv3',[])
+                            cvssv4 = cvss_data.get('cvssv4',[])
                         # we don't set any score fields as those will be overwritten by Defect Dojo
-                    if content['check']['issue']['recommendation']:
-                        mitigation = content['check']['issue']['recommendation']
+                    if content.get('check',{}).get('issue',{}).get('recommendation',[]):
+                        mitigation = content.get('check',{}).get('issue',{}).get('recommendation',[])
                         fix_available=True
                     else:
                         fix_available=False
                     
-                    impact = content['check']['issue']['impactSummary'] or ''''''
-                    if data['data']['auto']['assessment']['applicationRef'] and data['data']['auto']['assessment']['ref'] and content['checkId']:
-                        url = f"https://app.nowsecure.com/app/{data['data']['auto']['assessment']['applicationRef']}/assessment/{data['data']['auto']['assessment']['ref']}?viewObservationsBy=categories&viewFindingsBy=policyCategory#{content['checkId']}"
-                    steps_to_reproduce = (content['check']['issue']['stepsToReproduce'] or '''''')
-                    if content['check']['issue']['codeSamples']:
+                    impact = content.get('check',{}).get('issue',{}).get('impactSummary',[]) or ''''''
+                    if data.get('data',{}).get('auto',{}).get('assessment',{}).get('applicationRef',[]) and data.get('data',{}).get('auto',{}).get('assessment',{}).get('ref',[]) and content.get('checkId',[]):
+                        url = f"https://app.nowsecure.com/app/{data.get('data',{}).get('auto',{}).get('assessment',{}).get('applicationRef',[])}/assessment/{data.get('data',{}).get('auto',{}).get('assessment',{}).get('ref',[])}?viewObservationsBy=categories&viewFindingsBy=policyCategory#{content.get('checkId',[])}"
+                    steps_to_reproduce = (content.get('check',{}).get('issue',{}).get('stepsToReproduce',[]) or '''''')
+                    if content.get('check',{}).get('issue',{}).get('codeSamples',[]):
                         code_samples = ''''''
-                        for code_sample in content.get('check',{}).get('issue',{}).get('codeSamples',[]):
-                            code_samples += f'''**{code_sample['platform']}**: {code_sample['caption']}\n```{code_sample['syntax']}\n{code_sample['block']}\n```\n'''
+                        for code_sample in content.get('check',{}).get('issue',{}).get('codeSamples',{}):
+                            code_samples += f'''**{code_sample.get('platform',[])}**: {code_sample.get('caption',[])}\n```{code_sample.get('syntax',[])}\n{code_sample.get('block',[])}\n```\n'''
                         if code_samples:
                             steps_to_reproduce += code_samples
                     references = ''''''
-                    if content['check']['issue']['guidanceLinks']:
+                    if content.get('check',{}).get('issue',{}).get('guidanceLinks',[]):
                         references+="### Guidance Links\n"
                         for reference in content.get('check',{}).get('issue',{}).get('guidanceLinks',[]):
-                            references+=f'''* [{reference['caption']}]({reference['url']})\n'''
+                            references+=f'''* [{reference.get('caption',[])}]({reference.get('url',[])})\n'''
 
                     cwe = None
-                    if content['check']['issue']['regulations']:
+                    if content.get('check',{}).get('issue',{}).get('regulations',[]):
                         references+="### Regulations\n"
-                        for regulation in content.get('check',{}).get('issue',{}).get('regulations',[]):
-                            if regulation['type'] == 'cwe':
-                                cwe = regulation['links'][0]['title']
-                            for link in regulation['links']:
-                                references+=f"* **{regulation['label']}**: [{link['title']}]({link['url']})\n"
+                        for regulation in content.get('check',{}).get('issue',{}).get('regulations',{}):
+                            if regulation.get('type',[]) == 'cwe':
+                                cwe = regulation.get('links',[])[0].get('title',[])
+                            for link in regulation.get('links',{}):
+                                references+=f"* **{regulation.get('label',[])}**: [{link.get('title',[])}]({link.get('url',[])})\n"
                     cve = None
                     cve_pattern = r'CVE-\d{4}-\d{4,7}'
                     cve_matches = re.findall(cve_pattern, title)
