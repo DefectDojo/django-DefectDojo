@@ -159,7 +159,7 @@
                             </div>
                         </td>
                     {% endif %}
-                    <th>{{ fix_available_count }}</th>
+                    <td>{{ fix_available_count }}</td>
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
                         <td class="text-right">{{ test.total_reimport_count }}</td>
