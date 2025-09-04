@@ -57,12 +57,11 @@ class BaseTestCase(unittest.TestCase):
         # Path for automatic downloads, mapped to the media path
         cls.export_path = "/app"
 
-        global dd_driver
+        global dd_driver  # noqa: PLW0603 global variables are dirty, but in unit tests scenario's like these they are acceptable
         if not dd_driver:
             # setupModule and tearDownModule are not working in our scenario, so for now we use setupClass and a global variable
-            # global variables are dirty, but in unit tests scenario's like these they are acceptable
             logger.info(f"launching browser for: {cls.__name__}")
-            global dd_driver_options
+            global dd_driver_options  # noqa: PLW0603 global variables are dirty, but in unit tests scenario's like these they are acceptable
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
