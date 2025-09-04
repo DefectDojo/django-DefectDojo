@@ -236,12 +236,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # finding = new finding or existing finding still in the upload report
+                # all data is already saved on the finding, we only need to trigger post processing
+
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if self.findings_groups_enabled and self.group_by:
-                    finding.save()
-                else:
-                    finding.save(push_to_jira=self.push_to_jira)
+                push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -336,11 +335,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 hash_code=unsaved_finding.hash_code,
             ).exclude(hash_code=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
+            deduplicationLogger.debug(f"hash_code: {unsaved_finding.hash_code}")
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
@@ -500,10 +502,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
+        existing_finding = self.process_cve(existing_finding)
+        if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
+            # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
+            existing_finding.sla_start_date = self.now
+        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
+        existing_finding.save_no_options()
 
-        existing_finding.save(dedupe_option=False)
-        # don't dedupe before endpoints are added
-        existing_finding.save(dedupe_option=False)
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
@@ -551,6 +556,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
+                existing_finding.save_no_options()
+
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 logger.debug(
@@ -563,6 +571,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
+                existing_finding.save_no_options()
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding)
@@ -597,6 +607,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # scan_date was provided, override value from parser
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
+        unsaved_finding = self.process_cve(unsaved_finding)
+        # Hash code is already calculated earlier as it's the primary matching criteria for reimport
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save_no_options()
         finding = unsaved_finding
@@ -640,7 +652,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process vulnerability IDs
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
-
+        # legacy cve field has already been processed/set earlier
         return self.process_vulnerability_ids(finding)
 
     def process_groups_for_all_findings(
