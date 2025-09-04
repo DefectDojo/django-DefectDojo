@@ -13,7 +13,8 @@ from uuid import uuid4
 import dateutil
 import hyperlink
 import tagulous.admin
-from auditlog.registry import auditlog
+
+# Conditional import for audit logging - will be registered in auditlog.py
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -4700,21 +4701,9 @@ class ChoiceAnswer(Answer):
         return "No Response"
 
 
-if settings.ENABLE_AUDITLOG:
-    # Register for automatic logging to database
-    logger.info("enabling audit logging")
-    auditlog.register(Dojo_User, exclude_fields=["password"])
-    auditlog.register(Endpoint)
-    auditlog.register(Engagement)
-    auditlog.register(Finding, m2m_fields={"reviewers"})
-    auditlog.register(Finding_Group)
-    auditlog.register(Product_Type)
-    auditlog.register(Product)
-    auditlog.register(Test)
-    auditlog.register(Risk_Acceptance)
-    auditlog.register(Finding_Template)
-    auditlog.register(Cred_User, exclude_fields=["password"])
-    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+# Audit logging registration is now handled in auditlog.py and configured in apps.py
+# This allows for conditional registration of either django-auditlog or django-pghistory
+# The audit system is configured in DojoAppConfig.ready() to ensure all models are loaded
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
