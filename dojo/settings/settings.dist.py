@@ -311,6 +311,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
+    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -884,7 +886,6 @@ INSTALLED_APPS = (
     "polymorphic",  # provides admin templates
     "django.contrib.admin",
     "django.contrib.humanize",
-    "auditlog",
     "dojo",
     "watson",
     "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
@@ -900,6 +901,9 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "auditlog",
+    "pgtrigger",
+    "pghistory",
 )
 
 # ------------------------------------------------------------------------------
@@ -919,7 +923,6 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "watson.middleware.SearchContextMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
@@ -1903,6 +1906,7 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
 AUDITLOG_TWO_STEP_MIGRATION = False
 AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
 
@@ -1989,3 +1993,17 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+# Add audit middleware conditionally
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    if AUDITLOG_TYPE == "django-auditlog":
+        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
+    elif AUDITLOG_TYPE == "django-pghistory":
+        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
