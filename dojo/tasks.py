@@ -1,5 +1,5 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 
 from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
@@ -98,7 +98,7 @@ def flush_auditlog(*args, **kwargs):
         return
 
     logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
-    retention_date = date.today() - relativedelta(months=retention_period)
+    retention_date = timezone.now().date() - relativedelta(months=retention_period)
     subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
     event_count = subset.count()
     logger.debug("Initially received %d Logentries", event_count)

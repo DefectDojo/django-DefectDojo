@@ -1,6 +1,7 @@
 import hashlib
 import json
-from datetime import datetime
+
+from django.utils import timezone
 
 from dojo.models import Finding
 
@@ -90,7 +91,7 @@ class NoseyParkerParser:
                     description=description,
                     severity="High",
                     mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
-                    date=datetime.today().strftime("%Y-%m-%d"),
+                    date=timezone.now().strftime("%Y-%m-%d"),
                     verified=False,
                     active=True,
                     is_mitigated=False,
@@ -150,7 +151,7 @@ class NoseyParkerParser:
                     description=description,
                     severity="High",
                     mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
-                    date=datetime.today().strftime("%Y-%m-%d"),
+                    date=timezone.now().strftime("%Y-%m-%d"),
                     verified=False,
                     active=True,
                     is_mitigated=False,

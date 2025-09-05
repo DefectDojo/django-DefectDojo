@@ -42,7 +42,7 @@ select = [
    "A",
    "COM",
    "C4",
-   "DTZ003", "DTZ004", "DTZ012", "DTZ901",
+   "DTZ002", "DTZ003", "DTZ004", "DTZ01", "DTZ901",
    "T10",
    "DJ003", "DJ01",
    "EM",
