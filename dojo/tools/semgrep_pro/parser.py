@@ -139,11 +139,11 @@ class SemgrepProParser:
 
     def convert_severity(self, val):
         val = val.upper()
-        if val == "ERROR" or val == "HIGH":
+        if val in {"ERROR", "HIGH"}:
             return "High"
-        if val == "WARNING" or val == "MEDIUM":
+        if val in {"WARNING", "MEDIUM"}:
             return "Medium"
-        if val == "INFO" or val == "LOW":
+        if val in {"INFO", "LOW"}:
             return "Low"
         if val == "CRITICAL":
             return "Critical"
