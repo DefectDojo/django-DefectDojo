@@ -285,7 +285,7 @@ class ListFindingGroups(View):
 
     def paginate_queryset(self, queryset: QuerySet[Finding_Group], request: HttpRequest) -> Page:
         page_size = int(request.GET.get("page_size", 25))
-        queryset = queryset.order_by('id')
+        queryset = queryset.order_by("id")
         paginator = Paginator(queryset, page_size)
         page_number = request.GET.get("page")
         return paginator.get_page(page_number)
