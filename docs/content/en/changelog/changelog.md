@@ -8,6 +8,12 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Sept 2025: v2.50
+
+* **(Pro UI)** "Date During" filter has been added to the UI, allowing users to filter by a range of dates
+* **(Pro UI)** Vulnerability ID column can now be sorted, however the sorting only considers the **first** vulnerability ID.
+* **(Pro UI)** Request/Response pairs can now be added / updated / deleted via the Edit Finding form.
+
 ## August 2025: v2.49
 
 The Pro UI has been significantly reorganized, with changes to page organization.
