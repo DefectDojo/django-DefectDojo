@@ -115,8 +115,6 @@ class SystemSettingsView(View):
             context["celery_msg"] = "Celery needs to have the setting CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite' set in settings.py."
             context["celery_status"] = "Unknown"
 
-        return
-
     def get_template(self) -> str:
         return "dojo/system_settings.html"
 
@@ -129,7 +127,7 @@ class SystemSettingsView(View):
         # Set up the initial context
         context = self.get_context(request)
         # Add some breadcrumbs
-        add_breadcrumb(title="Application settings", top_level=False, request=request)
+        add_breadcrumb(title="System settings", top_level=False, request=request)
         # Render the page
         return render(request, self.get_template(), context)
 
@@ -144,6 +142,6 @@ class SystemSettingsView(View):
         # Check the status of celery
         request, _ = self.validate_form(request, context)
         # Add some breadcrumbs
-        add_breadcrumb(title="Application settings", top_level=False, request=request)
+        add_breadcrumb(title="System settings", top_level=False, request=request)
         # Render the page
         return render(request, self.get_template(), context)

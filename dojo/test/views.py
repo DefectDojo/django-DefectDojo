@@ -120,10 +120,12 @@ class ViewTest(View):
         finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
         findings = finding_filter_class(request.GET, pid=test.engagement.product.id, queryset=findings)
         paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix="findings")
+        fix_available_count = findings.qs.filter(fix_available=True).count()
 
         return {
             "findings": paged_findings,
             "filtered": findings,
+            "fix_available_count": fix_available_count,
         }
 
     def get_note_form(self, request: HttpRequest):
@@ -879,11 +881,11 @@ class ReImportScanResultsView(View):
         level are bubbled up to the user first before we process too much
         """
         form_validation_list = []
-        if context.get("form") is not None:
-            form_validation_list.append(context.get("form").is_valid())
-        if context.get("jform") is not None:
-            form_validation_list.append(context.get("jform").is_valid())
-        return all(form_validation_list)
+        for form_name in ["form", "jform"]:
+            if (form := context.get(form_name)) is not None:
+                if errors := form.errors:
+                    form_validation_list.append(errors)
+        return form_validation_list
 
     def process_form(
         self,
@@ -1031,8 +1033,10 @@ class ReImportScanResultsView(View):
         )
         request._start_time = time.perf_counter()
         # ensure all three forms are valid first before moving forward
-        if not self.validate_forms(context):
-            return self.failure_redirect(context)
+        if form_errors := self.validate_forms(context):
+            for form_error in form_errors:
+                add_error_message_to_response(form_error)
+            return self.failure_redirect(request, context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
             add_error_message_to_response(form_error)

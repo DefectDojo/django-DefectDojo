@@ -1,6 +1,8 @@
 import hashlib
 import json
 import logging
+from contextlib import suppress
+from datetime import datetime
 
 from dojo.models import Finding
 
@@ -36,10 +38,10 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
-            kev_date = None
             ransomware_used = None
             known_exploited = None
             component_path = None
+            kev_date = None
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
@@ -68,7 +70,10 @@ class MendParser:
                     + "\n"
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
-                kev_date = node["vulnerability"].get("publishDate", None)
+                kev_date_str = node["vulnerability"].get("publishDate", None)
+                if kev_date_str:
+                    with suppress(ValueError):
+                        kev_date = datetime.strptime(kev_date_str, "%Y-%m-%dT%H:%M:%SZ").date()
                 ransomware_used = node.get("malicious", None)
                 known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
@@ -203,9 +208,12 @@ class MendParser:
                 impact=impact if impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
                 kev_date=kev_date if kev_date is not None else None,
-                known_exploited=known_exploited if known_exploited is not None else None,
-                ransomware_used=ransomware_used if ransomware_used is not None else None,
             )
+            # only overwrite default values if they are not None #12989
+            if known_exploited is not None:
+                new_finding.known_exploited = known_exploited
+            if ransomware_used is not None:
+                new_finding.ransomware_used = ransomware_used
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
 

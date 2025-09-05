@@ -549,9 +549,7 @@ class ImportScanForm(forms.Form):
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
-        widget=forms.widgets.FileInput(
-            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
-        ),
+        widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}),
         label="Choose report file",
         allow_empty_file=True,
         required=False,
@@ -674,9 +672,7 @@ class ReImportScanForm(forms.Form):
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
-        widget=forms.widgets.FileInput(
-            attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"},
-        ),
+        widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}),
         label="Choose report file",
         allow_empty_file=True,
         required=False,
@@ -2392,7 +2388,14 @@ class UserContactInfoForm(forms.ModelForm):
         exclude = ["user", "slack_user_id"]
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        # Do not expose force password reset if the current user does not have a password to reset
+        if user is not None:
+            if not user.has_usable_password():
+                self.fields["force_password_reset"].disabled = True
+                self.fields["force_password_reset"].help_text = "This user is authorized through SSO, and does not have a password to reset"
+        # Determine some other settings based on the current user
         current_user = get_current_user()
         if not current_user.is_superuser:
             if not user_has_configuration_permission(current_user, "auth.change_user") and \

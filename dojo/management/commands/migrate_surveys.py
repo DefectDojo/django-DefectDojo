@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 copy_string = "INSERT INTO `" + new_table_name + "` SELECT * FROM `" + table + "`;"
                 cursor.execute(str(copy_string))
                 # Update polymorphic id on some tables
-                if new_table_name == "dojo_question" or new_table_name == "dojo_answer":
+                if new_table_name in {"dojo_question", "dojo_answer"}:
                     update_string = "UPDATE `" + new_table_name + "` SET polymorphic_ctype_id = " + str(ctype_id) + ";"
                     cursor.execute(str(update_string))
                 # Drop the ddse table

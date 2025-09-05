@@ -37,6 +37,7 @@ class TrivyClusterComplianceHandler:
                     severity=severity,
                     static_finding=False,
                     dynamic_finding=True,
+                    fix_available=True,
                 )
                 if vulnerabilityids != []:
                     finding.unsaved_vulnerability_ids = vulnerabilityids
