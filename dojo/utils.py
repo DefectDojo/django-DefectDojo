@@ -1598,8 +1598,13 @@ def calculate_grade(product, *args, **kwargs):
         aeval = Interpreter()
         aeval(system_settings.product_grade)
         grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
-        product.prod_numeric_grade = aeval(grade_product)
-        super(Product, product).save()
+        prod_numeric_grade = aeval(grade_product)
+        if prod_numeric_grade != product.prod_numeric_grade:
+            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, prod_numeric_grade)
+            product.prod_numeric_grade = prod_numeric_grade
+            super(Product, product).save()
+        else:
+            logger.debug("Product %s grade %i is up to date", product.id, prod_numeric_grade)
 
 
 def get_celery_worker_status():
