@@ -17,6 +17,7 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         self.assertEqual(1, len(item.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2018-14600", item.unsaved_vulnerability_ids[0])
         self.assertEqual(787, item.cwe)
+        self.assertEqual(True, item.fix_available)
 
     def test_parse_file_with_many_vulns(self):
         testfile = (get_unit_tests_scans_path("jfrogxray") / "many_vulns.json").open(encoding="utf-8")
