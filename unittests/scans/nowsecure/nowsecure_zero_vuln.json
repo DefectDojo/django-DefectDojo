@@ -1,0 +1,1758 @@
+{
+  "data": {
+    "auto": {
+      "assessment": {
+        "ref": "13371337-1337-1337-1337-133713371337",
+        "applicationRef": "73317331-7331-7331-7331-733173317331",
+        "platformType": "android",
+        "packageKey": "com.org.appname",
+        "packageVersion": "1.0.0",
+        "taskId": "1231231231231",
+        "title": "AppName",
+        "iconURL": "https://api.nowsecure.com/icon/hjfkjz9mxb3bxy3zi1ohraj60oqtpbw63wnvgon8l1ytt49dqwickoczrzopvkvb",
+        "isAppstoreDownload": false,
+        "createdAt": "2025-06-20T06:47:15.551Z",
+        "createdBy": {
+          "ref": "123123aa-129a-1223-ba11-129c91234asf",
+          "email": "user@email.com",
+          "name": "John Doe",
+          "__typename": "UserSummary"
+        },
+        "buildRef": "123123aa-123a-1a31-123a-1231aa112311",
+        "buildVersion": "010000",
+        "upload": {
+          "ref": "1231acc1-123a-129f-19af-0aa123018391",
+          "createdAt": "2025-06-20T06:45:16.788Z",
+          "digest": "25tnhu7gc0u70lw9jnc120rilyz2z1blfnhssinqsgnvpjtvafj0x82ddfclyzri",
+          "__typename": "AutoUpload"
+        },
+        "analysisConfigLevel": "BASELINE",
+        "type": "baseline",
+        "analysisJobType": "FULL",
+        "staticScore": null,
+        "score": 100,
+        "favorite": false,
+        "assessmentError": null,
+        "isDebugMode": false,
+        "hasPreviousAssessmentForComparison": false,
+        "policy": {
+          "ref": "1a11aa11-1111-1111-a111-11111aaa1111",
+          "name": "NowSecure Default Policy",
+          "createdBy": null,
+          "createdAt": "2022-07-06T11:04:26.575Z",
+          "updatedAt": "2025-08-20T16:25:34.128Z",
+          "archivedAt": null,
+          "targetType": "ORGANIZATION",
+          "isDefault": true,
+          "isNSManaged": true,
+          "latestVersion": {
+            "ref": "1111a11a-11aa-1aa1-1a1a-111a11111aa1",
+            "version": 60,
+            "trackedVersion": null,
+            "trackedVersionRef": null,
+            "__typename": "PolicyVersion"
+          },
+          "targets": [
+            {
+              "ref": "a1a111aa-111a-11aa-111a-11a111a1a1a1",
+              "type": "ORGANIZATION",
+              "__typename": "PolicyTarget"
+            }
+          ],
+          "enabled": true,
+          "trackedPolicy": null,
+          "__typename": "Policy"
+        },
+        "policyVersion": {
+          "ref": "a11aa111-1a11-1111-1a1a-11aaa1a111a1",
+          "policyRef": "1a11aa11-1111-1111-a111-11111aaa1111",
+          "version": 56,
+          "policyCategories": [
+            {
+              "policyCategory": 1,
+              "label": "Needs Remediation",
+              "description": "NowSecure suggests remediation",
+              "color": "#CA1108",
+              "__typename": "PolicyCategory"
+            },
+            {
+              "policyCategory": 2,
+              "label": "Review Required",
+              "description": "NowSecure suggests security review to determine risk",
+              "color": "#FBA255",
+              "__typename": "PolicyCategory"
+            },
+            {
+              "policyCategory": 3,
+              "label": "Informational",
+              "description": "NowSecure suggests general review for audit and information",
+              "color": "#0099ff",
+              "__typename": "PolicyCategory"
+            }
+          ],
+          "__typename": "PolicyVersion"
+        },
+        "analysis": {
+          "isAuthenticated": null,
+          "isCancelled": false,
+          "isComplete": true,
+          "isRunning": false,
+          "status": "completed",
+          "mappedStatus": "completed",
+          "errorCode": null,
+          "error": null,
+          "artifacts": [
+          ],
+          "screenshots": [
+          ],
+          "task": {
+            "static": {
+              "id": "1231231231231.static",
+              "status": "completed",
+              "modifiedAt": "2025-06-20T07:18:45.377Z",
+              "isRunning": false,
+              "isComplete": true,
+              "__typename": "AnalysisJob"
+            },
+            "dynamic": {
+              "id": "1231231231231.dynamic",
+              "status": "completed",
+              "modifiedAt": "2025-06-20T07:18:36.233Z",
+              "isRunning": false,
+              "isComplete": true,
+              "__typename": "AnalysisJob"
+            },
+            "__typename": "AnalysisTask"
+          },
+          "__typename": "AutoAssessmentAnalysis"
+        },
+        "build": {
+          "ref": "123123aa-123a-1a31-123a-1231aa112311",
+          "digest": "25tnhu7gc0u70lw9jnc120rilyz2z1blfnhssinqsgnvpjtvafj0x82ddfclyzri",
+          "version": "1.0.0",
+          "__typename": "AutoBuild"
+        },
+        "group": {
+          "ref": "a111aaaa-aa11-11aa-1a11-11a111aa1111",
+          "__typename": "AutoGroup"
+        },
+        "__typename": "AutoAssessment",
+        "report": {
+          "createdAt": "2025-06-20T06:47:15.551Z",
+          "findings": [
+          ],
+          "__typename": "AssessmentReport"
+        },
+        "baseReport": {
+          "findings": [
+            {
+              "checkId": "apk_insecure_network_config",
+              "affected": false,
+              "cvss": 7.5,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_webview_access",
+              "affected": false,
+              "cvss": 7.5,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2023_0286",
+              "affected": false,
+              "cvss": 7.4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "on_received_ssl_error_proceed",
+              "affected": false,
+              "cvss": 5.9,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "keysize_check",
+              "affected": false,
+              "cvss": 5.9,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libcurl",
+              "affected": false,
+              "cvss": 5.7,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_custom",
+              "affected": false,
+              "cvss": 4.4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unprotected_context_registered_broadcast_receivers",
+              "affected": false,
+              "cvss": 4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unprotected_manifest_broadcast_receivers",
+              "affected": false,
+              "cvss": 4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libraries_ssp",
+              "affected": false,
+              "cvss": 1.6,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_hashing_algorithms",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_deeplinks",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "vulnerable_libraries",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hardcoded_passwords",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_strandhogg",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_insecure_prng",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_network_config_exceptions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_ssl_vuln",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_intent_redirection",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_hardcoded_secrets",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_device_or_other_ids_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_use_on_device",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_hsts",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_textfield_autocorrect",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_certificate_pinning",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_flow",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check_https",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_firebase_mfa_not_used",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "kotlin_debug_lib",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_insecure_constants",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_debuggable_webviews",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hardcoded_api_keys",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "javascript_interface_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_dangerous_permissions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "url_listing",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_crypto_keys",
+              "affected": null,
+              "cvss": null,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sms_communications",
+              "affected": null,
+              "cvss": null,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unsigned_jwt",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sdcard_file_list",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sqlcipher",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_application_servers",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_padding_oracle",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_hardcoded",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sql_injection",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "path_traversal",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "serialized_objects",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "arbitrary_code_execution_observed",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_static_iv",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_uses_vpn_permission",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "obfuscation_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "master_key_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "fragment_injection",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "secure_random_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_discovery",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "automation_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "behavioral_events",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_connection_domains",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_ivs",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_tracking_domains",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sensitive_data_pii",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_libraries",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_build_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_nsc",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_app_files",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "app_sbom",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "snoop_network_hosts",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sqlite",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "all_android_components",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_permissions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_reflection_code",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_device_or_other_ids_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_location_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_location_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_personal_info_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_personal_info_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_authentication",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_cors",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "cookie_without_httponly_flag",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "cookie_without_secure_flag",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_insufficient_rounds",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "runs_root_command",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "runs_root_command_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_reuse",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_encryption_modes",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_null",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_encryption_algorithms",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_root_detection_rasp",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "key_reuse",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "certificate_validation",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hostname_verification",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "uses_http",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_cert_validation",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check_broken_ssl",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "writable_executable_files_private_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "writable_executable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "world_readable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sensitive_data_implicit_intents",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_api_keys",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "world_writable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "remote_code_execution",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "arbitrary_code_execution_probable",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_leaked_data_sdcard",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_biometric_key_invalidation_disabled",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_janus_vuln",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2014_0224",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2014_0160",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "debug_flag_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_minimum_sdk",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_debug_symbols",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "joda_cve",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_ftp_libs",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_target_sdk_min",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "allow_backup_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_native_methods",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sqlcipher_key_leakage_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_blocker_apptentive",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "exported_components",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_janus_warn",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_libraries_aslr",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "okhttp",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libpng_cve",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "play_services_basement",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "potential_sqlcipher_key_leakage_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_blocker_segment",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_in_app_updates",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "use_of_deprecated_xamarin",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "certificate_validity_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_vpn_always_on_not_available",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            }
+          ],
+          "__typename": "AssessmentReport"
+        }
+      },
+      "__typename": "AutoQuery"
+    }
+  }
+}
