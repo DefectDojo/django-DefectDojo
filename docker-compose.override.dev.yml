@@ -7,6 +7,7 @@ services:
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during development
       DD_DEBUG: 'True'
+      DD_DJANGO_DEBUG_TOOLBAR_ENABLED: 'True'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
@@ -33,6 +34,11 @@ services:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
   nginx:
+    build:
+      args:
+        COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC: 'True'
+    environment:
+      DD_DJANGO_DEBUG_TOOLBAR_ENABLED: 'True'
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
   postgres:

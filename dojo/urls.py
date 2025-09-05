@@ -281,3 +281,9 @@ def drf_spectacular_preprocessing_filter_spec(endpoints):
         if path.startswith("/api/v2/"):
             filtered.append((path, path_regex, method, callback))
     return filtered
+
+
+if hasattr(settings, "DJANGO_DEBUG_TOOLBAR_ENABLED"):
+    if settings.DJANGO_DEBUG_TOOLBAR_ENABLED:
+        from debug_toolbar.toolbar import debug_toolbar_urls
+        urlpatterns += debug_toolbar_urls()

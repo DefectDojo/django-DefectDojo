@@ -176,8 +176,8 @@ Or you can modify `settings.dist.py` directly, but this adds the risk of having 
 ```
 
 ## Debug Toolbar
-In the `dojo/settings/template-local_settings.py` you'll find instructions on how to enable the [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar).
-This toolbar allows you to debug SQL queries, and shows some other interesting information.
+The [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar) can be enabled via the `DD_DJANGO_DEBUG_TOOLBAR_ENABLED` environment variable.
+This toolbar allows you to debug SQL queries, and shows some other interesting information. Do NOT enable this in Production environments.
 
 
 # Explicit Versioning
