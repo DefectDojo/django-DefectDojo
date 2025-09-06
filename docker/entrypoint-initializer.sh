@@ -110,6 +110,8 @@ python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
     cat <<-EOF
 
 ********************************************************************************
+WARNING: Missing Database Migrations Detected
+********************************************************************************
 
 You made changes to the models without creating a DB migration for them.
 
@@ -119,14 +121,24 @@ If you're not familiar with migrations in Django, please read the
 great documentation thoroughly:
 https://docs.djangoproject.com/en/5.0/topics/migrations/
 
+This is now a WARNING and the container will continue to start.
+However, you should create the necessary migrations as soon as possible using:
+docker compose exec uwsgi bash -c 'python manage.py makemigrations -v2'
+
 ********************************************************************************
 
 EOF
-    exit 1
+    echo "WARNING: Continuing startup despite missing migrations..."
 }
 
 echo "Migrating"
 python3 manage.py migrate
+
+echo "Configuring pghistory triggers based on audit settings"
+cat <<EOD | python3 manage.py shell
+from dojo.auditlog import configure_pghistory_triggers
+configure_pghistory_triggers()
+EOD
 
 echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}" || true)
