@@ -51,11 +51,6 @@ minikube addons enable ingress
 
 Helm >= v3
 
-```zsh
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-```
-
 Then pull the dependent charts:
 
 ```zsh

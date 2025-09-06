@@ -49,7 +49,28 @@
                         "annotations": {
                             "type": "object"
                         },
+                        "extraEnv": {
+                            "type": "array"
+                        },
+                        "extraInitContainers": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "type": "array"
+                        },
+                        "extraVolumes": {
+                            "type": "array"
+                        },
+                        "livenessProbe": {
+                            "type": "object"
+                        },
                         "nodeSelector": {
+                            "type": "object"
+                        },
+                        "podAnnotations": {
+                            "type": "object"
+                        },
+                        "readinessProbe": {
                             "type": "object"
                         },
                         "replicas": {
@@ -82,6 +103,9 @@
                                 }
                             }
                         },
+                        "startupProbe": {
+                            "type": "object"
+                        },
                         "tolerations": {
                             "type": "array"
                         }
@@ -89,12 +113,6 @@
                 },
                 "broker": {
                     "type": "string"
-                },
-                "brokerHost": {
-                    "type": "string"
-                },
-                "extraVolumes": {
-                    "type": "array"
                 },
                 "logLevel": {
                     "type": "string"
@@ -116,7 +134,28 @@
                                 }
                             }
                         },
+                        "extraEnv": {
+                            "type": "array"
+                        },
+                        "extraInitContainers": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "type": "array"
+                        },
+                        "extraVolumes": {
+                            "type": "array"
+                        },
+                        "livenessProbe": {
+                            "type": "object"
+                        },
                         "nodeSelector": {
+                            "type": "object"
+                        },
+                        "podAnnotations": {
+                            "type": "object"
+                        },
+                        "readinessProbe": {
                             "type": "object"
                         },
                         "replicas": {
@@ -148,6 +187,9 @@
                                     }
                                 }
                             }
+                        },
+                        "startupProbe": {
+                            "type": "object"
                         },
                         "tolerations": {
                             "type": "array"
@@ -234,6 +276,9 @@
                 }
             }
         },
+        "disableHooks": {
+            "type": "boolean"
+        },
         "django": {
             "type": "object",
             "properties": {
@@ -242,6 +287,9 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "extraInitContainers": {
+                    "type": "array"
                 },
                 "extraVolumes": {
                     "type": "array"
@@ -309,6 +357,12 @@
                 "nginx": {
                     "type": "object",
                     "properties": {
+                        "extraEnv": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "type": "array"
+                        },
                         "resources": {
                             "type": "object",
                             "properties": {
@@ -405,6 +459,12 @@
                         },
                         "enableDebug": {
                             "type": "boolean"
+                        },
+                        "extraEnv": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "type": "array"
                         },
                         "livenessProbe": {
                             "type": "object",
@@ -509,6 +569,9 @@
         "extraConfigs": {
             "type": "object"
         },
+        "extraLabels": {
+            "type": "object"
+        },
         "gke": {
             "type": "object",
             "properties": {
@@ -529,6 +592,12 @@
         "imagePullPolicy": {
             "type": "string"
         },
+        "imagePullSecrets": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
         "initializer": {
             "type": "object",
             "properties": {
@@ -537,6 +606,12 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "extraEnv": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
                 },
                 "extraVolumes": {
                     "type": "array"
@@ -585,6 +660,9 @@
                 },
                 "staticName": {
                     "type": "boolean"
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             }
         },
@@ -632,6 +710,12 @@
         },
         "podLabels": {
             "type": "object"
+        },
+        "postgresServer": {
+            "type": [
+                "string",
+                "null"
+            ]
         },
         "postgresql": {
             "type": "object",
@@ -784,24 +868,38 @@
                 "enabled": {
                     "type": "boolean"
                 },
-                "scheme": {
-                    "type": "string"
-                },
-                "transportEncryption": {
+                "sentinel": {
                     "type": "object",
                     "properties": {
                         "enabled": {
                             "type": "boolean"
-                        },
-                        "params": {
-                            "type": "string"
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
                         }
                     }
                 }
             }
         },
+        "redisParams": {
+            "type": "string"
+        },
+        "redisServer": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
         "repositoryPrefix": {
             "type": "string"
+        },
+        "revisionHistoryLimit": {
+            "type": "integer"
         },
         "secrets": {
             "type": "object",
