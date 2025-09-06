@@ -1,4 +1,4 @@
-in import json
+import json
 import logging
 import time
 from importlib import import_module
@@ -8,12 +8,9 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-import dojo.tools.factory
-from dojo.models import Engagement, Product, Product_Type
 from unittests.test_dashboard import User
 
 logger = logging.getLogger(__name__)
@@ -94,18 +91,21 @@ class Command(BaseCommand):
 
         Returns:
             tuple: (scan_type, parser_class) or raises CommandError if not found
+
         """
         # Extract the directory name (parser module name)
         path_parts = Path(scan_file_path).parts
         if len(path_parts) < 2:
-            raise CommandError(f"Scan file path must include directory: {scan_file_path}")
+            msg = f"Scan file path must include directory: {scan_file_path}"
+            raise CommandError(msg)
 
         module_name = path_parts[0]
 
         # Try to find and load the parser module
         try:
             if not find_spec(f"dojo.tools.{module_name}.parser"):
-                raise CommandError(f"No parser module found for '{module_name}'")
+                msg = f"No parser module found for '{module_name}'"
+                raise CommandError(msg)
 
             module = import_module(f"dojo.tools.{module_name}.parser")
 
@@ -120,19 +120,22 @@ class Command(BaseCommand):
                     break
 
             if not parser_class:
-                raise CommandError(f"No parser class found in module '{module_name}'")
+                msg = f"No parser class found in module '{module_name}'"
+                raise CommandError(msg)
 
             # Get the scan type from the parser
             parser_instance = parser_class()
             scan_types = parser_instance.get_scan_types()
 
             if not scan_types:
-                raise CommandError(f"Parser '{module_name}' has no scan types")
+                msg = f"Parser '{module_name}' has no scan types"
+                raise CommandError(msg)
 
             return scan_types[0], parser_class
 
         except ImportError as e:
-            raise CommandError(f"Failed to import parser module '{module_name}': {e}")
+            msg = f"Failed to import parser module '{module_name}': {e}"
+            raise CommandError(msg)
 
     def import_unittest_scan(self, scan_file, product_name, engagement_name, product_type_name,
                            minimum_severity, active, verified):
@@ -147,14 +150,16 @@ class Command(BaseCommand):
             minimum_severity: Minimum severity level
             active: Whether findings should be active
             verified: Whether findings should be verified
+
         """
         # Validate scan file exists
         scan_path = Path("unittests/scans") / scan_file
         if not scan_path.exists():
-            raise CommandError(f"Scan file not found: {scan_path}")
+            msg = f"Scan file not found: {scan_path}"
+            raise CommandError(msg)
 
         # Deduce scan type from path
-        scan_type, parser_class = self.deduce_scan_type_from_path(scan_file)
+        scan_type, _parser_class = self.deduce_scan_type_from_path(scan_file)
 
         logger.info(f"Importing scan '{scan_file}' using scan type '{scan_type}'")
         logger.info(f"Target: Product '{product_name}' -> Engagement '{engagement_name}'")
@@ -194,7 +199,7 @@ class Command(BaseCommand):
         start_time = time.time()
 
         try:
-            result = self.import_unittest_scan(
+            self.import_unittest_scan(
                 scan_file=scan_file,
                 product_name=product_name,
                 engagement_name=engagement_name,
@@ -210,12 +215,13 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Successfully imported '{scan_file}' into product '{product_name}' "
-                    f"(took {duration:.2f} seconds)"
-                )
+                    f"(took {duration:.2f} seconds)",
+                ),
             )
 
         except Exception as e:
             end_time = time.time()
             duration = end_time - start_time
             logger.exception(f"Failed to import scan '{scan_file}' after {duration:.2f} seconds")
-            raise CommandError(f"Import failed after {duration:.2f} seconds: {e}")
+            msg = f"Import failed after {duration:.2f} seconds: {e}"
+            raise CommandError(msg)
