@@ -107,7 +107,7 @@ class GenericJSONParser:
                 "kev_date",
                 "known_exploited",
                 "ransomware_used",
-                "fix_available"
+                "fix_available",
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
