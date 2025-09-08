@@ -14,11 +14,10 @@ def calculate_posture(result):
     return list(posture_status_dict.keys())[-1] if posture_status_dict else "UNKNOWN"
 
 
-def calculate_priority(findings, active_findings):
+def calculate_priority(findings):
     sum_priority = 0
     for finding in findings:
         sum_priority += finding.priority
-    sum_priority = sum_priority / active_findings
     return round(sum_priority, 3)
 
 def is_in_hacking_continuous(test, data):
@@ -91,6 +90,6 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
         })
 
 
-    data["result"] = calculate_priority(active_finding, data["active_findings"])
+    data["result"] = calculate_priority(active_finding)
     data["status"] = calculate_posture(data["result"])
     return data
