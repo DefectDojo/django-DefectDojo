@@ -1660,6 +1660,13 @@ class Engagement(models.Model):
         self.risk_acceptance.add(*accepted_risks)
 
     @property
+    def get_all_finding_active(self):
+        """ Returns the number of active findings for this engagement """
+        a = Finding.objects.filter(is_mitigated=False, test__engagement=self)
+        return a
+
+
+    @property
     def has_jira_issue(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_issue(self)
@@ -5170,11 +5177,12 @@ class GeneralSettings(models.Model):
 
     @classmethod
     def get_value(cls, name_key: str, default=None):
+        import ast
         variable_object = None
         rule_data_type = {
             "INT": int,
             "STRING": str,
-            "DICT": lambda value: json.loads(value),
+            "DICT": lambda value: ast.literal_eval(value),
             "LIST": lambda value: value.split(","),
             "BOOLEAN": lambda value: value.lower() in ["true", "1", "t", "y", "yes"],
         }

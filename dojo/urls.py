@@ -120,6 +120,7 @@ from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.user.urls import urlpatterns as user_urls
 from dojo.api_v2.manager_cache.urls import urlpatterns as manager_cache_urls
 from dojo.api_v2.metrics.urls import urlpatterns as metrics_general_urls
+from dojo.api_v2.security_posture.urls import urlpatterns as security_posture_urls
 from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -279,6 +280,7 @@ urlpatterns += [
 
 urlpatterns += manager_cache_urls
 urlpatterns += metrics_general_urls
+urlpatterns += security_posture_urls
 urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 
