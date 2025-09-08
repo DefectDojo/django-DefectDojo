@@ -3605,7 +3605,7 @@ def calculate_possible_related_actions_for_similar_finding(
 
     return actions
 
-@method_decorator(dojo_ratelimit_view(), name='dispatch')
+dojo_ratelimit_view()
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def generate_token_generative_ia(request, fid):
     error_response = {
