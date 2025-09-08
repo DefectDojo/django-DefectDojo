@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import View
 
+from dojo.decorators import dojo_ratelimit_view
+from django.utils.decorators import method_decorator
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
     user_has_permission,
@@ -80,6 +82,7 @@ class ListGroups(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewGroup(View):
     def get_group(self, group_id: int):
         return get_object_or_404(Dojo_Group, id=group_id)

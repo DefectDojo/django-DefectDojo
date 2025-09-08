@@ -11,6 +11,7 @@ from itertools import chain
 from pathlib import Path
 
 from django.conf import settings
+from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.core import serializers
@@ -31,6 +32,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from dojo.decorators import dojo_ratelimit_view
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -48,7 +50,7 @@ from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
     user_is_authorized,
 )
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -103,6 +105,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
     Product,
+    Role,
     Stub_Finding,
     System_Settings,
     Test,
@@ -373,15 +376,18 @@ class BaseListFindings:
             else finding_filter_class(*args, **kwargs)
         )
 
-    def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View).order_by(self.get_order_by())
+    def get_filtered_findings(self, request=None):
+        findings = get_authorized_findings(
+            permission=Permissions.Finding_View,
+            user=request.user).order_by(self.get_order_by())
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
     def get_fully_filtered_findings(self, request: HttpRequest):
-        findings = self.get_filtered_findings()
+        findings = self.get_filtered_findings(request)
         return self.filter_findings_by_form(request, findings)
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 @method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListFindings(View, BaseListFindings):
     def get_initial_context(self, request: HttpRequest):
@@ -536,7 +542,7 @@ class ListBlacklistedFindings(ListFindings):
         self.filter_name = "Blacklisted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFindingRender(View):
     
     def get_template(self):
@@ -576,6 +582,7 @@ class ViewFindingRender(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
         finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
@@ -891,6 +898,7 @@ class ViewFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class EditFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -1240,6 +1248,7 @@ class EditFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class DeleteFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -3596,6 +3605,7 @@ def calculate_possible_related_actions_for_similar_finding(
 
     return actions
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def generate_token_generative_ia(request, fid):
     error_response = {
@@ -3643,3 +3653,20 @@ def generate_token_generative_ia(request, fid):
     contex = finding_helper.parser_ia_recommendation(
         response.json())
     return JsonResponse(contex, status=200)
+
+
+@dojo_ratelimit_view()
+def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
+    page_name = ('all_findings_frontend')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    base_params += f"&product={product_id}" if product_id else ""
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/all_findings_v2.html', {
+        'name': page_name,
+        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
+        'mf_frontend_defect_dojo_params': base_params,
+        'user': user,
+    })

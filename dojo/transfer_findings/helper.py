@@ -163,7 +163,7 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                     )
                 elif dict_findings["risk_status"] == "Transfer Rejected":
                     finding.risk_status = dict_findings["risk_status"]
-                    finding.active = True
+                    finding.active = False if finding.is_mitigated and finding.mitigated is not None else True
                 finding.save()
         else:
             logger.warning(f"Finding not Found: {finding.id}")
@@ -346,8 +346,7 @@ def reset_finding_related(finding):
     try:
         if finding:
             finding.risk_status = "Risk Active"
-            finding.active = True
-            finding.out_of_scope = False
+            finding.active = False if finding.is_mitigated and finding.mitigated is not None else True
             finding.save()
         else:
             raise ApiError.not_found(f"Finding id: {finding.id} not found")

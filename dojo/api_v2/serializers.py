@@ -2860,6 +2860,10 @@ class ReportGenerateOptionSerializer(serializers.Serializer):
     include_table_of_contents = serializers.BooleanField(default=False)
 
 
+class FindingBulkUpdateSLAStartDate(serializers.Serializer):
+    tags = serializers.CharField(max_length=200)
+    date = serializers.DateTimeField(required=True)
+
 class ExecutiveSummarySerializer(serializers.Serializer):
     engagement_name = serializers.CharField(max_length=200)
     engagement_target_start = serializers.DateField()
@@ -2997,6 +3001,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
     )
     risk_acceptance_request = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
+    url_report_finding = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
     risk_acceptance_confirmed = MultipleChoiceField(

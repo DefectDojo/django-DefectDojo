@@ -69,8 +69,8 @@ env = environ.FileAwareEnv(
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
-    DD_THROTTLE_ANON=(str, "0/secod"),
-    DD_THROTTLE_USER=(str, "1000/secod"),
+    DD_THROTTLE_ANON=(str, "1000/second"),
+    DD_THROTTLE_USER=(str, "1000/second"),
     DD_TEST_RUNNER=(str, "django.test.runner.DiscoverRunner"),
     DD_URL_PREFIX=(str, ""),
     DD_ROOT=(str, root("dojo")),
@@ -99,8 +99,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
-    # Every day at 3:00 AM
-    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 3),
+    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 1),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -255,6 +254,7 @@ env = environ.FileAwareEnv(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
     DD_SLA_BUSINESS_DAYS=(bool, False),
+    DD_SLA_FREEZE_DAYS=(int, 0),  # Number of days to freeze SLA's
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -269,6 +269,7 @@ env = environ.FileAwareEnv(
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, "console"),
+    DD_ENABLE_SQL_LOGGING=(bool, False),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
@@ -479,7 +480,8 @@ env = environ.FileAwareEnv(
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "tag1,tag2"),
     DD_PRIORITY_FILTER_TAGS=(str, ""),
-    
+    DD_TAGS_EXCLUDE_PRACTICE_FILTER=(list, []),
+
     # contact types AUTHORIZED FOR RISK ACCEPTANCE
     DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE=(list, [
         "team_manager",
@@ -575,12 +577,14 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     return "".join(result_list)
 
 
+AWS_REGION = env("AWS_REGION", default="us-east-1")
+
+
 def get_secret(secret_name):
-    region_name = env("AWS_REGION")
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
+    client = session.client(service_name="secretsmanager", region_name=AWS_REGION)
 
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
@@ -1007,6 +1011,7 @@ SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")
 SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")
 # Use business days to calculate SLA's and age of a finding instead of calendar days
 SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")
+SLA_FREEZE_DAYS = env("DD_SLA_FREEZE_DAYS")
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -1635,7 +1640,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
-        "schedule": crontab(hour=CELERY_CRON_SCHEDULE_DUPE_DELETE, minute=0),
+        "schedule": timedelta(minutes=CELERY_CRON_SCHEDULE_DUPE_DELETE),
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
@@ -2156,6 +2161,7 @@ JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GRO
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING_HANDLER = env("DD_LOGGING_HANDLER")
+ENABLE_SQL_LOGGING = env("DD_ENABLE_SQL_LOGGING")
 
 LOG_LEVEL = env("DD_LOG_LEVEL")
 if not LOG_LEVEL:
@@ -2191,12 +2197,14 @@ LOGGING = {
         },
     },
     "handlers": {
-        "console_sql": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "sql_with_trace",
-            "filters": ["sql_trace"],
-        },
+        **({
+            "console_sql": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+                "formatter": "sql_with_trace",
+                "filters": ["sql_trace"],
+            }
+        } if ENABLE_SQL_LOGGING else {}),
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
@@ -2212,11 +2220,13 @@ LOGGING = {
         },
     },
     "loggers": {
+      **({
         "django.db.backends": {
             'level': str(LOG_LEVEL),
             'handlers': ['console_sql'],
             'propagate': False,
-        },
+        }
+        } if ENABLE_SQL_LOGGING else {}),
         "django.request": {
             "handlers": ["mail_admins", "console"],
             "level": str(LOG_LEVEL),
@@ -2421,6 +2431,7 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
 PRIORITY_FILTER_TAGS = env("DD_PRIORITY_FILTER_TAGS")
+TAGS_EXCLUDE_PRACTICE_FILTER = env("DD_TAGS_EXCLUDE_PRACTICE_FILTER")
 # Contacts_types_permissions
 CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE = env("DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE")
 # exclusive permission

@@ -122,6 +122,9 @@
                             </i>
                         </th>
                     {% endif %}
+                    {% if 'ENABLE_VS_INTEGRATIONS'|general_settings_get_value:"False" and 'ENABLE_FOR_PRACTICES_VULSOLVER'|general_settings_get_value in test.tags.all %}
+                        <th> {{"TITLE_VULSOLVER_URL"|general_settings_get_value}}</th>
+                    {% endif %}
                     {% if test.api_scan_configuration %}<th>{% trans "API Scan Configuration" %}</th>{% endif %}
                     {% endblock test_header %}
                 </tr>
@@ -173,6 +176,14 @@
                             {% endif %}
                         </td>
                     {% endif %}
+                    {% if 'ENABLE_VS_INTEGRATIONS'|general_settings_get_value:"False" and 'ENABLE_FOR_PRACTICES_VULSOLVER'|general_settings_get_value in test.tags.all %}
+                    <td>
+                        <a rel="noopener noreferrer"
+                        href="{{'URL_VS'|general_settings_get_value}}" target="_blank" title="{{'VULSOLVER_DESCRIPTION'|general_settings_get_value}}">
+                        <img src="{{ 'LOGO_URL_VS'|general_settings_get_value }}" alt="Logo VS" width="30"/> 
+                    </a>
+                    </td>
+                    {%endif%}
                     {% endblock test_body %}
                 </tr>
             </table>
@@ -945,7 +956,7 @@
                                 <th>
                                     {% trans "EPSS Percentile" %}
                                 </th>
-                                <th>
+                                <th class="nowrap centered severity-sort" scope="col">
                                     {% trans "Priority" %}
                                 </th>
                                 <th>
@@ -1250,7 +1261,7 @@
                                     <td class="nowrap">
                                         {{ finding.epss_percentile|format_epss }}
                                     </td>
-                                    <td>
+                                    <td class="centered severity-sort" data-severity="{{ finding|priority_display_status }}">
                                         <span class="label severity severity-{{ finding|priority_display_status }}">
                                             <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                 data-content="{{ finding.priority }}">
@@ -1697,10 +1708,14 @@
                         return 2;
                     case 'Medium':
                         return 3;
-                    case 'High':
+                    case 'Medium-Low':
                         return 4;
-                    case 'Critical':
+                    case 'High':
                         return 5;
+                    case 'Critical':
+                        return 6;
+                    case 'Very-Critical':
+                        return 7;
                     default:
                         return 1;
                 }

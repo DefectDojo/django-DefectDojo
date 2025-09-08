@@ -13,3 +13,8 @@ class RecommendationSerializer(serializers.Serializer):
     recommendations = serializers.ListField(child=serializers.CharField())
     mitigations = serializers.ListField(child=serializers.CharField())
     files_to_fix = serializers.ListField(child=serializers.CharField())
+
+class FindingBulkUpdateSLAStartDateSerializer(serializers.Serializer):
+    tags = serializers.CharField(max_length=200)
+    priority = serializers.FloatField()
+    date = serializers.DateField()

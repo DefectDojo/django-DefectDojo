@@ -1,4 +1,3 @@
-
 {% extends "notifications/mail/base_email.tpl" %}
 {% load i18n %}
 {% load navigation_tags %}
@@ -41,5 +40,6 @@
                 </div>
             {% endif %}
         {% endautoescape %}
+
     </body>
 </html>

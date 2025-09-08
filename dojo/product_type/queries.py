@@ -15,8 +15,8 @@ from dojo.models import Global_Role, Product_Type, Product, Product_Type_Group, 
 from django.conf import settings
 
 
-def get_authorized_product_types(permission):
-    user = get_current_user()
+def get_authorized_product_types(permission, user=None):
+    user = get_current_user() if user is None else user
 
     if user is None:
         return Product_Type.objects.none()

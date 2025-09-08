@@ -47,6 +47,13 @@
             <td>
               {{ finding.epss_percentile|format_epss }}
           </td>
+          <td>
+            <span class="label severity severity-{{ finding|priority_display_status }}">
+                <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+    data-content="{{ finding.priority }}">
+                {{ finding|priority_display_status }}
+            </span>
+          </td>
           <td>{{ finding.date }}</td>
           
           <td>{{ finding.active }}</td>

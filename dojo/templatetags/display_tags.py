@@ -1,12 +1,12 @@
 from enum import Enum
 import re
 import base64
-import json
 import contextlib
 import datetime
 import logging
 import mimetypes
 import pytz
+import crum
 from ast import literal_eval
 from itertools import chain
 
@@ -29,6 +29,7 @@ from django.utils.translation import gettext as _
 from django.template import Context, Template
 
 from dojo.engine_tools.models import FindingExclusion
+from dojo.user.queries import get_role_members
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
 from dojo.finding.helper import parser_ia_recommendation
@@ -43,7 +44,7 @@ from dojo.models import (
     ExclusivePermission,
     GeneralSettings)
 
-from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, calculate_severity_priority
 
 logger = logging.getLogger(__name__)
 
@@ -302,7 +303,9 @@ def finding_sla(finding):
     if not enforce_sla:
         return ""
 
-    severity = finding.severity
+    severity = calculate_severity_priority(finding.tags, finding.priority)
+    if severity == "Unknown":
+        severity = finding.severity
     find_sla = finding.sla_days_remaining()
     status = "green"
 
@@ -839,26 +842,7 @@ def finding_display_status(finding, event="view"):
 
 @register.filter
 def priority_display_status(finding):
-    if finding.tags:
-        if not any(tag in finding.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-            return "Unknown"
-        
-    priority = float(finding.priority)
-    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical")
-    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical")
-    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High")
-    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low")
-
-    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
-        return "Very-Critical"
-    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
-        return "Critical"
-    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
-        return "High"
-    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
-        return "Medium-Low"
-    else:
-        return "Unknown"
+    return calculate_severity_priority(finding.tags, finding.priority)
 
 
 @register.filter
@@ -1251,13 +1235,42 @@ def permission_view_findings(user):
         "USERS_PERMISSION_VIEW_FINDINGS",
         "all"
     )
-    if value == "all" or user in value:
+    if "all" in value or user in value:
         return True
     return False
 
 @register.filter()
-def general_settings_get_value(name_key, default):
+def general_settings_get_value(name_key, default=None):
     """
     Returns the value of a general setting by its name key.
     """
     return GeneralSettings.get_value(name_key, default)
+
+@register.filter()
+def has_user_permission_view(permission_render_view, product):
+
+    if GeneralSettings.get_status(
+        name_key=permission_render_view, default=False) is False:
+        return False
+
+    roles_with_permission = GeneralSettings.get_value(permission_render_view, None)
+
+    if roles_with_permission is None:
+        return False
+
+    user = crum.get_current_user()
+
+    if user.is_superuser:
+        return True
+
+
+    if hasattr(user, 'global_role'):
+        if user.global_role.role:
+            if user.global_role.role.name in roles_with_permission:
+                return True
+        
+    roles_allowed = get_role_members(user, product, product.prod_type)
+    if roles_allowed in roles_with_permission:
+        return True
+    
+    return False

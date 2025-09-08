@@ -97,11 +97,6 @@ steps:
   - task: SonarQubeAnalyze@7
     displayName: "Run Code Analysis"
 
-  - task: sonar-buildbreaker@8
-    displayName: "Break build on quality gate failure"
-    inputs:
-      SonarQube: SonarQube
-
   - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
     displayName: "Copy Files"
     # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))

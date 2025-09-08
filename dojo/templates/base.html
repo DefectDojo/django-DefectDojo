@@ -763,6 +763,14 @@
                                                 <span class="caret"></span>
                                             </a>
                                             <ul class="dropdown-menu">
+                                                {% if "RENDER_ALL_FINDING_V2"|has_user_permission_view:product_tab.product %}
+                                                 <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'all_findings_frontend' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-rectangle-list"></i>
+                                                        {% trans "View All Findings v2.0" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-rectangle-list"></i>

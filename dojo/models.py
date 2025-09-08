@@ -849,6 +849,9 @@ class Product_Type(models.Model):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -1212,6 +1215,9 @@ class Product(models.Model):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -1445,6 +1451,11 @@ class Product_API_Scan_Configuration(models.Model):
         if self.service_key_1 or self.service_key_2 or self.service_key_3:
             name += f" ({self.details})"
         return name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=["service_key_1", "product"]),
+        ]
 
     @property
     def details(self):
@@ -1582,6 +1593,7 @@ class Engagement(models.Model):
         ordering = ["-target_start"]
         indexes = [
             models.Index(fields=["product", "active"]),
+            models.Index(fields=["name"]),
         ]
 
     def __str__(self):
@@ -3205,8 +3217,37 @@ class Finding(models.Model):
 
     def get_sla_period(self):
         sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        sla_period = getattr(sla_configuration, self.severity.lower(), None)
-        enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
+        
+        severity = self.severity.lower()
+        severity_mapping = {
+            "Very-Critical": "critical",
+            "Critical": "high",
+            "High": "medium",
+            "Medium-Low": "low",
+        }
+
+        if self.tags:
+            if any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
+                # If the finding has a tag that matches the priority filter tags, use the priority field
+                priority = round(float(self.priority), 2)
+                RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical", None)
+                RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
+                RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
+                RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low", None)
+
+                if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
+
+                    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
+                        severity = "Very-Critical"
+                    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
+                        severity = "Critical"
+                    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
+                        severity = "High"
+                    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
+                        severity = "Medium-Low"
+
+        sla_period = getattr(sla_configuration, severity_mapping.get(severity, severity), None)
+        enforce_period = getattr(sla_configuration, str("enforce_" + severity_mapping.get(severity, severity)), None)
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
@@ -3233,7 +3274,10 @@ class Finding(models.Model):
                     mitigated_date = self.mitigated.date()
                 self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
             else:
-                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
+                if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:3]):
+                    self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining) + timedelta(days=settings.SLA_FREEZE_DAYS)
+                else:
+                    self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
@@ -3404,7 +3448,26 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
+        if self.test.engagement.source_code_management_server:
+            st = self.test.engagement.source_code_management_server.name
+            if st:
+                return st.lower()
+            
         return ""
+    
+    def clean_file_path(self):
+        """
+        Clean file path according to specific rules.
+        """
+
+        idx = self.file_path.find(":")
+        mr_idx = self.file_path.find("_MR_")
+        path = self.file_path[idx+1:] if idx != -1 and mr_idx == -1 else self.file_path
+
+        if mr_idx != -1:
+            path_mr = path[mr_idx+4:]
+            return path_mr.replace(":", "/") if idx != -1 else path_mr
+        return path
 
     def scm_public_prepare_base_link(self, uri):
         # scm public (https://scm-domain.org) url template for browse is:
@@ -3421,17 +3484,19 @@ class Finding(models.Model):
         # hash or branch/tag should be appended to base browser link
         intermediate_path = "/blob/" if scm_type in {"github", "gitlab"} else "/src/"
 
+        clean_file_path = self.clean_file_path()
+
         link = self.scm_public_prepare_base_link(uri)
-        if self.test.commit_hash:
-            link += intermediate_path + self.test.commit_hash + "/" + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += intermediate_path + self.test.engagement.commit_hash + "/" + self.file_path
-        elif self.test.branch_tag:
-            link += intermediate_path + self.test.branch_tag + "/" + self.file_path
+        if self.test.branch_tag:
+            link += intermediate_path + self.test.branch_tag + "/" + clean_file_path
         elif self.test.engagement.branch_tag:
-            link += intermediate_path + self.test.engagement.branch_tag + "/" + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + "/" + clean_file_path
+        elif self.test.commit_hash:
+            link += intermediate_path + self.test.commit_hash + "/" + clean_file_path
+        elif self.test.engagement.commit_hash:
+            link += intermediate_path + self.test.engagement.commit_hash + "/" + clean_file_path
         else:
-            link += intermediate_path + "master/" + self.file_path
+            link += intermediate_path + "master/" + clean_file_path
 
         return link
 
@@ -3472,6 +3537,13 @@ class Finding(models.Model):
 
         return link
 
+    def azuredevops_scm_link(self, uri):
+        # azure devops url template for browse is:
+        # uri?path=%2F<file_path>&version=GB<branch>
+        # so to create browser url - git url should be recomposed like below:
+        clean_file_path = self.clean_file_path()
+        return uri + "?path=%2F" + clean_file_path + "&version=GB" + self.test.branch_tag
+
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3481,6 +3553,8 @@ class Finding(models.Model):
         if (self.test.engagement.source_code_management_uri is not None):
             if scm_type == "bitbucket-standalone":
                 link = self.bitbucket_standalone_prepare_scm_link(link)
+            elif scm_type == "azure devops":
+                link = self.azuredevops_scm_link(link)
             elif scm_type in {"github", "gitlab", "gitea", "codeberg", "bitbucket"}:
                 link = self.git_public_prepare_scm_link(link, scm_type)
             elif "https://github.com/" in self.test.engagement.source_code_management_uri:
@@ -4422,6 +4496,9 @@ class Notifications(models.Model):
     finding_exclusion_expired = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_("Finding exclusion expired"),
         help_text=_("Get notified of finding exclusion requests expired"))
+    url_report_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+        verbose_name=_("Url report finding"),
+        help_text=_("Get notified of url download report finding"))
 
     class Meta:
         constraints = [
@@ -4469,6 +4546,7 @@ class Notifications(models.Model):
                 result.finding_exclusion_rejected = {*result.finding_exclusion_rejected, *notifications.finding_exclusion_rejected}
                 result.finding_exclusion_approved = {*result.finding_exclusion_approved, *notifications.finding_exclusion_approved}
                 result.finding_exclusion_expired = {*result.finding_exclusion_expired, *notifications.finding_exclusion_expired}
+                result.url_report_finding = {*result.url_report_finding, *notifications.url_report_finding}
         return result
 
 
@@ -5119,8 +5197,12 @@ class GeneralSettings(models.Model):
         return cls.status if cls.status else False
 
     @classmethod
-    def get_status(cls, name_key: str):
-        return GeneralSettings.objects.get(name_key=name_key).status
+    def get_status(cls, name_key: str, default=False):
+        try:
+            return GeneralSettings.objects.get(name_key=name_key).status
+        except ObjectDoesNotExist as e:
+            logger.error(f"Variable not found : {name_key}, {str(e)}")
+            return default
 
     @classmethod
     def get_value(cls, name_key: str, default=None):
