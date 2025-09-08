@@ -682,14 +682,11 @@ class BaseImporter(ImporterOptions):
             logger.debug("endpoints_to_add: %s", endpoints_to_add)
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
 
-    def process_vulnerability_ids(
+    def process_cve(
         self,
         finding: Finding,
     ) -> Finding:
-        """
-        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
-        to create `Vulnerability_Id` objects with the finding associated correctly
-        """
+        """Ensure cve is set from the unsaved_vulnerability_ids field, or vice versa."""
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
@@ -703,6 +700,16 @@ class BaseImporter(ImporterOptions):
             # If there is no list, make one with the value of the cve field
             finding.unsaved_vulnerability_ids = [finding.cve]
 
+        return finding
+
+    def process_vulnerability_ids(
+        self,
+        finding: Finding,
+    ) -> Finding:
+        """
+        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
+        to create `Vulnerability_Id` objects with the finding associated correctly
+        """
         if finding.unsaved_vulnerability_ids:
             # Remove old vulnerability ids - keeping this call only because of flake8
             Vulnerability_Id.objects.filter(finding=finding).delete()
