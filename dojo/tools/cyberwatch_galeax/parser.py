@@ -22,11 +22,11 @@ class CyberwatchGaleaxParser:
         return "Import Cyberwatch Cve and Security Issue data in JSON format, you can get the json from this tool : https://github.com/Galeax/Cyberwatch-API-DefectDojo"
 
     def get_findings(self, filename, test):
-        logger.debug(f"Starting get_findings with filename: {filename}")
+        logger.debug("Starting get_findings with filename: %s", filename)
         try:
             file_content = self.read_file_content(filename)
         except Exception as e:
-            logger.error(f"Error processing file: {e}")
+            logger.error("Error processing file: %s", e)
             return []
         else:
             data = json.loads(file_content)
@@ -75,12 +75,12 @@ class CyberwatchGaleaxParser:
         # Safely handle when "cwes" is null
         cwes = json_data.get("cwes") or {}
         if not isinstance(cwes, dict):
-            logger.error(f"Invalid cwes data: {cwes}")
+            logger.error("Invalid cwes data: %s", cwes)
             cwes = {}
 
         cwes_ids = cwes.get("cwe_id", [])
         if not isinstance(cwes_ids, list):
-            logger.error(f"Invalid cwe_id data: {cwes_ids}")
+            logger.error("Invalid cwe_id data: %s", cwes_ids)
             cwes_ids = []
         if cwes_ids:
             try:
@@ -139,7 +139,7 @@ class CyberwatchGaleaxParser:
 
         servers = json_data.get("servers", [])
         if not isinstance(servers, list):
-            logger.error(f"servers is not a list: {servers}")
+            logger.error("servers is not a list: %s", servers)
             return
         server_lookup = {s.get("computer_name", ""): s for s in servers if isinstance(s, dict)}
 
@@ -327,7 +327,7 @@ class CyberwatchGaleaxParser:
             try:
                 finding.epss_score = float(epss)
             except Exception:
-                logger.error(f"Error converting epss score to percentage: {epss}")
+                logger.error("Error converting epss score to percentage: %s", epss)
                 finding.epss_score = epss
             return finding
         finding.epss_score = epss
@@ -404,7 +404,7 @@ class CyberwatchGaleaxParser:
 
         servers = json_data.get("servers", [])
         if not isinstance(servers, list):
-            logger.error(f"servers is not a list: {servers}")
+            logger.error("servers is not a list: %s", servers)
             return None
 
         unsaved_endpoints, unsaved_endpoint_status, active_status, mitigated_date = self.process_servers_for_security_issue(servers)
@@ -452,7 +452,7 @@ class CyberwatchGaleaxParser:
 
         for server in servers:
             if not server or not isinstance(server, dict):
-                logger.error(f"Invalid server data: {server}")
+                logger.error("Invalid server data: %s", server)
                 continue
 
             computer_name = server.get("computer_name", "Unknown Hostname")
@@ -499,7 +499,7 @@ class CyberwatchGaleaxParser:
             try:
                 return datetime.strptime(fixed_at_str, "%Y-%m-%dT%H:%M:%S.%f%z")
             except ValueError as e:
-                logger.error(f'Error parsing fixed_at date "{fixed_at_str}": {e}')
+                logger.error('Error parsing fixed_at date "%s": %s', fixed_at_str, e)
         return datetime.now()
 
     def parse_datetime(self, dt_str):
@@ -508,7 +508,7 @@ class CyberwatchGaleaxParser:
             try:
                 return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%f%z")
             except (ValueError, TypeError):
-                logger.error(f'Error parsing datetime "{dt_str}"')
+                logger.error('Error parsing datetime "%s"', dt_str)
         return datetime.now()
 
     def parse_cvss(self, cvss_v3_vector, json_data):
@@ -519,7 +519,7 @@ class CyberwatchGaleaxParser:
                 cvssv3_score = vectors[0].scores()[0]
                 severity = vectors[0].severities()[0]
                 return cvssv3, cvssv3_score, severity
-            logger.error(f"Invalid CVSS v3 vector: {cvss_v3_vector}")
+            logger.error("Invalid CVSS v3 vector: %s", cvss_v3_vector)
         severity = self.convert_severity(json_data.get("cve_level", "Info"))
         return None, None, severity
 

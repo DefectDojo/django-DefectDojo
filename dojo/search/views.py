@@ -422,9 +422,9 @@ def parse_search_query(clean_query):
         else:
             keywords.append(vulnerability_id_fix(query_part))
 
-    logger.debug(f"query:     {clean_query}")
-    logger.debug(f"operators: {operators}")
-    logger.debug(f"keywords:  {keywords}")
+    logger.debug("query:     %s", clean_query)
+    logger.debug("operators: %s", operators)
+    logger.debug("keywords:  %s", keywords)
 
     return operators, keywords
 

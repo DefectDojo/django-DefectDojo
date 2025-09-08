@@ -155,7 +155,7 @@ class ApiBugcrowdParser:
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            f"{bug_endpoint} bug url from bugcrowd failed to parse to endpoint, error= {e}",
+                            "%s bug url from bugcrowd failed to parse to endpoint, error= %s", bug_endpoint, e,
                         )
                 except ValidationError:
                     logger.error(
