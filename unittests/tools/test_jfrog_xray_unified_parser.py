@@ -27,6 +27,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual(1, len(item.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2020-28493", item.unsaved_vulnerability_ids[0])
         self.assertEqual("Medium", item.severity)
+        self.assertEqual(True, item.fix_available)
         self.assertEqual("This affects the package", item.description[:24])
         self.assertEqual(" memory.", item.description[-8:])
         self.assertIsNotNone(item.mitigation)
