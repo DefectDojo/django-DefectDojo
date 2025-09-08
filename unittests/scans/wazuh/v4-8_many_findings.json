@@ -1,0 +1,629 @@
+{
+    "took": 8,
+    "timed_out": false,
+    "_shards": {
+      "total": 1,
+      "successful": 1,
+      "skipped": 0,
+      "failed": 0
+    },
+    "hits": {
+      "total": {
+        "value": 125,
+        "relation": "eq"
+      },
+      "max_score": 5.596354,
+      "hits": [
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "001",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+              "detected_at": "2025-06-30T17:07:15.204Z",
+              "enumeration": "CVE",
+              "id": "CVE-2025-27558",
+              "published_at": "2025-05-21T19:16:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.1,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2024-56180",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "0201",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "CWE-502 Deserialization of Untrusted Data at theeventmesh-meta-raft plugin module in Apache EventMesh master branch withoutrelease version on windows\\linux\\mac os e.g. platforms allows attackers tosend controlled message and remote code execute via hessian deserializationrpc protocol. Users can use the code under the master branch in projectrepo or version 1.11.0 to fix this issue.",
+              "detected_at": "2025-06-30T17:07:15.217Z",
+              "enumeration": "CVE",
+              "id": "CVE-2024-56180",
+              "published_at": "2025-02-14T14:15:32Z",
+              "reference": "https://ubuntu.com/security/CVE-2024-56180, https://www.cve.org/CVERecord?id=CVE-2024-56180",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2024-56180",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "4001",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+              "detected_at": "2025-06-30T17:07:15.218Z",
+              "enumeration": "CVE",
+              "id": "CVE-2021-3773",
+              "published_at": "2022-02-16T19:15:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "0016",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-62-generic",
+              "size": 15033344,
+              "type": "deb",
+              "version": "6.8.0-62.65"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+              "detected_at": "2025-06-30T17:07:15.926Z",
+              "enumeration": "CVE",
+              "id": "CVE-2025-27558",
+              "published_at": "2025-05-21T19:16:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.1,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2024-56180",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "0701",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-62-generic",
+              "size": 15033344,
+              "type": "deb",
+              "version": "6.8.0-62.65"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "CWE-502 Deserialization of Untrusted Data at theeventmesh-meta-raft plugin module in Apache EventMesh master branch withoutrelease version on windows\\linux\\mac os e.g. platforms allows attackers tosend controlled message and remote code execute via hessian deserializationrpc protocol. Users can use the code under the master branch in projectrepo or version 1.11.0 to fix this issue.",
+              "detected_at": "2025-06-30T17:07:15.934Z",
+              "enumeration": "CVE",
+              "id": "CVE-2024-56180",
+              "published_at": "2025-02-14T14:15:32Z",
+              "reference": "https://ubuntu.com/security/CVE-2024-56180, https://www.cve.org/CVERecord?id=CVE-2024-56180",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2024-56180",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "0037",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-62-generic",
+              "size": 15033344,
+              "type": "deb",
+              "version": "6.8.0-62.65"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+              "detected_at": "2025-06-30T17:07:15.935Z",
+              "enumeration": "CVE",
+              "id": "CVE-2021-3773",
+              "published_at": "2022-02-16T19:15:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2022-44640",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "0012",
+              "name": "myhost1",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.1"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Heimdal Kerberos - Base library",
+              "name": "libheimbase1t64-heimdal",
+              "size": 95232,
+              "type": "deb",
+              "version": "7.8.git20221117.28daf24+dfsg-5ubuntu3"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "Heimdal before 7.7.1 allows remote attackers to execute arbitrary codebecause of an invalid free in the ASN.1 codec used by the Key DistributionCenter (KDC).",
+              "detected_at": "2025-06-30T17:07:16.011Z",
+              "enumeration": "CVE",
+              "id": "CVE-2022-44640",
+              "published_at": "2022-12-25T05:15:11Z",
+              "reference": "https://ubuntu.com/security/CVE-2022-44640, https://ubuntu.com/security/notices/USN-5800-1, https://www.cve.org/CVERecord?id=CVE-2022-44640",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2022-44640",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2025-27558",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "002",
+              "name": "myhost1",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.1"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "IEEE P802.11-REVme D1.1 through D7.0 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+              "detected_at": "2025-06-30T17:07:16.927Z",
+              "enumeration": "CVE",
+              "id": "CVE-2025-27558",
+              "published_at": "2025-05-21T19:16:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.1,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2024-56180",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "002",
+              "name": "myhost1",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.1"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "CWE-502 Deserialization of Untrusted Data at theeventmesh-meta-raft plugin module in Apache EventMesh master branch withoutrelease version on windows\\linux\\mac os e.g. platforms allows attackers tosend controlled message and remote code execute via hessian deserializationrpc protocol. Users can use the code under the master branch in projectrepo or version 1.11.0 to fix this issue.",
+              "detected_at": "2025-06-30T17:07:16.937Z",
+              "enumeration": "CVE",
+              "id": "CVE-2024-56180",
+              "published_at": "2025-02-14T14:15:32Z",
+              "reference": "https://ubuntu.com/security/CVE-2024-56180, https://www.cve.org/CVERecord?id=CVE-2024-56180",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2024-56180",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        },
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "002_b5f8c1a3d7e902b4c6d8e0f2a4b6c8d0e2f4a6b8_CVE-2021-3773",
+          "_score": 5.596354,
+          "_source": {
+            "agent": {
+              "id": "002",
+              "name": "myhost1",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.1 LTS (Noble Numbat)",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.1"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "A flaw in netfilter could allow a network-connected attacker to inferopenvpn connection endpoint information for further use in traditionalnetwork attacks.",
+              "detected_at": "2025-06-30T17:07:16.938Z",
+              "enumeration": "CVE",
+              "id": "CVE-2021-3773",
+              "published_at": "2022-02-16T19:15:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2021-3773, https://www.cve.org/CVERecord?id=CVE-2021-3773",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2021-3773",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.8,
+                "version": "3.1"
+              },
+              "severity": "Critical",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
