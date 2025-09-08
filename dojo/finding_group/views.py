@@ -236,8 +236,8 @@ class ListFindingGroups(View):
             order_field_param = order_field_param[1:] if reverse_order else order_field_param
             if order_field_param in {"name", "creator", "findings_count", "sla_deadline"}:
                 prefix = "-" if reverse_order else ""
-                group_findings_queryset = group_findings_queryset.order_by(f"{prefix}{order_field_param}")
-        return group_findings_queryset
+                return group_findings_queryset.order_by(f"{prefix}{order_field_param}")
+        return group_findings_queryset.order_by("id")
 
     def filters(self, request: HttpRequest) -> tuple[str, str | None, list[str], list[str]]:
         name_filter: str = request.GET.get("name", "").lower()
@@ -285,7 +285,6 @@ class ListFindingGroups(View):
 
     def paginate_queryset(self, queryset: QuerySet[Finding_Group], request: HttpRequest) -> Page:
         page_size = int(request.GET.get("page_size", 25))
-        queryset = queryset.order_by("id")
         paginator = Paginator(queryset, page_size)
         page_number = request.GET.get("page")
         return paginator.get_page(page_number)
