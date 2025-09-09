@@ -301,6 +301,15 @@
                                         </li>
                                         {% if request.user.username|permission_view_findings %}
                                         <li>
+                                               <a rel="noopener noreferrer" href="{% url 'finding_list_frontend' %}" aria-expanded="false" aria-label="Findings">
+                                                <i class="fa-solid fa-bug fa-fw" style="color: green;"></i>
+                                                <span>{% trans "Findings" %}</span>
+                                                <span class="glyphicon arrow"></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                         
+                                            <!-- /.nav-second-level -->
                                             <a rel="noopener noreferrer" href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa-solid fa-bug fa-fw"></i>
                                                 <span>{% trans "Findings" %}</span>

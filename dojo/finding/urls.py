@@ -10,6 +10,11 @@ urlpatterns = [
         name="all_findings_frontend"
         ),
     re_path(
+        r"^all/findings/list/v2$",
+        views.finding_list_v2,
+        name="finding_list_frontend"
+        ),
+    re_path(
         r"^finding/(?P<finding_id>\d+)$",
         views.ViewFinding.as_view(),
         name="view_finding"
