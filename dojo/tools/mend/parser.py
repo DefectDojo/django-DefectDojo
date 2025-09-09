@@ -77,6 +77,7 @@ class MendParser:
                 ransomware_used = node.get("malicious", None)
                 known_exploited = node.get("exploitable", None)
                 component_path = node["component"].get("path", None)
+                fix_available = False
                 if component_path:
                     locations.append(component_path)
                 if "topFix" in node:
@@ -91,6 +92,7 @@ class MendParser:
                             + topfix_node.get("fixResolution", "")
                             + "\n"
                         )
+                        fix_available = True
                     except Exception:
                         logger.exception("Error handling topFix node.")
             elif "library" in node:
@@ -116,6 +118,7 @@ class MendParser:
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
                 cvss3_score = node.get("cvss3_score", None)
+                fix_available = False
                 if "topFix" in node:
                     try:
                         topfix_node = node.get("topFix")
@@ -123,6 +126,7 @@ class MendParser:
                             topfix_node.get("date"),
                             topfix_node.get("fixResolution"),
                         )
+                        fix_available = True
                     except Exception:
                         logger.exception("Error handling topFix node.")
             else:
@@ -208,6 +212,7 @@ class MendParser:
                 impact=impact if impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
                 kev_date=kev_date if kev_date is not None else None,
+                fix_available=fix_available,
             )
             # only overwrite default values if they are not None #12989
             if known_exploited is not None:
