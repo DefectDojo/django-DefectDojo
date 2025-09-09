@@ -131,6 +131,7 @@ class MendParser:
                         logger.exception("Error handling topFix node.")
             else:
                 description = node.get("description", "Unknown")
+                fix_available = False
 
             cve = node.get("name")
             title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
