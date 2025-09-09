@@ -18,7 +18,8 @@ from dojo.models import (
     System_Settings,
     PermissionKey,
     Dojo_User,
-    FindingExclusion
+    FindingExclusion,
+    GeneralSettings
     )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_prefix_key
@@ -477,6 +478,9 @@ def is_correlated(finding_select: Finding,
         bool: True if the findings are correlated, False otherwise
     """
     result = False
+    tags_enabled = GeneralSettings.get_value('ENABLE_TAGS_CORRELATED_FINDINGS')
+    if finding_to_correlated.tags.filter(name__in=tags_enabled).exists() is False:
+        return result
     if finding_select.severity == finding_to_correlated.severity:
         result = any([
             finding_select.vuln_id_from_tool == finding_to_correlated.vuln_id_from_tool,
@@ -556,6 +560,7 @@ def search_finding_correlated(entry_findings: QuerySet[Finding] | list[Finding],
             return Risk_Acceptance.objects.none()
 
         if isinstance(engagement, int) or isinstance(engagement, Engagement):
+            tags_enabled = GeneralSettings.get_value('ENABLE_TAGS_CORRELATED_FINDINGS')
             queryset = (
                 Risk_Acceptance.objects.filter(
                     engagement=engagement,
@@ -564,6 +569,7 @@ def search_finding_correlated(entry_findings: QuerySet[Finding] | list[Finding],
                 .filter(
                     Q(accepted_findings__cve__in=ids_vult) |
                     Q(accepted_findings__vuln_id_from_tool__in=ids_from_tool) &
+                    Q(accepted_findings__tags__name__in=tags_enabled) &
                     ~Q(accepted_findings__id__in=ids)
                 )
             )
@@ -576,16 +582,19 @@ def search_finding_correlated(entry_findings: QuerySet[Finding] | list[Finding],
 
 def add_finding_correlated(entry_findings, queryset):
     finding_accepted_ids = []
+    tags_enable = GeneralSettings.get_value('ENABLE_TAGS_CORRELATED_FINDINGS')
     for finding in entry_findings:
         risk_acceptance_query = None
         risk_acceptance_query = queryset.filter(
             accepted_findings__cve__in=finding.vulnerability_ids,
-            accepted_findings__severity=finding.severity
+            accepted_findings__severity=finding.severity,
+            accepted_findings__tags__name__in=tags_enable
             ).order_by("-created")
         if not risk_acceptance_query.exists():
             risk_acceptance_query = queryset.filter(
                 accepted_findings__vuln_id_from_tool=finding.vuln_id_from_tool,
-                accepted_findings__severity=finding.severity
+                accepted_findings__severity=finding.severity,
+                accepted_findings__tags__name__in=tags_enable
                 ).order_by("-created")
         # add finding a risk-acceptance
         if risk_acceptance_query:
