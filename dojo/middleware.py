@@ -276,12 +276,12 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
         from dojo.tasks import update_watson_search_index_for_model
 
         # Create tasks per model type, chunking large lists into configurable batches
-        for model_key, pk_list in model_groups.items():
+        for model_name, pk_list in model_groups.items():
             # Chunk into batches using configurable batch size (compatible with Python 3.11)
             batch_size = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
             batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
 
             # Create tasks for each batch and log each one
             for i, batch in enumerate(batches, 1):
-                logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_key}: {len(batch)} instances")
-                update_watson_search_index_for_model.delay(model_key, batch)
+                logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
+                update_watson_search_index_for_model(model_name, batch)

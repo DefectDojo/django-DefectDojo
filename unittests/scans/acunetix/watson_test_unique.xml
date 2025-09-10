@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<ScanGroup>
+    <Scan>
+        <Name>WatsonUniqueTest</Name>
+        <ShortName>Watson Unique Short Name</ShortName>
+        <StartURL>https://watson-unique-test.com</StartURL>
+        <StartTime>10/09/2025, 18:09:55</StartTime>
+        <FinishTime>10/09/2025, 21:42:41</FinishTime>
+        <ScanTime>212 minutes, 4 seconds</ScanTime>
+        <Aborted>False</Aborted>
+        <Responsive>True</Responsive>
+        <Banner></Banner>
+        <Os></Os>
+        <WebServer>Apache-Coyote/1.1</WebServer>
+        <ReportItems>
+            <ReportItem>
+                <Name>WatsonUniqueReportItem2025</Name>
+                <ModuleName>WatsonUniqueTestModule</ModuleName>
+                <Details>Watson Unique Test Details</Details>
+                <Affects><![CDATA[/watson/unique/path]]></Affects>
+                <Parameter></Parameter>
+                <AOP_SourceFile></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional></AOP_Additional>
+                <IsFalsePositive></IsFalsePositive>
+                <Severity>high</Severity>
+                <Type>xss</Type>
+                <Impact>Watson Unique Test Impact XYZ123</Impact>
+                <DetailedInformation>Watson Unique Test Detailed Information ABC456</DetailedInformation>
+                <Recommendation>Watson Unique Test Recommendation DEF789</Recommendation>
+                <Description>Watson Unique Test Description GHI000</Description>
+                <CWEList>
+                    <CWE id="79"><![CDATA[CWE-79]]></CWE>
+                </CWEList>
+                <References>
+                    <Reference>
+                        <URL>https://watson-unique-ref.com</URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+        </ReportItems>
+    </Scan>
+</ScanGroup>
+

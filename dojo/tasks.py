@@ -12,8 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
-from dojo.finding.helper import fix_loop_duplicates
-from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
+from dojo.decorators import dojo_async_task
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade, sla_compute_and_notify
@@ -225,8 +224,9 @@ def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
 
 
-@app.task(bind=True)
-def update_watson_search_index_for_model(self, model_name, pk_list):
+@dojo_async_task
+@app.task
+def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     Async task to update watson search indexes for a specific model type.
 
@@ -237,7 +237,7 @@ def update_watson_search_index_for_model(self, model_name, pk_list):
     """
     from watson.search import SearchContextManager, default_search_engine
 
-    logger.info(f"🔍 Starting async watson index update for {len(pk_list)} {model_name} instances")
+    logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
 
     try:
         # Create new SearchContextManager and start it
