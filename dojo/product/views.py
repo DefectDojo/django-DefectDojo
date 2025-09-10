@@ -892,12 +892,6 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
     return engagements
 
 
-# Authorization is within the import_scan_results method
-def import_scan_results_prod(request, pid=None):
-    from dojo.engagement.views import import_scan_results
-    return import_scan_results(request, pid=pid)
-
-
 def new_product(request, ptid=None):
     if get_authorized_product_types(Permissions.Product_Type_Add_Product).count() == 0:
         raise PermissionDenied

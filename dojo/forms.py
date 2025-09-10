@@ -2388,7 +2388,14 @@ class UserContactInfoForm(forms.ModelForm):
         exclude = ["user", "slack_user_id"]
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        # Do not expose force password reset if the current user does not have a password to reset
+        if user is not None:
+            if not user.has_usable_password():
+                self.fields["force_password_reset"].disabled = True
+                self.fields["force_password_reset"].help_text = "This user is authorized through SSO, and does not have a password to reset"
+        # Determine some other settings based on the current user
         current_user = get_current_user()
         if not current_user.is_superuser:
             if not user_has_configuration_permission(current_user, "auth.change_user") and \

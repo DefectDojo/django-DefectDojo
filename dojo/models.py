@@ -2789,8 +2789,8 @@ class Finding(models.Model):
         if self.pk is None:
             # We enter here during the first call from serializers.py
             from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
+            # No need to use the returned variable since `self` Is updated in memory
+            apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
