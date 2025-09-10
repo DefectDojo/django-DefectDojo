@@ -45,14 +45,40 @@ def engagement_post_delete(sender, instance, using, origin, **kwargs):
     with contextlib.suppress(sender.DoesNotExist, Product.DoesNotExist):
         if instance == origin:
             description = _('The engagement "%(name)s" was deleted') % {"name": instance.name}
+            user = None
+
             if settings.ENABLE_AUDITLOG:
-                if le := LogEntry.objects.filter(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label="dojo", model="engagement"),
-                    object_id=instance.id,
-                ).order_by("-id").first():
+                # First try to find deletion author in pghistory events
+                from dojo.pghistory_models import DojoEvents
+                # Look for delete events for this specific engagement instance
+                pghistory_delete_events = DojoEvents.objects.filter(
+                    pgh_obj_model="dojo.Engagement",
+                    pgh_obj_id=instance.id,
+                    pgh_label="delete",
+                ).order_by("-pgh_created_at")
+
+                if pghistory_delete_events.exists():
+                    latest_delete = pghistory_delete_events.first()
+                    # Extract user from pghistory context
+                    if latest_delete.user:
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        with contextlib.suppress(User.DoesNotExist):
+                            user = User.objects.get(id=latest_delete.user)
+
+                # Fall back to django-auditlog if no user found in pghistory
+                if not user:
+                    if le := LogEntry.objects.filter(
+                        action=LogEntry.Action.DELETE,
+                        content_type=ContentType.objects.get(app_label="dojo", model="engagement"),
+                        object_id=instance.id,
+                    ).order_by("-id").first():
+                        user = le.actor
+
+                # Update description with user if found
+                if user:
                     description = _('The engagement "%(name)s" was deleted by %(user)s') % {
-                                    "name": instance.name, "user": le.actor}
+                                    "name": instance.name, "user": user}
             create_notification(event="engagement_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                                 title=_("Deletion of %(name)s") % {"name": instance.name},
                                 description=description,
