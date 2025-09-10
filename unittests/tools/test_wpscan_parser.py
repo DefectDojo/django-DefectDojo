@@ -107,6 +107,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
                 self.assertEqual("WordPress 2.8.1-4.7.2 - Control Characters in Redirect URL Validation", finding.title)
                 self.assertEqual("fixed in : 4.6.4", finding.mitigation)
+                self.assertEqual(True, finding.fix_available)
                 self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
     def test_parse_file_issue5774(self):
@@ -123,6 +124,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertNotEqual("Info", finding.severity)
                 self.assertEqual("All in One SEO Pack <= 2.9.1.1 - Authenticated Stored Cross-Site Scripting (XSS)", finding.title)
                 self.assertEqual("fixed in : 2.10", finding.mitigation)
+                self.assertEqual(True, finding.fix_available)
                 self.assertEqual(7, finding.scanner_confidence)
                 self.assertEqual("Tentative", finding.get_scanner_confidence_text())  # data are at 30%
             with self.subTest(i=19):
@@ -137,6 +139,7 @@ class TestWpscanParser(DojoTestCase):
                 self.assertNotEqual("Info", finding.severity)
                 self.assertEqual("All in One SEO Pack <= 2.9.1.1 - Authenticated Stored Cross-Site Scripting (XSS)", finding.title)
                 self.assertEqual("fixed in : 2.10", finding.mitigation)
+                self.assertEqual(True, finding.fix_available)
                 self.assertEqual("Tentative", finding.get_scanner_confidence_text())  # data are at 30%
 
             with self.subTest(i=50):
