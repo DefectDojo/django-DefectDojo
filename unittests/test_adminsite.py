@@ -12,6 +12,9 @@ class AdminSite(DojoTestCase):
             if subclass._meta.proxy:
                 continue
             if subclass.__module__ == "dojo.models":
+                # Skip pghistory Event models - they're audit trail models not meant for admin
+                if subclass.__name__.endswith("Event"):
+                    continue
                 if not ((subclass.__name__[:9] == "Tagulous_") and (subclass.__name__[-5:] == "_tags")):
                     with self.subTest(type="base", subclass=subclass):
                         self.assertIn(subclass, admin.site._registry.keys(), f"{subclass} is not registered in 'admin.site' in models.py")

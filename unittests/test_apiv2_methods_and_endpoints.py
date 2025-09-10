@@ -124,6 +124,9 @@ class ApiEndpoints(DojoTestCase):
                     continue
                 if subclass.__name__ == "Alerts":
                     continue
+                # Skip pghistory Event models - they're audit trail models not meant for API endpoints
+                if subclass.__name__.endswith("Event"):
+                    continue
                 with self.subTest(subclass=subclass):
                     if subclass in self.used_models:
                         self.assertNotIn(subclass, self.no_api_models, "Thank you, you just implemented API endpoint for the model which was needed. Please remove it from exception list 'self.no_api_models'")
