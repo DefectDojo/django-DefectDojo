@@ -3666,7 +3666,20 @@ def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/all_findings_v2.html', {
         'name': page_name,
-        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
-        'mf_frontend_defect_dojo_params': base_params,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/all/findings/v2{base_params}",  
+        'user': user,
+    })
+
+@dojo_ratelimit_view()
+def finding_list_v2(request: HttpRequest) -> HttpResponse:
+    page_name = ('finding_list_frontend')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/all_findings_v2.html', {
+        'name': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",
         'user': user,
     })
