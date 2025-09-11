@@ -24,6 +24,7 @@ from rest_framework.fields import DictField, MultipleChoiceField
 import dojo.jira_link.helper as jira_helper
 from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -116,7 +117,7 @@ from dojo.models import (
     get_current_date,
     TransferFinding,
     Component,
-    ExclusivePermission
+    GeneralSettings,
 )
 from dojo.tools.factory import (
     get_choices_sorted,
@@ -2485,6 +2486,17 @@ class ImportScanSerializer(CommonImportScanSerializer):
         context["push_to_jira"] = push_to_jira
         # Import the scan with all of the supplied data
         self.process_scan(data, context)
+        # If the test is provided, search for correlated findings
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
+            test = context.get("test")
+            engagement = context.get("engagement")
+            queryset = search_finding_correlated(
+                test.finding_set.all(),
+                engagement)
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
@@ -2630,6 +2642,18 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         self.process_auto_create_create_context(auto_create_manager, context)
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)
+        # If the test iss provided, search for correlated findings
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
+            test = context.get("test")
+            engagement = context.get("engagement")
+            queryset = search_finding_correlated(
+                test.finding_set.all(),
+                engagement
+            )
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):

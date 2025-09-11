@@ -2884,6 +2884,23 @@ class Finding(models.Model):
         from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
+    def add_note(self,
+                note_text,
+                author,
+                note_type=None,
+                private=False):
+
+        note = Notes.objects.create(
+            entry=note_text,
+            author=author,
+            note_type=note_type,
+            private=private,
+        )
+
+        self.notes.add(note)
+        self.save()
+        return note
+
     def copy(self, test=None):
         copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
@@ -3623,7 +3640,7 @@ class Finding(models.Model):
                 deduplicationLogger.debug("Hash_code already computed for finding")
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+                deduplicationLogger.debug("HASH_CODE: computed for finding: %s", self.hash_code)
 
 
 class TransferFinding(models.Model):
@@ -4098,6 +4115,25 @@ class Risk_Acceptance(models.Model):
                 logger.error(f"Error evaluating accepted_by: {e}")
         return usernames
 
+
+    
+    def add_note(
+        self,
+        note_text,
+        author,
+        note_type=None,
+        private=False):
+
+        note = Notes.objects.create(
+            entry=note_text,
+            author=author,
+            note_type=note_type,
+            private=private,
+        )
+
+        self.notes.add(note)
+        self.save()
+        return note
 
 
 class FileAccessToken(models.Model):

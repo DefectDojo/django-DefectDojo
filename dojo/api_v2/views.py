@@ -184,7 +184,9 @@ from dojo.reports.views import (
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.notification import Notification as NotificationRiskAcceptance
-from dojo.risk_acceptance.risk_pending import accept_or_reject_risk_bulk, get_user_with_permission_key
+from dojo.risk_acceptance.risk_pending import (
+    accept_or_reject_risk_bulk,
+    get_user_with_permission_key)
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
