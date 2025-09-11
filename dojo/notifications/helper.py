@@ -696,8 +696,7 @@ class NotificationManager(NotificationManagerHelpers):
             self.product = finding.test.engagement.product
             logger.debug("Defined product of finding %s", self.product)
         elif (obj := kwargs.get("obj")) is not None:
-            from dojo.utils import get_product
-
+            from dojo.utils import get_product  # noqa: PLC0415 circular import
             self.product = get_product(obj)
             logger.debug("Defined product of obj %s", self.product)
 
