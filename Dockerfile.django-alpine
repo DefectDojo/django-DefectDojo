@@ -3,8 +3,9 @@
 # debian build - 1m42 - 960MB
 
 # DEBIAN
-# drop wheels - 866MB
+# drop wheels - 1m42 - 866MB
 # drop unittests, integration tests and *-dev packages from main stage - 1m40 - 842MB
+# take dev requirements out of main stage - 1m40 - 836MB ==> reduce attack surface, not just size
 
 # code: language=Dockerfile
 
