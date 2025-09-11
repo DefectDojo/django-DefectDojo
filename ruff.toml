@@ -129,9 +129,6 @@ preview = true
 "dojo/forms.py" = [
     "PLC0415",  # fix later
 ]
-"dojo/finding/helper.py" = [
-    "PLC0415",  # fix later
-]
 "dojo/decorators.py" = [
     "PLC0415",  # fix later
 ]
