@@ -132,9 +132,6 @@ preview = true
 "dojo/finding/helper.py" = [
     "PLC0415",  # fix later
 ]
-"dojo/filters.py" = [
-    "PLC0415",  # fix later
-]
 "dojo/decorators.py" = [
     "PLC0415",  # fix later
 ]
