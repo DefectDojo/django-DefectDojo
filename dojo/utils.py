@@ -64,7 +64,7 @@ from dojo.models import (
     Language_Type,
     Languages,
     Notifications,
-    Product,
+    Product,  # imported lazily to avoid circulars
     System_Settings,
     Test,
     User,
@@ -590,8 +590,6 @@ def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict
         )
     )
     rows = list(agg)
-
-    from dojo.models import Product  # imported lazily to avoid circulars
 
     products = Product.objects.in_bulk([r["prod_id"] for r in rows])
     product_count = {
@@ -1603,7 +1601,7 @@ def calculate_grade(product, *args, **kwargs):
 
 
 def get_celery_worker_status():
-    from .tasks import celery_status
+    from .tasks import celery_status  # noqa: PLC0415 circular import
     res = celery_status.apply_async()
 
     # Wait 5 seconds for a response from Celery
@@ -1850,7 +1848,7 @@ def sla_compute_and_notify(*args, **kwargs):
     Notifications are managed the usual way, so you'd have to opt-in.
     Exception is for JIRA issues, which would get a comment anyways.
     """
-    import dojo.jira_link.helper as jira_helper
+    import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
 
     class NotificationEntry:
         def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
