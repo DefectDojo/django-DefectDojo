@@ -2052,9 +2052,9 @@ class Endpoint(models.Model):
                 query_parts.append(f"{k}={v}")
         query_string = "&".join(query_parts)
 
-        protocol = url.scheme if url.scheme else None
+        protocol = url.scheme or None
         userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
-        host = url.host if url.host else None
+        host = url.host or None
         port = url.port
         path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
         query = query_string[:1000] if query_string is not None and query_string else None
