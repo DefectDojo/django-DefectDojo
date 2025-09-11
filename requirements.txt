@@ -155,7 +155,7 @@ s3transfer==0.11.4
 setuptools==78.1.1
 referencing==0.36.2
 tzdata==2025.2
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.9.1
 googleapis-common-protos==1.70.0
 grpcio==1.71.0
 zipp==3.21.0
