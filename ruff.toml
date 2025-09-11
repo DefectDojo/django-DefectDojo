@@ -138,12 +138,10 @@ preview = true
 "dojo/decorators.py" = [
     "PLC0415",  # fix later
 ]
-"dojo/context_processors.py" = [
-    "PLC0415",  # fix later
-]
 "dojo/apps.py" = [
     "PLC0415",  # fix later
 ]
+
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
 
