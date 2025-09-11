@@ -113,8 +113,9 @@ class URL(AbstractLocation):
 
         return value
 
-    def get_location_type(self) -> str:
-        return self.LOCATION_TYPE
+    @classmethod
+    def get_location_type(cls) -> str:
+        return cls.LOCATION_TYPE
 
     def get_location_value(self) -> str:
         return str(self)

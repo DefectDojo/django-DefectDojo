@@ -51,7 +51,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                               {% if not host_view %}
-                                {% if endpoint|has_object_permission:"Endpoint_Edit" %}
+                                {% if endpoint|has_object_permission:"Location_Edit" %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa-solid fa-pen-to-square"></i> Edit Endpoint
@@ -74,7 +74,7 @@
                                             <i class="fa-solid fa-file-lines"></i> Report
                                         </a>
                                     </li>
-                                {% if endpoint|has_object_permission:"Endpoint_Delete" %}
+                                {% if endpoint|has_object_permission:"Location_Delete" %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">

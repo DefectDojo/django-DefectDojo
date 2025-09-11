@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 
 
 class Location(BaseModel):
-
     """Internal metadata for a location. Managed automatically by subclasses."""
 
     location_type = CharField(
@@ -87,7 +86,10 @@ class Location(BaseModel):
         # Set the default status to non vulnerable by default
         status = ProductLocationStatus.Mitigated
         # First determine the status based on the number of findings present
-        if self.finding_locations.exists():
+        if self.findings.filter(
+            finding__test__engagement__product=product,
+            status=FindingLocationStatus.Active,
+        ).exists():
             status = ProductLocationStatus.Active
         return status
 
@@ -164,7 +166,8 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
     class Meta:
         abstract = True
 
-    def get_location_type(self) -> str:
+    @classmethod
+    def get_location_type(cls) -> str:
         """Return the type of location (e.g., 'url')."""
         msg = "Subclasses must implement get_location_type"
         raise NotImplementedError(msg)
@@ -199,11 +202,10 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
 
 class LocationFindingReference(BaseModel):
-
     """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
 
-    location = ForeignKey(Location, on_delete=CASCADE, related_name="finding_locations")
-    finding = ForeignKey(Finding, on_delete=CASCADE, related_name="findings")
+    location = ForeignKey(Location, on_delete=CASCADE, related_name="findings")
+    finding = ForeignKey(Finding, on_delete=CASCADE, related_name="locations")
     auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT)
     audit_time = DateTimeField(editable=False, null=True, blank=True)
     status = CharField(
@@ -240,11 +242,10 @@ class LocationFindingReference(BaseModel):
 
 
 class LocationProductReference(BaseModel):
-
     """Manually managed One-2-Many field to represent the relationship of a product and a location."""
 
-    location = ForeignKey(Location, on_delete=CASCADE, related_name="product_locations")
-    product = ForeignKey(Product, on_delete=CASCADE, related_name="products")
+    location = ForeignKey(Location, on_delete=CASCADE, related_name="products")
+    product = ForeignKey(Product, on_delete=CASCADE, related_name="locations")
     status = CharField(
         verbose_name=_("Status"),
         choices=ProductLocationStatus.choices,

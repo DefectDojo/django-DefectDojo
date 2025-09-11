@@ -9,6 +9,7 @@ class URLFilter(AbstractedLocationFilter):
     """Filter for the URL Model."""
 
     StaticMethodFilters.create_char_filters("protocol", "Protocol", locals())
+    StaticMethodFilters.create_char_filters("url__user_info", "User Info", locals())
     StaticMethodFilters.create_char_filters("host", "Host", locals())
     StaticMethodFilters.create_char_filters("path", "Path", locals())
     StaticMethodFilters.create_integer_filters("port", "Port", locals())
@@ -20,6 +21,7 @@ class URLFilter(AbstractedLocationFilter):
             "id",
             "protocol",
             "host",
+            "user_info",
             "path",
             "port",
             "query",
