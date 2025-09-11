@@ -363,11 +363,14 @@ class SearchFindingCorrelatedTests(TestCase):
 
     @patch('dojo.risk_acceptance.helper.add_findings_to_risk_acceptance')
     @patch('dojo.user.queries.get_user')
+    @patch('dojo.risk_acceptance.risk_pending.GeneralSettings.get_value')
     def test_add_finding_correlated_success(
             self,
+            mock_get_value,
             get_user_mock,
             add_finding_to_risk_acceptance_mock
         ):
+        mock_get_value.return_value = ["test_tag"]
         self.user.username = "admin"
         self.user.save()
         get_user_mock.return_value = self.user
@@ -378,6 +381,7 @@ class SearchFindingCorrelatedTests(TestCase):
         )
         self.finding2.cve = "CVE-2025-4802"
         self.finding2.vuln_id_from_tool = "CVE-2025-4802"
+        self.finding2.tags.add("test_tag")
         self.finding2.save()
 
         self.risk_acceptance.accepted_findings.add(self.finding2)
