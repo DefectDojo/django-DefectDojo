@@ -330,16 +330,23 @@ class SearchFindingCorrelatedTests(TestCase):
         self.finding1 = Finding.objects.create(test=self.test, reporter=self.user)
         self.risk_acceptance.accepted_findings.add(self.finding1)
 
-    def test_correlated_findings_not_cve(self):
+    @patch('dojo.risk_acceptance.risk_pending.GeneralSettings.get_value')
+    def test_correlated_findings_not_cve(self, mock_get_value):
+        mock_get_value.return_value = ["test_tag"]
         self.finding1.cve = ""
         self.finding1.vuln_id_from_tool = ""
+        self.finding1.tags.add("test_tag")
+        self.finding1.save()
         entry_findings = [self.finding1]
         queryset = risk_pending.search_finding_correlated(
             entry_findings, self.engagement)
         self.assertQuerySetEqual(Risk_Acceptance.objects.none(), queryset)
 
-    def test_correlated_finding_success(self):
+
+    @patch('dojo.risk_acceptance.risk_pending.GeneralSettings.get_value')
+    def test_correlated_finding_success(self, mock_get_value):
         """finding1 added in risk-acceptance"""
+        mock_get_value.return_value = ["test_tag"]
         self.finding1.cve = "CVE-2025-4802"
         self.finding1.vuln_id_from_tool = "CVE-2025-4802"
         self.finding1.save()
@@ -347,6 +354,7 @@ class SearchFindingCorrelatedTests(TestCase):
         self.finding2 = Finding.objects.create(test=self.test, reporter=self.user)
         self.finding2.cve = "CVE-2025-4802"
         self.finding2.vuln_id_from_tool = "CVE-2025-4802"
+        self.finding2.tags.add("test_tag")
         self.finding2.save()
         entry_findings = [self.finding2]
         queryset = risk_pending.search_finding_correlated(
