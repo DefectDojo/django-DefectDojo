@@ -37,6 +37,8 @@ from polymorphic.base import ManagerInheritanceWarning
 
 # from tagulous.forms import TagWidget
 # import tagulous
+from dojo.api_helpers.filters import StaticMethodFilters
+from dojo.location.status import ProductLocationStatus, FindingLocationStatus
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -1276,6 +1278,10 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    StaticMethodFilters.create_choice_filters("locations__status", "Location Status", ProductLocationStatus.choices, locals())
+    locations__location = NumberFilter(widget=HiddenInput())
+    locations__location__url__host = CharFilter(widget=HiddenInput(), distinct=True)
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1695,6 +1701,9 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
+    locations__location = NumberFilter(widget=HiddenInput())
+    locations__location__url__host = CharFilter(widget=HiddenInput(), distinct=True)
 
     has_component = BooleanFilter(
         field_name="component_name",

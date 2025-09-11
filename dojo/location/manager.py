@@ -8,41 +8,40 @@ from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
 class LocationQueryset(BaseQuerySet):
-
     """Location Queryset to add chainable queries."""
 
-    def vulnerable_by_products(self):
-        return self.filter(product_locations__status=ProductLocationStatus.Active)
+    def active_by_products(self):
+        return self.prefetch_related("products").filter(products__status=ProductLocationStatus.Active)
 
-    def vulnerable_by_product(self, product_id: int):
-        return self.filter(
-            product_locations__status=ProductLocationStatus.Active,
-            product_locations__product__id=product_id,
+    def active_by_product(self, product_id: int):
+        return self.prefetch_related("products__product").filter(
+            products__status=ProductLocationStatus.Active,
+            products__product__id=product_id,
         )
 
-    def vulnerable_by_findings(self):
-        return self.filter(finding_locations__status=FindingLocationStatus.Active)
+    def active_by_findings(self):
+        return self.prefetch_related("findings").filter(findings__status=FindingLocationStatus.Active)
 
-    def vulnerable_by_finding(self, finding_id: int):
-        return self.filter(
-            finding_locations__status=ProductLocationStatus.Active,
-            finding_locations__finding__id=finding_id,
+    def active_by_finding(self, finding_id: int):
+        return self.prefetch_related("findings__finding").filter(
+            findings__status=ProductLocationStatus.Active,
+            findings__finding__id=finding_id,
         )
 
     def status_and_total_counts(self):
-        return self.annotate(
+        return self.prefetch_related("findings", "products").annotate(
             # Products
-            total_products=Count("product_locations", distinct=True),
-            vulnerable_products=Count(
-                "product_locations",
-                filter=Q(product_locations__status=ProductLocationStatus.Active),
+            total_products=Count("products", distinct=True),
+            active_products=Count(
+                "products",
+                filter=Q(products__status=ProductLocationStatus.Active),
                 distinct=True,
             ),
             # Findings
-            total_findings=Count("finding_locations", distinct=True),
-            vulnerable_findings=Count(
-                "finding_locations",
-                filter=Q(finding_locations__status=FindingLocationStatus.Active),
+            total_findings=Count("findings", distinct=True),
+            active_findings=Count(
+                "findings",
+                filter=Q(findings__status=FindingLocationStatus.Active),
                 distinct=True,
             ),
         )
@@ -52,7 +51,7 @@ class LocationQueryset(BaseQuerySet):
             # Overall status (active if any product is active)
             overall_status=Case(
                 When(
-                    Q(vulnerable_products__gt=0) | Q(vulnerable_findings__gt=0),
+                    Q(active_products__gt=0) | Q(active_findings__gt=0),
                     then=Value(ProductLocationStatus.Active),
                 ),
                 default=Value(ProductLocationStatus.Mitigated),
@@ -62,14 +61,12 @@ class LocationQueryset(BaseQuerySet):
 
 
 class LocationManager(BaseManager):
-
     """Location manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationQueryset
 
 
 class LocationProductReferenceQueryset(BaseQuerySet):
-
     """LocationProductReference Queryset to add chainable queries."""
 
     def with_location_annotations(self):
@@ -84,17 +81,12 @@ class LocationProductReferenceQueryset(BaseQuerySet):
 
 
 class LocationProductReferenceManager(BaseManager):
-
     """LocationProductReference manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationProductReferenceQueryset
 
-    def get_queryset(self) -> Self:
-        return super().get_queryset().with_location_annotations()
-
 
 class LocationFindingReferenceQueryset(BaseQuerySet):
-
     """LocationFindingReference Queryset to add chainable queries."""
 
     def with_location_annotations(self):
@@ -109,10 +101,6 @@ class LocationFindingReferenceQueryset(BaseQuerySet):
 
 
 class LocationFindingReferenceManager(BaseManager):
-
     """LocationFindingReference manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationFindingReferenceQueryset
-
-    def get_queryset(self) -> Self:
-        return super().get_queryset().with_location_annotations()

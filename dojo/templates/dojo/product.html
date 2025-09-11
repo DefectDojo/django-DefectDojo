@@ -107,7 +107,7 @@
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                                           <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li>
-                                        {% if prod|has_object_permission:"Endpoint_Add" %}
+                                        {% if prod|has_object_permission:"Location_Add" %}
                                           <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Endpoint</a></li>
                                         {% endif %}
                                         {% if prod|has_object_permission:"Product_Edit" %}

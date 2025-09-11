@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 
 from dojo.location.status import FindingLocationStatus
+from dojo.location.models import Location
 from dojo.models import Endpoint, Endpoint_Status, Finding
 from dojo.url.models import URL
 from dojo.url.validators import validate_host_or_ip
@@ -23,7 +24,7 @@ class Command(BaseCommand):
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
 
-    def _endpoint_to_url(self, endpoint: Endpoint) -> URL:
+    def _endpoint_to_url(self, endpoint: Endpoint) -> Location:
         # First determine if we will have a problem with the endpoint
         try:
             validate_host_or_ip(endpoint.host)
@@ -44,9 +45,9 @@ class Command(BaseCommand):
         )[0]
         # Add the endpoint tags to the location tags
         if endpoint.tags:
-            url.location.tags.set(set(endpoint.tags.values_list("name", flat=True)))
+            [url.location.tags.add(tag) for tag in set(endpoint.tags.values_list("name", flat=True))]
 
-        return url
+        return url.location
 
     def _convert_endpoint_status_to_string_status(self, endpoint_status: Endpoint_Status) -> str:
         """
@@ -64,28 +65,29 @@ class Command(BaseCommand):
         # Default to Active
         return FindingLocationStatus.Active
 
-    def _associate_url_with_findings(self, endpoint: Endpoint, url: URL) -> None:
-        # Type hinting to make auto complete a bit easier
-        endpoint_status: Endpoint_Status
-        # Iterate over each endpoint status to get the status and the finding object
-        for endpoint_status in endpoint.status_endpoint.all():
-            # Store a ref to the finding
-            finding: Finding = endpoint_status.finding
-            # Determine the status of the location based on the status of the endpoint status
-            status = self._convert_endpoint_status_to_string_status(endpoint_status)
-            # Create the association (which will also associate with the product)
-            url.location.associate_with_finding(
-                finding=finding,
-                status=status,
-                auditor=endpoint_status.mitigated_by,
-                audit_time=endpoint_status.mitigated_time,
-            )
+    def _associate_location_with_findings(self, endpoint: Endpoint, location: Location) -> None:
+        # Determine if we can associate from the finding, or if have to use the product (for cases of zero findings on an endpoint)
+        if endpoint.status_endpoint.exists():
+            # Iterate over each endpoint status to get the status and the finding object
+            for endpoint_status in endpoint.status_endpoint.all():
+                if finding := endpoint_status.finding:
+                    # Determine the status of the location based on the status of the endpoint status
+                    status = self._convert_endpoint_status_to_string_status(endpoint_status)
+                    # Create the association (which will also associate with the product)
+                    location.associate_with_finding(
+                        finding=finding,
+                        status=status,
+                        auditor=endpoint_status.mitigated_by,
+                        audit_time=endpoint_status.mitigated_time,
+                    )
+        elif product := endpoint.product:
+            location.associate_with_product(product)
 
     def handle(self, *args, **options):
         # Start off with the endpoint objects - it should everything we need
         for endpoint in Endpoint.objects.all().iterator():
             # Get the URL object first
-            url = self._endpoint_to_url(endpoint)
+            location = self._endpoint_to_url(endpoint)
             # Associate the URL with the findings associated with the Findings
             # the association to a finding will also apply to a product automatically
-            self._associate_url_with_findings(endpoint, url)
+            self._associate_location_with_findings(endpoint, location)
