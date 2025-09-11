@@ -113,7 +113,7 @@ class SysdigCLIParser:
                 except ValueError:
                     continue
 
-                if vulnName != "":
+                if vulnName:
                     finding.unsaved_vulnerability_ids = []
                     finding.unsaved_vulnerability_ids.append(vulnName)
                 findings.append(finding)
@@ -136,7 +136,7 @@ class SysdigCLIParser:
             finding.component_version = row.package_version
             # Set some finding tags
             tags = []
-            if row.vulnerability_id != "":
+            if row.vulnerability_id:
                 tags.append(clean_tags("VulnId:" + row.vulnerability_id))
             finding.tags = tags
             finding.dynamic_finding = False
@@ -148,7 +148,7 @@ class SysdigCLIParser:
             finding.description += f"\n - **Publish Date:** {row.vuln_publish_date}"
             finding.description += f"\n - **CVSS Version:** {row.cvss_version}"
             finding.description += f"\n - **CVSS Vector:** {row.cvss_vector}"
-            if row.public_exploit != "":
+            if row.public_exploit:
                 finding.description += f"\n - **Public Exploit:** {row.public_exploit}"
             finding.description += "\n\n###Package Details"
             if row.package_type == "os":
@@ -157,7 +157,7 @@ class SysdigCLIParser:
                 finding.description += f"\n - **Package Type:** {row.package_type}"
             finding.description += f"\n - **Package Name:** {row.package_name}"
             finding.description += f"\n - **Package Version:** {row.package_version}"
-            if row.package_path != "":
+            if row.package_path:
                 finding.description += f"\n - **Package Path:** {row.package_path}"
                 finding.file_path = row.package_path
             try:
@@ -170,7 +170,7 @@ class SysdigCLIParser:
                 continue
             finding.risk_accepted = row.risk_accepted
             # Set reference
-            if row.vuln_link != "":
+            if row.vuln_link:
                 finding.references = row.vuln_link
                 finding.url = row.vuln_link
             finding.epss_score = row.epss_score

@@ -323,7 +323,7 @@ class ListFindings(View, BaseListFindings):
         # show custom breadcrumb if user has filtered by exactly 1 endpoint
         if "endpoints" in request.GET:
             endpoint_ids = request.GET.getlist("endpoints", [])
-            if len(endpoint_ids) == 1 and endpoint_ids[0] != "":
+            if len(endpoint_ids) == 1 and endpoint_ids[0]:
                 endpoint_id = endpoint_ids[0]
                 endpoint = get_object_or_404(Endpoint, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
@@ -2470,7 +2470,7 @@ def merge_finding_product(request, pid):
                                 finding.tags.add("merged-inactive")
 
                     # Update the finding to merge into
-                    if finding_descriptions != "":
+                    if finding_descriptions:
                         finding_to_merge_into.description = f"{finding_to_merge_into.description}\n\n{finding_descriptions}"
 
                     if finding_to_merge_into.static_finding:
@@ -2479,7 +2479,7 @@ def merge_finding_product(request, pid):
                     if finding_to_merge_into.dynamic_finding:
                         dynamic = finding.dynamic_finding
 
-                    if finding_references != "":
+                    if finding_references:
                         finding_to_merge_into.references = f"{finding_to_merge_into.references}\n{finding_references}"
 
                     finding_to_merge_into.static_finding = static
