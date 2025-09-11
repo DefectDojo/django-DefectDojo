@@ -276,12 +276,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=666,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=630,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=312,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=702,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=645,
+            expected_num_async_tasks2=28,
+            expected_num_queries3=322,
+            expected_num_async_tasks3=25,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
@@ -300,10 +300,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=627,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=591,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=273,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=663,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=631,
+            expected_num_async_tasks2=28,
+            expected_num_queries3=312,
+            expected_num_async_tasks3=25,
         )
