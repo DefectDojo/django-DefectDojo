@@ -80,12 +80,12 @@ class GenericCSVParser:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
                 if len(cvss_objects) > 0:
                     finding.cvssv3 = cvss_objects[0].clean_vector()
-            
+
             if "CVSSV4" in row:
                 cvss4_objects = cvss_parser.parse_cvss_from_text(row["CVSSV4"])
                 if len(cvss4_objects) > 0:
                     finding.cvssv4 = cvss4_objects[0].clean_vector()
-            
+
             if "CVSSV4_score" in row:
                 finding.cvssv4_score = float(row["CVSSV4_score"])
 
