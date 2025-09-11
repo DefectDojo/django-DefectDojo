@@ -1,3 +1,4 @@
+import importlib
 import io
 import json
 import logging
@@ -442,7 +443,6 @@ def connect_to_jira(jira_server, jira_username, jira_password):
 def get_jira_connect_method():
     if hasattr(settings, "JIRA_CONNECT_METHOD"):
         try:
-            import importlib
             mn, _, fn = settings.JIRA_CONNECT_METHOD.rpartition(".")
             m = importlib.import_module(mn)
             return getattr(m, fn)
@@ -1770,7 +1770,7 @@ def escape_for_jira(text):
 
 def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
-    import dojo.risk_acceptance.helper as ra_helper
+    import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 import error
     status_changed = False
     resolved = resolution_id is not None
     jira_instance = get_jira_instance(finding)
