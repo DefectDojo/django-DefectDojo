@@ -114,7 +114,18 @@ class TenableCSVParser:
         data_exploit_ease = row.get("Exploit Ease", "")
         data_check_type = row.get("Check Type", "")
         data_version = row.get("Version", "")
-        data_custom_id = row.get("Custom Id", "")
+        data_custom_id = row.get("Custom Id", "NA")
+        data_company = row.get("Company", "")
+        if data_custom_id != "NA":
+            try:
+                data_custom_id_decoded = base64.b64decode(data_custom_id).decode("utf-8")
+                custom_id_clean = re.sub(r"(^[^,]+,[^,]+,[^.]+)\..*", r"\1", data_custom_id_decoded)
+            except Exception:
+                data_custom_id_decoded = data_custom_id
+                custom_id_clean = None
+        else:
+            data_custom_id_decoded = "NA"
+            custom_id_clean = None
         return (
         "<p><strong>Plugin:</strong> " + str(data_plugin) + "</p>"
         "<p><strong>Description:</strong> " + str(data_desc) + "</p>"
@@ -153,7 +164,8 @@ class TenableCSVParser:
         + "<p><strong>Exploit Ease:</strong> " + str(data_exploit_ease) + "</p>"
         + "<p><strong>Check Type:</strong> " + str(data_check_type) + "</p>"
         + "<p><strong>Version:</strong> " + str(data_version) + "</p>"
-        + "<p><strong>Custom Id:</strong> " + ( base64.b64decode(data_custom_id).decode("utf-8") if data_custom_id else "NA") + "</p>"
+        + "<p><strong>Custom Id:</strong> " + (custom_id_clean if custom_id_clean else data_custom_id_decoded) + "</p>"
+        + "<p><strong>Company:</strong> " + str(data_company) + "</p>"
     )
 
     def get_severity_by_vpr(self, vpr_score: float):
