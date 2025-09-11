@@ -117,9 +117,6 @@ preview = true
 "dojo/models.py" = [
     "PLC0415",  # fix later
 ]
-"dojo/github.py" = [
-    "PLC0415",  # fix later
-]
 "dojo/forms.py" = [
     "PLC0415",  # fix later
 ]
