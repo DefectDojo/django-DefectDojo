@@ -117,9 +117,7 @@ preview = true
 "dojo/models.py" = [
     "PLC0415",  # fix later
 ]
-"dojo/apps.py" = [
-    "PLC0415",  # fix later
-]
+
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
