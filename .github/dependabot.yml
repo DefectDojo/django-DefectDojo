@@ -5,7 +5,7 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
-  target-branch: dev
+  target-branch: trunk
   ignore:
   - dependency-name: whitenoise
     versions:
@@ -16,7 +16,7 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
-  target-branch: dev
+  target-branch: trunk
   ignore:
   - dependency-name: bootstrap
     versions:
@@ -67,5 +67,5 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
-  target-branch: dev
+  target-branch: trunk
   

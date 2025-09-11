@@ -3532,7 +3532,7 @@ class Finding(models.Model):
         # uri?path=%2F<file_path>&version=GB<branch>
         # so to create browser url - git url should be recomposed like below:
         clean_file_path = self.clean_file_path()
-        return uri + "?path=%2F" + clean_file_path + "&version=GB" + self.test.branch_tag
+        return uri + "?path=%2F" + clean_file_path + "&version=GB" + (self.test.branch_tag if self.test.branch_tag else "")
 
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
