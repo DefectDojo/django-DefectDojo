@@ -16,6 +16,7 @@ from django.test import tag as test_tag
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
+from drf_spectacular.validation import validate_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.mixins import (
@@ -161,7 +162,6 @@ def get_open_api3_json_schema():
     schema = generator.get_schema(request=None, public=True)
     GENERATOR_STATS.emit_summary()
 
-    from drf_spectacular.validation import validate_schema
     validate_schema(schema)
 
     return schema

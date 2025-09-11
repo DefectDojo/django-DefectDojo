@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import unittest
+import warnings
 from pathlib import Path
 
 from selenium import webdriver
@@ -95,7 +96,6 @@ class BaseTestCase(unittest.TestCase):
             )
 
             # TODO: - this filter needs to be removed
-            import warnings
             warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
             warnings.filterwarnings("ignore", message="use options instead of chrome_options")
             warnings.filterwarnings("ignore", message="desired_capabilities has been deprecated, please pass in a Service object")
