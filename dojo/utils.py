@@ -64,7 +64,7 @@ from dojo.models import (
     Language_Type,
     Languages,
     Notifications,
-    Product,  # imported lazily to avoid circulars
+    Product,
     System_Settings,
     Test,
     User,
