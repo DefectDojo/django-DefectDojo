@@ -58,10 +58,13 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
-COPY --from=build /tmp/wheels /tmp/wheels
-COPY requirements.txt ./
-RUN export PYCURL_SSL_LIBRARY=openssl && \
-    pip3 install \
+# COPY --from=build /tmp/wheels /tmp/wheels
+# COPY requirements.txt ./
+RUN \
+  --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
+  --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \
+  export PYCURL_SSL_LIBRARY=openssl && \
+  pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \

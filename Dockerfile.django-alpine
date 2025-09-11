@@ -1,3 +1,10 @@
+# TESTS
+# alpine build - 1m55 - 732MB
+# debian build - 1m42 - 960MB
+
+# DROP WHEELS
+# debian build - 866MB
+
 
 # code: language=Dockerfile
 
@@ -58,7 +65,7 @@ RUN \
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
 RUN export PYCURL_SSL_LIBRARY=openssl && \
-    pip3 install \
+  pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
