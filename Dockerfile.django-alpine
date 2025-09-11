@@ -2,9 +2,9 @@
 # alpine build - 1m55 - 732MB
 # debian build - 1m42 - 960MB
 
-# DROP WHEELS
-# debian build - 866MB
-
+# DEBIAN
+# drop wheels - 866MB
+# drop unittests, integration tests and *-dev packages from main stage - 1m40 - 842MB
 
 # code: language=Dockerfile
 
