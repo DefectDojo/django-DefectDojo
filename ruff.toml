@@ -114,9 +114,6 @@ preview = true
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
 ]
-"dojo/models.py" = [
-    "PLC0415",  # fix later
-]
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
