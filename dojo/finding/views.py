@@ -3666,7 +3666,7 @@ def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/all_findings_v2.html', {
         'name': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/all/findings/v2{base_params}",  
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",  
         'user': user,
     })
 
