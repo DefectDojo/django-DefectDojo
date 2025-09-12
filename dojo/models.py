@@ -1288,6 +1288,7 @@ class Product(BaseModel):
                                             test__engagement__product=self).count()
             return self.active_verified_finding_count
 
+    # TODO: Delete this after the move to Locations
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
@@ -1301,6 +1302,7 @@ class Product(BaseModel):
 
         return len(hosts)
 
+    # TODO: Delete this after the move to Locations
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
@@ -2430,6 +2432,7 @@ class Finding(BaseModel):
                                               blank=True,
                                               verbose_name=_("Severity Justification"),
                                               help_text=_("Text describing why a certain severity was associated with this flaw."))
+    # TODO: Delete this after the move to Locations
     endpoints = models.ManyToManyField(Endpoint,
                                        blank=True,
                                        verbose_name=_("Endpoints"),
@@ -2801,7 +2804,7 @@ class Finding(BaseModel):
 
         # logger.debug('setting static / dynamic in save')
         # need to have an id/pk before we can access endpoints
-        elif (self.file_path is not None) and (self.endpoints.count() == 0):
+        elif (self.file_path is not None) and (not self.endpoints.exists()):
             self.static_finding = True
             self.dynamic_finding = False
         elif (self.file_path is not None):
@@ -3465,6 +3468,7 @@ class Finding(BaseModel):
 
 
 class FindingAdmin(admin.ModelAdmin):
+    # TODO: Delete this after the move to Locations
     # For efficiency with large databases, display many-to-many fields with raw
     # IDs rather than multi-select
     raw_id_fields = (

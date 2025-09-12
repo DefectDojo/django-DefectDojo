@@ -7,11 +7,13 @@ register = template.Library()
 
 
 @register.filter(name="has_endpoints")
+# TODO: Delete this after the move to Locations
 def has_endpoints(finding):
     return bool(finding.endpoints.all())
 
 
 @register.filter(name="get_vulnerable_endpoints")
+# TODO: Delete this after the move to Locations
 def get_vulnerable_endpoints(finding):
     return finding.endpoints.filter(
         status_endpoint__mitigated=False,
@@ -21,6 +23,7 @@ def get_vulnerable_endpoints(finding):
 
 
 @register.filter(name="get_mitigated_endpoints")
+# TODO: Delete this after the move to Locations
 def get_mitigated_endpoints(finding):
     return finding.endpoints.filter(
         Q(status_endpoint__mitigated=True)
