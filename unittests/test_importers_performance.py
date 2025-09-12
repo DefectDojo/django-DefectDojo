@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings
 from django.utils import timezone
 
+from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
 from dojo.decorators import dojo_async_task_counter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
@@ -175,7 +176,6 @@ class TestDojoImporterPerformance(DojoTestCase):
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_import_reimport_reimport_performance_async(self):
         # Ensure django-auditlog is properly configured for this test
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -194,7 +194,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         This test checks the performance of the importers when using django-pghistory with async enabled.
         Query counts will need to be determined by running the test initially.
         """
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -216,8 +215,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
-        # Ensure django-auditlog is properly configured for this test
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -239,7 +236,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         This test checks the performance of the importers when using django-pghistory with async disabled.
         Query counts will need to be determined by running the test initially.
         """
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -265,8 +261,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
-        # Ensure django-auditlog is properly configured for this test
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -290,7 +284,6 @@ class TestDojoImporterPerformance(DojoTestCase):
         This test checks the performance of the importers when using django-pghistory with async disabled and product grading enabled.
         Query counts will need to be determined by running the test initially.
         """
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
         configure_audit_system()
         configure_pghistory_triggers()
 

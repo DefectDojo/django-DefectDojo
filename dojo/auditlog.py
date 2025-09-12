@@ -9,7 +9,6 @@ import logging
 import sys
 
 import pghistory
-from auditlog.registry import auditlog
 from django.conf import settings
 from django.core.management import call_command
 from django.db import models
@@ -19,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 def enable_django_auditlog():
     """Enable django-auditlog by registering models."""
-    from dojo.models import (
+    # Import inside function to avoid AppRegistryNotReady errors
+    from auditlog.registry import auditlog  # noqa: PLC0415
+
+    from dojo.models import (  # noqa: PLC0415
         Cred_User,
         Dojo_User,
         Endpoint,
@@ -52,7 +54,10 @@ def enable_django_auditlog():
 
 def disable_django_auditlog():
     """Disable django-auditlog by unregistering models."""
-    from dojo.models import (
+    # Import inside function to avoid AppRegistryNotReady errors
+    from auditlog.registry import auditlog  # noqa: PLC0415
+
+    from dojo.models import (  # noqa: PLC0415
         Cred_User,
         Dojo_User,
         Endpoint,
@@ -99,7 +104,8 @@ def register_django_pghistory_models():
     Then we control the enabling/disabling by enabling/disabling the underlying database
     triggers.
     """
-    from dojo.models import (
+    # Import models inside function to avoid AppRegistryNotReady errors
+    from dojo.models import (  # noqa: PLC0415
         Cred_User,
         Dojo_User,
         Endpoint,
