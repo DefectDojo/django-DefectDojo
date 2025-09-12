@@ -3525,13 +3525,6 @@ class PgHistoryFilter(DojoFilter):
         empty_label="All Users",
     )
 
-    # Filter by URL (from context)
-    url = CharFilter(
-        field_name="url",
-        lookup_expr="icontains",
-        label="URL Contains",
-    )
-
     # Filter by IP address (from context)
     remote_addr = CharFilter(
         field_name="remote_addr",
