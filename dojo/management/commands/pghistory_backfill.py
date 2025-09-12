@@ -149,6 +149,7 @@ class Command(BaseCommand):
                     if not dry_run:
                         # Create events with preserved timestamps from original instances
                         event_records = []
+                        failed_records = []
                         for instance in filtered_batch:
                             try:
                                 # Create event record with all model fields
@@ -184,10 +185,12 @@ class Command(BaseCommand):
                                 event_records.append(EventModel(**event_data))
 
                             except Exception as e:
+                                failed_records.append(instance.id)
                                 logger.error(
                                     f"Failed to prepare event for {model_name} "
                                     f"ID {instance.id}: {e}",
                                 )
+                                # Continue processing other records in the batch
 
                         # Bulk create all events in this batch
                         if event_records:
@@ -218,18 +221,40 @@ class Command(BaseCommand):
                                 # Re-raise the exception instead of falling back
                                 raise
 
-                    processed += len(filtered_batch)
+                    # Count only successfully processed records
+                    successful_in_batch = len(event_records)
+                    failed_in_batch = len(failed_records)
+                    processed += successful_in_batch
+
+                    if failed_in_batch > 0:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"  Batch {start + 1}-{end}: {successful_in_batch} successful, "
+                                f"{failed_in_batch} failed (IDs: {failed_records[:5]}{'...' if failed_in_batch > 5 else ''})",
+                            ),
+                        )
+
                     self.stdout.write(
                         f"  Processed {processed:,}/{backfill_count:,} records needing backfill "
                         f"({processed / backfill_count * 100:.1f}%)",
                     )
 
                 total_processed += processed
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"  ✓ Completed {model_name}: {processed:,} records",
-                    ),
-                )
+
+                # Show completion summary
+                if processed < backfill_count:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"  ⚠ Completed {model_name}: {processed:,}/{backfill_count:,} records "
+                            f"({backfill_count - processed:,} records failed and will need to be retried)",
+                        ),
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"  ✓ Completed {model_name}: {processed:,} records",
+                        ),
+                    )
 
             except Exception as e:
                 self.stdout.write(
@@ -237,15 +262,8 @@ class Command(BaseCommand):
                 )
                 logger.error(f"Error processing {model_name}: {e}")
 
-        if dry_run:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"\nDRY RUN COMPLETE: Would have processed {total_processed:,} records",
-                ),
-            )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"\nBACKFILL COMPLETE: Processed {total_processed:,} records",
-                ),
-            )
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\nBACKFILL COMPLETE: Processed {total_processed:,} records",
+            ),
+        )
