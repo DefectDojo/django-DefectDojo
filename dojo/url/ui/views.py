@@ -393,3 +393,38 @@ def manage_meta_data(request, location_id):
         "dojo/edit_metadata.html",
         {"formset": formset},
     )
+
+
+@user_is_authorized(Product, Permissions.Location_Edit, "product_id")
+def import_endpoint_meta(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    form = ImportEndpointMetaForm()
+    if request.method == "POST":
+        form = ImportEndpointMetaForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES.get("file", None)
+            # Make sure size is not too large
+            if file and is_scan_file_too_large(file):
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
+                    extra_tags="alert-danger")
+
+            create_endpoints = form.cleaned_data["create_endpoints"]
+            create_tags = form.cleaned_data["create_tags"]
+            create_dojo_meta = form.cleaned_data["create_dojo_meta"]
+
+            try:
+                endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin="UI", request=request, object_class=Location)
+            except Exception as e:
+                logger.exception("An exception error occurred during the report import")
+                add_error_message_to_response(f"An exception error occurred during the report import:{e}")
+            return HttpResponseRedirect(reverse("endpoint") + f"?product={product_id}")
+
+    add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)
+    product_tab = Product_Tab(product, title="Endpoint Meta Importer", tab="endpoints")
+    return render(request, "dojo/endpoint_meta_importer.html", {
+        "product_tab": product_tab,
+        "form": form,
+    })
