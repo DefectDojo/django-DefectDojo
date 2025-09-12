@@ -9,7 +9,7 @@ import logging
 from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import transaction
+from django.db import connection, transaction
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,6 @@ class Command(BaseCommand):
                         # Get the actual database table name
                         db_table = EventModel._meta.db_table
 
-                        from django.db import connection
                         with connection.cursor() as cursor:
                             if drop_tables:
                                 # DROP TABLE - completely removes the table structure

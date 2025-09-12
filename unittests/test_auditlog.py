@@ -4,13 +4,22 @@ Unit tests for audit configuration functionality.
 Tests the dual-audit system where both django-auditlog and django-pghistory
 can coexist, allowing users to see historical data from both systems.
 """
-import logging
 from unittest.mock import MagicMock, patch
 
+from auditlog.models import LogEntry
+from django.apps import apps
 from django.test import TestCase, override_settings
 
-# Disable logging during tests to avoid noise
-logging.disable(logging.CRITICAL)
+from dojo.auditlog import (
+    configure_audit_system,
+    configure_pghistory_triggers,
+    disable_django_auditlog,
+    disable_django_pghistory,
+    enable_django_auditlog,
+    enable_django_pghistory,
+    register_django_pghistory_models,
+)
+from dojo.models import Product_Type
 
 
 class TestAuditConfig(TestCase):
@@ -20,8 +29,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.auditlog")
     def test_enable_django_auditlog(self, mock_auditlog):
         """Test that enable_django_auditlog registers models."""
-        from dojo.auditlog import enable_django_auditlog
-
         # Mock the auditlog registry
         mock_auditlog.register = MagicMock()
 
@@ -33,16 +40,12 @@ class TestAuditConfig(TestCase):
 
     def test_disable_django_auditlog(self):
         """Test that disable_django_auditlog runs without error."""
-        from dojo.auditlog import disable_django_auditlog
-
         # This should not raise an exception
         disable_django_auditlog()
 
     @patch("dojo.auditlog.pghistory")
     def test_register_django_pghistory_models(self, mock_pghistory):
         """Test that register_django_pghistory_models registers all models."""
-        from dojo.auditlog import register_django_pghistory_models
-
         # Mock pghistory.track
         mock_pghistory.track = MagicMock()
         mock_pghistory.InsertEvent = MagicMock()
@@ -59,8 +62,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_enable_django_pghistory(self, mock_call_command):
         """Test that enable_django_pghistory enables triggers only."""
-        from dojo.auditlog import enable_django_pghistory
-
         enable_django_pghistory()
 
         # Verify that pgtrigger enable command was called
@@ -69,8 +70,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_disable_django_pghistory(self, mock_call_command):
         """Test that disable_django_pghistory disables triggers."""
-        from dojo.auditlog import disable_django_pghistory
-
         disable_django_pghistory()
 
         # Verify that pgtrigger disable command was called
@@ -81,8 +80,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_invalid_audit_type_warning(self, mock_call_command, mock_disable_auditlog):
         """Test that invalid audit types disable both audit systems."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         # Call the main configuration function with invalid type
         configure_audit_system()
         configure_pghistory_triggers()
@@ -100,8 +97,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_dual_audit_system_coexistence(self, mock_call_command, mock_disable_auditlog, mock_enable_auditlog):
         """Test that audit system configuration handles pghistory type correctly."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         # Call the main configuration function
         configure_audit_system()
         configure_pghistory_triggers()
@@ -128,12 +123,6 @@ class TestAuditConfig(TestCase):
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
     def test_pghistory_insert_event_creation(self):
         """Test that pghistory creates insert events when a Product_Type is created and auditlog does not."""
-        from auditlog.models import LogEntry
-        from django.apps import apps
-
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-        from dojo.models import Product_Type
-
         # Configure audit system for pghistory
         configure_audit_system()
         configure_pghistory_triggers()
@@ -190,8 +179,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_configure_audit_system_auditlog_enabled(self, mock_call_command, mock_enable_auditlog):
         """Test that configure_audit_system enables auditlog and configures pghistory triggers correctly."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -205,8 +192,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_configure_audit_system_pghistory_enabled(self, mock_call_command, mock_disable_auditlog):
         """Test that configure_audit_system disables auditlog and enables pghistory triggers correctly."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -220,8 +205,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_configure_audit_system_all_disabled(self, mock_call_command, mock_disable_auditlog):
         """Test that configure_audit_system disables both auditlog and pghistory when audit is disabled."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -235,8 +218,6 @@ class TestAuditConfig(TestCase):
     @patch("dojo.auditlog.call_command")
     def test_configure_audit_system_unknown_type(self, mock_call_command, mock_disable_auditlog):
         """Test that configure_audit_system disables both systems for unknown audit types."""
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -251,8 +232,6 @@ class TestAuditConfig(TestCase):
         # Simulate command failure
         mock_call_command.side_effect = Exception("Command failed")
 
-        from dojo.auditlog import disable_django_pghistory
-
         # This should not raise an exception
         disable_django_pghistory()
 
@@ -265,8 +244,6 @@ class TestAuditConfig(TestCase):
         # Simulate command failure for trigger enable
         mock_call_command.side_effect = Exception("Command failed")
 
-        from dojo.auditlog import enable_django_pghistory
-
         # This should not raise an exception
         enable_django_pghistory()
 
@@ -276,12 +253,6 @@ class TestAuditConfig(TestCase):
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_auditlog_insert_event_creation(self):
         """Test that django-auditlog creates audit log entries when a Product_Type is created and pghistory does not."""
-        from auditlog.models import LogEntry
-        from django.apps import apps
-
-        from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
-        from dojo.models import Product_Type
-
         # Configure audit system for auditlog
         configure_audit_system()
         configure_pghistory_triggers()
@@ -324,7 +295,3 @@ class TestAuditConfig(TestCase):
 
         # Clean up
         product_type.delete()
-
-
-# Re-enable logging after tests
-logging.disable(logging.NOTSET)
