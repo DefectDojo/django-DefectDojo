@@ -1348,7 +1348,7 @@ class Product(models.Model):
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     def violates_sla(self):
@@ -1637,7 +1637,7 @@ class Engagement(models.Model):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @property
@@ -3177,7 +3177,7 @@ class Finding(models.Model):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
@@ -3190,12 +3190,12 @@ class Finding(models.Model):
         if not self.has_finding_group:
             return False
 
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self.finding_group)
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     @cached_property
@@ -3515,7 +3515,7 @@ class Finding_Group(TimeStampedModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
