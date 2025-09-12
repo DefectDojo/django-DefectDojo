@@ -15,6 +15,7 @@ import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
+from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -42,6 +43,7 @@ from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+from titlecase import titlecase
 
 from dojo.validators import cvss3_validator, cvss4_validator
 
@@ -2744,7 +2746,6 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
         # Title Casing
-        from titlecase import titlecase
         self.title = titlecase(self.title[:511])
         # Set the date of the finding if nothing is supplied
         if self.date is None:
@@ -3078,9 +3079,8 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        from dateutil.parser import parse
         if start_date and isinstance(start_date, str):
-            start_date = parse(start_date).date()
+            start_date = datetutilsparse(start_date).date()
 
         if isinstance(start_date, datetime):
             start_date = start_date.date()
