@@ -1094,7 +1094,7 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
 
     def clean(self):
@@ -1256,7 +1256,7 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
@@ -2743,7 +2743,7 @@ class Finding(models.Model):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
         if not user:
-            from dojo.utils import get_current_user
+            from dojo.utils import get_current_user  # noqa: PLC0415 circular import
             user = get_current_user()
         # Title Casing
         self.title = titlecase(self.title[:511])
