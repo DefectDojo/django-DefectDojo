@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 
 class Location(BaseModel):
+
     """Internal metadata for a location. Managed automatically by subclasses."""
 
     location_type = CharField(
@@ -202,6 +203,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
 
 class LocationFindingReference(BaseModel):
+
     """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
 
     location = ForeignKey(Location, on_delete=CASCADE, related_name="findings")
@@ -242,6 +244,7 @@ class LocationFindingReference(BaseModel):
 
 
 class LocationProductReference(BaseModel):
+
     """Manually managed One-2-Many field to represent the relationship of a product and a location."""
 
     location = ForeignKey(Location, on_delete=CASCADE, related_name="products")

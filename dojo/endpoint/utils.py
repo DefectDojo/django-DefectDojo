@@ -12,8 +12,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from hyperlink._url import SCHEME_PORT_MAP
 
-from dojo.models import DojoMeta, Endpoint
 from dojo.location.models import Location
+from dojo.models import DojoMeta, Endpoint
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)

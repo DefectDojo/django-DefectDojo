@@ -22,9 +22,6 @@ from dojo.api_v2.views import (
     DojoGroupMemberViewSet,
     DojoGroupViewSet,
     DojoMetaViewSet,
-    EndpointMetaImporterView,
-    EndpointStatusViewSet,
-    EndPointViewSet,
     EngagementPresetsViewset,
     EngagementViewSet,
     FindingTemplatesViewSet,
@@ -88,8 +85,6 @@ from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.location.api.urls import add_locations_urls
-from dojo.url.api.urls import add_url_urls
-from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
@@ -108,6 +103,8 @@ from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
+from dojo.url.api.urls import add_url_urls
+from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 

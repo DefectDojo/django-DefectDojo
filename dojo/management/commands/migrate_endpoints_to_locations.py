@@ -3,9 +3,9 @@ import logging
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 
-from dojo.location.status import FindingLocationStatus
 from dojo.location.models import Location
-from dojo.models import Endpoint, Endpoint_Status, DojoMeta
+from dojo.location.status import FindingLocationStatus
+from dojo.models import DojoMeta, Endpoint, Endpoint_Status
 from dojo.url.models import URL
 from dojo.url.validators import validate_host_or_ip
 

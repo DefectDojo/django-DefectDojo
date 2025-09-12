@@ -2,15 +2,13 @@ from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
-    Endpoint,
-    Endpoint_Status,
     Product_Group,
     Product_Member,
     Product_Type_Group,
     Product_Type_Member,
 )
-from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 
 
 def get_authorized_locations(permission, queryset=None, user=None):

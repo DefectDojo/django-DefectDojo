@@ -38,7 +38,6 @@ from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.api_helpers.filters import StaticMethodFilters
-from dojo.location.status import ProductLocationStatus, FindingLocationStatus
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -56,6 +55,7 @@ from dojo.finding.helper import (
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,

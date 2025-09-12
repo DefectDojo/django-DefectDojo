@@ -8,14 +8,18 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
-                    <h3 class="has-filters">
-                        {{ name }}
-                    </h3>
-                </div>
-                <div id="the-filters" class="is-filters panel-body collapse">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                    <h3 class="has-filters">{{ name }}</h3>
                 </div>
             </div>
+            <h5>
+                This migration will convert existing Endpoints to the new Location model. Please ensure you have a full backup of your database before proceeding. This operation may take some time depending on the number of endpoints in your system.
+                Please consult the documentation for more information.
+            </h5>
+            <br/>
+            <h5>
+                If you would prefer to run this migration from the command line, you can do so by executing:
+                <pre><code>python manage.py migrate_endpoints_to_locations</code></pre>
+            </h5>
             <div class="panel-heading">
                 <form class="form-horizontal" method="post">
                     {% csrf_token %}
@@ -24,23 +28,6 @@
                     </div>
                 </form>
             </div>
-            {% if html_log|length > 0 %}
-                <ul>
-                    {% for log in html_log %}
-                        <li>
-                            {% if 'message' in log.keys %}
-                                <a href="{{ log.view }}">Endpoint</a> {{ log.message }}. It is not possible to migrate it.
-                                  <a href="{{ log.delete }}">Delete</a> or <a href="{{ log.edit }}">edit</a> this endpoint.
-                            {% else %}
-                                {{ log }}
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                No changes or broken endpoints detected.
-            {% endif %}
         </div>
     </div>
-
 {% endblock %}

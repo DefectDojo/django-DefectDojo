@@ -50,6 +50,8 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.location.models import Location
+from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -1627,15 +1629,23 @@ class Product_Tab:
                                                           out_of_scope=False,
                                                           active=True,
                                                           mitigated__isnull=True).count()
-        active_endpoints = Endpoint.objects.filter(
-            product=self.product,
-            status_endpoint__mitigated=False,
-            status_endpoint__false_positive=False,
-            status_endpoint__out_of_scope=False,
-            status_endpoint__risk_accepted=False,
-        )
-        self.endpoints_count = active_endpoints.distinct().count()
-        self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
+        if settings.ENABLE_V3_FEATURE_SET:
+            active_endpoints = Location.objects.filter(
+                products__product=self.product,
+                products__status=ProductLocationStatus.Active,
+            )
+            self.endpoints_count = active_endpoints.distinct().count()
+            self.endpoint_hosts_count = active_endpoints.values("url__host").distinct().count()
+        else:
+            active_endpoints = Endpoint.objects.filter(
+                product=self.product,
+                status_endpoint__mitigated=False,
+                status_endpoint__false_positive=False,
+                status_endpoint__out_of_scope=False,
+                status_endpoint__risk_accepted=False,
+            )
+            self.endpoints_count = active_endpoints.distinct().count()
+            self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by("name")
         self.engagement = None
