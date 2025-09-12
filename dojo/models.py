@@ -1310,7 +1310,7 @@ class Product(models.Model):
         if start_date is None or end_date is None:
             return {}
 
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
                                         false_p=False,
@@ -1624,7 +1624,7 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
@@ -2188,7 +2188,7 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
@@ -2869,7 +2869,7 @@ class Finding(models.Model):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
