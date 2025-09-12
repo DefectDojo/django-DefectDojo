@@ -8,7 +8,6 @@ import logging
 from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import transaction
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -140,113 +139,110 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(f"  Processing {backfill_count:,} records in batches of {batch_size:,}...")
 
-                # Process in batches using bulk_create
+                # Process records one by one and bulk insert every batch_size records
                 processed = 0
-                for start in range(0, backfill_count, batch_size):
-                    end = min(start + batch_size, backfill_count)
-                    filtered_batch = list(records_needing_backfill[start:end])
+                event_records = []
+                failed_records = []
 
-                    if not dry_run:
-                        # Create events with preserved timestamps from original instances
-                        event_records = []
-                        failed_records = []
-                        for instance in filtered_batch:
-                            try:
-                                # Create event record with all model fields
-                                event_data = {}
+                for instance in records_needing_backfill.iterator():
+                    try:
+                        # Create event record with all model fields
+                        event_data = {}
 
-                                # Get excluded fields for this model from pghistory configuration
-                                excluded_fields = self.get_excluded_fields(model_name)
+                        # Get excluded fields for this model from pghistory configuration
+                        excluded_fields = self.get_excluded_fields(model_name)
 
-                                # Copy all fields from the instance to event_data, except excluded ones
-                                for field in instance._meta.fields:
-                                    field_name = field.name
-                                    if field_name not in excluded_fields:
-                                        field_value = getattr(instance, field_name)
-                                        event_data[field_name] = field_value
+                        # Copy all fields from the instance to event_data, except excluded ones
+                        for field in instance._meta.fields:
+                            field_name = field.name
+                            if field_name not in excluded_fields:
+                                field_value = getattr(instance, field_name)
+                                event_data[field_name] = field_value
 
-                                # Explicitly preserve created timestamp from the original instance
-                                # Only if not excluded and exists
-                                if hasattr(instance, "created") and instance.created and "created" not in excluded_fields:
-                                    event_data["created"] = instance.created
-                                # Note: We don't preserve 'updated' for Product since it's excluded
+                        # Explicitly preserve created timestamp from the original instance
+                        # Only if not excluded and exists
+                        if hasattr(instance, "created") and instance.created and "created" not in excluded_fields:
+                            event_data["created"] = instance.created
+                        # Note: We don't preserve 'updated' for Product since it's excluded
 
-                                # Add pghistory-specific fields
-                                event_data.update({
-                                    "pgh_label": "initial_import",
-                                    "pgh_obj": instance,  # ForeignKey to the original object
-                                    "pgh_context": None,  # No context for backfilled events
-                                })
+                        # Add pghistory-specific fields
+                        event_data.update({
+                            "pgh_label": "initial_import",
+                            "pgh_obj": instance,  # ForeignKey to the original object
+                            "pgh_context": None,  # No context for backfilled events
+                        })
 
-                                # Set pgh_created_at to current time (this is for the event creation time)
-                                # The created/updated fields above contain the original instance timestamps
-                                event_data["pgh_created_at"] = timezone.now()
+                        # Set pgh_created_at to current time (this is for the event creation time)
+                        # The created/updated fields above contain the original instance timestamps
+                        event_data["pgh_created_at"] = timezone.now()
 
-                                event_records.append(EventModel(**event_data))
+                        event_records.append(EventModel(**event_data))
 
-                            except Exception as e:
-                                failed_records.append(instance.id)
-                                logger.error(
-                                    f"Failed to prepare event for {model_name} "
-                                    f"ID {instance.id}: {e}",
-                                )
-                                # Continue processing other records in the batch
-
-                        # Bulk create all events in this batch
-                        if event_records:
-                            try:
-                                with transaction.atomic():
-                                    # Temporarily disable auto_now and auto_now_add for accurate timestamp preservation
-                                    for field in EventModel._meta.fields:
-                                        if hasattr(field, "auto_now"):
-                                            field.auto_now = False
-                                        if hasattr(field, "auto_now_add"):
-                                            field.auto_now_add = False
-
-                                    EventModel.objects.bulk_create(
-                                        event_records,
-                                        batch_size=batch_size,
-                                    )
-
-                                    # Restore auto_now and auto_now_add settings
-                                    for field in EventModel._meta.fields:
-                                        if field.name == "created" and hasattr(field, "auto_now_add"):
-                                            field.auto_now_add = True
-                                        if field.name == "updated" and hasattr(field, "auto_now"):
-                                            field.auto_now = True
-                            except Exception as e:
-                                logger.error(
-                                    f"Failed to bulk create events for {model_name}: {e}",
-                                )
-                                # Re-raise the exception instead of falling back
-                                raise
-
-                    # Count only successfully processed records
-                    successful_in_batch = len(event_records)
-                    failed_in_batch = len(failed_records)
-                    processed += successful_in_batch
-
-                    if failed_in_batch > 0:
-                        self.stdout.write(
-                            self.style.WARNING(
-                                f"  Batch {start + 1}-{end}: {successful_in_batch} successful, "
-                                f"{failed_in_batch} failed (IDs: {failed_records[:5]}{'...' if failed_in_batch > 5 else ''})",
-                            ),
+                    except Exception as e:
+                        failed_records.append(instance.id)
+                        logger.error(
+                            f"Failed to prepare event for {model_name} ID {instance.id}: {e}",
                         )
 
-                    self.stdout.write(
-                        f"  Processed {processed:,}/{backfill_count:,} records needing backfill "
-                        f"({processed / backfill_count * 100:.1f}%)",
-                    )
+                    # Bulk create when we hit batch_size records
+                    if len(event_records) >= batch_size:
+                        if not dry_run and event_records:
+                            try:
+                                attempted = len(event_records)
+                                created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
+                                actually_created = len(created_objects) if created_objects else 0
+                                processed += actually_created
+
+                                if actually_created != attempted:
+                                    logger.warning(
+                                        f"bulk_create for {model_name}: attempted {attempted}, "
+                                        f"actually created {actually_created} ({attempted - actually_created} skipped)",
+                                    )
+                            except Exception as e:
+                                logger.error(f"Failed to bulk create events for {model_name}: {e}")
+                                raise
+                        elif dry_run:
+                            processed += len(event_records)
+
+                        event_records = []  # Reset for next batch
+
+                        # Progress update
+                        progress = (processed / backfill_count) * 100
+                        self.stdout.write(f"  Processed {processed:,}/{backfill_count:,} records needing backfill ({progress:.1f}%)")
+
+                # Handle remaining records
+                if event_records:
+                    if not dry_run:
+                        try:
+                            attempted = len(event_records)
+                            created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
+                            actually_created = len(created_objects) if created_objects else 0
+                            processed += actually_created
+
+                            if actually_created != attempted:
+                                logger.warning(
+                                    f"bulk_create final batch for {model_name}: attempted {attempted}, "
+                                    f"actually created {actually_created} ({attempted - actually_created} skipped)",
+                                )
+                        except Exception as e:
+                            logger.error(f"Failed to bulk create final batch for {model_name}: {e}")
+                            raise
+                    else:
+                        processed += len(event_records)
+
+                # Final progress update
+                if backfill_count > 0:
+                    progress = (processed / backfill_count) * 100
+                    self.stdout.write(f"  Processed {processed:,}/{backfill_count:,} records needing backfill ({progress:.1f}%)")
 
                 total_processed += processed
 
                 # Show completion summary
-                if processed < backfill_count:
+                if failed_records:
                     self.stdout.write(
                         self.style.WARNING(
-                            f"  ⚠ Completed {model_name}: {processed:,}/{backfill_count:,} records "
-                            f"({backfill_count - processed:,} records failed and will need to be retried)",
+                            f"  ⚠ Completed {model_name}: {processed:,} records processed, "
+                            f"{len(failed_records)} records failed",
                         ),
                     )
                 else:
