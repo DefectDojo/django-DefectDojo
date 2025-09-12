@@ -3400,7 +3400,7 @@ class Finding(models.Model):
         return link
 
     def get_references_with_links(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.references is None:
             return None
         matches = re.findall(r"([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)", self.references)
