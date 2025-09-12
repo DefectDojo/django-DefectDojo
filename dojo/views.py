@@ -2,6 +2,8 @@ import logging
 from contextlib import suppress
 from pathlib import Path
 
+from auditlog.models import LogEntry
+from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -20,10 +22,39 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.pghistory_models import DojoEvents
 from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
+
+
+def get_object_str(event):
+    """Get the __str__ representation of the original object from pghistory event data."""
+    try:
+        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
+            return "N/A"
+
+        app_label, model_name = event.pgh_obj_model.split(".")
+        model_class = apps.get_model(app_label, model_name)
+
+        if hasattr(event, "pgh_data") and event.pgh_data:
+            # Create a temporary instance with the event data
+            temp_instance = model_class(**event.pgh_data)
+            return str(temp_instance)
+        if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
+            return f"Object ID: {event.pgh_obj_id}"
+        return "N/A"  # noqa: TRY300 it complains that it wants an else, but if I add an else, it complains that the elise is unnecessary
+
+    except (ValueError, LookupError, TypeError, AttributeError):
+        # Fallback to name from data if available
+        if hasattr(event, "pgh_data") and event.pgh_data and "name" in event.pgh_data:
+            return event.pgh_data["name"]
+
+        if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
+            return f"Object ID: {event.pgh_obj_id}"
+
+        return "N/A"
 
 
 def custom_error_view(request, exception=None):
@@ -109,75 +140,33 @@ def action_history(request, cid, oid):
     pghistory_history = []
 
     # Try to get django-auditlog entries
-    try:
-        from auditlog.models import LogEntry
-        auditlog_queryset = LogEntry.objects.filter(
-            content_type=ct,
-            object_pk=obj.id,
-        ).order_by("-timestamp")
-        auditlog_history = auditlog_queryset
-    except ImportError:
-        auditlog_history = []  # django-auditlog not available
+    auditlog_queryset = LogEntry.objects.filter(
+        content_type=ct,
+        object_pk=obj.id,
+    ).order_by("-timestamp")
+    auditlog_history = auditlog_queryset
 
-    # Try to get django-pghistory entries using the official Events model
-    try:
-        from django.apps import apps
+    # Use custom DojoEvents proxy model - provides proper diff calculation and context fields
+    # Filter by the specific object using tracks() method
+    # Note: Events is a CTE that doesn't support select_related, but includes context data
+    pghistory_history = DojoEvents.objects.tracks(obj).order_by("-pgh_created_at")
 
-        from dojo.pghistory_models import DojoEvents
+    # Add object string representation based on the original models __str__ method
+    # this value was available in the old auditlogs, so we mimic that here
+    # it can be useful to see the object_str that was changed, but we'll have to see how it performs
 
-        # Use custom DojoEvents proxy model - provides proper diff calculation and context fields
-        # Filter by the specific object using tracks() method
-        # Note: Events is a CTE that doesn't support select_related, but includes context data
-        pghistory_history = DojoEvents.objects.tracks(obj).order_by("-pgh_created_at")
+    # Apply filtering first, then process for object strings
+    pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
+    filtered_pghistory = pghistory_filter.qs
 
-        # Add object string representation based on the original models __str__ method
-        # this value was available in the old auditlogs, so we mimic that here
-        # it can be useful to see the object_str that was changed, but we'll have to see how it performs
-        def get_object_str(event):
-            """Get the __str__ representation of the original object from pghistory event data."""
-            try:
-                if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
-                    return "N/A"
+    # Process filtered events to add object string representation
+    processed_events = []
+    for event in filtered_pghistory:
+        event.object_str = get_object_str(event)
+        processed_events.append(event)
 
-                app_label, model_name = event.pgh_obj_model.split(".")
-                model_class = apps.get_model(app_label, model_name)
-
-                if hasattr(event, "pgh_data") and event.pgh_data:
-                    # Create a temporary instance with the event data
-                    temp_instance = model_class(**event.pgh_data)
-                    return str(temp_instance)
-                if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-                    return f"Object ID: {event.pgh_obj_id}"
-                return "N/A"  # noqa: TRY300 it complains that it wants an else, but if I add an else, it complains that the elise is unnecessary
-
-            except (ValueError, LookupError, TypeError, AttributeError):
-                # Fallback to name from data if available
-                if hasattr(event, "pgh_data") and event.pgh_data and "name" in event.pgh_data:
-                    return event.pgh_data["name"]
-
-                if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-                    return f"Object ID: {event.pgh_obj_id}"
-
-                return "N/A"
-
-        # Apply filtering first, then process for object strings
-        pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
-        filtered_pghistory = pghistory_filter.qs
-
-        # Process filtered events to add object string representation
-        processed_events = []
-        for event in filtered_pghistory:
-            event.object_str = get_object_str(event)
-            processed_events.append(event)
-
-        # Paginate the processed events
-        paged_pghistory_history = get_page_items(request, processed_events, 25)
-
-    except ImportError:
-        # django-pghistory not available, create empty QuerySet using auditlog as fallback
-        pghistory_history = auditlog_history.none() if auditlog_history else []
-        pghistory_filter = None
-        paged_pghistory_history = get_page_items(request, pghistory_history, 25)
+    # Paginate the processed events
+    paged_pghistory_history = get_page_items(request, processed_events, 25)
 
     # Create filter and pagination for auditlog entries
     auditlog_filter = LogEntryFilter(request.GET, queryset=auditlog_history)

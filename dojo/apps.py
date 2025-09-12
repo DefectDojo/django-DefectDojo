@@ -5,6 +5,7 @@ from django.core.checks import register as register_check
 from django.db import models
 from watson import search as watson
 
+from dojo.auditlog import configure_audit_system, register_django_pghistory_models
 from dojo.checks import check_configuration_deduplication
 
 logger = logging.getLogger(__name__)
@@ -91,7 +92,6 @@ class DojoAppConfig(AppConfig):
         # This must be done in ready() to avoid "Models aren't loaded yet" errors
         # Note: pghistory models are registered here (no database access), but trigger
         # enabling is handled via management command to avoid database access warnings
-        from dojo.auditlog import configure_audit_system, register_django_pghistory_models
         register_django_pghistory_models()
         configure_audit_system()
 

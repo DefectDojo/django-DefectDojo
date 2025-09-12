@@ -2,6 +2,7 @@ import contextlib
 
 from auditlog.models import LogEntry
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
@@ -12,6 +13,7 @@ from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
+from dojo.pghistory_models import DojoEvents
 
 
 @receiver(post_delete, sender=Test)
@@ -24,7 +26,6 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
 
             if settings.ENABLE_AUDITLOG:
                 # First try to find deletion author in pghistory events
-                from dojo.pghistory_models import DojoEvents
                 # Look for delete events for this specific test instance
                 pghistory_delete_events = DojoEvents.objects.filter(
                     pgh_obj_model="dojo.Test",
@@ -36,7 +37,6 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
                     latest_delete = pghistory_delete_events.first()
                     # Extract user from pghistory context
                     if latest_delete.user:
-                        from django.contrib.auth import get_user_model
                         User = get_user_model()
                         with contextlib.suppress(User.DoesNotExist):
                             user = User.objects.get(id=latest_delete.user)

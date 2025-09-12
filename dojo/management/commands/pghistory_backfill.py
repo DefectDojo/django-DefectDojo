@@ -9,6 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +179,6 @@ class Command(BaseCommand):
 
                                 # Set pgh_created_at to current time (this is for the event creation time)
                                 # The created/updated fields above contain the original instance timestamps
-                                from django.utils import timezone
                                 event_data["pgh_created_at"] = timezone.now()
 
                                 event_records.append(EventModel(**event_data))
