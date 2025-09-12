@@ -34,11 +34,11 @@ class Command(BaseCommand):
         # Create the raw URL object first
         # This should create the location object as well
         url = URL.objects.get_or_create(
-            protocol=endpoint.protocol or "tcp",
+            protocol=endpoint.protocol or "",
             user_info=endpoint.userinfo or "",
             host=endpoint.host,
             port=endpoint.port,
-            path=endpoint.path or "/",
+            path=endpoint.path or "",
             query=endpoint.query or "",
             fragment=endpoint.fragment or "",
             host_validation_failure=host_validation_failure,

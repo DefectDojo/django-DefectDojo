@@ -103,4 +103,6 @@ DEFAULT_PORTS = {
     "openvpn": 1194,  # included for completeness, though it doesn't fit the URL scheme exactly
     "irc": 194,
     "tcp": None,
+    # Empty string is used when the protocol is not specified, port is then assumed to be None as well
+    "": None,
 }

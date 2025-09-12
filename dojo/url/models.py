@@ -27,13 +27,14 @@ class URL(AbstractLocation):
     protocol = CharField(
         max_length=10,
         blank=True,
-        default="tcp",
+        default="",
         validators=[validate_protocol],
         help_text="The protocol of the URL (e.g., http, https, ftp, etc.)",
     )
     user_info = CharField(
         max_length=512,
         blank=True,
+        default="",
         validators=[validate_user_info],
         help_text="Connection details for a given user",
     )
@@ -62,18 +63,20 @@ class URL(AbstractLocation):
     path = CharField(
         max_length=2048,
         blank=True,
-        default="/",
+        default="",
         help_text="The path of the URL (optional),",
     )
     query = CharField(
         max_length=2048,
         blank=True,
+        default="",
         validators=[validate_query],
         help_text="The query string of the URL (optional)",
     )
     fragment = CharField(
         max_length=2048,
         blank=True,
+        default="",
         validators=[validate_fragment],
         help_text="The fragment identifier of the URL (optional)",
     )
