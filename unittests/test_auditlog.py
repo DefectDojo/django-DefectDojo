@@ -26,7 +26,7 @@ class TestAuditConfig(TestCase):
 
     """Test audit configuration functionality."""
 
-    @patch("dojo.auditlog.auditlog")
+    @patch("auditlog.registry.auditlog")
     def test_enable_django_auditlog(self, mock_auditlog):
         """Test that enable_django_auditlog registers models."""
         # Mock the auditlog registry
