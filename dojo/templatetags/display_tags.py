@@ -1,12 +1,13 @@
 from enum import Enum
+import re
 import base64
-import json
 import contextlib
 import datetime
 import logging
 import mimetypes
 import pytz
 import re
+import crum
 from ast import literal_eval
 from itertools import chain
 
@@ -26,11 +27,13 @@ from django.utils import timezone
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
+from django.template import Context, Template
 
 from dojo.engine_tools.models import FindingExclusion
+from dojo.user.queries import get_role_members
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
-
+from dojo.finding.helper import parser_ia_recommendation
 from dojo.models import (
     Benchmark_Product,
     Check_List,
@@ -42,7 +45,7 @@ from dojo.models import (
     ExclusivePermission,
     GeneralSettings)
 
-from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, calculate_severity_priority
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +160,11 @@ def dojo_version():
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
-    return f"v. {version}"
+    return f"v. {version.replace('v', '')}"
+
+@register.simple_tag
+def team_name():
+    return System_Settings.objects.get().team_name
 
 
 @register.simple_tag
@@ -301,23 +308,24 @@ def finding_sla(finding):
         return ""
 
     title = ""
-    severity = finding.severity
+    severity = calculate_severity_priority(finding.tags, finding.priority)
+    if severity == "Unknown":
+        severity = finding.severity
     days_remaining = finding.sla_days_remaining()
+    status = "green"
+
     if finding.mitigated:
         status = "blue"
-        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
-        if days_remaining and days_remaining < 0:
+        status_text = f"Remediated within SLA for {severity.lower()} findings ({sla_period} days since {finding.get_sla_start_date().strftime('%b %d, %Y')})"
+        if days_remaining is not None and days_remaining < 0:
             status = "orange"
             days_remaining = abs(days_remaining)
-            status_text = "Out of SLA: Remediated " + str(
-                days_remaining) + " days past SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+            status_text = f"Out of SLA: Remediated {days_remaining} days past SLA for {severity.lower()} findings ({sla_period} days since {finding.get_sla_start_date().strftime('%b %d, %Y')})"
     else:
-        status = "green"
-        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
-        if days_remaining and days_remaining < 0:
+        status_text = f"Remediation for {severity.lower()} findings in {sla_period} days or less since {finding.get_sla_start_date().strftime('%b %d, %Y')}"
+        if days_remaining is not None and days_remaining < 0:
             status = "red"
-            status_text = "Overdue: Remediation for " + severity.lower() + " findings in " + str(
-                sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+            status_text = f"Overdue: Remediation for {severity.lower()} findings in {sla_period} days or less since {finding.get_sla_start_date().strftime('%b %d, %Y')}"
 
     if days_remaining is not None:
         title = (
@@ -826,6 +834,10 @@ def finding_display_status(finding, event="view"):
     html_render = template_object.render(context_object)
     return html_render
 
+@register.filter
+def priority_display_status(finding):
+    return calculate_severity_priority(finding.tags, finding.priority)
+
 
 @register.filter
 def cwe_url(cwe):
@@ -1042,19 +1054,8 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
     if not jira_project:
         return ""
 
-    html = """
-    <i class="fa %s has-popover %s"
-        title="<i class='fa %s'></i> <b>JIRA Project Configuration%s</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-        data-content="<b>Jira:</b> %s<br/>
-        <b>Project Key:</b> %s<br/>
-        <b>Component:</b> %s<br/>
-        <b>Push All Issues:</b> %s<br/>
-        <b>Engagement Epic Mapping:</b> %s<br/>
-        <b>Push Notes:</b> %s">
-    </i>
-    """
     jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
-    inherited = bool(not jira_project_no_inheritance)
+    inherited = not bool(jira_project_no_inheritance)
 
     icon = "fa-bug"
     color = ""
@@ -1068,13 +1069,37 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
         color = "red"
         icon = "fa-exclamation-triangle"
 
-    return mark_safe(html % (icon, color, icon, inherited_text,  # indicator if jira_instance is missing
-                                esc(jira_project.jira_instance),
-                                esc(jira_project.project_key),
-                                esc(jira_project.component),
-                                esc(jira_project.push_all_issues),
-                                esc(jira_project.enable_engagement_epic_mapping),
-                                esc(jira_project.push_notes)))
+    # Template en string
+    template_string = """
+    <i class="fa {{ icon }} has-popover {{ color }}"
+       title="<i class='fa {{ icon }}'></i> <b>JIRA Project Configuration{{ inherited_text }}</b>"
+       data-trigger="hover"
+       data-container="body"
+       data-html="true"
+       data-placement="bottom"
+       data-content="<b>Jira:</b> {{ jira_instance }}<br/>
+                     <b>Project Key:</b> {{ project_key }}<br/>
+                     <b>Component:</b> {{ component }}<br/>
+                     <b>Push All Issues:</b> {{ push_all_issues }}<br/>
+                     <b>Engagement Epic Mapping:</b> {{ engagement_epic_mapping }}<br/>
+                     <b>Push Notes:</b> {{ push_notes }}">
+    </i>
+    """
+
+    template_obj = Template(template_string)
+    context = Context({
+        "icon": icon,
+        "color": color,
+        "inherited_text": esc(inherited_text),
+        "jira_instance": esc(jira_project.jira_instance),
+        "project_key": esc(jira_project.project_key),
+        "component": esc(jira_project.component),
+        "push_all_issues": esc(jira_project.push_all_issues),
+        "engagement_epic_mapping": esc(jira_project.enable_engagement_epic_mapping),
+        "push_notes": esc(jira_project.push_notes),
+    })
+
+    return template_obj.render(context)
 
 
 @register.filter
@@ -1174,14 +1199,100 @@ def render_exclusive_permission_for_member(exclusive_permissions: list[Exclusive
 
 
 @register.filter()
-def render_ia_recommendation(ia_recommendation: str):
-    data = ia_recommendation.get("data")
-    if not data or not all(key in data for key in ["recommendations", "mitigations", "files_to_fix"]):
-        return "An error occurred. Please click the 'Recommendation AI' 🤖 button to try again."
+def render_ia_recommendation(finding):
+    if finding.ia_recommendation is None:
+        return 'Click the 🤖 bot button to generate a recommendation using AI.'
+    context = parser_ia_recommendation(
+        finding.ia_recommendation)
+    return context["ia_recommendations"]
+
+
+@register.filter()
+def enable_like_status(finding):
+    response = "Undefined"
+    if finding.ia_recommendation:
+        if "data" in finding.ia_recommendation:
+            if "like_status" in finding.ia_recommendation["data"]:
+                like_status = finding.ia_recommendation["data"]["like_status"]
+                if like_status is True:
+                    response = "Like"
+                if like_status is False:
+                    response = "Dislike"
+    return response
+
+
+@register.filter()
+def render_risk_acceptance_accepted_by(finding: Finding):
+    accepted_by = finding.accepted_by
+    if finding.accepted_by is None:
+        accepted_by = ""
+    accepted_by_user = ""
+    if finding.risk_acceptance.accepted_by:
+        accepted_by_recommendation_ra = finding.risk_acceptance.accepted_by_user
+        for user in accepted_by_recommendation_ra:
+            status = "⏳"
+            name_parts = re.findall(r'[A-Z][a-z]*', user)
+            accepte_by_finding = [item.strip() for item in accepted_by.split(",")]
+            if accepte_by_finding != ['']:
+                if (user in accepte_by_finding or
+                    all(
+                        x not in accepte_by_finding
+                        for x in accepted_by_recommendation_ra)):
+                    status = "✅"
+            if len(name_parts) > 2:
+                accepted_by_user += f"👤 {name_parts[0]} {name_parts[2]} {status}"
+            elif len(name_parts) == 2:
+                accepted_by_user += f"👤 {name_parts[0]} {name_parts[1]} {status}"
+            else:
+                logger.debug(f"name user '{user}' not match whit regex ")
+                accepted_by_user += f"👤 {user} {status}"
+            accepted_by_user += "</br>"
+        logger.debug(f"render_accepted_by_context is {accepted_by_user}")
+    return accepted_by_user
+
+
+@register.filter()
+def permission_view_findings(user):
+    value = GeneralSettings.get_value(
+        "USERS_PERMISSION_VIEW_FINDINGS",
+        "all"
+    )
+    if "all" in value or user in value:
+        return True
+    return False
+
+@register.filter()
+def general_settings_get_value(name_key, default=None):
+    """
+    Returns the value of a general setting by its name key.
+    """
+    return GeneralSettings.get_value(name_key, default)
+
+@register.filter()
+def has_user_permission_view(permission_render_view, product):
+
+    if GeneralSettings.get_status(
+        name_key=permission_render_view, default=False) is False:
+        return False
+
+    roles_with_permission = GeneralSettings.get_value(permission_render_view, None)
+
+    if roles_with_permission is None:
+        return False
+
+    user = crum.get_current_user()
+
+    if user.is_superuser:
+        return True
+
+
+    if hasattr(user, 'global_role'):
+        if user.global_role.role:
+            if user.global_role.role.name in roles_with_permission:
+                return True
         
-    rendered = render_to_string("dojo/ia_recommendation.html", {
-        "recommendations": data["recommendations"],
-        "mitigations": data["mitigations"],
-        "files_to_fix": data["files_to_fix"]
-    })
-    return rendered
+    roles_allowed = get_role_members(user, product, product.prod_type)
+    if roles_allowed in roles_with_permission:
+        return True
+    
+    return False

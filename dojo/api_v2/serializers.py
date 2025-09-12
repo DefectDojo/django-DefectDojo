@@ -25,6 +25,7 @@ from rest_framework.fields import DictField, MultipleChoiceField
 import dojo.jira_link.helper as jira_helper
 from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -117,7 +118,7 @@ from dojo.models import (
     get_current_date,
     TransferFinding,
     Component,
-    ExclusivePermission
+    GeneralSettings,
 )
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
@@ -2056,7 +2057,8 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class EngagementByProductResponseSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255)
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
     engagements_list = serializers.SerializerMethodField()
@@ -2083,7 +2085,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   "prod_type")
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     # findings_list = serializers.SerializerMethodField()
 
@@ -2432,6 +2434,17 @@ class ImportScanSerializer(CommonImportScanSerializer):
         context["push_to_jira"] = push_to_jira
         # Import the scan with all of the supplied data
         self.process_scan(data, context)
+        # If the test is provided, search for correlated findings
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
+            test = context.get("test")
+            engagement = context.get("engagement")
+            queryset = search_finding_correlated(
+                test.finding_set.all(),
+                engagement)
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class ReImportScanSerializer(CommonImportScanSerializer):
@@ -2581,6 +2594,18 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         self.process_auto_create_create_context(auto_create_manager, context)
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)
+        # If the test iss provided, search for correlated findings
+        if GeneralSettings.get_value(
+            "ENABLE_CORRELATED_FINDING_REIMPORT_SCAN",
+            False
+        ):
+            test = context.get("test")
+            engagement = context.get("engagement")
+            queryset = search_finding_correlated(
+                test.finding_set.all(),
+                engagement
+            )
+            add_finding_correlated(test.finding_set.all(), queryset)
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):
@@ -2765,9 +2790,15 @@ class FindingCloseSerializer(serializers.ModelSerializer):
         )
 
 
+class FindingsCloseBulkSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=True)
+    is_mitigated = serializers.BooleanField(required=True)
+    mitigated = serializers.DateTimeField(required=False)
+
+
 class FindingCloseBulkSerializer(serializers.Serializer):
     verify = serializers.BooleanField(required=False, default=False)
-    findings = FindingCloseSerializer(many=True, required=True)
+    findings = FindingsCloseBulkSerializer(many=True, required=True)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
@@ -2776,6 +2807,10 @@ class ReportGenerateOptionSerializer(serializers.Serializer):
     include_executive_summary = serializers.BooleanField(default=False)
     include_table_of_contents = serializers.BooleanField(default=False)
 
+
+class FindingBulkUpdateSLAStartDate(serializers.Serializer):
+    tags = serializers.CharField(max_length=200)
+    date = serializers.DateTimeField(required=True)
 
 class ExecutiveSummarySerializer(serializers.Serializer):
     engagement_name = serializers.CharField(max_length=200)
@@ -2914,6 +2949,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
     )
     risk_acceptance_request = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
+    url_report_finding = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
     risk_acceptance_confirmed = MultipleChoiceField(

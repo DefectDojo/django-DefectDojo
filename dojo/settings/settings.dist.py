@@ -38,6 +38,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_ENBABLED_DEBUG_TOOLBAR=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -69,8 +70,8 @@ env = environ.FileAwareEnv(
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
-    DD_THROTTLE_ANON=(str, "0/secod"),
-    DD_THROTTLE_USER=(str, "1000/secod"),
+    DD_THROTTLE_ANON=(str, "1000/second"),
+    DD_THROTTLE_USER=(str, "1000/second"),
     DD_TEST_RUNNER=(str, "django.test.runner.DiscoverRunner"),
     DD_URL_PREFIX=(str, ""),
     DD_ROOT=(str, root("dojo")),
@@ -100,6 +101,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 1),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -252,6 +254,9 @@ env = environ.FileAwareEnv(
     # finetuning settings for when enabled
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+    # Use business day's to calculate SLA's and age instead of calendar days
+    DD_SLA_BUSINESS_DAYS=(bool, False),
+    DD_SLA_FREEZE_DAYS=(int, 0),  # Number of days to freeze SLA's
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -267,6 +272,7 @@ env = environ.FileAwareEnv(
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, "console"),
+    DD_ENABLE_SQL_LOGGING=(bool, False),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
@@ -466,14 +472,20 @@ env = environ.FileAwareEnv(
         }
     }),
     
-    # Finding exclusion - request expiration days
+    # Finding exclusion - request expiration
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
-    DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS=(int, 1),
-    DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS=(int, 1),
+    DD_CHECK_EXPIRING_FINDINGEXCLUSION=(int, 12),
+    DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST=(int, 5),
     
     # tags for filter to finding exclusion
-    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
-    DD_BLACKLIST_FILTER_TAGS=(str, ""),
+    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "tag1,tag2"),
+    DD_PRIORITY_FILTER_TAGS=(str, ""),
+    DD_TAGS_EXCLUDE_PRACTICE_FILTER=(list, []),
+
+    # contact types AUTHORIZED FOR RISK ACCEPTANCE
+    DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE=(list, [
+        "team_manager",
+        ]),
     # User Contacts with exclusive permissions
     DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
         "product_type_manager",
@@ -506,20 +518,39 @@ env = environ.FileAwareEnv(
     DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
     DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
     
-    # Twistlock
-    DD_TWISTLOCK_API_URL=(str, ""),
-    DD_TWISTLOCK_ACCESS_KEY=(str, ""),
-    DD_TWISTLOCK_SECRET_KEY=(str, ""),
-    
     # Priorization
-    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
+    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 7 * * 0"),
+
     # Host IA recommendation
     DD_HOST_IA_RECOMMENDATION=(str, "http://localhost:3000"),
+    DD_LOGO_URL=(str, ""),
     DD_CLIENT_ID_IA=(str, ""),
     DD_CLIENT_SECRET_IA=(str, ""),
 
     # Regex Validation Name
     DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
+    # Redis
+    DD_USE_CACHE_REDIS=(bool, False),
+    DD_CACHE_PAGE_TIME=(int, 60 * 5),  # 5 minutes
+
+    # Cors
+    DD_CORS_ENABLED=(bool, False),
+    DD_CORS_ALLOWED_ORIGINS=(list, []),
+    DD_CORS_ALLOW_METHODS=(list, ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]),
+    DD_CORS_ALLOW_HEADERS=(list, ["Authorization", "Content-Type", "Accept", "session-cookie"]),
+    DD_CORS_ALLOW_CREDENTIALS=(bool, True),
+
+    # Pool conecction
+    DD_MIN_CONNS=(int, 10),
+    DD_MAX_CONNS=(int, 50),
+    DD_TIMEOUT_CONNS=(int, 10),
+    DD_USE_DB_POOL=(bool, False),
+    DD_STATEMENT_TIMEOUT=(str, "10000"),
+    DD_STATEMENT_TIMEOUT_REPLICA=(str, "10000"),
+
+    # Risk Score
+    DD_BUCKET_NAME_RISK_SCORE=(str, ""),
+    DD_PATH_FILE_RISK_SCORE=(str, ""),
 )
 
 
@@ -546,12 +577,14 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     return "".join(result_list)
 
 
+AWS_REGION = env("AWS_REGION", default="us-east-1")
+
+
 def get_secret(secret_name):
-    region_name = env("AWS_REGION")
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
+    client = session.client(service_name="secretsmanager", region_name=AWS_REGION)
 
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
@@ -575,6 +608,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
+ENBABLED_DEBUG_TOOLBAR = env("DD_ENBABLED_DEBUG_TOOLBAR")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
@@ -627,7 +661,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -637,14 +671,15 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PASSWORD": secret_database["password"],
             "HOST": secret_database["host"],
             "PORT": secret_database["port"],
+            "CONN_MAX_AGE": None,
         }
-    }
+    }    
     if env("DD_DATABASE_REPLICA"):
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": f"-c search_path={SCHEMA_DB}"
+                "options": f"-c search_path={SCHEMA_DB}",
             },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
@@ -661,7 +696,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": f"-c search_path={SCHEMA_DB}"
+                    "options": f"-c search_path={SCHEMA_DB}",
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
@@ -674,21 +709,49 @@ else:
             }
         }
 
+
+# Pool connection settings
+MIN_CONNS = env("DD_MIN_CONNS")
+MAX_CONNS = env("DD_MAX_CONNS")
+TIMEOUT_CONNS = env("DD_TIMEOUT_CONNS")
+USE_DB_POOL = env("DD_USE_DB_POOL")
+STATEMENT_TIMEOUT = env("DD_STATEMENT_TIMEOUT")
+STATEMENT_TIMEOUT_REPLICA = env("DD_STATEMENT_TIMEOUT_REPLICA")
+
+# Risk score
+BUCKET_NAME_RISK_SCORE = env("DD_BUCKET_NAME_RISK_SCORE")
+PATH_FILE_RISK_SCORE = env("DD_PATH_FILE_RISK_SCORE")
+
+if STATEMENT_TIMEOUT:
+    if "OPTIONS" not in DATABASES["default"].keys():
+        DATABASES["default"]["OPTIONS"] = {}
+        DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT}"
+
+if STATEMENT_TIMEOUT_REPLICA:
+    if "replica" in DATABASES.keys():
+        if "OPTIONS" not in DATABASES["replica"].keys():
+            DATABASES["default"]["OPTIONS"] = {}
+            DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={SCHEMA_DB} -c statement_timeout={STATEMENT_TIMEOUT_REPLICA}"
+
+# If the database engine is PostgreSQL, we add the pool configuration
+if USE_DB_POOL:
+    if "OPTIONS" not in DATABASES["default"].keys():
+        DATABASES["default"]["OPTIONS"] = {}
+    DATABASES["default"]["CONN_MAX_AGE"] = 0
+    DATABASES["default"]["OPTIONS"]["pool"] = {}
+    DATABASES["default"]["OPTIONS"]["pool"]["min_size"] = MIN_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["max_size"] = MAX_CONNS
+    DATABASES["default"]["OPTIONS"]["pool"]["timeout"] = TIMEOUT_CONNS
+
 # ------------------------------------------------------------------------------
 # ENGINE BACKEND
 # ------------------------------------------------------------------------------
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
     PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
-    # Twistlock API
-    TWISTLOCK_ACCESS_KEY = secret_engine_backend["prismaAccessKey"]
-    TWISTLOCK_SECRET_KEY = secret_engine_backend["prismaSecretKey"]
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
-    TWISTLOCK_ACCESS_KEY = env("DD_TWISTLOCK_ACCESS_KEY")
-    TWISTLOCK_SECRET_KEY = env("DD_TWISTLOCK_SECRET_KEY")
     
-TWISTLOCK_API_URL = env('DD_TWISTLOCK_API_URL')
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
     MIGRATION_MODULES = {"dojo": "dojo.db_migrations"}
@@ -944,6 +1007,7 @@ SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 
 SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
 SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS") # Use business days to calculate SLA's and age of a finding instead of calendar days
+SLA_FREEZE_DAYS = env("DD_SLA_FREEZE_DAYS")
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -1157,7 +1221,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "dojo.api_v2.exception_handler.custom_exception_handler",
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'dojo.authorization.role_based_rate_throttle.RoleBasedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': THROTTLE_ANON,
@@ -1272,7 +1336,47 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
+# CORS
+
+if env("DD_CORS_ENABLED"):
+
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "corsheaders",
+    ]
+
+    DJANGO_MIDDLEWARE_CLASSES = [
+        *DJANGO_MIDDLEWARE_CLASSES,
+        "corsheaders.middleware.CorsMiddleware",
+    ]
+
+    if env("DD_CORS_ALLOWED_ORIGINS") != ["[]"]:
+        CORS_ALLOWED_ORIGINS = env("DD_CORS_ALLOWED_ORIGINS")
+
+    if env("DD_CORS_ALLOW_METHODS") != ["[]"]:
+        CORS_ALLOW_METHODS = env("DD_CORS_ALLOW_METHODS")
+
+    if env("DD_CORS_ALLOW_HEADERS") != ["[]"]:
+        CORS_ALLOW_HEADERS = env("DD_CORS_ALLOW_HEADERS")
+
+    CORS_ALLOW_CREDENTIALS = env("DD_CORS_ALLOW_CREDENTIALS")
+
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
+if ENBABLED_DEBUG_TOOLBAR:
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]
+    INTERNAL_IPS = [
+        # ...
+        "127.0.0.1",
+        # ...
+    ]
 
 
 # WhiteNoise allows your web app to serve its own static files,
@@ -1514,9 +1618,10 @@ CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
+CELERY_CRON_SCHEDULE_DUPE_DELETE = env("DD_CELERY_CRON_SCHEDULE_DUPE_DELETE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
-CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
-CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS")
+CELERY_EXPIRING_FINDINGEXCLUSION = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION")
+CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 REGEX_VALIDATION_NAME = env("DD_REGEX_VALIDATION_NAME")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
@@ -1535,8 +1640,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
-        "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
+        "schedule": timedelta(minutes=CELERY_CRON_SCHEDULE_DUPE_DELETE),
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
@@ -1573,16 +1677,15 @@ CELERY_BEAT_SCHEDULE = {
         },
     "check_expiring_findingexclusions": {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
-        'schedule': timedelta(days=CELERY_EXPIRING_FINDINGEXCLUSION_DAYS),
+        'schedule': crontab(hour=CELERY_EXPIRING_FINDINGEXCLUSION, minute=0),
     },
     "check_new_findings_to_exclusion_list": {
         'task': 'dojo.engine_tools.helpers.check_new_findings_to_exclusion_list',
-        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST_DAYS),
+        'schedule': crontab(hour=CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST, minute=0),
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
-
     },
     "check_finding_priorization": {
         "task": "dojo.engine_tools.helpers.check_priorization",
@@ -1590,7 +1693,8 @@ CELERY_BEAT_SCHEDULE = {
             minute=CELERY_CRON_CHECK_PRIORIZATION.split()[0],
             hour=CELERY_CRON_CHECK_PRIORIZATION.split()[1],
             day_of_month=CELERY_CRON_CHECK_PRIORIZATION.split()[2],
-            month_of_year=CELERY_CRON_CHECK_PRIORIZATION.split()[3],    
+            month_of_year=CELERY_CRON_CHECK_PRIORIZATION.split()[3],
+            day_of_week=CELERY_CRON_CHECK_PRIORIZATION.split()[4]
         )
     },
     "trigger_evaluate_pro_proposition": {
@@ -1914,7 +2018,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Sonatype Application Scan": DEDUPE_ALGO_HASH_CODE,
     "Dependency Check Scan": DEDUPE_ALGO_HASH_CODE,
     "Dockle Scan": DEDUPE_ALGO_HASH_CODE,
-    "Tenable Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tenable Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Nexpose Scan": DEDUPE_ALGO_HASH_CODE,
     "NPM Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "NPM Audit v7+ Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1981,7 +2085,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Blackduck Binary Analysis": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "docker-bench-security Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Vulners Scan": DEDUPE_ALGO_HASH_CODE,
-    "Twistlock Image Scan": DEDUPE_ALGO_HASH_CODE,
+    "Twistlock Image Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "NeuVector (REST)": DEDUPE_ALGO_HASH_CODE,
     "NeuVector (compliance)": DEDUPE_ALGO_HASH_CODE,
     "Wpscan": DEDUPE_ALGO_HASH_CODE,
@@ -2067,6 +2171,7 @@ JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GRO
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING_HANDLER = env("DD_LOGGING_HANDLER")
+ENABLE_SQL_LOGGING = env("DD_ENABLE_SQL_LOGGING")
 
 LOG_LEVEL = env("DD_LOG_LEVEL")
 if not LOG_LEVEL:
@@ -2086,6 +2191,9 @@ LOGGING = {
         "json": {
             "()": "json_log_formatter.JSONFormatter",
         },
+        "sql_with_trace": {
+            "format": "[%(asctime)s] %(levelname)s [%(name)s] %(message)s | From: %(origin)s",
+        },
     },
     "filters": {
         "require_debug_false": {
@@ -2094,8 +2202,19 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        "sql_trace": {
+        "()": "dojo.logfilters.SQLTraceFilter",
+        },
     },
     "handlers": {
+        **({
+            "console_sql": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+                "formatter": "sql_with_trace",
+                "filters": ["sql_trace"],
+            }
+        } if ENABLE_SQL_LOGGING else {}),
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
@@ -2111,6 +2230,13 @@ LOGGING = {
         },
     },
     "loggers": {
+      **({
+        "django.db.backends": {
+            'level': str(LOG_LEVEL),
+            'handlers': ['console_sql'],
+            'propagate': False,
+        }
+        } if ENABLE_SQL_LOGGING else {}),
         "django.request": {
             "handlers": ["mail_admins", "console"],
             "level": str(LOG_LEVEL),
@@ -2331,7 +2457,10 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
-BLACKLIST_FILTER_TAGS = env("DD_BLACKLIST_FILTER_TAGS")
+PRIORITY_FILTER_TAGS = env("DD_PRIORITY_FILTER_TAGS")
+TAGS_EXCLUDE_PRACTICE_FILTER = env("DD_TAGS_EXCLUDE_PRACTICE_FILTER")
+# Contacts_types_permissions
+CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE = env("DD_CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE")
 # exclusive permission
 CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
@@ -2357,6 +2486,9 @@ PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLO
 TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
 # IA Recommendation
 HOST_IA_RECOMMENDATION = env("DD_HOST_IA_RECOMMENDATION")
+# Url Logo
+LOGO_URL = env("DD_LOGO_URL")
+
 
 
 CLIENT_ID_IA = (
@@ -2374,7 +2506,8 @@ CLIENT_SECRET_IA = (
 # ------------------------------------------------------------------------------
 # CACHE REDIS
 # ------------------------------------------------------------------------------
-if os.getenv("DD_USE_CACHE_REDIS") == "true":
+USE_CACHE_REDIS = env("DD_USE_CACHE_REDIS")
+if USE_CACHE_REDIS:
     LOCATION_CACHE = "redis://127.0.0.1:6379"
     OPTIONS_CACHE = {"CLIENT_CLASS": "django_redis.client.DefaultClient"}
     if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
@@ -2392,6 +2525,8 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
             "OPTIONS": OPTIONS_CACHE,
         }
     }
+
+CACHE_PAGE_TIME = env("DD_CACHE_PAGE_TIME")
 
 # ------------------------------------------------------------------------------
 # Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
@@ -2450,3 +2585,5 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+

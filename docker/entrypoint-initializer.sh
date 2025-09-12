@@ -47,7 +47,7 @@ update_hash_code()
     if [ "${DD_UPDATE_HASHCODE}" = true ]
     then
         echo "Updating hash_code for parser ${DD_PARSER_TOUPDATE_HASHCODE}"
-        python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}" --hash_code_only
+        python3 manage.py dedupe --parser "${DD_PARSER_TOUPDATE_HASHCODE}"
     fi
 }
 

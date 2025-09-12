@@ -5,7 +5,12 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.conf import settings
 
+@cache_page(settings.CACHE_PAGE_TIME)
+@vary_on_cookie
 def components(request):
     add_breadcrumb(title="Components", top_level=True, request=request)
     
@@ -18,8 +23,6 @@ def components(request):
     # Add annotations to count findings
     component_query = component_query.annotate(
         total_findings=Count('finding__id', distinct=True), 
-        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
-        closed_findings=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True),
         engagement_name=F('engagement__name'),
         product_name=F('engagement__product__name'),
         product_type_name=F('engagement__product__prod_type__name')

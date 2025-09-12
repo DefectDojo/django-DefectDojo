@@ -1,9 +1,10 @@
 import datetime
 import logging
 from unittest import mock
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from crum import impersonate
+from dojo.models import ApiError
 from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -17,6 +18,8 @@ from dojo.finding.helper import (
     rule_cve_enable_ia_recommendation,
     rule_product_type_or_product_enable_ia_recommendation,
     enable_flow_ia_recommendation,
+    bulk_close_all_findings,
+    bulk_edit_finding,
 
     )
 
@@ -26,7 +29,8 @@ from dojo.models import (
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
-    GeneralSettings)
+    GeneralSettings,
+    Dojo_User,)
 
 
 from .dojo_test_case import DojoAPITestCase, DojoTestCase
@@ -267,9 +271,11 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_tags_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_tags_enable_ia_recommendation(self, mock_get_status, mock_get_value):
 
         # Return GeneralSettings Value
+        mock_get_status.return_value = True
         mock_get_value.return_value = ["tag1", "tag2"]
 
         mock_tags = MagicMock()
@@ -288,8 +294,10 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         assert result is False
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_repository_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_repository_enable_ia_recommendation(self, mock_get_status, mock_get_value):
         # Mock data
+        mock_get_status.return_value = True
         mock_finding = MagicMock()
         mock_finding.test.engagement.source_code_management_server.name = "repo1"
 
@@ -306,7 +314,10 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         self.assertFalse(result)
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
-    def test_rule_cve_enable_ia_recommendation(self, mock_get_value):
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
+    def test_rule_cve_enable_ia_recommendation(self,mock_get_status, mock_get_value):
+
+        mock_get_status.return_value = True
         # Mock data
         mock_finding = MagicMock()
         mock_finding.cve = "CVE-1234"
@@ -326,14 +337,17 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch("dojo.finding.helper.GeneralSettings.get_value")
     @patch("dojo.finding.helper.get_product")
+    @patch("dojo.finding.helper.GeneralSettings.get_status")
     def test_rule_product_type_or_product_enable_ia_recommendation(
             self,
+            mock_get_status,
             mock_get_product,
             mock_get_value):
 
         mock_finding = MagicMock()
         mock_product = MagicMock()
 
+        mock_get_status.return_value = True
         mock_product.name = "Product1"
         mock_product.prod_type.name = "Product Type1"
 
@@ -351,6 +365,94 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         mock_get_value.return_value = ["Product Type1"]
         result = rule_product_type_or_product_enable_ia_recommendation(finding=mock_finding)
         self.assertFalse(result)
+
+
+class TestFindingHelper(DojoTestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user = MagicMock()
+        self.findings = list(Finding.objects.filter(test__engagement=1))
+        self.user = Dojo_User.objects.get(id=1)
+
+
+    @patch("dojo.finding.helper.bulk_edit_finding")
+    def test_bulk_close_all_findings(self, mock_bulk_edit_finding):
+        bulk_close_all_findings(self.findings, self.user)
+
+        for finding in self.findings:
+            for e_status in finding.status_finding.all():
+                self.assertEqual(e_status.mitigated_by, self.user)
+                self.assertIsNotNone(e_status.mitigated)
+                self.assertTrue(e_status.mitigated)
+                self.assertIsNotNone(e_status.last_modified)
+
+        mock_bulk_edit_finding.assert_called_once_with(
+            self.findings,
+            fields=[
+                "is_mitigated",
+                "mitigated",
+                "mitigated_by",
+                "active",
+                "false_p",
+                "duplicate",
+                "out_of_scope",
+            ],
+            values=[
+                True,
+                ANY,
+                self.user,
+                False,
+                False,
+                False,
+                False,
+            ],
+        )
+
+    def test_bulk_close_all_findings_empty_list(self):
+        result = bulk_close_all_findings([], self.user)
+        self.assertTrue(result)
+
+    def test_bulk_edit_finding_success(self):
+        bulk_edit_finding(
+            self.findings,
+            fields=["is_mitigated", "active"],
+            values=[True, False],
+        )
+        """Verified that all findings are mitigated and inactive"""
+        for finding in self.findings:
+            self.assertTrue(finding.is_mitigated)
+            self.assertFalse(finding.active)
+
+    def test_bulk_edit_finding_no_findings(self):
+        """verified that no findings are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding([], fields=["is_mitigated"], values=[True])
+        self.assertEqual(str(context.exception.detail), "No findings to edit")
+
+    def test_bulk_edit_finding_no_fields(self):
+        """verified that no fields are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings, fields=[], values=[True])
+        self.assertEqual(str(context.exception.detail), "No fields to update")
+
+    def test_bulk_edit_finding_no_values(self):
+        """verified that no values are passed"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings, fields=["is_mitigated"], values=[])
+        self.assertEqual(str(context.exception.detail), "No values to update")
+
+    def test_bulk_edit_finding_mismatched_fields_and_values(self):
+        """verified that the number of fields and values do not match"""
+        with self.assertRaises(ApiError) as context:
+            bulk_edit_finding(self.findings,
+                              fields=["is_mitigated"],
+                              values=[True, False])
+        self.assertEqual(
+            str(context.exception.detail),
+            "Number of fields and values do not match"
+        )
 
 
 class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):

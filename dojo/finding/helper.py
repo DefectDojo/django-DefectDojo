@@ -1,10 +1,13 @@
+import markdown
 import logging
 import re
 from contextlib import suppress
 from time import strftime
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -28,6 +31,7 @@ from dojo.models import (
     ExclusivePermission,
     GeneralSettings
 )
+from dojo.api_v2.api_error import ApiError
 from dojo.notes.helper import delete_related_notes
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -703,16 +707,25 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
 
 
 def rule_tags_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.get_status(
+        name_key="TAGS_IA_RECOMMENDATION") is False:
+        return True
     finding = kwargs["finding"]
     tags = list(finding.tags.all().values_list("name", flat=True))
     tags_enabled = GeneralSettings.get_value(
                 "TAGS_IA_RECOMMENDATION", [])
     if any(tag_enabled in tags for tag_enabled in tags_enabled):
         return True
+    logger.debug("Tags IA_RECOMMENDATION not pass rule: %s not found in %s",
+                 tags,
+                 tags_enabled)
     return False
 
 
 def rule_repository_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.get_status(
+        name_key="REPOSITORY_IA_RECOMMENDATION") is False:
+        return True
     finding = kwargs["finding"]
     engagement = finding.test.engagement
     repositories = GeneralSettings.get_value(
@@ -720,11 +733,14 @@ def rule_repository_enable_ia_recommendation(*args, **kwargs):
     if engagement.source_code_management_server is not None:
         if engagement.source_code_management_server.name in repositories:
             return True
-    logger.debug("Repository IA_RECOMMENDATION not pass rule: %s or %s", engagement.source_code_management_server.name)
+    logger.debug("Repository IA_RECOMMENDATION not pass rule server name no match o is null")
     return False
 
 
 def rule_cve_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.get_status(
+        name_key="CVE_IA_RECOMMENDATION") is False:
+        return True
     finding = kwargs["finding"]
     expression = GeneralSettings.get_value("CVE_IA_RECOMMENDATION", [])
     expression = r"" + expression
@@ -740,6 +756,9 @@ def rule_cve_enable_ia_recommendation(*args, **kwargs):
 
 
 def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
+    if GeneralSettings.get_status(
+        name_key="PRODUCT_TYPES_IA_RECOMMENDATION") is False:
+        return True
     finding = kwargs["finding"]
     product = get_product(finding)
     # Product Enabled
@@ -758,7 +777,7 @@ def rule_product_type_or_product_enable_ia_recommendation(*args, **kwargs):
        product.name not in product_exclude):
         return True
     logger.debug("Product or product_type IA_RECOMMENDATION not pass rule: %s",
-                 product.prod_type.name, finding.cve)
+                 product.prod_type.name)
     return False
 
 
@@ -774,4 +793,108 @@ def enable_flow_ia_recommendation(**kwargs):
     for rule in rules_list:
         if rule(finding=finding) is False:
             return False
+    return True
+
+
+def parser_ia_recommendation(ia_recommendation: dict = {}):
+    markdown_code = ""
+    context = {}
+    if recomendations := ia_recommendation["data"].get("recommendations", None):
+        markdown_code = "\n###✅ Recomendaciones \n<br>"
+        for recomendation in recomendations:
+            markdown_code += "- " + recomendation + "<br>"
+
+    if mitigations := ia_recommendation["data"].get("mitigations", None):
+        markdown_code += "\n###🛠️ Mitigación\n<br>"
+        for mitigation in mitigations:
+            markdown_code += mitigation + "<br>"
+
+    if files_to_fix := ia_recommendation["data"].get("files_to_fix", None):
+        markdown_code += "\n###📌 Archivos a corregir\n<br>"
+        for file_to_fix in files_to_fix:
+            markdown_code += "```" + file_to_fix + "```"
+
+    markdown_code = markdown_code.replace("'", "`")
+    html = markdown.markdown(markdown_code)
+    context["ia_recommendations"] = html
+    context["like_status"] = ia_recommendation["data"].get("like_status", None)
+    return context
+
+
+def bulk_close_all_findings(findings: list[Finding], user):
+    findings_update = []
+    if not findings:
+        logger.debug("Findings List is empty")
+        return True
+    for finding in findings:
+        endpoints_status = finding.status_finding.all()
+        for e_status in endpoints_status:
+            e_status.mitigated_by = user
+            e_status.mitigated = timezone.now()
+            e_status.mitigated_time = timezone.now()
+            e_status.mitigated = True
+            e_status.last_modified = timezone.now()
+            e_status.save()
+        findings_update.append(finding)
+    bulk_edit_finding(
+        findings_update,
+        fields=["is_mitigated",
+                "mitigated",
+                "mitigated_by",
+                "active",
+                "false_p",
+                "duplicate",
+                "out_of_scope"],
+        values=[
+            True,
+            timezone.now(),
+            user,
+            False,
+            False,
+            False,
+            False
+        ])
+
+
+def bulk_edit_finding(findings, *args, **kwargs):
+    """
+    Bulk edit findings
+    """
+    if not findings:
+        raise ApiError.bad_request(
+            detail="No findings to edit")
+
+    fields = kwargs.get("fields", [])
+    if not fields:
+        raise ApiError.bad_request(
+            detail="No fields to update")
+
+    values = kwargs.get("values", [])
+    if not values:
+        raise ApiError.bad_request(
+            detail="No values to update")
+
+    if len(fields) != len(values):
+        raise ApiError.bad_request(
+            detail="Number of fields and values do not match")
+    try:
+        """Set finding attributes"""
+        for finding in findings:
+            for field, value in zip(fields, values):
+                setattr(finding, field, value)
+    except Exception as e:
+        logger.error(f"BULK_EDIT: bulk update setattr {str(e)}")
+        raise ApiError.internal_server_error(
+            detail=str(f"Error editing finding bulk: {str(e)}"))
+
+    try:
+        with transaction.atomic():
+            Finding.objects.bulk_update(
+                objs=findings,
+                fields=fields,
+                batch_size=500)
+    except Exception as e:
+        logger.error(f"BULK_EDIT: bulk update {str(e)}")
+        raise ApiError.internal_server_error(
+            detail=str(f"Error editing finding bulk: {str(e)}"))
     return True

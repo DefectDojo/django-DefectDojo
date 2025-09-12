@@ -1,4 +1,5 @@
 import json
+import re
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
 
@@ -14,8 +15,8 @@ from dojo.models import Global_Role, Product_Type, Product, Product_Type_Group, 
 from django.conf import settings
 
 
-def get_authorized_product_types(permission):
-    user = get_current_user()
+def get_authorized_product_types(permission, user=None):
+    user = get_current_user() if user is None else user
 
     if user is None:
         return Product_Type.objects.none()
@@ -104,10 +105,8 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
     product_obj = Product.objects.get(id=product)
     product_type_obj = Product_Type.objects.get(id=product_type)
     risk_rule_map = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])
-    product_type_prefix_key = (
-        lambda prefix: prefix[0] if prefix and prefix[0] in risk_rule_map else "DEFAULT"
-    )(product_type_obj.name.split(" - "))
-    type_contacts = rule["type_contacts"][risk_rule_map[product_type_prefix_key]]
+    prefix_math = re.match(r"" + settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1], product_type_obj.name)
+    type_contacts = rule["type_contacts"][risk_rule_map[prefix_math.group(1) if prefix_math else "DEFAULT"]]
     contacts_list = type_contacts["users"]
 
     if user.is_superuser:
@@ -122,16 +121,19 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
         contacts_result.append(user.id)
 
     elif not contacts_result:
+        count_contacts = 0
         for contact_type in contacts_list:
-            leader = getattr(product_obj, contact_type, None) if contact_type == "team_manager" else getattr(product_type_obj, contact_type, None)
+            leader = getattr(product_obj, contact_type, None) if contact_type in settings.CONTACT_TYPES_AUTHORIZED_RISK_ACCEPTANCE else getattr(product_type_obj, contact_type, None)
             if leader:
                 contacts_result.append(leader.id)
-            else:
-                lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
-                dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
-                user_leader = dict_inverter.get(contact_type, "Leader")
-                message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
-                raise ValueError(message)
+                count_contacts += 1
+            
+        if not contacts_result or count_contacts < type_contacts["number_acceptors"]:
+            lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
+            dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
+            user_leader = dict_inverter.get(contact_type, "Leader")
+            message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
+            raise ValueError(message)
 
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)

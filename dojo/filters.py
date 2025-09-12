@@ -16,6 +16,7 @@ from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -32,6 +33,9 @@ from django_filters import (
 )
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import Case, When, Value, DecimalField
+from decimal import Decimal
+from django.db.models.functions import Round
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from polymorphic.base import ManagerInheritanceWarning
@@ -96,6 +100,7 @@ from dojo.models import (
     TextQuestion,
     User,
     Vulnerability_Id,
+    GeneralSettings
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -249,6 +254,98 @@ class FindingStatusFilter(ChoiceFilter):
             value = None
         return self.options[value][1](self, qs, self.field_name)
 
+class FindingPriorityFilter(MultipleChoiceFilter):
+    tags_priority = settings.PRIORITY_FILTER_TAGS.split(",")
+    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+                "RP_Very_Critical", None
+            )
+    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
+    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
+    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+        "RP_Medium_Low", None
+    )
+
+    if RP_VERY_CRITICAL is None and RP_CRITICAL is None and RP_HIGH is None and RP_MEDIUM_LOW is None:
+        warnings.warn(
+            "No RP_VERY_CRITICAL, RP_CRITICAL, RP_HIGH or RP_MEDIUM_LOW settings found. "
+            "Please set them in your settings.py file to use the FindingPriorityFilter.",
+            RuntimeWarning,
+        )
+
+    def __init__(self, *args, **kwargs):
+        choices = [
+            (0, _("Unknown")),
+            (1, _("Medium-Low")),
+            (2, _("High")),
+            (3, _("Critical")),
+            (4, _("Very Critical")),
+        ]
+        kwargs["choices"] = choices
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # Crear una Q query para combinar múltiples filtros con OR
+        combined_query = Q()
+
+        for priority_value in value:
+            try:
+                priority_int = int(priority_value)
+
+                if priority_int == 0:  # Unknown
+                    combined_query |= Q(priority=0.0) & ~Q(tags__name__in=self.tags_priority)
+                elif priority_int == 1:  # Medium-Low
+                    if self.RP_MEDIUM_LOW:
+                        lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
+                        combined_query |= Q(
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 2:  # High
+                    if self.RP_HIGH:
+                        lower, upper = map(float, self.RP_HIGH.split("-"))
+                        combined_query |= Q(
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 3:  # Critical
+                    if self.RP_CRITICAL:
+                        lower, upper = map(float, self.RP_CRITICAL.split("-"))
+                        combined_query |= Q(
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper, 
+                            tags__name__in=self.tags_priority
+                        )
+                elif priority_int == 4:  # Very Critical
+                    if self.RP_VERY_CRITICAL:
+                        lower, upper = map(float, self.RP_VERY_CRITICAL.split("-"))
+                        combined_query |= Q(
+                            priority_rounded__gte=lower, 
+                            priority_rounded__lte=upper,
+                            tags__name__in=self.tags_priority
+                        )
+            except (ValueError, TypeError):
+                continue
+
+        if combined_query:
+            return (
+                qs.annotate(
+                    priority_rounded=Case(
+                        When(priority__isnull=False, then=Round("priority", 2)),
+                        default=Value(Decimal("0.00")),
+                        output_field=DecimalField(max_digits=10, decimal_places=2),
+                    )
+                )
+                .filter(combined_query)
+                .distinct()
+            )
+
+        return qs
+
 
 class FindingSLAFilter(ChoiceFilter):
     def any(self, qs, name):
@@ -271,11 +368,24 @@ class FindingSLAFilter(ChoiceFilter):
                 mitigated=None,
             ) & Q(sla_expiration_date__lt=now().date()),
         )
+    
+    def sla_left_seven_days(self, qs, name):
+        return qs.filter(
+            Q(sla_expiration_date__gte=timezone.now().date()) & 
+            Q(sla_expiration_date__lt=timezone.now().date() + timedelta(days=7))
+        )
+    
+    def sla_left_seven_days(self, qs, name):
+        return qs.filter(
+            Q(sla_expiration_date__gte=timezone.now().date()) & 
+            Q(sla_expiration_date__lt=timezone.now().date() + timedelta(days=7))
+        )
 
     options = {
         None: (_("Any"), any),
         0: (_("False"), sla_satisfied),
         1: (_("True"), sla_violated),
+        2: (_("SLA left in next 7 days"), sla_left_seven_days),
     }
 
     def __init__(self, *args, **kwargs):
@@ -544,7 +654,14 @@ class FindingTagFilter(DojoFilter):
         field_name="tags__name",
         to_field_name="name",
         queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        label="Finding Tags",
         help_text="Filter Findings by the selected tags")
+    practice = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=settings.TAGS_EXCLUDE_PRACTICE_FILTER),
+        label="Practice",
+        help_text="Filter Findings by the selected practices (tags)")
     test__tags = ModelMultipleChoiceFilter(
         field_name="test__tags__name",
         to_field_name="name",
@@ -604,6 +721,12 @@ class FindingTagStringFilter(FilterSet):
         field_name="tags__name",
         lookup_expr="iexact",
         help_text="Search for tags on a Finding that are an exact match")
+    practice = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name").exclude(name__in=settings.TAGS_EXCLUDE_PRACTICE_FILTER),
+        label="Practice",
+        help_text="Filter Findings by the selected practices (tags)")
     test__tags_contains = CharFilter(
         label="Test Tag Contains",
         field_name="test__tags__name",
@@ -1773,6 +1896,7 @@ class FindingFilterHelper(FilterSet):
     test__engagement__product__lifecycle = MultipleChoiceFilter(
         choices=Product.LIFECYCLE_CHOICES,
         label="Product lifecycle")
+    priority = FindingPriorityFilter(label="Priority")
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -1905,11 +2029,10 @@ class FindingFilterHelper(FilterSet):
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
     test__engagement__product = NumberFilter(widget=HiddenInput())
-    reporter = CharFilter(
-        field_name="reporter__username",
-        lookup_expr="iexact",
-        label="Reporter Username",
-        help_text="Search for Reporter names that are an exact match")
+    reporter = ModelMultipleChoiceFilter(
+        queryset=Dojo_User.objects.filter(global_role__role__name="API_Importer").distinct(),
+        label="Reporter"
+    )
     reporter_contains = CharFilter(
         field_name="reporter__username",
         lookup_expr="icontains",
@@ -2013,7 +2136,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
-    reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
+    reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.filter(global_role__role__name="API_Importer").distinct())
     reviewers = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -2072,15 +2195,14 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             finding_group_query = Finding_Group.objects.filter(test__engagement__product_id=self.pid)
         else:
             self.form.fields[
-                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View, self.user)
             self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
             del self.form.fields["test"]
 
         if self.form.fields.get("test__engagement__product"):
-            self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+            self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View, self.user)
         if self.form.fields.get("finding_group", None):
             self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
-        self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
 

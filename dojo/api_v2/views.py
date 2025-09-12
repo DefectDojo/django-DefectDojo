@@ -1,5 +1,3 @@
-import copy
-import time
 import base64
 import logging
 import mimetypes
@@ -7,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 
 import tagulous
-from django.core.exceptions import PermissionDenied 
 from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -38,7 +35,6 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
-from dojo import engagement
 from dojo.api_v2.api_error import ApiError
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
@@ -55,7 +51,7 @@ from dojo.transfer_findings.serializers import (
     TransferFindingCreateSerializer,
     TransferFindingSerializer,
     TransferFindingFindingCreateSerializer,)
-from dojo.finding.serializer import IARecommendationSerializer
+from dojo.finding.serializer import IARecommendationSerializer, FindingBulkUpdateSLAStartDateSerializer
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -190,7 +186,9 @@ from dojo.reports.views import (
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.notification import Notification as NotificationRiskAcceptance
-from dojo.risk_acceptance.risk_pending import accept_or_reject_risk_bulk, get_user_with_permission_key
+from dojo.risk_acceptance.risk_pending import (
+    accept_or_reject_risk_bulk,
+    get_user_with_permission_key)
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -202,6 +200,7 @@ from dojo.utils import (
     generate_file_response,
     get_setting,
     get_system_setting,
+    async_bulk_update_sla_start_date
 )
 from rest_framework.throttling import UserRateThrottle
 
@@ -708,6 +707,34 @@ class EngagementViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return response
+ 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        if response.data["results"] and request.query_params.get("product", None):
+            product_id = request.query_params.get("product")
+            try: 
+                product = Product.objects.get(id=product_id)
+                contacts = {
+                    "contacts": {
+                        "product_manager": {
+                            "id": product.product_manager.id if product.product_manager else "",
+                            "username": product.product_manager.username if product.product_manager else ""
+                        },
+                        "technical_contact": {
+                            "id": product.technical_contact.id if product.technical_contact else "",
+                            "username": product.technical_contact.username if product.technical_contact else ""
+                        },
+                        "team_manager": {
+                            "id": product.team_manager.id if product.team_manager else "",
+                            "username": product.team_manager.username if product.team_manager else ""
+                        }
+                    }
+                }
+                response.data.update(contacts)
+            except Product.DoesNotExist:
+                pass
+        return response
+
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -942,6 +969,25 @@ class FindingViewSet(
         permissions.UserHasFindingPermission,
     )
 
+    def get_serializer(self, *args, **kwargs):
+        fields = self.request.query_params.get("fields")
+        serializer_class = self.get_serializer_class()
+        if fields:
+            field_list = [f.strip() for f in fields.split(",")]
+
+            class Meta(serializer_class.Meta):
+                fields = field_list
+                exclude = None
+
+            DynamicFindingSerializer = type(
+                "DynamicFindingSerializer",
+                (serializer_class,),
+                {"Meta": Meta}
+            )
+            kwargs['context'] = self.get_serializer_context()
+            return DynamicFindingSerializer(*args, **kwargs)
+        return super().get_serializer(*args, **kwargs)
+
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
@@ -1040,7 +1086,7 @@ class FindingViewSet(
                     helper_tf.close_or_reactive_related_finding(
                         event="close",
                         parent_finding=finding,
-                        notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                        notes=f"finding reactived by the parent finding {finding.id} (policies for the transfer of findings)",
                         send_notification=False)
             else:
                 return Response(
@@ -1056,6 +1102,7 @@ class FindingViewSet(
     )
     @action(detail=False, methods=["POST"])
     def bulk_close(self, request):
+        logger.debug(f"BULK_CLOSE: Number finding to closed {len(request.data['findings'])}")
         errors = []
         success = []
         if request.method == "POST":
@@ -1063,12 +1110,15 @@ class FindingViewSet(
                 data=request.data
             )
             if findings_close.is_valid():
+                logger.debug("BULK_CLOSE: Finding serializer is Valid")
                 try:
                     findings = []
                     for finding_close in findings_close.data["findings"]:
+                        logger.debug(f"BULK_CLOSE: finding_close {finding_close['id']}")
                         try:
                             finding = Finding.objects.get(id=finding_close["id"])
                         except Finding.DoesNotExist:
+                            logger.debug(f"BULK_CLOSE: Finding {finding_close['id']} not found")
                             continue
                         finding.is_mitigated = finding_close["is_mitigated"]
                         finding.mitigated = finding_close.get("mitigated", timezone.now())
@@ -1095,13 +1145,16 @@ class FindingViewSet(
                         findings.append(finding)
                         system_settings = System_Settings.objects.get()
                         if system_settings.enable_transfer_finding:
+                            logger.debug(f"BULK_CLOSE: Init transfer finding close or reactive {finding.id}")
                             helper_tf.close_or_reactive_related_finding(
                                 event="close",
                                 parent_finding=finding,
-                                notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                notes=f"finding reactived by the parent finding {finding.id} (policies for the transfer of findings)",
                                 send_notification=False)
+                            logger.debug(f"BULK_CLOSE: Finish transfer finding close or reactive {finding.id}")
 
                 except Exception as e:
+                    logger.error(f"BULK_CLOSE: Error finding close {e}")
                     raise ApiError.internal_server_error(detail=str(e))
                 
                 try:
@@ -1114,11 +1167,14 @@ class FindingViewSet(
                                                                "duplicate",
                                                                "out_of_scope"])
                 except Exception as e:
+                    logger.error(f"BULK_CLOSE: bulk update {str(e)}")
                     raise ApiError.internal_server_error(
-                        detail=str(f"Error Closed finding bulk: {e}"))
+                        detail=str(f"Error Closed finding bulk: {str(e)}"))
             else:
+                logger.debug(f"BULK_CLOSE: Finding serializer is not valid {findings_close.errors}")
                 return http_response.bad_request(data=findings_close.errors)
             if findings_close.data["verify"] is True:
+                logger.debug("BULK_CLOSE: Verify finding is True")
                 for finding_close in findings_close.data["findings"]:
                     try:
                         finding = Finding.objects.get(id=finding_close["id"])
@@ -1127,7 +1183,10 @@ class FindingViewSet(
                         else:
                             errors.append({finding.id: "Not closed"})
                     except Finding.DoesNotExist:
+                        logger.error(f"BULK_CLOSE: Finding error {finding_close['id']} not found")
                         errors.append({finding_close['id']: "not found"})
+            logger.debug(f"BULK_CLOSE: finish process Success {success}")
+            logger.debug(f"BULK_CLOSE: finish process Error {errors}")
             return http_response.ok(data={"success": success, "errors": errors})
 
     @extend_schema(
@@ -1273,7 +1332,7 @@ class FindingViewSet(
         serialized_notes = serializers.FindingToNotesSerializer(
             {"finding_id": finding, "notes": notes},
         )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK) 
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)
     
     @extend_schema(
         methods=["GET"],
@@ -1284,25 +1343,64 @@ class FindingViewSet(
         request=IARecommendationSerializer,
         responses={status.HTTP_201_CREATED: IARecommendationSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @extend_schema(
+        methods=["PATCH"],
+        request=IARecommendationSerializer,
+        responses={status.HTTP_201_CREATED: IARecommendationSerializer},
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
     def ia_recommendation(self, request, pk=None):
-        finding = get_authorized_findings(
-            Permissions.Finding_Add_Recommendation,
-            Finding.objects.filter(id=pk),
-            request.user).first()
-        if request.method == "POST":
-            serializer = IARecommendationSerializer(
-                data=request.data,
+        try:
+            finding = Finding.objects.get(id=pk)
+        except Finding.DoesNotExist:
+            raise ApiError.not_found(
+                detail=f"Finding with id {pk} does not exist"
             )
-            if serializer.is_valid():
-                finding.ia_recommendation = serializer.validated_data
-                finding.save()
-                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
-            else:
-                return http_response.bad_request(data=serializer.errors)
-        elif request.method == "GET":
-            return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
 
+        if user_has_permission(request.user,
+                               finding,
+                               Permissions.Finding_Add_Recommendation):
+            if request.method == "POST":
+                serializer = IARecommendationSerializer(
+                    data=request.data,
+                )
+                if serializer.is_valid():
+                    finding.ia_recommendation = serializer.validated_data
+                    finding.save()
+                    return http_response.ok(
+                        IARecommendationSerializer(finding.ia_recommendation).data)
+                else:
+                    return http_response.bad_request(data=serializer.errors)
+            elif request.method == "GET":
+                return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+            elif request.method == "PATCH":
+                serializer = IARecommendationSerializer(
+                    data=request.data,
+                )
+                if serializer.is_valid():
+                    data = serializer.data["data"]
+                    ia_recommendation_dict = finding.ia_recommendation
+                    if data.get("recommendations"):
+                        ia_recommendation_dict["data"]["recommendations"] = (
+                            data.get("recommendations"))
+                    if data.get("mitigations"):
+                        ia_recommendation_dict["data"]["mitigations"] = (
+                            data.get("mitigations"))
+                    if data.get("files_to_fix"):
+                        ia_recommendation_dict["data"]["files_to_fix"] = (
+                            serializer.data.get("files_to_fix"))
+                    if "like_status" in data:
+                        ia_recommendation_dict["data"]["like_status"] = (
+                            data.get("like_status"))
+                    finding.ia_recommendation = ia_recommendation_dict
+                    finding.save()
+                    return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)
+                else:
+                    return http_response.error(serializer.errors)
+        else:
+            return http_response.forbidden(
+                detail="You do not have permission to add IA recommendation to this finding"
+            )
         return http_response.non_authoritative_information()
 
     @extend_schema(
@@ -1538,6 +1636,27 @@ class FindingViewSet(
         data = report_generate(request, findings, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+    
+    @extend_schema(
+        request=FindingBulkUpdateSLAStartDateSerializer,
+        responses={status.HTTP_202_ACCEPTED: ""},
+    )
+    @action(
+        detail=False, methods=["post"], permission_classes=[permissions.IsSuperUser],
+    )
+    def bulk_update_sla_start_date(self, request):
+        """
+        Bulk update the SLA start date for multiple findings.
+        """
+        serializer = FindingBulkUpdateSLAStartDateSerializer(data=request.data)
+        if serializer.is_valid():
+            async_bulk_update_sla_start_date.apply_async(args=(serializer.validated_data["tags"], serializer.validated_data["priority"], serializer.validated_data["date"]))
+            return Response(
+                {"Success": "SLA start date updated successfully."},
+                status=status.HTTP_202_ACCEPTED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def _get_metadata(self, request, finding):
         metadata = DojoMeta.objects.filter(finding=finding)
@@ -1685,7 +1804,7 @@ class FindingViewSet(
             return self._remove_metadata(request, finding)
 
         return Response(
-            {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
+            {"error": "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -1963,7 +2082,7 @@ class ProductViewSet(
 
         serializer = serializers.EngagementByProductResponseSerializer(queryset)
         return http_response.ok(data=serializer.data)
-
+    
     # def list(self, request):
     #     # Note the use of `get_queryset()` instead of `self.queryset`
     #     queryset = self.get_queryset()
@@ -2157,7 +2276,7 @@ class ProductTypeMemberViewSet(
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "user_id"]
+    filterset_fields = ["id", "product_type_id", "user_id", "role"]
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasProductTypeMemberPermission,

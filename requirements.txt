@@ -1,6 +1,6 @@
 # requirements.txt for DefectDojo using Python 3.x
 py==1.11.0
-decorator==5.1.1
+decorator==5.2.1
 asteval==1.0.6
 beautifulsoup4==4.13.3
 bleach==6.2.0
@@ -8,6 +8,7 @@ bleach[css]
 celery==5.5.3
 defusedxml==0.7.1
 django_celery_results==2.6.0
+django-cors-headers==4.7.0
 django-csp==3.7
 django-auditlog==3.2.1
 django-dbbackup==4.3.0
@@ -35,9 +36,11 @@ lxml==6.0.1
 Markdown==3.8.2
 openpyxl==3.1.5
 Pillow==11.3.0  # required by django-imagekit
-psycopg[c]==3.2.9
+psycopg[c]==3.2.10
+psycopg-pool==3.2.6
 cryptography==45.0.6
 python-dateutil==2.9.0.post0
+pytz==2025.1
 redis==6.4.0
 requests==2.32.5
 sqlalchemy==2.0.43  # Required by Celery broker transport
@@ -83,21 +86,23 @@ parameterized==0.9.0
 watchdog==6.0.0 # only needed for development, but would require some docker refactoring if we want to exclude it for production images
 azure-devops==7.1.0b4
 backoff==2.2.1
-opentelemetry-sdk==1.20.0
-opentelemetry-api==1.20.0
-opentelemetry-util-http==0.41b0
-opentelemetry-exporter-otlp==1.20.0
-opentelemetry-exporter-otlp-proto-common==1.20.0
-opentelemetry-exporter-otlp-proto-grpc==1.20.0
-opentelemetry-exporter-otlp-proto-http==1.20.0
-opentelemetry-instrumentation-wsgi==0.41b0
-opentelemetry-proto==1.20.0
-opentelemetry-semantic-conventions==0.41b0
-opentelemetry-instrumentation==0.41b0
-django-redis==5.4.0
+opentelemetry-sdk==1.36.0
+opentelemetry-api==1.36.0
+opentelemetry-util-http==0.57b0
+opentelemetry-exporter-otlp==1.36.0
+opentelemetry-exporter-otlp-proto-common==1.36.0
+opentelemetry-exporter-otlp-proto-grpc==1.36.0
+opentelemetry-exporter-otlp-proto-http==1.36.0
+opentelemetry-instrumentation-wsgi==0.57b0
+opentelemetry-proto==1.36.0
+opentelemetry-semantic-conventions==0.57b0
+opentelemetry-instrumentation==0.57b0
+django-redis==6.0.0
+pandas==2.1.3
+pyarrow==21.0.0
 # Pinning Dependencies
 azure-core==1.32.0
-protobuf==4.25.6
+protobuf==6.31.1
 billiard==4.2.1
 botocore==1.40.20
 et_xmlfile==2.0.0
@@ -105,7 +110,7 @@ inflection==0.5.1
 requests-toolbelt==1.0.0
 smmap==5.0.2
 wcwidth==0.2.13
-kombu==5.5.2
+kombu==5.5.4
 six==1.17.0
 attrs==25.1.0
 idna==3.10
@@ -118,7 +123,7 @@ multidict==6.4.3
 Deprecated==1.2.18
 click-didyoumean==0.3.1
 webencodings==0.5.1
-uritemplate==4.1.1
+uritemplate==4.2.0
 pilkit==3.0
 yarl==1.19.0
 django-appconf==1.1.0
@@ -135,11 +140,11 @@ cffi==1.17.1
 gitdb==4.0.12
 PyYAML==6.0.2
 click-plugins==1.1.1
-asgiref==3.8.1
+asgiref==3.9.1
 elementpath==4.8.0
 requests-oauthlib==2.0.0
 vine==5.1.0
-wrapt==1.17.2
+wrapt==1.17.3
 appdirs==1.4.4
 amqp==5.3.1
 msrest==0.7.1
@@ -152,7 +157,7 @@ s3transfer==0.13.0
 setuptools==78.1.0
 referencing==0.36.2
 tzdata==2025.2
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.9.1
 googleapis-common-protos==1.70.0
 grpcio==1.71.0
 zipp==3.21.0
@@ -162,3 +167,4 @@ typing_extensions==4.13.2
 propcache==0.3.1
 py==1.11.0
 soupsieve==2.6
+hashids==1.3.1

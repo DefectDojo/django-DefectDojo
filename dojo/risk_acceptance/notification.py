@@ -1,11 +1,11 @@
-
+import logging
 from typing import List
 from django.urls import reverse
 from django.conf import settings
 from dojo.notifications.helper import create_notification
 from dojo.models import Finding, Risk_Acceptance, Dojo_User, System_Settings
 from crum import get_current_user
-
+logger = logging.getLogger(__name__)
 
 class Notification:
 
@@ -93,7 +93,7 @@ class Notification:
                         description=description,
                         permission_keys=permission_keys,
                         enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
-                        recipients=eval(risk_pending.accepted_by),
+                        recipients=risk_pending.accepted_by_user,
                         icon="bell",
                         owner=risk_pending.owner,
                         color_icon="#1B30DE",
@@ -103,7 +103,12 @@ class Notification:
     def risk_acceptance_expiration(risk_acceptance,
                                    reactivated_findings=None,
                                    title=None):
-        accepted_findings = risk_acceptance.accepted_findings.all()
+        accepted_findings = risk_acceptance.accepted_findings.filter(
+            is_mitigated=False,
+            risk_status="Risk Accepted")
+        if accepted_findings.count() == 0:
+            logger.debug("RISK_ACCETANCE_EXPIRATION: Not found findings in Risk Acceptance")
+            return True
         if title is None:
             title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
                     str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
@@ -114,6 +119,7 @@ class Notification:
             title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
             reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
+            recipients=risk_acceptance.accepted_by_user + [risk_acceptance.owner.get_username()],
             url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
     
     @staticmethod

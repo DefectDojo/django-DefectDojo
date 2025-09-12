@@ -20,11 +20,11 @@
             {% elif product_tab.title %}
                 {{ product_tab.title }} |
             {% endif %}
-            DefectDojo
+            {% team_name %}
         </title>
         {% block add_css_before %}
         {% endblock %}
-        
+
         <!-- jQuery -->
         <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
         <!--  jQuery UI -->
@@ -118,7 +118,11 @@
                         <a rel="noopener noreferrer" class="navbar-brand" href="{% url 'home' %}">
                         {% block header_logo %}
                             <div style="padding: 10px;">
-                                <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                                {% if LOGO_URL %}
+                                    <img src="{{ LOGO_URL }}" alt="DefectDojo Logo" width="150"/>
+                                {% else %}
+                                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                                {% endif %}
                             </div>
                         {% endblock %}
                         </a>
@@ -165,7 +169,7 @@
                                     {% if request.user.is_authenticated %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'view_profile' %}">
-                                                <i class="fa-solid fa-user fa-fw"></i> 
+                                                <i class="fa-solid fa-user fa-fw"></i>
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
@@ -300,7 +304,17 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% if request.user.username|permission_view_findings %}
                                         <li>
+                                               <a rel="noopener noreferrer" href="{% url 'finding_list_frontend' %}" aria-expanded="false" aria-label="Findings">
+                                                <i class="fa-solid fa-bug fa-fw" style="color: green;"></i>
+                                                <span>{% trans "Findings" %}</span>
+                                                <span class="glyphicon arrow"></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                         
+                                            <!-- /.nav-second-level -->
                                             <a rel="noopener noreferrer" href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa-solid fa-bug fa-fw"></i>
                                                 <span>{% trans "Findings" %}</span>
@@ -337,6 +351,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% endif %}
                                         <li>
                                             <a rel="noopener noreferrer" href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
@@ -396,7 +411,11 @@
                                         </li>
                                         {% endblock %} -->
                                         <li>
-                                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% if "DISABLE_OLD_METRICS"|general_settings_get_value:"False" %}
+                                                <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            {% else %}
+                                            <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Metrics">
+                                            {% endif %}
                                                 <i class="fa-solid fa-chart-column fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -406,7 +425,7 @@
                                                     <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard">
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
-                                                </li> --> 
+                                                </li> -->
                                                 <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
@@ -436,19 +455,19 @@
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
-                                                </li> -->                            
+                                                </li> -->
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
                                                         {% trans "Metrics Panel" %}
                                                     </a>
-                                                </li> 
+                                                </li>
                                                 {% if "Metrics_Panel_Admin"|has_role_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
                                                             {% trans "Metrics Panel Administrative" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}  
+                                                {% endif %}
                                                 {% if "Metrics_DevSecOps"|has_global_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_devsecops' %}">
@@ -456,13 +475,6 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "Metrics_Scan_Cycle"|has_role_permission %}
-                                                    <li>
-                                                        <a rel="noopener noreferrer" href="{% url 'metrics_scan_cycle' %}">
-                                                            {% trans "Metrics Scan Cycle" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}                                                 
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -475,7 +487,7 @@
                                                 </a>
                                                 <ul class="nav nav-second-level">
                                                     {% if "auth.view_user"|has_configuration_permission:request %}
-                                                        <li>    
+                                                        <li>
                                                             <a rel="noopener noreferrer" href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
@@ -534,24 +546,16 @@
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                
+
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'finding_exclusions' %}">
                                                         {% trans "Vulnerability Black & White Lists" %}
                                                     </a>
                                                 </li>
-                                                {% if request.user|is_in_group:"Reviewers_Maintainer" %}
-                                                <li>
-                                                    <a rel="noopener noreferrer" href="{% url 'execute_priorization_check' %}">
-                                                        {% trans "Execute Priorization Check" %}
-                                                    </a>
-                                                </li>
-                                                {% endif %}
-
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
-                                        
+
                                         <li id="menu_configuration">
                                             <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>
@@ -773,6 +777,14 @@
                                                 <span class="caret"></span>
                                             </a>
                                             <ul class="dropdown-menu">
+                                                {% if "RENDER_ALL_FINDING_V2"|has_user_permission_view:product_tab.product %}
+                                                 <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'all_findings_frontend' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-rectangle-list"></i>
+                                                        {% trans "View All Findings v2.0" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-rectangle-list"></i>

@@ -89,6 +89,10 @@ celerybeat.pid
 *.env*
 !docker/environments/*.env
 
+# Celery
+*.db-shm
+*.db-wal
+
 weekly.txt
 Monthly.txt
 Quarterly.txt

@@ -1154,7 +1154,8 @@ class RiskPendingForm(forms.ModelForm):
         self.fields["expiration_date"].disabled = True
         self.fields['owner'].queryset = get_owner_user()
 
-        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields['accepted_findings'].queryset = queryset_permissions
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product, product_type)
         owner_username = self.fields['owner'].queryset.first().username
         if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
@@ -1164,7 +1165,6 @@ class RiskPendingForm(forms.ModelForm):
         else:
             users_approvers = self.fields['accepted_by'].queryset.filter(username=owner_username) if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
             self.fields['approvers'].initial = list(users_approvers.values_list('username', flat=True))
-        
 
     def clean(self):
         data = self.cleaned_data
@@ -1223,7 +1223,7 @@ class TransferFindingForm(forms.ModelForm):
     destination_product_type = forms.ModelChoiceField(queryset=Product_Type.objects.all(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
     notes = forms.CharField(
-        required=False, max_length=2400, widget=forms.Textarea, label="Notes"
+        required=True, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
 
@@ -2388,8 +2388,12 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            role = Roles(int(settings.DD_REVIEWERS_ROLE_TAG.get(finding.tags.first().name)))
-            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}')
+            role = None
+            for tag in finding.tags.all():
+                if tag.name in settings.DD_REVIEWERS_ROLE_TAG:
+                    role = Roles(int(settings.DD_REVIEWERS_ROLE_TAG[tag.name]))
+                    break
+            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}') if role else get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True

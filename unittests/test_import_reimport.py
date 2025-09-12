@@ -1276,7 +1276,7 @@ class ImportReimportMixin:
                 self.assertFalse(finding["false_p"])
                 self.assertFalse(finding["out_of_scope"])
                 self.assertTrue(finding["risk_accepted"])
-                self.assertTrue(finding["is_mitigated"])
+                self.assertFalse(finding["is_mitigated"])
             elif "Zap5" in finding["title"]:
                 self.assertTrue(finding["active"])
                 self.assertTrue(finding["verified"])

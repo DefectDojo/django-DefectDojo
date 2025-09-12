@@ -69,7 +69,7 @@ class TestFindingModel(DojoTestCase):
         finding.file_path = "some-folder/some-file.ext"
         finding.line = 5432
         engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
-        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-branch/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_github_with_scm_type_with_details_and_line(self):
         # checks that for github in custom field dojo makes correct url to browse on github
@@ -93,7 +93,7 @@ class TestFindingModel(DojoTestCase):
         finding.line = 5432
 
         engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
-        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-branch/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
     def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_public_project_with_no_details_and_line(self):
         # checks that for public bitbucket (bitbucket.org) in custom field

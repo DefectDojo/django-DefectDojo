@@ -32,6 +32,7 @@ def globalize_vars(request):
         "RISK_PENDING": settings.RISK_PENDING,
         "HOST_IA_RECOMMENDATION": settings.HOST_IA_RECOMMENDATION,
         "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
+        "LOGO_URL": settings.LOGO_URL,
     }
 
 

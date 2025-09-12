@@ -15,6 +15,7 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
+     System_Settings
 )
 from dojo.validators import clean_tags
 
@@ -426,6 +427,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             self.unchanged_items.append(existing_finding)
             return existing_finding, True
+        
+        if existing_finding.risk_accepted and existing_finding.is_mitigated and not unsaved_finding.is_mitigated:
+            # If the existing finding is risk accepted and mitigated, but the new finding is not mitigated,
+            # we need to update the existing finding to match the new finding
+            logger.debug(
+                f"Updating existing risk accepted finding: {existing_finding.id}: {existing_finding.title} "
+                f"({existing_finding.component_name} - {existing_finding.component_version})",
+            )
+            existing_finding.is_mitigated = unsaved_finding.is_mitigated
+            existing_finding.save(dedupe_option=False)
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
+
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
         # (Risk accepted findings are not set to mitigated by Defectdojo)
@@ -508,6 +522,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         existing_finding.active = True
         if self.verified is not None:
             existing_finding.verified = self.verified
+        system_settings = System_Settings.objects.get()
+        if (system_settings.enable_transfer_finding and existing_finding.risk_status == "Transfer Accepted") or existing_finding.risk_status == "On Whitelist":
+            existing_finding.active = False
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)

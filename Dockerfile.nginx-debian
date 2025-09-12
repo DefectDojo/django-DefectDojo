@@ -72,11 +72,11 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.27.4-alpine3.21@sha256:4ff102c5d78d254a6f0da062b3cf39eaf07f01eec0927fd21e219d0af8bc0591
+FROM nginx:1.28.0-alpine3.21@sha256:8f2bcf97c473dfe311e79a510ee540ee02e28ce1e6a64e1ef89bfad32574ef10
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
-RUN rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/datatables && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/mocha
+RUN rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/datatables && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/mocha && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/jquery && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/bootstrap && rm -R /usr/share/nginx/html/static/startbootstrap-sb-admin-2/bower_components/morrisjs
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \

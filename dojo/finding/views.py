@@ -11,6 +11,8 @@ from itertools import chain
 from pathlib import Path
 
 from django.conf import settings
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -28,6 +30,10 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from dojo.decorators import dojo_ratelimit_view
+from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
 
@@ -44,7 +50,7 @@ from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
     user_is_authorized,
 )
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -99,6 +105,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
     Product,
+    Role,
     Stub_Finding,
     System_Settings,
     Test,
@@ -285,15 +292,19 @@ class BaseListFindings:
             else finding_filter_class(*args, **kwargs)
         )
 
-    def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View).order_by(self.get_order_by())
+    def get_filtered_findings(self, request=None):
+        findings = get_authorized_findings(
+            permission=Permissions.Finding_View,
+            user=request.user).order_by(self.get_order_by())
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
     def get_fully_filtered_findings(self, request: HttpRequest):
-        findings = self.get_filtered_findings()
+        findings = self.get_filtered_findings(request)
         return self.filter_findings_by_form(request, findings)
- 
+
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
+@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListFindings(View, BaseListFindings):
     def get_initial_context(self, request: HttpRequest):
         context = {
@@ -350,7 +361,7 @@ class ListFindings(View, BaseListFindings):
             add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
         return request, context
-
+    @vary_on_cookie
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
@@ -386,7 +397,7 @@ class ListFindings(View, BaseListFindings):
         # Render the view
         return render(request, self.get_template(), context)
 
-
+@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListOpenFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Open"
@@ -416,7 +427,7 @@ class ListInactiveFindings(ListFindings):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-
+@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListAcceptedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Accepted"
@@ -428,7 +439,7 @@ class ListTransferFinding(ListFindings):
         self.filter_name = "Transfer Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-
+@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListClosedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"
@@ -447,7 +458,7 @@ class ListBlacklistedFindings(ListFindings):
         self.filter_name = "Blacklisted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFindingRender(View):
     
     def get_template(self):
@@ -487,6 +498,7 @@ class ViewFindingRender(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
         finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
@@ -802,6 +814,7 @@ class ViewFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class EditFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -1151,6 +1164,7 @@ class EditFinding(View):
         return render(request, self.get_template(), context)
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class DeleteFinding(View):
     def get_finding(self, finding_id: int):
         return get_object_or_404(Finding, id=finding_id)
@@ -1300,7 +1314,7 @@ def close_finding(request, fid):
 
                 tf_helper.close_or_reactive_related_finding(event="close",
                                                             parent_finding=finding,
-                                                            notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                            notes=f"finding reactived by the parent finding {finding.id} (policies for the transfer of findings)",
                                                             send_notification=False)
                 return HttpResponseRedirect(
                     reverse("view_test", args=(finding.test.id,)),
@@ -3505,30 +3519,81 @@ def calculate_possible_related_actions_for_similar_finding(
 
     return actions
 
-
+dojo_ratelimit_view()
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def generate_token_generative_ia(request, fid):
+    error_response = {
+    "status": "Ok",
+    "ia_recommendations": (
+            "At the moment, you can't generate a recommendation for this finding.\n"
+            "Please try again later or with a different finding.🫣"
+        )}
     url = GeneralSettings.get_value("HOST_LOGIN_IA_RECOMMENDATION", "")
     payload = f"grant_type=client_credentials&client_id={settings.CLIENT_ID_IA}&client_secret={settings.CLIENT_SECRET_IA}"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
+    logger.debug("IA RECOMMENDATION:get token by finding: %s", fid)
     response = requests.request("POST",
                                 url=f"{url}/auth/login",
                                 headers=headers,
                                 data=payload,
                                 )
     if response.status_code != 200:
-        logger.error("Error generating token for IA recommendation: %s", response.text)
-        raise ApiError.internal_server_error(response.text)
+        logger.error(" IA RECOMMENDATION: Error generating token %s", response.text)
+        error_response["status"] = "Error"
+        return JsonResponse(error_response, status=200)
 
     # get Recommendation
     access_token = response.json()["data"]["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
-    
+    logger.debug("IA RECOMMENDATION: get recomendation by finding: %s", fid)
     response = requests.request("GET",
-                                url=f"{url}/devsecops/recommendation-process/362488",
+                                url=f"{url}/devsecops/recommendation-process/{fid}",
                                 headers=headers,
                                 )
+    if response.status_code != 200:
+        logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
+        error_response["status"] = "Error"
+        return JsonResponse(error_response, status=200)
 
-    return JsonResponse(response.json())
+    finding = get_object_or_404(Finding, id=fid)
+    
+    finding.ia_recommendation = response.json()
+    finding.ia_recommendation["data"]["like_status"] = None
+    finding.ia_recommendation["data"]["user"] = request.user.username
+    finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
+    finding.save()
+    contex = finding_helper.parser_ia_recommendation(
+        response.json())
+    return JsonResponse(contex, status=200)
+
+
+@dojo_ratelimit_view()
+def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
+    page_name = ('all_findings_frontend')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    base_params += f"&product={product_id}" if product_id else ""
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/all_findings_v2.html', {
+        'name': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",  
+        'user': user,
+    })
+
+@dojo_ratelimit_view()
+def finding_list_v2(request: HttpRequest) -> HttpResponse:
+    page_name = ('finding_list_frontend')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/all_findings_v2.html', {
+        'name': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",
+        'user': user,
+    })

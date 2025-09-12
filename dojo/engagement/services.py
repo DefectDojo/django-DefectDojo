@@ -6,11 +6,13 @@ from django.dispatch import receiver
 
 import dojo.jira_link.helper as jira_helper
 from dojo.models import Engagement
+from dojo.engagement.helper import close_all_finding_by_engagement
 
 logger = logging.getLogger(__name__)
 
 
 def close_engagement(eng):
+    close_all_finding_by_engagement.apply_async(args=(eng.id,))
     eng.active = False
     eng.status = "Completed"
     eng.save()

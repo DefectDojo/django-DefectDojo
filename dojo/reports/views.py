@@ -1,18 +1,23 @@
 import csv
 import logging
-import re
+from bs4 import BeautifulSoup
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
+from urllib.parse import urlencode
 from dateutil.relativedelta import relativedelta
+from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views import View
+from django.core.cache import cache
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from django.contrib import messages
+
 
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -26,9 +31,19 @@ from dojo.filters import (
     ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
-from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Test,
+    GeneralSettings)
+from dojo.reports import helper as helper_reports
+from dojo.home.helper import get_key_for_user_and_urlpath
+from dojo.reports.helper import get_findings
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -42,12 +57,14 @@ from dojo.reports.widgets import (
     report_widget_factory,
 )
 from dojo.utils import (
+    redirect_to_return_url_or_else,
     Product_Tab,
     add_breadcrumb,
     get_page_items,
     get_period_counts_legacy,
     get_system_setting,
     get_words_for_field,
+    calculate_severity_priority
 )
 
 logger = logging.getLogger(__name__)
@@ -655,100 +672,6 @@ def prefetch_related_endpoints_for_report(endpoints):
                                       "tags",
                                      )
 
-
-def get_list_index(full_list, index):
-    try:
-        element = full_list[index]
-    except Exception:
-        element = None
-    return element
-
-
-def get_findings(request):
-    url = request.META.get("QUERY_STRING")
-    if not url:
-        msg = "Please use the report button when viewing findings"
-        raise Http404(msg)
-    url = url.removeprefix("url=")
-
-    views = ["all", "open", "inactive", "verified",
-             "closed", "accepted", "out_of_scope",
-             "false_positive", "inactive"]
-    # request.path = url
-    obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split(r"/|\?", url)))
-
-    try:
-        finding_index = path_items.index("finding")
-    except ValueError:
-        finding_index = -1
-    # There is a engagement or product here
-    if finding_index > 0:
-        # path_items ['product', '1', 'finding', 'closed', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        view = get_list_index(path_items, 3)
-        query = get_list_index(path_items, 4)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is findings only. Accomodate view and query
-    elif finding_index == 0:
-        # path_items ['finding', 'closed', 'title=blah']
-        obj_name = get_list_index(path_items, 0)
-        view = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-        # Try to catch a mix up
-        query = query if view in views else view
-    # This is a test or engagement only
-    elif finding_index == -1:
-        # path_items ['test', '1', 'test__engagement__product=1']
-        obj_name = get_list_index(path_items, 0)
-        obj_id = get_list_index(path_items, 1)
-        query = get_list_index(path_items, 2)
-
-    filter_name = None
-    if view:
-        if view == "open":
-            filter_name = "Open"
-        elif view == "inactive":
-            filter_name = "Inactive"
-        elif view == "verified":
-            filter_name = "Verified"
-        elif view == "closed":
-            filter_name = "Closed"
-        elif view == "accepted":
-            filter_name = "Accepted"
-        elif view == "out_of_scope":
-            filter_name = "Out of Scope"
-        elif view == "false_positive":
-            filter_name = "False Positive"
-
-    obj = pid = eid = tid = None
-    if obj_id:
-        if "product" in obj_name:
-            pid = obj_id
-            obj = get_object_or_404(Product, id=pid)
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        elif "engagement" in obj_name:
-            eid = obj_id
-            obj = get_object_or_404(Engagement, id=eid)
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif "test" in obj_name:
-            tid = obj_id
-            obj = get_object_or_404(Test, id=tid)
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-
-    request.GET = QueryDict(query)
-    list_findings = BaseListFindings(
-        filter_name=filter_name,
-        product_id=pid,
-        engagement_id=eid,
-        test_id=tid)
-    findings = list_findings.get_fully_filtered_findings(request).qs
-
-    return findings, obj
-
-
 class QuickReportView(View):
     def add_findings_data(self):
         return self.findings
@@ -757,12 +680,52 @@ class QuickReportView(View):
         return "dojo/finding_pdf_report.html"
 
     def get(self, request):
-        findings, obj = get_findings(request)
+        findings, obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
                                                         user=request.user)
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            
+            request_data = {
+                "query_dict_get": urlencode(request.GET),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "format": "html",
+                "user_id": request.user.id
+            }
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                helper_reports.async_generate_report.apply_async(
+                    args=(request_data,))
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         return self.generate_quick_report(request, findings, obj)
 
@@ -790,14 +753,6 @@ class QuickReportView(View):
                   })
 
 
-def get_excludes():
-    return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
-    "test__engagement__product__authorized_group", "test__engagement__product__member",
-    "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
-    "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
-    "unsaved_tags", "vulnerability_ids", "cve", "transferfindingfinding", "transfer_finding"]
-
-
 def get_foreign_keys():
     return ["defect_review_requested_by", "duplicate_finding", "finding_group", "last_reviewed_by",
         "mitigated_by", "reporter", "review_requested_by", "sonarqube_issue", "test"]
@@ -818,18 +773,58 @@ class CSVExportView(View):
         pass
 
     def get(self, request):
-        findings, _obj = get_findings(request)
+        findings, _obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(objs=findings,
                                                         product=None,
                                                         user=request.user)
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            
+            request_data = {
+                "query_dict_get": urlencode(request.GET),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "format": "csv",
+                "user_id": request.user.id
+            }
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                helper_reports.async_generate_report.apply_async(
+                    args=(request_data,))
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
-        excludes_list = get_excludes()
+        excludes_list = helper_reports.get_excludes()
         allowed_foreign_keys = get_foreign_keys()
         first_row = True
 
@@ -849,12 +844,12 @@ class CSVExportView(View):
                         fields.append(key)
                         continue
                 fields.extend((
-                    "test",
+                    "namespace",
+                    "custom_id",
                     "found_by",
-                    "engagement_id",
                     "engagement",
-                    "product_id",
                     "product",
+                    "product_type",
                     "endpoints",
                     "vulnerability_ids",
                     "tags",
@@ -881,17 +876,28 @@ class CSVExportView(View):
                                     value = str(getattr(finding, key))
                             if value and isinstance(value, str):
                                 value = value.replace("\n", " NEWLINE ").replace("\r", "")
+                            if key == "priority":
+                                value = calculate_severity_priority(finding.tags, value)
                             fields.append(value)
                     except Exception as exc:
                         logger.error("Error in attribute: " + str(exc))
                         fields.append("Value not supported")
                         continue
-                fields.append(finding.test.title)
+                soup = BeautifulSoup(finding.description, "html.parser")
+                namespace_value = ""
+                customid_value = ""
+                namespace_label = soup.find("strong", string="Namespaces:")
+                customid_label = soup.find("strong", string="Custom Id:")
+                if namespace_label:
+                    namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                if customid_label:
+                    customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                fields.append(namespace_value)
+                fields.append(customid_value)
                 fields.append(finding.test.test_type.name)
-                fields.append(finding.test.engagement.id)
                 fields.append(finding.test.engagement.name)
-                fields.append(finding.test.engagement.product.id)
                 fields.append(finding.test.engagement.product.name)
+                fields.append(finding.test.engagement.product.prod_type.name)
 
                 endpoint_value = ""
                 for endpoint in finding.endpoints.all():
@@ -942,7 +948,7 @@ class ExcelExportView(View):
         pass
 
     def get(self, request):
-        findings, _obj = get_findings(request)
+        findings, _obj, url = get_findings(request)
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             findings = exclude_test_or_finding_with_tag(
                 objs=findings,
@@ -950,6 +956,46 @@ class ExcelExportView(View):
                 user=request.user
             )
         self.findings = findings
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_ASYNCHRONOUS_REPORT_GENERATION",
+                False) and
+            self.findings.count() >= GeneralSettings.get_value(
+                "MAXIMUM_FINDINGS_IN_REPORT",
+                1000)
+        ):
+            
+            request_data = {
+                "query_dict_get": urlencode(request.GET),
+                "query_string_meta": request.META.get('QUERY_STRING', ''),
+                "post_data": request.POST.dict(),
+                "format": "excel",
+                "user_id": request.user.id
+            }
+            if cache.get(get_key_for_user_and_urlpath(request, "report_finding")):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                            "A report is already being generated from this view. "
+                            "Please wait for it to finish before requesting your report and will "
+                            f"send it to your email ({request.user.email}) as soon as it's ready."
+                        ),
+                    extra_tags="alert-warning"
+                )
+            else:
+                helper_reports.async_generate_report.apply_async(
+                    args=(request_data,))
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    message=(
+                        "Hold on a moment! We're generating your report and will "
+                        f"send it to your email ({request.user.email}) as soon as it's ready."
+                    ),
+                    extra_tags="alert-success"
+                )
+            return redirect_to_return_url_or_else(request, url)
         findings = self.add_findings_data()
         workbook = Workbook()
         workbook.iso_dates = True
@@ -959,7 +1005,7 @@ class ExcelExportView(View):
         font_bold = Font(bold=True)
         self.font_bold = font_bold
         allowed_attributes = get_attributes()
-        excludes_list = get_excludes()
+        excludes_list = helper_reports.get_excludes()
         allowed_foreign_keys = get_foreign_keys()
 
         row_num = 1
@@ -980,19 +1026,22 @@ class ExcelExportView(View):
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
                         col_num += 1
                         continue
-                cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
+                cell = worksheet.cell(row=row_num, column=col_num, value="namespace")
                 cell.font = font_bold
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value="engagement_id")
-                cell = cell.font = font_bold
+                cell = worksheet.cell(row=row_num, column=col_num, value="custom_id")
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
+                cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="engagement")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value="product_id")
+                cell = worksheet.cell(row=row_num, column=col_num, value="product")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value="product")
+                cell = worksheet.cell(row=row_num, column=col_num, value="product_type")
                 cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="endpoints")
@@ -1002,6 +1051,9 @@ class ExcelExportView(View):
                 cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="tags")
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value="risk_acceptance_expiration_date")
                 cell.font = font_bold
                 col_num += 1
                 self.row_num = row_num
@@ -1025,6 +1077,8 @@ class ExcelExportView(View):
                                     value = str(getattr(finding, key))
                             if value and isinstance(value, datetime):
                                 value = value.replace(tzinfo=None)
+                            if key == "priority":
+                                value = calculate_severity_priority(finding.tags, value)
                             worksheet.cell(row=row_num, column=col_num, value=value)
                             col_num += 1
                     except Exception as exc:
@@ -1032,15 +1086,26 @@ class ExcelExportView(View):
                         worksheet.cell(row=row_num, column=col_num, value="Value not supported")
                         col_num += 1
                         continue
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
+                soup = BeautifulSoup(finding.description, "html.parser")
+                namespace_value = ""
+                customid_value = ""
+                namespace_label = soup.find("strong", string="Namespaces:")
+                customid_label = soup.find("strong", string="Custom Id:")
+                if namespace_label:
+                    namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                if customid_label:
+                    customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
+                worksheet.cell(row=row_num, column=col_num, value=namespace_value)
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
+                worksheet.cell(row=row_num, column=col_num, value=customid_value)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
                 col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
-                col_num += 1
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.prod_type.name)
                 col_num += 1
 
                 endpoint_value = ""
@@ -1070,6 +1135,10 @@ class ExcelExportView(View):
                 tags_value = tags_value.removesuffix("; \n")
                 worksheet.cell(row=row_num, column=col_num, value=tags_value)
                 col_num += 1
+                if finding.risk_acceptance:
+                    value = finding.risk_acceptance.expiration_date.strftime("%Y-%m-%d")
+                    worksheet.cell(row=row_num, column=col_num, value=value)
+                    col_num += 1
                 self.col_num = col_num
                 self.row_num = row_num
                 self.finding = finding
@@ -1087,3 +1156,10 @@ class ExcelExportView(View):
         )
         response["Content-Disposition"] = "attachment; filename=findings.xlsx"
         return response
+
+
+def get_url_presigned(request, id):
+    if value := cache.get(f"report_finding:{request.user.username}:{id}"):
+        return HttpResponseRedirect(value)
+    else:
+        return render(request, "dojo/page_status.html")

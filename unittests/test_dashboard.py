@@ -5,8 +5,9 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 
-from dojo.models import Engagement, Finding, Risk_Acceptance, System_Settings, Test
+from dojo.models import Engagement, Finding, Risk_Acceptance, System_Settings, Test, Product_Member, Product_Type_Member
 
 from .dojo_test_case import DojoTestCase
 
@@ -196,3 +197,26 @@ class TestDashboard(DojoTestCase):
         user = User.objects.get(username=username)
         self.client.force_login(user)
         return self.client.get(reverse("dashboard"))
+
+    def test_counters_as_staff_cache(self):
+        settings.USE_CACHE_REDIS = True
+        self._setup_test_counters_findings(product_id=2)
+
+        response = self._request("admin")
+
+        self.assertEqual(3, response.context["engagement_count"])
+        self.assertEqual(11, response.context["finding_count"])
+        self.assertEqual(3, response.context["mitigated_count"])
+        self.assertEqual(3, response.context["accepted_count"])
+
+    def test_counters_as_user_cache(self):
+        settings.USE_CACHE_REDIS = True
+        self._setup_test_counters_findings(product_id=2)
+        self._setup_test_counters_findings(product_id=3)
+
+        response = self._request("user1")
+
+        self.assertEqual(3, response.context["engagement_count"])
+        self.assertEqual(11, response.context["finding_count"])
+        self.assertEqual(3, response.context["mitigated_count"])
+        self.assertEqual(3, response.context["accepted_count"])

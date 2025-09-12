@@ -64,11 +64,6 @@
   dependencies:
     "@types/estree" "*"
 
-"@types/web-animations-js@^2.2.16":
-  version "2.2.16"
-  resolved "https://registry.yarnpkg.com/@types/web-animations-js/-/web-animations-js-2.2.16.tgz#fd84c49a7a2f148b588ba8b372496162b427742f"
-  integrity sha512-ATELeWMFwj8eQiH0KmvsCl1V2lu/qx/CjOBmv4ADSZS5u8r4reMyjCXtxG7khqyiwH3IOMNdrON/Ugn94OUcRA==
-
 JUMFlot@jumjum123/JUMFlot#*:
   version "0.0.0"
   resolved "https://codeload.github.com/jumjum123/JUMFlot/tar.gz/203147fa2ace27db89e2defcde0800654015ae23"
@@ -143,12 +138,12 @@ call-bound@^1.0.2:
   version "0.0.0"
   resolved "https://github.com/dbtek/chosen-bootstrap#12dcd363d1482c54c740ed9fe0e92549d81e9176"
 
-chosen-js@1.8.7:
+chosen-js@^1.8.7:
   version "1.8.7"
   resolved "https://registry.yarnpkg.com/chosen-js/-/chosen-js-1.8.7.tgz#9bfa5597f5081d602ff4ae904af9aef33265bb1d"
   integrity sha512-eVdrZJ2U5ISdObkgsi0od5vIJdLwq1P1Xa/Vj/mgxkMZf14DlgobfB6nrlFi3kW4kkvKLsKk4NDqZj1MU1DCpw==
 
-clipboard@2.0.11:
+clipboard@^2.0.11:
   version "2.0.11"
   resolved "https://registry.yarnpkg.com/clipboard/-/clipboard-2.0.11.tgz#62180360b97dd668b6b3a84ec226975762a70be5"
   integrity sha512-C+0bbOqkezLIsmWSvlsXS0Q0bmkugu7jcfMIACB+RDEntIzQIkdr148we28AfSloQLRdZlYL/QYyrq05j/3Faw==
@@ -229,7 +224,7 @@ datatables.net@^2, datatables.net@^2.3.3:
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.3.tgz#fe4f96bdbc4cf47c8d11162a7af525ca6a3683d2"
   integrity sha512-SWL3za6nheY6gdoiLgCc++tYmxbwrmv2bjrEiII9rXBWXXSbOZct6pjR3FueMVRM5jmt7pQcXiGovfuFDnutQg==
   dependencies:
-    jquery "1.8 - 4"
+    jquery ">=1.7"
 
 deep-equal@^1.0.0:
   version "1.1.2"
@@ -595,11 +590,6 @@ png-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/png-js/-/png-js-1.0.0.tgz#e5484f1e8156996e383aceebb3789fd75df1874d"
   integrity sha512-k+YsbhpA9e+EFfKjTCH3VW6aoKlyNYI6NYdTfDL4CIvFnvsuO84ttonmZE7rc+v23SLTH8XX+5w/Ak9v0xGY4g==
 
-prismjs@^1.27.0:
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.30.0.tgz#d9709969d9d4e16403f6f348c63553b19f0975a9"
-  integrity sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==
-
 process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
@@ -705,13 +695,6 @@ tiny-inflate@^1.0.0, tiny-inflate@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tiny-inflate/-/tiny-inflate-1.0.3.tgz#122715494913a1805166aaf7c93467933eea26c4"
   integrity sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==
-
-typeit@^8.7.1:
-  version "8.8.7"
-  resolved "https://registry.yarnpkg.com/typeit/-/typeit-8.8.7.tgz#6b6533c2c17dffa86924647f818db378ef328a1d"
-  integrity sha512-sSVpy+cjeFP6Z+fZqiHzUSShg5yYFeJEt/Qut/bX945+Axyq+Yq+GPOuuk+sofoccSv8nNX/ibOOHkbki2mEpg==
-  dependencies:
-    "@types/web-animations-js" "^2.2.16"
 
 typo-js@*:
   version "1.2.5"
