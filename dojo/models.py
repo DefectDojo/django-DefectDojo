@@ -673,7 +673,7 @@ class System_Settings(models.Model):
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
 
-    from dojo.middleware import System_Settings_Manager
+    from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()
 
     def clean(self):
