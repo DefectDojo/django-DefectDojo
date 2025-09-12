@@ -65,6 +65,8 @@ class GenericJSONParser:
                 "epss_percentile",
                 "cvssv3",
                 "cvssv3_score",
+                "cvssv4",
+                "cvssv4_score",
                 "mitigation",
                 "impact",
                 "steps_to_reproduce",
@@ -102,6 +104,10 @@ class GenericJSONParser:
                 "planned_remediation_version",
                 "effort_for_fixing",
                 "tags",
+                "kev_date",
+                "known_exploited",
+                "ransomware_used",
+                "fix_available",
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
