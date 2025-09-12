@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% url 'view_product' finding.test.engagement.product.id as product_url %}
 {% url 'view_engagement' finding.test.engagement.id as engagement_url %}
 {% url 'view_test' finding.test.id as test_url %}
@@ -44,12 +45,12 @@
 
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
-{% for endpoint in finding.endpoints.all %}
-* {{ endpoint }}{% endfor %}
-{% comment %}
-    we leave the endfor at the same line to avoid double line breaks i.e. too many blank lines
-{% endcomment %}
+||System/Endpoint||Status||
+{% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}
 {%endif%}
+
 
 {% if finding.component_name %}
 *Vulnerable Component*: {{finding.component_name }} - {{ finding.component_version }}
@@ -93,5 +94,11 @@
 *References*:
 {{ finding.references|safe }}
 {% endif %}
+
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe }}
+{% endif %}
+
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

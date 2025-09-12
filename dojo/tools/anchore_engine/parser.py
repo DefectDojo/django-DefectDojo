@@ -46,12 +46,12 @@ class AnchoreEngineParser:
                 severity = "Info"
 
             mitigation = "No fix available."
-
+            fix_available = False
             if item.get("fixAvailable") and item["fixAvailable"] != "None":
                 mitigation = f"Upgrade to: {' or '.join(item['fixAvailable'].split(','))}\n\n"
                 mitigation += f"URL: {item.get('link', 'None')}"
+                fix_available = True
             cvssv3_base_score = item.get("nvdCvssBaseScore")
-
             if isinstance(cvssv3_base_score, str) and cvssv3_base_score.replace(".", "", 1).isdigit():
                 cvssv3_base_score = float(cvssv3_base_score)
             elif not isinstance(cvssv3_base_score, int | float):
@@ -87,6 +87,7 @@ class AnchoreEngineParser:
                     static_finding=True,
                     dynamic_finding=False,
                     vuln_id_from_tool=vulnerability_id,
+                    fix_available=fix_available,
                 )
 
                 if vulnerability_id:
@@ -135,14 +136,16 @@ class AnchoreEngineParser:
             )
 
             sev = item["severity"]
-            if sev == "Negligible" or sev == "Unknown":
+            if sev in {"Negligible", "Unknown"}:
                 sev = "Info"
 
             mitigation = (
                 "Upgrade to " + item["package_name"] + " " + item["fix"] + "\n"
             )
             mitigation += "URL: " + item["url"] + "\n"
-
+            fix_available = True
+            if item["fix"] == "None":
+                fix_available = False
             cvssv3_base_score = None
             if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
                 if "nvd_data" in item and len(item["nvd_data"]) > 0:
@@ -213,6 +216,7 @@ class AnchoreEngineParser:
                     static_finding=True,
                     dynamic_finding=False,
                     vuln_id_from_tool=item.get("vuln"),
+                    fix_available=fix_available,
                 )
                 if vulnerability_id:
                     find.unsaved_vulnerability_ids = [vulnerability_id]

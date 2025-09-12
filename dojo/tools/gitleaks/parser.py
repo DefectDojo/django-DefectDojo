@@ -21,6 +21,8 @@ class GitleaksParser:
         - severity: Set to high and inccreased to critical if "Github", "AWS", or "Heroku" are in the isssue rule.
         - file_path: Set to issuel file from Gitleaks Scanner.
         - line: Set to line number from Gitleaks Scanner.
+        - dynamic_finding: Set to false.
+        - static_finding: Set to true.
         - nb_occurences: Inittially set to 1 and incremented based on number of occurences.
         """
         return [
@@ -29,6 +31,8 @@ class GitleaksParser:
             "severity",
             "file_path",
             "line",
+            "dynamic_finding",
+            "static_finding",
             "nb_occurences",
         ]
 
@@ -43,6 +47,7 @@ class GitleaksParser:
         - description: Custom description made from commit details.
 
         NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        NOTE: cwe is not provided by parser.
         """
         return [
             "title",
@@ -197,7 +202,7 @@ class GitleaksParser:
             severity = "High"
 
         dupe_key = hashlib.md5(
-            (title + secret + str(line)).encode("utf-8"),
+            (title + secret + str(line)).encode("utf-8"), usedforsecurity=False,
         ).hexdigest()
 
         if dupe_key in dupes:

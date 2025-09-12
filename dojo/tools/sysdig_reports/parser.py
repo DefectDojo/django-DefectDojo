@@ -1,10 +1,13 @@
+import csv
+import io
 import json
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
-from dojo.tools.sysdig_reports.sysdig_csv_parser import CSVParser
+from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.validators import clean_tags
 
 
 class SysdigReportsParser:
@@ -22,18 +25,36 @@ class SysdigReportsParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return ()
+            return []
+
         if filename.name.lower().endswith(".csv"):
-            arr_data = CSVParser().parse(filename=filename)
+            arr_data = self.load_csv(filename=filename)
             return self.parse_csv(arr_data=arr_data, test=test)
+
         if filename.name.lower().endswith(".json"):
             scan_data = filename.read()
             try:
                 data = json.loads(str(scan_data, "utf-8"))
             except Exception:
                 data = json.loads(scan_data)
-            return self.parse_json(data=data, test=test)
-        return ()
+
+            # Handle both old and new JSON formats
+            if "data" in data:
+                # Old format: data is at root level
+                return self.parse_json(data=data, test=test)
+
+            if "panels" in data and len(data["panels"]) > 0 and "data" in data["panels"][0]:
+                # New 2025 format: data is nested in panels[0]
+                return self.parse_json(data=data["panels"][0], test=test)
+
+            if "result" in data:
+                msg = "JSON file is not in the expected format, it looks like a Sysdig CLI report."
+                raise ValueError(msg)
+            msg = "JSON file is not in the expected format, expected data element"
+            raise ValueError(msg)
+
+        msg = "Expected CSV or JSON  file"
+        raise ValueError(msg)
 
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)
@@ -41,31 +62,34 @@ class SysdigReportsParser:
             return []
         findings = []
         for item in vulnerability:
-            imageId = item.get("imageId", "")
-            imagePullString = item.get("imagePullString", "")
-            osName = item.get("osName", "")
-            k8sClusterName = item.get("k8sClusterName", "")
-            k8sNamespaceName = item.get("k8sNamespaceName", "")
-            k8sWorkloadType = item.get("k8sWorkloadType", "")
-            k8sWorkloadName = item.get("k8sWorkloadName", "")
-            k8sPodContainerName = item.get("k8sPodContainerName", "")
-            vulnName = item.get("vulnName", "")
-            vulnSeverity = item.get("vulnSeverity", "")
-            vulnLink = item.get("vulnLink", "")
-            vulnCvssVersion = item.get("vulnCvssVersion", "")
-            vulnCvssScore = item.get("vulnCvssScore", "")
-            vulnCvssVector = item.get("vulnCvssVector", "")
-            vulnDisclosureDate = item.get("vulnDisclosureDate", "")
-            vulnSolutionDate = item.get("vulnSolutionDate", "")
-            vulnExploitable = item.get("vulnExploitable", "")
-            vulnFixAvailable = item.get("vulnFixAvailable", "")
-            vulnFixVersion = item.get("vulnFixVersion", "")
-            packageName = item.get("packageName", "")
-            packageType = item.get("packageType", "")
-            packagePath = item.get("packagePath", "")
-            packageVersion = item.get("packageVersion", "")
-            packageSuggestedFix = item.get("packageSuggestedFix", "")
-            k8sPodCount = item.get("k8sPodCount", "")
+            # Handle both old and new JSON field names
+            # Old format uses camelCase, new format uses snake_case with different field names
+            imageId = item.get("imageId", "") or item.get("container_image_id", "")
+            imagePullString = item.get("imagePullString", "") or item.get("container_image", "")
+            osName = item.get("osName", "") or item.get("container_image_distro", "")
+            k8sClusterName = item.get("k8sClusterName", "") or item.get("kubernetes_cluster_name", "")
+            k8sNamespaceName = item.get("k8sNamespaceName", "") or item.get("kubernetes_namespace_name", "")
+            k8sWorkloadType = item.get("k8sWorkloadType", "") or item.get("kubernetes_workload_type", "")
+            k8sWorkloadName = item.get("k8sWorkloadName", "") or item.get("kubernetes_workload_name", "")
+            k8sPodContainerName = item.get("k8sPodContainerName", "") or item.get("kubernetes_pod_container_name", "")
+            vulnName = item.get("vulnName", "") or item.get("vuln_id", "")
+            vulnSeverity = SysdigData._map_severity(item.get("vulnSeverity", "") or item.get("vuln_severity", ""))
+            vulnLink = item.get("vulnLink", "") or ""  # Not present in new format
+            vulnCvssVersion = item.get("vulnCvssVersion", "") or item.get("vuln_cvss_version", "")
+            vulnCvssScore = item.get("vulnCvssScore", "") or item.get("vuln_cvss_score", "")
+            vulnCvssVector = item.get("vulnCvssVector", "") or item.get("vuln_cvss_vector", "")
+            vulnDisclosureDate = item.get("vulnDisclosureDate", "") or item.get("vuln_disclosure_date", "")
+            vulnSolutionDate = item.get("vulnSolutionDate", "") or item.get("vuln_fix_available_date", "")
+            vulnExploitable = item.get("vulnExploitable", "") or item.get("vuln_has_exploit", "")
+            vulnFixAvailable = item.get("vulnFixAvailable", "") or item.get("vuln_fix_available", "")
+            vulnFixVersion = item.get("vulnFixVersion", "") or item.get("vuln_fixed_in_version", "")
+            packageName = item.get("packageName", "") or item.get("scan_package_name", "")
+            packageType = item.get("packageType", "") or item.get("scan_package_type", "")
+            packagePath = item.get("packagePath", "") or item.get("scan_package_path", "")
+            packageVersion = item.get("packageVersion", "") or item.get("scan_package_version", "")
+            packageSuggestedFix = item.get("packageSuggestedFix", "") or ""  # Not present in new format
+            k8sPodCount = item.get("k8sPodCount", "") or ""  # Not present in new format
+
             description = ""
             description += "imageId: " + imageId + "\n"
             description += "imagePullString: " + imagePullString + "\n"
@@ -87,9 +111,12 @@ class SysdigReportsParser:
             description += "packageVersion: " + packageVersion + "\n"
             description += "packageSuggestedFix: " + packageSuggestedFix + "\n"
             description += "k8sPodCount: " + str(k8sPodCount) + "\n"
+
             mitigation = ""
             mitigation += "vulnFixAvailable: " + str(vulnFixAvailable) + "\n"
             mitigation += "vulnFixVersion: " + vulnFixVersion + "\n"
+            mitigation += "suggestedFix: " + packageSuggestedFix + "\n"
+
             find = Finding(
                 title=vulnName + "_" + vulnFixVersion,
                 test=test,
@@ -128,20 +155,20 @@ class SysdigReportsParser:
             # Set some finding tags
             tags = []
             if row.k8s_cluster_name != "":
-                tags.append("Cluster: " + row.k8s_cluster_name)
+                tags.append(clean_tags("Cluster:" + row.k8s_cluster_name))
             if row.k8s_namespace_name != "":
-                tags.append("Namespace: " + row.k8s_namespace_name)
+                tags.append(clean_tags("Namespace:" + row.k8s_namespace_name))
             if row.k8s_workload_name != "":
-                tags.append("WorkloadName: " + row.k8s_workload_name)
+                tags.append(clean_tags("WorkloadName:" + row.k8s_workload_name))
             if row.package_name != "":
-                tags.append("PackageName: " + row.package_name)
+                tags.append(clean_tags("PackageName:" + row.package_name))
             if row.package_version != "":
-                tags.append("PackageVersion: " + row.package_version)
+                tags.append(clean_tags("PackageVersion:" + row.package_version))
             if row.k8s_cluster_name != "":
-                tags.append("InUse: " + str(row.in_use))
+                tags.append(clean_tags("InUse:" + str(row.in_use)))
             if row.vulnerability_id != "":
-                tags.append("VulnId: " + row.vulnerability_id)
-            finding.tags = tags
+                tags.append(clean_tags("VulnId:" + row.vulnerability_id))
+            finding.unsaved_tags = tags
             if row.k8s_cluster_name != "":
                 finding.dynamic_finding = True
                 finding.static_finding = False
@@ -203,11 +230,11 @@ class SysdigReportsParser:
                 finding.description += f"\n - **Registry Name:** {row.registry_name}"
                 finding.description += f"\n - **Registy Image Repository:** {row.registry_image_repository}"
             try:
-                if float(row.cvss_version) >= 3:
-                    finding.cvssv3_score = row.cvss_score
+                if float(row.cvss_version) >= 3 and float(row.cvss_version) < 4:
+                    finding.cvssv3_score = float(row.cvss_score)
                     vectors = cvss.parser.parse_cvss_from_text(row.cvss_vector)
                     if len(vectors) > 0 and isinstance(vectors[0], CVSS3):
-                        finding.cvss = vectors[0].clean_vector()
+                        finding.cvssv3 = vectors[0].clean_vector()
             except ValueError:
                 continue
             finding.risk_accepted = row.risk_accepted
@@ -215,6 +242,126 @@ class SysdigReportsParser:
             if row.vuln_link != "":
                 finding.references = row.vuln_link
                 finding.url = row.vuln_link
+
             # finally, Add finding to list
             sysdig_report_findings.append(finding)
         return sysdig_report_findings
+
+    def load_csv(self, filename) -> SysdigData:
+
+        if filename is None:
+            return ()
+
+        content = filename.read()
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
+
+        # normalise on lower case for consistency
+        reader.fieldnames = [name.lower() for name in reader.fieldnames]
+
+        csvarray = []
+
+        for row in reader:
+            # Compare headers to values.
+            if len(row) != len(reader.fieldnames):
+                msg = f"Number of fields in row ({len(row)}) does not match number of headers ({len(reader.fieldnames)})"
+                raise ValueError(msg)
+
+            # Check for a CVE value to being with
+            if not row[reader.fieldnames[0]].startswith("CVE"):
+                msg = f"Expected 'CVE' at the start but got: {row[reader.fieldnames[0]]}"
+                raise ValueError(msg)
+
+            csvarray.append(row)
+
+        if "cve id" in reader.fieldnames:
+            msg = "Unknown CSV format: CVE ID column found, looks like a SysDig CLI Report"
+            raise ValueError(msg)
+
+        # Support both old and new CSV formats
+        if "vulnerability id" not in reader.fieldnames and "vulnerability name" not in reader.fieldnames:
+            msg = "Unknown CSV format: expected either 'Vulnerability ID' or 'Vulnerability Name' column"
+            raise ValueError(msg)
+
+        arr_csv_data = []
+
+        for row in csvarray:
+
+            csv_data_record = SysdigData()
+
+            # Handle both old and new CSV formats
+            if "vulnerability id" in reader.fieldnames:
+                # Old format: Vulnerability Engine Format
+                csv_data_record.vulnerability_id = row.get("vulnerability id", "")
+                csv_data_record.severity = SysdigData._map_severity(row.get("severity", "").upper())
+                csv_data_record.package_name = row.get("package name", "")
+                csv_data_record.package_version = row.get("package version", "")
+                csv_data_record.package_type = row.get("package type", "")
+                csv_data_record.package_path = row.get("package path", "")
+                csv_data_record.image = row.get("image", "")
+                csv_data_record.os_name = row.get("os name", "")
+                csv_data_record.cvss_version = row.get("cvss version", "")
+                csv_data_record.cvss_score = row.get("cvss score", "")
+                csv_data_record.cvss_vector = row.get("cvss vector", "")
+                csv_data_record.vuln_link = row.get("vuln link", "")
+                csv_data_record.vuln_publish_date = row.get("vuln publish date", "")
+                csv_data_record.vuln_fix_date = row.get("vuln fix date", "")
+                csv_data_record.vuln_fix_version = row.get("fix version", "")
+                csv_data_record.public_exploit = row.get("public exploit", "")
+                csv_data_record.k8s_cluster_name = row.get("k8s cluster name", "")
+                csv_data_record.k8s_namespace_name = row.get("k8s namespace name", "")
+                csv_data_record.k8s_workload_type = row.get("k8s workload type", "")
+                csv_data_record.k8s_workload_name = row.get("k8s workload name", "")
+                csv_data_record.k8s_container_name = row.get("k8s container name", "")
+                csv_data_record.image_id = row.get("image id", "")
+                csv_data_record.k8s_pod_count = row.get("k8s pod count", "")
+                csv_data_record.package_suggested_fix = row.get("package suggested fix", "")
+                csv_data_record.in_use = row.get("in use", "") == "TRUE"
+                csv_data_record.risk_accepted = row.get("risk accepted", "") == "TRUE"
+                csv_data_record.registry_name = row.get("registry name", "")
+                csv_data_record.registry_image_repository = row.get("registry image repository", "")
+                csv_data_record.cloud_provider_name = row.get("cloud provider name", "")
+                csv_data_record.cloud_provider_account_id = row.get("cloud provider account ID", "")
+                csv_data_record.cloud_provider_region = row.get("cloud provider region", "")
+                csv_data_record.registry_vendor = row.get("registry vendor", "")
+
+            elif "vulnerability name" in reader.fieldnames:
+                # New 2025 format
+                csv_data_record.vulnerability_id = row.get("vulnerability name", "")
+                csv_data_record.severity = SysdigData._map_severity(row.get("vulnerability severity", "").upper())
+                csv_data_record.package_name = row.get("package name", "")
+                csv_data_record.package_version = row.get("package version", "")
+                csv_data_record.package_type = row.get("package type", "")
+                csv_data_record.package_path = row.get("package path", "")
+                csv_data_record.image = row.get("image name", "")
+                csv_data_record.os_name = row.get("os name", "")
+                csv_data_record.cvss_version = row.get("cvss version", "")
+                csv_data_record.cvss_score = row.get("cvss score", "")
+                csv_data_record.cvss_vector = row.get("cvss vector", "")
+                # Map new 2025 column names to existing fields
+                csv_data_record.vuln_link = ""  # Not present in 2025 format
+                csv_data_record.vuln_publish_date = row.get("disclosure date", "")
+                csv_data_record.vuln_fix_date = row.get("fix available date", "")
+                csv_data_record.vuln_fix_version = row.get("fix version", "")
+                csv_data_record.public_exploit = row.get("public exploit", "")
+                csv_data_record.k8s_cluster_name = row.get("kubernetes cluster name", "")
+                csv_data_record.k8s_namespace_name = row.get("kubernetes namespace name", "")
+                csv_data_record.k8s_workload_type = row.get("kubernetes workload type", "")
+                csv_data_record.k8s_workload_name = row.get("kubernetes workload name", "")
+                csv_data_record.k8s_container_name = row.get("kubernetes container name", "")
+                csv_data_record.image_id = row.get("image id", "")
+                csv_data_record.k8s_pod_count = ""  # Not present in 2025 format
+                csv_data_record.package_suggested_fix = ""  # Not present in 2025 format
+                csv_data_record.in_use = row.get("package in use", "").lower() == "true"
+                csv_data_record.risk_accepted = row.get("risk accepted", "").lower() == "true"
+                csv_data_record.registry_name = ""  # Not present in 2025 format
+                csv_data_record.registry_image_repository = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_name = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_account_id = ""  # Not present in 2025 format
+                csv_data_record.cloud_provider_region = ""  # Not present in 2025 format
+                csv_data_record.registry_vendor = ""  # Not present in 2025 format
+
+            arr_csv_data.append(csv_data_record)
+
+        return arr_csv_data

@@ -1,7 +1,7 @@
 ---
 title: "Files"
 description: "Report uploaded to DefectDojo as files"
-weight: 2
+weight: 3
 chapter: true
 sidebar:
   collapsed: true

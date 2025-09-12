@@ -1,0 +1,94 @@
+{
+ "matches": [],
+ "source": {
+  "type": "image",
+  "target": {
+   "userInput": "busybox",
+   "imageID": "sha256:6d3e4188a38af91b0c1577b9e88c53368926b2fe0e1fb985d6e8a70040520c4d",
+   "manifestDigest": "sha256:ec873b4546f40d80c4486dafb5340c8782ad30bf7b4f9014e6370318cdaa0930",
+   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+   "tags": [
+    "busybox:latest"
+   ],
+   "imageSize": 4277894,
+   "layers": [
+    {
+     "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     "digest": "sha256:65014c70e84b6817fac42bb201ec5c1ea460a8da246cac0e481f5c9a9491eac0",
+     "size": 4277894
+    }
+   ],
+   "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjo0NTksImRpZ2VzdCI6InNoYTI1Njo2ZDNlNDE4OGEzOGFmOTFiMGMxNTc3YjllODhjNTMzNjg5MjZiMmZlMGUxZmI5ODVkNmU4YTcwMDQwNTIwYzRkIn0sImxheWVycyI6W3sibWVkaWFUeXBlIjoiYXBwbGljYXRpb24vdm5kLmRvY2tlci5pbWFnZS5yb290ZnMuZGlmZi50YXIuZ3ppcCIsInNpemUiOjQ1MTU4NDAsImRpZ2VzdCI6InNoYTI1Njo2NTAxNGM3MGU4NGI2ODE3ZmFjNDJiYjIwMWVjNWMxZWE0NjBhOGRhMjQ2Y2FjMGU0ODFmNWM5YTk0OTFlYWMwIn1dfQ==",
+   "config": "ewoJImNvbmZpZyI6IHsKCQkiQ21kIjogWwoJCQkic2giCgkJXSwKCQkiRW52IjogWwoJCQkiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iCgkJXQoJfSwKCSJjcmVhdGVkIjogIjIwMjQtMDktMjZUMjE6MzE6NDJaIiwKCSJoaXN0b3J5IjogWwoJCXsKCQkJImNyZWF0ZWQiOiAiMjAyNC0wOS0yNlQyMTozMTo0MloiLAoJCQkiY3JlYXRlZF9ieSI6ICJCdXN5Qm94IDEuMzcuMCAoZ2xpYmMpLCBEZWJpYW4gMTIiCgkJfQoJXSwKCSJyb290ZnMiOiB7CgkJInR5cGUiOiAibGF5ZXJzIiwKCQkiZGlmZl9pZHMiOiBbCgkJCSJzaGEyNTY6NjUwMTRjNzBlODRiNjgxN2ZhYzQyYmIyMDFlYzVjMWVhNDYwYThkYTI0NmNhYzBlNDgxZjVjOWE5NDkxZWFjMCIKCQldCgl9LAoJImFyY2hpdGVjdHVyZSI6ICJhbWQ2NCIsCgkib3MiOiAibGludXgiCn0K",
+   "repoDigests": [
+    "busybox@sha256:f85340bf132ae937d2c2a763b8335c9bab35d6e8293f70f606b9c6178d84f42b"
+   ],
+   "architecture": "amd64",
+   "os": "linux"
+  }
+ },
+ "distro": {
+  "name": "busybox",
+  "version": "1.37.0",
+  "idLike": [
+   "busybox"
+  ]
+ },
+ "descriptor": {
+  "name": "xeol",
+  "version": "[not provided]",
+  "configuration": {
+   "output": [
+    "json"
+   ],
+   "file": "",
+   "distro": "",
+   "check-for-app-update": true,
+   "platform": "",
+   "search": {
+    "scope": "squashed",
+    "unindexed-archives": false,
+    "indexed-archives": true
+   },
+   "db": {
+    "cache-dir": "/home/ub/.cache/xeol/db",
+    "update-url": "https://data.xeol.io/xeol/databases/listing.json",
+    "ca-cert": "",
+    "auto-update": true,
+    "validate-by-hash-on-start": false,
+    "validate-age": true,
+    "max-allowed-built-age": 7776000000000000
+   },
+   "lookahead": "1y",
+   "fail-on-eol-found": false,
+   "api-key": "",
+   "project-name": "",
+   "image-path": "Dockerfile",
+   "commit-hash": "",
+   "match": {
+    "Packages": {
+     "using-purls": true
+    },
+    "Distro": {
+     "using-cpes": true
+    }
+   },
+   "registry": {
+    "insecure-skip-tls-verify": false,
+    "insecure-use-http": false,
+    "auth": null,
+    "ca-cert": ""
+   },
+   "name": "",
+   "default-image-pull-source": "",
+   "show-vuln-count": false
+  },
+  "db": {
+   "built": "2025-07-23T00:00:45.408675Z",
+   "schemaVersion": 1,
+   "location": "/home/ub/.cache/xeol/db/1",
+   "checksum": "sha256:55c592c6f9d35d2b5c5e040a5f0950e0ec6002959ad99c54c984b9802309919c",
+   "error": null
+  }
+ }
+}

@@ -26,6 +26,7 @@ class TestParsers(DojoTestCase):
             if doc_name not in {
                 "checkmarx_osa",  # it is documented in 'checkmarx'
                 "wizcli_common_parsers",  # common class for other wizcli parsers
+                "sysdig_common",  # common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="docs"):
                     doc_file = Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / category / f"{doc_name}.md"
@@ -49,8 +50,9 @@ class TestParsers(DojoTestCase):
                                         f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
 
-            if parser_dir.name not in {  # noqa: FURB171
+            if parser_dir.name not in {
                 "wizcli_common_parsers",  # common class for other wizcli parsers
+                "sysdig_common",  # common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = Path(basedir) / "unittests" / "tools" / f"test_{parser_dir.name}_parser.py"
@@ -62,6 +64,7 @@ class TestParsers(DojoTestCase):
             if parser_dir.name not in {
                 "vcg",  # content of the sample report is string the directly in unittest
                 "wizcli_common_parsers",  # common class for other wizcli parsers
+                "sysdig_common",  # common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = Path(basedir) / "unittests" / "scans" / parser_dir.name
@@ -82,7 +85,7 @@ class TestParsers(DojoTestCase):
                             f"Unittest of importer '{importer_test_file}' is missing or using different name",
                         )
             for file in os.scandir(Path(basedir) / "dojo" / "tools" / parser_dir.name):
-                if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
+                if file.is_file() and file.name not in {"__pycache__", "__init__.py"}:
                     f_path = Path(basedir) / "dojo" / "tools" / parser_dir.name / file.name
                     read_true = False
                     with f_path.open(encoding="utf-8") as f:
@@ -93,7 +96,7 @@ class TestParsers(DojoTestCase):
                                     read_true = False
                                     i = 0
                                 elif i > 4:
-                                    self.assertTrue(expr=False, msg=f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
+                                    self.fail(f"In file '{f_path}' the test is failing because you don't have utf-8 after .read()")
                                     i = 0
                                     read_true = False
                                 else:

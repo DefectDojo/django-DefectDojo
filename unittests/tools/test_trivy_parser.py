@@ -12,13 +12,13 @@ def sample_path(file_name):
 class TestTrivyParser(DojoTestCase):
 
     def test_legacy_no_vuln(self):
-        with open(sample_path("legacy_no_vuln.json"), encoding="utf-8") as test_file:
+        with sample_path("legacy_no_vuln.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             trivy_findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(trivy_findings), 0)
 
     def test_legacy_many_vulns(self):
-        with open(sample_path("legacy_many_vulns.json"), encoding="utf-8") as test_file:
+        with sample_path("legacy_many_vulns.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 93)
@@ -31,13 +31,13 @@ class TestTrivyParser(DojoTestCase):
             self.assertEqual("1.8.2.2", finding.component_version)
 
     def test_scheme_2_no_vuln(self):
-        with open(sample_path("scheme_2_no_vuln.json"), encoding="utf-8") as test_file:
+        with sample_path("scheme_2_no_vuln.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             trivy_findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(trivy_findings), 0)
 
     def test_scheme_2_many_vulns(self):
-        with open(sample_path("scheme_2_many_vulns.json"), encoding="utf-8") as test_file:
+        with sample_path("scheme_2_many_vulns.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 5)
@@ -68,12 +68,13 @@ class TestTrivyParser(DojoTestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.references)
             self.assertEqual("1.15.5-r1", finding.mitigation)
-            self.assertIsNone(finding.cvssv3)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
+            self.assertTrue(finding.fix_available)
 
     def test_misconfigurations_and_secrets(self):
-        with open(sample_path("misconfigurations_and_secrets.json"), encoding="utf-8") as test_file:
+        with sample_path("misconfigurations_and_secrets.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 5)
@@ -105,7 +106,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
             self.assertEqual(["secret"], finding.tags)
 
     def test_kubernetes(self):
-        with open(sample_path("kubernetes.json"), encoding="utf-8") as test_file:
+        with sample_path("kubernetes.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 20)
@@ -176,7 +177,7 @@ Number  Content
             self.assertEqual("default / Deployment / redis-follower", finding.service)
 
     def test_license_scheme(self):
-        with open(sample_path("license_scheme.json"), encoding="utf-8") as test_file:
+        with sample_path("license_scheme.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 19)
@@ -192,16 +193,16 @@ Number  Content
             self.assertEqual(description, finding.description)
 
     def test_issue_9092(self):
-        with open(sample_path("issue_9092.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_9092.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
             finding = findings[0]
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(finding.file_path, "requirements.txt")
 
     def test_issue_9170(self):
-        with open(sample_path("issue_9170.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_9170.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 37)
@@ -210,7 +211,7 @@ Number  Content
             self.assertEqual("KSV116 - Runs with a root primary or supplementary GID", finding.title)
 
     def test_issue_9263(self):
-        with open(sample_path("issue_9263.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_9263.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
@@ -218,7 +219,7 @@ Number  Content
             self.assertEqual("High", finding.severity)
 
     def test_issue_9333(self):
-        with open(sample_path("issue_9333.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_9333.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 13)
@@ -226,7 +227,95 @@ Number  Content
             self.assertEqual("Low", finding.severity)
 
     def test_issue_10991(self):
-        with open(sample_path("issue_10991.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_10991.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 37)
+
+    def test_all_statuses(self):
+        with sample_path("all_statuses.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 8)
+
+            with self.subTest("unknown"):
+                finding = findings[0]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("not_affected"):
+                finding = findings[1]
+                self.assertEqual(False, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(True, finding.is_mitigated)
+
+            with self.subTest("affected"):
+                finding = findings[2]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("fixed"):
+                finding = findings[3]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("under_investigation"):
+                finding = findings[4]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("will_not_fix"):
+                finding = findings[5]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("fix_deferred"):
+                finding = findings[6]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+            with self.subTest("end_of_life"):
+                finding = findings[7]
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(False, finding.out_of_scope)
+                self.assertEqual(False, finding.is_mitigated)
+
+    def test_cvss_severity_sources(self):
+        """Testing with two findings - one where SeveritySource matches the CVSS entry, and one that does not"""
+        with sample_path("cvss_severity_source.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            with self.subTest("SeveritySource matches the CVSS entry"):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N", finding.cvssv3)
+                self.assertEqual(6.5, finding.cvssv3_score)
+
+            with self.subTest("SeveritySource does not match the CVSS entry"):
+                finding = findings[1]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
+                self.assertEqual(7.5, finding.cvssv3_score)

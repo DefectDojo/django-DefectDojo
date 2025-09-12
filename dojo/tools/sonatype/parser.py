@@ -2,6 +2,7 @@ import json
 
 from dojo.models import Finding
 from dojo.tools.sonatype.identifier import ComponentIdentifier
+from dojo.utils import parse_cvss_data
 
 
 class SonatypeParser:
@@ -63,7 +64,10 @@ def get_finding(security_issue, component, test):
         finding.cwe = security_issue["cwe"]
 
     if "cvssVector" in security_issue:
-        finding.cvssv3 = security_issue["cvssVector"]
+        cvss_data = parse_cvss_data(security_issue["cvssVector"])
+        if cvss_data:
+            finding.cvssv3 = cvss_data.get("cvssv3")
+            finding.cvssv3_score = cvss_data.get("cvssv3_score")
 
     if "pathnames" in component:
         finding.file_path = " ".join(component["pathnames"])[:1000]

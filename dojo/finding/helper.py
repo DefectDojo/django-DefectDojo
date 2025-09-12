@@ -1,5 +1,6 @@
 import logging
 import re
+from contextlib import suppress
 from time import strftime
 from django.conf import settings
 from django.db.models.query_utils import Q
@@ -13,6 +14,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.file_uploads.helper import delete_related_files
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -269,6 +271,9 @@ def get_group_by_group_name(finding, finding_group_by_option):
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
         group_name = finding.title
+    elif finding_group_by_option == "vuln_id_from_tool":
+        if finding.vuln_id_from_tool:
+            group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
     else:
         msg = f"Invalid group_by option {finding_group_by_option}"
         raise ValueError(msg)
@@ -365,6 +370,10 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
+    if not finding:
+        logger.warning("post_process_finding_save called with finding==None, skipping post processing")
+        return
+
     system_settings = System_Settings.objects.get()
 
     # STEP 1 run all status changing tasks sequentially to avoid race conditions
@@ -419,6 +428,7 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     instance.found_by.clear()
     delete_related_notes(instance)
+    delete_related_files(instance)
 
 
 def finding_delete(instance, **kwargs):
@@ -453,8 +463,10 @@ def finding_delete(instance, **kwargs):
 
 @receiver(post_delete, sender=Finding)
 def finding_post_delete(sender, instance, **kwargs):
-    logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    # calculate_grade(instance.test.engagement.product)
+    # Catch instances in async delete where a single object is deleted more than once
+    with suppress(Finding.DoesNotExist):
+        logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
+        # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):
@@ -643,9 +655,7 @@ def removeLoop(finding_id, counter):
 
 def add_endpoints(new_finding, form):
     added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
-    endpoint_ids = []
-    for endpoint in added_endpoints:
-        endpoint_ids.append(endpoint.id)
+    endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
     new_finding.endpoints.set(form.cleaned_data["endpoints"] | Endpoint.objects.filter(id__in=endpoint_ids))
 

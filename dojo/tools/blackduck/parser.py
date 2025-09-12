@@ -46,7 +46,7 @@ class BlackduckParser:
             references = self.format_reference(i)
 
             dupe_key = hashlib.md5(
-                f"{title} | {i.vuln_source}".encode(),
+                f"{title} | {i.vuln_source}".encode(), usedforsecurity=False,
             ).hexdigest()
 
             if dupe_key in dupes:

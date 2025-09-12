@@ -6,6 +6,7 @@ import datetime
 import logging
 import mimetypes
 import pytz
+import re
 from ast import literal_eval
 from itertools import chain
 
@@ -215,10 +216,13 @@ def percentage(fraction, value):
 
 @register.filter
 def format_epss(value):
+    if value is None:
+        return "N.A."
+
     try:
         return f"{value:.2%}"
     except (ValueError, TypeError):
-        return "N.A."
+        return "error"
 
 
 def asvs_calc_level(benchmark_score):
@@ -292,33 +296,33 @@ def finding_sla(finding):
     if not get_system_setting("enable_finding_sla"):
         return ""
 
-    sla_age, enforce_sla = finding.get_sla_period()
+    sla_period, enforce_sla = finding.get_sla_period()
     if not enforce_sla:
         return ""
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla_days_remaining()
+    days_remaining = finding.sla_days_remaining()
     if finding.mitigated:
         status = "blue"
-        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
-        if find_sla and find_sla < 0:
+        status_text = "Remediated within SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+        if days_remaining and days_remaining < 0:
             status = "orange"
-            find_sla = abs(find_sla)
+            days_remaining = abs(days_remaining)
             status_text = "Out of SLA: Remediated " + str(
-                find_sla) + " days past SLA for " + severity.lower() + " findings (" + str(sla_age) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
+                days_remaining) + " days past SLA for " + severity.lower() + " findings (" + str(sla_period) + " days since " + finding.get_sla_start_date().strftime("%b %d, %Y") + ")"
     else:
         status = "green"
-        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
-        if find_sla and find_sla < 0:
+        status_text = "Remediation for " + severity.lower() + " findings in " + str(sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+        if days_remaining and days_remaining < 0:
             status = "red"
             status_text = "Overdue: Remediation for " + severity.lower() + " findings in " + str(
-                sla_age) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
+                sla_period) + " days or less since " + finding.get_sla_start_date().strftime("%b %d, %Y")
 
-    if find_sla is not None:
+    if days_remaining is not None:
         title = (
             f'<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="{status_text}">'
-            f'<span class="label severity age-{status}">{find_sla}</span></a>'
+            f'<span class="label severity age-{status}">{days_remaining}</span></a>'
         )
 
     return mark_safe(title)
@@ -370,6 +374,9 @@ def action_log_entry(value, autoescape=None):
 
 @register.simple_tag(takes_context=True)
 def dojo_body_class(context):
+    if "request" not in context:
+        return ""
+
     request = context["request"]
     return request.COOKIES.get("dojo-sidebar", "min")
 
@@ -441,7 +448,7 @@ def colgroup(parser, token):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=True)
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols, strict=False)
             return ""
 
     try:
@@ -742,7 +749,7 @@ def get_severity_count(elem_id, table_type):
 
     if table_type == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table_type == "engagement" or table_type == "product":
+    elif table_type in {"engagement", "product"}:
         display_counts.append("Total: " + str(total) + " Active Findings")
 
     return ", ".join([str(item) for item in display_counts])
@@ -842,14 +849,22 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "ALINUX2-SA-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
+            if key == "ALINUX3-SA-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace(":", "").lower()) + ".xml"
             if key == "GLSA":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key == "SSA:":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
-            if key in {"AVD", "KHV", "C-"}:
+            if key == "SSA-" and not re.findall(r"SSA-\d{4}-", vulnerability_id):
+                return "https://cert-portal.siemens.com/productcert/html/" + str(vulnerability_id.lower()) + ".html"
+            if key in {"AVD", "KHV", "C-", "ELA-"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
+            if key == "JVNDB-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.split("-")[1]) + "/" + str(vulnerability_id) + ".html"
             if "&&" in settings.VULNERABILITY_URLS[key]:
                 # Process specific keys specially if need
                 if key in {"CAPEC", "CWE"}:
@@ -925,6 +940,26 @@ def jira_creation(obj):
 @register.filter
 def jira_change(obj):
     return jira_helper.get_jira_change(obj)
+
+
+@register.filter
+def jira_qualified_findings(finding_group):
+    return jira_helper.get_qualified_findings(finding_group)
+
+
+@register.filter
+def jira_non_qualified_findings(finding_group):
+    return jira_helper.get_non_qualified_findings(finding_group)
+
+
+@register.filter
+def jira_sla_deadline(obj):
+    return jira_helper.get_sla_deadline(obj)
+
+
+@register.filter
+def jira_severity(findings):
+    return jira_helper.get_severity(findings)
 
 
 @register.filter

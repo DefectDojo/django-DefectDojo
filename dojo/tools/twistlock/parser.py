@@ -5,6 +5,7 @@ import json
 import logging
 import textwrap
 import dateutil
+from datetime import datetime
 
 from dojo.models import Finding
 from django.conf import settings
@@ -78,6 +79,7 @@ class TwistlockCSVParser:
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
+            date=finding_date,
             severity=convert_severity(data_severity),
             description=self.get_description(
                 data_description,
@@ -116,10 +118,6 @@ class TwistlockCSVParser:
                 placeholder="...",
             ),
             component_version=data_package_version,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False,
-            mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             cvssv3_score=float(data_cvss) if data_cvss else None,
             impact=data_severity,
@@ -337,6 +335,21 @@ class TwistlockJsonParser:
                     + str(node["severity"]),
                 )
                 items[unique_key] = item
+
+            # Parse compliance findings
+            complianceTree = result.get("compliances", [])
+            for node in complianceTree:
+                item = get_compliance_item(node, test, image_metadata)
+                # Create unique key for compliance findings - prefer ID if available
+                if node.get("id"):
+                    unique_key = f"compliance_{node['id']}"
+                else:
+                    # Fallback to hash of title + description
+                    unique_key = "compliance_" + hashlib.md5(
+                        (node.get("title", "") + node.get("description", "")).encode("utf-8"),
+                        usedforsecurity=False,
+                    ).hexdigest()
+                items[unique_key] = item
         return list(items.values())
 
 
@@ -381,11 +394,11 @@ def get_item(vulnerability, test, packageTree):
 
     # create the finding object
     finding = Finding(
-        title=vulnerability["id"]
+        title=vulnerability.get("id", "Unknown Vulnerability")
         + ": "
-        + vulnerability["packageName"]
+        + vulnerability.get("packageName", "Unknown Package")
         + " - "
-        + vulnerability["packageVersion"],
+        + str(vulnerability.get("packageVersion", "")),
         test=test,
         severity=severity,
         description=description,
@@ -416,6 +429,61 @@ def get_item(vulnerability, test, packageTree):
     ]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
+
+    return finding
+
+
+def get_compliance_item(compliance, test, image_metadata=""):
+    """Create a Finding object for compliance issues"""
+    severity = (
+        convert_severity(compliance["severity"])
+        if "severity" in compliance
+        else "Info"
+    )
+
+    title = compliance.get("title", "Unknown Compliance Issue")
+    description = compliance.get("description", "No description specified")
+    compliance_id = compliance.get("id", "")
+    category = compliance.get("category", "")
+    layer_time = compliance.get("layerTime", "")
+
+    # Build comprehensive description
+    desc_parts = [f"**Compliance Issue:** {title}\n\n"]
+
+    if compliance_id:
+        desc_parts.append(f"**Compliance ID:** {compliance_id}\n\n")
+
+    if category:
+        desc_parts.append(f"**Category:** {category}\n\n")
+
+    desc_parts.append(f"**Description:** {description}\n\n")
+
+    # Build impact field combining severity and image metadata
+    impact_parts = [severity]
+    if image_metadata:
+        impact_parts.append(image_metadata)
+    if layer_time:
+        desc_parts.append(f"Layer Time: {layer_time}")
+    impact_text = "\n".join(impact_parts)
+
+    # create the finding object for compliance
+    finding = Finding(
+        title=f"Compliance: {title}",
+        test=test,
+        severity=severity,
+        description="".join(desc_parts),
+        mitigation="Review and address the compliance issue as described in the description.",
+        severity_justification=f"Compliance severity: {severity}",
+        impact=impact_text,
+        vuln_id_from_tool=str(compliance_id) if compliance_id else None,
+    )
+    finding.description = finding.description.strip()
+
+    # Add compliance-specific tags
+    tags = ["compliance"]
+    if category:
+        tags.append(category.lower())
+    finding.unsaved_tags = tags
 
     return finding
 

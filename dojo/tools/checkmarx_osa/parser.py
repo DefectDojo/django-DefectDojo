@@ -82,9 +82,7 @@ class CheckmarxOsaParser:
                 else None,
                 active=status != "NOT_EXPLOITABLE",
                 false_p=status == "NOT_EXPLOITABLE",
-                verified=status != "TO_VERIFY"
-                and status != "NOT_EXPLOITABLE"
-                and status != "PROPOSED_NOT_EXPLOITABLE",
+                verified=status not in {"TO_VERIFY", "NOT_EXPLOITABLE", "PROPOSED_NOT_EXPLOITABLE"},
                 test=test,
             )
             if vulnerability_id != "NC":

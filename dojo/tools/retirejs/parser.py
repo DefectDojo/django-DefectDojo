@@ -47,7 +47,7 @@ class RetireJsParser:
                         unique_key = hashlib.md5(
                             (
                                 item.title + item.references + encrypted_file
-                            ).encode(),
+                            ).encode(), usedforsecurity=False,
                         ).hexdigest()
                         items[unique_key] = item
         return list(items.values())

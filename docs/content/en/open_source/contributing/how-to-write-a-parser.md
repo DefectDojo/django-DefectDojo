@@ -37,7 +37,8 @@ $ docker compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`doc/content/en/integrations/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
+|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained
+
 
 ## Factory contract
 
@@ -50,12 +51,13 @@ Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded
 3. The name of this class **MUST** be the Python module name without underscores and with `Parser` suffix.
    - ex: `dojo.tools.my_tool.parser.MyToolParser`
 4. This class **MUST** have an empty constructor or no constructor
-5. This class **MUST** implement 3 methods:
+5. This class **MUST** implement 4 methods:
    1. `def get_scan_types(self)` This function return a list of all the *scan_type* supported by your parser. This identifiers are used internally. Your parser can support more than one *scan_type*. For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc...)
    2. `def get_label_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (short label)
    3. `def get_description_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (long description)
    4. `def get_findings(self, file, test)` This function return a list of findings
 6. If your parser have more than 1 scan_type (for detailled mode) you **MUST** implement `def set_mode(self, mode)` method
+7. The parser instance is re-used over all imports performed for this scan_type, so do not store any data at class level
 
 Example:
 
@@ -144,7 +146,7 @@ Very bad example:
 Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
 
 #### defusedXML in favour of lxml
-As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library.
 
 ### Not all attributes are mandatory
 
@@ -164,42 +166,52 @@ Good example:
        finding.cwe = data["mykey"]
 ```
 
-### Do not parse CVSS by hand (vector, score or severity)
+### Parsing of CVSS vectors
 
-Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
-For parser, we rely on module `cvss`.
+Data can have `CVSS` vectors or scores. Defect Dojo use the `cvss` module provided by RedHat Security.
+There's also a helper method to validate the vector and extract the base score and severity from it.
 
-It's easy to use and will make the parser aligned with the rest of the code.
+```python
+    from dojo.utils import parse_cvss_data
+
+    cvss_vector = <get CVSS3 or CVSS4 vector from the report>
+    cvss_data = parse_cvss_data(cvss_vector)
+    if cvss_data:
+        finding.severity = cvss_data["severity"]
+        finding.cvssv3 = cvss_data["cvssv3"]
+        finding.cvssv4 = cvss_data["cvssv4"]
+        # we don't set any score fields as those will be overwritten by Defect Dojo
+```
+Not all values have to be used as scan reports usually provide their own value for `severity`.
+And sometimes also for `cvss_score`. Defect Dojo will not overwrite any `cvss3_score` or `cvss4_score`.
+If no score is set, Defect Dojo will use the `cvss` library to calculate the score.
+The response also has the detected major version of the CVSS vector in `cvss_data["major_version"]`.
+
+
+If you need more manual processing, you can parse the `CVSS` vector directly.
 
 Example of use:
 
 ```python
-from cvss.cvss3 import CVSS3
-import cvss.parser
-vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
-    print(vectors[0].severities())  # this is the 3 severities
+    import cvss.parser
+    from cvss import CVSS2, CVSS3, CVSS4
 
-    cvssv3 = vectors[0].clean_vector()
-    severity = vectors[0].severities()[0]
-    vectors[0].compute_base_score()
-    cvssv3_score = vectors[0].scores()[0]
-    print(severity)
-    print(cvssv3_score)
+    # TEMPORARY: Use Defect Dojo implementation of `parse_cvss_from_text` white waiting for https://github.com/RedHatProductSecurity/cvss/pull/75 to be released
+    vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
+        if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+            print(vectors[0].severities())  # this is the 3 severities
+
+            cvssv3 = vectors[0].clean_vector()
+            severity = vectors[0].severities()[0]
+            vectors[0].compute_base_score()
+            cvssv3_score = vectors[0].scores()[0]
+            finding.severity = severity
+            finding.cvssv3_score = cvssv3_score
 ```
 
-Good example:
+Do not do something like this:
 
-```python
-vectors = cvss.parser.parse_cvss_from_text(item['cvss_vect'])
-if len(vectors) > 0 and type(vectors[0]) == CVSS3:
-    finding.cvss = vectors[0].clean_vector()
-    finding.severity = vectors[0].severities()[0]  # if your tool does generate severity
 ```
-
-Bad example (DIY):
-
-```python
     def get_severity(self, cvss, cvss_version="2.0"):
         cvss = float(cvss)
         cvss_version = float(cvss_version[:1])
@@ -229,9 +241,10 @@ Bad example (DIY):
 
 ## Deduplication algorithm
 
-By default a new parser uses the 'legacy' deduplication algorithm documented at https://documentation.defectdojo.com/usage/features/#deduplication-algorithms
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://docs.defectdojo.com/en/open_source/archived_docs/usage/features/#deduplication
 
-Please use a pre-defined deduplication algorithm where applicable.
+Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are uqniue for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
+The values must be coming from the report directly and must not be something that is calculated by the parser internally.
 
 ## Unit tests
 
@@ -277,12 +290,7 @@ This ensures the file is closed at the end of the with statement, even if an exc
 
 ### Test database
 
-To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker compose logs, login as root and issue the following commands:
-
-{{< highlight mysql >}}
-MYSQL> grant all privileges on test_defectdojo.* to defectdojo@'%';
-MYSQL> flush privileges;
-{{< /highlight >}}
+Django uses a separate test database for running unit tests called `test_defectdojo`. It's automatically created and initialized with a basic set of test data.
 
 ### Run your tests
 
@@ -310,7 +318,7 @@ or like this:
 $ ./run-unittest.sh --test-case unittests.tools.test_aqua_parser.TestAquaParser
 {{< /highlight >}}
 
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
+If you want to run all parser unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test -p "test_*_parser.py" -v2'`
 
 ### Endpoint validation
 
@@ -357,7 +365,7 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please add a new .md file in [`docs/content/en/integrations/parsers`] with the details of your new parser.  Include the following content headings:
+Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] with the details of your new parser.  Include the following content headings:
 
 * Acceptable File Type(s) - please include how to generate this type of file from the related tool, as some tools have multiple methods or require specific commands.
 * An example unit test block, if applicable.
@@ -365,4 +373,3 @@ Please add a new .md file in [`docs/content/en/integrations/parsers`] with the d
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
 Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md)
-

@@ -8,8 +8,59 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.utils import parse_cvss_data
 
 _logger = logging.getLogger(__name__)
+
+
+def get_fields(self) -> list[str]:
+    """
+    Return the list of fields used in the Qualys CSV Parser.
+
+    Fields:
+    - title: Set to gid and vulnerability name from Qualys Scanner
+    - mitigation: Set to solution from Qualys Scanner
+    - description: Custom description made from: description, category, QID, port, result evidence, first found, last found, and times found.
+    - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+    - impact: Set to impact from Qualys Scanner.
+    - date: Set to datetime from Qualys Scanner.
+    - vuln_id_from_tool: Set to gid from Qualys Scanner.
+    - mitigated: Set to the mitigation_date from Qualys Scanner
+    - is_mitigated: Set to true or false based on pressence of "mitigated" in Qualys Scanner output.
+    - active: Set to true if status equals active, re-opened, or new; else set to false.
+    - cvssv3: Set to CVSS_vector if not null.
+    - verified: Set to true.
+    """
+    return [
+        "title",
+        "mitigation",
+        "description",
+        "severity",
+        "impact",
+        "date",
+        "vuln_id_from_tool",
+        "mitigated",
+        "is_mitigated",
+        "active",
+        "cvssv3",
+        "verified",
+    ]
+
+
+def get_dedupe_fields(self) -> list[str]:
+    """
+    Return the list of fields used for deduplication in the Qualys CSV Parser.
+
+    Fields:
+    - title: Set to gid and vulnerability name from Qualys Scanner
+    - severity: Set to severity from Qualys Scanner translated into DefectDojo formant.
+
+    #NOTE: endpoints is not provided by parser
+    """
+    return [
+        "title",
+        "severity",
+    ]
 
 
 def parse_csv(csv_file) -> [Finding]:
@@ -38,12 +89,7 @@ def get_report_findings(csv_reader) -> [dict]:
         csv_reader:
 
     """
-    report_findings = []
-
-    for row in csv_reader:
-        if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE"):
-            report_findings.append(row)
-    return report_findings
+    return [row for row in csv_reader if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE")]
 
 
 def _extract_cvss_vectors(cvss_base, cvss_temporal):
@@ -182,8 +228,13 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                 impact=report_finding["Impact"],
                 date=date,
                 vuln_id_from_tool=report_finding["QID"],
-                cvssv3=cvssv3,
             )
+            # Make sure vector is valid
+            cvss_data = parse_cvss_data(cvssv3)
+            if cvss_data:
+                finding.cvssv3 = cvss_data.get("cvssv3")
+                finding.cvssv3_score = cvss_data.get("cvssv3_score")
+
             # Qualys reports regression findings as active, but with a Date Last
             # Fixed.
             if report_finding["Date Last Fixed"]:

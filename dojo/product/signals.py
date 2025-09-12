@@ -1,3 +1,5 @@
+import contextlib
+
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -23,18 +25,19 @@ def product_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Product)
 def product_post_delete(sender, instance, **kwargs):
-    if settings.ENABLE_AUDITLOG:
-        le = LogEntry.objects.get(
-            action=LogEntry.Action.DELETE,
-            content_type=ContentType.objects.get(app_label="dojo", model="product"),
-            object_id=instance.id,
-        )
-        description = _('The product "%(name)s" was deleted by %(user)s') % {
-                            "name": instance.name, "user": le.actor}
-    else:
+    # Catch instances in async delete where a single object is deleted more than once
+    with contextlib.suppress(sender.DoesNotExist):
         description = _('The product "%(name)s" was deleted') % {"name": instance.name}
-    create_notification(event="product_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                        title=_("Deletion of %(name)s") % {"name": instance.name},
-                        description=description,
-                        url=reverse("product"),
-                        icon="exclamation-triangle")
+        if settings.ENABLE_AUDITLOG:
+            if le := LogEntry.objects.filter(
+                action=LogEntry.Action.DELETE,
+                content_type=ContentType.objects.get(app_label="dojo", model="product"),
+                object_id=instance.id,
+            ).order_by("-id").first():
+                description = _('The product "%(name)s" was deleted by %(user)s') % {
+                                "name": instance.name, "user": le.actor}
+        create_notification(event="product_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                            title=_("Deletion of %(name)s") % {"name": instance.name},
+                            description=description,
+                            url=reverse("product"),
+                            icon="exclamation-triangle")

@@ -17,8 +17,8 @@ class TestQualysParser(DojoTestCase):
         self.parse_file_with_no_vuln_has_no_findings()
 
     def parse_file_with_no_vuln_has_no_findings(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "empty.xml", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "empty.xml").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -34,8 +34,8 @@ class TestQualysParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2019, 7, 31).date(), finding.date)
 
     def parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -81,8 +81,8 @@ class TestQualysParser(DojoTestCase):
         self.parse_file_with_no_vuln_has_no_findings_csv()
 
     def parse_file_with_no_vuln_has_no_findings_csv(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "empty.csv", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "empty.csv").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -98,8 +98,8 @@ class TestQualysParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2021, 5, 25).date(), finding.date)
 
     def parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.csv", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.csv").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -135,16 +135,16 @@ class TestQualysParser(DojoTestCase):
             return findings[0]
 
     def test_parse_file_monthly_pci_issue6932(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "monthly_pci_issue6932.csv", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "monthly_pci_issue6932.csv").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
     def test_parse_file_with_cvss_values_and_scores(self):
-        with open(
-            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8",
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -179,7 +179,7 @@ class TestQualysParser(DojoTestCase):
             )
 
     def test_get_severity_legacy(self):
-        with open(get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8") as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
             counts = {}
@@ -197,7 +197,7 @@ class TestQualysParser(DojoTestCase):
 
     @override_settings(USE_QUALYS_LEGACY_SEVERITY_PARSING=False)
     def test_get_severity(self):
-        with open(get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8") as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
             counts = {}

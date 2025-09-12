@@ -1,0 +1,21 @@
+name: "Release-Nightly: Build & Push DEV"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+  schedule:
+    # every day at 5:00 UTC
+    # in this case inputs are all null/empty, hence the default values are used below
+    - cron: "* 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  nightly-build-dev:
+    uses: ./.github/workflows/release-x-nightly.yml
+    if: github.repository == 'DefectDojo/django-DefectDojo' # Build (and try to push) fails in forks
+    with:
+        branch-to-build: 'dev'
+        tag-to-apply: 'nightly-dev'
+    secrets: inherit
