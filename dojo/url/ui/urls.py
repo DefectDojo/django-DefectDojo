@@ -2,21 +2,22 @@
 from django.urls import re_path
 
 from dojo.url.ui.views import (
-    all_endpoints,
+    add_endpoint_to_finding,
+    add_endpoint_to_product,
     all_endpoint_hosts,
-    vulnerable_endpoints,
-    vulnerable_endpoint_hosts,
+    all_endpoints,
+    delete_endpoint,
+    edit_endpoint,
+    endpoint_bulk_update_all,
+    finding_location_bulk_update,
+    import_endpoint_meta,
+    manage_meta_data,
+    migrate_endpoints_view,
     view_endpoint,
     view_endpoint_host,
-    edit_endpoint,
-    add_endpoint_to_product,
-    add_endpoint_to_product,
-    add_endpoint_to_finding,
-    delete_endpoint,
-    manage_meta_data,
-    import_endpoint_meta,
+    vulnerable_endpoint_hosts,
+    vulnerable_endpoints,
 )
-from dojo.endpoint import views
 
 urlpatterns = [
     re_path(r"^endpoint$", all_endpoints, name="endpoint"),
@@ -34,14 +35,12 @@ urlpatterns = [
     re_path(r"^endpoint/(?P<location_id>\d+)/add_meta_data$", manage_meta_data, name="add_endpoint_meta_data"),
     re_path(r"^endpoint/(?P<location_id>\d+)/edit_meta_data$", manage_meta_data, name="edit_endpoint_meta_data"),
     re_path(r"^endpoint/(?P<product_id>\d+)/import_endpoint_meta$", import_endpoint_meta, name="import_endpoint_meta"),
-
-
-    re_path(r"^endpoint/bulk$", views.endpoint_bulk_update_all, name="endpoints_bulk_all"),
+    re_path(r"^endpoint/bulk$", endpoint_bulk_update_all, name="endpoints_bulk_all"),
     re_path(
-        r"^product/(?P<pid>\d+)/endpoint/bulk_product$",
-        views.endpoint_bulk_update_all,
+        r"^product/(?P<product_id>\d+)/endpoint/bulk_product$",
+        endpoint_bulk_update_all,
         name="endpoints_bulk_update_all_product",
     ),
-    re_path(r"^endpoint/(?P<fid>\d+)/bulk_status$", views.endpoint_status_bulk_update, name="endpoints_status_bulk"),
-    re_path(r"^endpoint/migrate$", views.migrate_endpoints_view, name="endpoint_migrate"),
+    re_path(r"^endpoint/(?P<finding_id>\d+)/bulk_status$", finding_location_bulk_update, name="endpoints_status_bulk"),
+    re_path(r"^endpoint/migrate$", migrate_endpoints_view, name="endpoint_migrate"),
 ]

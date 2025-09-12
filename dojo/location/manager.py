@@ -1,4 +1,3 @@
-from typing import Self
 
 from django.db.models import Case, CharField, Count, F, Q, Value, When
 from django.db.models.functions import Coalesce
@@ -8,6 +7,7 @@ from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
 
 class LocationQueryset(BaseQuerySet):
+
     """Location Queryset to add chainable queries."""
 
     def active_by_products(self):
@@ -61,12 +61,14 @@ class LocationQueryset(BaseQuerySet):
 
 
 class LocationManager(BaseManager):
+
     """Location manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationQueryset
 
 
 class LocationProductReferenceQueryset(BaseQuerySet):
+
     """LocationProductReference Queryset to add chainable queries."""
 
     def with_location_annotations(self):
@@ -81,12 +83,14 @@ class LocationProductReferenceQueryset(BaseQuerySet):
 
 
 class LocationProductReferenceManager(BaseManager):
+
     """LocationProductReference manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationProductReferenceQueryset
 
 
 class LocationFindingReferenceQueryset(BaseQuerySet):
+
     """LocationFindingReference Queryset to add chainable queries."""
 
     def with_location_annotations(self):
@@ -101,6 +105,7 @@ class LocationFindingReferenceQueryset(BaseQuerySet):
 
 
 class LocationFindingReferenceManager(BaseManager):
+
     """LocationFindingReference manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationFindingReferenceQueryset

@@ -8,6 +8,7 @@ from functools import partial
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
@@ -51,12 +52,11 @@ from dojo.forms import (
     AppAnalysisForm,
     Delete_Product_GroupForm,
     Delete_Product_MemberForm,
-    DojoMetaFormSet,
     DeleteAppAnalysisForm,
     DeleteEngagementPresetsForm,
     DeleteProduct_API_Scan_ConfigurationForm,
     DeleteProductForm,
-    DojoMetaDataForm,
+    DojoMetaFormSet,
     Edit_Product_Group_Form,
     Edit_Product_MemberForm,
     EngagementPresetsForm,
@@ -148,6 +148,11 @@ def product(request):
             build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
         ),
     )
+    if settings.ENABLE_V3_FEATURE_SET:
+        prods.annotate(
+            endpoint_host_count=Count("locations__location__url__host", distinct=True),
+            endpoint_count=Count("locations", distinct=True),
+        )
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
@@ -1251,7 +1256,6 @@ def new_eng_for_app_cicd(request, pid):
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def manage_meta_data(request, pid):
     product = Product.objects.get(id=pid)
@@ -1264,7 +1268,7 @@ def manage_meta_data(request, pid):
         if formset.is_valid():
             formset.save()
             messages.add_message(
-                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success"
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 
@@ -1275,6 +1279,7 @@ def manage_meta_data(request, pid):
         "dojo/edit_metadata.html",
         {"formset": formset, "product_tab": product_tab},
     )
+
 
 class AdHocFindingView(View):
     def get_product(self, product_id: int):

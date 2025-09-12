@@ -21,7 +21,13 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
-from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm, DojoMetaFormSet
+from dojo.forms import (
+    AddEndpointForm,
+    DeleteEndpointForm,
+    DojoMetaFormSet,
+    EditEndpointForm,
+    ImportEndpointMetaForm,
+)
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
 from dojo.utils import (
@@ -304,7 +310,7 @@ def manage_meta_data(request, eid):
         if formset.is_valid():
             formset.save()
             messages.add_message(
-                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success"
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
 
@@ -315,6 +321,7 @@ def manage_meta_data(request, eid):
         "dojo/edit_metadata.html",
         {"formset": formset, "product_tab": product_tab},
     )
+
 
 # bulk mitigate and delete are combined, so we can't have the nice user_is_authorized decorator
 def endpoint_bulk_update_all(request, pid=None):
