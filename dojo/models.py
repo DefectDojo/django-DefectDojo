@@ -3444,7 +3444,7 @@ class Finding(models.Model):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
 
     def set_hash_code(self, dedupe_option):
-        from dojo.utils import get_custom_method
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
             hash_method(self, dedupe_option)
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
