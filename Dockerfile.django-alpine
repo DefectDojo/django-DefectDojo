@@ -141,3 +141,13 @@ COPY \
   /
 COPY docker/unit-tests.sh ./
 COPY unittests/ ./unittests/
+
+USER root
+RUN \
+  --mount=src=requirements-dev.txt,target=/tmp/requirements-dev.txt \
+  pip3 install \
+	--no-cache-dir \
+  -r /tmp/requirements-dev.txt
+
+ARG uid=1001
+USER ${uid}
