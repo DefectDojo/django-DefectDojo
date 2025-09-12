@@ -1238,17 +1238,16 @@
                     }, 100);
                 });
 
-                <!-- TODO not working with django tagulous which uses select2, break styling -->
-                <!-- $('#id_tags').select2({ -->
-                    <!-- 'placeholder': 'Select or add some tags...', -->
-                    <!-- 'no_results_text': "Tag not found, press TAB key to add.", -->
-                <!-- }); -->
-
-                $('select').not('#notification-scope').addClass('selectpicker');
-                $('.selectpicker').attr('data-live-search', 'true');
-                $('.selectpicker').attr('data-container', 'body');
-                $('.selectpicker').css('width', '70%');
-                $('.selectpicker').selectpicker('render');
+                // Simple cleanup after page load
+                setTimeout(function() {
+                    $('input[data-tagulous]').each(function() {
+                        var $input = $(this);
+                        var $containers = $input.siblings('.select2-container');
+                        if ($containers.length > 1) {
+                            $containers.not(':first').remove();
+                        }
+                    });
+                }, 100);
 
             });
         </script>
