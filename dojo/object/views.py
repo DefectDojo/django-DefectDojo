@@ -9,14 +9,18 @@ from django.urls import reverse
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.forms import DeleteObjectsSettingsForm, ObjectSettingsForm
+from dojo.labels import get_labels
 from dojo.models import Objects_Product, Product
 from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)
 
+labels = get_labels()
+
 
 @user_is_authorized(Product, Permissions.Product_Tracking_Files_Add, "pid")
 def new_object(request, pid):
+    page_name = labels.ASSET_TRACKED_FILES_ADD_LABEL
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
         tform = ObjectSettingsForm(request.POST)
@@ -27,15 +31,17 @@ def new_object(request, pid):
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Added Tracked File to a Product",
+                                 labels.ASSET_TRACKED_FILES_ADD_SUCCESS_MESSAGE,
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
         return None
     tform = ObjectSettingsForm()
-    product_tab = Product_Tab(prod, title="Add Tracked Files to a Product", tab="settings")
+    product_tab = Product_Tab(prod, title=str(page_name), tab="settings")
 
     return render(request, "dojo/new_object.html",
-                  {"tform": tform,
+                  {
+                   "name": page_name,
+                   "tform": tform,
                    "product_tab": product_tab,
                    "pid": prod.id})
 
@@ -45,7 +51,7 @@ def view_objects(request, pid):
     product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by("path", "folder", "artifact")
 
-    product_tab = Product_Tab(product, title="Tracked Product Files, Paths and Artifacts", tab="settings")
+    product_tab = Product_Tab(product, title="Tracked Files, Paths and Artifacts", tab="settings")
     return render(request,
                   "dojo/view_objects.html",
                   {
@@ -60,7 +66,8 @@ def edit_object(request, pid, ttid):
     object_prod = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
-        msg = f"Product {pid} does not fit to product of Object {object_prod.product.id}"
+        msg = labels.ASSET_TRACKED_FILES_ID_MISMATCH_ERROR_MESSAGE % {"asset_id": pid,
+                                                                      "object_asset_id": object_prod.product.id}
         raise BadRequest(msg)
 
     if request.method == "POST":
@@ -70,7 +77,7 @@ def edit_object(request, pid, ttid):
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Tool Product Configuration Successfully Updated.",
+                                 "Tracked File Successfully Updated.",
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
     else:
@@ -90,7 +97,8 @@ def delete_object(request, pid, ttid):
     object_prod = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
-        msg = f"Product {pid} does not fit to product of Object {object_prod.product.id}"
+        msg = labels.ASSET_TRACKED_FILES_ID_MISMATCH_ERROR_MESSAGE % {"asset_id": pid,
+                                                                      "object_asset_id": object_prod.product.id}
         raise BadRequest(msg)
 
     if request.method == "POST":
@@ -98,12 +106,12 @@ def delete_object(request, pid, ttid):
         object_prod.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             "Tracked Product Files Deleted.",
+                             "Tracked Files Deleted.",
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
     tform = DeleteObjectsSettingsForm(instance=object_prod)
 
-    product_tab = Product_Tab(product, title="Delete Product Tool Configuration", tab="settings")
+    product_tab = Product_Tab(product, title="Delete Tracked File", tab="settings")
     return render(request,
                   "dojo/delete_object.html",
                   {

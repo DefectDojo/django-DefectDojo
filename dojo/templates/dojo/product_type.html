@@ -11,12 +11,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        {% trans "Product Type List" %}
+                        {{ labels.ORG_LABEL }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "Product_Type_Add"|has_global_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true" aria-label="Product type options">
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_LABEL }} options">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
@@ -24,7 +24,8 @@
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_product_type' %}">
-                                            <i class="fa-solid fa-plus"></i> {% trans "Add Product Type" %}
+                                            <i class="fa-solid fa-plus"></i>
+                                            {{ labels.ORG_CREATE_LABEL }}
                                         </a>
                                     </li>
                             </ul>
@@ -49,11 +50,11 @@
                         <tr>
                             <th></th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                            <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
-                            <th>{% trans "Product count" %}</th>
+                            <th>{% dojo_sort request labels.ORG_LABEL 'name' 'asc' %}</th>
+                            <th>{{ labels.ASSET_COUNT_LABEL }}</th>
                             <th>{% trans "Active (Verified) findings" %}</th>
-                            <th class="text-center">{% trans "Critical product" %}</th>
-                            <th class="text-center">{% trans "Key product" %}</th>
+                            <th class="text-center">{{ labels.ORG_CRITICAL_PRODUCT_LABEL }}</th>
+                            <th class="text-center">{{ labels.ORG_KEY_PRODUCT_LABEL }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -62,7 +63,7 @@
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
-                                            <a href="#" aria-label="Product type options menu" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                            <a href="#" aria-label="Organization options menu" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuProductType">
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'view_product_type' pt.id %}" role="menuitem">
@@ -77,7 +78,9 @@
                                                 {% if pt|has_object_permission:"Product_Type_Add_Product" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}" role="menuitem">
-                                                    <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}</a>
+                                                        <i class="fa-solid fa-plus"></i>
+                                                        {{ labels.ASSET_CREATE_LABEL }}
+                                                    </a>
                                                 </li>
                                                 {% endif %}
                                                 <li role="separator" class="divider"></li>
@@ -87,7 +90,9 @@
                                                 </li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'product_type_report' pt.id %}" role="menuitem">
-                                                    <i class="fa-solid fa-file-lines"></i> {% trans "Product Type Report" %}</a>
+                                                        <i class="fa-solid fa-file-lines"></i>
+                                                        {{ labels.ORG_REPORT_LABEL }}
+                                                    </a>
                                                 </li>
                                                 {% if pt|has_object_permission:"Product_Type_Delete" %}
                                                 <li role="separator" class="divider"></li>
@@ -129,7 +134,7 @@
                     {% include "dojo/paging_snippet.html" with page=pts page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">{% trans "No product types found." %}</p>
+                <p class="text-center">{{ labels.ORG_NONE_FOUND_MESSAGE }}</p>
             {% endif %}
         </div>
     </div>

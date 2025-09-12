@@ -31,7 +31,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product groups added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset groups added successfully."))
         # Query the site to determine if the member has been added
         self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
         self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Reader")
@@ -46,7 +46,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product group updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset group updated successfully."))
         # Query the site to determine if the member has been edited
         self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
         self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Owner")
@@ -59,7 +59,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product group deleted successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset group deleted successfully."))
         # Query the site to determine if the member has been deleted
         self.assertFalse(driver.find_elements(By.NAME, "member_product"))
 
@@ -88,7 +88,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product groups added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset groups added successfully."))
         # Query the site to determine if the member has been added
         self.assertEqual(driver.find_elements(By.NAME, "group_name")[0].text, "Group Name")
         self.assertEqual(driver.find_elements(By.NAME, "group_role")[0].text, "Reader")
@@ -110,7 +110,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product group updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset group updated successfully."))
         # Query the site to determine if the member has been edited
         self.assertEqual(driver.find_elements(By.NAME, "group_name")[0].text, "Group Name")
         self.assertEqual(driver.find_elements(By.NAME, "group_role")[0].text, "Maintainer")
@@ -130,7 +130,7 @@ class ProductGroupTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
-        self.assertTrue(self.is_success_message_present(text="Product group deleted successfully."))
+        self.assertTrue(self.is_success_message_present(text="Asset group deleted successfully."))
         # Query the site to determine if the member has been deleted
         self.assertFalse(driver.find_elements(By.NAME, "group_name"))
 

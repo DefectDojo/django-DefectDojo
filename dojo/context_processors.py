@@ -3,6 +3,8 @@ import contextlib
 # import the settings file
 from django.conf import settings
 
+from dojo.labels import get_labels
+
 
 def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
@@ -77,3 +79,9 @@ def session_expiry_notification(request):
         return {
             "session_notify_time": notify_time,
         }
+
+
+def labels(request):
+    return {
+        "labels": get_labels(),
+    }

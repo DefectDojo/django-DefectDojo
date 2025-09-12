@@ -41,7 +41,7 @@
                         <th class="nowrap">{% dojo_sort request 'EPSS Percentile' 'epss_percentile' %}</th>
                         <th class="nowrap">Status</th>
                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                        <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name' %}</th>
+                        <th class="nowrap">{% dojo_sort request asset_label 'test__engagement__product__name' %}</th>
                     </tr>
                     </thead>
                     <tbody>

@@ -83,6 +83,7 @@ from dojo.jira_link.queries import (
     get_authorized_jira_issues,
     get_authorized_jira_projects,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     Announcement,
     Answer,
@@ -175,6 +176,9 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 def schema_with_prefetch() -> dict:
@@ -2747,7 +2751,7 @@ def report_generate(request, obj, options):
     if type(obj).__name__ == "Product_Type":
         product_type = obj
 
-        report_name = "Product Type Report: " + str(product_type)
+        report_name = labels.ORG_REPORT_WITH_NAME_TITLE % {"name": str(product_type)}
 
         findings = report_finding_filter_class(
             request.GET,
@@ -2776,7 +2780,7 @@ def report_generate(request, obj, options):
     elif type(obj).__name__ == "Product":
         product = obj
 
-        report_name = "Product Report: " + str(product)
+        report_name = labels.ASSET_REPORT_WITH_NAME_TITLE % {"name": str(product)}
 
         findings = report_finding_filter_class(
             request.GET,

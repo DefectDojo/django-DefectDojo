@@ -484,7 +484,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
 # 'axes.backends.AxesModelBackend',
 # ]
 
-ROOT_URLCONF = "dojo.urls"
+ROOT_URLCONF = "dojo.v3_migration.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
@@ -860,6 +860,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
@@ -901,7 +902,9 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "dojo.v3_migration.middleware.V3MigrationMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSytemSettingsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

@@ -169,7 +169,7 @@ class JIRAConfigProductTest(DojoTestCase):
     @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
     def test_add_product_with_jira_project_invalid_jira_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
-        product = self.add_product_with_jira_project(expected_delta_jira_project_db=0, expect_redirect_to="/product/%i/edit")
+        product = self.add_product_with_jira_project(expected_delta_jira_project_db=0, expect_redirect_to="/asset/%i/edit")
         # product is still saved, even with invalid jira project key
         self.assertIsNotNone(product)
         self.assertEqual(jira_mock.call_count, 1)

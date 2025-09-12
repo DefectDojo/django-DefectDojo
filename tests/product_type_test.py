@@ -12,17 +12,17 @@ class ProductTypeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_create_product_type(self):
-        logger.debug("\n\nDebug Print Log: testing 'create product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'create organization' \n")
         driver = self.driver
-        driver.get(self.base_url + "product/type")
+        driver.get(self.base_url + "organization")
         driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.LINK_TEXT, "Add Product Type").click()
+        driver.find_element(By.LINK_TEXT, "Add Organization").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Product test type")
         driver.find_element(By.ID, "id_critical_product").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text="Product type added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization added successfully."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -35,7 +35,7 @@ class ProductTypeTest(BaseTestCase):
         self.goto_product_type_overview(driver)
 
         driver.find_element(By.ID, "dropdownMenuProductType").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Add Product").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Add Asset").click()
         # Fill in th product name
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("QA Test PT")
@@ -46,41 +46,41 @@ class ProductTypeTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text="Product added successfully"))
+        self.assertTrue(self.is_success_message_present(text="Asset added successfully"))
         self.assertFalse(self.is_error_message_present())
 
     def test_view_product_type(self):
-        logger.debug("\n\nDebug Print Log: testing 'view product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'view organization' \n")
         driver = self.driver
-        driver.get(self.base_url + "product/type")
+        driver.get(self.base_url + "organization")
         driver.find_element(By.ID, "dropdownMenuProductType").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "View").click()
         product_type_text = driver.find_element(By.ID, "id_heading").text
 
-        self.assertEqual("Product Type Product test type", product_type_text)
+        self.assertEqual("Organization Product test type", product_type_text)
 
     def test_edit_product_type(self):
-        logger.debug("\n\nDebug Print Log: testing 'edit product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'edit organization' \n")
         driver = self.driver
-        driver.get(self.base_url + "product/type")
+        driver.get(self.base_url + "organization")
         driver.find_element(By.ID, "dropdownMenuProductType").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Edit").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited product test type")
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text="Product type updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Organization updated successfully."))
 
     def test_delete_product_type(self):
-        logger.debug("\n\nDebug Print Log: testing 'delete product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'delete organization' \n")
         driver = self.driver
-        driver.get(self.base_url + "product/type")
+        driver.get(self.base_url + "organization")
         # TODO: this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
         driver.find_element(By.ID, "dropdownMenuProductType").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Delete").click()
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-danger").click()
 
-        self.assertTrue(self.is_success_message_present(text="Product Type and relationships removed."))
+        self.assertTrue(self.is_success_message_present(text="Organization and relationships removed."))
 
 
 def suite():
