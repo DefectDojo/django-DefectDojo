@@ -2,6 +2,7 @@ import datetime
 from unittest import skip
 
 from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -221,7 +222,6 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
             target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
             test_type_id=1,
         )
-        from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
         self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
         self.endpoint = Endpoint.objects.create(protocol="http", host="foo.bar.eps").pk

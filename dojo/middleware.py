@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
 
+from dojo.models import Dojo_User
 from dojo.product_announcements import LongRunningRequestProductAnnouncement
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,6 @@ class LoginRequiredMiddleware:
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
             path = request.path_info.lstrip("/")
-            from dojo.models import Dojo_User
             if Dojo_User.force_password_reset(request.user) and path != "change_password":
                 return HttpResponseRedirect(reverse("change_password"))
 
@@ -77,8 +77,7 @@ class DojoSytemSettingsMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
-        # avoid circular imports
-        from dojo.models import System_Settings
+        from dojo.models import System_Settings  # noqa: PLC0415 circular import
         models.signals.post_save.connect(self.cleanup, sender=System_Settings)
 
     def __call__(self, request):
@@ -107,7 +106,7 @@ class DojoSytemSettingsMiddleware:
     def load(cls):
         # cleanup any existing settings first to ensure fresh state
         cls.cleanup()
-        from dojo.models import System_Settings
+        from dojo.models import System_Settings  # noqa: PLC0415 circular import
         system_settings = System_Settings.objects.get(no_cache=True)
         cls._thread_local.system_settings = system_settings
         return system_settings
@@ -120,7 +119,7 @@ class System_Settings_Manager(models.Manager):
         try:
             from_db = super().get(*args, **kwargs)
         except:
-            from dojo.models import System_Settings
+            from dojo.models import System_Settings  # noqa: PLC0415 circular import
             # this mimics the existing code that was in filters.py and utils.py.
             # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
             # logger.debug('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)
