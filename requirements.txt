@@ -94,7 +94,7 @@ opentelemetry-instrumentation-wsgi==0.57b0
 opentelemetry-proto==1.36.0
 opentelemetry-semantic-conventions==0.57b0
 opentelemetry-instrumentation==0.57b0
-django-redis==5.4.0
+django-redis==6.0.0
 pandas==2.1.3
 pyarrow==21.0.0
 # Pinning Dependencies
