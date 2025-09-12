@@ -101,6 +101,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.test.queries import get_authorized_tests
+from dojo.tools import tool_issue_updater
 from dojo.utils import (
     FileIterWrapper,
     Product_Tab,
@@ -2918,8 +2919,6 @@ def finding_bulk_update_all(request, pid=None):
             error_counts = defaultdict(lambda: 0)
             success_count = 0
             for finding in finds:
-                from dojo.tools import tool_issue_updater
-
                 tool_issue_updater.async_tool_issue_update(finding)
 
                 # not sure yet if we want to support bulk unlink, so leave as commented out for now

@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
+from dojo.finding.helper import fix_loop_duplicates
+from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade, sla_compute_and_notify
@@ -182,13 +184,11 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
 
 @app.task
 def jira_status_reconciliation_task(*args, **kwargs):
-    from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
     return jira_status_reconciliation(*args, **kwargs)
 
 
 @app.task
 def fix_loop_duplicates_task(*args, **kwargs):
-    from dojo.finding.helper import fix_loop_duplicates
     return fix_loop_duplicates()
 
 
