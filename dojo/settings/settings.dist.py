@@ -15,6 +15,7 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
+import pghistory
 from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
@@ -1994,7 +1995,10 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         # 'cachalot.panels.CachalotPanel',
     ]
 
-# Add audit middleware conditionally
+#########################################################################################################
+# Auditlog configuration                                                                                #
+#########################################################################################################
+
 if ENABLE_AUDITLOG:
     middleware_list = list(MIDDLEWARE)
     crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
@@ -2007,3 +2011,11 @@ if ENABLE_AUDITLOG:
         middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
 
     MIDDLEWARE = middleware_list
+
+PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
+PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+
+#########################################################################################################
+# Endof Auditlog configuration                                                                          #
+#########################################################################################################

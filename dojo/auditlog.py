@@ -12,6 +12,7 @@ import pghistory
 from auditlog.registry import auditlog
 from django.conf import settings
 from django.core.management import call_command
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -128,14 +129,28 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
         exclude=["password"],
+        # add some indexes manually so we don't have to define a customer phistory Event model with overridden fields.
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Dojo_User)
 
-    # Track other models
     pghistory.track(
         pghistory.InsertEvent(),
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Endpoint)
 
     pghistory.track(
@@ -143,6 +158,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Engagement)
 
     pghistory.track(
@@ -150,6 +172,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Finding)
 
     pghistory.track(
@@ -157,6 +186,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Finding_Group)
 
     pghistory.track(
@@ -164,6 +200,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Product_Type)
 
     pghistory.track(
@@ -171,6 +214,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Product)
 
     pghistory.track(
@@ -178,6 +228,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Test)
 
     pghistory.track(
@@ -185,6 +242,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Risk_Acceptance)
 
     pghistory.track(
@@ -192,6 +256,13 @@ def register_django_pghistory_models():
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Finding_Template)
 
     pghistory.track(
@@ -200,6 +271,13 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
         exclude=["password"],
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Cred_User)
 
     pghistory.track(
@@ -208,6 +286,13 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_import"),
         exclude=["header_name", "header_value"],
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
     )(Notification_Webhooks)
 
     # Only log during actual application startup, not during shell commands
