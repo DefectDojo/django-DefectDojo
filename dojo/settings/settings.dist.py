@@ -1970,5 +1970,5 @@ PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
 PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
 
 #########################################################################################################
-# Endof Auditlog configuration                                                                          #
+# End of Auditlog configuration                                                                          #
 #########################################################################################################
