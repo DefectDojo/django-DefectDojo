@@ -1556,10 +1556,24 @@ def get_setting(setting):
 
 
 @dojo_model_to_id
+@dojo_async_task(signature=True)
+@app.task
+@dojo_model_from_id(model=Product)
+def calculate_grade_signature(product, *args, **kwargs):
+    """Returns a signature for calculating product grade that can be used in chords or groups."""
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+@dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
 def calculate_grade(product, *args, **kwargs):
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+def calculate_grade_internal(product, *args, **kwargs):
+    """Internal function for calculating product grade."""
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning("ignoring calculate product for product None!")

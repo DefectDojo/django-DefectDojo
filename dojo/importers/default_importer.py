@@ -5,8 +5,8 @@ from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -155,6 +155,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
+        from celery import chord
+
+        from dojo.finding import helper as finding_helper
+        from dojo.utils import calculate_grade, calculate_grade_signature
+        post_processing_task_signatures = []
+
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -206,6 +212,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.save_no_options()
 
             finding = unsaved_finding
+            finding = self.process_cve(unsaved_finding)
+            # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
+            finding.set_hash_code(True)
+
+            # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
+            finding.save_no_options()
+
             # Determine how the finding should be grouped
             self.process_finding_groups(
                 finding,
@@ -225,9 +238,19 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing
 
-            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            # Collect finding for parallel processing - we'll process them all at once after the loop
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
+            # Always create signatures - we'll execute them sync or async later
+            post_processing_task_signatures.append(
+                finding_helper.post_process_finding_save_signature(
+                    finding,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=False,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira,
+                ),
+            )
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -242,6 +265,21 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+
+        # Calculate product grade after all findings are processed
+        product = self.test.engagement.product
+        if post_processing_task_signatures:
+            # If we have async tasks, use chord to wait for them before calculating grade
+            if we_want_async(async_user=self.user):
+                # Run the chord asynchronously and after completing post processing tasks, calculate grade ONCE
+                chord(post_processing_task_signatures)(calculate_grade_signature(product))
+            else:
+                # Execute each task synchronously
+                for task_sig in post_processing_task_signatures:
+                    task_sig()
+
+        # Calculate grade, which can be prelimary calculated before the async tasks have finished
+        calculate_grade(product)
 
         sync = kwargs.get("sync", True)
         if not sync:
