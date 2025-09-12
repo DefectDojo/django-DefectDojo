@@ -13,6 +13,8 @@ from django.utils import timezone
 
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
+from dojo.finding.helper import fix_loop_duplicates
+from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade, sla_compute_and_notify
@@ -235,7 +237,7 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
         pk_list: List of primary keys for instances of this model type. it's advised to chunk the list into batches of 1000 or less.
 
     """
-    from watson.search import SearchContextManager, default_search_engine
+    from watson.search import SearchContextManager, default_search_engine  # noqa: PLC0415 circular import
 
     logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
 

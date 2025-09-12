@@ -224,7 +224,7 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
     def _close_search_context(self, request):
         """Override watson's close behavior to trigger async updates when above threshold."""
         if search_context_manager.is_active():
-            from django.conf import settings
+            from django.conf import settings  # noqa: PLC0415 circular import
 
             # Extract tasks and check if we should trigger async update
             captured_tasks = self._extract_tasks_for_async()
@@ -271,9 +271,9 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             return
 
         # Import here to avoid circular import
-        from django.conf import settings
+        from django.conf import settings  # noqa: PLC0415 circular import
 
-        from dojo.tasks import update_watson_search_index_for_model
+        from dojo.tasks import update_watson_search_index_for_model  # noqa: PLC0415 circular import
 
         # Create tasks per model type, chunking large lists into configurable batches
         for model_name, pk_list in model_groups.items():
