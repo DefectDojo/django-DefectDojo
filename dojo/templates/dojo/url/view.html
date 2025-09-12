@@ -20,9 +20,7 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                        <span title="{{ host }}">
-                            Host: {{ host|url_shortener }}
-                        </span>
+                        <span title="{{ host }}">Host: {{ host|url_shortener }}</span>
                     {% else %}
                         <span title="{{ location }}">
                             Endpoint: {{ location|url_shortener }}
@@ -204,7 +202,7 @@
                 {% endif %}
             {% else %}
                 <div class="panel-heading">
-                    <h4>Host </h4>
+                    <h4>Host</h4>
                 </div>
                 <div id="vuln_endpoints" class="panel-body table-responsive">
                     <a data-toggle="tooltip"
@@ -215,15 +213,15 @@
                 </div>
             {% endif %}
         </div>
-        {% if not host_view and location.tags.all %}
+        {% if not host_view and location.tags.exists %}
             <div class="panel panel-default tags">
                 <div class="panel-heading">
                     <h4>Tags</h4>
                 </div>
-                <div class="tags panel-body">{% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}</div>
+                <div class="tags panel-body">{% include "dojo/snippets/tags.html" with tags=location.tags.all %}</div>
             </div>
         {% endif %}
-        {% comment %} {% if not host_view and endpoint_metadata %}
+        {% if not host_view and metadata %}
             <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
@@ -231,17 +229,21 @@
                             <h4>
                                 Additional Information
                                 <div class="btn-group pull-right">
-                                    <a title="Edit Information" class="btn btn-sm btn-primary" href="{% url 'edit_endpoint_meta_data' location.id %}">
+                                    <a title="Edit Information"
+                                       class="btn btn-sm btn-primary"
+                                       href="{% url 'edit_endpoint_meta_data' location.id %}">
                                         <span class="fa-solid fa-pen-to-square"></span>
                                     </a>
-                                    <a title="Add Information" class="btn btn-sm btn-primary" href="{% url 'add_endpoint_meta_data' location.id %}">
+                                    <a title="Add Information"
+                                       class="btn btn-sm btn-primary"
+                                       href="{% url 'add_endpoint_meta_data' location.id %}">
                                         <span class="fa-solid fa-plus"></span>
                                     </a>
                                 </div>
                             </h4>
                         </div>
                         <div class="panel-body">
-                            {% for key, value in endpoint_metadata.items %}
+                            {% for key, value in metadata.items %}
                                 <div class="col-md-2 centered">
                                     <b>{{ key }}</b>
                                     <br />
@@ -254,10 +256,10 @@
                     </div>
                 </div>
             </div>
-        {% endif %} {% endcomment %}
+        {% endif %}
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Open Findings ({{ active_findings_count }} / {{ all_findings_count}} Active Findings)</h4>
+                <h4>Open Findings ({{ active_findings_count }} / {{ all_findings_count }} Active Findings)</h4>
             </div>
             {% if findings %}
                 <div class="clearfix pagination-in-panel">

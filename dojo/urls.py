@@ -89,7 +89,7 @@ from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.location.api.urls import add_locations_urls
 from dojo.url.api.urls import add_url_urls
-from dojo.url.views.urls import urlpatterns as url_patterns
+from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
@@ -222,7 +222,6 @@ ur += announcement_urls
 if settings.ENABLE_V3_FEATURE_SET:
     # Endpoints -> Location
     ur += url_patterns
-    ur += endpoint_urls
 else:
     ur += endpoint_urls
 
