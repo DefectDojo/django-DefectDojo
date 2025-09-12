@@ -1643,7 +1643,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ("Security", "Security"),
 )
 
-if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
+if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
     for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 

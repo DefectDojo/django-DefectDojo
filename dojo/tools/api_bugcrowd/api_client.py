@@ -52,7 +52,7 @@ class BugcrowdAPI:
             params_encoded = urlencode(params_default)
 
         next_page = f"{self.bugcrowd_api_url}/submissions?{params_encoded}"
-        while next_page != "":
+        while next_page:
             response = self.session.get(
                 url=next_page,
                 timeout=settings.REQUESTS_TIMEOUT,

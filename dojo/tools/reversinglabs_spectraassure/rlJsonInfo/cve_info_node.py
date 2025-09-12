@@ -62,7 +62,7 @@ class CveInfoNode:
         if self.component_type == "component":
             purl = self.component_file_purl
 
-        if purl != "":
+        if purl:
             self.title = " ".join(
                 [
                     f"{cve}",
@@ -113,7 +113,7 @@ class CveInfoNode:
             return self.description
 
         purl = self.component_file_purl
-        if purl == "":
+        if not purl:
             purl = self.component_file_name + "@" + self.component_file_version
 
         self.description = " ".join(

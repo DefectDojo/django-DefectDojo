@@ -106,7 +106,7 @@ class BurpSuiteDASTParser:
             ))
         else:
             for elem in container.iterchildren():
-                if elem.text is not None and elem.text.strip() != "":
+                if elem.text is not None and elem.text.strip():
                     stripped_text = elem.text.strip()
                     if elem.tag == "a":
                         value = "[" + stripped_text + "](" + elem.attrib["href"] + ")" + "\n"

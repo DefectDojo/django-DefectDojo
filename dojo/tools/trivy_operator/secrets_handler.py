@@ -22,7 +22,7 @@ class TrivySecretsHandler:
         resource_name = labels.get("trivy-operator.resource.name", "")
         container_name = labels.get("trivy-operator.container.name", "")
         service = f"{resource_namespace}/{resource_kind}/{resource_name}"
-        if container_name != "":
+        if container_name:
             service = f"{service}/{container_name}"
         for secret in secrets:
             secret_title = secret.get("title")
@@ -55,7 +55,7 @@ class TrivySecretsHandler:
                 service=service,
                 fix_available=True,
             )
-            if resource_namespace != "":
+            if resource_namespace:
                 finding.tags = resource_namespace
             findings.append(finding)
         return findings

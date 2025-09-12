@@ -132,7 +132,7 @@ class TenableXMLParser:
 
                     # Get and clean the protocol
                     protocol = str(item.attrib.get("svc_name", ""))
-                    if protocol != "":
+                    if protocol:
                         protocol = re.sub(r"[^A-Za-z0-9\-\+]+", "", protocol)
                         if protocol == "www":
                             protocol = "http"

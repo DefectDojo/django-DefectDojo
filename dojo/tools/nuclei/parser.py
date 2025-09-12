@@ -30,7 +30,7 @@ class NucleiParser:
         if isinstance(filecontent, bytes):
             filecontent = filecontent.decode("utf-8")
         data = []
-        if filecontent == "" or len(filecontent) == 0:
+        if not filecontent or len(filecontent) == 0:
             return []
         if filecontent[0] == "[":
             content = json.loads(filecontent)
@@ -38,7 +38,7 @@ class NucleiParser:
                 data.append(template)
         elif filecontent[0] == "{":
             file = filecontent.split("\n")
-            data.extend(json.loads(line) for line in file if line != "")
+            data.extend(json.loads(line) for line in file if line)
         dupes = {}
         for item in data:
             logger.debug("Item %s.", str(item))

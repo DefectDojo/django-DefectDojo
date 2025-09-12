@@ -91,7 +91,7 @@ class TenableCSVParser:
         return "Info"
 
     def _format_cve(self, val):
-        if val is None or val == "":
+        if val is None or not val:
             return None
         cve_match = re.findall(
             r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE,
@@ -101,7 +101,7 @@ class TenableCSVParser:
         return None
 
     def _format_cpe(self, val):
-        if val is None or val == "":
+        if val is None or not val:
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
         return cpe_match or None
@@ -131,11 +131,11 @@ class TenableCSVParser:
         for row in reader:
             # title: Could come from "Name" or "Plugin Name"
             title = row.get("Name", row.get("Plugin Name", row.get("asset.name")))
-            if title is None or title == "":
+            if title is None or not title:
                 continue
             # severity: Could come from "Severity" or "Risk"
             raw_severity = row.get("Risk", row.get("severity", ""))
-            if raw_severity == "":
+            if not raw_severity:
                 raw_severity = row.get("Severity", "Info")
             # this could actually be a int, so try to convert
             # and swallow the exception if it's a string a move on
@@ -211,14 +211,14 @@ class TenableCSVParser:
 
                 # manage CVSS vector (only v3.x for now)
                 cvss_vector = row.get("CVSS V3 Vector", "")
-                if cvss_vector != "":
+                if cvss_vector:
                     find.cvssv3 = CVSS3(
                         "CVSS:3.0/" + str(cvss_vector),
                     ).clean_vector(output_prefix=True)
 
                 # Add CVSS score if present
                 cvssv3 = row.get("CVSSv3", row.get("definition.cvss3.base_score", ""))
-                if cvssv3 != "":
+                if cvssv3:
                     find.cvssv3_score = cvssv3
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
@@ -251,7 +251,7 @@ class TenableCSVParser:
             # Determine if there is more details to be included in the
             # description
             plugin_output = str(row.get("Plugin Output", row.get("output", "")))
-            if plugin_output != "":
+            if plugin_output:
                 find.description += f"\n\n{plugin_output}"
             # Process any CVEs
             detected_cve = self._format_cve(str(row.get("CVE", row.get("definition.cve", ""))))
@@ -262,13 +262,13 @@ class TenableCSVParser:
                     find.unsaved_vulnerability_ids.append(detected_cve)
             # Endpoint related fields
             host = row.get("Host", row.get("asset.host_name", ""))
-            if host == "":
+            if not host:
                 host = row.get("DNS Name", "")
-            if host == "":
+            if not host:
                 host = row.get("IP Address", "localhost")
 
             protocol = row.get("Protocol", row.get("protocol", ""))
-            protocol = protocol.lower() if protocol != "" else None
+            protocol = protocol.lower() if protocol else None
             port = str(row.get("Port", row.get("asset.port", "")))
             if isinstance(port, str) and port in {"", "0"}:
                 port = None

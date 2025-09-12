@@ -42,7 +42,7 @@ class AWSProwlerV4Parser:
             resource_arn = deserialized.get("resources", [{}])[0].get("uid", "")
             resource_id = deserialized.get("resources", [{}])[0].get("name", "")
             unique_id_from_tool = deserialized.get("finding_info", {}).get("uid", "")
-            if not resource_arn or resource_arn == "":
+            if not resource_arn:
                 component_name = str(provider) + "-" + str(account_id) + "-" + str(region) + "-" + str(resource_id)
             else:
                 component_name = resource_arn

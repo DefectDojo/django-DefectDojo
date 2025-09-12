@@ -65,8 +65,8 @@ class ContrastParser:
                 finding.unsaved_endpoints.append(endpoint)
 
             if (
-                row.get("Request Qs", "") != ""
-                and row.get("Request Body", "") != ""
+                row.get("Request Qs", "")
+                and row.get("Request Body", "")
             ):
                 finding.unsaved_req_resp = []
                 finding.unsaved_req_resp.append(

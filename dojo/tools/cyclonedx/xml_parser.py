@@ -135,7 +135,7 @@ class CycloneDXXMLParser:
             "v:recommendations/v:recommendation", namespaces=ns,
         ):
             mitigation += f"{recommend.text}\n"
-        if mitigation != "":
+        if mitigation:
             finding.mitigation = mitigation
         # manage CVSS
         for rating in vulnerability.findall(
