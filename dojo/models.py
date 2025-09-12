@@ -2784,7 +2784,7 @@ class Finding(models.Model):
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template
+            from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
             # No need to use the returned variable since `self` Is updated in memory
             apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
@@ -3275,7 +3275,7 @@ class Finding(models.Model):
         return ""
 
     def get_sast_source_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
@@ -3286,7 +3286,7 @@ class Finding(models.Model):
         return create_bleached_link(link, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
