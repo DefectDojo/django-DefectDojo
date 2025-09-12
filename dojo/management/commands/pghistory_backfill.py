@@ -55,14 +55,6 @@ class Command(BaseCommand):
             )
             return
 
-        try:
-            import pghistory
-        except ImportError:
-            self.stdout.write(
-                self.style.ERROR("django-pghistory is not installed"),
-            )
-            return
-
         # Models that are tracked by pghistory
         tracked_models = [
             "Dojo_User", "Endpoint", "Engagement", "Finding", "Finding_Group",
@@ -91,6 +83,7 @@ class Command(BaseCommand):
             )
 
         total_processed = 0
+        self.stdout.write(f"Starting backfill for {len(tracked_models)} model(s)...")
 
         for model_name in tracked_models:
             self.stdout.write(f"\nProcessing {model_name}...")
@@ -105,7 +98,7 @@ class Command(BaseCommand):
                     self.stdout.write(f"  No records found for {model_name}")
                     continue
 
-                self.stdout.write(f"  Found {total_count} records")
+                self.stdout.write(f"  Found {total_count:,} records")
 
                 # Get the corresponding Event model for bulk operations
                 event_table_name = f"{model_name}Event"
@@ -120,16 +113,42 @@ class Command(BaseCommand):
                     )
                     continue
 
+                # Get IDs of records that already have initial_import events
+                existing_initial_import_ids = set(
+                    EventModel.objects.filter(pgh_label="initial_import").values_list("pgh_obj_id", flat=True),
+                )
+
+                # Filter to only get records that don't have initial_import events
+                records_needing_backfill = Model.objects.exclude(id__in=existing_initial_import_ids)
+                backfill_count = records_needing_backfill.count()
+                existing_count = len(existing_initial_import_ids)
+
+                # Log the breakdown
+                self.stdout.write(f"  Records with initial_import events: {existing_count:,}")
+                self.stdout.write(f"  Records needing initial_import events: {backfill_count:,}")
+
+                if backfill_count == 0:
+                    self.stdout.write(
+                        self.style.SUCCESS(f"  ✓ All {total_count:,} records already have initial_import events"),
+                    )
+                    processed = total_count
+                    continue
+
+                if dry_run:
+                    self.stdout.write(f"  Would process {backfill_count:,} records in batches of {batch_size:,}...")
+                else:
+                    self.stdout.write(f"  Processing {backfill_count:,} records in batches of {batch_size:,}...")
+
                 # Process in batches using bulk_create
                 processed = 0
-                for start in range(0, total_count, batch_size):
-                    end = min(start + batch_size, total_count)
-                    batch = Model.objects.all()[start:end]
+                for start in range(0, backfill_count, batch_size):
+                    end = min(start + batch_size, backfill_count)
+                    filtered_batch = list(records_needing_backfill[start:end])
 
                     if not dry_run:
                         # Create events with preserved timestamps from original instances
                         event_records = []
-                        for instance in batch:
+                        for instance in filtered_batch:
                             try:
                                 # Create event record with all model fields
                                 event_data = {}
@@ -196,44 +215,19 @@ class Command(BaseCommand):
                                 logger.error(
                                     f"Failed to bulk create events for {model_name}: {e}",
                                 )
-                                # Fall back to individual creation but preserve timestamps
-                                self.stdout.write(
-                                    self.style.WARNING(
-                                        "  Bulk create failed, falling back to individual creation",
-                                    ),
-                                )
-                                for instance in batch:
-                                    try:
-                                        # Create individual event with preserved timestamp
-                                        event = pghistory.create_event(
-                                            instance,
-                                            label="initial_import",
-                                        )
-                                        # Update the timestamp after creation if possible
-                                        if hasattr(instance, "created") and instance.created:
-                                            EventModel.objects.filter(pgh_id=event.pgh_id).update(
-                                                pgh_created_at=instance.created,
-                                            )
-                                        elif hasattr(instance, "updated") and instance.updated:
-                                            EventModel.objects.filter(pgh_id=event.pgh_id).update(
-                                                pgh_created_at=instance.updated,
-                                            )
-                                    except Exception as e:
-                                        logger.error(
-                                            f"Failed to create event for {model_name} "
-                                            f"ID {instance.id}: {e}",
-                                        )
+                                # Re-raise the exception instead of falling back
+                                raise
 
-                    processed += len(batch)
+                    processed += len(filtered_batch)
                     self.stdout.write(
-                        f"  Processed {processed}/{total_count} records "
-                        f"({processed / total_count * 100:.1f}%)",
+                        f"  Processed {processed:,}/{backfill_count:,} records needing backfill "
+                        f"({processed / backfill_count * 100:.1f}%)",
                     )
 
                 total_processed += processed
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"  ✓ Completed {model_name}: {processed} records",
+                        f"  ✓ Completed {model_name}: {processed:,} records",
                     ),
                 )
 
@@ -246,12 +240,12 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"\nDRY RUN COMPLETE: Would have processed {total_processed} records",
+                    f"\nDRY RUN COMPLETE: Would have processed {total_processed:,} records",
                 ),
             )
         else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"\nBACKFILL COMPLETE: Processed {total_processed} records",
+                    f"\nBACKFILL COMPLETE: Processed {total_processed:,} records",
                 ),
             )
