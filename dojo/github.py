@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def reopen_external_issue_github(find, note, prod, eng):
 
-    from dojo.utils import get_system_setting
+    from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
 
@@ -47,7 +47,7 @@ def reopen_external_issue_github(find, note, prod, eng):
 
 def close_external_issue_github(find, note, prod, eng):
 
-    from dojo.utils import get_system_setting
+    from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
 
@@ -78,7 +78,7 @@ def close_external_issue_github(find, note, prod, eng):
 
 def update_external_issue_github(find, prod, eng):
 
-    from dojo.utils import get_system_setting
+    from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
 
@@ -106,7 +106,7 @@ def update_external_issue_github(find, prod, eng):
 
 def add_external_issue_github(find, prod, eng):
 
-    from dojo.utils import get_system_setting
+    from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
 

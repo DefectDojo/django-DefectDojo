@@ -55,8 +55,7 @@ dojo_async_task_counter = ThreadLocalTaskCounter()
 
 
 def we_want_async(*args, func=None, **kwargs):
-    from dojo.models import Dojo_User
-    from dojo.utils import get_current_user
+    from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
     sync = kwargs.get("sync", False)
     if sync:
@@ -83,7 +82,7 @@ def we_want_async(*args, func=None, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
-        from dojo.utils import get_current_user
+        from dojo.utils import get_current_user  # noqa: PLC0415 circular import
         user = get_current_user()
         kwargs["async_user"] = user
 

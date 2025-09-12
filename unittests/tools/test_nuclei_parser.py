@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from dateutil.tz import tzoffset
+from django.contrib.auth import get_user_model
 
 from dojo.models import Test, Test_Type
 from dojo.tools.nuclei.parser import NucleiParser
@@ -259,7 +260,6 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("turquoise-estrellita-69.tiiny.site", finding.unsaved_endpoints[0].host)
 
             # required to compute hash code, same as in test_endpoint_model - move to some test utils module?
-            from django.contrib.auth import get_user_model
             user, _ = get_user_model().objects.get_or_create(username="importer")
             product_type = self.create_product_type("prod_type")
             product = self.create_product("test_deduplicate_finding", prod_type=product_type)

@@ -3465,7 +3465,6 @@ class TestImportAPIFilter(DojoFilter):
 
 
 class LogEntryFilter(DojoFilter):
-    from auditlog.models import LogEntry
 
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
     actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
