@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    {{ block.super }}
+    <h3>Edit Metadata</h3>
+    <br />
+    <form class="form-horizontal" method="post">
+        {% csrf_token %}
+        {% for form in formset %}
+            <fieldset>
+                {% include "dojo/form_fields.html" with form=form %}
+            </fieldset>
+        {% endfor %}
+        <fieldset>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    {{ formset.management_form }}
+                    <button class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{% endblock content %}

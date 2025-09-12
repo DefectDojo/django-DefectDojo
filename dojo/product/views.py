@@ -51,6 +51,7 @@ from dojo.forms import (
     AppAnalysisForm,
     Delete_Product_GroupForm,
     Delete_Product_MemberForm,
+    DojoMetaFormSet,
     DeleteAppAnalysisForm,
     DeleteEngagementPresetsForm,
     DeleteProduct_API_Scan_ConfigurationForm,
@@ -1250,61 +1251,30 @@ def new_eng_for_app_cicd(request, pid):
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
+
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
-def add_meta_data(request, pid):
-    prod = Product.objects.get(id=pid)
+def manage_meta_data(request, pid):
+    product = Product.objects.get(id=pid)
+    meta_data_query = DojoMeta.objects.filter(product=product)
+    form_mapping = {"product": product}
+    formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+
     if request.method == "POST":
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(product=prod))
-        if form.is_valid():
-            form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("Metadata added successfully."),
-                                 extra_tags="alert-success")
-            if "add_another" in request.POST:
-                return HttpResponseRedirect(reverse("add_meta_data", args=(pid,)))
+        formset = DojoMetaFormSet(request.POST, queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+        if formset.is_valid():
+            formset.save()
+            messages.add_message(
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success"
+            )
             return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-    else:
-        form = DojoMetaDataForm()
 
-    product_tab = Product_Tab(prod, title=_("Add Metadata"), tab="settings")
-
-    return render(request, "dojo/add_product_meta_data.html",
-                  {"form": form,
-                   "product_tab": product_tab,
-                   "product": prod,
-                   })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
-def edit_meta_data(request, pid):
-    prod = Product.objects.get(id=pid)
-    if request.method == "POST":
-        for key, orig_value in request.POST.items():
-            if key.startswith("cfv_"):
-                cfv_id = int(key.split("_")[1])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                value = orig_value.strip()
-                if value:
-                    cfv.value = value
-                    cfv.save()
-            if key.startswith("delete_"):
-                cfv_id = int(key.split("_")[2])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                cfv.delete()
-
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             _("Metadata edited successfully."),
-                             extra_tags="alert-success")
-        return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-
-    product_tab = Product_Tab(prod, title=_("Edit Metadata"), tab="settings")
-    return render(request, "dojo/edit_product_meta_data.html",
-                  {"product": prod,
-                   "product_tab": product_tab,
-                   })
-
+    add_breadcrumb(parent=product, title="Manage Metadata", top_level=False, request=request)
+    product_tab = Product_Tab(product, "Edit Metadata", tab="products")
+    return render(
+        request,
+        "dojo/edit_metadata.html",
+        {"formset": formset, "product_tab": product_tab},
+    )
 
 class AdHocFindingView(View):
     def get_product(self, product_id: int):
