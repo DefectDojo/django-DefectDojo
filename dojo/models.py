@@ -1646,8 +1646,8 @@ class Engagement(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        from dojo.finding import helper
-        helper.prepare_duplicates_for_delete(engagement=self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
@@ -2737,7 +2737,7 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
@@ -2858,8 +2858,8 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d finding delete", self.id)
-        from dojo.finding import helper
-        helper.finding_delete(self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.finding_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
