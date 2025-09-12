@@ -12,7 +12,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true" aria-label="Endpoint actions">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>

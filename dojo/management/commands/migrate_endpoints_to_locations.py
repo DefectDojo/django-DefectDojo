@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from dojo.location.status import FindingLocationStatus
 from dojo.location.models import Location
-from dojo.models import Endpoint, Endpoint_Status, Finding
+from dojo.models import Endpoint, Endpoint_Status, DojoMeta
 from dojo.url.models import URL
 from dojo.url.validators import validate_host_or_ip
 
@@ -46,6 +46,13 @@ class Command(BaseCommand):
         # Add the endpoint tags to the location tags
         if endpoint.tags:
             [url.location.tags.add(tag) for tag in set(endpoint.tags.values_list("name", flat=True))]
+        # Add any metadata from the endpoint to the location
+        for meta in endpoint.endpoint_meta.all():
+            DojoMeta.objects.get_or_create(
+                name=meta.name,
+                value=meta.value,
+                location=url.location,
+            )
 
         return url.location
 

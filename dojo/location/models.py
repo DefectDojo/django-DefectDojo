@@ -224,7 +224,7 @@ class LocationFindingReference(BaseModel):
 
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
-        return f"{self.location} - {self.finding} ({self.status})"
+        return f"{self.location} - Finding: {self.finding} ({self.status})"
 
     class Meta:
         verbose_name = "Locations - FindingReference"
@@ -262,7 +262,7 @@ class LocationProductReference(BaseModel):
 
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
-        return f"{self.location} - {self.product} ({self.status})"
+        return f"{self.location} - Product: {self.product} ({self.status})"
 
     class Meta:
         verbose_name = "Locations - ProductReference"

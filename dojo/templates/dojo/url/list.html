@@ -32,7 +32,7 @@
                                     role="menu"
                                     aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% if product_tab %} {% url 'add_endpoint' product_tab.product.id %} {% else %} {% url 'add_product_endpoint' %} {% endif %}">
+                                        <a href="{% url 'add_endpoint_to_product' product_tab.product.id %}">
                                             <i class="fa-solid fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
