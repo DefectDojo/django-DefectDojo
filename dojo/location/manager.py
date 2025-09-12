@@ -28,7 +28,7 @@ class LocationQueryset(BaseQuerySet):
             findings__finding__id=finding_id,
         )
 
-    def status_and_total_counts(self):
+    def total_counts(self):
         return self.prefetch_related("findings", "products").annotate(
             # Products
             total_products=Count("products", distinct=True),
@@ -47,7 +47,7 @@ class LocationQueryset(BaseQuerySet):
         )
 
     def overall_status(self):
-        return self.status_and_total_counts().annotate(
+        return self.total_counts().annotate(
             # Overall status (active if any product is active)
             overall_status=Case(
                 When(

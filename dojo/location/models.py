@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self
 
+from auditlog.registry import auditlog
 from django.db import transaction
 from django.db.models import (
     CASCADE,
@@ -28,6 +29,7 @@ from dojo.location.manager import (
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Dojo_User, Finding, Product
+from dojo.settings import settings
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -200,6 +202,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         else:
             self.location.location_type = location_type
             self.location.location_value = location_value
+            self.location.save(update_fields=["location_type", "location_value"])
 
 
 class LocationFindingReference(BaseModel):
@@ -280,3 +283,7 @@ class LocationProductReference(BaseModel):
             Index(fields=["location"]),
             Index(fields=["product"]),
         ]
+
+
+if settings.ENABLE_AUDITLOG:
+    auditlog.register(Location)
