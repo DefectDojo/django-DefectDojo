@@ -4556,7 +4556,7 @@ class TextQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import TextQuestionForm
+        from .forms import TextQuestionForm  # noqa: PLC0415
         return TextQuestionForm
 
 
@@ -4589,7 +4589,7 @@ class ChoiceQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import ChoiceQuestionForm
+        from .forms import ChoiceQuestionForm  # noqa: PLC0415
         return ChoiceQuestionForm
 
 
