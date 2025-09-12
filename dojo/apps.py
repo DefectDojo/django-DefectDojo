@@ -59,7 +59,9 @@ class DojoAppConfig(AppConfig):
         # sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
 
         watson.register(self.get_model("Finding_Template"))
+        # TODO: Delete this after the move to Locations
         watson.register(self.get_model("Endpoint"), store=("product__name", ))  # add product name also?
+        watson.register(self.get_model("Location"))
         watson.register(self.get_model("Engagement"), fields=get_model_fields_with_extra(self.get_model("Engagement"), ("id", "product__name")), store=("product__name", ))
         watson.register(self.get_model("App_Analysis"))
         watson.register(self.get_model("Vulnerability_Id"), store=("finding__test__engagement__product__name", ))
@@ -74,6 +76,8 @@ class DojoAppConfig(AppConfig):
         import dojo.announcement.signals
         import dojo.benchmark.signals
         import dojo.cred.signals
+
+        # TODO: Delete this after the move to Locations
         import dojo.endpoint.signals
         import dojo.engagement.signals
         import dojo.file_uploads.signals
@@ -85,7 +89,8 @@ class DojoAppConfig(AppConfig):
         import dojo.sla_config.helpers
         import dojo.tags_signals
         import dojo.test.signals
-        import dojo.tool_product.signals  # noqa: F401
+        import dojo.tool_product.signals
+        import dojo.url.signals  # noqa: F401
 
 
 def get_model_fields_with_extra(model, extra_fields=()):

@@ -20,6 +20,7 @@ from dojo.authorization.authorization import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
+from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
 from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
@@ -77,6 +78,11 @@ def action_history(request, cid, oid):
         product_id = object_value.test.engagement.product.id
         active_tab = "findings"
         finding = object_value
+    elif ct.model == "location":
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+        object_value = Location.objects.get(id=obj.id)
+        active_tab = "endpoints"
+    # TODO: Delete this after the move to Locations
     elif ct.model == "endpoint":
         user_has_permission_or_403(request.user, obj, Permissions.Location_View)
         object_value = Endpoint.objects.get(id=obj.id)

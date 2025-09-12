@@ -1,14 +1,21 @@
+import logging
+
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, QuerySet, Value
+from django.db.models.functions import Coalesce
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
+    Finding,
     Product_Group,
     Product_Member,
     Product_Type_Group,
     Product_Type_Member,
 )
+from dojo.query_utils import build_count_subquery
+
+logger = logging.getLogger(__name__)
 
 
 def get_authorized_locations(permission, queryset=None, user=None):
@@ -138,3 +145,17 @@ def get_authorized_location_product_reference(permission, queryset=None, user=No
     return location_product_reference.filter(
         Q(location__product__prod_type__member=True) | Q(location__product__member=True)
         | Q(location__product__prod_type__authorized_group=True) | Q(location__product__authorized_group=True))
+
+
+def prefetch_for_locations(locations):
+    if isinstance(locations, QuerySet):
+        locations = locations.prefetch_related("tags")
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(locations=OuterRef("pk"), active=True),
+            group_field="locations",
+        )
+        locations = locations.annotate(active_finding_count=Coalesce(active_finding_subquery, Value(0)))
+    else:
+        logger.debug("unable to prefetch because query was already executed")
+
+    return locations
