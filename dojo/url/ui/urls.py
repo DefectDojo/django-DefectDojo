@@ -14,6 +14,7 @@ from dojo.url.ui.views import (
     add_endpoint_to_finding,
     delete_endpoint,
     manage_meta_data,
+    import_endpoint_meta,
 )
 from dojo.endpoint import views
 
@@ -32,6 +33,7 @@ urlpatterns = [
     re_path(r"^endpoint/(?P<location_id>\d+)/delete$", delete_endpoint, name="delete_endpoint"),
     re_path(r"^endpoint/(?P<location_id>\d+)/add_meta_data$", manage_meta_data, name="add_endpoint_meta_data"),
     re_path(r"^endpoint/(?P<location_id>\d+)/edit_meta_data$", manage_meta_data, name="edit_endpoint_meta_data"),
+    re_path(r"^endpoint/(?P<product_id>\d+)/import_endpoint_meta$", import_endpoint_meta, name="import_endpoint_meta"),
 
 
     re_path(r"^endpoint/bulk$", views.endpoint_bulk_update_all, name="endpoints_bulk_all"),
@@ -42,5 +44,4 @@ urlpatterns = [
     ),
     re_path(r"^endpoint/(?P<fid>\d+)/bulk_status$", views.endpoint_status_bulk_update, name="endpoints_status_bulk"),
     re_path(r"^endpoint/migrate$", views.migrate_endpoints_view, name="endpoint_migrate"),
-    re_path(r"^endpoint/(?P<pid>\d+)/import_endpoint_meta$", views.import_endpoint_meta, name="import_endpoint_meta"),
 ]
