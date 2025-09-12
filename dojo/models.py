@@ -8,6 +8,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import dateutil
@@ -870,7 +871,6 @@ class Product_Type(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("product_type", args=[str(self.id)])
 
     def get_breadcrumbs(self):
@@ -1258,7 +1258,6 @@ class Product(models.Model):
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
 
     @cached_property
@@ -1578,7 +1577,6 @@ class Engagement(models.Model):
                                             "%b %d, %Y"))
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
@@ -1820,7 +1818,6 @@ class Endpoint(models.Model):
             return url
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_endpoint", args=[str(self.id)])
 
     def clean(self):
@@ -2038,7 +2035,6 @@ class Endpoint(models.Model):
         try:
             url = hyperlink.parse(url=uri)
         except UnicodeDecodeError:
-            from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
             msg = f"Invalid URL format: {e}"
@@ -2151,7 +2147,6 @@ class Test(models.Model):
         return str(self.test_type)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.id)])
 
     def test_type_name(self) -> str:
@@ -2826,7 +2821,6 @@ class Finding(models.Model):
             logger.debug("no options selected that require finding post processing")
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
@@ -3406,8 +3400,6 @@ class Finding(models.Model):
         return link
 
     def get_references_with_links(self):
-        import re
-
         from dojo.utils import create_bleached_link
         if self.references is None:
             return None
@@ -3481,7 +3473,6 @@ class Vulnerability_Id(models.Model):
         return self.vulnerability_id
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.finding.id)])
 
 
@@ -3585,7 +3576,6 @@ class Finding_Group(TimeStampedModel):
         return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.test.id)])
 
     class Meta:
@@ -3624,7 +3614,6 @@ class Finding_Template(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("edit_template", args=[str(self.id)])
 
     def get_breadcrumbs(self):
