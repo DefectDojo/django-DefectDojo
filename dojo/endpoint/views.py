@@ -21,7 +21,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
-from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
+from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm, DojoMetaFormSet
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
 from dojo.utils import (
@@ -293,64 +293,28 @@ def add_product_endpoint(request):
 
 
 @user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
-def add_meta_data(request, eid):
+def manage_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
+    meta_data_query = DojoMeta.objects.filter(endpoint=endpoint)
+    form_mapping = {"endpoint": endpoint}
+    formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+
     if request.method == "POST":
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(endpoint=endpoint))
-        if form.is_valid():
-            form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 "Metadata added successfully.",
-                                 extra_tags="alert-success")
-            if "add_another" in request.POST:
-                return HttpResponseRedirect(reverse("add_endpoint_meta_data", args=(eid,)))
+        formset = DojoMetaFormSet(request.POST, queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+        if formset.is_valid():
+            formset.save()
+            messages.add_message(
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success"
+            )
             return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
-    else:
-        form = DojoMetaDataForm()
 
-    add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
-    product_tab = Product_Tab(endpoint.product, "Add Metadata", tab="endpoints")
-    return render(request,
-                  "dojo/add_endpoint_meta_data.html",
-                  {"form": form,
-                   "product_tab": product_tab,
-                   "endpoint": endpoint,
-                   })
-
-
-@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
-def edit_meta_data(request, eid):
-    endpoint = Endpoint.objects.get(id=eid)
-
-    if request.method == "POST":
-        for key, orig_value in request.POST.items():
-            if key.startswith("cfv_"):
-                cfv_id = int(key.split("_")[1])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-
-                value = orig_value.strip()
-                if value:
-                    cfv.value = value
-                    cfv.save()
-            if key.startswith("delete_"):
-                cfv_id = int(key.split("_")[2])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                cfv.delete()
-
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             "Metadata edited successfully.",
-                             extra_tags="alert-success")
-        return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
-
+    add_breadcrumb(parent=endpoint, title="Manage Metadata", top_level=False, request=request)
     product_tab = Product_Tab(endpoint.product, "Edit Metadata", tab="endpoints")
-    return render(request,
-                  "dojo/edit_endpoint_meta_data.html",
-                  {"endpoint": endpoint,
-                   "product_tab": product_tab,
-                   })
-
+    return render(
+        request,
+        "dojo/edit_metadata.html",
+        {"formset": formset, "product_tab": product_tab},
+    )
 
 # bulk mitigate and delete are combined, so we can't have the nice user_is_authorized decorator
 def endpoint_bulk_update_all(request, pid=None):

@@ -966,11 +966,17 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name="finding_meta")
+    location = models.ForeignKey("Location",
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name="location_meta")
 
     class Meta:
         unique_together = (("product", "name"),
                            ("endpoint", "name"),
-                           ("finding", "name"))
+                           ("finding", "name"),
+                           ("location", "name"))
 
     def __str__(self):
         return f"{self.name}: {self.value}"
@@ -982,7 +988,8 @@ class DojoMeta(models.Model):
 
         ids = [self.product_id,
                self.endpoint_id,
-               self.finding_id]
+               self.finding_id,
+               self.location_id]
         ids_count = 0
 
         for obj_id in ids:
@@ -990,10 +997,10 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            msg = "Metadata entries need either a product, an endpoint or a finding"
+            msg = "Metadata entries need either a product, endpoint, location or a finding"
             raise ValidationError(msg)
         if ids_count > 1:
-            msg = "Metadata entries may not have more than one relation, either a product, an endpoint either or a finding"
+            msg = "Metadata entries may not have more than one relation, either a product, endpoint, location or a finding"
             raise ValidationError(msg)
 
 

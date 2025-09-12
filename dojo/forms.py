@@ -494,10 +494,10 @@ class DisableOrEnableNoteTypeForm(NoteTypeForm):
 
 
 class DojoMetaDataForm(forms.ModelForm):
-    value = forms.CharField(widget=forms.Textarea(attrs={}),
-                            required=True)
-
     def full_clean(self):
+        # inject all fk_map values
+        for field, value in self.fk_map.items():
+            setattr(self.instance, field, value)
         super().full_clean()
         try:
             self.instance.validate_unique()
@@ -505,9 +505,21 @@ class DojoMetaDataForm(forms.ModelForm):
             msg = "A metadata entry with the same name exists already for this object."
             self.add_error("name", msg)
 
+    def __init__(self, *args, **kwargs):
+        self.fk_map = kwargs.pop("fk_map", {})
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = DojoMeta
         fields = "__all__"
+
+
+DojoMetaFormSet = modelformset_factory(
+    DojoMeta,
+    form=DojoMetaDataForm,
+    extra=1,
+    can_delete=True,
+)
 
 
 class ImportScanForm(forms.Form):
