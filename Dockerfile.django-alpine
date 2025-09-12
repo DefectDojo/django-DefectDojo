@@ -1,11 +1,3 @@
-# TESTS
-# alpine build - 1m55 - 732MB
-# debian build - 1m42 - 960MB
-
-# DEBIAN
-# drop wheels - 1m42 - 866MB
-# drop unittests, integration tests and *-dev packages from main stage - 1m40 - 842MB
-# take dev requirements out of main stage - 1m40 - 836MB ==> reduce attack surface, not just size
 
 # code: language=Dockerfile
 
@@ -37,7 +29,8 @@ RUN \
 COPY requirements.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
-RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN export PYCURL_SSL_LIBRARY=openssl && \
+    CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS django
 WORKDIR /app
@@ -63,9 +56,9 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
-COPY --from=build /tmp/wheels /tmp/wheels
-COPY requirements.txt ./
-RUN export PYCURL_SSL_LIBRARY=openssl && \
+RUN \
+  --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
+  --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \
   pip3 install \
 	--no-cache-dir \
 	--no-index \
@@ -80,20 +73,17 @@ COPY \
   docker/entrypoint-first-boot.sh \
   docker/entrypoint-uwsgi.sh \
   docker/entrypoint-uwsgi-dev.sh \
-  docker/entrypoint-unit-tests.sh \
-  docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
   docker/reach_database.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py docker/unit-tests.sh ./
+COPY wsgi.py manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
-COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs
   rm -f /readme.txt && \
@@ -145,4 +135,9 @@ ENV \
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django AS django-unittests
+COPY \
+  docker/entrypoint-unit-tests.sh \
+  docker/entrypoint-unit-tests-devDocker.sh \
+  /
+COPY docker/unit-tests.sh ./
 COPY unittests/ ./unittests/
