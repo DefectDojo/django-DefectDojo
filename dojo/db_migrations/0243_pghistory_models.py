@@ -3,6 +3,7 @@
 import django.contrib.auth.validators
 import django.core.validators
 import django.db.models.deletion
+import django.db.models.manager
 import django.utils.timezone
 import django_extensions.db.fields
 import dojo.models
@@ -918,5 +919,20 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='testevent',
             index=models.Index(fields=['pgh_context_id'], name='dojo_testev_pgh_con_e18502_idx'),
+        ),
+        # DojoEvents proxy model for structured context field access
+        migrations.CreateModel(
+            name='DojoEvents',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('pghistory.events',),
+            managers=[
+                ('no_objects', django.db.models.manager.Manager()),
+            ],
         ),
     ]
