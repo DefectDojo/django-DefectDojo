@@ -201,10 +201,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         DojoSytemSettingsMiddleware.load()
 
         self.import_reimport_performance(
-            expected_num_queries1=732,
+            expected_num_queries1=717,
             expected_num_async_tasks1=15,
-            expected_num_queries2=686,
+            expected_num_queries2=662,
             expected_num_async_tasks2=28,
-            expected_num_queries3=357,
+            expected_num_queries3=337,
             expected_num_async_tasks3=25,
         )
