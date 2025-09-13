@@ -7,6 +7,7 @@ from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
 from dojo.decorators import we_want_async
+from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -16,6 +17,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.tasks import wait_for_tasks_and_calculate_grade
+from dojo.utils import calculate_grade
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -155,11 +158,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
-        from celery import chord
-
-        from dojo.finding import helper as finding_helper
-        from dojo.utils import calculate_grade, calculate_grade_signature
-        post_processing_task_signatures = []
+        async_task_ids = []
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -189,7 +188,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_findings: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
+            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:
                 unsaved_finding.active = self.active
@@ -238,19 +237,24 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing
 
-            # Collect finding for parallel processing - we'll process them all at once after the loop
+            # We create a signature for the post processing task so we can decide to apply it async or sync
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            # Always create signatures - we'll execute them sync or async later
-            post_processing_task_signatures.append(
-                finding_helper.post_process_finding_save_signature(
-                    finding,
-                    dedupe_option=True,
-                    rules_option=True,
-                    product_grading_option=False,
-                    issue_updater_option=True,
-                    push_to_jira=push_to_jira,
-                ),
+            post_processing_task_signature = finding_helper.post_process_finding_save_signature(
+                finding,
+                dedupe_option=True,
+                rules_option=True,
+                product_grading_option=False,
+                issue_updater_option=True,
+                push_to_jira=push_to_jira,
             )
+
+            # We need to call apply_async to get the result of the task so we can collect the task ID
+            if we_want_async(async_user=self.user):
+                result = post_processing_task_signature.apply_async()
+                async_task_ids.append(result.id)
+            else:
+                # Execute task immediately for synchronous processing
+                post_processing_task_signature()
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -268,17 +272,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         # Calculate product grade after all findings are processed
         product = self.test.engagement.product
-        if post_processing_task_signatures:
-            # If we have async tasks, use chord to wait for them before calculating grade
-            if we_want_async(async_user=self.user):
-                # Run the chord asynchronously and after completing post processing tasks, calculate grade ONCE
-                chord(post_processing_task_signatures)(calculate_grade_signature(product))
-            else:
-                # Execute each task synchronously
-                for task_sig in post_processing_task_signatures:
-                    task_sig()
 
-        # Calculate grade, which can be prelimary calculated before the async tasks have finished
+        if we_want_async(async_user=self.user) and async_task_ids:
+            # Tasks were executed immediately during processing, now coordinate final grade calculation
+            wait_for_tasks_and_calculate_grade.delay(async_task_ids, product.id)
+
+        # Synchronous tasks were already executed during processing, just calculate grade
         calculate_grade(product)
 
         sync = kwargs.get("sync", True)

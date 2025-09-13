@@ -365,7 +365,8 @@ def post_process_finding_save_signature(finding, dedupe_option=True, rules_optio
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
     """
     Returns a task signature for post-processing a finding. This is useful for creating task signatures
-    that can be used in chords or groups.
+    that can be used in chords or groups or to await results. We need this extra method because of our dojo_async decorator.
+    If we use more of these celery features, we should probably move away from that decorator.
     """
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
                                    issue_updater_option, push_to_jira, user, *args, **kwargs)
