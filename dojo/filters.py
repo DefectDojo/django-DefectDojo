@@ -3534,15 +3534,29 @@ class PgHistoryFilter(DojoFilter):
 
     # Filter by changes/diff field (JSON field containing what changed)
     pgh_diff = CharFilter(
-        field_name="pgh_diff",
-        lookup_expr="icontains",
+        method="filter_pgh_diff_contains",
         label="Changes Contains",
-        help_text="Search for field names or values in the changes",
+        help_text="Search for field names or values in the changes (optimized for JSONB, but can be slow)",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields["user"].queryset = get_authorized_users(Permissions.Product_View)
+
+    def filter_pgh_diff_contains(self, queryset, name, value):
+        """
+        Custom filter for pgh_diff that uses efficient JSONB operations.
+        Searches both keys and values in the JSONB field.
+        """
+        if not value:
+            return queryset
+
+        # Search in both keys and values using JSONB operators
+        return queryset.filter(
+            Q(pgh_diff__has_key=value) |  # Search in keys: {"severity": [...]}
+            Q(pgh_diff__has_any_keys=[value]) |  # Alternative key search
+            Q(pgh_diff__contains=f'"{value}"'),  # Search in values: ["severity", "other"]
+        )
 
     class Meta:
         fields = ["pgh_created_at", "pgh_label", "user", "url", "remote_addr", "pgh_diff"]
