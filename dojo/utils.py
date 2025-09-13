@@ -2465,7 +2465,8 @@ def get_open_findings_burndown(product):
     findings = Finding.objects.filter(test__engagement__product=product, duplicate=False)
     f_list = list(findings)
 
-    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    curr_date = datetime.combine(timezone.now().date(), datetime.min.time())
+    curr_date = timezone.make_aware(curr_date)
     start_date = curr_date - timedelta(days=90)
 
     critical_count = 0
@@ -2703,3 +2704,21 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         }
     logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
+
+
+def truncate_timezone_aware(dt):
+    """
+    Truncate datetime to date and make it timezone-aware.
+    This replaces the django_filters._truncate function which creates naive datetimes.
+    """
+    if dt is None:
+        return None
+
+    # Get the date part and create a new datetime at midnight
+    truncated = datetime.combine(dt.date(), datetime.min.time())
+
+    # Make it timezone-aware if it isn't already
+    if timezone.is_naive(truncated):
+        truncated = timezone.make_aware(truncated)
+
+    return truncated
