@@ -71,7 +71,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
         soc = user.social_auth.order_by("-created").first()
         token = soc.extra_data["access_token"]
         group_names = []
-        if "groups" not in kwargs["response"] or kwargs["response"]["groups"] == "":
+        if "groups" not in kwargs["response"] or not kwargs["response"]["groups"]:
             logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
             return
         group_IDs = kwargs["response"]["groups"]
@@ -93,7 +93,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                     logger.debug("detected " + group_from_response + " as group name and will not call microsoft graph")
                     group_name = group_from_response
 
-                if settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER == "" or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
+                if not settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
                     group_names.append(group_name)
                 else:
                     logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)

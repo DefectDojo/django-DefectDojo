@@ -303,8 +303,7 @@ def product_grade(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
-
-        if prod_numeric_grade == "" or prod_numeric_grade is None:
+        if not prod_numeric_grade or prod_numeric_grade is None:
             calculate_grade(product)
         if prod_numeric_grade:
             if prod_numeric_grade >= system_settings.product_grade_a:
@@ -360,7 +359,7 @@ def datediff_time(date1, date2):
         date_str = date_str + date_part + " "
 
     # Date is for one day
-    if date_str == "":
+    if not date_str:
         date_str = "1 day"
 
     return date_str
