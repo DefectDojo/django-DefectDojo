@@ -1552,6 +1552,10 @@ def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
     end_date = datetime.combine(eng.target_end, datetime.max.time())
+    if timezone.is_naive(start_date):
+        start_date = timezone.make_aware(start_date)
+    if timezone.is_naive(end_date):
+        end_date = timezone.make_aware(end_date)
     uid = f"dojo_eng_{eng.id}_{eng.product.id}"
     cal = get_cal_event(
         start_date,

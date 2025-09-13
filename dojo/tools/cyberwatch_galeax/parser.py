@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
+from django.utils import timezone
 
 from dojo.models import Endpoint, Endpoint_Status, Finding
 
@@ -202,7 +203,7 @@ class CyberwatchGaleaxParser:
         products = c_data["products"]
 
         if not products:
-            mitigated_date = datetime.now()
+            mitigated_date = timezone.now()
             mitigation = f"Fixed At: {mitigated_date}"
             endpoints = [Endpoint(host=e) for e in c_data["no_product_endpoints"]]
 
@@ -269,7 +270,7 @@ class CyberwatchGaleaxParser:
         active_status = any(am[0] for am in p_data["active_mitigated_data"])
         mitigated_date = (max(am[1] for am in p_data["active_mitigated_data"] if am[1])
                           if [am[1] for am in p_data["active_mitigated_data"] if am[1]] and not active_status
-                          else (datetime.now() if not active_status else None))
+                          else (timezone.now() if not active_status else None))
         return component_version_str, active_status, mitigated_date
 
     def create_finding(
@@ -466,7 +467,7 @@ class CyberwatchGaleaxParser:
                 active_status = True
                 mitigated_date = None
             else:
-                mitigated_date = datetime.now()
+                mitigated_date = timezone.now()
                 mitigated_dates.append(mitigated_date)
 
             detected_at_str = server.get("detected_at")
@@ -483,7 +484,7 @@ class CyberwatchGaleaxParser:
             )
             unsaved_endpoint_status.append(endpoint_status)
 
-        mitigated_date = (max(mitigated_dates) if mitigated_dates else datetime.now()) if not active_status else None
+        mitigated_date = (max(mitigated_dates) if mitigated_dates else timezone.now()) if not active_status else None
         return unsaved_endpoints, unsaved_endpoint_status, active_status, mitigated_date
 
     def parse_detected_at(self, detected_at_str):
@@ -491,7 +492,7 @@ class CyberwatchGaleaxParser:
         try:
             return datetime.strptime(detected_at_str, "%Y-%m-%dT%H:%M:%S.%fZ")
         except (ValueError, TypeError):
-            return datetime.now()
+            return timezone.now()
 
     def parse_fixed_at(self, fixed_at_str):
         """Parse fixed_at datetime, defaulting to now if parsing fails."""
@@ -500,7 +501,7 @@ class CyberwatchGaleaxParser:
                 return datetime.strptime(fixed_at_str, "%Y-%m-%dT%H:%M:%S.%f%z")
             except ValueError as e:
                 logger.error(f'Error parsing fixed_at date "{fixed_at_str}": {e}')
-        return datetime.now()
+        return timezone.now()
 
     def parse_datetime(self, dt_str):
         """Parse a datetime string with fallback to now on error."""
@@ -509,7 +510,7 @@ class CyberwatchGaleaxParser:
                 return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%f%z")
             except (ValueError, TypeError):
                 logger.error(f'Error parsing datetime "{dt_str}"')
-        return datetime.now()
+        return timezone.now()
 
     def parse_cvss(self, cvss_v3_vector, json_data):
         if cvss_v3_vector:
