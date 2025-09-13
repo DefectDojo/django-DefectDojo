@@ -5,6 +5,7 @@ from django.core.checks import register as register_check
 from django.db import models
 from watson import search as watson
 
+from dojo.auditlog import configure_audit_system, register_django_pghistory_models
 from dojo.checks import check_configuration_deduplication
 
 logger = logging.getLogger(__name__)
@@ -86,6 +87,13 @@ class DojoAppConfig(AppConfig):
         import dojo.tags_signals  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.test.signals  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.tool_product.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
+
+        # Configure audit system after all models are loaded
+        # This must be done in ready() to avoid "Models aren't loaded yet" errors
+        # Note: pghistory models are registered here (no database access), but trigger
+        # enabling is handled via management command to avoid database access warnings
+        register_django_pghistory_models()
+        configure_audit_system()
 
 
 def get_model_fields_with_extra(model, extra_fields=()):

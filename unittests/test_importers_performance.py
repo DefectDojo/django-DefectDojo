@@ -3,8 +3,10 @@ from contextlib import contextmanager
 
 from crum import impersonate
 from django.contrib.contenttypes.models import ContentType
+from django.test import override_settings
 from django.utils import timezone
 
+from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
 from dojo.decorators import dojo_async_task_counter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
@@ -87,7 +89,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | less
         Then search for `expected` to find the lines where the expected number of queries is printed.
         Or you can use `grep` to filter the output:
-            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | grep expected
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | grep expected -B 10
         """
         product_type, _created = Product_Type.objects.get_or_create(name="test")
         product, _created = Product.objects.get_or_create(
@@ -171,10 +173,12 @@ class TestDojoImporterPerformance(DojoTestCase):
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
-    # patch the we_want_async decorator to always return True so we don't depend on block_execution flag shenanigans
-    # @patch("dojo.decorators.we_want_async", return_value=True)
-    # def test_import_reimport_reimport_performance_async(self, mock):
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_import_reimport_reimport_performance_async(self):
+        # Ensure django-auditlog is properly configured for this test
+        configure_audit_system()
+        configure_pghistory_triggers()
+
         self.import_reimport_performance(
             expected_num_queries1=682,
             expected_num_async_tasks1=10,
@@ -184,8 +188,25 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_async_tasks3=20,
         )
 
-    # @patch("dojo.decorators.we_want_async", return_value=False)
-    # def test_import_reimport_reimport_performance_no_async(self, mock):
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    def test_import_reimport_reimport_performance_pghistory_async(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async enabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        self.import_reimport_performance(
+            expected_num_queries1=648,
+            expected_num_async_tasks1=10,
+            expected_num_queries2=603,
+            expected_num_async_tasks2=22,
+            expected_num_queries3=287,
+            expected_num_async_tasks3=20,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_import_reimport_reimport_performance_no_async(self):
         """
         This test checks the performance of the importers when they are run in sync mode.
@@ -194,6 +215,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
@@ -206,8 +230,29 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_async_tasks3=20,
         )
 
-    # @patch("dojo.decorators.we_want_async", return_value=False)
-    # def test_import_reimport_reimport_performance_no_async_with_product_grading(self, mock):
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    def test_import_reimport_reimport_performance_pghistory_no_async(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async disabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
+        self.import_reimport_performance(
+            expected_num_queries1=648,
+            expected_num_async_tasks1=10,
+            expected_num_queries2=608,
+            expected_num_async_tasks2=22,
+            expected_num_queries3=292,
+            expected_num_async_tasks3=20,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_import_reimport_reimport_performance_no_async_with_product_grading(self):
         """
         This test checks the performance of the importers when they are run in sync mode.
@@ -216,6 +261,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
@@ -227,5 +275,28 @@ class TestDojoImporterPerformance(DojoTestCase):
             expected_num_queries2=645,
             expected_num_async_tasks2=28,
             expected_num_queries3=322,
+            expected_num_async_tasks3=25,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    def test_import_reimport_reimport_performance_pghistory_no_async_with_product_grading(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async disabled and product grading enabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.system_settings(enable_product_grade=True)
+
+        self.import_reimport_performance(
+            expected_num_queries1=663,
+            expected_num_async_tasks1=15,
+            expected_num_queries2=631,
+            expected_num_async_tasks2=28,
+            expected_num_queries3=312,
             expected_num_async_tasks3=25,
         )

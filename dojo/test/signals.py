@@ -2,6 +2,7 @@ import contextlib
 
 from auditlog.models import LogEntry
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
@@ -12,6 +13,7 @@ from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
+from dojo.pghistory_models import DojoEvents
 
 
 @receiver(post_delete, sender=Test)
@@ -20,14 +22,39 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
     with contextlib.suppress(sender.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
         if instance == origin:
             description = _('The test "%(name)s" was deleted') % {"name": str(instance)}
+            user = None
+
             if settings.ENABLE_AUDITLOG:
-                if le := LogEntry.objects.filter(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label="dojo", model="test"),
-                    object_id=instance.id,
-                ).order_by("-id").first():
+                # First try to find deletion author in pghistory events
+                # Look for delete events for this specific test instance
+                pghistory_delete_events = DojoEvents.objects.filter(
+                    pgh_obj_model="dojo.Test",
+                    pgh_obj_id=instance.id,
+                    pgh_label="delete",
+                ).order_by("-pgh_created_at")
+
+                if pghistory_delete_events.exists():
+                    latest_delete = pghistory_delete_events.first()
+                    # Extract user from pghistory context
+                    if latest_delete.user:
+                        User = get_user_model()
+                        with contextlib.suppress(User.DoesNotExist):
+                            user = User.objects.get(id=latest_delete.user)
+
+                # Fall back to django-auditlog if no user found in pghistory
+                if not user:
+                    if le := LogEntry.objects.filter(
+                        action=LogEntry.Action.DELETE,
+                        content_type=ContentType.objects.get(app_label="dojo", model="test"),
+                        object_id=instance.id,
+                    ).order_by("-id").first():
+                        user = le.actor
+
+                # Update description with user if found
+                if user:
                     description = _('The test "%(name)s" was deleted by %(user)s') % {
-                                    "name": str(instance), "user": le.actor}
+                                    "name": str(instance), "user": user}
+
             create_notification(event="test_deleted",  # Template does not exist, it will default to "other" but this event name needs to stay because of unit testing
                                 title=_("Deletion of %(name)s") % {"name": str(instance)},
                                 description=description,

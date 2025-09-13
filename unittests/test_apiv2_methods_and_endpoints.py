@@ -51,6 +51,11 @@ class ApiEndpointMethods(DojoTestCase):
             "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
             "dojo_group_members", "product_members", "product_groups", "product_type_groups",
             "product_type_members",
+            # pghistory Event models (should not be exposed via API)
+            "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
+            "finding_groupevents", "product_typeevents", "productevents", "testevents",
+            "risk_acceptanceevents", "finding_templateevents", "cred_userevents",
+            "notification_webhooksevents",
         ]
         for reg, _, _ in sorted(self.registry):
             if reg in exempt_list:
@@ -118,6 +123,9 @@ class ApiEndpoints(DojoTestCase):
                 if (subclass.__name__[:9] == "Tagulous_") and (subclass.__name__[-5:] == "_tags"):
                     continue
                 if subclass.__name__ == "Alerts":
+                    continue
+                # Skip pghistory Event models - they're audit trail models not meant for API endpoints
+                if subclass.__name__.endswith("Event"):
                     continue
                 with self.subTest(subclass=subclass):
                     if subclass in self.used_models:
