@@ -743,6 +743,7 @@ class BaseImporter(ImporterOptions):
         note_message: str,
         *,
         finding_groups_enabled: bool,
+        product_grading_option: bool = True,
     ) -> None:
         """
         Mitigates a finding, all endpoint statuses, leaves a note on the finding
@@ -764,9 +765,9 @@ class BaseImporter(ImporterOptions):
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
-            finding.save(dedupe_option=False)
+            finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+            finding.save(dedupe_option=False, push_to_jira=self.push_to_jira, product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,

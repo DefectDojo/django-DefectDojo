@@ -6,6 +6,7 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -15,6 +16,8 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.tasks import wait_for_tasks_and_calculate_grade
+from dojo.utils import calculate_grade
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -176,6 +179,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
+        async_task_ids = []
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
@@ -238,9 +242,24 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 # all data is already saved on the finding, we only need to trigger post processing
 
-                # to avoid pushing a finding group multiple times, we push those outside of the loop
+                # Execute post-processing task immediately if async, otherwise execute synchronously
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-                finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
+
+                post_processing_task_signature = finding_helper.post_process_finding_save_signature(
+                    finding,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=False,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira,
+                )
+                if we_want_async(async_user=self.user):
+                    # Execute task immediately and collect task ID
+                    result = post_processing_task_signature.apply_async()
+                    async_task_ids.append(result.id)
+                else:
+                    # Execute task immediately for synchronous processing
+                    post_processing_task_signature()
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -252,6 +271,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
         # Process groups
         self.process_groups_for_all_findings(**kwargs)
+
+        # Calculate product grade once after all findings are processed
+        product = self.test.engagement.product
+
+        if we_want_async(async_user=self.user) and async_task_ids:
+            # Tasks were executed immediately during processing, now coordinate final grade calculation
+            wait_for_tasks_and_calculate_grade.delay(async_task_ids, product.id)
+        # Synchronous tasks were already executed during processing, just calculate grade
+        calculate_grade(product)
+
         # Process the results and return them back
         return self.process_results(**kwargs)
 
@@ -286,12 +315,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
                     finding_groups_enabled=self.findings_groups_enabled,
+                    product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        # Calculate grade once after all findings have been closed
+        if mitigated_findings:
+            product = self.test.engagement.product
+            calculate_grade(product)
 
         return mitigated_findings
 

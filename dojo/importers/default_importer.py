@@ -357,11 +357,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "as it is not present anymore in recent scans."
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
+                product_grading_option=False,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        # Calculate grade once after all findings have been closed
+        if old_findings:
+            product = self.test.engagement.product
+            calculate_grade(product)
 
         return old_findings
 
