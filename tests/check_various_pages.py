@@ -32,6 +32,11 @@ class VariousPagesTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "finding_group/open?name=CVE&severity=Medium&engagement=14&product=6")
 
+    def test_date_filter(self):
+        driver = self.driver
+        # can result in an error about date not having timezone information
+        driver.get(self.base_url + "finding/open?last_status_update=2")
+
 
 def suite():
     suite = unittest.TestSuite()
