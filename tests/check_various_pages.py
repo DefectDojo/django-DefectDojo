@@ -47,6 +47,7 @@ def suite():
     suite.addTest(VariousPagesTest("test_finding_group_all_status"))
     suite.addTest(VariousPagesTest("test_finding_group_closed_status"))
     suite.addTest(VariousPagesTest("test_finding_group_open_filtered_status"))
+    suite.addTest(VariousPagesTest("test_date_filter"))
     return suite
 
 
