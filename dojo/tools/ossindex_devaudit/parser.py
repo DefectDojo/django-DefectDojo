@@ -102,7 +102,7 @@ def get_item(
 def get_severity(cvss_score):
     result = "Info"
 
-    if cvss_score != "":
+    if cvss_score:
         ratings = [
             ("Critical", 9.0, 10.0),
             ("High", 7.0, 8.9),
