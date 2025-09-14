@@ -1,11 +1,13 @@
 import logging
 
+from celery import chord
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
+from dojo import utils
 from dojo.decorators import we_want_async
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -17,7 +19,6 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tasks import wait_for_tasks_and_calculate_grade
 from dojo.utils import calculate_grade
 from dojo.validators import clean_tags
 
@@ -158,7 +159,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
-        async_task_ids = []
+        # Progressive batching for chord execution
+        post_processing_task_signatures = []
+        current_batch_number = 1
+        max_batch_size = 1024
+        pending_grade_calculations = []
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -248,10 +253,25 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 push_to_jira=push_to_jira,
             )
 
-            # We need to call apply_async to get the result of the task so we can collect the task ID
             if we_want_async(async_user=self.user):
-                result = post_processing_task_signature.apply_async()
-                async_task_ids.append(result.id)
+                # Collect signatures for progressive batch execution
+                post_processing_task_signatures.append(post_processing_task_signature)
+
+                # Calculate current batch size: 2^batch_number, capped at max_batch_size
+                current_batch_size = min(2 ** current_batch_number, max_batch_size)
+
+                # Launch chord when batch is full
+                if len(post_processing_task_signatures) >= current_batch_size:
+                    product = self.test.engagement.product
+                    calculate_grade_signature = utils.calculate_grade_signature(product)
+                    chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
+                    pending_grade_calculations.append(chord_result)
+
+                    logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {current_batch_size})")
+
+                    # Reset for next batch
+                    post_processing_task_signatures = []
+                    current_batch_number += 1
             else:
                 # Execute task immediately for synchronous processing
                 post_processing_task_signature()
@@ -270,14 +290,18 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 else:
                     jira_helper.push_to_jira(findings[0])
 
-        # Calculate product grade after all findings are processed
+        # Handle any remaining signatures in the final batch
         product = self.test.engagement.product
 
-        if we_want_async(async_user=self.user) and async_task_ids:
-            # Tasks were executed immediately during processing, now coordinate final grade calculation
-            wait_for_tasks_and_calculate_grade.delay(async_task_ids, product.id)
+        if we_want_async(async_user=self.user):
+            if post_processing_task_signatures:
+                # Launch final chord with remaining signatures
+                calculate_grade_signature = utils.calculate_grade_signature(product)
+                chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
+                pending_grade_calculations.append(chord_result)
+                logger.debug(f"Launched final chord with {len(post_processing_task_signatures)} remaining tasks")
 
-        # Synchronous tasks were already executed during processing, just calculate grade
+        # Always perform an initial grading, even though it might get overwritten alter.
         calculate_grade(product)
 
         sync = kwargs.get("sync", True)

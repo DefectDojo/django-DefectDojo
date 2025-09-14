@@ -2,7 +2,6 @@ import logging
 from datetime import date, timedelta
 
 from auditlog.models import LogEntry
-from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -191,36 +190,6 @@ def jira_status_reconciliation_task(*args, **kwargs):
 @app.task
 def fix_loop_duplicates_task(*args, **kwargs):
     return fix_loop_duplicates()
-
-
-@app.task
-def wait_for_tasks_and_calculate_grade(task_ids, product_id, *args, **kwargs):
-    """
-    Wait for all specified tasks to complete, then calculate product grade.
-    This provides coordination for immediate task execution without using chord.
-    """
-    logger.info(f"Waiting for {len(task_ids)} tasks to complete before calculating grade for product {product_id}")
-
-    # Wait for all tasks to complete
-    results = [AsyncResult(task_id) for task_id in task_ids]
-
-    # This will block until all tasks are done
-    for result in results:
-        try:
-            result.get(timeout=300)  # 5 minute timeout per task
-        except Exception as e:
-            logger.warning(f"Task {result.id} failed: {e}")
-            # Continue waiting for other tasks even if one fails
-
-    # All tasks completed, now calculate grade
-    try:
-        product = Product.objects.get(id=product_id)
-        logger.info(f"All post-processing tasks completed, calculating grade for product {product.name}")
-        calculate_grade(product)
-    except Product.DoesNotExist:
-        logger.error(f"Product {product_id} not found for grade calculation")
-    except Exception as e:
-        logger.error(f"Error calculating grade for product {product_id}: {e}")
 
 
 @app.task
