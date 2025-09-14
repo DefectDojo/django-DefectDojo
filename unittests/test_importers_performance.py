@@ -176,12 +176,12 @@ class TestDojoImporterPerformance(DojoTestCase):
     # def test_import_reimport_reimport_performance_async(self, mock):
     def test_import_reimport_reimport_performance_async(self):
         self.import_reimport_performance(
-            expected_num_queries1=715,
-            expected_num_async_tasks1=13,
-            expected_num_queries2=612,
-            expected_num_async_tasks2=25,
-            expected_num_queries3=294,
-            expected_num_async_tasks3=23,
+            expected_num_queries1=713,
+            expected_num_async_tasks1=10,
+            expected_num_queries2=610,
+            expected_num_async_tasks2=22,
+            expected_num_queries3=292,
+            expected_num_async_tasks3=20,
         )
 
     # @patch("dojo.decorators.we_want_async", return_value=False)
@@ -199,11 +199,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
         self.import_reimport_performance(
             expected_num_queries1=713,
-            expected_num_async_tasks1=11,
+            expected_num_async_tasks1=10,
             expected_num_queries2=615,
-            expected_num_async_tasks2=23,
+            expected_num_async_tasks2=22,
             expected_num_queries3=297,
-            expected_num_async_tasks3=21,
+            expected_num_async_tasks3=20,
         )
 
     # @patch("dojo.decorators.we_want_async", return_value=False)

@@ -1,6 +1,6 @@
 import logging
 
-from celery import chord
+from celery import chord, group
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -15,6 +15,7 @@ from dojo.models import (
     Development_Environment,
     Finding,
     Notes,
+    System_Settings,
     Test,
     Test_Import,
 )
@@ -279,8 +280,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if batch_full or is_final:
                     # Launch chord with current batch of signatures
                     product = self.test.engagement.product
-                    calculate_grade_signature = utils.calculate_grade_signature(product)
-                    chord(post_processing_task_signatures)(calculate_grade_signature)
+                    system_settings = System_Settings.objects.get()
+                    if system_settings.enable_product_grade:
+                        calculate_grade_signature = utils.calculate_grade_signature(product)
+                        chord(post_processing_task_signatures)(calculate_grade_signature)
+                    # If product grading is disabled, just run the post-processing tasks without the grade calculation callback
+                    elif post_processing_task_signatures:
+                        group(post_processing_task_signatures).apply_async()
 
                     logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
 
@@ -306,7 +312,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         # Synchronous tasks were already executed during processing, just calculate grade
         product = self.test.engagement.product
-        calculate_grade(product)
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_product_grade:
+            calculate_grade(product)
 
         # Process the results and return them back
         return self.process_results(**kwargs)
@@ -353,7 +361,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Calculate grade once after all findings have been closed
         if mitigated_findings:
             product = self.test.engagement.product
-            calculate_grade(product)
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                calculate_grade(product)
 
         return mitigated_findings
 

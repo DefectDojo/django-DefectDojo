@@ -1,6 +1,6 @@
 import logging
 
-from celery import chord
+from celery import chord, group
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -15,6 +15,7 @@ from dojo.importers.options import ImporterOptions
 from dojo.models import (
     Engagement,
     Finding,
+    System_Settings,
     Test,
     Test_Import,
 )
@@ -274,8 +275,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 if batch_full or is_final:
                     # Launch chord with current batch of signatures
                     product = self.test.engagement.product
-                    calculate_grade_signature = utils.calculate_grade_signature(product)
-                    chord(post_processing_task_signatures)(calculate_grade_signature)
+                    system_settings = System_Settings.objects.get()
+                    if system_settings.enable_product_grade:
+                        calculate_grade_signature = utils.calculate_grade_signature(product)
+                        chord(post_processing_task_signatures)(calculate_grade_signature)
+                    # If product grading is disabled, just run the post-processing tasks without the grade calculation callback
+                    elif post_processing_task_signatures:
+                        group(post_processing_task_signatures).apply_async()
 
                     logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
 
@@ -305,7 +311,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         # Always perform an initial grading, even though it might get overwritten later.
         product = self.test.engagement.product
-        calculate_grade(product)
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_product_grade:
+            calculate_grade(product)
 
         sync = kwargs.get("sync", True)
         if not sync:
@@ -394,7 +402,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Calculate grade once after all findings have been closed
         if old_findings:
             product = self.test.engagement.product
-            calculate_grade(product)
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                calculate_grade(product)
 
         return old_findings
 
