@@ -184,13 +184,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         post_processing_task_signatures = []
         current_batch_number = 1
         max_batch_size = 1024
-        pending_grade_calculations = []
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        for non_clean_unsaved_finding in parsed_findings:
+        # Create iterator over parsed findings
+        findings_iterator = iter(parsed_findings)
+
+        # Get first finding to start the loop
+        non_clean_unsaved_finding = next(findings_iterator, None)
+
+        while non_clean_unsaved_finding:
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
@@ -258,28 +263,33 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
                 )
-                if we_want_async(async_user=self.user):
-                    # Collect signatures for progressive batch execution
-                    post_processing_task_signatures.append(post_processing_task_signature)
+                post_processing_task_signatures.append(post_processing_task_signature)
 
-                    # Calculate current batch size: 2^batch_number, capped at max_batch_size
-                    current_batch_size = min(2 ** current_batch_number, max_batch_size)
+            # Get next finding for next iteration
+            non_clean_unsaved_finding = next(findings_iterator, None)
 
-                    # Launch chord when batch is full
-                    if len(post_processing_task_signatures) >= current_batch_size:
-                        product = self.test.engagement.product
-                        calculate_grade_signature = utils.calculate_grade_signature(product)
-                        chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
-                        pending_grade_calculations.append(chord_result)
+            # Check if we should launch a chord (batch full or end of findings)
+            if we_want_async(async_user=self.user) and post_processing_task_signatures:
+                # Calculate current batch size: 2^batch_number, capped at max_batch_size
+                current_batch_size = min(2 ** current_batch_number, max_batch_size)
 
-                        logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {current_batch_size})")
+                batch_full = len(post_processing_task_signatures) >= current_batch_size
+                is_final = not non_clean_unsaved_finding
 
-                        # Reset for next batch
-                        post_processing_task_signatures = []
+                if batch_full or is_final:
+                    # Launch chord with current batch of signatures
+                    product = self.test.engagement.product
+                    calculate_grade_signature = utils.calculate_grade_signature(product)
+                    chord(post_processing_task_signatures)(calculate_grade_signature)
+
+                    logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
+
+                    # Reset for next batch (only if not final)
+                    post_processing_task_signatures = []
+                    if not is_final:
                         current_batch_number += 1
-                else:
-                    # Execute task immediately for synchronous processing
-                    post_processing_task_signature()
+            else:
+                post_processing_task_signature()
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -292,18 +302,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process groups
         self.process_groups_for_all_findings(**kwargs)
 
-        # Handle any remaining signatures in the final batch
-        product = self.test.engagement.product
-
-        if we_want_async(async_user=self.user):
-            if post_processing_task_signatures:
-                # Launch final chord with remaining signatures
-                calculate_grade_signature = utils.calculate_grade_signature(product)
-                chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
-                pending_grade_calculations.append(chord_result)
-                logger.debug(f"Launched final chord with {len(post_processing_task_signatures)} remaining tasks")
+        # Note: All chord batching is now handled within the loop above
 
         # Synchronous tasks were already executed during processing, just calculate grade
+        product = self.test.engagement.product
         calculate_grade(product)
 
         # Process the results and return them back

@@ -163,7 +163,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         post_processing_task_signatures = []
         current_batch_number = 1
         max_batch_size = 1024
-        pending_grade_calculations = []
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -176,7 +175,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for non_clean_unsaved_finding in parsed_findings:
+        # Create iterator over parsed findings
+        findings_iterator = iter(parsed_findings)
+
+        # Get first finding to start the loop
+        non_clean_unsaved_finding = next(findings_iterator, None)
+
+        while non_clean_unsaved_finding:
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
@@ -253,25 +258,31 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 push_to_jira=push_to_jira,
             )
 
-            if we_want_async(async_user=self.user):
-                # Collect signatures for progressive batch execution
-                post_processing_task_signatures.append(post_processing_task_signature)
+            post_processing_task_signatures.append(post_processing_task_signature)
 
+            # Get next finding for next iteration
+            non_clean_unsaved_finding = next(findings_iterator, None)
+            is_final = not non_clean_unsaved_finding
+
+            # Check if we should launch a chord (batch full or end of findings)
+            if we_want_async(async_user=self.user) and post_processing_task_signatures:
                 # Calculate current batch size: 2^batch_number, capped at max_batch_size
                 current_batch_size = min(2 ** current_batch_number, max_batch_size)
 
-                # Launch chord when batch is full
-                if len(post_processing_task_signatures) >= current_batch_size:
+                batch_full = len(post_processing_task_signatures) >= current_batch_size
+
+                if batch_full or is_final:
+                    # Launch chord with current batch of signatures
                     product = self.test.engagement.product
                     calculate_grade_signature = utils.calculate_grade_signature(product)
-                    chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
-                    pending_grade_calculations.append(chord_result)
+                    chord(post_processing_task_signatures)(calculate_grade_signature)
 
-                    logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {current_batch_size})")
+                    logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
 
-                    # Reset for next batch
+                    # Reset for next batch (only if not final)
                     post_processing_task_signatures = []
-                    current_batch_number += 1
+                    if not is_final:
+                        current_batch_number += 1
             else:
                 # Execute task immediately for synchronous processing
                 post_processing_task_signature()
@@ -290,18 +301,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 else:
                     jira_helper.push_to_jira(findings[0])
 
-        # Handle any remaining signatures in the final batch
+        # Note: All chord batching is now handled within the loop above
+
+        # Always perform an initial grading, even though it might get overwritten later.
         product = self.test.engagement.product
-
-        if we_want_async(async_user=self.user):
-            if post_processing_task_signatures:
-                # Launch final chord with remaining signatures
-                calculate_grade_signature = utils.calculate_grade_signature(product)
-                chord_result = chord(post_processing_task_signatures)(calculate_grade_signature)
-                pending_grade_calculations.append(chord_result)
-                logger.debug(f"Launched final chord with {len(post_processing_task_signatures)} remaining tasks")
-
-        # Always perform an initial grading, even though it might get overwritten alter.
         calculate_grade(product)
 
         sync = kwargs.get("sync", True)
