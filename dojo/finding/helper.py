@@ -477,7 +477,6 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-        # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):

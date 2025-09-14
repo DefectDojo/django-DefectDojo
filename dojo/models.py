@@ -2260,7 +2260,9 @@ class Test(models.Model):
         with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.engagement.product)
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                calculate_grade(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2869,7 +2871,9 @@ class Finding(models.Model):
         with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.test.engagement.product)
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
