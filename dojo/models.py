@@ -2254,15 +2254,16 @@ class Test(models.Model):
         deduplicationLogger.debug(f"HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}")
         return hashCodeAllowsNullCwe
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            system_settings = System_Settings.objects.get()
-            if system_settings.enable_product_grade:
-                calculate_grade(self.engagement.product)
+        if product_grading_option:
+            with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_product_grade:
+                    calculate_grade(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2863,17 +2864,18 @@ class Finding(models.Model):
 
         return copy
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            system_settings = System_Settings.objects.get()
-            if system_settings.enable_product_grade:
-                calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_product_grade:
+                    calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
