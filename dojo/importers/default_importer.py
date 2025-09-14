@@ -268,6 +268,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Check if we should launch a chord (batch full or end of findings)
             if we_want_async(async_user=self.user) and post_processing_task_signatures:
                 # Calculate current batch size: 2^batch_number, capped at max_batch_size
+                # We do this because post processing only starts after all tasks have been added to the chord
+                # So we start with small batches to minmize the delay
                 current_batch_size = min(2 ** current_batch_number, max_batch_size)
 
                 batch_full = len(post_processing_task_signatures) >= current_batch_size
@@ -279,8 +281,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     if system_settings.enable_product_grade:
                         calculate_grade_signature = utils.calculate_grade_signature(product)
                         chord(post_processing_task_signatures)(calculate_grade_signature)
-                    # If product grading is disabled, just run the post-processing tasks without the grade calculation callback
                     elif post_processing_task_signatures:
+                        # If product grading is disabled, just run the post-processing tasks without the grade calculation callback
                         group(post_processing_task_signatures).apply_async()
 
                     logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
