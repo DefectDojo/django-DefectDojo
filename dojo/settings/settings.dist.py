@@ -29,6 +29,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -120,6 +121,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT=(str, "Login with OIDC"),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
     DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ""),
@@ -356,6 +358,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
+DJANGO_DEBUG_TOOLBAR_ENABLED = env("DD_DJANGO_DEBUG_TOOLBAR_ENABLED")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -618,6 +621,8 @@ if value := env("DD_SOCIAL_AUTH_OIDC_USERINFO_URL"):
     SOCIAL_AUTH_OIDC_USERINFO_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
+if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
+    SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -1853,6 +1858,7 @@ VULNERABILITY_URLS = {
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
+    "OXAS-ADV-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/OXAS-ADV-2023-0001
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
     "PFPT-SA-": "https://www.proofpoint.com/us/security/security-advisories/",  # e.g. https://www.proofpoint.com/us/security/security-advisories/pfpt-sa-0002
     "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
@@ -1941,3 +1947,45 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+if DEBUG:
+    # adding DEBUG logging for all of Django.
+    LOGGING["loggers"]["root"] = {
+                "handlers": ["console"],
+                "level": "DEBUG",
+           }
+
+if DJANGO_DEBUG_TOOLBAR_ENABLED:
+
+    INSTALLED_APPS += (
+    "debug_toolbar",
+    )
+
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+    def show_toolbar(request):
+        return True
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+        "INTERCEPT_REDIRECTS": False,
+        "SHOW_COLLAPSED": True,
+    }
+
+    DEBUG_TOOLBAR_PANELS = [
+        # 'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        # 'debug_toolbar.panels.logging.LoggingPanel',
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+        # 'cachalot.panels.CachalotPanel',
+    ]

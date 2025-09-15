@@ -10,6 +10,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Sept 2025: v2.50
 
+### Sept 9, 2025: v2.50.1
+
+* **(Tools)** Removed CSV limit for Qualys HackerGuardian
+* **(SSO)** Removed Force Password Reset for users created via SSO
+
 ### Sept 2, 2025: v2.50.0
 
 * **(Pro UI)** "Date During" filter has been added to the UI, allowing users to filter by a range of dates
