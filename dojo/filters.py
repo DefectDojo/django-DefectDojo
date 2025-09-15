@@ -374,12 +374,6 @@ class FindingSLAFilter(ChoiceFilter):
             Q(sla_expiration_date__gte=timezone.now().date()) & 
             Q(sla_expiration_date__lt=timezone.now().date() + timedelta(days=7))
         )
-    
-    def sla_left_seven_days(self, qs, name):
-        return qs.filter(
-            Q(sla_expiration_date__gte=timezone.now().date()) & 
-            Q(sla_expiration_date__lt=timezone.now().date() + timedelta(days=7))
-        )
 
     options = {
         None: (_("Any"), any),

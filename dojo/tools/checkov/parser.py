@@ -121,7 +121,7 @@ def get_item(vuln, test, check_type):
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
-    if "description" in vuln:
+    if "description" in vuln and vuln["description"] is not None:
         description += f"\n{vuln['description']}\n"
     mitigation = ""
     if "benchmarks" in vuln and vuln["benchmarks"] is not None:

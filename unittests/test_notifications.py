@@ -958,32 +958,32 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 236,
+                    "id": 237,
                     "title": "Colon: New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/236/",
-                    "url_ui": "http://localhost:8080/finding/236",
-                }],
-                "mitigated": [{
-                    "id": 237,
-                    "title": "[Brackets] Mitigated Finding",
-                    "severity": "Medium",
                     "url_api": "http://localhost:8080/api/v2/findings/237/",
                     "url_ui": "http://localhost:8080/finding/237",
                 }],
-                "reactivated": [{
+                "mitigated": [{
                     "id": 238,
-                    "title": '"Quotation1" Reactivated Finding',
-                    "severity": "Low",
+                    "title": '[Brackets] Mitigated Finding',
+                    "severity": "Medium",
                     "url_api": "http://localhost:8080/api/v2/findings/238/",
                     "url_ui": "http://localhost:8080/finding/238",
                 }],
-                "untouched": [{
+                "reactivated": [{
                     "id": 239,
-                    "title": "'Quotation2' Untouched Finding",
-                    "severity": "Info",
+                    "title": '"Quotation1" Reactivated Finding',
+                    "severity": "Low",
                     "url_api": "http://localhost:8080/api/v2/findings/239/",
                     "url_ui": "http://localhost:8080/finding/239",
+                }],
+                "untouched": [{
+                    "id": 240,
+                    "title": "'Quotation2' Untouched Finding",
+                    "severity": "Info",
+                    "url_api": "http://localhost:8080/api/v2/findings/240/",
+                    "url_ui": "http://localhost:8080/finding/240",
                 }],
             })
 
