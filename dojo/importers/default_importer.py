@@ -221,14 +221,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
             unsaved_finding.save_no_options()
 
-            finding = unsaved_finding
-            finding = self.process_cve(unsaved_finding)
-            # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
-            finding.set_hash_code(True)
-
-            # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
-            finding.save_no_options()
-
             # Determine how the finding should be grouped
             self.process_finding_groups(
                 finding,
