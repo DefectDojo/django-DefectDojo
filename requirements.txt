@@ -27,7 +27,7 @@ git+https://github.com/DefectDojo/django-tagging@develop#egg=django-tagging
 django-watson==1.6.3
 django-prometheus==2.3.1
 Django==5.1.10
-djangorestframework==3.16.0
+djangorestframework==3.16.1
 html2text==2024.2.26
 humanize==4.12.2
 jira==3.8.0
