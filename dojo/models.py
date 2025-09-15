@@ -1866,7 +1866,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
-                    logger.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Path "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.path == "":
                 self.path = None
 
@@ -1879,7 +1879,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
-                    logger.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Query "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.query == "":
                 self.query = None
 
@@ -1892,7 +1892,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
-                    logger.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Fragment "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.fragment == "":
                 self.fragment = None
 
@@ -2789,8 +2789,8 @@ class Finding(models.Model):
         if self.pk is None:
             # We enter here during the first call from serializers.py
             from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
+            # No need to use the returned variable since `self` Is updated in memory
+            apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False

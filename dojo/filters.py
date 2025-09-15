@@ -2269,7 +2269,7 @@ class MetricsFindingFilter(FindingFilter):
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2299,7 +2299,7 @@ class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2388,7 +2388,7 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2550,7 +2550,7 @@ class MetricsEndpointFilterWithoutObjectLookups(MetricsEndpointFilterHelper, Fin
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -3465,7 +3465,6 @@ class TestImportAPIFilter(DojoFilter):
 
 
 class LogEntryFilter(DojoFilter):
-    from auditlog.models import LogEntry
 
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
     actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())

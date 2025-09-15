@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import unittest
+import warnings
 from pathlib import Path
 
 from selenium import webdriver
@@ -57,12 +58,11 @@ class BaseTestCase(unittest.TestCase):
         # Path for automatic downloads, mapped to the media path
         cls.export_path = "/app"
 
-        global dd_driver
+        global dd_driver  # noqa: PLW0603 global variables are dirty, but in unit tests scenario's like these they are acceptable
         if not dd_driver:
             # setupModule and tearDownModule are not working in our scenario, so for now we use setupClass and a global variable
-            # global variables are dirty, but in unit tests scenario's like these they are acceptable
             logger.info(f"launching browser for: {cls.__name__}")
-            global dd_driver_options
+            global dd_driver_options  # noqa: PLW0603 global variables are dirty, but in unit tests scenario's like these they are acceptable
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
@@ -96,7 +96,6 @@ class BaseTestCase(unittest.TestCase):
             )
 
             # TODO: - this filter needs to be removed
-            import warnings
             warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
             warnings.filterwarnings("ignore", message="use options instead of chrome_options")
             warnings.filterwarnings("ignore", message="desired_capabilities has been deprecated, please pass in a Service object")
@@ -331,7 +330,7 @@ class BaseTestCase(unittest.TestCase):
     def set_block_execution(self, *, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        logger.info(f"setting block execution to: {block_execution}")
+        logger.info("setting block execution to: %s", block_execution)
         driver = self.driver
         driver.get(self.base_url + "profile")
         if (

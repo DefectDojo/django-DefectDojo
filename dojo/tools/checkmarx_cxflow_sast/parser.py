@@ -55,7 +55,7 @@ class CheckmarxCXFlowSastParser:
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
         # TODO: support CxXML format
-        logger.warning(f"Not supported file format ${file}")
+        logger.warning("Not supported file format $%s", file)
         return []
 
     def _get_findings_json(self, file, test):
@@ -98,7 +98,7 @@ class CheckmarxCXFlowSastParser:
 
             for detail_key in issue.get("details"):
                 if detail_key not in map_paths:
-                    logger.warning(f"{detail_key} not found in path, ignore")
+                    logger.warning("%s not found in path, ignore", detail_key)
                 else:
                     detail = map_paths[detail_key]
 

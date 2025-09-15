@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 class Cyclonedxhelper:
     def _get_cvssv3(self, raw_vector):
-        if raw_vector is None or raw_vector == "":
+        if raw_vector is None or not raw_vector:
             return None
         if not raw_vector.startswith("CVSS:3"):
             raw_vector = "CVSS:3.1/" + raw_vector
@@ -15,13 +15,13 @@ class Cyclonedxhelper:
             return CVSS3(raw_vector)
         except BaseException:
             LOGGER.exception(
-                f"error while parsing vector CVSS v3 {raw_vector}",
+                "error while parsing vector CVSS v3 %s", raw_vector,
             )
             return None
 
     def _get_component(self, components, reference):
         if reference not in components:
-            LOGGER.warning(f"reference:{reference} not found in the BOM")
+            LOGGER.warning("reference:%s not found in the BOM", reference)
             return (None, None)
         if "version" not in components[reference]:
             return (components[reference]["name"], None)

@@ -1372,7 +1372,7 @@ if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
         if key not in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info(f"Adding {key} with value {value} from env var DD_HASHCODE_FIELDS_PER_SCANNER")
+            logger.info("Adding %s with value %s from env var DD_HASHCODE_FIELDS_PER_SCANNER", key, value)
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 
@@ -1626,7 +1626,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
         if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info(f"Adding {key} with value {value} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
+            logger.info("Adding %s with value %s from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER", key, value)
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
@@ -1648,7 +1648,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ("Security", "Security"),
 )
 
-if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
+if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
     for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
