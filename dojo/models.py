@@ -1826,13 +1826,13 @@ class Endpoint(models.Model):
         errors = []
         null_char_list = ["0x00", "\x00"]
         db_type = connection.vendor
-        if self.protocol or self.protocol == "":
+        if self.protocol is not None:
             if not re.match(r"^[A-Za-z][A-Za-z0-9\.\-\+]+$", self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError(f'Protocol "{self.protocol}" has invalid format'))
             if not self.protocol:
                 self.protocol = None
 
-        if self.userinfo or self.userinfo == "":
+        if self.userinfo is not None:
             if not re.match(r"^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$", self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 errors.append(ValidationError(f'Userinfo "{self.userinfo}" has invalid format'))
             if not self.userinfo:
@@ -1847,7 +1847,7 @@ class Endpoint(models.Model):
         else:
             errors.append(ValidationError("Host must not be empty"))
 
-        if self.port or self.port == 0:
+        if self.port is not None:
             try:
                 int_port = int(self.port)
                 if not (0 <= int_port < 65536):
@@ -1856,7 +1856,7 @@ class Endpoint(models.Model):
             except ValueError:
                 errors.append(ValidationError(f'Port "{self.port}" has invalid format - it is not a number'))
 
-        if self.path or self.path == "":
+        if self.path is not None:
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
             if any(null_char in self.path for null_char in null_char_list):
@@ -1869,7 +1869,7 @@ class Endpoint(models.Model):
             if not self.path:
                 self.path = None
 
-        if self.query or self.query == "":
+        if self.query is not None:
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
             if any(null_char in self.query for null_char in null_char_list):
@@ -1882,7 +1882,7 @@ class Endpoint(models.Model):
             if not self.query:
                 self.query = None
 
-        if self.fragment or self.fragment == "":
+        if self.fragment is not None:
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
             if any(null_char in self.fragment for null_char in null_char_list):
