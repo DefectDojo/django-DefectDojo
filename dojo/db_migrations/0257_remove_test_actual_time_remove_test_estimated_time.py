@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0257_alter_jira_instance_accepted_mapping_resolution_and_more'),
+        ('dojo', '0256_alter_jira_instance_accepted_mapping_resolution_and_more'),
     ]
 
     operations = [

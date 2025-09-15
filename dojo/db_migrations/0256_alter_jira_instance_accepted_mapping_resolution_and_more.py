@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0256_alter_finding_cvssv3_alter_finding_template_cvssv3'),
+        ('dojo', '0255_alter_finding_cvssv3_alter_finding_template_cvssv3'),
     ]
 
     operations = [

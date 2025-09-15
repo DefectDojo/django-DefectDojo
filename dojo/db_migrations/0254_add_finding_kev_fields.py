@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0254_alter_jira_username_password'),
+        ('dojo', '0253_alter_jira_username_password'),
     ]
 
     operations = [

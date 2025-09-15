@@ -26,7 +26,7 @@ def clean_tag_value(tag: str) -> str:
     - Converting all spaces to underscores
     - Removing all single/double quotes
     """
-    return tag.replace(",", "-").replace(" ", "").replace('"', "").replace("'", "")
+    return tag.replace(",", "-").replace(" ", "_").replace('"', "").replace("'", "")
 
 
 def clean_all_tag_fields(apps, schema_editor):
@@ -114,7 +114,7 @@ def cannot_turn_back_time(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0252_import_history_left_untouched_rename"),
+        ("dojo", "0265_file_upload_cleanup"),
     ]
 
     operations = [

@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0260_clean_tags'),
+        ('dojo', '0258_alter_system_settings_maximum_password_length_and_more'),
     ]
 
     operations = [

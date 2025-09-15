@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0265_jira_instance_password_help_text_fix'),
+        ('dojo', '0263_jira_instance_password_help_text_fix'),
     ]
 
     operations = [

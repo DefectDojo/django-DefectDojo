@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0255_add_finding_kev_fields'),
+        ('dojo', '0254_add_finding_kev_fields'),
     ]
 
     operations = [

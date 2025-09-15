@@ -31,7 +31,7 @@ def cannot_turn_back_time(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0266_remove_system_settings_time_zone"), 
+        ("dojo", "0264_remove_system_settings_time_zone"), 
     ]
 
     operations = [

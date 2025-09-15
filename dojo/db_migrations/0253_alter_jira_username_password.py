@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0253_migrate_tags'),
+        ('dojo', '0252_import_history_left_untouched_rename'),
     ]
 
     operations = [
