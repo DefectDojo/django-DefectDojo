@@ -148,7 +148,9 @@ def is_keep_in_sync_with_jira(finding):
     jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
     if jira_issue_exists:
         # Determine if any automatic sync should occur
-        keep_in_sync_enabled = get_jira_instance(finding).finding_jira_sync
+        jira_instance = get_jira_instance(finding)
+        if jira_instance:
+            keep_in_sync_enabled = jira_instance.finding_jira_sync
 
     return keep_in_sync_enabled
 
