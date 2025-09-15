@@ -26,7 +26,7 @@ def clean_tag_value(tag: str) -> str:
     - Converting all spaces to underscores
     - Removing all single/double quotes
     """
-    return tag.replace(",", "-").replace(" ", "_").replace('"', "").replace("'", "")
+    return tag.replace(",", "-").replace(" ", "").replace('"', "").replace("'", "")
 
 
 def clean_all_tag_fields(apps, schema_editor):
