@@ -18,6 +18,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db.models import Count, Q
 from django.forms import modelformset_factory
 from django.forms.widgets import Select, Widget
@@ -384,8 +385,6 @@ class EditFindingGroupForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        import dojo.jira_link.helper as jira_helper
-
         self.fields["push_to_jira"] = forms.BooleanField()
         self.fields["push_to_jira"].required = False
         self.fields["push_to_jira"].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
@@ -2596,7 +2595,6 @@ class BaseJiraForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True, help_text=JIRA_Instance._meta.get_field("password").help_text, label=JIRA_Instance._meta.get_field("password").verbose_name)
 
     def test_jira_connection(self):
-        import dojo.jira_link.helper as jira_helper
         try:
             # Attempt to validate the credentials before moving forward
             jira_helper.get_jira_connection_raw(self.cleaned_data["url"],
@@ -2663,13 +2661,6 @@ class DeleteBenchmarkForm(forms.ModelForm):
     class Meta:
         model = Benchmark_Product_Summary
         fields = ["id"]
-
-
-# class JIRA_ProjectForm(forms.ModelForm):
-
-#     class Meta:
-#         model = JIRA_Project
-#         exclude = ['product']
 
 
 class Product_API_Scan_ConfigurationForm(forms.ModelForm):
@@ -2768,7 +2759,6 @@ class ToolConfigForm(forms.ModelForm):
         exclude = ["product"]
 
     def clean(self):
-        from django.core.validators import URLValidator
         form_data = self.cleaned_data
 
         try:
@@ -2849,7 +2839,6 @@ class ToolProductSettingsForm(forms.ModelForm):
         order = ["name"]
 
     def clean(self):
-        from django.core.validators import URLValidator
         form_data = self.cleaned_data
 
         try:
@@ -3061,7 +3050,6 @@ class JIRAProjectForm(forms.ModelForm):
         fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
-        from dojo.jira_link import helper as jira_helper
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
         self.target = kwargs.pop("target", "product")
         self.product = kwargs.pop("product", None)

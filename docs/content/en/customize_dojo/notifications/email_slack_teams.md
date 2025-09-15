@@ -99,7 +99,7 @@ If you want to apply RBAC\-based filtering to your Slack messages, enabling pers
 
 If your team has a Slack integration enabled (through the above process), individual users can also configure notifications to send directly to your personal Slackbot channel.
 
-1. Start by navigating to your personal Profile page on DefectDojo. Find this by clicking the 👤 **icon** in the top\-right corner. Select your DefectDojo Username from the list. (👤 **paul** in our example)  
+1. Start by navigating to your personal Profile page on DefectDojo. Find this by clicking the 👤 **icon** in the top\-right corner. Select your DefectDojo Username from the list. (👤 **paul** in our example)
 ​
 ![image](images/Configure_a_Slack_Integration_4.png)
 
@@ -111,14 +111,16 @@ You can now [set specific notifications](../about_notifications/) to be sent to 
 
 Microsoft Teams can receive notifications to a specific channel. To do this, you will need to **set up an incoming webhook** on the channel where you wish to receive messages.
 
-1. Complete the process listed in the **[Microsoft Teams Documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet)** for creating a new Incoming Webhook. Keep your unique webhook.office.com link handy as you will need it in subsequent steps.  
+Please note that the old [Office Connector webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet) will be retired by Microsoft, use a new Power Automate Workflow based webhook as documented below.
+
+1. Complete the process listed in the **[Microsoft Teams Documentation](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498)** for creating a new Incoming Webhook. Keep your unique logic.azure.com link handy as you will need it in subsequent steps. You can create webhook for a channel or for a specific chat.
 ​
 ![image](images/Configure_a_Microsoft_Teams_Integration.png)
 2. In DefectDojo, navigate to **Configuration \> System Settings** from the sidebar. (In the Pro UI, this form is located under **Enterprise Settings > System Settings**.)
-3. Check the **Enable Microsoft Teams notifications** box. This will open a hidden section of the form, labeled **‘Msteams url**’.  
+3. Check the **Enable Microsoft Teams notifications** box. This will open a hidden section of the form, labeled **‘Msteams url**’.
 ​
 ![image](images/Configure_a_Microsoft_Teams_Integration_2.png)
-4. Paste the webhook.office.com URL (created in Step 1\) in the **Msteams url** box. Your Teams app will now listen to incoming Notifications from DefectDojo and post them to the channel you selected.
+4. Paste the logic.azure.com URL (created in Step 1\) in the **Msteams url** box. Your Teams app will now listen to incoming Notifications from DefectDojo and post them to the channel you selected.
 
 ### Notes on the Teams integration
 
