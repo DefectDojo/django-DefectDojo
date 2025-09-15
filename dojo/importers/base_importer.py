@@ -374,30 +374,36 @@ class BaseImporter(ImporterOptions):
         )
 
         # Create a history record for each finding
-        for finding in closed_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CLOSED_FINDING,
-            ))
-        for finding in new_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CREATED_FINDING,
-            ))
-        for finding in reactivated_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_REACTIVATED_FINDING,
-            ))
-        for finding in untouched_findings:
-            self.create_import_history_record_safe(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_UNTOUCHED_FINDING,
-            ))
+        finding_action_mappings = [
+            (closed_findings, IMPORT_CLOSED_FINDING),
+            (new_findings, IMPORT_CREATED_FINDING),
+            (reactivated_findings, IMPORT_REACTIVATED_FINDING),
+            (untouched_findings, IMPORT_UNTOUCHED_FINDING),
+        ]
+
+        # Collect all import history records
+        import_history_records = []
+        for findings, action in finding_action_mappings:
+            import_history_records.extend(Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=action,
+                ) for finding in findings)
+
+        # Create all import history records in batches
+        batch_size = 100
+        failed_records = []
+
+        for i in range(0, len(import_history_records), batch_size):
+            batch = import_history_records[i:i + batch_size]
+            try:
+                Test_Import_Finding_Action.objects.bulk_create(batch, ignore_conflicts=True)
+            except IntegrityError:
+                failed_records.extend(batch)
+
+        # Fallback to individual inserts for failed batches only
+        for record in failed_records:
+            self.create_import_history_record_safe(record)
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:

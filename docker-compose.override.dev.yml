@@ -42,6 +42,7 @@ services:
       args:
         COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC: 'True'
     environment:
+      # needed for collectstatic to work
       DD_DJANGO_DEBUG_TOOLBAR_ENABLED: 'True'
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
