@@ -1829,13 +1829,13 @@ class Endpoint(models.Model):
         if self.protocol or self.protocol == "":
             if not re.match(r"^[A-Za-z][A-Za-z0-9\.\-\+]+$", self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError(f'Protocol "{self.protocol}" has invalid format'))
-            if self.protocol == "":
+            if not self.protocol:
                 self.protocol = None
 
         if self.userinfo or self.userinfo == "":
             if not re.match(r"^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$", self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 errors.append(ValidationError(f'Userinfo "{self.userinfo}" has invalid format'))
-            if self.userinfo == "":
+            if not self.userinfo:
                 self.userinfo = None
 
         if self.host:
@@ -1866,7 +1866,7 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
                     logger.error('Path "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.path == "":
+            if not self.path:
                 self.path = None
 
         if self.query or self.query == "":
@@ -1879,7 +1879,7 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
                     logger.error('Query "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.query == "":
+            if not self.query:
                 self.query = None
 
         if self.fragment or self.fragment == "":
@@ -1892,7 +1892,7 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
                     logger.error('Fragment "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.fragment == "":
+            if not self.fragment:
                 self.fragment = None
 
         if errors:
@@ -2050,13 +2050,13 @@ class Endpoint(models.Model):
                 query_parts.append(f"{k}={v}")
         query_string = "&".join(query_parts)
 
-        protocol = url.scheme if url.scheme != "" else None
+        protocol = url.scheme or None
         userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
-        host = url.host if url.host != "" else None
+        host = url.host or None
         port = url.port
         path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
-        query = query_string[:1000] if query_string is not None and query_string != "" else None
-        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != "" else None
+        query = query_string[:1000] if query_string is not None and query_string else None
+        fragment = url.fragment[:500] if url.fragment is not None and url.fragment else None
 
         return Endpoint(
             protocol=protocol,
