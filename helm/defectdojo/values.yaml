@@ -325,8 +325,8 @@ django:
         cpu: 2000m
         memory: 512Mi
     appSettings:
-      processes: 2
-      threads: 2
+      processes: 4
+      threads: 4
       # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
     enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:

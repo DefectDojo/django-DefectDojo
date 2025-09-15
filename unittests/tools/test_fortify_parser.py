@@ -154,3 +154,27 @@ class TestFortifyParser(DojoTestCase):
                 self.assertFalse(finding.active)
                 self.assertTrue(finding.false_p)
                 self.assertEqual("Threaded Comments:\n2025-03-10T20:52:28.964+05:30 - (testuser): Not an issue. Handled in server config to refer to internal Artifactory\n", finding.impact)
+
+    def test_fortify_hello_world_fpr_rule_without_metainfo(self):
+        with (get_unit_tests_scans_path("fortify") / "hello_world_no_metainfo.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(4, len(findings))
+            # for i in range(len(findings)):
+            #     print(f"{i}: {findings[i]}: {findings[i].severity}")
+
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                # Info as rule has no metainfo/impact
+                self.assertEqual("Informational", finding.severity)
+                self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
+                self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
+                self.assertEqual(5, finding.line)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
+                self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
+                self.assertEqual(13, finding.line)

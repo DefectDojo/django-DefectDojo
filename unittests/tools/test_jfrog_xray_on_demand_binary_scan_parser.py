@@ -19,6 +19,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         self.assertEqual("gav://test", item.component_name)
         self.assertEqual("CVE-2014-0114", item.unsaved_vulnerability_ids[0])
         self.assertEqual("High", item.severity)
+        self.assertEqual(True, item.fix_available)
 
     def test_parse_file_with_many_vulns(self):
         testfile = (get_unit_tests_scans_path("jfrog_xray_on_demand_binary_scan") / "many_vulns.json").open(encoding="utf-8")
