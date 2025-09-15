@@ -33,6 +33,7 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 
 FROM build AS collectstatic
+ARG COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC=false
 RUN apk add nodejs npm
 RUN npm install -g yarn --force
 
@@ -51,7 +52,7 @@ RUN \
   yarn
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
+RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=${COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC} python3 manage.py collectstatic --noinput --verbosity=2 && true
 
 FROM nginx:1.29.1-alpine3.22@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
 ARG uid=1001
