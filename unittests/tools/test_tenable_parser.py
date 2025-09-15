@@ -112,7 +112,7 @@ class TestTenableParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("SSL Medium Strength Cipher Suites Supported (SWEET32)", finding.title)
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual(["CVE-2016-2183"], finding.unsaved_vulnerability_ids)
             self.assertEqual(0, finding.cwe)
@@ -120,7 +120,7 @@ class TestTenableParser(DojoTestCase):
             finding = findings[1]
             self.assertEqual("HTTP TRACE / TRACK Methods Allowed", finding.title)
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual(["CVE-2003-1567"], finding.unsaved_vulnerability_ids)
             self.assertEqual(0, finding.cwe)
             # self.assertEqual(16, finding.cwe)

@@ -271,6 +271,24 @@ class TenableCSVParser:
 
             # Other text fields
             description = self.get_description(row)
+
+            severity_justification = f"Severity: {severity}\n"
+            for field in (
+                "VPR score",
+                "EPSS Score",
+                "Risk Factor",
+                "STIG Severity",
+                "CVSS v4.0 Base Score",
+                "CVSS v4.0 Base+Threat Score",
+                "CVSS v3.0 Base Score",
+                "CVSS v3.0 Temporal Score",
+                "Metasploit",
+                "Core Impact",
+                "CANVAS",
+                "XREF",
+            ):
+                severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
+
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Object Class", "No Class Defined")
             references = row.get("See Also", row.get("definition.see_also", "N/A"))

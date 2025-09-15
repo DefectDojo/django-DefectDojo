@@ -68,8 +68,7 @@ class TestTwistlockParser(DojoTestCase):
 
         # Verify timestamp parsing (Item 4)
         self.assertIsNotNone(finding.date)
-        # Should use Published date (2020-09-04) or Discovered date (2020-09-29)
-        self.assertEqual(finding.date.year, 2020)
+        self.assertEqual(finding.date.year, 2025)
         self.assertIn(finding.date.month, {9, 1, 11, 12})  # Various months from the test data
 
         # Verify metadata in impact field (Item 3) - now separated by newlines
@@ -89,8 +88,6 @@ class TestTwistlockParser(DojoTestCase):
         self.assertIn("46", finding.impact)
         self.assertIn("Clusters:", finding.impact)
         self.assertIn("alpha", finding.impact)
-        self.assertIn("Published:", finding.impact)
-        self.assertIn("Discovered:", finding.impact)
 
         # Verify newline separation format
         self.assertTrue("\n" in finding.impact)

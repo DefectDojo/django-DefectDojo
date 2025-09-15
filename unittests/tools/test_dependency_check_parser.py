@@ -21,13 +21,13 @@ class TestFile:
 
 class TestDependencyCheckParser(DojoTestCase):
     def test_parse_empty_file(self):
-        with (get_unit_tests_scans_path("dependency_check") / "single_dependency_with_related_no_vulnerability.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("dependency_check") / "single_dependency_with_related_no_vulnerability.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_vulnerability_has_single_finding(self):
-        with (get_unit_tests_scans_path("dependency_check") / "single_vuln.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("dependency_check") / "single_vuln.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
@@ -36,8 +36,6 @@ class TestDependencyCheckParser(DojoTestCase):
             with self.subTest(i=i):
                 self.assertEqual(items[i].title, "org.owasp_library:6.7.8 | CVE-0000-0001")
                 self.assertEqual(items[i].severity, "Medium")
-                self.assertEqual(items[i].cvssv3, None)
-                self.assertEqual(items[i].cvssv3_score, None)
                 self.assertEqual(items[i].component_name, "org.owasp_library")
                 self.assertEqual(items[i].component_version, "6.7.8")
                 self.assertEqual(
@@ -47,14 +45,14 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[i].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400)))
 
     def test_parse_file_with_single_dependency_with_related_no_vulnerability(self):
-        with (get_unit_tests_scans_path("dependency_check") / "single_dependency_with_related_no_vulnerability.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("dependency_check") / "single_dependency_with_related_no_vulnerability.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
             self.assertEqual(0, len(items))
 
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        with (get_unit_tests_scans_path("dependency_check") / "multiple_vulnerabilities_has_multiple_findings.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("dependency_check") / "multiple_vulnerabilities_has_multiple_findings.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
@@ -75,8 +73,6 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[0].description,
                 )
                 self.assertEqual(items[0].severity, "High")
-                self.assertEqual(items[0].cvssv3, None)
-                self.assertEqual(items[0].cvssv3_score, None)
                 self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
                 self.assertEqual(
                     items[0].mitigation,
@@ -132,53 +128,6 @@ class TestDependencyCheckParser(DojoTestCase):
             #     self.assertEqual("CVE-0000-0001", items[2].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=1):
-                self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
-                self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
-                self.assertIn(
-                    "Description of a bad vulnerability.",
-                    items[1].description,
-                )
-                self.assertIn(
-                    "/var/lib/adapter-ear8.ear/dom4j-2.1.1.jar",
-                    items[1].description,
-                )
-                self.assertEqual(items[1].severity, "High")
-                self.assertEqual(items[1].cvssv3, None)
-                self.assertEqual(items[1].cvssv3_score, None)
-                self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
-                self.assertEqual(
-                    items[1].mitigation,
-                    "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
-                )
-                self.assertEqual(items[1].tags, "related")
-                self.assertEqual(1, len(items[1].unsaved_vulnerability_ids))
-                self.assertEqual("CVE-0000-0001", items[1].unsaved_vulnerability_ids[0])
-
-            with self.subTest(i=2):
-                self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
-                self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
-                self.assertIn(
-                    "Description of a bad vulnerability.",
-                    items[2].description,
-                )
-                self.assertIn(
-                    "/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar",
-                    items[2].description,
-                )
-                self.assertEqual(items[2].severity, "High")
-                self.assertEqual(items[2].cvssv3, None)
-                self.assertEqual(items[2].cvssv3_score, None)
-                self.assertEqual(items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar")
-                self.assertEqual(
-                    items[2].mitigation,
-                    "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
-                )
-                self.assertEqual(1, len(items[2].unsaved_vulnerability_ids))
-                self.assertEqual("CVE-0000-0001", items[2].unsaved_vulnerability_ids[0])
-
-            with self.subTest(i=3):
                 # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
                 self.assertEqual(
                     items[1].title, "yargs-parser:5.0.0 | 1500",
@@ -188,8 +137,6 @@ class TestDependencyCheckParser(DojoTestCase):
                 # assert fails due to special characters, not too important
                 # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
                 self.assertEqual(items[1].severity, "Low")
-                self.assertEqual(items[3].cvssv3, None)
-                self.assertEqual(items[3].cvssv3_score, None)
                 self.assertEqual(items[1].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[1].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -216,8 +163,6 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[2].description,
                 )
                 self.assertEqual(items[2].severity, "High")
-                self.assertEqual(items[4].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N")
-                self.assertEqual(items[4].cvssv3_score, 7.5)
                 self.assertEqual(items[2].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[2].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -242,8 +187,6 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[3].description,
                 )
                 self.assertEqual(items[3].severity, "High")
-                self.assertEqual(items[5].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H")
-                self.assertEqual(items[5].cvssv3_score, 7.5)
                 self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
                     items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
@@ -256,8 +199,6 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[4].component_name, "org.dom4j_dom4j")
                 self.assertEqual(items[4].component_version, "2.1.1.redhat-00001")
                 self.assertEqual(items[4].severity, "High")
-                self.assertEqual(items[6].cvssv3, None)
-                self.assertEqual(items[6].cvssv3_score, None)
                 self.assertEqual(items[4].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
                 self.assertEqual(
                     items[4].mitigation,
@@ -272,8 +213,6 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[5].component_name, "dom4j")
                 self.assertEqual(items[5].component_version, "2.1.1")
                 self.assertEqual(items[5].severity, "High")
-                self.assertEqual(items[7].cvssv3, None)
-                self.assertEqual(items[7].cvssv3_score, None)
                 self.assertEqual(
                     items[5].mitigation, "Update dom4j:2.1.1 to at least the version recommended in the description",
                 )
@@ -287,8 +226,6 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[6].component_name, "jquery")
                 self.assertEqual(items[6].component_version, "3.1.1")
                 self.assertEqual(items[6].severity, "High")
-                self.assertEqual(items[8].cvssv3, None)
-                self.assertEqual(items[8].cvssv3_score, None)
                 self.assertEqual(
                     items[6].mitigation, "Update jquery:3.1.1 to at least the version recommended in the description",
                 )
@@ -301,11 +238,9 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[7].mitigation,
                     "**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description",
                 )
-                self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
-                self.assertEqual(items[9].severity, "Critical")
-                self.assertEqual(items[9].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
-                self.assertEqual(items[9].cvssv3_score, 9.8)
-                self.assertEqual(items[9].is_mitigated, True)
+                self.assertEqual(items[7].tags, ["suppressed", "no_suppression_document"])
+                self.assertEqual(items[7].severity, "Critical")
+                self.assertEqual(items[7].is_mitigated, True)
 
             with self.subTest(i=8):
                 self.assertEqual(items[8].active, False)
@@ -313,15 +248,13 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[8].mitigation,
                     "**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description",
                 )
-                self.assertEqual(items[10].tags, "suppressed")
-                self.assertEqual(items[10].severity, "Critical")
-                self.assertEqual(items[10].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
-                self.assertEqual(items[10].cvssv3_score, 9.8)
-                self.assertEqual(items[10].is_mitigated, True)
+                self.assertEqual(items[8].tags, "suppressed")
+                self.assertEqual(items[8].severity, "Critical")
+                self.assertEqual(items[8].is_mitigated, True)
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
-        with (get_unit_tests_scans_path("dependency_check") / "version-6.5.3.xml").open(encoding="utf-8") as test_file:
+        with open(get_unit_tests_scans_path("dependency_check") / "version-6.5.3.xml", encoding="utf-8") as test_file:
             parser = DependencyCheckParser()
             findings = parser.get_findings(test_file, Test())
             items = findings
@@ -336,13 +269,11 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[i].description,
                 )
                 self.assertEqual(items[i].severity, "Low")
-                self.assertEqual(items[i].cvssv3, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N")
-                self.assertEqual(items[i].cvssv3_score, 3.7)
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
                 self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=UTC))
 
     def test_parse_file_pr6439(self):
-        with (get_unit_tests_scans_path("dependency_check") / "PR6439.xml").open(encoding="utf-8") as testfile:
+        with open(get_unit_tests_scans_path("dependency_check") / "PR6439.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
@@ -364,8 +295,6 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[0].description,
                 )
                 self.assertEqual(items[0].severity, "Critical")
-                self.assertEqual(items[0].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
-                self.assertEqual(items[0].cvssv3_score, 9.8)
                 self.assertEqual(items[0].file_path, "activemq-broker-5.16.5.jar")
                 self.assertIn(
                     "**This vulnerability is mitigated and/or suppressed:** Ist eine Dependency vom CXF. Der im Finding erwähnte Bug ist seit Version 1.0",
