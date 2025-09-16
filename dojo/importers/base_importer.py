@@ -333,6 +333,9 @@ class BaseImporter(ImporterOptions):
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
+        if settings.TRACK_IMPORT_HISTORY is False:
+            return None
+
         if untouched_findings is None:
             untouched_findings = []
         if reactivated_findings is None:
@@ -341,8 +344,6 @@ class BaseImporter(ImporterOptions):
             closed_findings = []
         if new_findings is None:
             new_findings = []
-        if settings.TRACK_IMPORT_HISTORY is False:
-            return None
         # Log the current state of what has occurred in case there could be
         # deviation from what is displayed in the view
         logger.debug(
@@ -382,28 +383,38 @@ class BaseImporter(ImporterOptions):
         ]
 
         # Collect all import history records
+        # # Single bulk existence check to avoid creating rows with missing FK
+        # candidate_ids = set()
+        # for _lst in (closed_findings, new_findings, reactivated_findings, untouched_findings):
+        #     candidate_ids.update(f.id for f in _lst)
+        # existing_ids = set(Finding.objects.filter(id__in=candidate_ids).values_list("id", flat=True)) if candidate_ids else set()
+
         import_history_records = []
         for findings, action in finding_action_mappings:
-            import_history_records.extend(Test_Import_Finding_Action(
+            import_history_records.extend(
+                Test_Import_Finding_Action(
                     test_import=test_import,
-                    finding=finding,
+                    finding_id=finding.id,
                     action=action,
-                ) for finding in findings)
+                )
+                for finding in findings
+#                if finding.id in existing_ids
+            )
 
-        # Create all import history records in batches
-        batch_size = 100
-        failed_records = []
-
-        for i in range(0, len(import_history_records), batch_size):
-            batch = import_history_records[i:i + batch_size]
-            try:
-                Test_Import_Finding_Action.objects.bulk_create(batch, ignore_conflicts=True)
-            except IntegrityError:
-                failed_records.extend(batch)
-
-        # Fallback to individual inserts for failed batches only
-        for record in failed_records:
-            self.create_import_history_record_safe(record)
+        # Bulk create all at once and let Django handle batching internally.
+        # If any integrity error occurs, fall back to inserting all records individually.
+        # The bulk_create is atomic so all batches will succeed or all will fail/rollback
+        try:
+            # keep bulk failure contained so fallback can proceed in TestCase transaction
+            Test_Import_Finding_Action.objects.bulk_create(
+                import_history_records,
+                ignore_conflicts=True,
+                batch_size=100,
+            )
+        except IntegrityError:
+            logger.warning("IntegrityError occurred while bulk creating Test_Import_Finding_Actions, falling back to individual inserts")
+            for record in import_history_records:
+                self.create_import_history_record_safe(record)
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
@@ -424,10 +435,10 @@ class BaseImporter(ImporterOptions):
         test_import_finding_action,
     ):
         """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
-        logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
+        logger.debug(f"creating Test_Import_Finding_Action for finding_id: {test_import_finding_action.finding_id} action: {test_import_finding_action.action}")
         try:
             test_import_finding_action.save()
-        except IntegrityError as e:
+        except (IntegrityError, ValueError) as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
             logger.warning("Error creating Test_Import_Finding_Action: %s", e)
             logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
