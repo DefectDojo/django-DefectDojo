@@ -982,7 +982,7 @@ class FindingViewSet(
             DynamicFindingSerializer = type(
                 "DynamicFindingSerializer",
                 (serializer_class,),
-                {"Meta": Meta},
+                {"Meta": Meta}
             )
             kwargs['context'] = self.get_serializer_context()
             return DynamicFindingSerializer(*args, **kwargs)
