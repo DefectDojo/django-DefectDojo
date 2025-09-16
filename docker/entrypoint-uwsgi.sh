@@ -36,8 +36,8 @@ exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
   --enable-threads \
-  --processes "${DD_UWSGI_NUM_OF_PROCESSES:-2}" \
-  --threads "${DD_UWSGI_NUM_OF_THREADS:-2}" \
+  --processes "${DD_UWSGI_NUM_OF_PROCESSES:-4}" \
+  --threads "${DD_UWSGI_NUM_OF_THREADS:-4}" \
   --wsgi dojo.wsgi:application \
   --http ${DD_UWSGI_HTTP} --http-to "${DD_UWSGI_ENDPOINT}" \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \

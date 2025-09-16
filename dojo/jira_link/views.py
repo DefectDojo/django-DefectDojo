@@ -2,12 +2,14 @@
 import datetime
 import json
 import logging
+import re
 
 # Third party imports
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -212,8 +214,8 @@ def check_for_and_create_comment(parsed_json):
     comment = parsed_json.get("comment", None)
     if comment is None:
         return None
-
     comment_text = comment.get("body")
+    comment_text_without_defectdojo_user = re.sub(r"^\(.*?\):\s*", "", comment_text)
     commenter = ""
     if "name" in comment.get("updateAuthor"):
         commenter = comment.get("updateAuthor", {}).get("name")
@@ -255,10 +257,9 @@ def check_for_and_create_comment(parsed_json):
     entry = f"({commenter_display_name} ({commenter})): {comment_text}"
     # Iterate (potentially) over each of the findings the note should be added to
     for finding in findings:
-        # Determine if this exact note was created within the last 30 seconds to avoid duplicate notes
+        # Determine if the same note body was created by either DefectDojo or Jira
         existing_notes = finding.notes.filter(
-            entry=entry,
-            author=author,
+            Q(entry__icontains=comment_text_without_defectdojo_user) | Q(entry__icontains=entry),
             date__gte=(timezone.now() - datetime.timedelta(seconds=30)),
         )
         # Check the query for any hits

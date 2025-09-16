@@ -117,7 +117,7 @@ class VCGXmlParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8"),
+                    ).encode("utf-8"), usedforsecurity=False,
                 ).hexdigest()
 
                 if key not in dupes:
@@ -183,7 +183,7 @@ class VCGCsvParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8"),
+                    ).encode("utf-8"), usedforsecurity=False,
                 ).hexdigest()
 
                 if key not in dupes:

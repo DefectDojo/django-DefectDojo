@@ -1,4 +1,5 @@
 import logging
+import threading
 from functools import wraps
 
 from django.conf import settings
@@ -10,6 +11,47 @@ from django_ratelimit.exceptions import Ratelimited
 from dojo.models import Dojo_User, Finding, GeneralSettings
 
 logger = logging.getLogger(__name__)
+
+
+class ThreadLocalTaskCounter:
+    def __init__(self):
+        self._thread_local = threading.local()
+
+    def _get_task_list(self):
+        if not hasattr(self._thread_local, "tasks"):
+            self._thread_local.tasks = []
+        return self._thread_local.tasks
+
+    def _get_recording(self):
+        return getattr(self._thread_local, "recording", False)
+
+    def start(self):
+        self._thread_local.recording = True
+        self._get_task_list().clear()
+
+    def stop(self):
+        self._thread_local.recording = False
+
+    def incr(self, task_name, model_id=None, args=None, kwargs=None):
+        if not self._get_recording():
+            return
+        tasks = self._get_task_list()
+        tasks.append({
+            "task": task_name,
+            "id": model_id,
+            "args": args if args is not None else [],
+            "kwargs": kwargs if kwargs is not None else {},
+        })
+
+    def get(self):
+        return len(self._get_task_list())
+
+    def get_tasks(self):
+        return list(self._get_task_list())
+
+
+# Create a shared instance
+dojo_async_task_counter = ThreadLocalTaskCounter()
 
 
 def we_want_async(*args, func=None, **kwargs):
@@ -40,6 +82,13 @@ def dojo_async_task(func):
         from dojo.utils import get_current_user
         user = get_current_user()
         kwargs["async_user"] = user
+
+        dojo_async_task_counter.incr(
+            func.__name__,
+            args=args,
+            kwargs=kwargs,
+        )
+
         countdown = kwargs.pop("countdown", 0)
         if we_want_async(*args, func=func, **kwargs):
             return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
@@ -106,7 +155,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
                     try:
                         instance = model.objects.get(id=model_or_id)
                     except model.DoesNotExist:
-                        logger.debug("error instantiating model_or_id: %s for model: %s: DoesNotExist", model_or_id, model)
+                        logger.warning("error instantiating model_or_id: %s for model: %s: DoesNotExist", model_or_id, model)
                         instance = None
                     args = list(args)
                     args[parameter] = instance

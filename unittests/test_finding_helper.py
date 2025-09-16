@@ -7,6 +7,8 @@ from crum import impersonate
 from dojo.models import ApiError
 from django.contrib.auth.models import User
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from dojo.finding.helper import (
     save_vulnerability_ids,
@@ -31,7 +33,7 @@ from dojo.models import (
     Dojo_User,)
 
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoAPITestCase, DojoTestCase
 
 logger = logging.getLogger(__name__)
 
@@ -451,3 +453,91 @@ class TestFindingHelper(DojoTestCase):
             str(context.exception.detail),
             "Number of fields and values do not match"
         )
+
+
+class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.system_settings(enable_jira=True)
+        self.testuser = User.objects.get(username="admin")
+        self.testuser.usercontactinfo.block_execution = True
+        self.testuser.usercontactinfo.save()
+        token = Token.objects.get(user=self.testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.client.force_login(self.get_test_admin())
+
+    def test_finding_create_without_cve(self):
+        # use existing finding as template for a new finding. this finding has no cve
+        finding_details = self.get_finding_api(2)
+        del finding_details["id"]
+        if "cve" in finding_details:
+            del finding_details["cve"]
+        new_vulnerability_ids = [
+            {"vulnerability_id": "RHSA-12345"},
+            {"vulnerability_id": "GHSA-7890"},
+        ]
+        finding_details["vulnerability_ids"] = new_vulnerability_ids
+        response = self.post_new_finding_api(finding_details)
+        # assert resopnse data
+        self.assertIsNone(response.get("cve"))
+        self.assertEqual(new_vulnerability_ids, response.get("vulnerability_ids"))
+
+        # assert GET finding
+        finding_id = response.get("id")
+        response = self.get_finding_api(finding_id)
+        self.assertIsNone(response.get("cve"))
+        self.assertEqual(new_vulnerability_ids, response.get("vulnerability_ids"))
+
+    def test_finding_create_with_cve(self):
+        # use existing finding as template for a new finding. this finding has no cve
+        finding_details = self.get_finding_api(2)
+        del finding_details["id"]
+        if "cve" in finding_details:
+            del finding_details["cve"]
+        new_vulnerability_ids = [
+            {"vulnerability_id": "CVE-2025-12345"},
+            {"vulnerability_id": "RHSA-12345"},
+            {"vulnerability_id": "GHSA-7890"},
+        ]
+        finding_details["vulnerability_ids"] = new_vulnerability_ids
+        response = self.post_new_finding_api(finding_details)
+        # assert response data
+        self.assertEqual(new_vulnerability_ids, response.get("vulnerability_ids"))
+
+        # CVE is not in the response, so get it fromt the database
+        self.assertEqual("CVE-2025-12345", Finding.objects.get(id=response.get("id")).cve)
+
+    def test_finding_create_and_update_with_cve(self):
+        # use existing finding as template for a new finding. this finding has no cve
+        finding_details = self.get_finding_api(2)
+        del finding_details["id"]
+        if "cve" in finding_details:
+            del finding_details["cve"]
+        new_vulnerability_ids = [
+            {"vulnerability_id": "CVE-2025-12345"},
+            {"vulnerability_id": "RHSA-12345"},
+            {"vulnerability_id": "GHSA-7890"},
+        ]
+        finding_details["vulnerability_ids"] = new_vulnerability_ids
+        response = self.post_new_finding_api(finding_details)
+        finding_id = response.get("id")
+        # assert resopnse data
+        self.assertEqual(new_vulnerability_ids, response.get("vulnerability_ids"))
+
+        # CVE is not in the response, so get it fromt the database
+        self.assertEqual("CVE-2025-12345", Finding.objects.get(id=finding_id).cve)
+
+        # change vulnerability_id and remove cve
+        updated_vulnerability_ids = [
+            {"vulnerability_id": "RHSA-000000"},
+        ]
+        response = self.patch_finding_api(finding_id, {"vulnerability_ids": updated_vulnerability_ids})
+        # assert resopnse data
+        self.assertEqual(updated_vulnerability_ids, response.get("vulnerability_ids"))
+
+        # CVE is not in the response, so get it fromt the database
+        # current behaviour is that the cve is taken from the first vulnerability_id...
+        self.assertEqual("RHSA-000000", Finding.objects.get(id=finding_id).cve)

@@ -19,11 +19,10 @@ class Importer(ABC):
 
 class BlackduckImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckFinding]:
-        if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
-
-        if zipfile.is_zipfile(str(report)):
+        if zipfile.is_zipfile(report):
+            report.seek(0)  # rewind after the check
             return self._process_zipfile(report)
+        report.seek(0)  # rewind after the check
         return self._process_csvfile(report)
 
     def _process_csvfile(self, report: Path):
@@ -31,10 +30,11 @@ class BlackduckImporter(Importer):
         If passed in a regular security.csv, process it.
         No file information then.
         """
-        security_issues = {}
-        with report.open(encoding="utf-8") as f:
-            security_issues = self.__partition_by_key(f)
+        content = report.read()
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
 
+        security_issues = self.__partition_by_key(io.StringIO(content))
         project_ids = set(security_issues.keys())
         return self._process_project_findings(
             project_ids, security_issues, None,
@@ -48,7 +48,7 @@ class BlackduckImporter(Importer):
         files = {}
         security_issues = {}
 
-        with zipfile.ZipFile(str(report)) as zipf:
+        with zipfile.ZipFile(report) as zipf:
             for full_file_name in zipf.namelist():
                 file_name = full_file_name.split("/")[-1]
                 # Backwards compatibility, newer versions of Blackduck have a source file rather

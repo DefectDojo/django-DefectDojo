@@ -178,4 +178,4 @@ class ApiCobaltParser:
         return cobalt_state == "wont_fix"
 
     def is_verified(self, cobalt_state):
-        return cobalt_state != "new" and cobalt_state != "triaging"
+        return cobalt_state not in {"new", "triaging"}

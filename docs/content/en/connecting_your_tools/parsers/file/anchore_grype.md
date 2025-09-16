@@ -5,12 +5,17 @@ toc_hide: true
 ### File Types
 DefectDojo parser accepts a .json file.
 
-Anchore Grype JSON files are created using the Grype CLI, using the '-o json' option.  See: https://github.com/anchore/grype
+Anchore Grype JSON files are created using the Grype CLI, using the '--output=json' option.  See: https://github.com/anchore/grype
 
 **Example:**
 {{< highlight bash >}}
-grype yourApp/example-page -o json > example_vulns.json
+grype yourApp/example-page --output=json=example_vulns.json
 {{< /highlight >}}
+
+It's possible to instruct Anchore to organize all findings by CVE (vs GHSA, RHSA, etc) using the `--by-cve` parameter.
+Considerations:
+- Using `--by-cve` could lead to more, or different Findings being created as some advisories fix multiple CVEs at once.
+- We recommend you consistently choose whether to use this flag or not in your report generation.  Mixing reports generated with `--by-cve` and without (via Reimport, for example) can lead to unpredictable results, such as mismatched Hash Codes.
 
 ### Acceptable JSON Format
 All properties are expected as strings and are required by the parser.
@@ -190,3 +195,11 @@ All properties are expected as strings and are required by the parser.
 
 ### Sample Scan Data
 Sample Grype scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_grype).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- severity
+- component name
+- component version

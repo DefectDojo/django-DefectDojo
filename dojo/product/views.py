@@ -4,6 +4,7 @@ import calendar as tcalendar
 import logging
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
+from functools import partial
 from math import ceil
 from django.conf import settings
 
@@ -12,9 +13,10 @@ from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
+from django.db import DEFAULT_DB_ALIAS, connection
+from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.expressions import Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -77,6 +79,7 @@ from dojo.forms import (
 from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
+    Benchmark_Type,
     BurpRawRequestResponse,
     Component,
     DojoMeta,
@@ -97,6 +100,7 @@ from dojo.models import (
     TransferFinding,
     System_Settings,
     Test,
+    Test_Import,
     Test_Type,
     ExclusivePermission,
 )
@@ -112,6 +116,7 @@ from dojo.product_type.queries import (
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.tool_config.factory import create_API
 from dojo.tools.factory import get_api_scan_configuration_hints
@@ -146,7 +151,15 @@ def product(request):
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+
     name_words = prods.values_list("name", flat=True)
+    base_findings = Finding.objects.filter(test__engagement__product_id=OuterRef("pk"), active=True)
+    prods = prods.annotate(
+        findings_count=Coalesce(
+            build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
+        ),
+    )
+
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
     prod_filter = filter_class(request.GET, queryset=prods, user=request.user)
@@ -156,6 +169,9 @@ def product(request):
     # It is deactivated for performance reasons
     # prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
+    # Get benchmark types for the template
+    benchmark_types = Benchmark_Type.objects.filter(enabled=True).order_by("name")
+
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
     return render(request, "dojo/product.html", {
@@ -163,47 +179,68 @@ def product(request):
         "prod_filter": prod_filter,
         "name_words": sorted(set(name_words)),
         "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
+        "benchmark_types": benchmark_types,
         "user": request.user})
 
 
 def prefetch_for_product(prods):
-    prefetched_prods = prods
-    if isinstance(prods,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-
-        prefetched_prods = prefetched_prods.prefetch_related("team_manager")
-        prefetched_prods = prefetched_prods.prefetch_related("product_manager")
-        prefetched_prods = prefetched_prods.prefetch_related("technical_contact")
-
-        prefetched_prods = prefetched_prods.annotate(
-            active_engagement_count=Count("engagement__id", filter=Q(engagement__active=True)))
-        prefetched_prods = prefetched_prods.annotate(
-            closed_engagement_count=Count("engagement__id", filter=Q(engagement__active=False)))
-        prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max("engagement__target_start"))
-        prefetched_prods = prefetched_prods.annotate(active_finding_count=Count("engagement__test__finding__id",
-                                                                                filter=Q(
-                                                                                    engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.prefetch_related("jira_project_set__jira_instance")
-        prefetched_prods = prefetched_prods.prefetch_related("members")
-        prefetched_prods = prefetched_prods.prefetch_related("prod_type__members")
-        active_endpoint_query = Endpoint.objects.filter(
-            status_endpoint__mitigated=False,
-            status_endpoint__false_positive=False,
-            status_endpoint__out_of_scope=False,
-            status_endpoint__risk_accepted=False,
-        ).distinct()
-        prefetched_prods = prefetched_prods.prefetch_related(
-            Prefetch("endpoint_set", queryset=active_endpoint_query, to_attr="active_endpoints"))
-        prefetched_prods = prefetched_prods.prefetch_related("tags")
-
-        if get_system_setting("enable_github"):
-            prefetched_prods = prefetched_prods.prefetch_related(
-                Prefetch("github_pkey_set", queryset=GITHUB_PKey.objects.all().select_related("git_conf"),
-                         to_attr="github_confs"))
-
-    else:
+    # old code can arrive here with prods being a list because the query was already executed
+    if not isinstance(prods, QuerySet):
         logger.debug("unable to prefetch because query was already executed")
+        return prods
 
+    prefetched_prods = prods.select_related("team_manager", "product_manager", "technical_contact").prefetch_related(
+        "tags",
+        "members",
+        "prod_type__members",
+        "jira_project_set__jira_instance",
+    )
+
+    engagements = Engagement.objects.filter(product_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="product_id")
+    prefetched_prods = prefetched_prods.annotate(
+        active_engagement_count=Coalesce(count_subquery(engagements.filter(active=True)), Value(0)),
+        closed_engagement_count=Coalesce(count_subquery(engagements.filter(active=False)), Value(0)),
+        last_engagement_date=Subquery(
+            engagements.order_by("-target_start").values("target_start")[:1], output_field=DateField(),
+        ),
+    )
+
+    base_findings = Finding.objects.filter(test__engagement__product_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="test__engagement__product_id")
+    prefetched_prods = prefetched_prods.annotate(
+        active_finding_count=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
+        active_verified_finding_count=Coalesce(
+            count_subquery(base_findings.filter(active=True, verified=True)),
+            Value(0),
+        ),
+    )
+    prefetched_prods = prefetched_prods.annotate(
+        total_reimport_count=Coalesce(
+            count_subquery(
+                Test_Import.objects.filter(test__engagement__product_id=OuterRef("pk"), type=Test_Import.REIMPORT_TYPE),
+            ),
+            Value(0),
+        ),
+    )
+
+    active_endpoint_qs = Endpoint.objects.filter(
+        status_endpoint__mitigated=False,
+        status_endpoint__false_positive=False,
+        status_endpoint__out_of_scope=False,
+        status_endpoint__risk_accepted=False,
+    ).distinct()
+
+    prefetched_prods = prefetched_prods.prefetch_related(
+        Prefetch("endpoint_set", queryset=active_endpoint_qs, to_attr="active_endpoints"),
+    )
+
+    if get_system_setting("enable_github"):
+        prefetched_prods = prefetched_prods.prefetch_related(
+            Prefetch(
+                "github_pkey_set", queryset=GITHUB_PKey.objects.all().select_related("git_conf"), to_attr="github_confs",
+            ),
+        )
     return prefetched_prods
 
 
@@ -300,6 +337,7 @@ def view_product(request, pid):
         "system_settings": system_settings,
         "benchmarks_percents": benchAndPercent,
         "benchmarks": benchmarks,
+        "benchmark_type": product_tab.benchmark_type,
         "product_members": product_members,
         "global_product_members": global_product_members,
         "product_type_members": product_type_members,
@@ -363,7 +401,7 @@ def identify_view(request):
     return "Finding"
 
 
-def finding_querys(request, prod):
+def finding_queries(request, prod):
     filters = {}
     findings_query = Finding.objects.filter(test__engagement__product=prod)
     # prefetch only what's needed to avoid lots of repeated queries
@@ -432,7 +470,7 @@ def finding_querys(request, prod):
     return filters
 
 
-def endpoint_querys(request, prod):
+def endpoint_queries(request, prod):
     filters = {}
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
                                                      finding__severity__in=(
@@ -448,13 +486,11 @@ def endpoint_querys(request, prod):
     filters["form"] = endpoints.form
 
     if not endpoints_qs and not endpoints_query:
-        endpoints = endpoints_query
-        endpoints_qs = queryset_check(endpoints)
-        messages.add_message(request,
-                             messages.ERROR,
-                             _("All objects have been filtered away. Displaying all objects"),
-                             extra_tags="alert-danger")
-
+        messages.add_message(
+            request,
+            messages.WARNING,
+            _("No Endpoints match the current filters."),
+            extra_tags="alert-danger")
     try:
         start_date = endpoints_qs.earliest("date").date
         start_date = datetime(start_date.year,
@@ -538,9 +574,9 @@ def view_product_metrics(request, pid):
 
     filters = {}
     if view == "Finding":
-        filters = finding_querys(request, prod)
+        filters = finding_queries(request, prod)
     elif view == "Endpoint":
-        filters = endpoint_querys(request, prod)
+        filters = endpoint_queries(request, prod)
 
     start_date = timezone.make_aware(datetime.combine(filters["start_date"], datetime.min.time()))
     end_date = filters["end_date"]
@@ -612,7 +648,7 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp] = {"closed": 0, "open": 1, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
 
-            if view == "Finding" or view == "Endpoint":
+            if view in {"Finding", "Endpoint"}:
                 severity = finding.get("severity")
 
             finding_age = calculate_finding_age(finding)
@@ -673,7 +709,11 @@ def view_product_metrics(request, pid):
                 accepted_objs_by_severity[finding.get("severity")] += 1
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related("finding_set", "test_type")
-    tests = tests.annotate(verified_finding_count=Count("finding__id", filter=Q(finding__verified=True)))
+    verified_finding_subquery = build_count_subquery(
+        Finding.objects.filter(test=OuterRef("pk"), verified=True),
+        group_field="test_id",
+    )
+    tests = tests.annotate(verified_finding_count=Coalesce(verified_finding_subquery, Value(0)))
 
     test_data = {}
     for t in tests:
@@ -802,9 +842,7 @@ def view_engagements(request, pid):
 
 
 def prefetch_for_view_engagements(engagements, recent_test_day_count):
-    engagements = engagements.select_related(
-        "lead",
-    ).prefetch_related(
+    engagements = engagements.prefetch_related(
         Prefetch("test_set", queryset=Test.objects.filter(
             id__in=Subquery(
                 Test.objects.filter(
@@ -814,15 +852,45 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
             )),
                  ),
         "test_set__test_type",
-    ).annotate(
-        count_tests=Count("test", distinct=True),
-        count_findings_all=Count("test__finding__id"),
-        count_findings_open=Count("test__finding__id", filter=Q(test__finding__active=True)),
-        count_findings_open_verified=Count("test__finding__id",
-                                           filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
-        count_findings_close=Count("test__finding__id", filter=Q(test__finding__is_mitigated=True)),
-        count_findings_duplicate=Count("test__finding__id", filter=Q(test__finding__duplicate=True)),
-        count_findings_accepted=Count("test__finding__id", filter=Q(test__finding__risk_accepted=True)),
+    ).select_related(
+        "lead",
+    )
+
+    # Use subqueries to avoid GROUP BY issues
+    test_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")), group_field="engagement_id",
+    )
+    finding_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk")), group_field="test__engagement_id",
+    )
+    finding_open_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True), group_field="test__engagement_id",
+    )
+    finding_open_verified_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, verified=True), group_field="test__engagement_id",
+    )
+    finding_open_fix_available_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, fix_available=True), group_field="test__engagement_id",
+    )
+    finding_close_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), is_mitigated=True), group_field="test__engagement_id",
+    )
+    finding_duplicate_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), duplicate=True), group_field="test__engagement_id",
+    )
+    finding_accepted_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), risk_accepted=True), group_field="test__engagement_id",
+    )
+
+    engagements = engagements.annotate(
+        count_tests=Coalesce(test_subquery, Value(0)),
+        count_findings_all=Coalesce(finding_subquery, Value(0)),
+        count_findings_open=Coalesce(finding_open_subquery, Value(0)),
+        count_findings_open_verified=Coalesce(finding_open_verified_subquery, Value(0)),
+        count_findings_fix_available=Coalesce(finding_open_fix_available_subquery, Value(0)),
+        count_findings_close=Coalesce(finding_close_subquery, Value(0)),
+        count_findings_duplicate=Coalesce(finding_duplicate_subquery, Value(0)),
+        count_findings_accepted=Coalesce(finding_accepted_subquery, Value(0)),
     )
 
     if System_Settings.objects.get().enable_jira:

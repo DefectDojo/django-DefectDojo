@@ -31,6 +31,7 @@ def globalize_vars(request):
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
         "RISK_PENDING": settings.RISK_PENDING,
         "HOST_IA_RECOMMENDATION": settings.HOST_IA_RECOMMENDATION,
+        "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
         "LOGO_URL": settings.LOGO_URL,
     }
 
@@ -60,3 +61,22 @@ def bind_announcement(request):
             ).get(user=request.user)
             return {"announcement": user_announcement.announcement}
     return {}
+
+
+def session_expiry_notification(request):
+    import time
+
+    try:
+        if request.user.is_authenticated:
+            last_activity = request.session.get("_last_activity", time.time())
+            expiry_time = last_activity + settings.SESSION_COOKIE_AGE  # When the session will expire
+            warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
+            notify_time = expiry_time - warning_time
+        else:
+            notify_time = None
+    except Exception:
+        return {}
+    else:
+        return {
+            "session_notify_time": notify_time,
+        }

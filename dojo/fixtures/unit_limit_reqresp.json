@@ -102,13 +102,12 @@
           "api_test": true,
           "deduplication_on_engagement": true
         }
-      },    
+      },
 {
     "pk": 5,
     "model": "dojo.test",
     "fields": {
       "lead": null,
-      "estimated_time": "00:00:00",
       "test_type": 1,
       "scan_type": "ZAP Scan",
       "engagement": 5,
@@ -116,7 +115,6 @@
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [],
       "percent_complete": 100,
-      "actual_time": "00:00:00",
       "target_end": "2017-12-10T00:00:00Z"
     }
   },{

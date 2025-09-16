@@ -38,12 +38,8 @@ class ApiEdgescanParser:
         return self.process_vulnerabilities(test, data)
 
     def process_vulnerabilities(self, test, vulnerabilities):
-        findings = []
 
-        for vulnerability in vulnerabilities:
-            findings.append(self.make_finding(test, vulnerability))
-
-        return findings
+        return [self.make_finding(test, vulnerability) for vulnerability in vulnerabilities]
 
     def make_finding(self, test, vulnerability):
         finding = Finding(test=test)
@@ -66,7 +62,7 @@ class ApiEdgescanParser:
         finding.mitigation = vulnerability["remediation"]
         finding.active = vulnerability["status"] == "open"
         if vulnerability["asset_tags"]:
-            finding.tags = vulnerability["asset_tags"].split(",")
+            finding.unsaved_tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
         finding.unsaved_endpoints = [

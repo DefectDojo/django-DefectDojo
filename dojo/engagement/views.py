@@ -3,8 +3,9 @@ import logging
 import mimetypes
 import operator
 import re
+import time
 from datetime import datetime
-from functools import reduce
+from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
@@ -16,7 +17,8 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q
+from django.db.models import OuterRef, Q, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -102,6 +104,12 @@ from dojo.transfer_findings.notification import Notification as TransferFindings
 from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
+from dojo.product_announcements import (
+    ErrorPageProductAnnouncement,
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
+from dojo.query_utils import build_count_subquery
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.user.queries import get_authorized_users, get_role_members, get_user
@@ -162,7 +170,6 @@ def engagement_calendar(request):
 
 
 def get_filtered_engagements(request, view):
-
     if view not in {"all", "active"}:
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
@@ -172,8 +179,11 @@ def get_filtered_engagements(request, view):
     if view == "active":
         engagements = engagements.filter(active=True)
 
-    engagements = engagements.select_related("product", "product__prod_type") \
+    engagements = (
+        engagements
+        .select_related("product", "product__prod_type")
         .prefetch_related("lead", "tags", "product__tags")
+    )
 
     if System_Settings.objects.get().enable_jira:
         engagements = engagements.prefetch_related(
@@ -181,30 +191,20 @@ def get_filtered_engagements(request, view):
             "product__jira_project_set__jira_instance",
         )
 
+    test_count_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")), group_field="engagement_id",
+    )
+    engagements = engagements.annotate(test_count=Coalesce(test_count_subquery, Value(0)))
+
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementDirectFilterWithoutObjectLookups if filter_string_matching else EngagementDirectFilter
     return filter_class(request.GET, queryset=engagements)
 
 
-def get_test_counts(engagements):
-    # Get the test counts per engagement. As a separate query, this is much
-    # faster than annotating the above `engagements` query.
-    return {
-        test["engagement"]: test["test_count"]
-        for test in Test.objects.filter(
-            engagement__in=engagements,
-        ).values(
-            "engagement",
-        ).annotate(
-            test_count=Count("engagement"),
-        )
-    }
-
 @dojo_ratelimit_view()
 @cache_page(settings.CACHE_PAGE_TIME)
 @vary_on_cookie
 def engagements(request, view):
-
     if not view:
         view = "active"
 
@@ -222,7 +222,6 @@ def engagements(request, view):
     return render(
         request, "dojo/engagement.html", {
             "engagements": engs,
-            "engagement_test_counts": get_test_counts(filtered_engagements.qs),
             "filter_form": filtered_engagements.form,
             "product_name_words": product_name_words,
             "engagement_name_words": engagement_name_words,
@@ -239,7 +238,11 @@ def engagements_all(request):
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_string_matching = get_system_setting("filter_string_matching", False)
     products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
-    engagement_query = Engagement.objects.annotate(test_count=Count("test__id"))
+    test_count_subquery = build_count_subquery(
+        Test.objects.filter(engagement=OuterRef("pk")),
+        group_field="engagement_id",
+    )
+    engagement_query = Engagement.objects.annotate(test_count=Coalesce(test_count_subquery, Value(0)))
     filter_qs = products_with_engagements.prefetch_related(
         Prefetch("engagement_set", queryset=products_filter_class(request.GET, engagement_query).qs),
     )
@@ -299,7 +302,7 @@ def edit_engagement(request, eid):
             new_status = form.cleaned_data.get("status")
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
-            if (new_status == "Cancelled" or new_status == "Completed"):
+            if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
             else:
                 engagement.active = True
@@ -443,7 +446,13 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        return eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
+        accepted_findings_subquery = build_count_subquery(
+            Finding.objects.filter(risk_acceptance=OuterRef("pk")),
+            group_field="risk_acceptance",
+        )
+        return eng.risk_acceptance.all().select_related("owner").annotate(
+            accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
+        )
 
     def get_filtered_tests(
         self,
@@ -617,23 +626,30 @@ class ViewEngagement(View):
 
 
 def prefetch_for_view_tests(tests):
-    prefetched = tests
-    if isinstance(tests,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-
-        prefetched = prefetched.select_related("lead")
-        prefetched = prefetched.prefetch_related("tags", "test_type", "notes")
-        prefetched = prefetched.annotate(count_findings_test_all=Count("finding__id", distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active=Count("finding__id", filter=Q(finding__active=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active_verified=Count("finding__id", filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count("finding__id", filter=Q(finding__is_mitigated=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_dups=Count("finding__id", filter=Q(finding__duplicate=True), distinct=True))
-        prefetched = prefetched.annotate(total_reimport_count=Count("test_import__id", filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
-
-    else:
+    # old code can arrive here with prods being a list because the query was already executed
+    if not isinstance(tests, QuerySet):
         logger.warning("unable to prefetch because query was already executed")
+        return tests
 
-    return prefetched
+    prefetched = tests.select_related("lead", "test_type").prefetch_related("tags", "notes")
+    base_findings = Finding.objects.filter(test_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="test_id")
+    return prefetched.annotate(
+        count_findings_test_all=Coalesce(count_subquery(base_findings), Value(0)),
+        count_findings_test_active=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
+        count_findings_test_active_verified=Coalesce(
+            count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
+        ),
+        count_findings_test_active_fix_available=Coalesce(
+            count_subquery(base_findings.filter(active=True, fix_available=True)), Value(0),
+        ),
+        count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
+        count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
+        total_reimport_count=Coalesce(
+            count_subquery(Test_Import.objects.filter(test_id=OuterRef("pk"), type=Test_Import.REIMPORT_TYPE)),
+            Value(0),
+        ),
+    )
 
 
 @dojo_ratelimit_view()
@@ -898,13 +914,11 @@ class ImportScanResultsView(View):
         level are bubbled up to the user first before we process too much
         """
         form_validation_list = []
-        if context.get("form") is not None:
-            form_validation_list.append(context.get("form").is_valid())
-        if context.get("jform") is not None:
-            form_validation_list.append(context.get("jform").is_valid())
-        if context.get("cred_form") is not None:
-            form_validation_list.append(context.get("cred_form").is_valid())
-        return all(form_validation_list)
+        for form_name in ["form", "jform", "cred_form"]:
+            if (form := context.get(form_name)) is not None:
+                if errors := form.errors:
+                    form_validation_list.append(errors)
+        return form_validation_list
 
     def create_engagement(
         self,
@@ -1059,19 +1073,30 @@ class ImportScanResultsView(View):
 
     def success_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a successful import"""
+        duration = time.perf_counter() - request._start_time
+        LargeScanSizeProductAnnouncement(request=request, duration=duration)
+        ScanTypeProductAnnouncement(request=request, scan_type=context.get("scan_type"))
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
+        request: HttpRequest,
         context: dict,
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
+        ErrorPageProductAnnouncement(request=request)
+        if obj := context.get("engagement"):
+            url = "import_scan_results"
+        else:
+            obj = context.get("product")
+            url = "import_scan_results_prod"
         return HttpResponseRedirect(reverse(
-            "import_scan_results",
-            args=(context.get("engagement", context.get("product")).id, ),
+            url,
+            args=(obj.id, ),
         ))
 
     def get(
@@ -1103,27 +1128,30 @@ class ImportScanResultsView(View):
             engagement_id=engagement_id,
             product_id=product_id,
         )
+        request._start_time = time.perf_counter()
         # ensure all three forms are valid first before moving forward
-        if not self.validate_forms(context):
-            return self.failure_redirect(context)
+        if form_errors := self.validate_forms(context):
+            for form_error in form_errors:
+                add_error_message_to_response(form_error)
+            return self.failure_redirect(request, context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the import form
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Kick off the import process
         if import_error := self.import_findings(context):
             add_error_message_to_response(import_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Process the credential form
         if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
             add_error_message_to_response(form_error)
-            return self.failure_redirect(context)
+            return self.failure_redirect(request, context)
         # Otherwise return the user back to the engagement (if present) or the product
-        return self.success_redirect(context)
+        return self.success_redirect(request, context)
 
 
 @dojo_ratelimit_view()
@@ -1507,7 +1535,7 @@ def add_risk_acceptance(request, eid, fid=None):
         risk_acceptance_title_suggestion = f"Accept: {finding}"
         form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
 
-    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by("title")
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
     if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
         finding_choices = exclude_test_or_finding_with_tag(
                 finding_choices,
@@ -1516,7 +1544,10 @@ def add_risk_acceptance(request, eid, fid=None):
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
+        # Set the initial selected finding
         form.fields["accepted_findings"].initial = {fid}
+        # Change the label for each finding in the dropdown
+        form.fields["accepted_findings"].label_from_instance = lambda obj: f"({obj.test.scan_type}) - ({obj.severity}) - {obj.title} - {obj.date} - {obj.status()} - {obj.finding_group})"
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
@@ -2055,14 +2086,18 @@ def get_engagements(request):
         query = get_list_index(path_items, 1)
 
     request.GET = QueryDict(query)
-    engagements = get_filtered_engagements(request, view).qs
-    test_counts = get_test_counts(engagements)
-
-    return engagements, test_counts
+    return get_filtered_engagements(request, view).qs
 
 
 def get_excludes():
-    return ["is_ci_cd", "jira_issue", "jira_project", "objects", "unaccepted_open_findings"]
+    return [
+        "is_ci_cd",
+        "jira_issue",
+        "jira_project",
+        "objects",
+        "unaccepted_open_findings",
+        "test_count",  # already exported separately as “tests”
+    ]
 
 
 def get_foreign_keys():
@@ -2072,7 +2107,7 @@ def get_foreign_keys():
 
 def csv_export(request):
     logger.debug("starting csv export")
-    engagements, test_counts = get_engagements(request)
+    engagements = get_engagements(request)
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = "attachment; filename=engagements.csv"
@@ -2082,10 +2117,8 @@ def csv_export(request):
     first_row = True
     for engagement in engagements:
         if first_row:
-            fields = []
-            for key in dir(engagement):
-                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_"):
-                    fields.append(key)
+            fields = [key for key in dir(engagement)
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_")]
             fields.append("tests")
 
             writer.writerow(fields)
@@ -2101,7 +2134,7 @@ def csv_export(request):
                     if value and isinstance(value, str):
                         value = value.replace("\n", " NEWLINE ").replace("\r", "")
                     fields.append(value)
-            fields.append(test_counts.get(engagement.id, 0))
+            fields.append(getattr(engagement, "test_count", 0))
 
             writer.writerow(fields)
     logger.debug("done with csv export")
@@ -2110,7 +2143,7 @@ def csv_export(request):
 
 def excel_export(request):
     logger.debug("starting excel export")
-    engagements, test_counts = get_engagements(request)
+    engagements = get_engagements(request)
 
     workbook = Workbook()
     workbook.iso_dates = True
@@ -2142,7 +2175,7 @@ def excel_export(request):
                         value = value.replace(tzinfo=None)
                     worksheet.cell(row=row_num, column=col_num, value=value)
                     col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=test_counts.get(engagement.id, 0))
+            worksheet.cell(row=row_num, column=col_num, value=getattr(engagement, "test_count", 0))
         row_num += 1
 
     with NamedTemporaryFile() as tmp:

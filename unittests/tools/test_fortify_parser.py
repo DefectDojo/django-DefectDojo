@@ -5,7 +5,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestFortifyParser(DojoTestCase):
     def test_fortify_many_findings(self):
-        with open(get_unit_tests_scans_path("fortify") / "fortify_many_findings.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "fortify_many_findings.xml").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(324, len(findings))
@@ -17,7 +17,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual(81, finding.line)
 
     def test_fortify_few_findings(self):
-        with open(get_unit_tests_scans_path("fortify") / "fortify_few_findings.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "fortify_few_findings.xml").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
@@ -31,7 +31,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("53C25D2FC6950554F16D3CEF9E41EF6F", finding.unique_id_from_tool)
 
     def test_fortify_few_findings_count_chart(self):
-        with open(get_unit_tests_scans_path("fortify") / "fortify_few_findings_count_chart.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "fortify_few_findings_count_chart.xml").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -44,7 +44,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("53C25D2FC6950554F16D3CEF9E41EF6F", finding.unique_id_from_tool)
 
     def test_fortify_issue6260(self):
-        with open(get_unit_tests_scans_path("fortify") / "issue6260.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "issue6260.xml").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(16, len(findings))
@@ -57,7 +57,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("7A2F1C728BDDBB17C7CB31CEDF5D8F85", finding.unique_id_from_tool)
 
     def test_fortify_issue6082(self):
-        with open(get_unit_tests_scans_path("fortify") / "issue6082.xml", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "issue6082.xml").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
@@ -77,7 +77,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("B5B15F27E10F4D7799BD0ED1E6D34C5D", finding.unique_id_from_tool)
 
     def test_fortify_many_fdr_findings(self):
-        with open(get_unit_tests_scans_path("fortify") / "many_findings.fpr", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("fortify") / "many_findings.fpr").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(61, len(findings))
@@ -99,8 +99,8 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("public/footer.html", finding.file_path)
                 self.assertEqual(104, finding.line)
 
-    def test_fortify_hello_world_fdr_findings(self):
-        with open(get_unit_tests_scans_path("fortify") / "hello_world.fpr", encoding="utf-8") as testfile:
+    def test_fortify_hello_world_fpr_findings(self):
+        with (get_unit_tests_scans_path("fortify") / "hello_world.fpr").open(encoding="utf-8") as testfile:
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -121,3 +121,36 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(13, finding.line)
+
+    def test_fortify_webinspect_4_2_many_findings(self):
+        with (get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(15, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Cookie Security: Cookie not Sent Over SSL", finding.title)
+                self.assertEqual("Medium", finding.severity)
+
+    def test_fortify_fpr_suppressed_finding(self):
+        with (get_unit_tests_scans_path("fortify") / "fortify_suppressed_with_comments.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(4, len(findings))
+            # for i in range(len(findings)):
+            #     print(f"{i}: {findings[i]}: {findings[i].active}")
+
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
+                self.assertTrue(finding.active)
+                self.assertFalse(finding.false_p)
+                self.assertEqual("", finding.impact)
+            with self.subTest(i=1):
+                finding = findings[2]
+                self.assertEqual("Build Misconfiguration - pom.xml: 1 (FF57412F-DD28-44DE-8F4F-0AD39620768C)", finding.title)
+                self.assertEqual("87E3EC5CC8154C006783CC461A6DDEEB", finding.unique_id_from_tool)
+                self.assertFalse(finding.active)
+                self.assertTrue(finding.false_p)
+                self.assertEqual("Threaded Comments:\n2025-03-10T20:52:28.964+05:30 - (testuser): Not an issue. Handled in server config to refer to internal Artifactory\n", finding.impact)

@@ -10,6 +10,7 @@ from packageurl import PackageURL
 
 from dojo.models import Finding
 from django.conf import settings
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,54 @@ class DependencyCheckParser:
         "medium": "Medium",
         "high": "High",
         "critical": "Critical",
+    }
+
+    CVSS_V3_MAPPINGS = {
+        "attackVector": {
+            "NETWORK": "N",
+            "ADJACENT": "A",
+            "LOCAL": "L",
+            "PHYSICAL": "P",
+            "N": "N",
+            "A": "A",
+            "L": "L",
+            "P": "P",
+        },
+        "attackComplexity": {"LOW": "L", "HIGH": "H", "L": "L", "H": "H"},
+        "privilegesRequired": {
+            "NONE": "N",
+            "LOW": "L",
+            "HIGH": "H",
+            "N": "N",
+            "L": "L",
+            "H": "H",
+        },
+        "userInteraction": {"NONE": "N", "REQUIRED": "R", "N": "N", "R": "R"},
+        "scope": {"UNCHANGED": "U", "CHANGED": "C", "U": "U", "C": "C"},
+        "confidentialityImpact": {
+            "NONE": "N",
+            "LOW": "L",
+            "HIGH": "H",
+            "N": "N",
+            "L": "L",
+            "H": "H",
+        },
+        "integrityImpact": {
+            "NONE": "N",
+            "LOW": "L",
+            "HIGH": "H",
+            "N": "N",
+            "L": "L",
+            "H": "H",
+        },
+        "availabilityImpact": {
+            "NONE": "N",
+            "LOW": "L",
+            "HIGH": "H",
+            "N": "N",
+            "L": "L",
+            "H": "H",
+        },
     }
 
     def add_finding(self, finding, dupes):
@@ -165,6 +214,55 @@ class DependencyCheckParser:
 
         return None, None
 
+    def get_severity_and_cvss_meta(self, vulnerability, namespace) -> dict:
+        # Get the base severity from the report
+        severity = vulnerability.findtext(f"{namespace}severity")
+        cvssv3 = None
+        cvssv3_score = None
+        # Attempt to add the CVSSv3 score, and update the severity accordingly
+        if (cvssv3_node := vulnerability.find(namespace + "cvssV3")) is not None:
+            try:
+                vector_parts = [
+                    f"AV:{self.CVSS_V3_MAPPINGS['attackVector'][cvssv3_node.findtext(f'{namespace}attackVector')]}",
+                    f"AC:{self.CVSS_V3_MAPPINGS['attackComplexity'][cvssv3_node.findtext(f'{namespace}attackComplexity')]}",
+                    f"PR:{self.CVSS_V3_MAPPINGS['privilegesRequired'][cvssv3_node.findtext(f'{namespace}privilegesRequired')]}",
+                    f"UI:{self.CVSS_V3_MAPPINGS['userInteraction'][cvssv3_node.findtext(f'{namespace}userInteraction')]}",
+                    f"S:{self.CVSS_V3_MAPPINGS['scope'][cvssv3_node.findtext(f'{namespace}scope')]}",
+                    f"C:{self.CVSS_V3_MAPPINGS['confidentialityImpact'][cvssv3_node.findtext(f'{namespace}confidentialityImpact')]}",
+                    f"I:{self.CVSS_V3_MAPPINGS['integrityImpact'][cvssv3_node.findtext(f'{namespace}integrityImpact')]}",
+                    f"A:{self.CVSS_V3_MAPPINGS['availabilityImpact'][cvssv3_node.findtext(f'{namespace}availabilityImpact')]}",
+                ]
+                version = cvssv3_node.findtext("version") or "3.1"
+                vector = f"CVSS:{version}/" + "/".join(vector_parts)
+                if cvss_data := parse_cvss_data(vector):
+                    cvssv3 = cvss_data.get("cvssv3")
+                    cvssv3_score = cvss_data.get("cvssv3_score")
+                    severity = cvss_data.get("severity")
+            except Exception as e:
+                # Only log the error - there is not much we can do to recover from this
+                logger.debug(e)
+        elif (cvssv2_node := vulnerability.find(namespace + "cvssV2")) is not None:
+            severity = cvssv2_node.findtext(f"{namespace}severity").lower().capitalize()
+
+        # handle if the severity have something not in the mapping
+        # default to 'Medium' and produce warnings in logs
+        if severity:
+            if severity.strip().lower() not in self.SEVERITY_MAPPING:
+                logger.warning(
+                    f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value",
+                )
+                severity = "Medium"
+            else:
+                severity = self.SEVERITY_MAPPING[severity.strip().lower()]
+        else:
+            severity = "Medium"
+
+        return {
+            "severity": severity,
+            "cvssv3": cvssv3,
+            "cvssv3_score": cvssv3_score,
+        }
+
     def get_finding_from_vulnerability(
         self, dependency, related_dependency, vulnerability, test, namespace,
     ):
@@ -239,36 +337,6 @@ class DependencyCheckParser:
         # some changes in v6.0.0 around CVSS version information
         # https://github.com/jeremylong/DependencyCheck/pull/2781
 
-        cvssv2_node = vulnerability.find(namespace + "cvssV2")
-        cvssv3_node = vulnerability.find(namespace + "cvssV3")
-        severity = vulnerability.findtext(f"{namespace}severity")
-        if not severity:
-            if cvssv3_node is not None:
-                severity = (
-                    cvssv3_node.findtext(f"{namespace}baseSeverity")
-                    .lower()
-                    .capitalize()
-                )
-            elif cvssv2_node is not None:
-                severity = (
-                    cvssv2_node.findtext(f"{namespace}severity")
-                    .lower()
-                    .capitalize()
-                )
-
-        # handle if the severity have something not in the mapping
-        # default to 'Medium' and produce warnings in logs
-        if severity:
-            if severity.strip().lower() not in self.SEVERITY_MAPPING:
-                logger.warning(
-                    f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value",
-                )
-                severity = "Medium"
-            else:
-                severity = self.SEVERITY_MAPPING[severity.strip().lower()]
-        else:
-            severity = "Medium"
-
         reference_detail = None
         references_node = vulnerability.find(namespace + "references")
 
@@ -316,7 +384,6 @@ class DependencyCheckParser:
             test=test,
             cwe=cwe,
             description=description,
-            severity=severity,
             mitigation=mitigation,
             mitigated=mitigated,
             is_mitigated=is_Mitigated,
@@ -327,6 +394,7 @@ class DependencyCheckParser:
             references=reference_detail,
             component_name=component_name,
             component_version=component_version,
+            **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
         finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("dependency_check")]
 

@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TesthadolintParser(DojoTestCase):
 
     def test_parse_file_with_one_dockerfile(self):
-        testfile = open(get_unit_tests_scans_path("hadolint") / "one_dockerfile.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("hadolint") / "one_dockerfile.json").open(encoding="utf-8")
         parser = HadolintParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -16,7 +16,7 @@ class TesthadolintParser(DojoTestCase):
         self.assertEqual(finding.file_path, "django-DefectDojo\\Dockerfile.django")
 
     def test_parse_file_with_many_dockerfile(self):
-        testfile = open(get_unit_tests_scans_path("hadolint") / "many_dockerfile.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("hadolint") / "many_dockerfile.json").open(encoding="utf-8")
         parser = HadolintParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

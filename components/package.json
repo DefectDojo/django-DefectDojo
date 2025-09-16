@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.45.0",
+  "version": "2.50.1",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -10,13 +10,11 @@
     "bootstrap-social": "^4.0.0",
     "bootstrap-wysiwyg": "^2.0.0",
     "chosen-bootstrap": "https://github.com/dbtek/chosen-bootstrap",
-    "chosen-js": "1.8.7",
-    "clipboard": "2.0.11",
-    "datatables.net": "^1.13.4",
-    "datatables.net-buttons-bs": "^2.3.6",
-    "datatables.net-buttons-dt": "^2.3.6",
-    "datatables.net-colreorder": "^1.6.1",
-    "datatables.net-dt": "^1.13.4",
+    "chosen-js": "^1.8.7",
+    "clipboard": "^2.0.11",
+    "datatables.net": "^2.3.3",
+    "datatables.net-buttons-bs": "^3.2.4",
+    "datatables.net-colreorder": "^2.1.1",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
     "easymde": "^2.20.0",
@@ -35,10 +33,8 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.18",
-    "startbootstrap-sb-admin-2": "1.0.7",
-    "prismjs": "^1.27.0",
-    "typeit": "^8.7.1"
+    "pdfmake": "^0.2.20",
+    "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {
     "yarn": ">= 1.0.0"

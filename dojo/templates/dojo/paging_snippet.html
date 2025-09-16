@@ -42,7 +42,6 @@
                             {% if page.paginator.count > 500 %}
                                 <li role="presentation"><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 500 %}" aria-label="{% trans '500 items per page' %}" role="menuitem" >500</a></li>
                             {% endif %}
-                            <!-- <li role="presentation"><a rel="noopener noreferrer" href="?{% url_replace request page_size_param page.paginator.count %}" aria-label="{% trans 'All items on one page' %}" role="menuitem">{% trans "All" %}</a></li> -->
                         </ul>
                     </div>
                 </li>

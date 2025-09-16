@@ -7,13 +7,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestGitlabContainerScanParser(DojoTestCase):
     def test_gitlab_container_scan_parser_with_no_vuln_has_no_findings(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-0-vuln.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-0-vuln.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_gitlab_container_scan_parser_with_one_vuln_has_one_findings_v14(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-1-vuln_v14.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-1-vuln_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:
@@ -32,7 +32,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
         self.assertEqual("df52bc8ce9a2ae56bbcb0c4ecda62123fbd6f69b", first_finding.unique_id_from_tool)
 
     def test_gitlab_container_scan_parser_with_one_vuln_has_one_findings_v15(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-1-vuln_v15.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-1-vuln_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:
@@ -51,7 +51,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
         self.assertEqual("df52bc8ce9a2ae56bbcb0c4ecda62123fbd6f69b", first_finding.unique_id_from_tool)
 
     def test_gitlab_container_scan_parser_with_five_vuln_has_five_findings_v14(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-5-vuln_v14.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-5-vuln_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:
@@ -60,7 +60,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
         self.assertEqual(5, len(findings))
 
     def test_gitlab_container_scan_parser_with_five_vuln_has_five_findings_v15(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-5-vuln_v15.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "gl-container-scanning-report-5-vuln_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:
@@ -69,7 +69,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
         self.assertEqual(5, len(findings))
 
     def test_gitlab_container_scan_parser_with_fless_data_v14(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "issue6639_v14.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "issue6639_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:
@@ -104,7 +104,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
             self.assertEqual("CVE-2022-0778", finding.unique_id_from_tool)
 
     def test_gitlab_container_scan_parser_with_fless_data_v15(self):
-        with open(get_unit_tests_scans_path("gitlab_container_scan") / "issue6639_v15.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("gitlab_container_scan") / "issue6639_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabContainerScanParser()
             findings = parser.get_findings(testfile, Test())
         for finding in findings:

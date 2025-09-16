@@ -16,6 +16,52 @@ class AcunetixXMLParser:
 
     """This parser is written for Acunetix XML reports"""
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Acunetix XML Parser.
+
+        Fields:
+        - title: Set to the name outputted by the Acunetix XML Scanner.
+        - severity: Set to severity from Acunetix XML Scanner converted into Defect Dojo format.
+        - description: Set to description, Details, and TechnivalDetails variables outputted from Acunetix XML Scanner.
+        - false_p: Set to True/False based on Defect Dojo standards.
+        - static_finding: Set to True by default and updated to False if requests are present.
+        - dynamic_finding: Set to False by default and updated to True if requests are present.
+        - nb_occurences: Set to 1 and increased based on presence of occurences.
+        - impact: Set to impact outputted from Acunetix XML Scanner if it is present.
+        - mitigation: Set to Recommendation outputted from Acunetix XML Scanner if it is present.
+        - date: Set to StartTime outputted from Acunetix XML Scanner if it is present.
+        - cwe: Set to converted cwe outputted from Acunetix XML Scanner if it is present.
+        - cvssv3: Set to converted cvssv3 values outputted from Acunetix XML Scanner if it is present.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "false_p",
+            "static_finding",
+            "dynamic_finding",
+            "nb_occurences",
+            "impact",
+            "mitigation",
+            "date",
+            "cwe",
+            "cvssv3",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Acunetix XML Parser.
+
+        Fields:
+        - title: Set to the name outputted by the Acunetix XML Scanner.
+        - description: Set to description, Details, and TechnivalDetails variables outputted from Acunetix XML Scanner.
+        """
+        return [
+            "title",
+            "description",
+        ]
+
     def get_findings(self, filename, test):
         dupes = {}
         root = parse(filename).getroot()

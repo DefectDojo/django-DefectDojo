@@ -2,7 +2,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
-{% load dict_key %}
 
 {% block content %}
     {{ block.super }}
@@ -172,10 +171,8 @@
                                 </td>
                                 <td>{{ e.lead.first_name }} {{ e.lead.last_name }}</td>
                                 <td>
-                                    <a rel="noopener noreferrer" class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
-                                        {% with test_count=engagement_test_counts|dict_key:e.pk|default_if_none:0 %}
-                                            {{ test_count }}
-                                        {% endwith %}
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
+                                        {{ e.test_count|default:0 }}
                                     </a>
                                 </td>
                                 {% if system_settings.enable_jira %}

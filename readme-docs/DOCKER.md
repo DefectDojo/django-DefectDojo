@@ -109,7 +109,8 @@ This will run the application based on merged configurations from docker-compose
     *  python code (uwsgi and celeryworker containers).
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
-* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
+*  Hot-reloading for the **celeryworker** container is implemented via `watchmedo` from the `watchdog` package.
+*  Changes in `.html` and `.tpl` files will also trigger a roload.
 
 ```
 docker compose restart celeryworker
@@ -151,6 +152,11 @@ Make sure you write down the first password generated as you'll need it when re-
 docker compose exec -it uwsgi ./manage.py changepassword admin
 ```
 
+Alternatively, you can run the command below to change the admin password in a single command. Useful for automation.
+```zsh
+docker compose exec uwsgi ./manage.py shell -c 'from django.contrib.auth.models import User; u = User.objects.get(username="admin"); u.set_password("Password123!"); u.save()'
+```
+
 # Logging
 For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](../dojo/settings/template-local_settings)). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
@@ -174,7 +180,7 @@ In the `dojo/settings/template-local_settings.py` you'll find instructions on ho
 This toolbar allows you to debug SQL queries, and shows some other interesting information.
 
 
-# Exploitation, versioning
+# Explicit Versioning
 ## Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 

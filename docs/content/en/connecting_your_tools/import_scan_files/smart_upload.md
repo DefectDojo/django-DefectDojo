@@ -1,5 +1,5 @@
 ---
-title: "Smart Upload for infrastructure scans"
+title: "Smart Upload for infrastructure scans (Pro)"
 description: "Automatically route incoming Findings to the correct Product"
 weight: 3
 ---

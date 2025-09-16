@@ -24,18 +24,18 @@
     </tr>
  </table>
 
-![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/screenshot1.png)
-
 [DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and
 vulnerability management tool.  DefectDojo orchestrates end-to-end security testing, vulnerability tracking,
 deduplication, remediation, and reporting.
 
 ## Demo
 
-Try out DefectDojo on our demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
+Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
-Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible
-and regularly reset. Do not put sensitive data in the demo.
+Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
+and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
 ## Quick Start for Compose V2
 
@@ -87,11 +87,13 @@ Navigate to `http://localhost:8080` to see your new instance!
     * [OAuth2/SAML2](https://docs.defectdojo.com/en/open_source/archived_docs/integrations/social-authentication/)
     * [LDAP](https://docs.defectdojo.com/en/open_source/ldap-authentication/)
 * [Supported tools](https://docs.defectdojo.com/en/connecting_your_tools/parsers/)
+* [How to Write Documentation Locally](/docs/README.md)
 
 ## Supported Installation Options
 
+* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes support & supports the project
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
-* [SaaS](https://www.defectdojo.com/) - Includes Support & Supports the Project
+
 
 ## Community, Getting Involved, and Updates
 
@@ -100,22 +102,20 @@ Navigate to `http://localhost:8080` to see your new instance!
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-[Join the OWASP Slack community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
+[Join the OWASP Slack Community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
 our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
 [Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and
 [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
 ## Contributing
 
-Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
-information.
+Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for details and standards on contributing __before__ considering or submitting a pull request.
 
 ## Pro Edition
-[Upgrade to DefectDojo Pro](https://www.defectdojo.com/) today to take your DevSecOps to 11. DefectDojo Pro is
-designed to meet you wherever you are on your security journey and help you scale, with enhanced dashboards, additional
-smart features, tunable deduplication, and support from DevSecOps experts.
 
-Alternatively, for information please email info@defectdojo.com
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+
+Alternatively, for information please email hello@defectdojo.com
 
 ## About Us
 
@@ -129,7 +129,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 
 Moderators can help you with pull requests or feedback on dev ideas:
 * Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
-* Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame

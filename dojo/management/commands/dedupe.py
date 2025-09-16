@@ -1,7 +1,6 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from pytz import timezone
 
 from dojo.models import Finding, Product
 from dojo.utils import (
@@ -11,8 +10,6 @@ from dojo.utils import (
     get_system_setting,
     mass_model_updater,
 )
-
-locale = timezone(get_system_setting("time_zone"))
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

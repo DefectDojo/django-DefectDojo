@@ -12,13 +12,13 @@ def sample_path(file_name):
 class TestTruffleHog3Parser(DojoTestCase):
 
     def test_zero_vulns(self):
-        with open(sample_path("zero_vulns.json"), encoding="utf-8") as test_file:
+        with sample_path("zero_vulns.json").open(encoding="utf-8") as test_file:
             parser = TruffleHog3Parser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 0)
 
     def test_many_vulns_legacy(self):
-        with open(sample_path("many_vulns_legacy.json"), encoding="utf-8") as test_file:
+        with sample_path("many_vulns_legacy.json").open(encoding="utf-8") as test_file:
             parser = TruffleHog3Parser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 7)
@@ -45,7 +45,7 @@ class TestTruffleHog3Parser(DojoTestCase):
             self.assertEqual(7, finding.nb_occurences)
 
     def test_many_vulns2_legacy(self):
-        with open(sample_path("many_vulns2_legacy.json"), encoding="utf-8") as test_file:
+        with sample_path("many_vulns2_legacy.json").open(encoding="utf-8") as test_file:
             parser = TruffleHog3Parser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 27)
@@ -56,7 +56,7 @@ class TestTruffleHog3Parser(DojoTestCase):
             self.assertEqual(8, finding.nb_occurences)
 
     def test_many_vulns_current(self):
-        with open(sample_path("many_vulns_current.json"), encoding="utf-8") as test_file:
+        with sample_path("many_vulns_current.json").open(encoding="utf-8") as test_file:
             parser = TruffleHog3Parser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 3)
@@ -101,7 +101,7 @@ class TestTruffleHog3Parser(DojoTestCase):
             self.assertEqual(1, finding.nb_occurences)
 
     def test_issue_6999(self):
-        with open(sample_path("issue_6999.json"), encoding="utf-8") as test_file:
+        with sample_path("issue_6999.json").open(encoding="utf-8") as test_file:
             parser = TruffleHog3Parser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)

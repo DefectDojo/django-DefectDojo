@@ -5,6 +5,48 @@ from dojo.models import Finding
 
 class OSVScannerParser:
 
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the OSV Parser.
+
+        Fields:
+        - title: Created from vulnerability id and package name.
+        - description: Custom description made from: vulnerability, source_type, & package_ecosystem.
+        - severity: Set to severity from OSV Scanner that has been translated into Defect Dojo format.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - component_name: Set to package name from OSV Scanner.
+        - component_version: Set to package version from OSV Scanner.
+        - cwe: Set to cwe outputted from OSV Scanner.
+        - file_path: Set to source path from OSV Scanner.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+            "static_finding",
+            "dynamic_finding",
+            "component_name",
+            "component_version",
+            "cwe",
+            "file_path",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the OSV Parser.
+
+        Fields:
+        - title: Created from vulnerability id and package name.
+        - description: Custom description made from: vulnerability, source_type, & package_ecosystem.
+        - severity: Set to severity from OSV Scanner that has been translated into Defect Dojo format.
+        """
+        return [
+            "title",
+            "description",
+            "severity",
+        ]
+
     def get_scan_types(self):
         return ["OSV Scan"]
 
@@ -37,6 +79,8 @@ class OSVScannerParser:
                     vulnerabilitydetails = vulnerability.get("details", "")
                     vulnerabilitypackagepurl = ""
                     cwe = None
+                    mitigations_by_type = {}  # Dictionary to store corrected versions by type
+
                     # Make sure we have an affected section to work with
                     if (affected := vulnerability.get("affected")) is not None:
                         if len(affected) > 0:
@@ -46,19 +90,45 @@ class OSVScannerParser:
                             # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
                                 cwe = cwe[0]["cweId"]
+                            # Extraction of corrected versions by type
+                            ranges = affected[0].get("ranges", [])
+                            for range_item in ranges:
+                                range_type = range_item.get("type", "")
+                                repo_url = range_item.get("repo", "")
+                                for event in range_item.get("events", []):
+                                    if "fixed" in event:
+                                        fixed_value = event["fixed"]
+                                        # GIT URL format if applicable
+                                        if range_type == "GIT" and repo_url:
+                                            formatted_value = f"{repo_url}/commit/{fixed_value}"
+                                        else:
+                                            formatted_value = fixed_value
+                                        # Add to the list by type
+                                        if range_type not in mitigations_by_type:
+                                            mitigations_by_type[range_type] = []
+                                        mitigations_by_type[range_type].append(formatted_value)
+
+                    # Creation of formatted mitigation text
+                    mitigation_text = None
+                    if mitigations_by_type:
+                        mitigation_text = "**Upgrade to versions**:\n"
+                        for typ, versions in mitigations_by_type.items():
+                            mitigation_text += f"\t{typ} :\n"
+                            for version in versions:
+                                mitigation_text += f"\t\t- {version}\n"
                     # Create some references
                     reference = ""
-                    for ref in vulnerability.get("references"):
+                    for ref in vulnerability.get("references", []):
                         reference += ref.get("url") + "\n"
                     # Define the description
                     description = vulnerabilitysummary + "\n"
-                    description += "**source_type**: " + source_type + "\n"
-                    description += "**package_ecosystem**: " + package_ecosystem + "\n"
-                    description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
-                    description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
+                    description += f"**Source type**: {source_type}\n"
+                    description += f"**Package ecosystem**: {package_ecosystem}\n"
+                    description += f"**Vulnerability details**: {vulnerabilitydetails}\n"
+                    description += f"**Vulnerability package purl**: {vulnerabilitypackagepurl}\n"
                     sev = vulnerability.get("database_specific", {}).get("severity", "")
                     finding = Finding(
-                        title=vulnerabilityid + "_" + package_name,
+                        title=f"{vulnerabilityid}_{package_name}",
                         test=test,
                         description=description,
                         severity=self.classify_severity(sev),
@@ -70,8 +140,11 @@ class OSVScannerParser:
                         file_path=source_path,
                         references=reference,
                     )
-                    if vulnerabilityid != "":
-                        finding.unsaved_vulnerability_ids = []
-                        finding.unsaved_vulnerability_ids.append(vulnerabilityid)
+
+                    if mitigation_text:
+                        finding.mitigation = mitigation_text
+
+                    if vulnerabilityid:
+                        finding.unsaved_vulnerability_ids = [vulnerabilityid]
                     findings.append(finding)
         return findings
