@@ -5,6 +5,7 @@ import logging
 
 from dojo.models import Finding
 from django.conf import settings
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,13 @@ TRIVY_SEVERITIES = {
     "LOW": "Low",
     "UNKNOWN": "Info",
 }
+
+CVSS_SEVERITY_SOURCES = [
+    "nvd",
+    "ghsa",
+    "redhat",
+    "bitnami",
+]
 
 DESCRIPTION_TEMPLATE = """{title}
 **Target:** {target}
@@ -66,6 +74,85 @@ class TrivyParser:
         if val < 9.0:
             return "High"
         return "Critical"
+
+    def convert_trivy_status(self, trivy_status: str) -> dict:
+        """
+        Determine status fields based on Trivy status
+
+        From: https://trivy.dev/v0.54/docs/configuration/filtering/
+
+        Trivy has a Status field based on VEX vulnerability statuses. Please not these are statuses based on the vulnerability advisories by OS vendors such as Debian, RHEL, etc.
+
+        - `unknown`
+        - `not_affected`: this package is not affected by this vulnerability on this platform
+        - `affected`: this package is affected by this vulnerability on this platform, but there is no patch released yet
+        - `fixed`: this vulnerability is fixed on this platform
+        - `under_investigation`: it is currently unknown whether or not this vulnerability affects this package on this platform, and it is under investigation
+        - `will_not_fix`: this package is affected by this vulnerability on this platform, but there is currently no intention to fix it (this would primarily be for flaws that are of Low or Moderate impact that pose no significant risk to customers)
+        - `fix_deferred`: this package is affected by this vulnerability on this platform, and may be fixed in the future
+        - `end_of_life`: this package has been identified to contain the impacted component, but analysis to determine whether it is affected or not by this vulnerability was not performed
+
+
+        Note that vulnerabilities with the `unknown`, `not_affected` or `under_investigation` status are not detected.
+        These are only defined for comprehensiveness, and you will not have the opportunity to specify these statuses.
+
+        Some statuses are supported in limited distributions.
+
+        |     OS     | Fixed | Affected | Under Investigation | Will Not Fix | Fix Deferred | End of Life |
+        |:----------:|:-----:|:--------:|:-------------------:|:------------:|:------------:|:-----------:|
+        |   Debian   |   ✓   |    ✓     |                     |              |      ✓       |      ✓      |
+        |    RHEL    |   ✓   |    ✓     |          ✓          |      ✓       |      ✓       |      ✓      |
+        | Other OSes |   ✓   |    ✓     |                     |              |              |             |
+        """
+        status_mapping = {
+            "unknown": {
+                # use default value for active which is usually True
+                "verified": False,
+            },
+            "not_affected": {
+                # false positive is the most appropriate status for not affected as out of scope might be interpreted as something else
+                "active": False,
+                "verified": True,
+                "is_mitigated": True,
+            },
+            "affected": {
+                # standard case
+                "active": True,
+                "verified": True,
+            },
+            "fixed": {
+                # fixed in this context means that there is a fix available by patching/updating/upgrading the package
+                # but it's still active and verified
+                "active": True,
+                "verified": True,
+            },
+            "under_investigation": {
+                # no status flag in Defect Dojo to capture this, but verified is False
+                "active": True,
+                "verified": False,
+            },
+            "will_not_fix": {
+                # no different from affected as Defect Dojo doesn't have a flag to capture will_not_fix by OS/Package Vendor
+                # we can't set active to False as the user needs to risk accept this finding
+                "active": True,
+                "verified": True,
+            },
+            "fix_deferred": {
+                # no different from affected as Defect Dojo doesn't have a flag to capture will_not_fix by OS/Package Vendor
+                # we can't set active to False as the user needs to (temporarily) risk accept this finding
+                "active": True,
+                "verified": True,
+            },
+            "end_of_life": {
+                # no different from affected as Defect Dojo doesn't have a flag to capture will_not_fix by OS/Package Vendor
+                # we can't set active to False as the user needs to (temporarily) risk accept this finding
+                "active": True,
+                "verified": True,
+            },
+        }
+
+        # default is to fallback to default Defect Dojo behaviour which takes scan parameters into account
+        return status_mapping.get(trivy_status, {})
 
     def get_findings(self, scan_file, test):
         scan_data = scan_file.read()
@@ -164,24 +251,32 @@ class TrivyParser:
                 try:
                     vuln_id = vuln.get("VulnerabilityID", "0")
                     package_name = vuln["PkgName"]
-                    severity_source = vuln.get("SeveritySource", None)
-                    cvss = vuln.get("CVSS", None)
+                    detected_severity_source = vuln.get("SeveritySource", None)
+                    cvss = vuln.get("CVSS", {})
+                    cvssclass = None
                     cvssv3 = None
-                    if severity_source is not None and cvss is not None:
+                    cvssv3_score = None
+                    # Iterate over the possible severity sources tom find the first match
+                    for severity_source in [detected_severity_source, *CVSS_SEVERITY_SOURCES]:
                         cvssclass = cvss.get(severity_source, None)
                         if cvssclass is not None:
-                            if cvssclass.get("V3Score") is not None:
-                                severity = self.convert_cvss_score(cvssclass.get("V3Score"))
-                                cvssv3 = dict(cvssclass).get("V3Vector")
-                            elif cvssclass.get("V2Score") is not None:
-                                severity = self.convert_cvss_score(cvssclass.get("V2Score"))
-                            else:
-                                severity = self.convert_cvss_score(None)
+                            break
+                    # Parse the CVSS class if it is not None
+                    if cvssclass is not None:
+                        if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
+                            cvssv3 = cvss_data.get("cvssv3")
+                            cvssv3_score = cvss_data.get("cvssv3_score")
+                            severity = cvss_data.get("severity")
+                        elif (cvss_v3_score := cvssclass.get("V3Score")) is not None:
+                            cvssv3_score = cvss_v3_score
+                            severity = self.convert_cvss_score(cvss_v3_score)
+                        elif (cvss_v2_score := cvssclass.get("V2Score")) is not None:
+                            severity = self.convert_cvss_score(cvss_v2_score)
                         else:
-                            severity = TRIVY_SEVERITIES[vuln["Severity"]]
+                            severity = self.convert_cvss_score(None)
                     else:
                         severity = TRIVY_SEVERITIES[vuln["Severity"]]
-                    if target_class == "os-pkgs" or target_class == "lang-pkgs":
+                    if target_class in {"os-pkgs", "lang-pkgs"}:
                         file_path = vuln.get("PkgPath")
                         if file_path is None:
                             file_path = target_target
@@ -195,6 +290,11 @@ class TrivyParser:
                 package_version = vuln.get("InstalledVersion", "")
                 references = "\n".join(vuln.get("References", []))
                 mitigation = vuln.get("FixedVersion", "")
+                fix_available = True
+                if mitigation == "":
+                    fix_available = False
+                impact = vuln.get("Status", "")
+                status_fields = self.convert_trivy_status(vuln.get("Status", ""))
                 cwe = int(vuln["CweIDs"][0].split("-")[1]) if len(vuln.get("CweIDs", [])) > 0 else 0
                 vul_type = target_data.get("Type", "")
                 title = f"{vuln_id} {package_name} {package_version}"
@@ -213,14 +313,18 @@ class TrivyParser:
                     file_path=file_path,
                     references=references,
                     description=description,
+                    impact=impact,
                     mitigation=mitigation,
                     component_name=package_name,
                     component_version=package_version,
                     cvssv3=cvssv3,
+                    cvssv3_score=cvssv3_score,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=fix_available,
                     tags=[],
                     service=service_name,
+                    **status_fields,
                 )
                 
                 custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("trivy")
@@ -277,6 +381,7 @@ class TrivyParser:
                     references=references,
                     description=description,
                     mitigation=misc_resolution,
+                    fix_available=True,
                     static_finding=True,
                     dynamic_finding=False,
                     tags=[target_type, target_class],
@@ -309,6 +414,7 @@ class TrivyParser:
                     line=secret_start_line,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=True,
                     tags=[target_class],
                     service=service_name,
                 )
@@ -342,6 +448,7 @@ class TrivyParser:
                     url=license_link,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=True,
                     tags=[target_class],
                     service=service_name,
                 )

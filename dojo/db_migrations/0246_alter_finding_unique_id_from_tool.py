@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='finding',
             name='unique_id_from_tool',
-            field=models.CharField(blank=True, help_text='Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.', max_length=1000, null=True, verbose_name='Unique ID from tool'),
+            field=models.CharField(blank=True, help_text='Vulnerability technical id from the source tool. Allows to track unique vulnerabilities over time across subsequent scans.', max_length=1000, null=True, verbose_name='Unique ID from tool'),
         ),
     ]

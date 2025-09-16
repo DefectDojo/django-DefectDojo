@@ -8,7 +8,7 @@ from unittests.dojo_test_case import get_unit_tests_scans_path
 class TestBearerParser(TestCase):
 
     def test_bearer_parser_with_one_vuln_has_one_findings(self):
-        testfile = open(get_unit_tests_scans_path("bearer_cli") / "bearer_cli_one_vul.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("bearer_cli") / "bearer_cli_one_vul.json").open(encoding="utf-8")
         parser = BearerCLIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -20,9 +20,10 @@ class TestBearerParser(TestCase):
         self.assertEqual("https://docs.bearer.com/reference/rules/javascript_lang_dangerous_insert_html", findings[0].references)
         self.assertEqual("js/adminer/editing.js", findings[0].file_path)
         self.assertEqual(581, findings[0].line)
+        self.assertEqual("804174abc284c6bc747d886b3e9ba757_0", findings[0].unique_id_from_tool)
 
     def test_bearer_parser_with_many_vuln_has_many_findings(self):
-        testfile = open(get_unit_tests_scans_path("bearer_cli") / "bearer_cli_many_vul.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("bearer_cli") / "bearer_cli_many_vul.json").open(encoding="utf-8")
         parser = BearerCLIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

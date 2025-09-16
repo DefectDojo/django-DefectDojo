@@ -112,10 +112,7 @@ class SSLyzeXMLParser:
                 ):
                     weak_cipher[element.tag] = []
                     for ciphers in element:
-                        if (
-                            ciphers.tag == "preferredCipherSuite"
-                            or ciphers.tag == "acceptedCipherSuites"
-                        ):
+                        if ciphers.tag in {"preferredCipherSuite", "acceptedCipherSuites"}:
                             for cipher in ciphers:
                                 if cipher.attrib["name"] in WEAK_CIPHER_LIST:
                                     if cipher.attrib["name"] not in weak_cipher[element.tag]:
@@ -135,7 +132,7 @@ class SSLyzeXMLParser:
                         )
                 if title and description is not None:
                     dupe_key = hashlib.md5(
-                        str(description + title).encode("utf-8"),
+                        str(description + title).encode("utf-8"), usedforsecurity=False,
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]

@@ -1,5 +1,7 @@
 # from unittest import skip
 import logging
+from unittest.mock import patch
+from unittest import skip
 
 from crum import impersonate
 from django.urls import reverse
@@ -16,6 +18,7 @@ from .dojo_test_case import (
     get_unit_tests_path,
     get_unit_tests_scans_path,
     toggle_system_setting_boolean,
+    with_system_setting,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,6 +77,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
         self.npm_groups_sample_filename = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups.json"
+        self.npm_groups_sample_filename2 = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups_different_titles.json"
+        self.clair_few_findings = get_unit_tests_scans_path("clair") / "clair_few_vuln.json"
         self.client.force_login(self.get_test_admin())
 
     def test_import_no_push_to_jira(self):
@@ -103,6 +108,29 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # all findings should be in a group, so no JIRA issues for individual findings
         self.assert_jira_issue_count_in_test(test_id, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 3)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    @with_system_setting("jira_minimum_severity", "Critical")
+    def test_import_with_groups_push_to_jira_minimum_critical(self):
+        # No Critical findings in report, so expect no groups to be pushed
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        # all findings should be in a group, so no JIRA issues for individual findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    @with_system_setting("jira_minimum_severity", "High")
+    def test_import_with_groups_push_to_jira_minimum_high(self):
+        # 7 findings, 5 unique component_name+component_version
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        # all findings should be in a group, so no JIRA issues for individual findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # fresh library has only medium findings, so only 2 instead of 3 groups expected
+        self.assert_jira_group_issue_count_in_test(test_id, 2)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
 
@@ -294,7 +322,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
 
-    def test_import_grouped_reopen_expired_sla(self):
+    def test_import_grouped_reopen_expired_risk_acceptance(self):
         # steps
         # import scan, make sure they are in grouped JIRA
         # risk acceptance all the grouped findings, make sure they are closed in JIRA
@@ -347,6 +375,60 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
+    @patch("dojo.decorators.we_want_async", return_value=False)
+    @skip("Its fail")
+    def test_import_grouped_reopen_expired_risk_acceptance_with_finding_sync(self, mock):
+        # steps
+        # import scan, make sure they are in grouped JIRA
+        # risk acceptance all the grouped findings, make sure they are closed in JIRA
+        # expire risk acceptance on all grouped findings, make sure they are open in JIRA
+        JIRA_Instance.objects.update(finding_jira_sync=True)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        findings = self.get_test_findings_api(test_id)
+        finding_id = findings["results"][0]["id"]
+
+        ra_data = {
+            "name": "Accept: Unit test",
+            "accepted_findings": [],
+            "recommendation": "A",
+            "recommendation_details": "recommendation 1",
+            "decision": "A",
+            "decision_details": "it has been decided!",
+            "accepted_by": "pointy haired boss",
+            "owner": 1,
+            "expiration_date": "2024-12-31",
+            "reactivate_expired": True,
+            }
+
+        for finding in findings["results"]:
+            ra_data["accepted_findings"].append(finding["id"])
+
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+
+        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        self.assertEqual("/engagement/1", response.url)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        pre_jira_status = post_jira_status
+        ra = Risk_Acceptance.objects.last()
+        ra_helper.expire_now(ra)
+
+        # we don't do any explicit push to JIRA here as it should happen automatically
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual(pre_jira_status, post_jira_status)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
     def test_import_with_groups_twice_push_to_jira(self):
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
         test_id = import0["test"]
@@ -382,43 +464,61 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         finding_id = findings["results"][0]["id"]
 
-        # logger.debug('finding_id: %s', finding_id)
-
         # use existing finding as template, but change some fields to make it not a duplicate
         finding_details = self.get_finding_api(finding_id)
         del finding_details["id"]
         del finding_details["push_to_jira"]
 
-        finding_details["title"] = "jira api test 1"
-        self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, no push to jira should not create a new issue"):
+            finding_details["title"] = "jira api test 1"
+            self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details["title"] = "jira api test 2"
-        self.post_new_finding_api(finding_details, push_to_jira=True)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, push to jira should create a new issue"):
+            finding_details["title"] = "jira api test 2"
+            self.post_new_finding_api(finding_details, push_to_jira=True)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details["title"] = "jira api test 3"
-        new_finding_json = self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        with self.subTest("New finding, no push to jira should not create a new issue"):
+            finding_details["title"] = "jira api test 3"
+            new_finding_json = self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": False})
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
-        self.assert_jira_issue_count_in_test(test_id, 2)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        pre_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+        with self.subTest("Updating this new finding without push to jira should not create a new issue"):
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": False})
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True,
-                                                        "is_mitigated": True,
-                                                        "active": False})
-        self.assert_jira_issue_count_in_test(test_id, 2)
-        self.assert_jira_group_issue_count_in_test(test_id, 0)
-        post_jira_status = self.get_jira_issue_status(new_finding_json["id"])
-        self.assertNotEqual(pre_jira_status, post_jira_status)
+        with self.subTest("Updating this new finding with push to jira should create a new issue"):
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Only Finding Groups will have their priority synced on updates.
+        # For Findings we resepect any priority change made in JIRA
+        # https://github.com/DefectDojo/django-DefectDojo/pull/9571 and https://github.com/DefectDojo/django-DefectDojo/pull/12475
+        with self.subTest("Changing priority of a finding should NOT be reflected in JIRA"):
+            pre_jira_priority = self.get_jira_issue_priority(new_finding_json["id"])
+            self.patch_finding_api(new_finding_json["id"], {"severity": "Medium"})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+            post_jira_priority = self.get_jira_issue_priority(new_finding_json["id"])
+            self.assertEqual(pre_jira_priority, post_jira_priority)
+
+        with self.subTest("Mitigating this finding should result in a status change in JIRA"):
+            pre_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+            self.assertEqual("Backlog", pre_jira_status.name)
+
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True,
+                                                            "is_mitigated": True,
+                                                            "active": False})
+            self.assert_jira_issue_count_in_test(test_id, 2)
+            self.assert_jira_group_issue_count_in_test(test_id, 0)
+            post_jira_status = self.get_jira_issue_status(new_finding_json["id"])
+            self.assertEqual("Done", post_jira_status.name)
 
         finding_details["title"] = "jira api test 4"
         new_finding_json = self.post_new_finding_api(finding_details)
@@ -449,78 +549,127 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         self.assertEqual(len(findings["results"]), 2)
 
-        finding_details = self.get_finding_api(findings["results"][0]["id"])
-        finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+        with self.subTest("Pushing a finding with in a group should result in the group issue being pushed"):
+            finding_details = self.get_finding_api(findings["results"][0]["id"])
+            finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
 
-        del finding_details["id"]
-        del finding_details["push_to_jira"]
+            del finding_details["id"]
+            del finding_details["push_to_jira"]
 
-        # push a finding should result in pushing the group instead
-        self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True})
+            # push a finding should result in pushing the group instead
+            self.patch_finding_api(findings["results"][0]["id"], {"push_to_jira": True, "verified": True})
 
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        # push second finding from the same group should not result in a new jira issue
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        self.patch_finding_api(findings["results"][1]["id"], {"push_to_jira": True})
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        with self.subTest("Pushing a different finding with in a group should result in the group issue being pushed and not a new issue being created"):
+            # push second finding from the same group should not result in a new jira issue
+            self.patch_finding_api(findings["results"][1]["id"], {"push_to_jira": True})
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        pre_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
-        # close both findings
-        self.patch_finding_api(findings["results"][0]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
-        self.patch_finding_api(findings["results"][1]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
-        # both findings inactive -> should update status in JIRA
-        self.assertNotEqual(pre_jira_status, post_jira_status)
+        with self.subTest("Changing severity of findings in the group to Medium should result in the group issue priority being updated"):
+            pre_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", pre_jira_priority.name)
 
-        # new finding, not pushed to JIRA
+            # change only 1 to medium, the other one remains high
+            self.patch_finding_api(findings["results"][0]["id"], {"severity": "Medium", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", post_jira_priority.name)
 
-        # use existing finding as template, but change some fields to make it not a duplicate
-        self.get_finding_api(findings["results"][0]["id"])
+            # both are Medium now
+            self.patch_finding_api(findings["results"][1]["id"], {"severity": "Medium", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("Medium", post_jira_priority.name)
 
-        finding_details["title"] = "jira api test 1"
-        self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 0)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            # revert to not mess up the following tests
+            self.patch_finding_api(findings["results"][0]["id"], {"severity": "High", "push_to_jira": True})
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("High", post_jira_priority.name)
 
-        # another new finding, pushed to JIRA
-        # same component_name, but not yet in a group, so finding pushed to JIRA
+        with self.subTest("Closing all findings in the group should result in the group issue being closed and priority being updated"):
+            pre_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            pre_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("High", pre_jira_priority.name)
+            self.assertEqual("Backlog", pre_jira_status.name)
 
-        finding_details["title"] = "jira api test 2"
-        new_finding_json = self.post_new_finding_api(finding_details, push_to_jira=True)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            # close both findings
+            self.patch_finding_api(findings["results"][0]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
+            self.patch_finding_api(findings["results"][1]["id"], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
-        # no way to set finding group easily via API yet
-        Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("Lowest", post_jira_priority.name)
+            self.assertEqual("Done", post_jira_status.name)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+        with self.subTest("Updating group findings to have no active findings above threshold should result in the group issue being set to the lowest priority and remain inactive"):
+            # reopen 1 finding, but make it below the threshold
+            self.patch_finding_api(findings["results"][0]["id"], {"active": True, "is_mitigated": False, "severity": "Info", "push_to_jira": True})
 
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+            post_jira_status = self.get_jira_issue_status(findings["results"][0]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][0]["id"])
+            self.assertEqual("Lowest", post_jira_priority.name)
+            self.assertEqual("Done", post_jira_status.name)
 
-        # another new finding, pushed to JIRA, different component_name / different group
+            # reopen the other finding
+            self.patch_finding_api(findings["results"][1]["id"], {"active": True, "is_mitigated": False, "severity": "Medium", "push_to_jira": True})
+            post_jira_status = self.get_jira_issue_status(findings["results"][1]["id"])
+            post_jira_priority = self.get_jira_issue_priority(findings["results"][1]["id"])
+            self.assertEqual("Medium", post_jira_priority.name)
+            self.assertEqual("Backlog", post_jira_status.name)
 
-        finding_details["title"] = "jira api test 3"
-        finding_details["component_name"] = "pg"
-        new_finding_json = self.post_new_finding_api(finding_details)
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        with self.subTest("Opening a finding without push_to_jira should not result in a new issue being created"):
+            # new finding, not pushed to JIRA
+            # use existing finding as template, but change some fields to make it not a duplicate
+            self.get_finding_api(findings["results"][0]["id"])
 
-        findings = self.get_test_findings_api(test_id, component_name="pg")
+            finding_details["title"] = "jira api test 1"
+            self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 0)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+        with self.subTest("Opening a finding in the same group without push_to_jira should not result in a new issue being created"):
+            # another new finding, pushed to JIRA
+            # same component_name, but not yet in a group, so finding pushed to JIRA
 
-        # no way to set finding group easily via API yet
-        Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+            finding_details["title"] = "jira api test 2"
+            new_finding_json = self.post_new_finding_api(finding_details, push_to_jira=True)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+            # no way to set finding group easily via API yet
+            Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
 
-        self.assert_jira_issue_count_in_test(test_id, 1)
-        self.assert_jira_group_issue_count_in_test(test_id, 2)
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        with self.subTest("Opening a finding with different fields resulting in a diffrent group should result in a new group issue being created"):
+            # another new finding, pushed to JIRA, different component_name / different group
+            finding_details["title"] = "jira api test 3"
+            finding_details["component_name"] = "pg"
+            new_finding_json = self.post_new_finding_api(finding_details)
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+            findings = self.get_test_findings_api(test_id, component_name="pg")
+
+            finding_group_id = findings["results"][0]["finding_groups"][0]["id"]
+
+            # no way to set finding group easily via API yet
+            Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json["id"]))
+
+            self.patch_finding_api(new_finding_json["id"], {"push_to_jira": True})
+
+            self.assert_jira_issue_count_in_test(test_id, 1)
+            self.assert_jira_group_issue_count_in_test(test_id, 2)
 
         self.assert_cassette_played()
 
@@ -624,41 +773,118 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
     @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
     @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
     def test_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_true(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
         self.assert_jira_issue_count_in_test(test_id, 0)
+
+        # Verfied findings should be pushed, different scan to avoid dedupe interference
+        import0 = self.import_scan_with_params(self.clair_few_findings, scan_type="Clair Scan", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 4)
+
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
     @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
     def test_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
         self.assert_jira_issue_count_in_test(test_id, 0)
+
+        # Verfied findings should be pushed, different scan to avoid dedupe interference
+        import0 = self.import_scan_with_params(self.clair_few_findings, scan_type="Clair Scan", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 4)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
+
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
     @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
     def test_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_true(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
         self.assert_jira_issue_count_in_test(test_id, 0)
+
+        # Verfied findings should be pushed, different scan to avoid dedupe interference
+        import0 = self.import_scan_with_params(self.clair_few_findings, scan_type="Clair Scan", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 4)
+
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
     @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
     def test_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push both of them
         self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename2, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_false(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename2, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # No verified findings, means no groups pushed to JIRA
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename2, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    @with_system_setting("jira_minimum_severity", "Low")
+    def test_groups_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_false(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
@@ -740,6 +966,99 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=False)
 
         self.assert_cassette_played()
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_mixed_findings_and_groups_jira_push_bug(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
+        """
+        Test the bug in bulk edit: when bulk editing findings where some are in groups
+        and some are not, individual findings should still be pushed to JIRA even if
+        groups are also pushed.
+
+        Bug: If finding groups are pushed to JIRA (groups_pushed_to_jira=True),
+        then individual findings are skipped due to the condition:
+        `if not groups_pushed_to_jira and (...)`
+        """
+        # Import scan with groups but don't push to JIRA initially
+        import0 = self.import_scan_with_params(
+            self.npm_groups_sample_filename,
+            scan_type="NPM Audit Scan",
+            group_by="component_name+component_version",
+            push_to_jira=False,
+            verified=True,
+        )
+        test_id = import0["test"]
+
+        # Verify no JIRA issues were created during import
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Get the findings and finding groups created
+        Finding.objects.filter(test__id=test_id).order_by("id")
+        finding_groups = Finding_Group.objects.filter(test__id=test_id)
+
+        # Create mixed scenario: some findings in groups, some ungrouped
+        # Remove one entire group to create ungrouped findings
+        if finding_groups.exists():
+            # Remove all findings from the first group and delete the group
+            group_to_remove = finding_groups.first()
+            list(group_to_remove.findings.all())
+            # Remove all findings from this group, making them ungrouped
+            group_to_remove.findings.clear()
+            # Delete the empty group
+            group_to_remove.delete()
+
+        # Verify we now have both grouped and ungrouped findings
+        # Note: finding_group is a cached property, so we need to check if findings are in any group
+        all_findings = Finding.objects.filter(test__id=test_id)
+        grouped_findings = [f for f in all_findings if f.finding_group is not None]
+        ungrouped_findings = [f for f in all_findings if f.finding_group is None]
+
+        self.assertGreater(len(grouped_findings), 0, "Should have some grouped findings")
+        self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
+
+        # Use Django test client instead of RequestFactory for proper auth
+        from django.contrib.auth import get_user_model
+
+        # Prepare bulk edit request data
+        # Get the current finding IDs after group modifications
+        current_findings = Finding.objects.filter(test__id=test_id)
+        all_finding_ids = [str(f.id) for f in current_findings]
+
+        # Login as admin user who has all permissions
+        admin_user = get_user_model().objects.get(username="admin")
+        self.client.force_login(admin_user)
+
+        post_data = {
+            "finding_to_update": all_finding_ids,
+            "push_to_jira": "on",  # Checkbox value when checked
+            # Form validation fields - all optional but need to be present
+            "severity": "",
+            "active": "",
+            "verified": "",
+            "false_p": "",
+            "duplicate": "",
+            "out_of_scope": "",
+            "is_mitigated": "",
+            "status": "",  # Required for form structure
+        }
+
+        # Perform bulk edit using test client
+        self.client.post("/finding/bulk", post_data)
+
+        # Analyze what was pushed to JIRA
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        # Test expectations - both groups AND individual findings should be pushed
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed to JIRA")
+        self.assertGreater(len(individual_calls), 0, "Individual findings should also be pushed to JIRA despite groups being pushed")
+
+        # Verify the fix: we should have exactly 2 groups + 2 individual findings pushed
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
 
     # creation of epic via the UI is already tested in test_jira_config_engagement_epic, so
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet

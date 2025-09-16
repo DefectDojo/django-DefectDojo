@@ -307,7 +307,7 @@ def get_user_manager(name, id, token_graph):
         "Authorization": f"Bearer {token_graph}",
         "ConsistencyLevel": "eventual",
     }
-    response = requests.get(url, headers=headers, verify=False).json()
+    response = requests.get(url, headers=headers).json()
     if "officeLocation" not in response:
         print(f"User {name} does not have an office location")
         return None

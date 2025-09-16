@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% url 'view_finding_group' finding_group.id as finding_group_url %}
 {% url 'view_product' finding_group.test.engagement.product.id as product_url %}
 {% url 'view_engagement' finding_group.test.engagement.id as engagement_url %}
@@ -10,13 +11,16 @@ A group of Findings has been pushed to JIRA to be investigated and fixed:
 h2. Group
 *Group*: [{{ finding_group.name|jiraencode}}|{{ finding_group_url|full_url }}] in [{{ finding_group.test.engagement.product.name|jiraencode }}|{{ product_url|full_url }}] / [{{ finding_group.test.engagement.name|jiraencode }}|{{ engagement_url|full_url }}] / [{{ finding_group.test|stringformat:'s'|jiraencode }}|{{ test_url|full_url }}]
 
+h2. Summary
+*Severity:* {{ finding_group.findings.all | jira_severity }} {% if finding_group.sla_deadline %} *Due Date:* {{ finding_group | jira_sla_deadline }} {% endif %}
 
-|| Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group.findings.all %}
-| {{finding.severity}} | {% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %} | [{{finding.cwe}}|{{finding.cwe|cwe_url}}] | {{finding.component_name|jiraencode_component}} | {{finding.component_version}} | {% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}] | {{ finding.status }} |{% endfor %}
+Findings matching the Active, Verified and Severity criteria:
+|| Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group|jira_qualified_findings %}
+|{{finding.severity}}|{% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %}|[{{finding.cwe}}|{{finding.cwe|cwe_url}}]|{{finding.component_name|jiraencode_component}}|{{finding.component_version}}|{% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]|{{ finding.status }}|{% endfor %}
 
-*Severity:* {{ finding_group.severity }}
-
-{% if finding_group.sla_deadline %} *Due Date:* {{ finding_group.sla_deadline }} {% endif %}
+Findings *not* matching the Active, Verified and Severity criteria:
+|| Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group|jira_non_qualified_findings %}
+|{{finding.severity}}|{% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %}|[{{finding.cwe}}|{{finding.cwe|cwe_url}}]|{{finding.component_name|jiraencode_component}}|{{finding.component_version}}|{% url 'view_finding' finding.id as finding_url %}[{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]|{{ finding.status }}|{% endfor %}
 
 {% if finding_group.test.engagement.branch_tag %}
 *Branch/Tag:* {{ finding_group.test.engagement.branch_tag }}
@@ -45,8 +49,10 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
-{% for endpoint in finding.endpoints.all %}
-* {{ endpoint }}{% endfor %}
+||System/Endpoint||Status||
+{% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}
 {%endif%}
 
 {% if finding.sast_source_object %}
@@ -87,6 +93,12 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 *References*:
 {{ finding.references|safe }}
 {% endif %}
+
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe }}
+{% endif %}
+
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
 {% endfor %}

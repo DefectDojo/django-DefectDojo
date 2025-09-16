@@ -53,7 +53,7 @@ class KubeHunterParser:
 
             # Finding evidence
             evidence = item.get("evidence")
-            if evidence and evidence != "" and evidence != "none":
+            if evidence and evidence not in {"", "none"}:
                 steps_to_reproduce = "**Evidence**: " + item.get("evidence")
             else:
                 steps_to_reproduce = None

@@ -210,12 +210,6 @@ class BaseTestCase(unittest.TestCase):
         driver.get(self.base_url + "components")
         return driver
 
-    def goto_google_sheets_configuration_form(self, driver):
-        # if something is terribly wrong, it may still fail, even if system_settings is disabled.
-        # See https://github.com/DefectDojo/django-DefectDojo/issues/3742 for reference.
-        driver.get(self.base_url + "configure_google_sheets")
-        return driver
-
     def goto_active_engagements_overview(self, driver):
         driver.get(self.base_url + "engagement/active")
         return driver
@@ -265,6 +259,9 @@ class BaseTestCase(unittest.TestCase):
         except NoSuchElementException:
             return False
         return True
+
+    def is_info_message_present(self, text=None):
+        return self.is_element_by_css_selector_present(".alert-info", text=text)
 
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-success", text=text)

@@ -13,13 +13,22 @@ It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if 
 
 For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different tools concurrently as part of a single testing effort.
 
-## Accessing the Import Scan Form
+## Accessing the Import Scan Form (Pro UI)
 
 The Import Scan form can be accessed from multiple locations:
 
 1. Via the **Import \> Add Findings** menu option on the sidebar
 2. From a **Product’s** **‘⋮’ (horizontal dots) Menu**, from a **Products Table**
 3. From the **⚙️Gear Menu** on a **Product Page**
+
+## Accessing the Import Scan Form (Classic UI / Open Source)
+
+In DefectDojo OS, you can access this form from two locations:
+
+* The Tests section of an Engagement:
+    ![image](images/import_scan_os.png)
+* The Findings section of the navigation bar on a Product:
+    ![image](images/import_scan_os_2.png)
 
 ## Completing the Import Scan Form
 
@@ -39,13 +48,13 @@ If you do not select a Scan Date, Findings created from this report will use the
 * **Tags:** if you want to use tags to further organize your Test data, you can add Tags using this form. Type in the name of the tag you want to create, and press Enter on your keyboard to add it to the list of tags.
 * **Process Findings Asynchronously**: this field is enabled by default, but it can be disabled if you wish. See explanation below.
 
-### Process Findings Asynchronously
+### Process Findings Asynchronously (Pro)
 
 When this field is enabled, DefectDojo will use a background process to populate your Test file with Findings. This allows you to continue working with DefectDojo while Findings are being created from your scan file.
 
 When this field is disabled, DefectDojo will wait until all Findings have been successfully created before you can proceed to the next screen. This could take significant time depending on the size of your file.
 
-This option is especially relevant when using the API. If uploading data with Process Findings Asynchronously turned **off**, DefectDojo will not return a successful response until all Findings have been created successfully, 
+This option is especially relevant when using the API to import data. If uploading data with Process Findings Asynchronously turned **off**, DefectDojo will not return a successful response until all Findings have been created successfully, 
 
 ### Optional Fields
 
@@ -56,9 +65,27 @@ This option is especially relevant when using the API. If uploading data with Pr
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
 
-# Next Steps
+### Triage-less scanners: Do Not Reactivate field
 
-Once your upload has completed, you should be redirected to the Test Page which contains the Findings found in the scan file. You can start working with those results right away, but feel free to consult the following articles:
+Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything, regardless of whether a vulnerability has already been triaged or not.
 
-* Learn how to organize your Product Hierarchy to manage different contexts for your Findings and Tests: [Product Hierarchy Overview](https://docs.defectdojo.com/en/working_with_findings/organizing_engagements_tests/product-hierarchy-overview/).
-* Learn how to extend a test with additional Findings and reports: **Reimport Data To Extend a Test**
+To handle this case, DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can use DefectDojo as the source of truth for triage, instead of reactivating your triaged Findings on each import / reimport.
+
+### Using the Scan Completion Date (API: `scan_date`) field
+
+DefectDojo offers a plethora of supported scanner reports, but not all of them contain the
+information most important to a user. The `scan_date` field is a flexible smart feature that
+allows users to set the completion date of the a given scan report, and have it propagate
+down to all the findings imported. This field is **not** mandatory, but the default value for
+this field is the date of import (whenever the request is processed and a successful response is returned).
+
+Here are the following use cases for using this field:
+
+1. The report **does not** set the date, and `scan_date` is **not** set at import
+    - Finding date will be the default value of `scan_date`
+2. The report **sets** the date, and the `scan_date` is **not** set at import
+    - Finding date will be whatever the report sets
+3. The report **does not** set the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`
+4. The report **sets** the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`

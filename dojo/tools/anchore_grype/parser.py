@@ -1,9 +1,12 @@
 import json
+import logging
 
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class AnchoreGrypeParser:
@@ -22,12 +25,14 @@ class AnchoreGrypeParser:
 
     def get_description_for_scan_types(self, scan_type):
         return (
-            "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' "
-            "format"
+            "A vulnerability scanner for container images, filesystems, and SBOMs. "
+            "JSON report generated with '--output=json' format."
         )
 
     def get_findings(self, file, test):
+        logger.debug(f"file: {file}")
         data = json.load(file)
+        logger.debug(f"data: {data}")
         dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
@@ -41,11 +46,13 @@ class AnchoreGrypeParser:
             if "fix" in vulnerability:
                 vuln_fix_versions = vulnerability["fix"].get("versions")
             vuln_cvss = vulnerability.get("cvss")
+            vuln_epss = vulnerability.get("epss")
 
             rel_datasource = None
             rel_urls = None
             rel_description = None
             rel_cvss = None
+            rel_epss = None
             vulnerability_ids = None
             related_vulnerabilities = item.get("relatedVulnerabilities")
             if related_vulnerabilities:
@@ -54,6 +61,8 @@ class AnchoreGrypeParser:
                 rel_urls = related_vulnerability.get("urls")
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
+                rel_epss = related_vulnerability.get("epss")
+                rel_vuln_id = related_vulnerability.get("id")
             vulnerability_ids = self.get_vulnerability_ids(
                 vuln_id, related_vulnerabilities,
             )
@@ -159,6 +168,15 @@ class AnchoreGrypeParser:
                 finding_cvss3 = self.get_cvss(vuln_cvss)
             if not finding_cvss3 and rel_cvss:
                 finding_cvss3 = self.get_cvss(rel_cvss)
+            # https://github.com/DefectDojo/django-DefectDojo/issues/12819
+            # the parser seems focues on only parsing the first related vulnerability
+            # this fixes the mentioned github issue, but a more thorough rewrite might be needed
+            # if the problem persists / we get more real world sample reports.
+            finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
+            if finding_epss_score is None and rel_epss:
+                finding_epss_score, finding_epss_percentile = self.get_epss_values(rel_vuln_id, rel_epss)
+                if finding_epss_score is None and rel_vuln_id:
+                    finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
 
             dupe_key = finding_title
             if dupe_key in dupes:
@@ -168,8 +186,9 @@ class AnchoreGrypeParser:
                 dupes[dupe_key] = Finding(
                     title=finding_title.replace("\x00", ""),
                     description=finding_description.replace("\x00", ""),
-                    cwe=1352,
                     cvssv3=finding_cvss3,
+                    epss_score=finding_epss_score,
+                    epss_percentile=finding_epss_percentile,
                     severity=vuln_severity,
                     mitigation=finding_mitigation,
                     references=finding_references,
@@ -187,7 +206,7 @@ class AnchoreGrypeParser:
         return list(dupes.values())
 
     def _convert_severity(self, val):
-        if val == "Unknown" or val == "Negligible":
+        if val in {"Unknown", "Negligible"}:
             return "Info"
         return val.title()
 
@@ -202,14 +221,33 @@ class AnchoreGrypeParser:
                     return vector
         return None
 
+    def get_epss_values(self, vuln_id, epss_list):
+        if not isinstance(epss_list, list):
+            logger.debug(f"epss_list is not a list: {epss_list}")
+            return None, None
+
+        if isinstance(epss_list, list):
+            logger.debug(f"epss_list: {epss_list}")
+            for epss_data in epss_list:
+                if epss_data.get("cve") != vuln_id:
+                    continue
+                try:
+                    epss_score = float(epss_data.get("epss"))
+                    epss_percentile = float(epss_data.get("percentile"))
+                except (TypeError, ValueError):
+                    logger.debug(f"epss_data is not a float: {epss_data}")
+                else:
+                    return epss_score, epss_percentile
+        logger.debug(f"epss not found for vuln_id: {vuln_id} in epss_list: {epss_list}")
+        return None, None
+
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
         vulnerability_ids = []
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:
-            for related_vulnerability in related_vulnerabilities:
-                if related_vulnerability.get("id"):
-                    vulnerability_ids.append(related_vulnerability.get("id"))
+            vulnerability_ids.extend(related_vulnerability_id for related_vulnerability in related_vulnerabilities
+                if (related_vulnerability_id := related_vulnerability.get("id")))
         if vulnerability_ids:
             return vulnerability_ids
         return None

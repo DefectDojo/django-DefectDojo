@@ -6,16 +6,16 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestDockerBenchParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open(
-            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-zero-vulns.json", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-zero-vulns.json").open(encoding="utf-8",
         ) as testfile:
             parser = DockerBenchParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        with open(
-            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-single-vuln.json", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-single-vuln.json").open(encoding="utf-8",
         ) as testfile:
             parser = DockerBenchParser()
             findings = parser.get_findings(testfile, Test())
@@ -28,8 +28,8 @@ class TestDockerBenchParser(DojoTestCase):
             self.assertIn("Ensure base device size is not changed until needed", finding.description)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with open(
-            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-many-vulns.json", encoding="utf-8",
+        with (
+            get_unit_tests_scans_path("dockerbench") / "docker-bench-report-many-vulns.json").open(encoding="utf-8",
         ) as testfile:
             parser = DockerBenchParser()
             findings = parser.get_findings(testfile, Test())

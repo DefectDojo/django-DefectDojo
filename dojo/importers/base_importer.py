@@ -1,7 +1,6 @@
 import base64
 import logging
 from typing import List, Tuple
-from warnings import warn
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -34,6 +33,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.tools.factory import get_parser
+from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
@@ -178,15 +178,36 @@ class BaseImporter(ImporterOptions):
             logger.warning(e)
             raise ValidationError(e)
 
-    def parse_dynamic_test_type_findings_from_tests(
-        self,
-        tests: list[Test],
-    ) -> list[Finding]:
-        """
-        Currently we only support import one Test
-        so for parser that support multiple tests (like SARIF)
-        we aggregate all the findings into one uniq test
-        """
+    def consolidate_dynamic_tests(self, tests: list[Test]) -> list[Finding]:
+        parsed_findings = []
+        # Make sure we have at least one test returned
+        if len(tests) == 0:
+            logger.info(f"No tests found in import for {self.scan_type}")
+            self.test = None
+            return parsed_findings
+        # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+        # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+        # when there is more than 1 test
+        #
+        # we also aggregate the label of the Test_type to show the user the original self.scan_type
+        # only if they are different. This is to support meta format like SARIF
+        # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
+        test_raw = tests[0]
+        test_type_name = self.scan_type
+        # Create a new test if it has not already been created
+        if not self.test:
+            # Determine if we should use a custom test type name
+            if test_raw.type:
+                test_type_name = f"{tests[0].type} Scan"
+                if test_type_name != self.scan_type:
+                    test_type_name = f"{test_type_name} ({self.scan_type})"
+            self.test = self.create_test(test_type_name)
+        # This part change the name of the Test
+        # we get it from the data of the parser
+        # Update the test and test type with meta from the raw test
+        self.update_test_from_internal_test(test_raw)
+        self.update_test_type_from_internal_test(test_raw)
+        # Aggregate all of the findings into a single place
         parsed_findings = []
         for test_raw in tests:
             parsed_findings.extend(test_raw.findings)
@@ -204,7 +225,7 @@ class BaseImporter(ImporterOptions):
         This version of this function is intended to be extended by children classes
         """
         tests = self.parse_dynamic_test_type_tests(scan, parser)
-        return self.parse_dynamic_test_type_findings_from_tests(tests)
+        return self.consolidate_dynamic_tests(tests)
 
     def parse_findings(
         self,
@@ -214,12 +235,12 @@ class BaseImporter(ImporterOptions):
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
-
-        This function will vary by importer, so it is marked as
-        abstract with a prohibitive exception raised if the
-        method is attempted to to be used by the BaseImporter class
         """
-        self.check_child_implementation_exception()
+        # Attempt any preprocessing before generating findings
+        scan = self.process_scan_file(scan)
+        if hasattr(parser, "get_tests"):
+            return self.parse_findings_dynamic_test_type(scan, parser)
+        return self.parse_findings_static_test_type(scan, parser)
 
     def sync_process_findings(
         self,
@@ -232,36 +253,11 @@ class BaseImporter(ImporterOptions):
         """
         return self.process_findings(parsed_findings, sync=True, **kwargs)
 
-    def async_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        """
-        Processes findings in chunks within N number of processes. The
-        ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
-        findings will be processed in a given worker/process/thread
-        """
-        warn(
-            "This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.",
-            stacklevel=2,
-        )
-        return self.process_findings(parsed_findings, sync=False, **kwargs)
-
     def determine_process_method(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
-        """
-        Determines whether to process the scan iteratively, or in chunks,
-        based upon the ASYNC_FINDING_IMPORT setting
-        """
-        if settings.ASYNC_FINDING_IMPORT:
-            return self.async_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
         return self.sync_process_findings(
             parsed_findings,
             **kwargs,
@@ -288,8 +284,6 @@ class BaseImporter(ImporterOptions):
             self.test.build_id = self.build_id
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
-
-        return
 
     def update_timestamps(self):
         """
@@ -509,32 +503,9 @@ class BaseImporter(ImporterOptions):
             message += "."
         else:
             # Set the message to convey that all findings processed are identical to the last time an import/reimport occurred
-            message = "No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report."
+            message = "No findings were added/updated/closed/reactivated as the report is empty or the findings in Defect Dojo are identical to those in the uploaded report."
 
         return message
-
-    def chunk_findings(
-        self,
-        finding_list: list[Finding],
-        chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> list[list[Finding]]:
-        """
-        Split a single large list into a list of lists of size `chunk_size`.
-        For Example
-        ```
-        >>> chunk_findings([A, B, C, D, E], 2)
-        >>> [[A, B], [B, C], [E]]
-        ```
-        """
-        # Break the list of parsed findings into "chunk_size" lists
-        chunk_list = [
-            finding_list[i : i + chunk_size]
-            for i in range(0, len(finding_list), chunk_size)
-        ]
-        logger.debug(
-            f"Split endpoints/findings into {len(chunk_list)} chunks of {chunk_size}"
-        )
-        return chunk_list
 
     def update_test_progress(
         self,
@@ -567,6 +538,20 @@ class BaseImporter(ImporterOptions):
             test_type.dynamically_generated = True
             test_type.save()
         return test_type
+
+    def update_test_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (description := getattr(internal_test, "description", None)) is not None:
+            self.test.description = description
+        if (version := getattr(internal_test, "version", None)) is not None:
+            self.test.version = version
+        self.test.save()
+
+    def update_test_type_from_internal_test(self, internal_test: ParserTest) -> None:
+        if (static_tool := getattr(internal_test, "static_tool", None)) is not None:
+            self.test.test_type.static_tool = static_tool
+        if (dynamic_tool := getattr(internal_test, "dynamic_tool", None)) is not None:
+            self.test.test_type.dynamic_tool = dynamic_tool
+        self.test.test_type.save()
 
     def verify_tool_configuration_from_test(self):
         """
@@ -791,7 +776,8 @@ class BaseImporter(ImporterOptions):
         """
         finding.active = False
         finding.is_mitigated = True
-        finding.mitigated = self.scan_date
+        if not finding.mitigated:
+            finding.mitigated = self.scan_date
         finding.mitigated_by = self.user
         finding.notes.create(
             author=self.user,

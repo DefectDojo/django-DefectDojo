@@ -1,6 +1,41 @@
+import importlib
+from contextlib import suppress
+
+from django.conf import settings
+
+
 class ParserTest:
-    def __init__(self, name: str, parser_type: str, version: str):
-        self.name = name
-        self.type = parser_type
-        self.version = version
-        self.description = None
+    def __init__(self, *args: list, **kwargs: dict):
+        parser_test_class = OpenSourceParserTest
+        with suppress(ModuleNotFoundError):
+            if (
+                class_path := getattr(settings, "PARSER_TEST_CLASS_PATH", None)
+            ) is not None:
+                module_name, _separator, class_name = class_path.rpartition(".")
+                module = importlib.import_module(module_name)
+                parser_test_class = getattr(module, class_name)
+        parser_test_class().apply(self, *args, **kwargs)
+
+
+class OpenSourceParserTest:
+    def apply(
+        self,
+        instance: ParserTest,
+        name: str,
+        parser_type: str,
+        version: str,
+        *args: list,
+        description: str | None = None,
+        dynamic_tool: bool | None = None,
+        static_tool: bool | None = None,
+        **kwargs: dict,
+    ):
+        instance.name = name
+        instance.type = parser_type
+        instance.version = version
+        if description is not None:
+            instance.description = description
+        if dynamic_tool is not None:
+            instance.dynamic_tool = dynamic_tool
+        if static_tool is not None:
+            instance.static_tool = static_tool

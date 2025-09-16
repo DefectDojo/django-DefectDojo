@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestPhpSecurityAuditV2ParserParser(DojoTestCase):
 
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
-        testfile = open(get_unit_tests_scans_path("php_security_audit_v2") / "php_security_audit_v2.0.0_unformatted.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("php_security_audit_v2") / "php_security_audit_v2.0.0_unformatted.json").open(encoding="utf-8")
         parser = PhpSecurityAuditV2Parser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -23,7 +23,7 @@ class TestPhpSecurityAuditV2ParserParser(DojoTestCase):
 
     def test_php_symfony_security_check_parser_with_many_vuln(self):
         """New report with latest version"""
-        testfile = open(get_unit_tests_scans_path("php_security_audit_v2") / "many_vulns.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("php_security_audit_v2") / "many_vulns.json").open(encoding="utf-8")
         parser = PhpSecurityAuditV2Parser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

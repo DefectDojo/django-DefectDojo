@@ -8,7 +8,8 @@ from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q, QuerySet
+from django.db.models import OuterRef, QuerySet, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -24,6 +25,7 @@ from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
+from dojo.query_utils import build_count_subquery
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -457,7 +459,11 @@ def endpoint_status_bulk_update(request, fid):
 def prefetch_for_endpoints(endpoints):
     if isinstance(endpoints, QuerySet):
         endpoints = endpoints.prefetch_related("product", "tags", "product__tags")
-        endpoints = endpoints.annotate(active_finding_count=Count("finding__id", filter=Q(finding__active=True)))
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+            group_field="endpoints",
+        )
+        endpoints = endpoints.annotate(active_finding_count=Coalesce(active_finding_subquery, Value(0)))
     else:
         logger.debug("unable to prefetch because query was already executed")
 

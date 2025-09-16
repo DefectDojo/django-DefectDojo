@@ -9,7 +9,7 @@ The process for adding and configuring a connector is similar, regardless of the
 
 Before you begin this process, we recommend checking our [Tool-Specific Reference](../connectors_tool_reference/) to find the API resources for the tool you're trying to connect.
 
-1. If you haven't already, start by **switching to the Beta UI** in DefectDojo.
+1. If you haven't already, start by **switching to the Pro UI** in DefectDojo.
 2. From the left\-side menu, click on the **API Connectors** menu item. This is nested under the **Import** header.
 ​
 ![image](images/add_edit_connectors.png)

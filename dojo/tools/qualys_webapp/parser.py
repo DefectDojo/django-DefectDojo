@@ -462,6 +462,52 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, *, enable_weakness=False
 
 
 class QualysWebAppParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Webapp Parser.
+
+        Fields:
+        - date: Set to date from Qualys Webapp Scanner.
+        - vuln_id_from_tool: Set to qid from Qualys Webapp Scanner.
+        - unique_id_from_tool: Set to the unique id from Qualys Webapp Scanner.
+        - param: Set to param from Qualys Webapp Scanner.
+        - payload: Set to payload from Qualys Webapp Scanner.
+        - active: Set to true or false based on finding status.
+        - title: Set to title from Qualys Webapp Scanner.
+        - severity: Set to severity from Qualys Webapp Scanner translated into DefectDojo formant.
+        - description: Custom description made from description and data from Qualys Webapp Scanner.
+        - impact: Set to title from Qualys Webapp Scanner.
+        - mitigation: Set to solution from Qualys Webapp Scanner.
+        - cwe: Set to cwe from Qualys Webapp Scanner.
+        """
+        return [
+            "date",
+            "vuln_id_from_tool",
+            "unique_id_from_tool",
+            "param",
+            "payload",
+            "active",
+            "title",
+            "severity",
+            "impact",
+            "mitigation",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Webapp Parser.
+
+        Fields:
+        - title: Set to title from Qualys Webapp Scanner.
+        - unique_id_from_tool: Set to the unique id from Qualys Webapp Scanner.
+        """
+        return [
+            "title",
+            "unique_id_from_tool",
+        ]
+
     def get_scan_types(self):
         return ["Qualys Webapp Scan"]
 

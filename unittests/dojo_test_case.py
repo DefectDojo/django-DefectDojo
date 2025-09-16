@@ -16,6 +16,7 @@ from vcr_unittest import VCRTestCase
 
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
+from dojo.middleware import DojoSytemSettingsMiddleware
 from dojo.models import (
     SEVERITIES,
     DojoMeta,
@@ -54,11 +55,38 @@ def toggle_system_setting_boolean(flag_name, value):
         def wrapper(*args, **kwargs):
             # Set the flag to the specified value
             System_Settings.objects.update(**{flag_name: value})
+            # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+            DojoSytemSettingsMiddleware.load()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{flag_name: not value})
+                # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+                DojoSytemSettingsMiddleware.load()
+        return wrapper
+
+    return decorator
+
+
+def with_system_setting(field, value):
+    """Decorator to temporarily set a value in System Settings."""
+
+    def decorator(test_func):
+        @wraps(test_func)
+        def wrapper(*args, **kwargs):
+            old_value = getattr(System_Settings.objects.get(), field)
+            # Set the flag to the specified value
+            System_Settings.objects.update(**{field: value})
+            # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+            DojoSytemSettingsMiddleware.load()
+            try:
+                return test_func(*args, **kwargs)
+            finally:
+                # Reset the flag to its original state after the test
+                System_Settings.objects.update(**{field: old_value})
+                # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
+                DojoSytemSettingsMiddleware.load()
 
         return wrapper
 
@@ -70,22 +98,13 @@ class DojoTestUtilsMixin:
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username="admin")
 
-    def system_settings(
-        self,
-        *,
-        enable_jira=False,
-        enable_jira_web_hook=False,
-        disable_jira_webhook_secret=False,
-        jira_webhook_secret=None,
-        enable_product_tag_inehritance=False,
-    ):
+    def system_settings(self, **kwargs):
         ss = System_Settings.objects.get()
-        ss.enable_jira = enable_jira
-        ss.enable_jira_web_hook = enable_jira_web_hook
-        ss.disable_jira_webhook_secret = disable_jira_webhook_secret
-        ss.jira_webhook_secret = jira_webhook_secret
-        ss.enable_product_tag_inheritance = enable_product_tag_inehritance
+        for key, value in kwargs.items():
+            setattr(ss, key, value)
         ss.save()
+        # Refresh the cache with the new settings
+        DojoSytemSettingsMiddleware.load()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):
         product_type = Product_Type(name=name, description=description)
@@ -106,10 +125,10 @@ class DojoTestUtilsMixin:
         product.save()
         return product
 
-    def patch_product_api(self, product_id, product_details):
+    def patch_product_api(self, product_id, product_details: dict, expected_status_code: int = 200):
         payload = copy.deepcopy(product_details)
         response = self.client.patch(reverse("product-list") + f"{product_id}/", payload, format="json")
-        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def patch_endpoint_api(self, endpoint_id, endpoint_details):
@@ -386,6 +405,10 @@ class DojoTestUtilsMixin:
         finding = Finding.objects.get(id=finding_id)
         return jira_helper.get_jira_status(finding)
 
+    def get_jira_issue_priority(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        return jira_helper.get_jira_priortiy(finding)
+
     def get_jira_issue_updated(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
         return jira_helper.get_jira_updated(finding)
@@ -459,6 +482,11 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
 
+    def setUp(self):
+        super().setUp()
+        # Initialize middleware with fresh settings from db
+        DojoSytemSettingsMiddleware.load()
+
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
         finding.clean()
@@ -506,20 +534,26 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return None
 
     def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
-                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
+                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=None, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
                                 scan_date=None, service=None, force_active=True, force_verified=True):
 
         with (get_unit_tests_path() / filename).open(encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
-                    "active": active,
-                    "verified": verified,
                     "scan_type": scan_type,
                     "file": testfile,
                     "version": "1.0.1",
-                    "close_old_findings": close_old_findings,
             }
+
+            if close_old_findings is not None:
+                payload["close_old_findings"] = close_old_findings
+
+            if active is not None:
+                payload["active"] = active
+
+            if verified is not None:
+                payload["verified"] = verified
 
             if engagement:
                 payload["engagement"] = engagement
@@ -560,7 +594,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False, push_to_jira=None,
-                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
+                                  tags=None, close_old_findings=None, group_by=None, engagement_name=None, scan_date=None, service=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
@@ -570,8 +604,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                     "scan_type": scan_type,
                     "file": testfile,
                     "version": "1.0.1",
-                    "close_old_findings": close_old_findings,
             }
+
+            if close_old_findings is not None:
+                payload["close_old_findings"] = close_old_findings
 
             if test_id is not None:
                 payload["test"] = test_id
@@ -606,6 +642,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             if scan_date is not None:
                 payload["scan_date"] = scan_date
 
+            if service is not None:
+                payload["service"] = service
+
             return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
     def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None, *,
@@ -632,7 +671,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def post_new_finding_api(self, finding_details, push_to_jira=None):
+    def post_new_finding_api(self, finding_details: dict, push_to_jira=None, expected_status_code: int = 201):
         payload = copy.deepcopy(finding_details)
         if push_to_jira is not None:
             payload["push_to_jira"] = push_to_jira
@@ -640,7 +679,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # logger.debug('posting new finding push_to_jira: %s', payload.get('push_to_jira', None))
 
         response = self.client.post(reverse("finding-list"), payload, format="json")
-        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def put_finding_api(self, finding_id, finding_details, push_to_jira=None):
@@ -669,7 +708,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json["count"], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None, severity=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, false_p=None, component_name=None, component_version=None, severity=None):
         payload = {"test": test_id}
         if active is not None:
             payload["active"] = active
@@ -677,6 +716,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload["verified"] = verified
         if is_mitigated is not None:
             payload["is_mitigated"] = is_mitigated
+        if false_p is not None:
+            payload["false_p"] = false_p
         if component_name is not None:
             payload["component_name"] = component_name
         if severity is not None:
@@ -777,6 +818,23 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         logger.debug("endpoint statuses")
         for eps in Endpoint_Status.objects.all():
             logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
+
+    def get_product_api(self, product_id):
+        response = self.client.get(reverse("product-list") + f"{product_id}/", format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
+    def post_new_product_api(self, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.post(reverse("product-list"), payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
+
+    def put_product_api(self, product_id, product_details: dict, expected_status_code: int = 201):
+        payload = copy.deepcopy(product_details)
+        response = self.client.put(reverse("product-list") + f"{product_id}/", payload, format="json")
+        self.assertEqual(expected_status_code, response.status_code, response.content[:1000])
+        return response.data
 
 
 class DojoVCRTestCase(DojoTestCase, VCRTestCase):
