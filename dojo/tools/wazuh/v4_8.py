@@ -1,5 +1,6 @@
 from dojo.models import Finding
 
+
 class WazuhV4_8:
     def parse_findings(self, test, data):
         dupes = {}
