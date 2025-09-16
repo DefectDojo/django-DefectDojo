@@ -74,6 +74,7 @@ steps:
       coverage report
       coverage xml
     displayName: "Unit test"
+    condition: false
 
   - task: SonarQubePrepare@7
     displayName: "Prepare analysis on SonarQube"

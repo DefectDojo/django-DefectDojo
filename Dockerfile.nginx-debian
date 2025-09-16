@@ -38,23 +38,23 @@ ENV \
   # due to the use of nodejs instead of node name in some distros
   node="nodejs"
 RUN \
-  apt-get -y update && \
-  apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget gnupg && \
-  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
-  echo 'deb https://deb.nodesource.com/node_20.x bookworm main' > /etc/apt/sources.list.d/nodesource.list && \
-  echo 'deb-src https://deb.nodesource.com/node_20.x bookworm main' >> /etc/apt/sources.list.d/nodesource.list && \
-  apt-get update -y -o Dir::Etc::sourcelist="sources.list.d/nodesource.list" \
-  -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0" && \
-  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
-  dpkg -i yarn_1.22.10_all.deb && \
-  echo "$(yarn --version)" && \
-  apt-get -y install --no-install-recommends nodejs && \
-  echo "$(node --version)" && \
-  apt-get clean && \
-  rm yarn_1.22.10_all.deb && \
-  rm -rf /var/lib/apt/lists && \
-  true
+    apt-get -y update && \
+    apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget gnupg && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key -o /usr/share/keyrings/nodesource.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x bookworm main' > /etc/apt/sources.list.d/nodesource.list && \
+    echo 'deb-src [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x bookworm main' >> /etc/apt/sources.list.d/nodesource.list && \
+    curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg -o /usr/share/keyrings/yarn.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list && \
+    apt-get update -y && \
+    wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
+    dpkg -i yarn_1.22.10_all.deb && \
+    echo "$(yarn --version)" && \
+    apt-get -y install --no-install-recommends nodejs && \
+    echo "$(node --version)" && \
+    apt-get clean && \
+    rm yarn_1.22.10_all.deb && \
+    rm -rf /var/lib/apt/lists && \
+    true
 
 RUN pip3 install \
 	--no-cache-dir \
