@@ -122,7 +122,7 @@ for module_name in os.listdir(package_dir):  # noqa: PTH208
                     # Allow parser class names with optional v[number] suffix (e.g., OpenVASParser, OpenVASParserV2)
                     expected_base = module_name.replace("_", "") + "parser"
                     if isclass(attribute) and (
-                        attribute_name.lower() == expected_base or 
+                        attribute_name.lower() == expected_base or
                         re.match(rf"^{re.escape(expected_base)}v\d+$", attribute_name.lower())
                     ):
                         register(attribute)

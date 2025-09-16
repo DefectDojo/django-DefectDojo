@@ -65,16 +65,17 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
             org.unsaved_endpoints += finding.unsaved_endpoints
 
 
-def id_from_tool_finding_hash(finding: Finding):
-    """Generate a hash that complements final hash generating outside of this parser"""
+def dedup_finding_hash(finding: Finding):
+    """Generate a hash for a finding that is used for deduplication of findings inside the current report"""
     endpoint = finding.unsaved_endpoints[0]
-
-    if "endpoints" in HASHCODE_FIELDS_PER_SCANNER["OpenVAS Parser v2"]:
-        pass
-
     hash_data = [
         str(endpoint.protocol),
-        str(endpoint.port),  # keep findings on different port seperate as it may be different applications
-        finding.severity,  # allows changing severity of finding after import
+        str(endpoint.userinfo),
+        str(endpoint.port),
+        str(endpoint.path),
+        str(endpoint.fragment),
+        finding.title,
+        finding.vuln_id_from_tool,
+        finding.severity,
     ]
     return hashlib.sha256("|".join(hash_data).encode("utf-8")).hexdigest()
