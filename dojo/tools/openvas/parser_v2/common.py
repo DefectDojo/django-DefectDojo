@@ -36,8 +36,6 @@ def update_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
 def deduplicate(dupes: dict[str, Finding], finding: Finding):
     """Combine multiple openvas findings into one defectdojo finding with multiple endpoints"""
     finding_hash = dedup_finding_hash(finding)
-    # deliberately missuse unique_id_from_tool to save some original values
-    finding.unique_id_from_tool = id_from_tool_finding_hash(finding)
 
     if finding_hash not in dupes:
         dupes[finding_hash] = finding
@@ -70,28 +68,13 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
 def id_from_tool_finding_hash(finding: Finding):
     """Generate a hash that complements final hash generating outside of this parser"""
     endpoint = finding.unsaved_endpoints[0]
+
+    if "endpoints" in HASHCODE_FIELDS_PER_SCANNER["OpenVAS Parser v2"]:
+        pass
+
     hash_data = [
         str(endpoint.protocol),
-        str(endpoint.userinfo),
         str(endpoint.port),  # keep findings on different port seperate as it may be different applications
-        str(endpoint.path),
-        str(endpoint.fragment),
         finding.severity,  # allows changing severity of finding after import
-    ]
-    return hashlib.sha256("|".join(hash_data).encode("utf-8")).hexdigest()
-
-
-def dedup_finding_hash(finding: Finding):
-    """Generate a hash for a finding that is used for deduplication of findings inside the current report"""
-    endpoint = finding.unsaved_endpoints[0]
-    hash_data = [
-        str(endpoint.protocol),
-        str(endpoint.userinfo),
-        str(endpoint.port),
-        str(endpoint.path),
-        str(endpoint.fragment),
-        finding.title,
-        finding.vuln_id_from_tool,
-        finding.severity,
     ]
     return hashlib.sha256("|".join(hash_data).encode("utf-8")).hexdigest()

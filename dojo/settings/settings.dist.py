@@ -1356,7 +1356,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
-    "OpenVAS Parser v2": ["title", "unique_id_from_tool", "vuln_id_from_tool"],
+    "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var

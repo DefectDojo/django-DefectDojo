@@ -15,3 +15,9 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 - line
 - file path
 - description
+
+### Parser V2 Changes
+Version 2 comes with multiple improvments:
+- Increased parsing Consistensy between the xml and csv parser
+- Combined findings where the only differences are in fields that can’t be rehashed due to inconsistent values between scans e.g fields with timestamps or packet ids.
+- Parser now combines multiple identical findings with different endpoints into one findings with multiple endpoints (instead of multiple findings with one endpoint each)

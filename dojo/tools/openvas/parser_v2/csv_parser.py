@@ -4,7 +4,7 @@ import io
 from dateutil.parser import parse
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.openvas_v2.common import (
+from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
     deduplicate,
