@@ -382,13 +382,15 @@ class BaseImporter(ImporterOptions):
             (untouched_findings, IMPORT_UNTOUCHED_FINDING),
         ]
 
-        # Collect all import history records
-        # # Single bulk existence check to avoid creating rows with missing FK
-        # candidate_ids = set()
-        # for _lst in (closed_findings, new_findings, reactivated_findings, untouched_findings):
-        #     candidate_ids.update(f.id for f in _lst)
-        # existing_ids = set(Finding.objects.filter(id__in=candidate_ids).values_list("id", flat=True)) if candidate_ids else set()
+        # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
+        # We filter out these findings here to avoid FK violations (IntegrityError)
+        all_findings = []
+        for _list, _ in finding_action_mappings:
+            all_findings.extend(_list)
+        existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
+        existing_ids = {f.id for f in existing_findings}
 
+        # Collect all import history records using the validated IDs
         import_history_records = []
         for findings, action in finding_action_mappings:
             import_history_records.extend(
@@ -398,10 +400,11 @@ class BaseImporter(ImporterOptions):
                     action=action,
                 )
                 for finding in findings
-#                if finding.id in existing_ids
+                if finding.id in existing_ids
             )
 
         # Bulk create all at once and let Django handle batching internally.
+        # Still in even more rare cases a finding can be deleted once we arrive here.
         # If any integrity error occurs, fall back to inserting all records individually.
         # The bulk_create is atomic so all batches will succeed or all will fail/rollback
         try:
