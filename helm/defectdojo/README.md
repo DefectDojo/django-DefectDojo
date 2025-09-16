@@ -612,8 +612,8 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.service.type | string | `""` |  |
 | django.strategy | object | `{}` |  |
 | django.tolerations | list | `[]` |  |
-| django.uwsgi.appSettings.processes | int | `2` |  |
-| django.uwsgi.appSettings.threads | int | `2` |  |
+| django.uwsgi.appSettings.processes | int | `4` |  |
+| django.uwsgi.appSettings.threads | int | `4` |  |
 | django.uwsgi.certificates.certFileName | string | `"ca.crt"` |  |
 | django.uwsgi.certificates.certMountPath | string | `"/certs/"` |  |
 | django.uwsgi.certificates.configName | string | `"defectdojo-ca-certs"` |  |
