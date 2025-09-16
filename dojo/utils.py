@@ -35,6 +35,7 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
+from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -2749,3 +2750,10 @@ def truncate_timezone_aware(dt):
         truncated = timezone.make_aware(truncated)
 
     return truncated
+
+
+def redirect_view(to: str):
+    """"View" that redirects to the view named in 'to.'"""
+    def _redirect(request, **kwargs):
+        return django_redirect(to, **kwargs)
+    return _redirect

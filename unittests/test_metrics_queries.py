@@ -80,7 +80,7 @@ class FindingQueriesTest(DojoTestCase):
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding
-        with self.assertNumQueries(36):
+        with self.assertNumQueries(28):
             product_types = []
             finding_queries = utils.finding_queries(
                 product_types,
@@ -192,7 +192,7 @@ class EndpointQueriesTest(DojoTestCase):
         mock_now.return_value = fake_now
 
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(47):
+        with self.assertNumQueries(44):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,

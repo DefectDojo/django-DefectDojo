@@ -17,9 +17,6 @@ from dojo.models import (
     Product_API_Scan_Configuration,
     Product_Group,
     Product_Member,
-    Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
 )
 
 labels = get_labels()
@@ -116,34 +113,9 @@ class AssetMemberFilterSet(FilterSet):
         fields = ("id", "user_id")
 
 
-class OrganizationFilterSet(FilterSet):
-    critical_asset = BooleanFilter(field_name="critical_product")
-    key_asset = BooleanFilter(field_name="key_product")
-
-    class Meta:
-        model = Product_Type
-        fields = ("id", "name", "created", "updated")
-
-
 class AssetGroupFilterSet(FilterSet):
     asset_id = NumberFilter(field_name="product_id")
 
     class Meta:
         model = Product_Group
-        fields = ("id", "group_id")
-
-
-class OrganizationMemberFilterSet(FilterSet):
-    organization_id = NumberFilter(field_name="product_type_id")
-
-    class Meta:
-        model = Product_Type_Member
-        fields = ("id", "user_id")
-
-
-class OrganizationGroupFilterSet(FilterSet):
-    asset_type_id = NumberFilter(field_name="product_type_id")
-
-    class Meta:
-        model = Product_Type_Group
         fields = ("id", "group_id")

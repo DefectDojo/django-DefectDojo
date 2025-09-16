@@ -4,8 +4,8 @@ import time
 # import the settings file
 from django.conf import settings
 
-from dojo.models import Alerts, System_Settings, UserAnnouncement
 from dojo.labels import get_labels
+from dojo.models import Alerts, System_Settings, UserAnnouncement
 
 
 def globalize_vars(request):

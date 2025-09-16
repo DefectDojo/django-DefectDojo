@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views import View
 
 from dojo.forms import SystemSettingsForm
@@ -143,5 +143,5 @@ class SystemSettingsView(View):
         request, _ = self.validate_form(request, context)
         # Add some breadcrumbs
         add_breadcrumb(title="System settings", top_level=False, request=request)
-        # Redirect back to the page so urlconf changes will take effect
-        return redirect(request.resolver_match.view_name)
+        # Render the page
+        return render(request, self.get_template(), context)

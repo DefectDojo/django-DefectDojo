@@ -74,6 +74,8 @@ from dojo.api_v2.views import (
     UsersViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
+from dojo.asset.api.urls import add_asset_urls
+from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
@@ -92,8 +94,8 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
-from dojo.product.urls import urlpatterns as prod_urls
-from dojo.product_type.urls import urlpatterns as pt_urls
+from dojo.organization.api.urls import add_organization_urls
+from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
@@ -107,17 +109,6 @@ from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.user.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
-
-# V3 Migration
-from dojo.v3_migration.api_v2.views import (
-    AssetAPIScanConfigurationViewSet,
-    AssetGroupViewSet,
-    AssetMemberViewSet,
-    AssetViewSet,
-    OrganizationGroupViewSet,
-    OrganizationMemberViewSet,
-    OrganizationViewSet,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -191,35 +182,21 @@ v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredS
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
-# V3 Migration
-v2_api.register(r"assets", AssetViewSet, basename="asset")
-v2_api.register(r"asset_api_scan_configurations", AssetAPIScanConfigurationViewSet,
-                basename="asset_api_scan_configuration")
-v2_api.register(r"asset_groups", AssetGroupViewSet, basename="asset_group")
-v2_api.register(r"asset_members", AssetMemberViewSet, basename="asset_member")
-v2_api.register(r"organizations", OrganizationViewSet, basename="organization")
-v2_api.register(r"organization_members", OrganizationMemberViewSet, basename="organization_member")
-v2_api.register(r"organization_groups", OrganizationGroupViewSet, basename="organization_group")
-
-
-class Thing:
-    pass
-
-
-URL_PLACEHOLDER = Thing()
+# V3
+add_asset_urls(v2_api)
+add_organization_urls(v2_api)
 
 ur = []
+ur += asset_urls
 ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
 ur += home_urls
-# The following disabled due to v3 migration; added in at the bottom. Can be reactivated after v3 migration is complete.
-# ur += metrics_urls
-# ur += prod_urls
-# ur += pt_urls
-# ur += reports_urls
+ur += metrics_urls
+ur += organization_urls
+ur += reports_urls
 ur += search_urls
 ur += test_type_urls
 ur += test_urls
@@ -259,13 +236,13 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
             ),
         ]
 
-common_urlpatterns = []
+urlpatterns = []
 
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
 if hasattr(settings, "PRELOAD_URL_PATTERNS"):
-    common_urlpatterns += settings.PRELOAD_URL_PATTERNS
+    urlpatterns += settings.PRELOAD_URL_PATTERNS
 
-common_urlpatterns += [
+urlpatterns += [
     # action history
     re_path(r"^{}history/(?P<cid>\d+)/(?P<oid>\d+)$".format(get_system_setting("url_prefix")), views.action_history, name="action_history"),
     re_path(r"^{}".format(get_system_setting("url_prefix")), include(ur)),
@@ -280,26 +257,26 @@ common_urlpatterns += [
     re_path(r"^{}/(?P<path>.*)$".format(settings.MEDIA_URL.strip("/")), views.protected_serve, {"document_root": settings.MEDIA_ROOT}),
 ]
 
-common_urlpatterns += api_v2_urls
-common_urlpatterns += survey_urls
+urlpatterns += api_v2_urls
+urlpatterns += survey_urls
 
 if hasattr(settings, "DJANGO_METRICS_ENABLED"):
     if settings.DJANGO_METRICS_ENABLED:
-        common_urlpatterns += [re_path(r"^{}django_metrics/".format(get_system_setting("url_prefix")), include("django_prometheus.urls"))]
+        urlpatterns += [re_path(r"^{}django_metrics/".format(get_system_setting("url_prefix")), include("django_prometheus.urls"))]
 
 if hasattr(settings, "SAML2_ENABLED"):
     if settings.SAML2_ENABLED:
         # django saml2
-        common_urlpatterns += [re_path(r"^saml2/", include("djangosaml2.urls"))]
+        urlpatterns += [re_path(r"^saml2/", include("djangosaml2.urls"))]
 
 if hasattr(settings, "DJANGO_ADMIN_ENABLED"):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
-        common_urlpatterns += [re_path(r"^{}admin/".format(get_system_setting("url_prefix")), admin.site.urls)]
+        urlpatterns += [re_path(r"^{}admin/".format(get_system_setting("url_prefix")), admin.site.urls)]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, "EXTRA_URL_PATTERNS"):
-    common_urlpatterns += settings.EXTRA_URL_PATTERNS
+    urlpatterns += settings.EXTRA_URL_PATTERNS
 
 
 # Remove any other endpoints that drf-spectacular is guessing should be in the swagger
@@ -315,10 +292,4 @@ def drf_spectacular_preprocessing_filter_spec(endpoints):
 if hasattr(settings, "DJANGO_DEBUG_TOOLBAR_ENABLED"):
     if settings.DJANGO_DEBUG_TOOLBAR_ENABLED:
         from debug_toolbar.toolbar import debug_toolbar_urls
-        common_urlpatterns += debug_toolbar_urls()
-
-
-# V2-specific url patterns
-v2_ui_urls = prod_urls + pt_urls + reports_urls + metrics_urls
-
-urlpatterns = [*common_urlpatterns, re_path(r"^{}".format(get_system_setting("url_prefix")), include(v2_ui_urls))]
+        urlpatterns += debug_toolbar_urls()

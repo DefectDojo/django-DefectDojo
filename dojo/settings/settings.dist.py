@@ -328,6 +328,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
 )
 
 
@@ -492,7 +494,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
 # 'axes.backends.AxesModelBackend',
 # ]
 
-ROOT_URLCONF = "dojo.v3_migration.urls"
+ROOT_URLCONF = "dojo.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
@@ -774,6 +776,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -907,9 +911,7 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "dojo.v3_migration.middleware.V3MigrationMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSytemSettingsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
