@@ -19,6 +19,10 @@ class Roles(IntEnum):
         except ValueError:
             return False
         return True
+    
+    @classmethod
+    def get_roles(cls):
+        return [role.name for role in list(cls)]
 
 
 def django_enum(cls):

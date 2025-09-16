@@ -1720,12 +1720,6 @@ class FindingSerializer(serializers.ModelSerializer):
             "inherited_tags",
         )
     
-
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     data['permissions'] = self.context.get('permissions', [])
-    #     return data
-    
     @extend_schema_field(serializers.ListField())
     def get_permissions(self, obj):
         return authorization_helper.get_permissions(obj)
