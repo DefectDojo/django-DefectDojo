@@ -80,6 +80,11 @@ jobs:
               sed -ri "0,/version/s/version: \S+/$NEW_CHART_VERSION/" helm/defectdojo/Chart.yaml
           fi
 
+      - name: Update values in HELM chart
+        run: |
+          yq -i '.annotations."artifacthub.io/prerelease" = "false"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: Bump DefectDojo to ${{ inputs.release_number }}\n"' helm/defectdojo/Chart.yaml
+
       - name: Check version numbers
         run: |
           grep -H version dojo/__init__.py
