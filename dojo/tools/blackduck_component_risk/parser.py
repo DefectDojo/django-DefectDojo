@@ -67,6 +67,7 @@ class BlackduckComponentRiskParser:
                 description = self.license_description(component, source)
                 severity = "High"
                 mitigation = self.license_mitigation(component)
+                fix_available = bool(mitigation)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(
@@ -79,6 +80,7 @@ class BlackduckComponentRiskParser:
                     references=references,
                     static_finding=True,
                     unique_id_from_tool=component_id,
+                    fix_available=fix_available,
                 )
                 license_risk.append(finding)
             elif "None" not in self.license_severity(component):
@@ -88,6 +90,7 @@ class BlackduckComponentRiskParser:
                 description = self.license_description(component, source)
                 severity = self.license_severity(component)
                 mitigation = self.license_mitigation(component, violation=False)
+                fix_available = bool(mitigation)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(
@@ -100,6 +103,7 @@ class BlackduckComponentRiskParser:
                     references=references,
                     static_finding=True,
                     unique_id_from_tool=component_id,
+                    fix_available=fix_available,
                 )
                 license_risk.append(finding)
         items.extend(license_risk)
@@ -111,10 +115,10 @@ class BlackduckComponentRiskParser:
             description = self.security_description(vulns)
             severity = self.security_severity(vulns)
             mitigation = self.security_mitigation(vulns)
+            fix_available = bool(mitigation)
             impact = self.security_impact(vulns)
             references = self.security_references(vulns)
             file_path = self.security_filepath(vulns)
-
             finding = Finding(
                 title=title,
                 test=test,
@@ -126,6 +130,7 @@ class BlackduckComponentRiskParser:
                 static_finding=True,
                 file_path=file_path,
                 unique_id_from_tool=component_id,
+                fix_available=fix_available,
             )
             security_risk.append(finding)
         items.extend(security_risk)
