@@ -417,7 +417,8 @@ class SonarQubeAPI:
         - REVIEWED
 
         :param issue_key:
-        :param transition:
+        :param status:
+        :param resolution:
         :return:
         """
 
