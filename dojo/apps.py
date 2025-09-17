@@ -89,7 +89,7 @@ class DojoAppConfig(AppConfig):
         import dojo.sla_config.helpers  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.tags_signals  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.test.signals  # noqa: PLC0415 raised: AppRegistryNotReady
-        import dojo.tool_product.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
+        import dojo.tool_product.signals  # noqa: PLC0415 raised: AppRegistryNotReady
         import dojo.url.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
 
 

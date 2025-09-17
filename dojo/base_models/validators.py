@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 def validate_not_empty(value: str) -> None:
     """Validate that the value is not an empty string."""
-    if value.strip() == "":
+    if not value.strip():
         msg = "This field cannot be empty."
         raise ValidationError(msg)
 

@@ -152,7 +152,7 @@ class URL(AbstractLocation):
             protocol=parsed_url.protocol,
             host=parsed_url.hostname,
             port=parsed_url.port,
-            path=parsed_url.path if parsed_url.path != "" else None,
-            query=parsed_url.query if parsed_url.query != "" else None,
-            fragment=parsed_url.fragment if parsed_url.fragment != "" else None,
+            path=parsed_url.path or None,
+            query=parsed_url.query or None,
+            fragment=parsed_url.fragment or None,
         )
