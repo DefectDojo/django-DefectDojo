@@ -96,7 +96,7 @@ jobs:
 
       # If this step is failing, run `helm schema --use-helm-docs` in `helm/defectdojo`
       - name: Generate values schema json
-        uses: losisin/helm-values-schema-json-action@28b1b33dcd9bd10bb8157627566f3971313a8872 # v2.0.4
+        uses: losisin/helm-values-schema-json-action@d5847286fa04322702c4f8d45031974798c83ac7 # v2.3.0
         with:
           fail-on-diff: true
           working-directory: "helm/defectdojo"
