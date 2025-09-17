@@ -289,6 +289,9 @@ class TrivyParser:
                 package_version = vuln.get("InstalledVersion", "")
                 references = "\n".join(vuln.get("References", []))
                 mitigation = vuln.get("FixedVersion", "")
+                fix_available = True
+                if not mitigation:
+                    fix_available = False
                 impact = vuln.get("Status", "")
                 status_fields = self.convert_trivy_status(vuln.get("Status", ""))
                 cwe = int(vuln["CweIDs"][0].split("-")[1]) if len(vuln.get("CweIDs", [])) > 0 else 0
@@ -317,6 +320,7 @@ class TrivyParser:
                     cvssv3_score=cvssv3_score,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=fix_available,
                     tags=[vul_type, target_class],
                     service=service_name,
                     **status_fields,
@@ -342,7 +346,7 @@ class TrivyParser:
                 misc_cause_code = misc_causemetadata.get("Code", {})
                 misc_cause_lines = misc_cause_code.get("Lines", [])
                 string_lines_table = self.get_lines_as_string_table(misc_cause_lines)
-                if string_lines_table != "":
+                if string_lines_table:
                     misc_message += ("\n" + string_lines_table)
 
                 title = f"{misc_id} - {misc_title}"
@@ -370,6 +374,7 @@ class TrivyParser:
                     references=references,
                     description=description,
                     mitigation=misc_resolution,
+                    fix_available=True,
                     static_finding=True,
                     dynamic_finding=False,
                     tags=[target_type, target_class],
@@ -402,6 +407,7 @@ class TrivyParser:
                     line=secret_start_line,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=True,
                     tags=[target_class],
                     service=service_name,
                 )
@@ -435,6 +441,7 @@ class TrivyParser:
                     url=license_link,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=True,
                     tags=[target_class],
                     service=service_name,
                 )

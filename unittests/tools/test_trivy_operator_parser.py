@@ -61,6 +61,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("CVE-2023-23914 curl 7.87.0-r1", finding.title)
             self.assertEqual("7.87.0-r2", finding.mitigation)
             self.assertEqual(4.2, finding.cvssv3_score)
+            self.assertEqual(True, finding.fix_available)
 
     def test_vulnerabilityreport_many(self):
         with sample_path("vulnerabilityreport_many.json").open(encoding="utf-8") as test_file:

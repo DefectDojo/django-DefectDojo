@@ -6,6 +6,7 @@ import mimetypes
 import re
 from ast import literal_eval
 from itertools import chain
+from pathlib import Path
 
 import bleach
 import dateutil.relativedelta
@@ -25,8 +26,9 @@ from django.utils.translation import gettext as _
 
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
+from dojo import __docs__, __version__
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
-from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
+from dojo.utils import calculate_grade, get_file_images, get_full_url, get_system_setting, prepare_for_view
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +124,6 @@ def checklist_status(value):
 
 @register.simple_tag
 def dojo_version():
-    from dojo import __version__
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
@@ -151,7 +152,6 @@ def display_date_with_secs(obj):
 
 @register.simple_tag
 def dojo_docs_url():
-    from dojo import __docs__
     return mark_safe(__docs__)
 
 
@@ -303,9 +303,7 @@ def product_grade(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
-
-        if prod_numeric_grade == "" or prod_numeric_grade is None:
-            from dojo.utils import calculate_grade
+        if not prod_numeric_grade or prod_numeric_grade is None:
             calculate_grade(product)
         if prod_numeric_grade:
             if prod_numeric_grade >= system_settings.product_grade_a:
@@ -361,7 +359,7 @@ def datediff_time(date1, date2):
         date_str = date_str + date_part + " "
 
     # Date is for one day
-    if date_str == "":
+    if not date_str:
         date_str = "1 day"
 
     return date_str
@@ -900,7 +898,6 @@ def jira_severity(findings):
 
 @register.filter
 def get_thumbnail(file):
-    from pathlib import Path
     file_format = Path(file.file.url).suffix[1:]
     return file_format in supported_thumbnail_file_formats
 

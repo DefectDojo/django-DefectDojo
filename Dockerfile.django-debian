@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.11-slim-bookworm@sha256:42420f737ba91d509fc60d5ed65ed0492678a90c561e1fa08786ae8ba8b52eda AS base
+FROM python:3.12.11-slim-trixie@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -30,7 +30,7 @@ COPY requirements.txt ./
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM base AS django
+FROM base AS release
 WORKDIR /app
 ARG uid=1001
 ARG gid=1337
@@ -135,9 +135,15 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
-  DD_UWSGI_NUM_OF_PROCESSES="2" \
-  DD_UWSGI_NUM_OF_THREADS="2"
+  DD_UWSGI_NUM_OF_PROCESSES="4" \
+  DD_UWSGI_NUM_OF_THREADS="4"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
-FROM django AS django-unittests
+FROM release AS development
+USER root
+COPY requirements-dev.txt ./
+RUN pip3 install --no-cache-dir -r requirements-dev.txt
+USER ${uid}
+
+FROM development AS django-unittests
 COPY unittests/ ./unittests/

@@ -8,12 +8,14 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import dateutil
 import hyperlink
 import tagulous.admin
 from auditlog.registry import auditlog
+from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -41,6 +43,7 @@ from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
@@ -671,7 +674,7 @@ class System_Settings(models.Model):
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
 
-    from dojo.middleware import System_Settings_Manager
+    from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()
 
     def clean(self):
@@ -869,7 +872,6 @@ class Product_Type(BaseModel):
         return self.name
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("product_type", args=[str(self.id)])
 
     def get_breadcrumbs(self):
@@ -1098,7 +1100,7 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
 
     def clean(self):
@@ -1258,11 +1260,10 @@ class Product(BaseModel):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
 
     @cached_property
@@ -1315,7 +1316,7 @@ class Product(BaseModel):
         if start_date is None or end_date is None:
             return {}
 
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
                                         false_p=False,
@@ -1353,7 +1354,7 @@ class Product(BaseModel):
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     def violates_sla(self):
@@ -1582,7 +1583,6 @@ class Engagement(BaseModel):
                                             "%b %d, %Y"))
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
@@ -1628,7 +1628,7 @@ class Engagement(BaseModel):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
@@ -1641,7 +1641,7 @@ class Engagement(BaseModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @property
@@ -1650,8 +1650,8 @@ class Engagement(BaseModel):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        from dojo.finding import helper
-        helper.prepare_duplicates_for_delete(engagement=self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
@@ -1824,7 +1824,6 @@ class Endpoint(models.Model):
             return url
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_endpoint", args=[str(self.id)])
 
     def clean(self):
@@ -1870,7 +1869,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
-                    logger.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Path "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.path == "":
                 self.path = None
 
@@ -1883,7 +1882,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
-                    logger.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Query "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.query == "":
                 self.query = None
 
@@ -1896,7 +1895,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
-                    logger.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error('Fragment "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
             if self.fragment == "":
                 self.fragment = None
 
@@ -2042,7 +2041,6 @@ class Endpoint(models.Model):
         try:
             url = hyperlink.parse(url=uri)
         except UnicodeDecodeError:
-            from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
             msg = f"Invalid URL format: {e}"
@@ -2155,7 +2153,6 @@ class Test(models.Model):
         return str(self.test_type)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.id)])
 
     def test_type_name(self) -> str:
@@ -2195,7 +2192,7 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
@@ -2741,16 +2738,15 @@ class Finding(BaseModel):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
         if not user:
-            from dojo.utils import get_current_user
+            from dojo.utils import get_current_user  # noqa: PLC0415 circular import
             user = get_current_user()
         # Title Casing
-        from titlecase import titlecase
         self.title = titlecase(self.title[:511])
         # Set the date of the finding if nothing is supplied
         if self.date is None:
@@ -2789,9 +2785,9 @@ class Finding(BaseModel):
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
+            from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
+            # No need to use the returned variable since `self` Is updated in memory
+            apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -2828,7 +2824,6 @@ class Finding(BaseModel):
             logger.debug("no options selected that require finding post processing")
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
@@ -2865,8 +2860,8 @@ class Finding(BaseModel):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d finding delete", self.id)
-        from dojo.finding import helper
-        helper.finding_delete(self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.finding_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
@@ -2876,7 +2871,7 @@ class Finding(BaseModel):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
@@ -3086,9 +3081,8 @@ class Finding(BaseModel):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        from dateutil.parser import parse
         if start_date and isinstance(start_date, str):
-            start_date = parse(start_date).date()
+            start_date = datetutilsparse(start_date).date()
 
         if isinstance(start_date, datetime):
             start_date = start_date.date()
@@ -3185,7 +3179,7 @@ class Finding(BaseModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
@@ -3198,12 +3192,12 @@ class Finding(BaseModel):
         if not self.has_finding_group:
             return False
 
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self.finding_group)
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     @cached_property
@@ -3283,7 +3277,7 @@ class Finding(BaseModel):
         return ""
 
     def get_sast_source_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
@@ -3294,7 +3288,7 @@ class Finding(BaseModel):
         return create_bleached_link(link, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
@@ -3408,9 +3402,7 @@ class Finding(BaseModel):
         return link
 
     def get_references_with_links(self):
-        import re
-
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.references is None:
             return None
         matches = re.findall(r"([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)", self.references)
@@ -3454,7 +3446,7 @@ class Finding(BaseModel):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
 
     def set_hash_code(self, dedupe_option):
-        from dojo.utils import get_custom_method
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
             hash_method(self, dedupe_option)
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
@@ -3484,7 +3476,6 @@ class Vulnerability_Id(models.Model):
         return self.vulnerability_id
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.finding.id)])
 
 
@@ -3527,7 +3518,7 @@ class Finding_Group(TimeStampedModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
@@ -3588,7 +3579,6 @@ class Finding_Group(TimeStampedModel):
         return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.test.id)])
 
     class Meta:
@@ -3627,7 +3617,6 @@ class Finding_Template(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("edit_template", args=[str(self.id)])
 
     def get_breadcrumbs(self):
@@ -4570,7 +4559,7 @@ class TextQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import TextQuestionForm
+        from .forms import TextQuestionForm  # noqa: PLC0415
         return TextQuestionForm
 
 
@@ -4603,7 +4592,7 @@ class ChoiceQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import ChoiceQuestionForm
+        from .forms import ChoiceQuestionForm  # noqa: PLC0415
         return ChoiceQuestionForm
 
 

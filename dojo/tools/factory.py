@@ -24,7 +24,7 @@ def register(parser_type):
 
 
 def register_parser(scan_type, parser):
-    logger.debug(f"register scan_type:{scan_type} with parser:{parser}")
+    logger.debug("register scan_type:%s with parser:%s", scan_type, parser)
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
         msg = f"Try to register an existing parser '{scan_type}'"
@@ -38,7 +38,7 @@ def get_parser(scan_type):
         msg = f"Parser '{scan_type}' does not exist"
         raise ValueError(msg)
     rg = re.compile(settings.PARSER_EXCLUDE)
-    if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == "":
+    if not rg.match(scan_type) or not settings.PARSER_EXCLUDE.strip():
         # update DB dynamically
         test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
         if test_type.active:
@@ -122,4 +122,4 @@ for module_name in os.listdir(package_dir):  # noqa: PTH208
                     if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
                         register(attribute)
         except:
-            logger.exception(f"failed to load {module_name}")
+            logger.exception("failed to load %s", module_name)

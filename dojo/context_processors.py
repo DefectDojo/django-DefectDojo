@@ -1,7 +1,10 @@
 import contextlib
+import time
 
 # import the settings file
 from django.conf import settings
+
+from dojo.models import Alerts, System_Settings, UserAnnouncement
 
 
 def globalize_vars(request):
@@ -12,6 +15,7 @@ def globalize_vars(request):
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
         "CLASSIC_AUTH_ENABLED": settings.CLASSIC_AUTH_ENABLED,
         "OIDC_ENABLED": settings.OIDC_AUTH_ENABLED,
+        "SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT": settings.SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT,
         "AUTH0_ENABLED": settings.AUTH0_OAUTH2_ENABLED,
         "GOOGLE_ENABLED": settings.GOOGLE_OAUTH_ENABLED,
         "OKTA_ENABLED": settings.OKTA_OAUTH_ENABLED,
@@ -36,14 +40,11 @@ def globalize_vars(request):
 
 
 def bind_system_settings(request):
-    from dojo.models import System_Settings
-
     return {"system_settings": System_Settings.objects.get()}
 
 
 def bind_alert_count(request):
     if not settings.DISABLE_ALERT_COUNTER:
-        from dojo.models import Alerts
 
         if hasattr(request, "user") and request.user.is_authenticated:
             return {"alert_count": Alerts.objects.filter(user_id=request.user).count()}
@@ -51,8 +52,6 @@ def bind_alert_count(request):
 
 
 def bind_announcement(request):
-    from dojo.models import UserAnnouncement
-
     with contextlib.suppress(Exception):  # TODO: this should be replaced with more meaningful exception
         if request.user.is_authenticated:
             user_announcement = UserAnnouncement.objects.select_related(
@@ -63,8 +62,6 @@ def bind_announcement(request):
 
 
 def session_expiry_notification(request):
-    import time
-
     try:
         if request.user.is_authenticated:
             last_activity = request.session.get("_last_activity", time.time())

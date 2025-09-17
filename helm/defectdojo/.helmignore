@@ -20,4 +20,4 @@
 .idea/
 *.tmproj
 .vscode/
-README.md
+README.md.gotmpl

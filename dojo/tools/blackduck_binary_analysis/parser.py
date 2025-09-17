@@ -44,13 +44,13 @@ class BlackduckBinaryAnalysisParser:
             title = self.format_title(i)
             description = self.format_description(i)
             cvss_v3 = True
-            if str(i.cvss_vector_v3) != "":
+            if str(i.cvss_vector_v3):
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
                     i.cvss_vector_v3,
                 )
                 cvss_obj = CVSS3(cvss_vectors)
-            elif str(i.cvss_vector_v2) != "":
+            elif str(i.cvss_vector_v2):
                 # Some of the CVSSv2 vectors have a trailing
                 # colon that needs to be removed
                 cvss_v3 = False

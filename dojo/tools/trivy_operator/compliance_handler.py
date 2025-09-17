@@ -31,7 +31,7 @@ class TrivyComplianceHandler:
                     check_severity = check.get("severity", "")
                     check_target = check.get("target", "")
                     check_title = check.get("title", "")
-                    if check_severity == "":
+                    if not check_severity:
                         severity = TRIVY_SEVERITIES[check_severity]
                     else:
                         severity = TRIVY_SEVERITIES[result_severity]
@@ -53,6 +53,7 @@ class TrivyComplianceHandler:
                         description=description,
                         static_finding=False,
                         dynamic_finding=True,
+                        fix_available=True,
                     )
                     if check_checkID:
                         finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_checkID)]
