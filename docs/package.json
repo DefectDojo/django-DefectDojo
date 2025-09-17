@@ -18,7 +18,7 @@
     "@thulite/images": "3.3.0",
     "@thulite/inline-svg": "1.2.1",
     "@thulite/seo": "2.4.2",
-    "@tabler/icons": "3.34.1",
+    "@tabler/icons": "3.35.0",
     "thulite": "2.5.0"
   },
   "devDependencies": {
