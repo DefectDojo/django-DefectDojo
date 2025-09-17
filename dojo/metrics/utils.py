@@ -139,6 +139,7 @@ def finding_queries(
     }
 
 
+# TODO: Delete this after the move to Locations
 def endpoint_queries(
     prod_type: QuerySet[Product_Type],
     request: HttpRequest,

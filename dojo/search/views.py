@@ -126,7 +126,7 @@ def simple_search(request):
             authorized_tests = get_authorized_tests(Permissions.Test_View)
             authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
             authorized_products = get_authorized_products(Permissions.Product_View)
-            if settings.ENABLE_V3_FEATURE_SET:
+            if settings.V3_FEATURE_LOCATIONS:
                 authorized_endpoints = get_authorized_locations(Permissions.Location_View)
             else:
                 authorized_endpoints = get_authorized_endpoints(Permissions.Location_View)
@@ -293,7 +293,7 @@ def simple_search(request):
 
                 endpoints = authorized_endpoints
                 endpoints = apply_tag_filters(endpoints, operators)
-                if settings.ENABLE_V3_FEATURE_SET:
+                if settings.V3_FEATURE_LOCATIONS:
                     endpoints = endpoints.filter(Q(url__host__icontains=keywords_query) | Q(url__path__icontains=keywords_query) | Q(url__protocol__icontains=keywords_query) | Q(url__query__icontains=keywords_query) | Q(url__fragment__icontains=keywords_query))
                     endpoints = prefetch_for_locations(endpoints)
                 else:
@@ -520,7 +520,7 @@ def apply_tag_filters(qs, operators, *, skip_relations=False):
 
 def apply_endpoint_filter(qs, operators):
     if "endpoint" in operators:
-        if settings.ENABLE_V3_FEATURE_SET:
+        if settings.V3_FEATURE_LOCATIONS:
             qs = qs.filter(locations__location__url__host__contains=",".join(operators["endpoint"]))
         else:
             qs = qs.filter(endpoints__host__contains=",".join(operators["endpoint"]))

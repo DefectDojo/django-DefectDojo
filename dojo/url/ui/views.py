@@ -13,6 +13,7 @@ from django.db.models import (
     CharField,
     Count,
     F,
+    IntegerField,
     OuterRef,
     Q,
     QuerySet,
@@ -120,10 +121,10 @@ def annotate_host_contents(queryset: QuerySet[Location]) -> QuerySet[Location]:
     # Annotate each Location with host, findings, products, and overall status.
     return queryset.prefetch_related("url").annotate(
         host=Coalesce(F("url__host"), Value("", output_field=CharField())),
-        total_findings=Subquery(finding_host_counts.values("total_findings")[:1]),
-        active_findings=Subquery(finding_host_counts.values("active_findings")[:1]),
-        total_products=Subquery(product_host_counts.values("total_products")[:1]),
-        active_products=Subquery(product_host_counts.values("active_products")[:1]),
+        total_findings=Coalesce(Subquery(finding_host_counts.values("total_findings")[:1]), Value(0), output_field=IntegerField()),
+        active_findings=Coalesce(Subquery(finding_host_counts.values("active_findings")[:1]), Value(0), output_field=IntegerField()),
+        total_products=Coalesce(Subquery(product_host_counts.values("total_products")[:1]), Value(0), output_field=IntegerField()),
+        active_products=Coalesce(Subquery(product_host_counts.values("active_products")[:1]), Value(0), output_field=IntegerField()),
         mitigated_findings=F("total_findings") - F("active_findings"),
         overall_status=Case(
             When(

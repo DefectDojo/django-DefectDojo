@@ -14,8 +14,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum
-from django.db.models.expressions import Value
+from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponseRedirect, JsonResponse
@@ -148,7 +147,7 @@ def product(request):
             build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
         ),
     )
-    if settings.ENABLE_V3_FEATURE_SET:
+    if settings.V3_FEATURE_LOCATIONS:
         prods.annotate(
             endpoint_host_count=Count("locations__location__url__host", distinct=True),
             endpoint_count=Count("locations", distinct=True),
@@ -469,6 +468,7 @@ def finding_queries(request, prod):
     return filters
 
 
+# TODO: Delete this after the move to Locations
 def endpoint_queries(request, prod):
     filters = {}
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
@@ -573,6 +573,7 @@ def view_product_metrics(request, pid):
     filters = {}
     if view == "Finding":
         filters = finding_queries(request, prod)
+    # TODO: Delete this after the move to Locations
     elif view == "Endpoint":
         filters = endpoint_queries(request, prod)
 

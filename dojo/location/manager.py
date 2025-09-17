@@ -1,5 +1,5 @@
 
-from django.db.models import Case, CharField, Count, F, Q, Value, When
+from django.db.models import Case, CharField, Count, F, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
 
 from dojo.base_models.base import BaseManager, BaseQuerySet
@@ -31,19 +31,19 @@ class LocationQueryset(BaseQuerySet):
     def total_counts(self):
         return self.prefetch_related("findings", "products").annotate(
             # Products
-            total_products=Count("products", distinct=True),
-            active_products=Count(
+            total_products=Coalesce(Count("products", distinct=True), Value(0), output_field=IntegerField()),
+            active_products=Coalesce(Count(
                 "products",
                 filter=Q(products__status=ProductLocationStatus.Active),
                 distinct=True,
-            ),
+            ), Value(0), output_field=IntegerField()),
             # Findings
-            total_findings=Count("findings", distinct=True),
-            active_findings=Count(
+            total_findings=Coalesce(Count("findings", distinct=True), Value(0), output_field=IntegerField()),
+            active_findings=Coalesce(Count(
                 "findings",
                 filter=Q(findings__status=FindingLocationStatus.Active),
                 distinct=True,
-            ),
+            ), Value(0), output_field=IntegerField()),
         )
 
     def overall_status(self):
