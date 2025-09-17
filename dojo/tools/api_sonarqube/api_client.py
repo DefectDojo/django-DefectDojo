@@ -421,7 +421,6 @@ class SonarQubeAPI:
         :param resolution:
         :return:
         """
-
         data = {"hotspot": issue_key, "status": status}
 
         if resolution:

@@ -57,37 +57,37 @@ class SonarQubeApiUpdater:
             "from": ["TO_REVIEW"],
             "to": "RESOLVED / FALSE-POSITIVE",
             "transition": "REVIEWED",
-            "resolution" : "SAFE"
+            "resolution": "SAFE",
         },
         {
             "from": ["TO_REVIEW"],
             "to": "RESOLVED / FIXED",
             "transition": "REVIEWED",
-            "resolution" : "FIXED"
+            "resolution": "FIXED",
         },
                 {
             "from": ["TO_REVIEW"],
             "to": "RESOLVED / WONTFIX",
             "transition": "REVIEWED",
-            "resolution" : "ACKNOWLEDGED"
+            "resolution": "ACKNOWLEDGED",
         },
         {
             "from": ["REVIEWED"],
             "to": "OPEN",
             "transition": "TO_REVIEW",
-            "resolution" : None
+            "resolution": None,
         },
         {
             "from": ["REVIEWED"],
             "to": "REOPENED",
             "transition": "TO_REVIEW",
-            "resolution" : None
+            "resolution": None,
         },
         {
             "from": ["REVIEWED"],
             "to": "CONFIRMED",
             "transition": "TO_REVIEW",
-            "resolution" : None
+            "resolution": None,
         },
     ]
 
