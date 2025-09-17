@@ -188,6 +188,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
+                logger.debug(
+                    "skipping finding due to minimum_severity filter (finding=%s severity=%s min=%s)",
+                    getattr(unsaved_finding, "unique_id_from_tool", None),
+                    unsaved_finding.severity,
+                    self.minimum_severity,
+                )
+                # Advance iterator to avoid infinite loop when skipping
+                non_clean_unsaved_finding = next(findings_iterator, None)
                 continue
 
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
