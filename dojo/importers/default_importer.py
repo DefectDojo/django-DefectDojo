@@ -176,27 +176,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        # Create iterator over parsed findings
-        findings_iterator = iter(parsed_findings)
-
-        # Get first finding to start the loop
-        non_clean_unsaved_finding = next(findings_iterator, None)
-
-        while non_clean_unsaved_finding:
-            # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
-            # Filter on minimum severity if applicable
-            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                # finding's severity is below the configured threshold : ignoring the finding
-                logger.debug(
-                    "skipping finding due to minimum_severity filter (finding=%s severity=%s min=%s)",
-                    getattr(unsaved_finding, "unique_id_from_tool", None),
-                    unsaved_finding.severity,
-                    self.minimum_severity,
-                )
-                # Advance iterator to avoid infinite loop when skipping
-                non_clean_unsaved_finding = next(findings_iterator, None)
+        # Pre-sanitize and filter by minimum severity
+        cleaned_findings = []
+        for raw_finding in parsed_findings or []:
+            sanitized = self.sanitize_severity(raw_finding)
+            if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
+                logger.debug("skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)", sanitized.title, sanitized.severity, self.minimum_severity)
                 continue
+            cleaned_findings.append(sanitized)
+
+        for idx, unsaved_finding in enumerate(cleaned_findings):
+            is_final_finding = idx == len(cleaned_findings) - 1
 
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
@@ -261,10 +251,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             post_processing_task_signatures.append(post_processing_task_signature)
 
-            # Get next finding for next iteration
-            non_clean_unsaved_finding = next(findings_iterator, None)
-            is_final = not non_clean_unsaved_finding
-
             # Check if we should launch a chord (batch full or end of findings)
             if we_want_async(async_user=self.user) and post_processing_task_signatures:
                 # Calculate current batch size: 2^batch_number, capped at max_batch_size
@@ -274,7 +260,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
                 batch_full = len(post_processing_task_signatures) >= current_batch_size
 
-                if batch_full or is_final:
+                if batch_full or is_final_finding:
                     # Launch chord with current batch of signatures
                     product = self.test.engagement.product
                     system_settings = System_Settings.objects.get()
@@ -289,7 +275,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
                     # Reset for next batch (only if not final)
                     post_processing_task_signatures = []
-                    if not is_final:
+                    if not is_final_finding:
                         current_batch_number += 1
             else:
                 # Execute task immediately for synchronous processing
