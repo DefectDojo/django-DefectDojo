@@ -17,8 +17,8 @@ class WazuhV4_8:
                 continue  # Skip if this finding has already been processed
 
             description = vuln.get("description")
-            description += f"\nAgent id: {item['agent']['id']}"
-            description += f"\nAgent name: {item['agent']['name']}"
+            description += "\nAgent id:" + item.get("agent").get("id")
+            description += "\nAgent name:" + item.get("agent").get("name")
             severity = vuln.get("severity")
             cvssv3_score = vuln.get("score").get("base")
             publish_date = vuln.get("published_at").split("T")[0]
