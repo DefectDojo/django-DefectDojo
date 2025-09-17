@@ -1629,7 +1629,7 @@ class Product_Tab:
                                                           out_of_scope=False,
                                                           active=True,
                                                           mitigated__isnull=True).count()
-        if settings.ENABLE_V3_FEATURE_SET:
+        if settings.V3_FEATURE_LOCATIONS:
             active_endpoints = Location.objects.filter(
                 products__product=self.product,
                 products__status=ProductLocationStatus.Active,

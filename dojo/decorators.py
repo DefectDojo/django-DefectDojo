@@ -220,13 +220,13 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
 
 
 def require_v3_feature_set():
-    """Decorator that raises 404 if the ENABLE_V3_FEATURE_SET is False."""
+    """Decorator that raises 404 if the V3_FEATURE_LOCATIONS is False."""
 
     def decorator(func):
         @wraps(func)
         def _wrapped_view(request, *args, **kwargs):
-            if not getattr(settings, "ENABLE_V3_FEATURE_SET", False):
-                msg = "ENABLE_V3_FEATURE_SET must be enabled."
+            if not getattr(settings, "V3_FEATURE_LOCATIONS", False):
+                msg = "V3_FEATURE_LOCATIONS must be enabled."
                 raise Http404(msg)
             return func(request, *args, **kwargs)
 

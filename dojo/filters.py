@@ -55,7 +55,7 @@ from dojo.finding.helper import (
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
-from dojo.location.status import FindingLocationStatus, ProductLocationStatus
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,
@@ -1278,9 +1278,10 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
-    StaticMethodFilters.create_choice_filters("locations__status", "Location Status", ProductLocationStatus.choices, locals())
-    locations__location = NumberFilter(widget=HiddenInput())
-    locations__location__url__host = CharFilter(widget=HiddenInput(), distinct=True)
+    if settings.V3_FEATURE_LOCATIONS:
+        endpoints__host = CharFilter(field_name="locations__location__url__host", lookup_expr="icontains", label="Endpoint Host")
+        endpoints = NumberFilter(field_name="locations__location", widget=HiddenInput())
+        StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1692,18 +1693,20 @@ class FindingFilterHelper(FilterSet):
     param = CharFilter(lookup_expr="icontains")
     payload = CharFilter(lookup_expr="icontains")
     test__test_type = ModelMultipleChoiceFilter(queryset=Test_Type.objects.all(), label="Test Type")
-    endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
     service = CharFilter(lookup_expr="icontains")
     test__engagement__version = CharFilter(lookup_expr="icontains", label="Engagement Version")
     test__version = CharFilter(lookup_expr="icontains", label="Test Version")
     risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
-    endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
-    StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
-    locations__location = NumberFilter(widget=HiddenInput())
-    locations__location__url__host = CharFilter(widget=HiddenInput(), distinct=True)
+    if settings.V3_FEATURE_LOCATIONS:
+        endpoints__host = CharFilter(field_name="locations__location__url__host", lookup_expr="icontains", label="Endpoint Host")
+        endpoints = NumberFilter(field_name="locations__location", widget=HiddenInput())
+        StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
+    else:
+        endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
+        endpoints = NumberFilter(widget=HiddenInput())
 
     has_component = BooleanFilter(
         field_name="component_name",

@@ -142,10 +142,10 @@
                                 {% endif %}
                                 <td class="text-center">
                                     {% if host_view %}
-                                        <a href="{% url 'open_findings' %}?locations__location__url__host={{ location.host }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
+                                        <a href="{% url 'all_findings' %}?locations__location__url__host={{ location.host }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
                                         <a href="{% url 'all_findings' %}?locations__location__url__host={{ location.host }}">({{ location.total_findings }})</a>
                                     {% else %}
-                                        <a href="{% url 'open_findings' %}?locations__location={{ location.id }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
+                                        <a href="{% url 'all_findings' %}?locations__location={{ location.id }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
                                         <a href="{% url 'all_findings' %}?locations__location={{ location.id }}">({{ location.total_findings }})</a>
                                     {% endif %}
                                 </td>

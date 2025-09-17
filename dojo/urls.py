@@ -178,7 +178,7 @@ v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagem
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
 # Add the location routes
-if settings.ENABLE_V3_FEATURE_SET:
+if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations
     v2_api = add_locations_urls(v2_api)
     v2_api = add_url_urls(v2_api)
@@ -216,7 +216,7 @@ ur += component_urls
 ur += regulations
 ur += announcement_urls
 
-if settings.ENABLE_V3_FEATURE_SET:
+if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Location
     ur += url_patterns
 else:

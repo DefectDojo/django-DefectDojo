@@ -321,7 +321,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
         if not host:
             continue
 
-        # TODO: References to Endpoint will be removed in future releases
+        # TODO: Delete this after the move to Locations
         if object_class == Endpoint:
             endpoints = Endpoint.objects.filter(host=host, product=product)
             if not endpoints.exists() and create_endpoints:
@@ -341,7 +341,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 if item[1] is not None and len(item[1]) > 0:
                     if create_meta:
                         # check if meta exists first. Don't want to make duplicate endpoints
-                        # TODO: References to Endpoint will be removed in future releases
+                        # TODO: Delete this after the move to Locations
                         if object_class == Endpoint:
                             dojo_meta = DojoMeta.objects.get_or_create(
                                 endpoint=endpoint,
