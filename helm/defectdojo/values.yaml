@@ -55,12 +55,13 @@ networkPolicy:
 host: defectdojo.default.minikube.local
 
 # The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
+siteUrl: ""
 # siteUrl: 'https://<yourdomain>'
 
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
 # the global hostname.
-# alternativeHosts:
+alternativeHosts: []
 #  - defectdojo.example.com
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
@@ -94,7 +95,7 @@ serviceAccount:
 
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  # name: ""
+  name: ""
 
   # Optional additional annotations to add to the DefectDojo's Service Account.
   annotations: {}
@@ -139,7 +140,8 @@ monitoring:
     enabled: false
     image: nginx/nginx-prometheus-exporter:1.4.2
     imagePullPolicy: IfNotPresent
-
+    # Optional: add resource requests/limits for the nginx prometheus exporter container
+    resources: {}
 annotations: {}
 
 secrets:
@@ -339,8 +341,12 @@ django:
       certMountPath: /certs/
       certFileName: ca.crt
 
+  # Additional environment variables injected to all Django containers and initContainers.
+  extraEnv: []
   # A list of additional initContainers to run before the uwsgi and nginx containers.
   extraInitContainers: []
+  # Array of additional volume mount points common to all containers and initContainers.
+  extraVolumeMounts: []
   # A list of extra volumes to mount.
   extraVolumes: []
 
@@ -449,6 +455,8 @@ cloudsql:
   enable_iam_login: false
   # whether to use a private IP to connect to the database
   use_private_ip: false
+  # Optional: add resource requests/limits for the CloudSQL proxy container
+  resources: {}
 
 # Settings to make running the chart on GKE simpler
 gke:

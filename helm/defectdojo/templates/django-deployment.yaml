@@ -101,9 +101,19 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.django.extraEnv }}
+        env: {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- with .Values.cloudsql.resources }}
+        resources: {{- . | toYaml | nindent 10 }}
+        {{- end }}
         restartPolicy: Always
         securityContext:
+          {{- if .Values.securityContext.enabled }}
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- else }}
           runAsNonRoot: true
+          {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
@@ -114,9 +124,12 @@ spec:
         {{- if .Values.cloudsql.use_private_ip }}
         - "-ip_address_types=PRIVATE"
         {{- end }}
+        {{- with .Values.django.extraVolumeMounts }}
+        volumeMounts: {{ . | toYaml | nindent 10 }}
+        {{- end }}
       {{- end }}
       {{- if .Values.dbMigrationChecker.enabled }}
-      {{$data := dict "fullName" $fullName }}
+      {{- $data := dict "fullName" $fullName }}
       {{- $newContext := merge . (dict "fullName" $fullName) }}
       {{- include "dbMigrationChecker" $newContext | nindent 6 }}
       {{- end }}
@@ -126,7 +139,13 @@ spec:
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
-        command: [ '/usr/bin/nginx-prometheus-exporter', '--nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        command:
+        - /usr/bin/nginx-prometheus-exporter
+        - --nginx.scrape-uri
+        - http://127.0.0.1:8080/nginx_status
+        {{- with .Values.django.extraEnv }}
+        env: {{- . | toYaml | nindent 8 }}
+        {{- end }}
         ports:
         - name: http-metrics
           protocol: TCP
@@ -138,6 +157,16 @@ spec:
           periodSeconds: 20
           initialDelaySeconds: 15
           timeoutSeconds: 5
+        {{- with .Values.monitoring.prometheus.resources }}
+        resources: {{- . | toYaml | nindent 10 }}
+        {{- end }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- .Values.securityContext.djangoSecurityContext | toYaml | nindent 10 }}
+        {{- end }}
+        {{- with .Values.django.extraVolumeMounts }}
+        volumeMounts: {{ . | toYaml | nindent 10 }}
+        {{- end }}
       {{- end }}
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
@@ -158,6 +187,9 @@ spec:
         {{- if .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
+        {{- with .Values.django.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.django.uwsgi.extraVolumeMounts }}
           {{- . | toYaml | nindent 8 }}
@@ -209,7 +241,7 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
-        {{- with .Values.extraEnv }}
+        {{- with .Values.django.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.django.uwsgi.extraEnv }}
@@ -241,6 +273,9 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- with .Values.django.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.nginx.extraVolumeMounts }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -265,7 +300,7 @@ spec:
           value: '{{ .Values.django.nginx.tls.enabled }}'
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
-        {{- with .Values.extraEnv }}
+        {{- with .Values.django.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.django.nginx.extraEnv }}

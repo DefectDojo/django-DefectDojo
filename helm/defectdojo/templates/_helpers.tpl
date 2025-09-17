@@ -163,9 +163,13 @@ Create the name of the service account to use
       secretKeyRef:
         name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
         key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
-  {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 2 }}
+  {{- with.Values.django.extraEnv }}
+    {{- toYaml . | nindent 2 }}
   {{- end }}
   resources:
     {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
+  {{- with .Values.django.extraVolumeMounts }}
+  volumeMounts:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
 {{- end -}}
