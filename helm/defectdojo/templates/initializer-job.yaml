@@ -67,8 +67,10 @@ spec:
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
         restartPolicy: Always
+        {{- if .Values.securityContext.enabled }}
         securityContext:
-          runAsNonRoot: true
+          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
@@ -96,7 +98,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -123,7 +125,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
         {{- end }}
         volumeMounts:
         {{- if .Values.localsettingspy }}

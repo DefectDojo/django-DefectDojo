@@ -669,6 +669,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.resources.requests.cpu | string | `"100m"` |  |
 | initializer.resources.requests.memory | string | `"256Mi"` |  |
 | initializer.run | bool | `true` |  |
+| initializer.securityContext.runAsNonRoot | bool | `true` |  |
 | initializer.staticName | bool | `false` |  |
 | initializer.tolerations | list | `[]` |  |
 | monitoring.enabled | bool | `false` |  |

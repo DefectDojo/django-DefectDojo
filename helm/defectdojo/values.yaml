@@ -384,6 +384,8 @@ initializer:
     limits:
       cpu: 2000m
       memory: 512Mi
+  securityContext:
+    runAsNonRoot: true
   # Additional environment variables injected to the initializer job pods.
   extraEnv: []
   # Array of additional volume mount points for the initializer job (init)containers.

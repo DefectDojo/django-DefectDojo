@@ -670,6 +670,14 @@
                 "run": {
                     "type": "boolean"
                 },
+                "securityContext": {
+                    "type": "object",
+                    "properties": {
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "staticName": {
                     "type": "boolean"
                 },
