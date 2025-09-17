@@ -105,8 +105,7 @@ class SonarQubeApiUpdater:
         return target_status
 
     def get_sonarqube_required_transitions_for(
-        self, current_status, target_status, is_hotspot=False
-    ):
+        self, current_status, target_status, is_hotspot):
         # If current and target is the same... do nothing
         if current_status == target_status:
             return None
@@ -140,8 +139,7 @@ class SonarQubeApiUpdater:
                     t = transition.get("transition")
                     if is_hotspot:
                         return [{"status": t, "resolution": transition.get("resolution")}] if t else None
-                    else:
-                        return [t] if t else None
+                    return [t] if t else None
 
             # Handle complex transitions for regular issues
             if not is_hotspot:
@@ -156,7 +154,7 @@ class SonarQubeApiUpdater:
                     for t_from in transition.get("from"):
                         possible_transition = (
                             self.get_sonarqube_required_transitions_for(
-                                current_status, t_from, is_hotspot
+                                current_status, t_from, is_hotspot,
                             )
                         )
                         if possible_transition:
@@ -168,7 +166,7 @@ class SonarQubeApiUpdater:
                 transitions_result = deque()
                 transitions_result.appendleft(
                     {"status": transitions[0].get("transition"),
-                    "resolution": transitions[0].get("resolution")}
+                    "resolution": transitions[0].get("resolution")},
                 )
                 return list(transitions_result)
         return None
@@ -186,14 +184,10 @@ class SonarQubeApiUpdater:
         # we don't care about config, each finding knows which config was used
         # during import
 
-        type = sonarqube_issue.type
         target_status = self.get_sonarqube_status_for(finding)
-        is_hotspot = type == "SECURITY_HOTSPOT"
+        is_hotspot = sonarqube_issue.type == "SECURITY_HOTSPOT"
 
-        if is_hotspot:
-            issue = client.get_hotspot(sonarqube_issue.key)
-        else:
-            issue = client.get_issue(sonarqube_issue.key)
+        issue = client.get_hotspot(sonarqube_issue.key) if is_hotspot else client.get_issue(sonarqube_issue.key)
 
         # Issue does not exist (could have disappeared in SQ because a previous scan resolved it)
         if not issue:
@@ -201,17 +195,14 @@ class SonarQubeApiUpdater:
 
         if is_hotspot:
             current_status = issue.get("status")
+        elif issue.get("resolution"):
+            current_status = "{} / {}".format(issue.get("status"), issue.get("resolution"))
         else:
-            if issue.get("resolution"):
-                current_status = "{} / {}".format(
-                    issue.get("status"), issue.get("resolution"),
-            )
-            else:
-                current_status = issue.get("status")
+            current_status = issue.get("status")
 
         # Get required transitions
         transitions = self.get_sonarqube_required_transitions_for(
-            current_status, target_status, is_hotspot=is_hotspot
+            current_status, target_status, is_hotspot=is_hotspot,
         )
 
         if not transitions:
