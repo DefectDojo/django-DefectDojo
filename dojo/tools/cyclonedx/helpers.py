@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 class Cyclonedxhelper:
     def _get_cvssv3(self, raw_vector):
-        if raw_vector is None or raw_vector == "":
+        if raw_vector is None or not raw_vector:
             return None
         if not raw_vector.startswith("CVSS:3"):
             raw_vector = "CVSS:3.1/" + raw_vector

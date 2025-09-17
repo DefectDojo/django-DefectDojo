@@ -29,6 +29,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -85,6 +86,9 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -120,6 +124,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT=(str, "Login with OIDC"),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
     DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ""),
@@ -356,6 +361,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
+DJANGO_DEBUG_TOOLBAR_ENABLED = env("DD_DJANGO_DEBUG_TOOLBAR_ENABLED")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -618,6 +624,8 @@ if value := env("DD_SOCIAL_AUTH_OIDC_USERINFO_URL"):
     SOCIAL_AUTH_OIDC_USERINFO_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
+if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
+    SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -913,9 +921,9 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
-    "watson.middleware.SearchContextMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.middleware.AuditlogMiddleware",
+    "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
@@ -1155,6 +1163,10 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
+
+# Watson async index update settings
+WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
+WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1643,7 +1655,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ("Security", "Security"),
 )
 
-if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
+if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
     for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
@@ -1853,6 +1865,7 @@ VULNERABILITY_URLS = {
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
+    "OXAS-ADV-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/OXAS-ADV-2023-0001
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
     "PFPT-SA-": "https://www.proofpoint.com/us/security/security-advisories/",  # e.g. https://www.proofpoint.com/us/security/security-advisories/pfpt-sa-0002
     "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
@@ -1941,3 +1954,45 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+if DEBUG:
+    # adding DEBUG logging for all of Django.
+    LOGGING["loggers"]["root"] = {
+                "handlers": ["console"],
+                "level": "DEBUG",
+           }
+
+if DJANGO_DEBUG_TOOLBAR_ENABLED:
+
+    INSTALLED_APPS += (
+    "debug_toolbar",
+    )
+
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+    def show_toolbar(request):
+        return True
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+        "INTERCEPT_REDIRECTS": False,
+        "SHOW_COLLAPSED": True,
+    }
+
+    DEBUG_TOOLBAR_PANELS = [
+        # 'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        # 'debug_toolbar.panels.logging.LoggingPanel',
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+        # 'cachalot.panels.CachalotPanel',
+    ]

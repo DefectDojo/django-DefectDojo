@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
 from dateutil.relativedelta import relativedelta
+from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
 from django.db.models import Count, Prefetch
@@ -11,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
+from dojo.decorators import dojo_async_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
@@ -234,3 +236,53 @@ def evaluate_pro_proposition(*args, **kwargs):
 @app.task
 def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
+
+
+@dojo_async_task
+@app.task
+def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
+    """
+    Async task to update watson search indexes for a specific model type.
+
+    Args:
+        model_key: Model identifier like 'dojo.finding'
+        pk_list: List of primary keys for instances of this model type. it's advised to chunk the list into batches of 1000 or less.
+
+    """
+    from watson.search import SearchContextManager, default_search_engine  # noqa: PLC0415 circular import
+
+    logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
+
+    try:
+        # Create new SearchContextManager and start it
+        context_manager = SearchContextManager()
+        context_manager.start()
+
+        # Get the default engine and model class
+        engine = default_search_engine
+        app_label, model_name = model_name.split(".")
+        model_class = apps.get_model(app_label, model_name)
+
+        # Bulk load instances and add them to the context
+        instances = model_class.objects.filter(pk__in=pk_list)
+        instances_added = 0
+        instances_skipped = 0
+
+        for instance in instances:
+            try:
+                # Add to watson context (this will trigger indexing on end())
+                context_manager.add_to_context(engine, instance)
+                instances_added += 1
+            except Exception as e:
+                logger.warning(f"Skipping {model_name}:{instance.pk} - {e}")
+                instances_skipped += 1
+                continue
+
+        # Let watson handle the bulk indexing
+        context_manager.end()
+
+        logger.info(f"Completed async watson index update: {instances_added} updated, {instances_skipped} skipped")
+
+    except Exception as e:
+        logger.error(f"Watson async index update failed for {model_name}: {e}")
+        raise
