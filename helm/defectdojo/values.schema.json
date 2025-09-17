@@ -31,6 +31,9 @@
                 }
             }
         },
+        "alternativeHosts": {
+            "type": "array"
+        },
         "annotations": {
             "type": "object"
         },
@@ -224,6 +227,9 @@
                 "instance": {
                     "type": "string"
                 },
+                "resources": {
+                    "type": "object"
+                },
                 "use_private_ip": {
                     "type": "boolean"
                 },
@@ -288,7 +294,13 @@
                 "annotations": {
                     "type": "object"
                 },
+                "extraEnv": {
+                    "type": "array"
+                },
                 "extraInitContainers": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
                     "type": "array"
                 },
                 "extraVolumes": {
@@ -683,6 +695,9 @@
                         },
                         "imagePullPolicy": {
                             "type": "string"
+                        },
+                        "resources": {
+                            "type": "object"
                         }
                     }
                 }
@@ -944,8 +959,14 @@
                 },
                 "labels": {
                     "type": "object"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
+        },
+        "siteUrl": {
+            "type": "string"
         },
         "tag": {
             "type": "string"

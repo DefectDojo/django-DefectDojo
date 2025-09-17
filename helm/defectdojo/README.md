@@ -524,6 +524,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | admin.password | string | `nil` |  |
 | admin.secretKey | string | `nil` |  |
 | admin.user | string | `"admin"` |  |
+| alternativeHosts | list | `[]` |  |
 | annotations | object | `{}` |  |
 | celery.annotations | object | `{}` |  |
 | celery.beat.affinity | object | `{}` |  |
@@ -569,6 +570,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` |  |
 | cloudsql.image.tag | string | `"1.37.9"` |  |
 | cloudsql.instance | string | `""` |  |
+| cloudsql.resources | object | `{}` |  |
 | cloudsql.use_private_ip | bool | `false` |  |
 | cloudsql.verbose | bool | `true` |  |
 | createPostgresqlSecret | bool | `false` |  |
@@ -582,7 +584,9 @@ A Helm chart for Kubernetes to install DefectDojo
 | disableHooks | bool | `false` |  |
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
+| django.extraEnv | list | `[]` |  |
 | django.extraInitContainers | list | `[]` |  |
+| django.extraVolumeMounts | list | `[]` |  |
 | django.extraVolumes | list | `[]` |  |
 | django.ingress.activateTLS | bool | `true` |  |
 | django.ingress.annotations | object | `{}` |  |
@@ -671,6 +675,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | monitoring.prometheus.enabled | bool | `false` |  |
 | monitoring.prometheus.image | string | `"nginx/nginx-prometheus-exporter:1.4.2"` |  |
 | monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
+| monitoring.prometheus.resources | object | `{}` |  |
 | networkPolicy.annotations | object | `{}` |  |
 | networkPolicy.egress | list | `[]` |  |
 | networkPolicy.enabled | bool | `false` |  |
@@ -717,6 +722,8 @@ A Helm chart for Kubernetes to install DefectDojo
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.labels | object | `{}` |  |
+| serviceAccount.name | string | `""` |  |
+| siteUrl | string | `""` |  |
 | tag | string | `"latest"` |  |
 | tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
 | tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
