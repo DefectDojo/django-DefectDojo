@@ -26,10 +26,12 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
-COPY requirements.txt ./
+COPY requirements.txt requirements-dev.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+# needed for static files collection, didn't find a way to make this dependant on the COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC argument
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements-dev.txt
 
 
 FROM build AS collectstatic
@@ -44,6 +46,13 @@ RUN pip3 install \
 	--no-index \
   --find-links=/tmp/wheels \
 	-r ./requirements.txt
+
+# needed for static files collection, didn't find a way to make this dependant on the COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC argument
+RUN pip3 install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+	-r ./requirements-dev.txt
 
 # generate static files
 COPY components/ ./components/
