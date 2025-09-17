@@ -25,7 +25,9 @@ class WazuhV4_8:
             detection_time = vuln.get("detected_at").split("T")[0]
             references = vuln.get("reference")
 
-            title = f"{cve} affects (version: {item['package']['version']})"
+            title = (
+                cve + " affects (version: " + item.get("package").get("version") + ")"
+            )
 
             find = Finding(
                 title=title,
