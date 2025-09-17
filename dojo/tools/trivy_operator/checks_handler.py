@@ -18,7 +18,7 @@ class TrivyChecksHandler:
         resource_name = labels.get("trivy-operator.resource.name", "")
         container_name = labels.get("trivy-operator.container.name", "")
         service = f"{resource_namespace}/{resource_kind}/{resource_name}"
-        if container_name != "":
+        if container_name:
             service = f"{service}/{container_name}"
         for check in checks:
             check_title = check.get("title")
@@ -45,8 +45,9 @@ class TrivyChecksHandler:
                 static_finding=True,
                 dynamic_finding=False,
                 service=service,
+                fix_available=True,
             )
-            if resource_namespace != "":
+            if resource_namespace:
                 finding.tags = resource_namespace
             if check_id:
                 finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_id)]

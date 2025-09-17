@@ -80,12 +80,14 @@ def get_item(vulnerability, test):
         if "cvss_v2_vector" in worstCve:
             cvss_v2 = worstCve["cvss_v2_vector"]
 
+    fix_available = False
     if (
         "fixed_versions" in vulnerability
         and len(vulnerability["fixed_versions"]) > 0
     ):
         mitigation = "Versions containing a fix:\n"
         mitigation += "\n".join(vulnerability["fixed_versions"])
+        fix_available = True
 
     if (
         "external_advisory_source" in vulnerability
@@ -138,6 +140,7 @@ def get_item(vulnerability, test):
         date=scan_time,
         unique_id_from_tool=vulnerability["issue_id"],
         tags=tags,
+        fix_available=fix_available,
     )
 
     cvss_data = parse_cvss_data(cvssv3)

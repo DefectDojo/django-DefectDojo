@@ -1700,6 +1700,9 @@ class FindingFilterHelper(FilterSet):
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle")
     if settings.V3_FEATURE_LOCATIONS:
         endpoints__host = CharFilter(field_name="locations__location__url__host", lookup_expr="icontains", label="Endpoint Host")
         endpoints = NumberFilter(field_name="locations__location", widget=HiddenInput())
@@ -1952,9 +1955,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
-        label="Product lifecycle")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
@@ -2281,7 +2281,7 @@ class MetricsFindingFilter(FindingFilter):
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2311,7 +2311,7 @@ class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2400,7 +2400,7 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -2562,7 +2562,7 @@ class MetricsEndpointFilterWithoutObjectLookups(MetricsEndpointFilterHelper, Fin
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+            if args[0].get("start_date", "") or args[0].get("end_date", ""):
                 args[0]._mutable = True
                 args[0]["date"] = 8
                 args[0]._mutable = False
@@ -3477,7 +3477,6 @@ class TestImportAPIFilter(DojoFilter):
 
 
 class LogEntryFilter(DojoFilter):
-    from auditlog.models import LogEntry
 
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
     actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())

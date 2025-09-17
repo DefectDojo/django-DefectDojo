@@ -68,19 +68,19 @@ class FortifyFPRParser:
         related_data = FortifyRelatedData()
         for description in root.findall("Description", self.namespaces):
             class_id = description.attrib.get("classID")
-            logger.debug(f"Description: {class_id}")
+            logger.debug("Description: %s", class_id)
             if class_id:
                 related_data.descriptions[class_id] = self.parse_description_information(description)
 
         for snippet in root.find("Snippets", self.namespaces):
             snippet_id = snippet.attrib.get("id")
-            logger.debug(f"Snippet: {snippet_id}")
+            logger.debug("Snippet: %s", snippet_id)
             if snippet_id:
                 related_data.snippets[snippet_id] = self.parse_snippet_information(snippet)
 
         for rule in root.find("EngineData", self.namespaces).find("RuleInfo", self.namespaces):
             rule_id = rule.attrib.get("id")
-            logger.debug(f"Rule: {rule_id}")
+            logger.debug("Rule: %s", rule_id)
             if rule_id:
                 related_data.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
         return related_data
@@ -95,11 +95,11 @@ class FortifyFPRParser:
             if instance_id:
                 suppressed_string = issue.attrib.get("suppressed")
                 suppressed = suppressed_string.lower() == "true" if suppressed_string else False
-                logger.debug(f"Issue: {instance_id} - Suppressed: {suppressed}")
+                logger.debug("Issue: %s - Suppressed: %s", instance_id, suppressed)
                 related_data.suppressed[instance_id] = suppressed
 
                 threaded_comments = issue.find("ThreadedComments", self.namespaces_audit_log)
-                logger.debug(f"ThreadedComments: {threaded_comments}")
+                logger.debug("ThreadedComments: %s", threaded_comments)
                 if threaded_comments is not None:
                     related_data.threaded_comments[instance_id] = [self.get_comment_text(comment) for comment in threaded_comments.findall("Comment", self.namespaces_audit_log)]
         return related_data
@@ -133,14 +133,14 @@ class FortifyFPRParser:
             finding = Finding(test=test, static_finding=True)
 
             finding.active, finding.false_p = self.compute_status(related_data, vuln_data)
-            finding.title = self.format_title(vuln_data, snippet, description, rule)
+            finding.title = self.format_title(vuln_data, snippet)
             finding.description = self.format_description(vuln_data, snippet, description, rule)
             finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
-            finding.severity = self.compute_severity(vuln_data, snippet, description, rule)
+            finding.severity = self.compute_severity(vuln_data, rule)
             finding.impact = self.format_impact(related_data, vuln_data)
 
             finding.file_path = vuln_data.source_location_path
-            finding.line = int(self.compute_line(vuln_data, snippet, description, rule))
+            finding.line = int(self.compute_line(vuln_data, snippet))
             finding.unique_id_from_tool = vuln_data.instance_id
 
             findings.append(finding)
@@ -225,26 +225,28 @@ class FortifyFPRParser:
     def parse_rule_information(self, rule: Element) -> RuleData:
         """Parse the rule information and return a RuleData object."""
         rule_data = RuleData()
-        rule_data.accuracy = rule.findtext("Group[@name='Accuracy']", None, self.namespaces)
-        rule_data.impact = rule.findtext("Group[@name='Impact']", None, self.namespaces)
-        rule_data.probability = rule.findtext("Group[@name='Probability']", None, self.namespaces)
-        rule_data.impact_bias = rule.findtext("Group[@name='ImpactBias']", None, self.namespaces)
-        rule_data.confidentiality_impact = rule.findtext("Group[@name='ConfidentialityImpact']", None, self.namespaces)
-        rule_data.integrity_impact = rule.findtext("Group[@name='IntegrityImpact']", None, self.namespaces)
-        rule_data.remediation_effort = rule.findtext("Group[@name='Recommendations']", None, self.namespaces)
-        logger.debug(f"Rule Impact: {rule_data.impact}")
+        if rule is not None:
+            rule_data.accuracy = rule.findtext("Group[@name='Accuracy']", None, self.namespaces)
+            rule_data.impact = rule.findtext("Group[@name='Impact']", None, self.namespaces)
+            rule_data.probability = rule.findtext("Group[@name='Probability']", None, self.namespaces)
+            rule_data.impact_bias = rule.findtext("Group[@name='ImpactBias']", None, self.namespaces)
+            rule_data.confidentiality_impact = rule.findtext("Group[@name='ConfidentialityImpact']", None, self.namespaces)
+            rule_data.integrity_impact = rule.findtext("Group[@name='IntegrityImpact']", None, self.namespaces)
+            rule_data.remediation_effort = rule.findtext("Group[@name='Recommendations']", None, self.namespaces)
+            logger.debug(f"Rule Impact: {rule_data.impact}")
         return rule_data
 
-    def format_title(self, vulnerability, snippet, description, rule) -> str:
+    def format_title(self, vulnerability, snippet) -> str:
         # defaults for when there is no snippet (shouldn't happen, future improvement: parser might also parse ReplacementDefinitions and/or Context elements)
         file_name = vulnerability.source_location_path.split("/")[-1]
-        line = self.compute_line(vulnerability, snippet, description, rule)
+        line = self.compute_line(vulnerability, snippet)
 
         return f"{vulnerability.vulnerability_type} - {file_name}: {line} ({vulnerability.class_id})"
 
     def format_description(self, vulnerability, snippet, description, rule) -> str:
         desc = f"##Catagory: {vulnerability.vulnerability_type}\n"
-        desc += f"###Abstract:\n{description.abstract}\n"
+        if description:
+            desc += f"###Abstract:\n{description.abstract}\n"
 
         desc += f"**SourceLocationPath:** {vulnerability.source_location_path}\n"
         desc += f"**SourceLocationLine:** {vulnerability.source_location_line}\n"
@@ -258,7 +260,8 @@ class FortifyFPRParser:
                 "leads to this finding. \n")
             desc += f"###Snippet:\n**File: {snippet.file_name}: {snippet.start_line}**\n```\n{snippet.text}\n```\n"
 
-        desc += f"##Explanation:\n {description.explanation}"
+        if description:
+            desc += f"##Explanation:\n {description.explanation}"
 
         desc += f"##Details: {vulnerability.instance_id}\n"
         desc += f"**InstanceID:** {vulnerability.instance_id}\n"
@@ -273,14 +276,14 @@ class FortifyFPRParser:
 
     def format_mitigation(self, vulnerability, snippet, description, rule) -> str:
         mitigation = ""
-        if description.recommendations:
+        if description and description.recommendations:
             mitigation += f"###Recommendation:\n {description.recommendations}\n"
 
-        if description.tips:
+        if description and description.tips:
             mitigation += f"###Tips:\n {description.tips}"
         return mitigation
 
-    def compute_severity(self, vulnerability, snippet, description, rule) -> str:
+    def compute_severity(self, vulnerability, rule) -> str:
         """Convert the the float representation of severity and confidence to a string severity."""
         if not rule.impact:
             logger.debug("No rule impact found, setting severity to Informational")
@@ -295,7 +298,7 @@ class FortifyFPRParser:
             # This comes from Fortify support documentation, requested in #11901
             likelihood = (accuracy * confidence * probability) / 25
             likelihood = round(likelihood, 1)
-            logger.debug(f"Impact: {impact}, Likelihood: {likelihood}")
+            logger.debug("Impact: %s, Likelihood: %s", impact, likelihood)
 
             if impact >= 2.5 and likelihood >= 2.5:
                 return "Critical"
@@ -330,7 +333,7 @@ class FortifyFPRParser:
             return False, True
         return True, False
 
-    def compute_line(self, vulnerability, snippet, description, rule) -> str:
+    def compute_line(self, vulnerability, snippet) -> str:
         if snippet and snippet.start_line:
             return snippet.start_line
         return vulnerability.source_location_line

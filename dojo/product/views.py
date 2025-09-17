@@ -866,6 +866,9 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
     finding_open_verified_subquery = build_count_subquery(
         Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, verified=True), group_field="test__engagement_id",
     )
+    finding_open_fix_available_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, fix_available=True), group_field="test__engagement_id",
+    )
     finding_close_subquery = build_count_subquery(
         Finding.objects.filter(test__engagement=OuterRef("pk"), is_mitigated=True), group_field="test__engagement_id",
     )
@@ -881,6 +884,7 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         count_findings_all=Coalesce(finding_subquery, Value(0)),
         count_findings_open=Coalesce(finding_open_subquery, Value(0)),
         count_findings_open_verified=Coalesce(finding_open_verified_subquery, Value(0)),
+        count_findings_fix_available=Coalesce(finding_open_fix_available_subquery, Value(0)),
         count_findings_close=Coalesce(finding_close_subquery, Value(0)),
         count_findings_duplicate=Coalesce(finding_duplicate_subquery, Value(0)),
         count_findings_accepted=Coalesce(finding_accepted_subquery, Value(0)),
@@ -893,12 +897,6 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         )
 
     return engagements
-
-
-# Authorization is within the import_scan_results method
-def import_scan_results_prod(request, pid=None):
-    from dojo.engagement.views import import_scan_results
-    return import_scan_results(request, pid=pid)
 
 
 def new_product(request, ptid=None):

@@ -1,5 +1,6 @@
 import csv
 import io
+import sys
 
 from dateutil import parser as date_parser
 
@@ -88,6 +89,7 @@ class QualysHackerGuardianParser:
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
+        csv.field_size_limit(int(sys.maxsize / 10))
         reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
         dupes = {}
         for row in reader:

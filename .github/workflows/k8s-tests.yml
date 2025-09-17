@@ -65,7 +65,6 @@ jobs:
 
       - name: Configure HELM repos
         run: |-
-             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 
@@ -109,17 +108,17 @@ jobs:
                  echo "INFO: status:"
                  kubectl get pods
                  echo "INFO: logs:"
-                 kubectl logs  --selector=$3 --all-containers=true
+                 kubectl logs --selector=$3 --all-containers=true
                  exit 1
                fi
                return ${?}
              }
              echo "Waiting for init job..."
-             to_complete  "condition=Complete" job "defectdojo.org/component=initializer"
+             to_complete "condition=Complete" job "defectdojo.org/component=initializer"
              echo "Waiting for celery pods..."
-             to_complete  "condition=ready" pod "defectdojo.org/component=celery"
+             to_complete "condition=ready" pod "defectdojo.org/component=celery"
              echo "Waiting for django pod..."
-             to_complete  "condition=ready" pod "defectdojo.org/component=django"
+             to_complete "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
              RETRY=0
@@ -133,15 +132,15 @@ jobs:
                     --max-time 20 \
                     --head \
                     --header "Host: $DD_HOSTNAME" \
-                    http://$DJANGO_IP/login?next=/)
+                    "http://${DJANGO_IP}/login?next=/")
                echo $OUT
-               CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
+               CR=$(echo $OUT | egrep "^HTTP" | cut -d' ' -f2)
                echo $CR
                if [[ $CR -ne 200 ]]; then
                   echo $RETRY
                   if [[ $RETRY -gt 2 ]]; then
                     kubectl get pods
-                    echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
+                    echo $(kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi)
                     echo "ERROR: cannot display login screen; got HTTP code $CR"
                     exit 1
                   else
@@ -166,7 +165,7 @@ jobs:
                  --data-raw "username=admin&password=$ADMIN_PASS" \
                  --output /dev/null \
                  --write-out "%{http_code}\n" \
-                 http://$DJANGO_IP/api/v2/api-token-auth/)
+                 "http://${DJANGO_IP}/api/v2/api-token-auth/")
              echo $CR
              if [[ $CR -ne 200 ]]; then
               echo "ERROR: login is not possible; got HTTP code $CR"
@@ -175,8 +174,8 @@ jobs:
               echo "Result received"
              fi
              echo "Final Check of components"
-             errors=`kubectl get pods | grep Error | awk '{print  $1}'`
-             if [[ ! -z  $errors ]]; then
+             errors=$(kubectl get pods | grep Error | awk '{print $1}')
+             if [[ ! -z $errors ]]; then
                echo "Few pods with errors"
                for line in $errors; do
                  echo "Dumping log from $line"
