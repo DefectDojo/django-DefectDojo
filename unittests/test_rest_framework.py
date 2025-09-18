@@ -1987,7 +1987,8 @@ class ImportScanTest(BaseClass.BaseClassTest):
         self.viewname = "importscan"
         self.viewset = ImportScanView
 
-        testfile = Path("tests/zap_sample.xml").open(encoding="utf-8")
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as f:
+            testfile = f.read()
         self.payload = {
             "minimum_severity": "Low",
             "active": False,
@@ -2916,9 +2917,11 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.endpoint_path = "import-languages"
         self.viewname = "importlanguages"
         self.viewset = ImportLanguagesView
+        with Path("unittests/files/defectdojo_cloc.json").open(encoding="utf-8") as f:
+            file_content = f.read()
         self.payload = {
             "product": 1,
-            "file": Path("unittests/files/defectdojo_cloc.json").open(encoding="utf-8"),
+            "file": file_content,
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages

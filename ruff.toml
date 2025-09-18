@@ -88,6 +88,7 @@ select = [
    "PLW",
    "UP",
    "FURB",
+   "SIM115",
    "RUF",
    "TRY003", "TRY004", "TRY2", "TRY300", "TRY401",
 ]
@@ -95,7 +96,6 @@ ignore = [
     "E501",
     "E722",
     "SIM102",
-    "SIM115",
     "RUF012",
     "RUF015",
     "D205",
