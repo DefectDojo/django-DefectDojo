@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 def get_findings_from_csv(file, test) -> list[Finding]:
     """Returns list of findings as defectdojo factory contract expects"""
     dupes = {}
-    file = io.TextIOWrapper(file, encoding="utf-8")
+    if not isinstance(file, io.TextIOWrapper):
+        file = io.TextIOWrapper(file, encoding="utf-8")
     csv_reader = csv.reader(file, delimiter=",", quotechar='"')
     column_names = [column_name.lower() for column_name in next(csv_reader) if column_name]
 
