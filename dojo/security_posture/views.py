@@ -9,7 +9,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 
 
 @dojo_ratelimit_view()
-def security_posture(request: HttpRequest) -> HttpResponse:
+def security_posture_view(request: HttpRequest) -> HttpResponse:
     page_name = ('security_posture')
     engagement_id = request.GET.get('engagement_id')
     engagement_name = request.GET.get('engagement_name')
