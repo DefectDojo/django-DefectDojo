@@ -1098,20 +1098,32 @@ class EditRiskAcceptanceForm(forms.ModelForm):
 
 
 class RiskPendingForm(forms.ModelForm):
+    YES_NO_CHOICES = [
+        (None, "--- Select an option ---"),
+        (True, "Yes"),
+        (False, "No"),
+    ]
     name = forms.CharField(max_length=255, required=True)
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
         help_text=('Active, verified findings listed, please select to add findings.'),
         label="Select Findings to Accept")
-    # recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES,
-    #                                    initial=Risk_Acceptance.TREATMENT_ACCEPT,
-    #                                    widget=forms.RadioSelect, label="Security Recommendation")
+    long_term_acceptance = forms.ChoiceField(
+        choices=YES_NO_CHOICES,
+        widget=forms.widgets.Select(attrs={'size': 1}),
+        required=True,
+        initial="",
+        help_text=("You can request long-term acceptance for this vulnerability. For more information, please review documentation"),
+        label="Do you want to submit this request as a long-term acceptance?")
+    expiration_date_requested = forms.DateTimeField(
+        required=False, widget=forms.TextInput(attrs={"class": "datepicker"})
+    )
     accepted_by = forms.ModelMultipleChoiceField(
+        help_text=("acceptors depending on the severity of the risk"),
         queryset=Dojo_User.objects.none(),
         required=True,
         widget=forms.widgets.MultipleHiddenInput(),
-        help_text=("acceptors depending on the severity of the risk"),
     )
     approvers = forms.CharField(
         widget=forms.TextInput(attrs={'disabled': 'disabled'}),
@@ -1132,7 +1144,8 @@ class RiskPendingForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
-        fields = ["name", "accepted_findings",
+        fields = ["name","accepted_findings",
+                  "long_term_acceptance", "expiration_date_requested",
                   "recommendation_details",
                   "path", "accepted_by", "approvers", "path",
                   "expiration_date", "owner"]

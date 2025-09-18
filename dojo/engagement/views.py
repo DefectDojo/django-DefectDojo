@@ -35,12 +35,14 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.risk_acceptance.risk_pending as rp_helper
 from django.utils.decorators import method_decorator
+from dojo.templatetags.authorization_tags import is_in_group
 from dojo.decorators import dojo_ratelimit_view
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.group.queries import get_users_for_group
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
@@ -1313,7 +1315,13 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             active=True,
             severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
-        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
+        if form.fields["long_term_acceptance"] is True:
+            users = get_users_for_group("Approvers_Cybersecurity")
+            form.fields["approvers"].queryset = users
+        else:
+            # obtener usuario normal o inicales
+            form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
+
         for finding in findings:
             if (
                 rp_helper.validate_list_findings("black_list", finding)

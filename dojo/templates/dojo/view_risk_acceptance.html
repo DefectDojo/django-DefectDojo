@@ -120,6 +120,7 @@
                         <th>Recommended Acceptors</th>
                         <th>Name</th>
                         <th>Decision</th>
+                        <th>Long-Term</th>
                         <th>Expiration</th>
                         <th>Expiration handled</th>
                         <th>Findings</th>
@@ -144,6 +145,7 @@
 
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
+                        <td>{{ risk_acceptance.long_term_acceptance}}
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
                         <td>
                             {% if risk_acceptance.expiration_date %}
