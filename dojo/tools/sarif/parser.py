@@ -272,6 +272,7 @@ class SarifParser:
             tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
             tags = [s.removeprefix("external/cwe/") for s in tags]
             finding.tags = tags
+            finding.unsaved_tags = tags
 
             # manage fingerprints
             # fingerprinting in SARIF is more complete than in current implementation
