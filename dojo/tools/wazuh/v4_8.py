@@ -11,7 +11,7 @@ class WazuhV4_8:
             cve = vuln.get("id")
 
             # Construct a unique key for deduplication
-            dupe_key = f"{cve}-{item['agent']['id']}"
+            dupe_key = f"{cve}-{item.get('agent', {}).get('id')}"
 
             if dupe_key in dupes:
                 continue  # Skip if this finding has already been processed
