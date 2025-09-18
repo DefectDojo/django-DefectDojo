@@ -5,6 +5,7 @@ import operator
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 
+from django.http import HttpRequest, HttpResponse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -18,7 +19,9 @@ from django.utils.html import escape
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from django.middleware.csrf import get_token
 
+from dojo.decorators import dojo_ratelimit_view
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_has_role_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -252,12 +255,13 @@ def simple_metrics(request):
 
 # @cache_page(60 * 15)  # cache for 15 minutes
 # @vary_on_cookie
+@dojo_ratelimit_view()
 def metrics_panel(request):
     page_name = _('Metrics Panel')
     now = timezone.now()
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
-    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_csrftoken = get_token(request)
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -271,7 +275,8 @@ def metrics_panel(request):
     })
 
 @user_has_role_permission(Permissions.Metrics_DevSecOps)
-def metrics_devsecops(request):
+@dojo_ratelimit_view()
+def metrics_devsecops(request: HttpRequest) -> HttpResponse:
     page_name = _('Metrics DevSecOps')
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
@@ -286,11 +291,12 @@ def metrics_devsecops(request):
     })
 
 @user_has_role_permission(Permissions.Metrics_Panel_Admin)
-def metrics_panel_admin(request):
+@dojo_ratelimit_view()
+def metrics_panel_admin(request: HttpRequest) -> HttpResponse:
     page_name = _('Metrics Panel Admin')
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
-    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_csrftoken = get_token(request)
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -302,6 +308,21 @@ def metrics_panel_admin(request):
        'role': role,
        'user': user,
     })
+
+
+@dojo_ratelimit_view()
+def metrics_panel_tenable(request: HttpRequest) -> HttpResponse:
+    page_name = ('Metrics Panel Tenable')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/generic_view.html', {
+        'name': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/tenable{base_params}",  
+        'user': user})
+
 
 # @cache_page(60 * 5)  # cache for 5 minutes
 # @vary_on_cookie

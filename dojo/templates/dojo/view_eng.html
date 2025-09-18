@@ -752,6 +752,15 @@
                                     </em>
                                 </td>
                             </tr>
+                            {% if "ENABLE_SECURITY_POSTURE"|general_settings_get_value:"False"%}
+                            <tr>
+                                <td style="width: 150px;"><strong>Security Posture</strong></td>
+                                   <td>
+                                        <a href="security_posture/?engagement_id={{eng.id}}" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Details security posture">
+                                        <span style="background-color: #b50500;" class="pass_fail Pass">View Details</span></a>
+                                    </td>
+                            </tr>
+                            {% endif %}
                             <tr>
                                 <td><strong>Dates</strong></td>
                                 <td><a rel="noopener noreferrer" target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
