@@ -1,6 +1,5 @@
 import csv
 import io
-from typing import Optional
 
 from dateutil.parser import parse as parse_date
 

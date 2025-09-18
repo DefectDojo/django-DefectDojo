@@ -1,6 +1,5 @@
 import hashlib
 from dataclasses import dataclass
-from typing import Optional
 
 from dojo.models import Endpoint, Finding
 
@@ -17,7 +16,7 @@ class OpenVASFindingAuxData:
     fallback_cvss_score: float | None = None
 
 
-def setup_finding(test: bool) -> tuple[Finding, OpenVASFindingAuxData]:
+def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
     """Base setup and init for findings and auxiliary data"""
     finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info", nb_occurences=1, cwe=None)
     finding.unsaved_vulnerability_ids = []
