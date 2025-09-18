@@ -2,7 +2,7 @@ import logging
 from unittest.mock import patch
 
 from django.contrib.auth.models import User as DjangoUser
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, tag
 from django.utils import timezone
 
 from dojo.importers.default_importer import DefaultImporter
@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 # we need to run this as a TransactionTestCase to be able to mimic the behavior of the bulk_create fallback at runtime
+
+
+@tag("non-parallel")
 class UpdateImportHistoryTests(TransactionTestCase):
 
     # loading fixtures fails in TransactionTestCase, not sure why. possibly because they are not up-to-date and missing fields like sla_configuration
