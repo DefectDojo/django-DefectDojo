@@ -80,7 +80,7 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
-python3 manage.py test unittests -v 3 --no-input --exclude-tag="non-parallel" || {
+python3 manage.py test unittests -v 3 --no-input --keepdb --exclude-tag="non-parallel" || {
     exit 1;
 }
 
@@ -89,6 +89,6 @@ python3 manage.py test unittests -v 3 --no-input --exclude-tag="non-parallel" ||
 # Flushing keeps the test DB schema but removes all data.
 python3 manage.py flush --no-input
 
-python3 manage.py test unittests -v 3 --no-input --tag="non-parallel" || {
+python3 manage.py test unittests -v 3 --no-input --keepdb --tag="non-parallel" || {
     exit 1;
 }
