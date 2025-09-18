@@ -27,6 +27,7 @@ from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
 from dojo.authorization.authorization import user_has_permission
+import dojo.authorization.helper as authorization_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
@@ -1710,6 +1711,7 @@ class FindingSerializer(serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
     )
+    permissions = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding
@@ -1717,6 +1719,10 @@ class FindingSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+    
+    @extend_schema_field(serializers.ListField())
+    def get_permissions(self, obj):
+        return authorization_helper.get_permissions(obj)
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
