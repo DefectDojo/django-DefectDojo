@@ -412,19 +412,20 @@ class TwistlockJsonParser:
                 items[unique_key] = item
 
             # Parse compliance findings
-            complianceTree = result.get("compliances", [])
-            for node in complianceTree:
-                item = get_compliance_item(node, test, image_metadata)
-                # Create unique key for compliance findings - prefer ID if available
-                if node.get("id"):
-                    unique_key = f"compliance_{node['id']}"
-                else:
-                    # Fallback to hash of title + description
-                    unique_key = "compliance_" + hashlib.md5(
-                        (node.get("title", "") + node.get("description", "")).encode("utf-8"),
-                        usedforsecurity=False,
-                    ).hexdigest()
-                items[unique_key] = item
+            if settings.ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK:
+                complianceTree = result.get("compliances", [])
+                for node in complianceTree:
+                    item = get_compliance_item(node, test, image_metadata)
+                    # Create unique key for compliance findings - prefer ID if available
+                    if node.get("id"):
+                        unique_key = f"compliance_{node['id']}"
+                    else:
+                        # Fallback to hash of title + description
+                        unique_key = "compliance_" + hashlib.md5(
+                            (node.get("title", "") + node.get("description", "")).encode("utf-8"),
+                            usedforsecurity=False,
+                        ).hexdigest()
+                    items[unique_key] = item
         return list(items.values())
     
     def build_image_metadata(self, result):
