@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 
 from dateutil.parser import parse as parse_date
 
@@ -13,15 +14,14 @@ from dojo.tools.openvas.parser_v2.common import (
     setup_finding,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def get_findings_from_csv(file, test) -> list[Finding]:
     """Returns list of findings as defectdojo factory contract expects"""
     dupes = {}
-    content = file.read()
-    if isinstance(content, bytes):
-        content = content.decode("utf-8")
-
-    csv_reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
+    file = io.TextIOWrapper(file, encoding="utf-8")
+    csv_reader = csv.reader(file, delimiter=",", quotechar='"')
     column_names = [column_name.lower() for column_name in next(csv_reader) if column_name]
 
     if "nvt name" not in column_names:
@@ -85,8 +85,11 @@ class CSVParserV2:
         self.aux_info = aux_info
 
         handler = self.column_handlers.get(column_name)
-        if handler:
-            handler(column_value)
+        try:
+            if handler:
+                handler(column_value)
+        except ValueError as e:
+            logger.debug("openvas parser v2: error parsing column %s: %s", column_name, e)
 
     def _handle_nvt_name(self, column_value: str):
         self.finding.title = column_value

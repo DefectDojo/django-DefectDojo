@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
@@ -13,6 +14,8 @@ from dojo.tools.openvas.parser_v2.common import (
     setup_finding,
 )
 from dojo.utils import parse_cvss_data
+
+logger = logging.getLogger(__name__)
 
 
 def get_findings_from_xml(file, test) -> list[Finding]:
@@ -59,8 +62,11 @@ class XMLParserV2:
         self.aux_info = aux_info
 
         handler = self.tag_handlers.get(field.tag)
-        if handler:
-            handler(field)
+        try:
+            if handler:
+                handler(field)
+        except ValueError as e:
+            logger.debug("openvas parser v2: error parsing field %s: %s", field.tag, e)
 
     def _handle_nvt(self, field):
         self.finding.vuln_id_from_tool = field.get("oid")

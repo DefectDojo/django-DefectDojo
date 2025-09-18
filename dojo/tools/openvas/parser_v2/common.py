@@ -41,6 +41,8 @@ def escape_restructured_text(text: str) -> str:
     """Changes text so that restructured text symbols are not interpreted"""
     # OpenVAS likes to include markdown like tables in some fields
     # Defectdojo uses reStructuredText which causes them to be rendered wrong
+    text = text.replace("```", "")
+    text = text.replace("```", "")
     return f"```\n{text}\n```"
 
 
