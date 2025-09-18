@@ -80,15 +80,11 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
-python3 manage.py test unittests -v 3 --no-input --keepdb --exclude-tag="non-parallel" || {
+python3 manage.py test unittests -v 3 --no-input --exclude-tag="non-parallel" || {
     exit 1;
 }
 
-# Ensure a clean test database state before running the second batch.
-# TransactionTestCase-based suites can leave state that interferes when using --keepdb or preserved DBs.
-# Flushing keeps the test DB schema but removes all data.
-python3 manage.py flush --no-input
-
-python3 manage.py test unittests -v 3 --no-input --keepdb --tag="non-parallel" || {
+# For the second batch, run without --keepdb so a fresh test DB is created.
+python3 manage.py test unittests -v 3 --no-input --tag="non-parallel" || {
     exit 1;
 }
