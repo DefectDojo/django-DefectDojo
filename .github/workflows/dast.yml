@@ -3,8 +3,6 @@ name: DAST
 on:
   push:
     branches: [ "master", "main" ]
-  pull_request:
-    branches: [ "master", "main" ]
   workflow_dispatch: {}
 
 permissions:
@@ -24,17 +22,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Пассивный скан сайта, генерируем XML для Dojo
+      - name: Debug TARGET_URL
+        run: echo "TARGET_URL=${{ env.TARGET_URL }}"
+
       - name: Run ZAP Baseline
         uses: zaproxy/action-baseline@v0.13.0
         continue-on-error: true
         with:
           target: ${{ env.TARGET_URL }}
-          cmd_options: -a -x zap_report.xml   # -a: агрессивные пассивные проверки, -x: XML отчёт
+          cmd_options: "-a -t ${{ env.TARGET_URL }} -x zap_report.xml"
           allow_issue_writing: false
-          fail_action: false                  # не валим сборку — отчёт всё равно загрузим
+          fail_action: false
 
-      # Сохраним отчёт как артефакт на всякий случай
       - name: Upload ZAP report artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -43,13 +42,11 @@ jobs:
           path: zap_report.xml
           if-no-files-found: ignore
 
-      # Выгрузка в DefectDojo: сначала reimport, если теста нет — import
-      - name: Upload to DefectDojo (reimport → import)
+      - name: Upload to DefectDojo
         if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
         run: |
           set -e
           test -f zap_report.xml || { echo "ZAP XML report not found, skip Dojo upload"; exit 0; }
-
           curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
             -H "Authorization: Token $DD_API_KEY" \
             -F "engagement=$DD_ENGAGEMENT_ID" \
