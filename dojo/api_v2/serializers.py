@@ -2314,14 +2314,16 @@ class ImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same engagement.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same product."
                     "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
     )
@@ -2396,7 +2398,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=True,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same test.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
