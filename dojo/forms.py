@@ -1106,7 +1106,7 @@ class TestForm(forms.ModelForm):
     tags = TagField(
         required=False,
         help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.",
-    ) 
+    )
 
     def __init__(self, *args, **kwargs):
         obj = None
