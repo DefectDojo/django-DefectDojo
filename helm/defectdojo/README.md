@@ -516,13 +516,13 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| admin.credentialAes256Key | string | `nil` |  |
+| admin.credentialAes256Key | string | `""` |  |
 | admin.firstName | string | `"Administrator"` |  |
 | admin.lastName | string | `"User"` |  |
 | admin.mail | string | `"admin@defectdojo.local"` |  |
-| admin.metricsHttpAuthPassword | string | `nil` |  |
-| admin.password | string | `nil` |  |
-| admin.secretKey | string | `nil` |  |
+| admin.metricsHttpAuthPassword | string | `""` |  |
+| admin.password | string | `""` |  |
+| admin.secretKey | string | `""` |  |
 | admin.user | string | `"admin"` |  |
 | annotations | object | `{}` |  |
 | celery.annotations | object | `{}` |  |
@@ -594,9 +594,9 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.mediaPersistentVolume.name | string | `"media"` |  |
 | django.mediaPersistentVolume.persistentVolumeClaim.accessModes[0] | string | `"ReadWriteMany"` |  |
 | django.mediaPersistentVolume.persistentVolumeClaim.create | bool | `false` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.name | string | `nil` |  |
+| django.mediaPersistentVolume.persistentVolumeClaim.name | string | `""` |  |
 | django.mediaPersistentVolume.persistentVolumeClaim.size | string | `"5Gi"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.storageClassName | string | `nil` |  |
+| django.mediaPersistentVolume.persistentVolumeClaim.storageClassName | string | `""` |  |
 | django.mediaPersistentVolume.type | string | `"emptyDir"` |  |
 | django.nginx.extraEnv | list | `[]` |  |
 | django.nginx.extraVolumeMounts | list | `[]` |  |
