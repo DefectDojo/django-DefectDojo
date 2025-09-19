@@ -8,7 +8,7 @@ bleach[css]
 celery==5.5.3
 defusedxml==0.7.1
 django_celery_results==2.6.0
-django-cors-headers==4.8.0
+django-cors-headers==4.9.0
 django-auditlog==3.2.1
 django-dbbackup==4.3.0
 django-csp==4.0
