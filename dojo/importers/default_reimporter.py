@@ -190,19 +190,22 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        # Create iterator over parsed findings
-        findings_iterator = iter(parsed_findings)
-
-        # Get first finding to start the loop
-        non_clean_unsaved_finding = next(findings_iterator, None)
-
-        while non_clean_unsaved_finding:
-            # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
-            # Filter on minimum severity if applicable
-            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                # finding's severity is below the configured threshold : ignoring the finding
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        cleaned_findings = []
+        for raw_finding in parsed_findings or []:
+            sanitized = self.sanitize_severity(raw_finding)
+            if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
+                logger.debug(
+                    "skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)",
+                    getattr(sanitized, "title", "<no-title>"),
+                    sanitized.severity,
+                    self.minimum_severity,
+                )
                 continue
+            cleaned_findings.append(sanitized)
+
+        for idx, unsaved_finding in enumerate(cleaned_findings):
+            is_final = idx == len(cleaned_findings) - 1
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -266,9 +269,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 post_processing_task_signatures.append(post_processing_task_signature)
 
-            # Get next finding for next iteration
-            non_clean_unsaved_finding = next(findings_iterator, None)
-
             # Check if we should launch a chord (batch full or end of findings)
             if we_want_async(async_user=self.user) and post_processing_task_signatures:
                 # Calculate current batch size: 2^batch_number, capped at max_batch_size
@@ -277,7 +277,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 current_batch_size = min(2 ** current_batch_number, max_batch_size)
 
                 batch_full = len(post_processing_task_signatures) >= current_batch_size
-                is_final = not non_clean_unsaved_finding
 
                 if batch_full or is_final:
                     # Launch chord with current batch of signatures
