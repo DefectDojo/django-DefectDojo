@@ -95,7 +95,7 @@ class MSDefenderParser:
                     continue
             for vulnerability in vulnerabilities:
                 try:
-                    machine = machines.get(vulnerability["machineId"], None)
+                    machine = machines.get(vulnerability["machineId"])
                     if machine is not None:
                         findings.append(self.process_json_with_machine_info(vulnerability, machine))
                     else:
