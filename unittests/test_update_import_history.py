@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # we need to run this as a TransactionTestCase to be able to mimic the behavior of the bulk_create fallback at runtime
 
 
-@tag("non-parallel")
+@tag("transactional")
 class UpdateImportHistoryTests(TransactionTestCase):
 
     # loading fixtures fails in TransactionTestCase, not sure why. possibly because they are not up-to-date and missing fields like sla_configuration
