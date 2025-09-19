@@ -124,13 +124,13 @@ tests:
 
 admin:
   user: admin
-  password:
+  password: ""
   firstName: Administrator
   lastName: User
   mail: admin@defectdojo.local
-  secretKey:
-  credentialAes256Key:
-  metricsHttpAuthPassword:
+  secretKey: ""
+  credentialAes256Key: ""
+  metricsHttpAuthPassword: ""
 
 monitoring:
   enabled: false
@@ -356,11 +356,11 @@ django:
     persistentVolumeClaim:
       # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
       create: false
-      name:
+      name: ""
       size: 5Gi
       accessModes:
       - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
-      storageClassName:
+      storageClassName: ""
 
 initializer:
   run: true
