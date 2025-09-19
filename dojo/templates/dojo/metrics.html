@@ -131,7 +131,7 @@
                             {% if not critical_prods %}
                                 <div class="dropdown pull-right">
                                     <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                                    {% if V3_FEATURE_LOCATIONS %}
+                                    {% if not V3_FEATURE_LOCATIONS %}
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                                 data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
                                             <span class="fa-solid fa-bars"></span>
