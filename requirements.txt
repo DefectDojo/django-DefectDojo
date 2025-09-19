@@ -118,7 +118,7 @@ importlib-metadata==6.11.0
 packaging==25.0
 pysaml2==7.5.0
 click-repl==0.3.0
-pycparser==2.22
+pycparser==2.23
 multidict==6.6.4
 Deprecated==1.2.18
 click-didyoumean==0.3.1
