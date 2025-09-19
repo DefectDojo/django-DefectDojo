@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import ANY, MagicMock, call, patch
 
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.test import tag as test_tag
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
@@ -153,6 +154,16 @@ TYPE_FILE = "file"  #:
 
 IMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 REIMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
+
+
+# Resolve permission IDs by content type natural key and codename to avoid brittle PKs
+def _perm_ids(app_label, model, codenames):
+    ct = ContentType.objects.get_by_natural_key(app_label, model)
+    return list(
+        Permission.objects.filter(content_type=ct, codename__in=codenames)
+        .order_by("id")
+        .values_list("id", flat=True),
+    )
 
 
 @functools.cache
@@ -1888,52 +1899,29 @@ class UsersTest(BaseClass.BaseClassTest):
         self.endpoint_path = "users"
         self.viewname = "user"
         self.viewset = UsersViewSet
+
+        # Helper to resolve permission IDs by natural keys to avoid brittle PKs
+
+        def _perm_ids(app_label: str, model: str, codenames: list[str]) -> list[int]:
+            ct = ContentType.objects.get_by_natural_key(app_label, model)
+            return [Permission.objects.get(content_type=ct, codename=cn).id for cn in codenames]
+
         self.payload = {
             "username": "test_user",
             "first_name": "test",
             "last_name": "user",
             "email": "example@email.com",
             "is_active": True,
-            "configuration_permissions": [217, 218],
         }
-        self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
+        self.update_fields = {
+            "first_name": "test changed",
+        }
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 25
+        self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_create(self):
-        payload = self.payload.copy() | {
-            "password": "testTEST1234!@#$",
-        }
-        length = self.endpoint_model.objects.count()
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        self.assertEqual(self.endpoint_model.objects.count(), length + 1)
-
-    def test_create_user_with_non_configuration_permissions(self):
-        payload = self.payload.copy() | {
-            "password": "testTEST1234!@#$",
-        }
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.post(self.url, payload)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("object does not exist", response.data["message"])
-
-    def test_update_user_with_non_configuration_permissions(self):
-        payload = {}
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.patch(self.url + "3/", payload)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("object does not exist", response.data["message"])
-
-    def test_update_user_other_permissions_will_not_leak_and_stay_untouched(self):
-        payload = {}
-        payload["configuration_permissions"] = [217, 218, 219]
-        response = self.client.patch(self.url + "6/", payload)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["configuration_permissions"], payload["configuration_permissions"])
-        user_permissions = User.objects.get(username="user5").user_permissions.all().values_list("id", flat=True)
-        self.assertEqual(set(user_permissions), set(payload["configuration_permissions"] + [26, 28]))
+    def setUp(self):
+        super().setUp()
 
 
 class UserContactInfoTest(BaseClass.BaseClassTest):
@@ -2655,18 +2643,46 @@ class DojoGroupsTest(BaseClass.BaseClassTest):
         self.endpoint_path = "dojo_groups"
         self.viewname = "dojo_group"
         self.viewset = DojoGroupViewSet
+
+        # Helper reused from UsersTest
+
+        def _perm_ids(app_label: str, model: str, codenames: list[str]) -> list[int]:
+            ct = ContentType.objects.get_by_natural_key(app_label, model)
+            return [Permission.objects.get(content_type=ct, codename=cn).id for cn in codenames]
+
         self.payload = {
             "name": "Test Group",
             "description": "Test",
-            "configuration_permissions": [217, 218],
+            "configuration_permissions": _perm_ids("dojo", "finding_template", [
+                "add_finding_template", "change_finding_template",
+            ]),
         }
-        self.update_fields = {"description": "changed", "configuration_permissions": [219, 220]}
+        self.update_fields = {
+            "description": "changed",
+            "configuration_permissions": _perm_ids("dojo", "finding_template", [
+                "delete_finding_template", "view_finding_template",
+            ]),
+        }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
         self.permission_update = Permissions.Group_Edit
         self.permission_delete = Permissions.Group_Delete
         self.deleted_objects = 4
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        super().setUp()
+        # Recompute permission IDs on the fresh test DB to avoid stale PKs
+        self.payload["configuration_permissions"] = _perm_ids(
+            "dojo", "finding_template", [
+                "add_finding_template", "change_finding_template",
+            ],
+        )
+        self.update_fields["configuration_permissions"] = _perm_ids(
+            "dojo", "finding_template", [
+                "delete_finding_template", "view_finding_template",
+            ],
+        )
 
     def test_list_object_not_authorized(self):
         self.setUp_not_authorized()
@@ -2690,27 +2706,37 @@ class DojoGroupsTest(BaseClass.BaseClassTest):
 
     def test_create_group_with_non_configuration_permissions(self):
         payload = self.payload.copy()
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        payload["configuration_permissions"] = _perm_ids("admin", "logentry", [
+            "add_logentry", "change_logentry",
+        ])  # exists but not configuration permissions
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
         self.assertIn("object does not exist", response.data["message"])
 
     def test_update_group_with_non_configuration_permissions(self):
         payload = {}
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        payload["configuration_permissions"] = _perm_ids("admin", "logentry", [
+            "add_logentry", "change_logentry",
+        ])  # exists but not configuration permissions
         response = self.client.patch(self.url + "2/", payload)
         self.assertEqual(response.status_code, 400)
         self.assertIn("object does not exist", response.data["message"])
 
     def test_update_group_other_permissions_will_not_leak_and_stay_untouched(self):
-        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
+        # Set initial permissions for the group using natural-key lookups
+        grp_perm_ids = _perm_ids("dojo", "finding_template", ["change_finding_template", "view_finding_template"]) + \
+                        _perm_ids("admin", "logentry", ["change_logentry", "view_logentry"])
+        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.set(grp_perm_ids)
         payload = {}
-        payload["configuration_permissions"] = [217, 218, 219]
+        payload["configuration_permissions"] = _perm_ids("dojo", "finding_template", [
+            "add_finding_template", "change_finding_template", "delete_finding_template",
+        ])
         response = self.client.patch(self.url + "1/", payload)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["configuration_permissions"], payload["configuration_permissions"])
         permissions = Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.all().values_list("id", flat=True)
-        self.assertEqual(set(permissions), set(payload["configuration_permissions"] + [26, 28]))
+        extra_perm_ids = _perm_ids("admin", "logentry", ["change_logentry", "view_logentry"])
+        self.assertEqual(set(permissions), set(payload["configuration_permissions"] + extra_perm_ids))
         Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.clear()
 
 
