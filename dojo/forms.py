@@ -1719,7 +1719,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("severity", "date", "planned_remediation_date", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                  "is_mitigated")
+                  "under_review", "is_mitigated")
 
 
 class EditEndpointForm(forms.ModelForm):
