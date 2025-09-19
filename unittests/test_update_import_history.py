@@ -20,7 +20,7 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
-# we need to run this as a TransactionTestCase to be able to mimic the behavior of the bulk_create fallback at runtime
+# we need to run this as a TransactionTestCase to be able to mimic the behavior of the bulk_create fallback at runtime when a FK violation occurs
 
 
 @tag("transactional")
