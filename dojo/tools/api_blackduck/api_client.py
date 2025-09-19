@@ -3,7 +3,7 @@ import warnings
 # Ignore DeprecationWarning from the blackduck library because we cannot do anything about it
 # until they fix it in their library
 with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
-    from blackduck import Client  # noqa: E402
+    from blackduck import Client
 
 
 class BlackduckAPI:
