@@ -203,53 +203,6 @@ def schema_with_prefetch() -> dict:
                 ),
             ],
         ),
-        "post": extend_schema(
-            parameters=[
-                OpenApiParameter(
-                    "name",
-                    OpenApiTypes.STR,
-                    OpenApiParameter.QUERY,
-                    required=False,
-                    description="Name of the metadata",
-                ),
-                OpenApiParameter(
-                    "value",
-                    OpenApiTypes.STR,
-                    OpenApiParameter.QUERY,
-                    required=False,
-                    description="Value of the metadata",
-                ),
-            ],
-        ),
-        "delete": extend_schema(
-            parameters=[
-                OpenApiParameter(
-                    "name",
-                    OpenApiTypes.STR,
-                    OpenApiParameter.QUERY,
-                    required=True,
-                    description="Name of the metadata to delete",
-                ),
-            ],
-        ),
-        "put": extend_schema(
-            parameters=[
-                OpenApiParameter(
-                    "name",
-                    OpenApiTypes.STR,
-                    OpenApiParameter.QUERY,
-                    required=True,
-                    description="Name of the metadata to update",
-                ),
-                OpenApiParameter(
-                    "value",
-                    OpenApiTypes.STR,
-                    OpenApiParameter.QUERY,
-                    required=True,
-                    description="New value of the metadata",
-                ),
-            ],
-        ),
     }
 
 
