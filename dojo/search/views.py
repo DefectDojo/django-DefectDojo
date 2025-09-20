@@ -129,6 +129,7 @@ def simple_search(request):
             if settings.V3_FEATURE_LOCATIONS:
                 authorized_endpoints = get_authorized_locations(Permissions.Location_View)
             else:
+                # TODO: Delete this after the move to Locations
                 authorized_endpoints = get_authorized_endpoints(Permissions.Location_View)
             authorized_finding_templates = Finding_Template.objects.all()
             authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
