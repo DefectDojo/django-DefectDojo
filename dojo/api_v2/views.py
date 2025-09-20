@@ -13,7 +13,6 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.renderers import OpenApiJsonRenderer2
@@ -34,7 +33,6 @@ from rest_framework.response import Response
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import dojo.risk_acceptance.helper as ra_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
 )
@@ -146,7 +144,6 @@ from dojo.models import (
     User,
     UserContactInfo,
 )
-from dojo.notifications.helper import create_notification
 from dojo.product.queries import (
     get_authorized_app_analysis,
     get_authorized_dojo_meta,
@@ -174,7 +171,6 @@ from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
-    close_external_issue,
     generate_file_response,
     get_setting,
     get_system_setting,
@@ -979,104 +975,18 @@ class FindingViewSet(
                 context={"request": request},
             )
             if finding_close.is_valid():
-                # Optional: enforce permission for setting mitigated_by
-                provided_mitigated_by = finding_close.validated_data.get("mitigated_by")
-                if provided_mitigated_by is not None:
-                    if finding_helper.can_edit_mitigated_data(request.user):
-                        finding.mitigated_by = provided_mitigated_by
-                    else:
-                        return Response({"mitigated_by": ["Not allowed to set mitigated_by."]}, status=status.HTTP_403_FORBIDDEN)
-
-                finding.is_mitigated = finding_close.validated_data[
-                    "is_mitigated"
-                ]
-                if settings.EDITABLE_MITIGATED_DATA:
-                    finding.mitigated = (
-                        finding_close.validated_data["mitigated"]
-                        or timezone.now()
-                    )
-                else:
-                    finding.mitigated = timezone.now()
-                # If mitigated_by wasn't provided/allowed above, default to current user
-                finding.mitigated_by = finding.mitigated_by or request.user
-                finding.active = False
-                finding.false_p = finding_close.validated_data.get(
-                    "false_p", False,
-                )
-                finding.duplicate = finding_close.validated_data.get(
-                    "duplicate", False,
-                )
-                finding.out_of_scope = finding_close.validated_data.get(
-                    "out_of_scope", False,
-                )
-
-                # Align with UI close: update review fields
-                finding.under_review = False
-                finding.last_reviewed = finding.mitigated
-                finding.last_reviewed_by = request.user
-
-                endpoints_status = finding.status_finding.all()
-                for e_status in endpoints_status:
-                    e_status.mitigated_by = request.user
-                    if settings.EDITABLE_MITIGATED_DATA:
-                        e_status.mitigated_time = (
-                            finding_close.validated_data["mitigated"]
-                            or timezone.now()
-                        )
-                    else:
-                        e_status.mitigated_time = timezone.now()
-                    e_status.mitigated = True
-                    e_status.last_modified = timezone.now()
-                    e_status.save()
-
-                # Unaccept any risk acceptance on close (UI parity)
-                ra_helper.risk_unaccept(request.user, finding, perform_save=False)
-
-                # Optional note creation (UI parity)
-                note_text = finding_close.validated_data.get("note")
-                note_type = finding_close.validated_data.get("note_type")
-                new_note = None
-                if note_text:
-                    new_note = Notes.objects.create(
-                        entry=note_text,
-                        author=request.user,
-                        note_type=note_type,
-                        date=finding.mitigated or timezone.now(),
-                    )
-                    finding.notes.add(new_note)
-
-                # Close external issues (currently github only, like UI)
-                close_external_issue(finding, "Closed by defectdojo", "github")
-
-                # Manage JIRA status changes similar to UI
-                push_to_jira = False
-                finding_in_group = finding.has_finding_group
-                jira_issue_exists = finding.has_jira_issue or (
-                    finding.finding_group and finding.finding_group.has_jira_issue
-                )
-                jira_instance = jira_helper.get_jira_instance(finding)
-                jira_project = jira_helper.get_jira_project(finding)
-                if jira_issue_exists:
-                    push_to_jira = (
-                        jira_helper.is_push_all_issues(finding)
-                        or (jira_instance and jira_instance.finding_jira_sync)
-                    )
-                    # Add the closing note to Jira if requested (UI parity)
-                    if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
-                        jira_helper.add_comment(finding, new_note, force_push=True)
-
-                # Save and optionally push to JIRA (skip direct push if in group; push group after)
-                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-                if push_to_jira and finding_in_group:
-                    jira_helper.push_to_jira(finding.finding_group)
-
-                # Create notification (UI parity)
-                create_notification(
-                    event="finding_closed",
-                    title=f"Closing of {finding.title}",
+                # Use shared helper to perform close operations
+                finding_helper.close_finding_common(
                     finding=finding,
-                    description=f'The finding "{finding.title}" was closed by {request.user}',
-                    url=reverse("view_finding", args=(finding.id,)),
+                    user=request.user,
+                    is_mitigated=finding_close.validated_data["is_mitigated"],
+                    mitigated=(finding_close.validated_data.get("mitigated") if settings.EDITABLE_MITIGATED_DATA else timezone.now()),
+                    mitigated_by=finding_close.validated_data.get("mitigated_by") or (request.user if not finding_helper.can_edit_mitigated_data(request.user) else None),
+                    false_p=finding_close.validated_data.get("false_p", False),
+                    out_of_scope=finding_close.validated_data.get("out_of_scope", False),
+                    duplicate=finding_close.validated_data.get("duplicate", False),
+                    note_entry=finding_close.validated_data.get("note"),
+                    note_type=finding_close.validated_data.get("note_type"),
                 )
             else:
                 return Response(
