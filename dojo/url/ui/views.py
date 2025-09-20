@@ -30,7 +30,6 @@ from django.utils import timezone
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.utils import endpoint_meta_import
 from dojo.forms import (
     DeleteEndpointForm,
@@ -292,7 +291,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     """
     # Determine the view name and get authorized endpoints
     view_name = "Vulnerable" if vulnerable else "All"
-    locations = get_authorized_endpoints(
+    locations = get_authorized_locations(
         permission=Permissions.Location_View,
         queryset=Location.objects.prefetch_related("tags", "url").filter(location_type=URL.LOCATION_TYPE),
         user=request.user,

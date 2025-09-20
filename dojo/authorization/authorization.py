@@ -108,6 +108,7 @@ def user_has_permission(user, obj, permission):
             user, obj.test.engagement.product, permission,
         )
     if (
+        # TODO: Delete this after the move to Locations
         isinstance(obj, (Location, Endpoint))
         and permission in Permissions.get_location_permissions()
     ) or (
