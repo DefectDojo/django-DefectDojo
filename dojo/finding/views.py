@@ -410,7 +410,7 @@ class ListClosedFindings(ListFindings):
 
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
-        finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
+        finding_qs = prefetch_for_findings(Finding.objects.filter(id=finding_id), exclude_untouched=False)
         return get_object_or_404(finding_qs, id=finding_id)
 
     def get_dojo_user(self, request: HttpRequest):

@@ -1,7 +1,7 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
-{% load get_endpoint_status %}
+
 {% load static %}
 {% load i18n %}
 {% block findings_list %}
@@ -564,7 +564,7 @@
                                                 data-original-title="Files"
                                                 title=""></i>
                                             {% endif %}
-                                            {% if finding.endpoints.all %}
+                                            {% if finding.endpoints.exists %}
                                                 <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
                                                 {% for endpoint_status in finding.status_finding.all %}
                                                     {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}

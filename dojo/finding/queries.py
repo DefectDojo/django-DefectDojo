@@ -1,9 +1,9 @@
 import logging
-from functools import partial
 
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q, Value
-from django.db.models.functions import Coalesce
+from django.conf import settings
+from django.db.models import Case, CharField, Count, Exists, OuterRef, Q, Value, When
+from django.db.models.functions import Concat
 from django.db.models.query import Prefetch, QuerySet
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
@@ -19,7 +19,6 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Vulnerability_Id,
 )
-from dojo.query_utils import build_count_subquery
 
 logger = logging.getLogger(__name__)
 
@@ -218,9 +217,61 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
     )
 
     # Endpoint counts using optimized subqueries
-    base_status = Endpoint_Status.objects.filter(finding_id=OuterRef("pk"))
-    count_subquery = partial(build_count_subquery, group_field="finding_id")
-    return prefetched_findings.annotate(
-        active_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=False)), Value(0)),
-        mitigated_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=True)), Value(0)),
-    )
+    if settings.V3_FEATURE_LOCATIONS:
+        pass
+    else:
+        base_status = Endpoint_Status.objects.prefetch_related("endpoint")
+        display_status = Case(
+                When(
+                    Q(false_positive=True) | Q(risk_accepted=True) | Q(out_of_scope=True) | Q(mitigated=True),
+                    then=Concat(
+                        Case(When(false_positive=True, then=Value("False Positive, ")), default=Value("")),
+                        Case(When(risk_accepted=True, then=Value("Risk Accepted, ")), default=Value("")),
+                        Case(When(out_of_scope=True, then=Value("Out of Scope, ")), default=Value("")),
+                        Case(When(mitigated=True, then=Value("Mitigated, ")), default=Value("")),
+                        output_field=CharField(),
+                    ),
+                ),
+                default=Value("Active"),
+                output_field=CharField(),
+            )
+        prefetched_findings = prefetched_findings.annotate(
+            has_endpoints=Exists(base_status),
+            active_endpoint_count=Count(
+                "status_finding",
+                filter=Q(
+                    status_finding__mitigated=False,
+                    status_finding__false_positive=False,
+                    status_finding__out_of_scope=False,
+                    status_finding__risk_accepted=False,
+                ),
+                distinct=True,
+            ),
+            mitigated_endpoint_count=Count(
+                "status_finding",
+                filter=(
+                    Q(status_finding__mitigated=True)
+                    | Q(status_finding__false_positive=True)
+                    | Q(status_finding__out_of_scope=True)
+                    | Q(status_finding__risk_accepted=True)
+                ),
+                distinct=True,
+            ),
+        ).prefetch_related(
+            Prefetch(
+                "status_finding",
+                queryset=base_status.filter(
+                    mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False,
+                ).annotate(display_status=display_status).order_by("last_modified"),
+                to_attr="active_endpoints",
+            ),
+            Prefetch(
+                "status_finding",
+                queryset=base_status.filter(
+                    Q(mitigated=True) | Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
+                ).annotate(display_status=display_status).order_by("mitigated_time"),
+                to_attr="mitigated_endpoints",
+            ),
+        )
+
+    return prefetched_findings
