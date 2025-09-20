@@ -1143,7 +1143,7 @@ def close_finding(request, fid):
             messages.add_message(request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success")
 
             if len(missing_note_types) <= 1:
-                finding_helper.close_finding_common(
+                finding_helper.close_finding(
                     finding=finding,
                     user=request.user,
                     is_mitigated=True,

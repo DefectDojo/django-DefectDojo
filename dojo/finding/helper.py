@@ -695,7 +695,7 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = None
 
 
-def close_finding_common(
+def close_finding(
     *,
     finding,
     user,

@@ -2728,8 +2728,8 @@ class FindingCloseSerializer(serializers.ModelSerializer):
                     "mitigated_by": ["Not allowed to set mitigated_by."],
                 })
 
-            # Ensure selected user is authorized like UI (Permissions.Test_Edit)
-            authorized_users = get_authorized_users(Permissions.Test_Edit, user=request_user)
+            # Ensure selected user is authorized (Finding_Edit)
+            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
             if not authorized_users.filter(id=mitigated_by_user.id).exists():
                 raise serializers.ValidationError({
                     "mitigated_by": [

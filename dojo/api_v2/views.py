@@ -976,7 +976,7 @@ class FindingViewSet(
             )
             if finding_close.is_valid():
                 # Use shared helper to perform close operations
-                finding_helper.close_finding_common(
+                finding_helper.close_finding(
                     finding=finding,
                     user=request.user,
                     is_mitigated=finding_close.validated_data["is_mitigated"],
