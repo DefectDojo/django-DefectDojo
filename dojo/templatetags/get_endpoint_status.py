@@ -1,3 +1,12 @@
+"""
+None of the templates are used any longer, but the jira templates
+were using them pretty heavily. For that reason, we should leave
+this file here for the foreseeable future.
+
+These template tags are awful for performance, so the use of them
+is strongly discouraged in any new code.
+"""
+
 from django import template
 from django.db.models import Q
 
@@ -7,13 +16,11 @@ register = template.Library()
 
 
 @register.filter(name="has_endpoints")
-# TODO: Delete this after the move to Locations
 def has_endpoints(finding):
     return bool(finding.endpoints.all())
 
 
 @register.filter(name="get_vulnerable_endpoints")
-# TODO: Delete this after the move to Locations
 def get_vulnerable_endpoints(finding):
     return finding.endpoints.filter(
         status_endpoint__mitigated=False,
@@ -23,7 +30,6 @@ def get_vulnerable_endpoints(finding):
 
 
 @register.filter(name="get_mitigated_endpoints")
-# TODO: Delete this after the move to Locations
 def get_mitigated_endpoints(finding):
     return finding.endpoints.filter(
         Q(status_endpoint__mitigated=True)

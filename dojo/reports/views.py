@@ -24,7 +24,7 @@ from dojo.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
@@ -77,7 +77,7 @@ class ReportBuilder(View):
         return render(request, self.get_template(), self.get_context(request))
 
     def get_findings(self, request: HttpRequest):
-        findings = get_authorized_findings(Permissions.Finding_View)
+        findings = prefetch_related_findings_for_report(get_authorized_findings(Permissions.Finding_View))
         filter_string_matching = get_system_setting("filter_string_matching", False)
         filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
         return filter_class(self.request.GET, queryset=findings)
@@ -175,7 +175,7 @@ class CustomReport(View):
 
 
 def report_findings(request):
-    findings = Finding.objects.filter()
+    findings = prefetch_related_findings_for_report(Finding.objects.filter())
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     findings = filter_class(request.GET, queryset=findings)
@@ -437,7 +437,7 @@ def generate_report(request, obj, *, host_view=False):
         report_title = "Product Report"
         findings = report_finding_filter_class(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
+        ids = findings.qs.values_list("id", flat=True)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -468,7 +468,7 @@ def generate_report(request, obj, *, host_view=False):
         template = "dojo/engagement_pdf_report.html"
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
+        ids = findings.qs.values_list("id", flat=True)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
@@ -628,19 +628,18 @@ def generate_report(request, obj, *, host_view=False):
 
 
 def prefetch_related_findings_for_report(findings):
-    return findings.prefetch_related("test",
-                                     "test__engagement__product",
-                                     "test__engagement__product__prod_type",
-                                     "risk_acceptance_set",
-                                     "risk_acceptance_set__accepted_findings",
-                                     "burprawrequestresponse_set",
-                                     "endpoints",
-                                     "tags",
-                                     "notes",
-                                     "files",
-                                     "reporter",
-                                     "mitigated_by",
-                                     )
+    return prefetch_for_findings(
+        findings.prefetch_related(
+            # Some of the fields are removed here because they are being
+            # prefetched in the prefetch_for_findings function
+            "test__engagement__product__prod_type",
+            "risk_acceptance_set__accepted_findings",
+            "burprawrequestresponse_set",
+            "files",
+            "reporter",
+            "mitigated_by",
+        ),
+    )
 
 
 def prefetch_related_endpoints_for_report(endpoints):
@@ -753,7 +752,7 @@ class QuickReportView(View):
     def get(self, request):
         findings, obj = get_findings(request)
         self.findings = findings
-        findings = self.add_findings_data()
+        findings = prefetch_related_findings_for_report(self.add_findings_data())
         return self.generate_quick_report(request, findings, obj)
 
     def generate_quick_report(self, request, findings, obj=None):
