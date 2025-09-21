@@ -98,12 +98,13 @@ jobs:
           script: |
             cd /opt/
             git clone https://github.com/nasekaylovm-cyber/diplom_defect
-            sleep 600
+            sleep 1000
             cd diplom_defect
             docker compose build
-            sleep 600
+            sleep 1000
             docker-compose pull
             docker-compose up -d
+            sleep 1000
             echo "Deployment done! Containers:"
             
 
