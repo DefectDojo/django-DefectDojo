@@ -92,11 +92,13 @@ jobs:
       - name: Deploy to production server
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ env.SERVER_IP }}
-          username: ${{ env.DEPLOY_USER }}
+          host: 5.129.250.92
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/defectdojo
             docker-compose pull
             docker-compose up -d
             docker system prune -f
+
+
