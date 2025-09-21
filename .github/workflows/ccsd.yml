@@ -96,9 +96,12 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/defectdojo
+            cd /opt/
             git clone https://github.com/nasekaylovm-cyber/diplom_defect
-            cd defectdojo
+            sleep 600
+            cd diplom_defect
+            docker compose build
+            sleep 600
             docker-compose pull
             docker-compose up -d
             echo "Deployment done! Containers:"
