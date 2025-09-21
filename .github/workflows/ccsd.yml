@@ -97,6 +97,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/
+            rm -rf diplom_defect
+            sleep 180
             git clone https://github.com/nasekaylovm-cyber/diplom_defect
             sleep 1000
             cd diplom_defect
