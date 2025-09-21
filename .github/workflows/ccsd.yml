@@ -89,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Deploy to production server
+      - name: Deploy to server
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: 5.129.250.92
@@ -97,8 +97,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/defectdojo
+            git clone https://github.com/nasekaylovm-cyber/diplom_defect
+            cd defectdojo
             docker-compose pull
             docker-compose up -d
-            docker system prune -f
+            echo "Deployment done! Containers:"
+            
 
 
