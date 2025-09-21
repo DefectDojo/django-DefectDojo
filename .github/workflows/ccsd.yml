@@ -81,3 +81,22 @@ jobs:
         run: |
           docker pull ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           echo "✓ Image verification successful"
+
+  deploy:
+    name: Deploy to Server
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_IP }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/defectdojo
+            docker-compose pull
+            docker-compose up -d
+            docker system prune -f
