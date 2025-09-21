@@ -67,72 +67,32 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.DOCKER_REGISTRY }} -u ${{ github.actor }} --password-stdin
       
-      - name: Try to use official DefectDojo image
+      - name: Create minimal Docker application
         run: |
-          echo "Attempting to use official DefectDojo image..."
+          echo "FROM python:3.10-slim" > Dockerfile
+          echo "WORKDIR /app" >> Dockerfile
+          echo "RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*" >> Dockerfile
+          echo "COPY requirements.txt ./" >> Dockerfile
+          echo "RUN pip install --no-cache-dir -r requirements.txt" >> Dockerfile
+          echo "COPY . ." >> Dockerfile
+          echo "EXPOSE 8000" >> Dockerfile
+          echo 'CMD ["python", "-m", "http.server", "8000"]' >> Dockerfile
           
-          # Пробуем скачать официальный образ
-          if docker pull defectdojo/defectdojo-django:latest; then
-            echo "✓ Official DefectDojo image found"
-            
-            # Тегируем для нашего registry
-            docker tag defectdojo/defectdojo-django:latest ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            docker tag defectdojo/defectdojo-django:latest ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            
-            # Пушим образы
-            docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            
-            echo "✓ Official image successfully pushed to GHCR"
-            
-          else
-            echo "✗ Official image not available, creating minimal application image..."
-            
-            # Создаем минимальный requirements.txt если нет
-            if [ ! -f "requirements.txt" ]; then
-              echo "Creating requirements.txt..."
-              cat > requirements.txt << 'EOF'
-                Django>=4.0
-                gunicorn>=20.0
-                psycopg2-binary>=2.9.0
-                whitenoise>=6.0
-                EOF
-            fi
-            
-            # Создаем минимальный Dockerfile
-            cat > Dockerfile << 'EOF'
-              FROM python:3.10-slim
-
-              WORKDIR /app
-
-              RUN apt-get update && apt-get install -y \
-              gcc \
-              libpq-dev \
-              && rm -rf /var/lib/apt/lists/*
-
-              COPY requirements.txt ./
-              RUN pip install --no-cache-dir -r requirements.txt
-
-              COPY . .
-
-              EXPOSE 8000
-
-              CMD ["python", "-m", "http.server", "8000"]
-              EOF
-            
-           
-            docker build -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest .
-            docker tag ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            
-            docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            
-            echo "✓ Custom image successfully built and pushed to GHCR"
+          if [ ! -f "requirements.txt" ]; then
+            echo "Django>=4.0" > requirements.txt
+            echo "gunicorn>=20.0" >> requirements.txt
           fi
-      
-      - name: Verify images
+      - name: Build and push custom image
         run: |
-          echo "Verifying images in registry..."
+          docker build -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest .
+          docker tag ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        
+          docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        
+          echo "✓ Image successfully built and pushed to GHCR"
+      
+      - name: Verify image
+        run: |
           docker pull ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           echo "✓ Image verification successful"
-          docker images | grep "${{ env.DOCKER_IMAGE_NAME }}"
