@@ -824,6 +824,31 @@ class BaseClass:
 class AppAnalysisTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = App_Analysis
+        self.endpoint_path = "technologies"
+        self.viewname = "app_analysis"
+        self.viewset = AppAnalysisViewSet
+        self.payload = {
+            "product": 1,
+            "name": "Tomcat",
+            "user": 1,
+            "confidence": 100,
+            "version": "8.5.1",
+            "icon": "",
+            "website": "",
+            "website_found": "",
+            "created": "2018-08-16T16:58:23.908Z",
+        }
+        self.update_fields = {"version": "9.0"}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product
+        self.permission_create = Permissions.Technology_Add
+        self.permission_update = Permissions.Technology_Edit
+        self.permission_delete = Permissions.Technology_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
 
 class FindingCloseAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
@@ -892,31 +917,6 @@ class FindingCloseAPITest(DojoAPITestCase):
             response = self.client.post(self._close_url(finding.id), payload, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
             self.assertTrue(add_comment_mock.called)
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = App_Analysis
-        self.endpoint_path = "technologies"
-        self.viewname = "app_analysis"
-        self.viewset = AppAnalysisViewSet
-        self.payload = {
-            "product": 1,
-            "name": "Tomcat",
-            "user": 1,
-            "confidence": 100,
-            "version": "8.5.1",
-            "icon": "",
-            "website": "",
-            "website_found": "",
-            "created": "2018-08-16T16:58:23.908Z",
-        }
-        self.update_fields = {"version": "9.0"}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product
-        self.permission_create = Permissions.Technology_Add
-        self.permission_update = Permissions.Technology_Edit
-        self.permission_delete = Permissions.Technology_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class EndpointStatusTest(BaseClass.BaseClassTest):
