@@ -108,6 +108,25 @@ jobs:
             docker-compose up -d
             sleep 1000
             echo "Deployment done! Containers:"
-            
+            dast:
+   
+  dast:  
+    name: DAST Analysis
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://${{ env.SERVER_IP }}'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          
+      - name: Upload DAST results
+        uses: actions/upload-artifact@v3
+        with:
+          name: dast-results
+          path: zap-report.html
+
 
 
