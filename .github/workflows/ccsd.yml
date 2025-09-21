@@ -42,7 +42,7 @@ jobs:
           safety check --json -o safety-results.json || true
           
       - name: Upload SAST results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sast-results
           path: |
