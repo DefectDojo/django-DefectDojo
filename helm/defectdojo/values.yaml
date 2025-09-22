@@ -492,7 +492,6 @@ cloudsql:
   use_private_ip: false
   # Optional: security context for the CloudSQL proxy container.
   containerSecurityContext:
-    
   # Additional environment variables for the CloudSQL proxy container.
   extraEnv: []
   # Array of additional volume mount points for the CloudSQL proxy container
