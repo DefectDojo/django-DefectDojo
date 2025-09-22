@@ -4,14 +4,20 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  {{- with .Values.extraAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" $ }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" $ }}
-    {{- with $.Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
   name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}

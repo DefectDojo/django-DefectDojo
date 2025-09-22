@@ -2,21 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullName }}-django
-  namespace: {{ .Release.Namespace }}
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-  {{- with .Values.django.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.django.replicas }}
   {{- with .Values.django.strategy }}
@@ -37,15 +39,12 @@ spec:
         defectdojo.org/component: django
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- with .Values.extraLabels }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.podLabels }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- range $key, $value := mergeOverwrite dict .Values.extraLabels .Values.podLabels }}
+        {{ $key }}: {{ quote $value }}
+      {{- end }}
       annotations:
-      {{- with .Values.django.annotations }}
-        {{- toYaml . | nindent 8 }}
+      {{- range $key, $value := mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+        {{ $key }}: {{ quote $value }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
         prometheus.io/path: /metrics
@@ -65,8 +64,14 @@ spec:
       - name: {{ quote . }}
       {{- end }}
       {{- if .Values.django.mediaPersistentVolume.enabled }}
+      {{- if .Values.securityContext.enabled }}
       securityContext:
-        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+        {{- include "helpers.securityContext" (list
+          .Values
+          "django.podSecurityContext"
+          "securityContext.podSecurityContext"
+        ) | nindent 8 }}
+      {{- end }}
       {{- end }}
       volumes:
       - name: run
@@ -102,19 +107,21 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        {{- with .Values.django.extraEnv }}
+        {{- with .Values.cloudsql.extraEnv }}
         env: {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.cloudsql.resources }}
         resources: {{- . | toYaml | nindent 10 }}
         {{- end }}
         restartPolicy: Always
+        {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- if .Values.securityContext.enabled }}
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
-          {{- else }}
-          runAsNonRoot: true
-          {{- end }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "cloudsql.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
@@ -125,7 +132,7 @@ spec:
         {{- if .Values.cloudsql.use_private_ip }}
         - "-ip_address_types=PRIVATE"
         {{- end }}
-        {{- with .Values.django.extraVolumeMounts }}
+        {{- with .Values.cloudsql.extraVolumeMounts }}
         volumeMounts: {{ . | toYaml | nindent 10 }}
         {{- end }}
       {{- end }}
@@ -144,7 +151,7 @@ spec:
         - /usr/bin/nginx-prometheus-exporter
         - --nginx.scrape-uri
         - http://127.0.0.1:8080/nginx_status
-        {{- with .Values.django.extraEnv }}
+        {{- with .Values.monitoring.prometheus.extraEnv }}
         env: {{- . | toYaml | nindent 8 }}
         {{- end }}
         ports:
@@ -163,9 +170,13 @@ spec:
         {{- end }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- .Values.securityContext.djangoSecurityContext | toYaml | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "monitoring.prometheus.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
-        {{- with .Values.django.extraVolumeMounts }}
+        {{- with .Values.monitoring.prometheus.extraVolumeMounts }}
         volumeMounts: {{ . | toYaml | nindent 10 }}
         {{- end }}
       {{- end }}
@@ -174,7 +185,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "django.uwsgi.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         - name: run
@@ -242,6 +257,9 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -269,7 +287,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.nginxSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "django.nginx.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         - name: run
@@ -301,6 +323,9 @@ spec:
           value: '{{ .Values.django.nginx.tls.enabled }}'
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}

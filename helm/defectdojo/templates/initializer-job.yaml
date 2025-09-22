@@ -3,21 +3,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "initializer.jobname" . }}
-  namespace: {{ .Release.Namespace }}
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.initializer.jobAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: initializer
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-  annotations:
-    {{- with .Values.initializer.jobAnnotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  name: {{ template "initializer.jobname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   {{- if and (int .Values.initializer.keepSeconds) (gt (int .Values.initializer.keepSeconds) 0) }}
   ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
@@ -39,6 +41,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        {{- include "helpers.securityContext" (list
+          .Values
+          "initializer.podSecurityContext"
+          "securityContext.podSecurityContext"
+        ) | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -73,7 +83,11 @@ spec:
         restartPolicy: Always
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "cloudsql.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
@@ -102,7 +116,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "django.uwsgi.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -129,7 +147,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.initializer.securityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "initializer.containerSecurityContext"
+            "securityContext.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         {{- if .Values.localsettingspy }}
