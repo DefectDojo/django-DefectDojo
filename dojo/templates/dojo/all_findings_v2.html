@@ -1,17 +1,36 @@
-{% extends "base.html" %}
-{% load authorization_tags %}
-{% load i18n %}
-{% load static %}
-{% block add_styles %}
-    .embed-responsive .embed-responsive-item,
-    .embed-responsive iframe { height: 100%;} 
-{% endblock %}
-{% block content %}
-    {{block.super }}
-    <div class="embed-responsive embed-responsive-16by9">
-        <iframe class="embed-responsive-item"
-            src="{{url}}" 
-            frameborder="0" allowfullscreen></iframe>
-    </div>
-    <hr />
+{% extends "base.html" %} {% load authorization_tags %} {% load i18n %} {% load
+static %} {% block add_styles %} .embed-responsive .embed-responsive-item,
+.embed-responsive iframe { height: 100%;} {% endblock %} {% block content %}
+{{block.super }}
+<div class="embed-responsive embed-responsive-16by9">
+  <iframe
+    class="embed-responsive-item"
+    src="{{url}}"
+    frameborder="0"
+    allowfullscreen
+  ></iframe>
+</div>
+<hr />
+{% endblock %} {% block postscript %} {{ block.super }}
+<script type="text/javascript">
+  const channel = new MessageChannel();
+  const iframe = document.querySelector("iframe");
+  const origin = ""; // TODO: pending change url to the real url vultracker
+  iframe.addEventListener("load", onLoad);
+
+  function onLoad() {
+    channel.port1.onmessage = onMessage;
+
+    const data = {
+      session: "{{ sessionId }}",
+      csrf: "{{ csrfToken }}",
+    };
+
+    iframe.contentWindow.postMessage(JSON.stringify(data), origin, [channel.port2]);
+  }
+
+  function onMessage(event) {
+    console.log(event.data);
+  }
+</script>
 {% endblock %}
