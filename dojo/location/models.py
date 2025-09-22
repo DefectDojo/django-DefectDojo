@@ -46,7 +46,7 @@ class Location(BaseModel):
         blank=False,
         editable=False,
         validators=[validate_not_empty],
-        help_text=_("The type of location that is stored"),
+        help_text=_("The type of location that is stored. This field is automatically managed"),
     )
     location_value = CharField(
         verbose_name=_("Location Value"),
@@ -102,7 +102,7 @@ class Location(BaseModel):
         status: FindingLocationStatus | None = None,
         auditor: Dojo_User | None = None,
         audit_time: datetime | None = None,
-    ) -> None:
+    ) -> LocationFindingReference:
         """
         Get or create a LocationFindingReference for this location and finding,
         updating the status each time. Also associates the related product.
@@ -121,19 +121,20 @@ class Location(BaseModel):
         # Determine if we need to update
         # Ensure atomicity to prevent race conditions
         with transaction.atomic():
-            LocationFindingReference.objects.update_or_create(
+            # Associate the product for this finding (already uses update_or_create)
+            self.associate_with_product(finding.test.engagement.product)
+            # Now associate the finding with the location
+            return LocationFindingReference.objects.update_or_create(
                 location=self,
                 finding=finding,
                 defaults=context_fields,
-            )
-        # Associate the product for this finding (already uses update_or_create)
-        self.associate_with_product(finding.test.engagement.product)
+            )[0]
 
     def associate_with_product(
         self,
         product: Product,
         status: ProductLocationStatus | None = None,
-    ) -> None:
+    ) -> LocationProductReference:
         """
         Get or create a LocationProductReference for this location and product,
         updating the status each time.
@@ -142,11 +143,11 @@ class Location(BaseModel):
             status = self.status_from_product(product)
         # Use a transaction for safety in concurrent scenarios
         with transaction.atomic():
-            LocationProductReference.objects.update_or_create(
+            return LocationProductReference.objects.update_or_create(
                 location=self,
                 product=product,
                 defaults={"status": status},
-            )
+            )[0]
 
     class Meta:
         verbose_name = "Locations - Location"
@@ -211,8 +212,8 @@ class LocationFindingReference(BaseModel):
 
     location = ForeignKey(Location, on_delete=CASCADE, related_name="findings")
     finding = ForeignKey(Finding, on_delete=CASCADE, related_name="locations")
-    auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT)
-    audit_time = DateTimeField(editable=False, null=True, blank=True)
+    auditor = ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=RESTRICT, help_text=_("The user who audited the location"))
+    audit_time = DateTimeField(editable=False, null=True, blank=True, help_text=_("The time when the audit was performed"))
     status = CharField(
         verbose_name=_("Status"),
         choices=FindingLocationStatus.choices,

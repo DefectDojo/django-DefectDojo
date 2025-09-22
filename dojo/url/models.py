@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import Self
 from urllib.parse import ParseResult, urlparse
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import BooleanField, CharField, Index, PositiveIntegerField
+
+# Ignoring the N811 error as this is an external library and we cannot change its name
+# We are already using "URL" in our own code so we need to alias this import
+from hyperlink import URL as HyperlinkURL  # noqa: N811
 
 from dojo.base_models.validators import validate_not_empty
 from dojo.location.models import AbstractLocation
@@ -113,7 +118,9 @@ class URL(AbstractLocation):
         # Fragment
         if self.fragment is not None and len(self.fragment) > 0:
             value += f"#{self.fragment}"
-
+        with suppress(Exception):
+            # Run this through the URL parser to ensure it is valid
+            return HyperlinkURL.from_text(value).to_text()
         return value
 
     @classmethod

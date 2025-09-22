@@ -1,7 +1,9 @@
+import datetime
 import logging
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
@@ -81,12 +83,16 @@ class Command(BaseCommand):
                     # Determine the status of the location based on the status of the endpoint status
                     status = self._convert_endpoint_status_to_string_status(endpoint_status)
                     # Create the association (which will also associate with the product)
-                    location.associate_with_finding(
+                    reference = location.associate_with_finding(
                         finding=finding,
                         status=status,
                         auditor=endpoint_status.mitigated_by,
-                        audit_time=endpoint_status.mitigated_time,
+                        audit_time=endpoint_status.mitigated_time or endpoint_status.last_modified,
                     )
+                    # Update the created date from the endpoint status date
+                    reference.created = timezone.make_aware(datetime.datetime(endpoint_status.date.year, endpoint_status.date.month, endpoint_status.date.day))
+                    reference.save(update_fields=["created"])
+        # If there are no findings, we can at least associate with the product if it exists
         elif product := endpoint.product:
             location.associate_with_product(product)
 

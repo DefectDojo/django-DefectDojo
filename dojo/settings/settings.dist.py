@@ -327,7 +327,7 @@ env = environ.FileAwareEnv(
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 functionality will be enabled
-    DD_V3_FEATURE_LOCATIONS=(bool, False),
+    DD_V3_FEATURE_LOCATIONS=(bool, True),
 )
 
 

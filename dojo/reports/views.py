@@ -42,6 +42,7 @@ from dojo.reports.widgets import (
     WYSIWYGContent,
     report_widget_factory,
 )
+from dojo.url.filters import URLFilter
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -200,6 +201,17 @@ def report_findings(request):
 def report_endpoints(request):
     if settings.V3_FEATURE_LOCATIONS:
         pass  # TODO: Implement Locations
+        endpoints = Location.objects.filter(
+            finding__active=True,
+            finding__false_p=False,
+            finding__duplicate=False,
+            finding__out_of_scope=False,
+        )
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+            endpoints = endpoints.filter(finding__active=True)
+        endpoints = endpoints.distinct()
+        endpoints = URLFilter(request.GET, queryset=endpoints, user=request.user)
+        paged_endpoints = get_page_items(request, endpoints.qs, 25)
     else:
         # TODO: Delete this after the move to Locations
         endpoints = Endpoint.objects.filter(finding__active=True,
