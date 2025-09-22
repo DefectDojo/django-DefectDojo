@@ -405,6 +405,8 @@ def js_epoch(
     """
     if isinstance(d, date):
         d = datetime.combine(d, datetime.min.time())
+        if timezone.is_naive(d):
+            d = timezone.make_aware(d)
     return int(d.timestamp()) * 1000
 
 

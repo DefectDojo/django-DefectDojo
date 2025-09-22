@@ -129,3 +129,18 @@ jobs:
       - name: Lint
         run: |-
           helm lint ./helm/defectdojo --strict
+
+  artifacthub_linter:
+    name: Artifacthub Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Run ah lint
+        working-directory: ./helm/defectdojo
+        run: |-
+          docker run --rm \
+            -v ${{ github.workspace }}/helm/defectdojo:/workspace \
+            -w /workspace \
+            artifacthub/ah:v1.21.0@sha256:511818fa90ce87d7132c6214e51ea6dd62eea030f5d2271ce073f948b3060972 \
+              ah lint
