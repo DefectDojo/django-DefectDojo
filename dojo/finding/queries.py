@@ -2,11 +2,13 @@ import logging
 
 from crum import get_current_user
 from django.conf import settings
-from django.db.models import Case, CharField, Count, Exists, OuterRef, Q, Value, When
+from django.db.models import Case, CharField, Count, Exists, F, OuterRef, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import Prefetch, QuerySet
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+from dojo.location.models import LocationFindingReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     Endpoint_Status,
@@ -218,10 +220,34 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
 
     # Endpoint counts using optimized subqueries
     if settings.V3_FEATURE_LOCATIONS:
-        pass
+        base_status = LocationFindingReference.objects.prefetch_related("location__url").all()
+        prefetched_findings = prefetched_findings.annotate(
+            has_endpoints=Exists(base_status),
+            active_endpoint_count=Count(
+                "locations",
+                filter=Q(locations__status=FindingLocationStatus.Active),
+                distinct=True,
+            ),
+            mitigated_endpoint_count=Count(
+                "locations",
+                filter=(~Q(locations__status=FindingLocationStatus.Active)),
+                distinct=True,
+            ),
+        ).prefetch_related(
+            Prefetch(
+                "locations",
+                queryset=base_status.filter(status=FindingLocationStatus.Active).annotate(is_broken=F("location__url__host_validation_failure"), object_id=F("location__id")).order_by("audit_time"),
+                to_attr="active_endpoints",
+            ),
+            Prefetch(
+                "locations",
+                queryset=base_status.filter(~Q(status=FindingLocationStatus.Active)).annotate(is_broken=F("location__url__host_validation_failure"), object_id=F("location__id")).order_by("audit_time"),
+                to_attr="mitigated_endpoints",
+            ),
+        )
     else:
         base_status = Endpoint_Status.objects.prefetch_related("endpoint")
-        display_status = Case(
+        status = Case(
                 When(
                     Q(false_positive=True) | Q(risk_accepted=True) | Q(out_of_scope=True) | Q(mitigated=True),
                     then=Concat(
@@ -262,14 +288,14 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
                 "status_finding",
                 queryset=base_status.filter(
                     mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False,
-                ).annotate(display_status=display_status).order_by("last_modified"),
+                ).annotate(status=status, object_id=F("endpoint__id")).order_by("last_modified"),
                 to_attr="active_endpoints",
             ),
             Prefetch(
                 "status_finding",
                 queryset=base_status.filter(
                     Q(mitigated=True) | Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
-                ).annotate(display_status=display_status).order_by("mitigated_time"),
+                ).annotate(status=status, object_id=F("endpoint__id")).order_by("mitigated_time"),
                 to_attr="mitigated_endpoints",
             ),
         )
