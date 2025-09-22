@@ -82,6 +82,9 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.cloudsql.resources }}
+        resources: {{- . | toYaml | nindent 10 }}
+        {{- end }}
         restartPolicy: Always
         securityContext:
           runAsNonRoot: true
