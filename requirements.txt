@@ -114,7 +114,7 @@ kombu==5.5.4
 six==1.17.0
 attrs==25.1.0
 idna==3.10
-importlib-metadata==6.11.0
+importlib-metadata==8.7.0
 packaging==25.0
 pysaml2==7.5.0
 click-repl==0.3.0
