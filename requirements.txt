@@ -149,7 +149,7 @@ appdirs==1.4.4
 amqp==5.3.1
 msrest==0.7.1
 tinycss2==1.4.0
-argon2-cffi-bindings==21.2.0
+argon2-cffi-bindings==25.1.0
 isodate==0.7.2
 oauthlib==3.3.1
 rpds-py==0.24.0
