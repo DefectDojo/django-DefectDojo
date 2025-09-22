@@ -343,6 +343,10 @@ class ProductForm(forms.ModelForm):
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1026,6 +1030,10 @@ class EngForm(forms.ModelForm):
         queryset=None,
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         cicd = False
@@ -1105,10 +1113,13 @@ class TestForm(forms.ModelForm):
         attrs={"class": "datepicker", "autocomplete": "off"}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={"class": "datepicker", "autocomplete": "off"}))
-
     lead = forms.ModelChoiceField(
         queryset=None,
         required=False, label="Testing Lead")
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         obj = None
@@ -1465,6 +1476,10 @@ class FindingForm(forms.ModelForm):
         choices=EFFORT_FOR_FIXING_CHOICES,
         error_messages={
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
@@ -1732,10 +1747,15 @@ class FindingBulkUpdateForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("severity", "date", "planned_remediation_date", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                  "is_mitigated")
+                  "under_review", "is_mitigated")
 
 
 class EditEndpointForm(forms.ModelForm):
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.",
+    )
+
     class Meta:
         model = Endpoint
         exclude = ["product", "inherited_tags"]
