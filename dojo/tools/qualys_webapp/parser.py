@@ -94,7 +94,7 @@ def attach_unique_extras(
         )
 
     for i in range(len(requests)):
-        if requests[i] != "" or responses[i] != "":
+        if requests[i] or responses[i]:
             finding.unsaved_req_resp.append(
                 {"req": requests[i], "resp": responses[i]},
             )
@@ -130,7 +130,7 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
 
     for i in range(len(requests)):
-        if requests[i] != "" or responses[i] != "":
+        if requests[i] or responses[i]:
             finding.unsaved_req_resp.append(
                 {"req": requests[i], "resp": responses[i]},
             )

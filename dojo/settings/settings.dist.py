@@ -86,6 +86,9 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -918,9 +921,9 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
-    "watson.middleware.SearchContextMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.middleware.AuditlogMiddleware",
+    "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
@@ -1161,6 +1164,10 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 
+# Watson async index update settings
+WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
+WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
+
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
@@ -1372,7 +1379,7 @@ if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
         if key not in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info(f"Adding {key} with value {value} from env var DD_HASHCODE_FIELDS_PER_SCANNER")
+            logger.info("Adding %s with value %s from env var DD_HASHCODE_FIELDS_PER_SCANNER", key, value)
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 
@@ -1626,7 +1633,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
         if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info(f"Adding {key} with value {value} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
+            logger.info("Adding %s with value %s from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER", key, value)
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
@@ -1648,7 +1655,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ("Security", "Security"),
 )
 
-if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
+if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
     for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 

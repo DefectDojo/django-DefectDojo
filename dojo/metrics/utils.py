@@ -343,7 +343,7 @@ def get_date_range(
     return start_date, end_date
 
 
-def severity_count(
+def severity_count[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     queryset: MetricsQuerySet,
     method: str,
     expression: str,
@@ -409,7 +409,7 @@ def js_epoch(
     return int(d.timestamp()) * 1000
 
 
-def get_charting_data(
+def get_charting_data[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     qs: MetricsQuerySet,
     start_date: date,
     period: MetricsPeriod,
@@ -472,7 +472,7 @@ def period_deltas(start_date, end_date):
     return weeks_between, months_between
 
 
-def aggregate_counts_by_period(
+def aggregate_counts_by_period[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     qs: MetricsQuerySet,
     period: MetricsPeriod,
     metrics_type: MetricsType,
@@ -582,7 +582,7 @@ def get_closed_in_period_details(
     )
 
 
-def findings_queryset(
+def findings_queryset[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     qs: MetricsQuerySet,
 ) -> QuerySet[Finding]:
     """
