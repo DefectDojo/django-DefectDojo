@@ -1,6 +1,8 @@
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.tools.api_sonarqube.parser import SCAN_SONARQUBE_API
+from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
+from dojo.tools.api_sonarqube.updater_from_source import SonarQubeApiUpdaterFromSource
 
 
 def async_tool_issue_update(finding, *args, **kwargs):
@@ -22,14 +24,12 @@ def tool_issue_updater(finding, *args, **kwargs):
     test_type = finding.test.test_type
 
     if test_type.name == SCAN_SONARQUBE_API:
-        from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
         SonarQubeApiUpdater().update_sonarqube_finding(finding)
 
 
 @dojo_async_task
 @app.task
 def update_findings_from_source_issues(**kwargs):
-    from dojo.tools.api_sonarqube.updater_from_source import SonarQubeApiUpdaterFromSource
 
     findings = SonarQubeApiUpdaterFromSource().get_findings_to_update()
 

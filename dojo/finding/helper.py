@@ -27,7 +27,15 @@ from dojo.models import (
     Vulnerability_Id_Template,
 )
 from dojo.notes.helper import delete_related_notes
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
+from dojo.tools import tool_issue_updater
+from dojo.utils import (
+    calculate_grade,
+    do_dedupe_finding,
+    do_false_positive_history,
+    get_current_user,
+    mass_model_updater,
+    to_str_typed,
+)
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -366,7 +374,6 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
     if dedupe_option:
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
-                from dojo.utils import do_dedupe_finding
                 do_dedupe_finding(finding, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
@@ -378,17 +385,14 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
         if system_settings.enable_deduplication:
             deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
         else:
-            from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:
-        from dojo.tools import tool_issue_updater
         tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            from dojo.utils import calculate_grade
             calculate_grade(finding.test.engagement.product)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
@@ -396,7 +400,6 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
     # Adding a snippet here for push to JIRA so that it's in one place
     if push_to_jira:
         logger.debug("pushing finding %s to jira from finding.save()", finding.pk)
-        import dojo.jira_link.helper as jira_helper
 
         # current approach is that whenever a finding is in a group, the group will be pushed to JIRA
         # based on feedback we could introduct another push_group_to_jira boolean everywhere

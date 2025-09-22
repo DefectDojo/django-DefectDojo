@@ -30,7 +30,7 @@ def query_string_as_hidden(context):
 
 @register.simple_tag
 def url_replace(request, field="page", value=1):
-    if field is None or field == "":
+    if field is None or not field:
         field = "page"
     dict_ = request.GET.copy()
     dict_[field] = value
