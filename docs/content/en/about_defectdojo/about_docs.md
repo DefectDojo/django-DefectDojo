@@ -67,6 +67,8 @@ Other guides for working with an Open-Source install:
 
 If you run into trouble with an Open Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the **# defectdojo** channel and can help you with issues you’re facing.
 
+Looking for cool DefectDojo laptop stickers? As a thank you for being a part of the DefectDojo community, you can sign up to get some free DefectDojo stickers.  For more information, check out [this link](https://defectdojo.com/defectdojo-sticker-request).
+
 ### Online Demo
 
 A running example of DefectDojo (Open-Source Edition) is available on [our demo server](https://demo.defectdojo.org), using the credentials `admin` / `1Defectdojo@demo#appsec`. The demo server is refreshed regularly and provisioned with some sample data.
