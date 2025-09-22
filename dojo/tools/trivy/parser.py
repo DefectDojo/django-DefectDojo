@@ -283,6 +283,15 @@ class TrivyParser:
                         file_path = target_target
                     else:
                         file_path = None
+
+                    epss_data = vuln.get("EPSS", None)
+                    if epss_data is not None:
+                        epss_score = epss_data.get("score", None)
+                        epss_percentile = epss_data.get("percentile", None)
+                    else:
+                        epss_score = None
+                        epss_percentile = None
+                    
                 except KeyError as exc:
                     logger.warning("skip vulnerability due %r", exc)
                     continue
@@ -309,6 +318,8 @@ class TrivyParser:
                     title=title,
                     cwe=cwe,
                     severity=severity,
+                    epss_score=epss_score,
+                    epss_percentile=epss_percentile,                    
                     file_path=file_path,
                     references=references,
                     description=description,
