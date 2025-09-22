@@ -120,7 +120,7 @@ jobs:
       - name: Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
         with:
-          target: 'http://5.129.250.92
+          target: 'http://5.129.250.92'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           
