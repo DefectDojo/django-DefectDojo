@@ -504,12 +504,13 @@ redis:
 #   DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #   DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #   DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+extraConfigs: {}
 
 # Extra secrets can be created inside of extraSecrets block:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
-extraConfigs: {}
+extraSecrets: {}
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
@@ -519,6 +520,7 @@ extraConfigs: {}
 #     configMapKeyRef:
 #       name: my-other-postgres-configmap
 #       key: cluster_endpoint
+extraEnv: {}
 
 # To add code snippet which would extend setting functionality, you might add it here
 # It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
@@ -531,6 +533,8 @@ extraConfigs: {}
 #   MIDDLEWARE = [
 #       'debug_toolbar.middleware.DebugToolbarMiddleware',
 #   ] + MIDDLEWARE
+localsettingspy: ""
+
 #
 # External database support.
 #

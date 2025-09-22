@@ -1,9 +1,10 @@
-{{- if  .Values.localsettingspy }}
+{{- if .Values.localsettingspy }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $fullName }}-localsettingspy
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

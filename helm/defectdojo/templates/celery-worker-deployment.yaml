@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $fullName }}-celery-worker
+  namespace: {{ .Release.Namespace }}
   labels:
     defectdojo.org/component: celery
     defectdojo.org/subcomponent: worker
@@ -127,7 +128,7 @@ spec:
           mountPath: /app/dojo/settings/local_settings.py
           subPath: file
         {{- end }}
-        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        {{- if .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}

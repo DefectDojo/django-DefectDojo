@@ -4,6 +4,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}

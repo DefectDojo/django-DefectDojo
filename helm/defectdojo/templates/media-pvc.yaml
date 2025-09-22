@@ -1,6 +1,6 @@
 {{- $fullName := include "django.pvc_name" $ -}}
 {{ with .Values.django.mediaPersistentVolume }}
-{{- if and .enabled (eq .type "pvc") .persistentVolumeClaim.create   }}
+{{- if and .enabled (eq .type "pvc") .persistentVolumeClaim.create }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -14,9 +14,10 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
   name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
 spec:
   accessModes: 
-  {{- toYaml .persistentVolumeClaim.accessModes |nindent 4 }}
+  {{- toYaml .persistentVolumeClaim.accessModes | nindent 4 }}
   resources:
     requests:
       storage: {{ .persistentVolumeClaim.size }}

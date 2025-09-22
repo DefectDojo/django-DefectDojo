@@ -3,6 +3,7 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: {{ include "defectdojo.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
