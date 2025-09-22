@@ -34,9 +34,6 @@
         "alternativeHosts": {
             "type": "array"
         },
-        "annotations": {
-            "type": "object"
-        },
         "celery": {
             "type": "object",
             "properties": {
@@ -50,6 +47,9 @@
                             "type": "object"
                         },
                         "annotations": {
+                            "type": "object"
+                        },
+                        "containerSecurityContext": {
                             "type": "object"
                         },
                         "extraEnv": {
@@ -71,6 +71,9 @@
                             "type": "object"
                         },
                         "podAnnotations": {
+                            "type": "object"
+                        },
+                        "podSecurityContext": {
                             "type": "object"
                         },
                         "readinessProbe": {
@@ -137,6 +140,9 @@
                                 }
                             }
                         },
+                        "containerSecurityContext": {
+                            "type": "object"
+                        },
                         "extraEnv": {
                             "type": "array"
                         },
@@ -156,6 +162,9 @@
                             "type": "object"
                         },
                         "podAnnotations": {
+                            "type": "object"
+                        },
+                        "podSecurityContext": {
                             "type": "object"
                         },
                         "readinessProbe": {
@@ -204,11 +213,20 @@
         "cloudsql": {
             "type": "object",
             "properties": {
+                "containerSecurityContext": {
+                    "type": "null"
+                },
                 "enable_iam_login": {
                     "type": "boolean"
                 },
                 "enabled": {
                     "type": "boolean"
+                },
+                "extraEnv": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
                 },
                 "image": {
                     "type": "object",
@@ -250,8 +268,17 @@
         "dbMigrationChecker": {
             "type": "object",
             "properties": {
+                "containerSecurityContext": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
+                },
+                "extraEnv": {
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
                 },
                 "resources": {
                     "type": "object",
@@ -369,6 +396,14 @@
                 "nginx": {
                     "type": "object",
                     "properties": {
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "properties": {
+                                "runAsUser": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "extraEnv": {
                             "type": "array"
                         },
@@ -418,6 +453,14 @@
                 "nodeSelector": {
                     "type": "object"
                 },
+                "podSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "fsGroup": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "replicas": {
                     "type": "integer"
                 },
@@ -466,6 +509,14 @@
                                 },
                                 "enabled": {
                                     "type": "boolean"
+                                }
+                            }
+                        },
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "properties": {
+                                "runAsUser": {
+                                    "type": "integer"
                                 }
                             }
                         },
@@ -578,10 +629,19 @@
                 }
             }
         },
+        "extraAnnotations": {
+            "type": "object"
+        },
         "extraConfigs": {
             "type": "object"
         },
+        "extraEnv": {
+            "type": "array"
+        },
         "extraLabels": {
+            "type": "object"
+        },
+        "extraSecrets": {
             "type": "object"
         },
         "gke": {
@@ -619,6 +679,9 @@
                 "annotations": {
                     "type": "object"
                 },
+                "containerSecurityContext": {
+                    "type": "object"
+                },
                 "extraEnv": {
                     "type": "array"
                 },
@@ -638,6 +701,9 @@
                     "type": "object"
                 },
                 "nodeSelector": {
+                    "type": "object"
+                },
+                "podSecurityContext": {
                     "type": "object"
                 },
                 "resources": {
@@ -670,14 +736,6 @@
                 "run": {
                     "type": "boolean"
                 },
-                "securityContext": {
-                    "type": "object",
-                    "properties": {
-                        "runAsNonRoot": {
-                            "type": "boolean"
-                        }
-                    }
-                },
                 "staticName": {
                     "type": "boolean"
                 },
@@ -685,6 +743,9 @@
                     "type": "array"
                 }
             }
+        },
+        "localsettingspy": {
+            "type": "string"
         },
         "monitoring": {
             "type": "object",
@@ -695,8 +756,17 @@
                 "prometheus": {
                     "type": "object",
                     "properties": {
+                        "containerSecurityContext": {
+                            "type": "object"
+                        },
                         "enabled": {
                             "type": "boolean"
+                        },
+                        "extraEnv": {
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "type": "array"
                         },
                         "image": {
                             "type": "string"
@@ -935,22 +1005,22 @@
         "securityContext": {
             "type": "object",
             "properties": {
-                "djangoSecurityContext": {
+                "containerSecurityContext": {
                     "type": "object",
                     "properties": {
-                        "runAsUser": {
-                            "type": "integer"
+                        "runAsNonRoot": {
+                            "type": "boolean"
                         }
                     }
                 },
                 "enabled": {
                     "type": "boolean"
                 },
-                "nginxSecurityContext": {
+                "podSecurityContext": {
                     "type": "object",
                     "properties": {
-                        "runAsUser": {
-                            "type": "integer"
+                        "runAsNonRoot": {
+                            "type": "boolean"
                         }
                     }
                 }
