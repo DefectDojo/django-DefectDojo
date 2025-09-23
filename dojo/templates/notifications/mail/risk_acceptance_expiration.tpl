@@ -19,6 +19,9 @@
 		{% if risk_acceptance.restart_sla_expired %}
 			{% blocktranslate %}Findings SLA start date have been reset</p>{% endblocktranslate %}
 		{% endif %}
+		{% if risk_acceptance.long_term_acceptance %}
+		 	{% blocktranslate %}Long-term acceptance.{% endblocktranslate %}	
+		{% endif%}
 	{%endblock%}
 		<br/>
 		{%block findings%}
@@ -44,7 +47,7 @@
 		<br/>
 		<br/>
 		{% if enable_acceptance_risk_for_email and permission_keys %}
-			If for some reason you cannot login to vultacker you have the option to accept or reject it directly.
+			If for some reason you cannot login to {{ system_settings.team_name}} you have the option to accept or reject it directly.
 			clicking on the following link will automatically accept or reject all findings. use this functionality responsibly.
 				{% for permission_key in permission_keys %}
 					{% if permission_key.username == user.username%}

@@ -1314,13 +1314,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             test__engagement=eng,
             active=True,
             severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
-
-        if form.fields["long_term_acceptance"] is True:
-            users = get_users_for_group("Approvers_Cybersecurity")
-            form.fields["approvers"].queryset = users
-        else:
-            # obtener usuario normal o inicales
-            form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
+        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial # TODO VALDIAR COMPORTAMIENTO
 
         for finding in findings:
             if (

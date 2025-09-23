@@ -315,39 +315,6 @@ def limit_assumption_of_vulnerability(**kwargs):
     return result
 
 
-def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(**kwargs):
-    # "LTVLT - Limit of Temporarily Assumed Vulnerabilities Limited to Tolerance"
-    result = {}
-    result["status"] = True
-    result["message"] = ""
-    return result
-
-
-def percentage_of_vulnerabilitiese_closed(**kwargs):
-    """ PVC - Percentage of vulnerabilitiese closed """
-    result = kwargs["result"]
-    response = abuse_control_min_vulnerability_closed(
-        product_id=kwargs["product_id"],
-        min_percentage=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["percentage"],
-        days=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["days"])
-    logger.debug(f"Abuse Control: {response}")
-    if settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["active"]:
-        result = response
-    return result
-
-
-def temporaly_assumed_vulnerabilities(**kwargs):
-    """ TAV - Temporarily Assumed Vulnerabilities """
-    result = kwargs["result"]
-    response = abuse_control_max_vulnerability_accepted(
-        product_id=kwargs["product_id"],
-        max_percentage=settings.TEMPORARILY_ASSUMED_VULNERABILITIES["percentage"])
-    logger.debug(f"Abuse Control: {response}")
-    if settings.TEMPORARILY_ASSUMED_VULNERABILITIES["active"]:
-        result = response
-    return result
-
-
 def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
     result = {}
     result["status"] = True
@@ -357,10 +324,7 @@ def abuse_control(user, finding: Finding, product: Product, product_type: Produc
         return {"Privileged role": {"status": True, "message": "This user has risk acceptance privileges"}}
 
     rule_abuse_control = {
-        "LAV": limit_assumption_of_vulnerability,
-        "PVC": percentage_of_vulnerabilitiese_closed,
-        "TAV": temporaly_assumed_vulnerabilities,
-        "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance
+        "LAV": limit_assumption_of_vulnerability
     }
     result_dict = {}
     for key, rule in rule_abuse_control.items():

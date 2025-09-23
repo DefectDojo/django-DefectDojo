@@ -4092,7 +4092,6 @@ class Risk_Acceptance(models.Model):
 
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
     long_term_acceptance = models.BooleanField(default=None, null=True, blank=True, verbose_name=_("Long Term Acceptance"), help_text=_("You can request long-term acceptance for this vulnerability."))
-    expiration_date_requested = models.DateTimeField(default=None, null=True, blank=True, help_text=_("If you have a requested expiration date, enter it here. The risk acceptance approver can decide to set a different expiration date."))
     accepted_findings = models.ManyToManyField(Finding)
     severity = models.CharField(choices=SEVERITY_CHOICES,
                                 max_length=10,

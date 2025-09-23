@@ -397,7 +397,7 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_SECRET=(str, ""),
     DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
-    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
+    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer", "Risk"]),
     # Risk severity levels: Low, Medium, High, Critical
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
@@ -1335,7 +1335,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
-    "dojo.middleware.LongRunningRequestAlertMiddleware",
+    # "dojo.middleware.LongRunningRequestAlertMiddleware", # Disable middleware
 ]
 
 # CORS

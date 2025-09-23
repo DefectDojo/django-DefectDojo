@@ -752,6 +752,12 @@ class RiskAcceptanceViewSet(
         permissions.UserHasRiskAcceptancePermission,
     )
 
+
+    def put(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return response
+
+
     def destroy(self, request, pk=None):
         instance = self.get_object()
         # Remove any findings on the risk acceptance

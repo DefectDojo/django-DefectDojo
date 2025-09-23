@@ -30,6 +30,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
+from dojo.risk_acceptance.notification import Notification
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization import user_has_global_permission
@@ -104,8 +105,9 @@ from dojo.models import (
     UserContactInfo,
     ExclusivePermission,
     Role,
+    GeneralSettings,
 )
-from dojo.group.queries import get_users_for_group
+from dojo.group.queries import get_users_for_group, get_users_for_group_by_role
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types, get_owner_user, get_authorized_contacts_for_product_type
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
@@ -1116,9 +1118,6 @@ class RiskPendingForm(forms.ModelForm):
         initial="",
         help_text=("You can request long-term acceptance for this vulnerability. For more information, please review documentation"),
         label="Do you want to submit this request as a long-term acceptance?")
-    expiration_date_requested = forms.DateTimeField(
-        required=False, widget=forms.TextInput(attrs={"class": "datepicker"})
-    )
     accepted_by = forms.ModelMultipleChoiceField(
         help_text=("acceptors depending on the severity of the risk"),
         queryset=Dojo_User.objects.none(),
@@ -1135,7 +1134,8 @@ class RiskPendingForm(forms.ModelForm):
         widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}),
     )
     expiration_date = forms.DateTimeField(
-        required=False, widget=forms.TextInput(attrs={"class": "datepicker"})
+        help_text=("Recommend an expiration date."),
+        required=True, widget=forms.TextInput(attrs={"class": "datepicker"})
     )
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
@@ -1145,10 +1145,11 @@ class RiskPendingForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ["name","accepted_findings",
-                  "long_term_acceptance", "expiration_date_requested",
+                  "long_term_acceptance",
+                  "expiration_date",
                   "recommendation_details",
-                  "path", "accepted_by", "approvers", "path",
-                  "expiration_date", "owner"]
+                  "path", "accepted_by",
+                  "approvers", "path", "owner"]
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
@@ -1164,7 +1165,6 @@ class RiskPendingForm(forms.ModelForm):
             days=expiration_delta_days.get(severity.lower())
         )
         self.fields["expiration_date"].initial = expiration_date
-        self.fields["expiration_date"].disabled = True
         self.fields['owner'].queryset = get_owner_user()
 
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
@@ -1181,7 +1181,12 @@ class RiskPendingForm(forms.ModelForm):
 
     def clean(self):
         data = self.cleaned_data
-        if "accepted_by" in data.keys():
+        if data["long_term_acceptance"] == "True":
+            if value := GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE"):
+                users = get_users_for_group_by_role(value, "Risk")
+                user_names = [user.username for user in users]
+                data["accepted_by"] = user_names
+        elif "accepted_by" in data.keys():
             accepted_by = data["accepted_by"]
             contacts = accepted_by.values()
             contact = [contact["username"] for contact in contacts]
