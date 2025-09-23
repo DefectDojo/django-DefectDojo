@@ -24,15 +24,12 @@ def on_exception_html_source_logger(func):
     def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-
         except Exception:
             logger.info(f"exception occured at url: {self.driver.current_url}")
             logger.info(f"page source: {self.driver.page_source}")
-            f = Path("selenium_page_source.html").open("w", encoding="utf-8")
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
+            with Path("selenium_page_source.html").open("w", encoding="utf-8") as f:
+                f.writelines(self.driver.page_source)
             raise
-
     return wrapper
 
 

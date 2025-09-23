@@ -95,7 +95,6 @@ ignore = [
     "E501",
     "E722",
     "SIM102",
-    "SIM115",
     "RUF012",
     "RUF015",
     "D205",
@@ -113,10 +112,6 @@ preview = true
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
-]
-
-"dojo/models.py" = [
-    "PLC1901",  # fix later, causes some problems
 ]
 
 [lint.flake8-boolean-trap]
