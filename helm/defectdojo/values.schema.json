@@ -6,7 +6,7 @@
             "type": "object",
             "properties": {
                 "credentialAes256Key": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "firstName": {
                     "type": "string"
@@ -18,13 +18,13 @@
                     "type": "string"
                 },
                 "metricsHttpAuthPassword": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "password": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "secretKey": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "user": {
                     "type": "string"
@@ -339,13 +339,13 @@
                                     "type": "boolean"
                                 },
                                 "name": {
-                                    "type": "null"
+                                    "type": "string"
                                 },
                                 "size": {
                                     "type": "string"
                                 },
                                 "storageClassName": {
-                                    "type": "null"
+                                    "type": "string"
                                 }
                             }
                         },
