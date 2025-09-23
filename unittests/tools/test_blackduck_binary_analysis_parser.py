@@ -22,26 +22,21 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
                     "instrument.dll: zlib 1.2.13 Vulnerable to CVE-2023-45853",
                     finding.title,
                 )
-
+                self.assertEqual(True, finding.fix_available)
                 self.assertIsNotNone(finding.description)
                 self.assertIsNotNone(finding.severity)
                 self.assertEqual("Critical", finding.severity)
-
                 self.assertIsNotNone(finding.component_name)
                 self.assertEqual("zlib", finding.component_name)
-
                 self.assertIsNotNone(finding.component_version)
                 self.assertEqual("1.2.13", finding.component_version)
-
                 self.assertIsNotNone(finding.file_path)
                 self.assertEqual(
                     "JRE.msi:JRE.msi-30276-90876123.cab:instrument.dll",
                     finding.file_path,
                 )
-
                 self.assertIsNotNone(finding.vuln_id_from_tool)
                 self.assertEqual("CVE-2023-45853", finding.vuln_id_from_tool)
-
                 self.assertIsNotNone(finding.unique_id_from_tool)
 
     def test_parse_many_vulns(self):
