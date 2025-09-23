@@ -293,10 +293,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=663,
+            expected_num_queries1=653,
             expected_num_async_tasks1=15,
-            expected_num_queries2=631,
+            expected_num_queries2=614,
             expected_num_async_tasks2=28,
-            expected_num_queries3=312,
+            expected_num_queries3=297,
             expected_num_async_tasks3=25,
         )
