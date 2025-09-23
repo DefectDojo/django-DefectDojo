@@ -15,22 +15,29 @@ static %} {% block add_styles %} .embed-responsive .embed-responsive-item,
 <script type="text/javascript">
   const channel = new MessageChannel();
   const iframe = document.querySelector("iframe");
-  const origin = ""; // TODO: pending change url to the real url vultracker
-  iframe.addEventListener("load", onLoad);
-
-  function onLoad() {
-    channel.port1.onmessage = onMessage;
-
-    const data = {
-      session: "{{ sessionId }}",
-      csrf: "{{ csrfToken }}",
-    };
-
-    iframe.contentWindow.postMessage(JSON.stringify(data), origin, [channel.port2]);
-  }
-
-  function onMessage(event) {
-    console.log(event.data);
-  }
+  iframe.onload = () => {
+    iframe.contentWindow.postMessage(
+      { action: "all_findings" },
+      "URL_MF_VULTRACKER",
+      [channel.port2]
+    );
+    setTimeout(() => {
+      channel.port1.start();
+      channel.port1.onmessage = (event) => {
+        if (event.data.action === "all_findings") {
+          setTimeout(() => {
+            iframe.contentWindow.postMessage({
+              action: "all_findings",
+              data: {
+                csrf_token: "{{ csrf_token }}",
+                sessionid: "{{ sessionid }}",
+                product_id: "{{ product_id }}",
+              },
+            });
+          }, 100);
+        }
+      };
+    }, 100);
+  };
 </script>
 {% endblock %}
