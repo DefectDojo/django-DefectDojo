@@ -96,12 +96,14 @@ class BlackduckBinaryAnalysisParser:
                     component_version=i.version,
                     unique_id_from_tool=unique_finding_key,
                 )
-
                 if cvss_v3:
                     finding.cvssv3 = cvss_vectors
                 else:
                     finding.severity_justification = cvss_vectors
-
+                if i.latest_version:
+                    finding.fix_available = True
+                else:
+                    finding.fix_available = False
                 findings[unique_finding_key] = finding
 
         return list(findings.values())
