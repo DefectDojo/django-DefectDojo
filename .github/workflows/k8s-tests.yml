@@ -27,7 +27,7 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.33.4'
+            k8s: 'v1.34.1'
             os: debian
     steps:
       - name: Checkout
@@ -36,7 +36,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
         with:
-          minikube version: 'v1.33.1'
+          minikube version: 'v1.37.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -126,7 +126,6 @@ jobs:
                do
                DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
                OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
-                  --overrides='{ "apiVersion": "v1" }' \
                   --restart=Never -i --rm -- \
                     --silent \
                     --max-time 20 \
@@ -157,7 +156,6 @@ jobs:
              echo "Simple API check"
              DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
              CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
-               --overrides='{ "apiVersion": "v1" }' \
                --restart=Never -i --rm -- \
                  --silent \
                  --max-time 20 \

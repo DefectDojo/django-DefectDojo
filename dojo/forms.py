@@ -343,6 +343,10 @@ class ProductForm(forms.ModelForm):
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -559,13 +563,15 @@ class ImportScanForm(forms.Form):
     # Exposing the choice as two different check boxes.
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
     close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "If service has been set, only the findings for this service will be closed; "
+                                                        "if no service is set, only findings without a service will be closed. "
                                                         "This affects findings within the same engagement by default.",
                                             label="Close old findings",
                                             required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "If service has been set, only the findings for this service will be closed; "
+                                                        "if no service is set, only findings without a service will be closed. "
                                                         "This affects findings within the same product.",
                                             label="Close old findings within this product",
                                             required=False,
@@ -1012,6 +1018,10 @@ class EngForm(forms.ModelForm):
         queryset=None,
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         cicd = False
@@ -1091,10 +1101,13 @@ class TestForm(forms.ModelForm):
         attrs={"class": "datepicker", "autocomplete": "off"}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={"class": "datepicker", "autocomplete": "off"}))
-
     lead = forms.ModelChoiceField(
         queryset=None,
         required=False, label="Testing Lead")
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     def __init__(self, *args, **kwargs):
         obj = None
@@ -1451,6 +1464,10 @@ class FindingForm(forms.ModelForm):
         choices=EFFORT_FOR_FIXING_CHOICES,
         error_messages={
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.",
+    )
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
@@ -1718,10 +1735,15 @@ class FindingBulkUpdateForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("severity", "date", "planned_remediation_date", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                  "is_mitigated")
+                  "under_review", "is_mitigated")
 
 
 class EditEndpointForm(forms.ModelForm):
+    tags = TagField(
+        required=False,
+        help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.",
+    )
+
     class Meta:
         model = Endpoint
         exclude = ["product", "inherited_tags"]

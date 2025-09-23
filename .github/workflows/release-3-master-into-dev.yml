@@ -74,6 +74,17 @@ jobs:
           git add docs/content/en/open_source/upgrading/$minorv.md
         if: endsWith(inputs.release_number_new, '.0') && endsWith(inputs.release_number_dev, '.0-dev')
 
+      - name: Update values in HELM chart
+        run: |
+          yq -i '.annotations = {}' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/prerelease" = "true"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        with:
+          chart-search-root: "helm/defectdojo"
+
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
         with:
@@ -138,6 +149,17 @@ jobs:
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
+
+      - name: Update values in HELM chart
+        run: |
+          yq -i '.annotations = {}' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/prerelease" = "true"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        with:
+          chart-search-root: "helm/defectdojo"
 
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
