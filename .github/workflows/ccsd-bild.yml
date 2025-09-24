@@ -1,4 +1,4 @@
-name: "Build Docker Images For Testing"
+name: "Build For Testing"
 
 on:
   # inspired by https://github.com/orgs/community/discussions/26801 we take the runs-on as parameter so we can run arm64 on native hardwarde
