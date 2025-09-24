@@ -98,7 +98,7 @@ class ReportBuilder(View):
                 finding__out_of_scope=False,
             )
             if get_system_setting("enforce_verified_status", True) or get_system_setting(
-                "enforce_verified_status_metrics", True
+                "enforce_verified_status_metrics", True,
             ):
                 endpoints = endpoints.filter(finding__active=True)
             endpoints = endpoints.distinct()
@@ -217,7 +217,7 @@ def report_endpoints(request):
             finding__out_of_scope=False,
         )
         if get_system_setting("enforce_verified_status", True) or get_system_setting(
-            "enforce_verified_status_metrics", True
+            "enforce_verified_status_metrics", True,
         ):
             endpoints = endpoints.filter(finding__active=True)
         endpoints = endpoints.distinct()
