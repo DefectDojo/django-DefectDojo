@@ -132,7 +132,7 @@
                     </p>
                 {% endif %}
                 {% for endpoint in endpoints %}
-                    <div class="panel panel-warning">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4>
                                 Endpoint: {{ endpoint }}
@@ -140,7 +140,8 @@
                         </div>
                     </div>
 
-                    {% for finding in endpoint.active_findings %}
+                    {% for finding in endpoint.active_annotated_findings %}
+                        
                         <div class="panel panel-default">
                             <div class="panel-heading finding-title">
                                 <div class="clearfix">

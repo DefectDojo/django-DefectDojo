@@ -132,21 +132,21 @@
                                 {% if not product_tab %}
                                     <td class="text-center">
                                         {% if host_view %}
-                                            <a href="{% url 'product' %}?locations__location__url__host={{ location.host }}&locations__status_equals={{ location.overall_status }}">{{ location.active_products }}</a>
-                                            <a href="{% url 'product' %}?locations__location__url__host={{ location.host }}">({{ location.total_products }})</a>
+                                            <a href="{% url 'product' %}?endpoints__host={{ location.host }}&location_status=Active">{{ location.active_products }}</a>
+                                            <a href="{% url 'product' %}?endpoints__host={{ location.host }}">({{ location.total_products }})</a>
                                         {% else %}
-                                            <a href="{% url 'product' %}?locations__location={{ location.id }}&locations__status_equals={{ location.overall_status }}">{{ location.active_products }}</a>
-                                            <a href="{% url 'product' %}?locations__location={{ location.id }}">({{ location.total_products }})</a>
+                                            <a href="{% url 'product' %}?endpoints={{ location.id }}&location_status=Active">{{ location.active_products }}</a>
+                                            <a href="{% url 'product' %}?endpoints={{ location.id }}">({{ location.total_products }})</a>
                                         {% endif %}
                                     </td>
                                 {% endif %}
                                 <td class="text-center">
                                     {% if host_view %}
-                                        <a href="{% url 'all_findings' %}?locations__location__url__host={{ location.host }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
-                                        <a href="{% url 'all_findings' %}?locations__location__url__host={{ location.host }}">({{ location.total_findings }})</a>
+                                        <a href="{% url 'all_findings' %}?endpoints__host={{ location.host }}&location_status=Active">{{ location.active_findings }}</a>
+                                        <a href="{% url 'all_findings' %}?endpoints__host={{ location.host }}">({{ location.total_findings }})</a>
                                     {% else %}
-                                        <a href="{% url 'all_findings' %}?locations__location={{ location.id }}&locations__status_equals={{ location.overall_status }}">{{ location.active_findings }}</a>
-                                        <a href="{% url 'all_findings' %}?locations__location={{ location.id }}">({{ location.total_findings }})</a>
+                                        <a href="{% url 'all_findings' %}?endpoints={{ location.id }}&location_status=Active">{{ location.active_findings }}</a>
+                                        <a href="{% url 'all_findings' %}?endpoints={{ location.id }}">({{ location.total_findings }})</a>
                                     {% endif %}
                                 </td>
                                 <td class="text-center">{{ location.overall_status }}</td>

@@ -1,7 +1,11 @@
 
-from django.db.models import Prefetch, QuerySet
+from django.conf import settings
+from django.db.models import Prefetch, Q, QuerySet
 
 from dojo.finding.queries import prefetch_for_findings
+from dojo.location.models import LocationFindingReference
+from dojo.location.status import FindingLocationStatus
+from dojo.location.queries import annotate_location_counts_and_status
 from dojo.models import Finding
 
 
@@ -21,6 +25,20 @@ def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
 
 
 def prefetch_related_endpoints_for_report(endpoints: QuerySet) -> QuerySet:
+    if settings.V3_FEATURE_LOCATIONS:
+        return annotate_location_counts_and_status(
+            endpoints.prefetch_related(
+                "tags",
+                Prefetch(
+                    "findings",
+                    queryset=LocationFindingReference.objects.filter(status=FindingLocationStatus.Active)
+                    .prefetch_related("finding")
+                    .order_by("finding__numerical_severity"),
+                    to_attr="_active_annotated_findings",
+                ),
+            )
+        )
+    # TODO: Delete this after the move to Locations
     return endpoints.prefetch_related(
         "product",
         "tags",

@@ -38,4 +38,8 @@ urlpatterns = [
         name="endpoint_migrate"),
     re_path(r"^endpoint/(?P<pid>\d+)/import_endpoint_meta$", views.import_endpoint_meta,
         name="import_endpoint_meta"),
+    re_path(r"^endpoint/(?P<eid>\d+)/report$", views.endpoint_report,
+        name="endpoint_report"),
+    re_path(r"^endpoint/host/(?P<eid>\d+)/report$", views.endpoint_host_report,
+        name="endpoint_host_report"),
 ]

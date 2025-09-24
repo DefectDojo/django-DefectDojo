@@ -18,6 +18,9 @@ from dojo.filters import (
     ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.forms import CustomReportOptionsForm
+from dojo.location.models import Location
+from dojo.location.status import FindingLocationStatus
+from dojo.url.filters import URLFilter
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.settings import settings
@@ -363,12 +366,23 @@ class EndpointList(Widget):
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,
+                                 "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
                                  })
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None, user=None, *, finding_notes=False, finding_images=False,
-                          host=None):
+def report_widget_factory(
+    json_data=None, request=None, user=None, *, finding_notes=False, finding_images=False, host=None
+):
+    def convert_to_querydict(data):
+        d = QueryDict(mutable=True)
+        for item in data:
+            if item["name"] in d:
+                d.appendlist(item["name"], item["value"])
+            else:
+                d[item["name"]] = item["value"]
+        return d
+
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
 
@@ -377,45 +391,43 @@ def report_widget_factory(json_data=None, request=None, user=None, *, finding_no
             selected_widgets[list(widget.keys())[0] + "-" + str(idx)] = PageBreak()
 
         if list(widget.keys())[0] == "endpoint-list":
+            d = convert_to_querydict(widget.get(list(widget.keys())[0]))
             if settings.V3_FEATURE_LOCATIONS:
-                pass  # TODO: Implement Locations
+                endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+                endpoints = URLFilter(d, queryset=endpoints, user=request.user)
             else:
                 # TODO: Delete this after the move to Locations
-                endpoints = Endpoint.objects.filter(finding__active=True,
-                                                    finding__false_p=False,
-                                                    finding__duplicate=False,
-                                                    finding__out_of_scope=False,
-                                                    )
-                if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+                endpoints = Endpoint.objects.filter(
+                    finding__active=True,
+                    finding__false_p=False,
+                    finding__duplicate=False,
+                    finding__out_of_scope=False,
+                )
+                if get_system_setting("enforce_verified_status", True) or get_system_setting(
+                    "enforce_verified_status_metrics", True
+                ):
                     endpoints = endpoints.filter(finding__verified=True)
 
                 endpoints = endpoints.distinct()
-
-                d = QueryDict(mutable=True)
-                for item in widget.get(list(widget.keys())[0]):
-                    if item["name"] in d:
-                        d.appendlist(item["name"], item["value"])
-                    else:
-                        d[item["name"]] = item["value"]
-
                 endpoints = Endpoint.objects.filter(id__in=endpoints)
                 filter_string_matching = get_system_setting("filter_string_matching", False)
                 filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
                 endpoints = filter_class(d, queryset=endpoints, user=request.user)
-                user_id = user.id if user is not None else None
-                endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
-                                        finding_images=finding_images, host=host, user_id=user_id)
 
-                selected_widgets[list(widget.keys())[0] + "-" + str(idx)] = endpoints
+            user_id = user.id if user is not None else None
+            endpoints = EndpointList(
+                request=request,
+                endpoints=endpoints,
+                finding_notes=finding_notes,
+                finding_images=finding_images,
+                host=host,
+                user_id=user_id,
+            )
+            selected_widgets[list(widget.keys())[0] + "-" + str(idx)] = endpoints
 
         if list(widget.keys())[0] == "finding-list":
+            d = convert_to_querydict(widget.get(list(widget.keys())[0]))
             findings = Finding.objects.all()
-            d = QueryDict(mutable=True)
-            for item in widget.get(list(widget.keys())[0]):
-                if item["name"] in d:
-                    d.appendlist(item["name"], item["value"])
-                else:
-                    d[item["name"]] = item["value"]
             filter_string_matching = get_system_setting("filter_string_matching", False)
             filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
             findings = filter_class(d, queryset=findings)

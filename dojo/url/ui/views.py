@@ -8,20 +8,6 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import (
-    Case,
-    CharField,
-    Count,
-    F,
-    IntegerField,
-    OuterRef,
-    Q,
-    QuerySet,
-    Subquery,
-    Value,
-    When,
-)
-from django.db.models.functions import Coalesce
 from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -37,11 +23,13 @@ from dojo.forms import (
     ImportEndpointMetaForm,
 )
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.location.queries import get_authorized_locations
+from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
+from dojo.reports.views import generate_report
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
+from dojo.url.queries import annotate_host_contents
 from dojo.url.ui.forms import URLForm
 from dojo.utils import (
     Product_Tab,
@@ -81,59 +69,6 @@ def vulnerable_endpoints(request):
 
 def vulnerable_endpoint_hosts(request):
     return process_endpoints_view(request, host_view=True, vulnerable=True)
-
-
-def annotate_host_contents(queryset: QuerySet[Location]) -> QuerySet[Location]:
-    """This essentially replaces the `overall_status` annotation helper on the manager class"""
-    # Annotate the queryset with counts of findings per host.
-    # This aggregates the total and active findings for each host by joining LocationFindingReference.
-    finding_host_counts = (
-        LocationFindingReference.objects.prefetch_related("location__url")
-        .filter(location__url__host=OuterRef("url__host"))
-        .values("location__url__host")
-        .annotate(
-            total_findings=Count("finding_id", distinct=True),
-            active_findings=Count(
-                "finding_id",
-                filter=Q(status=FindingLocationStatus.Active),
-                distinct=True,
-            ),
-        )
-        .order_by("location__url__host")
-    )
-    # Annotate the queryset with counts of products per host.
-    # This aggregates the total and active products for each host by joining LocationProductReference.
-    product_host_counts = (
-        LocationProductReference.objects.prefetch_related("location__url")
-        .filter(location__url__host=OuterRef("url__host"))
-        .values("location__url__host")
-        .annotate(
-            total_products=Count("product_id", distinct=True),
-            active_products=Count(
-                "product_id",
-                filter=Q(status=ProductLocationStatus.Active),
-                distinct=True,
-            ),
-        )
-        .order_by("location__url__host")
-    )
-    # Annotate each Location with host, findings, products, and overall status.
-    return queryset.prefetch_related("url").annotate(
-        host=Coalesce(F("url__host"), Value("", output_field=CharField())),
-        total_findings=Coalesce(Subquery(finding_host_counts.values("total_findings")[:1]), Value(0), output_field=IntegerField()),
-        active_findings=Coalesce(Subquery(finding_host_counts.values("active_findings")[:1]), Value(0), output_field=IntegerField()),
-        total_products=Coalesce(Subquery(product_host_counts.values("total_products")[:1]), Value(0), output_field=IntegerField()),
-        active_products=Coalesce(Subquery(product_host_counts.values("active_products")[:1]), Value(0), output_field=IntegerField()),
-        mitigated_findings=F("total_findings") - F("active_findings"),
-        overall_status=Case(
-            When(
-                Q(active_products__gt=0) | Q(active_findings__gt=0),
-                then=Value(ProductLocationStatus.Active),
-            ),
-            default=Value(ProductLocationStatus.Mitigated),
-            output_field=CharField(),
-        ),
-    )
 
 
 def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=False):
@@ -313,7 +248,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         # Endpoint view: show all endpoints with overall status annotation
         view_name += " Endpoints"
-        locations = URLFilter(request.GET, queryset=locations.overall_status(), user=request.user)
+        locations = URLFilter(request.GET, queryset=annotate_location_counts_and_status(locations), user=request.user)
         # Count total and mitigated endpoints after filtering
         location_count = locations.qs.count()
         mitigated_location_count = locations.qs.filter(overall_status=ProductLocationStatus.Mitigated).count()
@@ -681,3 +616,15 @@ def migrate_endpoints_view(request):
         request, "dojo/migrate_endpoints.html", {
             "name": view_name,
         })
+
+
+@user_is_authorized(Location, Permissions.Location_View, "location_id")
+def endpoint_report(request, location_id):
+    location = get_object_or_404(Location, id=location_id)
+    return generate_report(request, location, host_view=False)
+
+
+@user_is_authorized(Location, Permissions.Location_View, "location_id")
+def endpoint_host_report(request, location_id):
+    location = get_object_or_404(Location, id=location_id)
+    return generate_report(request, location, host_view=True)

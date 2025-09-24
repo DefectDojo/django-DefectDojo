@@ -9,6 +9,8 @@ from dojo.url.ui.views import (
     delete_endpoint,
     edit_endpoint,
     endpoint_bulk_update_all,
+    endpoint_host_report,
+    endpoint_report,
     finding_location_bulk_update,
     import_endpoint_meta,
     manage_meta_data,
@@ -43,4 +45,8 @@ urlpatterns = [
     ),
     re_path(r"^endpoint/(?P<finding_id>\d+)/bulk_status$", finding_location_bulk_update, name="endpoints_status_bulk"),
     re_path(r"^endpoint/migrate$", migrate_endpoints_view, name="endpoint_migrate"),
+    re_path(r"^endpoint/(?P<location_id>\d+)/report$", endpoint_report,
+        name="endpoint_report"),
+    re_path(r"^endpoint/host/(?P<location_id>\d+)/report$", endpoint_host_report,
+        name="endpoint_host_report"),
 ]
