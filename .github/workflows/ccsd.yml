@@ -63,36 +63,18 @@ jobs:
             cd /opt/
             rm -rf diplom_defect
 
-            echo "Downloading repository as ZIP..."
-            git clone https://github.com/nasekaylovm-cyber/diplom_defect/archive/refs/heads/main.zip
-            unzip repo.zip
-            mv diplom_defect-main diplom_defect
-            rm repo.zip
-            
-            cd diplom_defect
+            git clone https://github.com/DefectDojo/django-DefectDojo
+            sleep 300
+            cd django-DefectDojo
+
+            ./docker/docker-compose-check.sh
+
             docker compose build
-            sleep 1000
-            docker-compose up -d
-            sleep 1000
-            echo "Deployment done! Containers:"
+            sleep 300
+            
+            docker compose up -d
+            sleep 300
+            
+            docker compose logs initializer | grep "Admin password:"
    
-  dast:  
-    name: DAST Analysis
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.10.0
-        with:
-          target: 'http://5.129.250.92'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          
-      - name: Upload DAST results
-        uses: actions/upload-artifact@v3
-        with:
-          name: dast-results
-          path: zap-report.html
-
-
-
+ 
