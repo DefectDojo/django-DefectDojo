@@ -49,6 +49,7 @@ class SonarQubeRESTAPIJSON:
                         static_finding=True,
                         dynamic_finding=False,
                         tags=["bug"],
+                        line=line,
                     )
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
@@ -58,6 +59,7 @@ class SonarQubeRESTAPIJSON:
                     flows = issue.get("flows", [])
                     status = issue.get("status")
                     message = issue.get("message")
+                    line = str(issue.get("line"))
                     cwe = None
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
@@ -91,6 +93,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
+                    description += "**line:** " + line + "\n"
                     if flows != []:
                         description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
@@ -115,6 +118,7 @@ class SonarQubeRESTAPIJSON:
                         cvssv3_score=cvss,
                         file_path=component,
                         tags=["vulnerability"],
+                        line=line,
                     )
                     vulnids = []
                     if "Reference: CVE" in message:
@@ -180,6 +184,7 @@ class SonarQubeRESTAPIJSON:
                         dynamic_finding=False,
                         file_path=component,
                         tags=["code_smell"],
+                        line=line,
                     )
                 items.append(item)
         if json_content.get("hotspots"):
@@ -223,6 +228,7 @@ class SonarQubeRESTAPIJSON:
                     dynamic_finding=False,
                     file_path=component,
                     tags=["hotspot"],
+                    line=line,
                 )
                 items.append(item)
         return items
