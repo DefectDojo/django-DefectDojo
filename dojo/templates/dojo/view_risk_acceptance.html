@@ -149,7 +149,8 @@
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
                         <td>
                             {% if risk_acceptance.expiration_date %}
-                                {{ risk_acceptance.expiration_date|date }}
+                                <input type="text" id="calendar" name="expiration_date", value="{{ risk_acceptance.expiration_date|date:'m/d/y' }}" readonly>
+                                <i class="fa-solid fa-pencil"></i>
                             {% else %}
                                 Never
                             {% endif %}
@@ -523,7 +524,16 @@
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
 <script type="text/javascript">
+    $(document).ready(function() {
+    $('#calendar').datepicker({
+        format: 'yyyy-mm-dd',
+        language: 'es',
+        autoclose: true,
+        todayHighlight: true
+    });
+    });
     $(document).ready(function() {
         var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
             entries.forEach(function (entry) {
