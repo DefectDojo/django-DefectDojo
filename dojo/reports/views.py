@@ -28,6 +28,7 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.location.models import Location
+from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.reports.widgets import (
@@ -86,18 +87,23 @@ class ReportBuilder(View):
         return filter_class(self.request.GET, queryset=findings)
 
     def get_endpoints(self, request: HttpRequest):
-        endpoints = Endpoint.objects.filter(finding__active=True,
-                                            finding__false_p=False,
-                                            finding__duplicate=False,
-                                            finding__out_of_scope=False,
-                                            )
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            endpoints = endpoints.filter(finding__active=True)
-
-        endpoints = endpoints.distinct()
-
-        filter_string_matching = get_system_setting("filter_string_matching", False)
-        filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+            filter_class = URLFilter
+        else:
+            endpoints = Endpoint.objects.filter(
+                finding__active=True,
+                finding__false_p=False,
+                finding__duplicate=False,
+                finding__out_of_scope=False,
+            )
+            if get_system_setting("enforce_verified_status", True) or get_system_setting(
+                "enforce_verified_status_metrics", True
+            ):
+                endpoints = endpoints.filter(finding__active=True)
+            endpoints = endpoints.distinct()
+            filter_string_matching = get_system_setting("filter_string_matching", False)
+            filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
         return filter_class(request.GET, queryset=endpoints, user=request.user)
 
     def get_available_widgets(self, request: HttpRequest) -> list[Widget]:
@@ -200,32 +206,24 @@ def report_findings(request):
 
 def report_endpoints(request):
     if settings.V3_FEATURE_LOCATIONS:
-        pass  # TODO: Implement Locations
-        endpoints = Location.objects.filter(
+        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = URLFilter(request.GET, queryset=endpoints)
+    else:
+        # TODO: Delete this after the move to Locations
+        endpoints = Endpoint.objects.filter(
             finding__active=True,
             finding__false_p=False,
             finding__duplicate=False,
             finding__out_of_scope=False,
         )
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting(
+            "enforce_verified_status_metrics", True
+        ):
             endpoints = endpoints.filter(finding__active=True)
-        endpoints = endpoints.distinct()
-        endpoints = URLFilter(request.GET, queryset=endpoints, user=request.user)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    else:
-        # TODO: Delete this after the move to Locations
-        endpoints = Endpoint.objects.filter(finding__active=True,
-                                            finding__false_p=False,
-                                            finding__duplicate=False,
-                                            finding__out_of_scope=False,
-                                            )
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            endpoints = endpoints.filter(finding__active=True)
-
         endpoints = endpoints.distinct()
         endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
     return render(request,
                   "dojo/report_endpoints.html",
@@ -276,23 +274,13 @@ def test_report(request, tid):
     return generate_report(request, test)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
-def endpoint_report(request, eid):
-    endpoint = get_object_or_404(Endpoint, id=eid)
-    return generate_report(request, endpoint, host_view=False)
-
-
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
-def endpoint_host_report(request, eid):
-    endpoint = get_object_or_404(Endpoint, id=eid)
-    return generate_report(request, endpoint, host_view=True)
-
-
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     if settings.V3_FEATURE_LOCATIONS:
-        pass  # TODO: Implement Locations
+        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
         endpoints = Endpoint.objects.filter(finding__active=True,
@@ -300,12 +288,11 @@ def product_endpoint_report(request, pid):
                                             finding__duplicate=False,
                                             finding__out_of_scope=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            endpoint_ids = endpoints.filter(finding__active=True).values_list("id", flat=True)
-        endpoint_ids = endpoints.values_list("id", flat=True)
-        endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
+            endpoints = endpoints.filter(finding__active=True)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
         endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     report_format = request.GET.get("report_type", "HTML")
     include_finding_notes = int(request.GET.get("include_finding_notes", 0))
     include_finding_images = int(request.GET.get("include_finding_images", 0))
@@ -461,7 +448,7 @@ def generate_report(request, obj, *, host_view=False):
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         if settings.V3_FEATURE_LOCATIONS:
-            pass  # TODO: Implement Locations
+            endpoints = Location.objects.prefetch_related("products__product").filter(products__product=product).distinct()
         else:
             # TODO: Delete this after the move to Locations
             endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -495,7 +482,7 @@ def generate_report(request, obj, *, host_view=False):
         ids = findings.qs.values_list("id", flat=True)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         if settings.V3_FEATURE_LOCATIONS:
-            pass  # TODO: Implement Locations
+            endpoints = Location.objects.prefetch_related("products__product").filter(products__product=engagement.product).distinct()
         else:
             # TODO: Delete this after the move to Locations
             endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
@@ -540,24 +527,21 @@ def generate_report(request, obj, *, host_view=False):
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
 
+    # TODO: Delete this after the move to Locations
     elif isinstance(obj, Endpoint):
-        if settings.V3_FEATURE_LOCATIONS:
-            pass  # TODO: Implement Locations
+        endpoint = obj
+        if host_view:
+            report_name = "Endpoint Host Report: " + endpoint.host
+            endpoints = Endpoint.objects.filter(host=endpoint.host,
+                                                product=endpoint.product).distinct()
+            report_title = "Endpoint Host Report"
         else:
-            # TODO: Delete this after the move to Locations
-            endpoint = obj
-            if host_view:
-                report_name = "Endpoint Host Report: " + endpoint.host
-                endpoints = Endpoint.objects.filter(host=endpoint.host,
-                                                    product=endpoint.product).distinct()
-                report_title = "Endpoint Host Report"
-            else:
-                report_name = "Endpoint Report: " + str(endpoint)
-                endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
-                report_title = "Endpoint Report"
-            template = "dojo/endpoint_pdf_report.html"
-            findings = report_finding_filter_class(request.GET,
-                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
+            report_name = "Endpoint Report: " + str(endpoint)
+            endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
+            report_title = "Endpoint Report"
+        template = "dojo/endpoint_pdf_report.html"
+        findings = report_finding_filter_class(request.GET,
+                                    queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {"endpoint": endpoint,
                    "endpoints": endpoints,
@@ -574,6 +558,40 @@ def generate_report(request, obj, *, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
+
+    elif isinstance(obj, Location):
+        endpoint = obj
+        if host_view:
+            report_name = "Endpoint Host Report: " + endpoint.url.host
+            endpoints = Location.objects.prefetch_related("url").filter(url__host=endpoint.url.host).distinct()
+            report_title = "Endpoint Host Report"
+        else:
+            report_name = "Endpoint Report: " + str(endpoint)
+            endpoints = Location.objects.filter(id=endpoint.id).distinct()
+            report_title = "Endpoint Report"
+        template = "dojo/endpoint_pdf_report.html"
+        findings = report_finding_filter_class(
+            request.GET,
+            queryset=prefetch_related_findings_for_report(Finding.objects.filter(locations__location__in=endpoints)),
+        )
+
+        context = {
+            "endpoint": endpoint,
+            "endpoints": endpoints,
+            "report_name": report_name,
+            "findings": findings.qs.distinct().order_by("numerical_severity"),
+            "include_finding_notes": include_finding_notes,
+            "include_finding_images": include_finding_images,
+            "include_executive_summary": include_executive_summary,
+            "include_table_of_contents": include_table_of_contents,
+            "include_disclaimer": include_disclaimer,
+            "disclaimer": disclaimer,
+            "user": user,
+            "team_name": get_system_setting("team_name"),
+            "title": report_title,
+            "host": report_url_resolver(request),
+            "user_id": request.user.id,
+        }
 
     elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
@@ -641,10 +659,12 @@ def generate_report(request, obj, *, host_view=False):
     elif product:
         product_tab = Product_Tab(product, title="Product Report", tab="findings")
     elif endpoints:
-        if host_view:
-            product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
-        else:
-            product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            if host_view:
+                product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
+            else:
+                product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
 
     return render(request, "dojo/request_report.html",
                   {"product_type": product_type,

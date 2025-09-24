@@ -37,7 +37,6 @@ from polymorphic.base import ManagerInheritanceWarning
 
 # from tagulous.forms import TagWidget
 # import tagulous
-from dojo.api_helpers.filters import StaticMethodFilters
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -55,7 +54,7 @@ from dojo.finding.helper import (
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
-from dojo.location.status import FindingLocationStatus
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,
@@ -487,6 +486,34 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
             ])
 
     return fields
+
+
+def filter_endpoints_base(queryset, name, value, statuses=None, host=None):
+    """
+    Apply `endpoints` filter, and if location_status or host
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location": value}
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+    if host:
+        filters_kwargs["locations__location__url__host__icontains"] = host
+
+    return queryset.filter(**filters_kwargs)
+
+
+def filter_endpoints_host_base(queryset, name, value, statuses=None, endpoint_id=None):
+    """
+    Apply `endpoints__host` filter, and if endpoints or location_status
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location__url__host__icontains": value}
+    if endpoint_id:
+        filters_kwargs["locations__location"] = endpoint_id
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+
+    return queryset.filter(**filters_kwargs)
 
 
 class FindingTagFilter(DojoFilter):
@@ -1279,9 +1306,33 @@ class ProductFilterHelper(FilterSet):
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
     if settings.V3_FEATURE_LOCATIONS:
-        endpoints__host = CharFilter(field_name="locations__location__url__host", lookup_expr="icontains", label="Endpoint Host")
-        endpoints = NumberFilter(field_name="locations__location", widget=HiddenInput())
-        StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=ProductLocationStatus.choices,
+            help_text="Status of the Location from the Products relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1704,10 +1755,35 @@ class FindingFilterHelper(FilterSet):
         choices=Product.LIFECYCLE_CHOICES,
         label="Product lifecycle")
     if settings.V3_FEATURE_LOCATIONS:
-        endpoints__host = CharFilter(field_name="locations__location__url__host", lookup_expr="icontains", label="Endpoint Host")
-        endpoints = NumberFilter(field_name="locations__location", widget=HiddenInput())
-        StaticMethodFilters.create_choice_filters("locations__status", "Location Status", FindingLocationStatus.choices, locals())
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=FindingLocationStatus.choices,
+            help_text="Status of the Location from the Findings relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
     else:
+        # TODO: Delete this after the move to Locations
         endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
         endpoints = NumberFilter(widget=HiddenInput())
 

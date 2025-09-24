@@ -121,14 +121,16 @@ class Location(BaseModel):
         # Determine if we need to update
         # Ensure atomicity to prevent race conditions
         with transaction.atomic():
-            # Associate the product for this finding (already uses update_or_create)
-            self.associate_with_product(finding.test.engagement.product)
-            # Now associate the finding with the location
-            return LocationFindingReference.objects.update_or_create(
+            # Associate the finding with the location
+            reference = LocationFindingReference.objects.update_or_create(
                 location=self,
                 finding=finding,
                 defaults=context_fields,
             )[0]
+            # Now associate the product for this finding (already uses update_or_create)
+            self.associate_with_product(finding.test.engagement.product)
+
+            return reference
 
     def associate_with_product(
         self,
@@ -148,6 +150,17 @@ class Location(BaseModel):
                 product=product,
                 defaults={"status": status},
             )[0]
+
+    @property
+    def active_annotated_findings(self):
+        """
+        This is a hack used exclusively to generate endpoint reports where findings
+        are fetched from the findings rather than the findings being fetched directly.
+        """
+        # If we prefetched refs, expose the actual Finding objects
+        if hasattr(self, "_active_annotated_findings"):
+            return [ref.finding for ref in self._active_annotated_findings]
+        return []
 
     class Meta:
         verbose_name = "Locations - Location"

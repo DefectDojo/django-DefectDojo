@@ -24,7 +24,7 @@
                                     {% for endpoint in endpoints %}
                                         <tr>
                                             {% if V3_FEATURE_LOCATIONS %}
-                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.created|date }}</td>
                                                 <td>{{ endpoint.audit_time|date}}</td>
@@ -57,14 +57,20 @@
                                 <thead>
                                     <th>Endpoint</th>
                                     <th>Status</th>
-                                    <th>Mitigator</th>
-                                    <th>Mitigation Time</th>
+                                    {% if V3_FEATURE_LOCATIONS %}
+                                        <th>Auditor</th>
+                                        <th>Audit Time</th>
+                                    {% else %}
+                                        {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                        <th>Mitigator</th>
+                                        <th>Mitigation Time</th>
+                                    {% endif %}
                                 </thead>
                                 <tbody>
                                     {% for endpoint in endpoints %}
                                         <tr>
                                             {% if V3_FEATURE_LOCATIONS %}
-                                                <td style="word-break: break-word">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
+                                                <td style="word-break: break-word">{{ endpoint.location }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</td>
                                                 <td>{{ endpoint.status }}</td>
                                                 <td>{{ endpoint.auditor|safe }}</td>
                                                 <td>{{ endpoint.audit_time|date }}</td>
@@ -224,8 +230,14 @@
                                 {% endif %}
                                 <th>Endpoint</th>
                                 <th>Status</th>
-                                <th>Auditor</th>
-                                <th>Audit Time</th>
+                                {% if V3_FEATURE_LOCATIONS %}
+                                    <th>Auditor</th>
+                                    <th>Audit Time</th>
+                                {% else %}
+                                    {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                    <th>Mitigator</th>
+                                    <th>Mitigation Time</th>
+                                {% endif %}
                             </thead>
                             <tbody>
                                 {% for endpoint in endpoints %}

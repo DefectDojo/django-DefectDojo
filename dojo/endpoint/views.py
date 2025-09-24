@@ -30,6 +30,7 @@ from dojo.forms import (
 )
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
+from dojo.reports.views import generate_report
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -488,3 +489,15 @@ def import_endpoint_meta(request, pid):
         "product_tab": product_tab,
         "form": form,
     })
+
+
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
+def endpoint_report(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    return generate_report(request, endpoint, host_view=False)
+
+
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
+def endpoint_host_report(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    return generate_report(request, endpoint, host_view=True)
