@@ -1,4 +1,4 @@
-name: Secure CI/CD Pipeline
+name: SAST Pipeline
 
 
 on:
