@@ -1,17 +1,18 @@
-name: "Build For Testing"
+name: Build For Testing
 
 on:
-  # inspired by https://github.com/orgs/community/discussions/26801 we take the runs-on as parameter so we can run arm64 on native hardwarde
   workflow_dispatch:
     inputs:
-        platform:
-          type: string
-          default: "linux/amd64"
+      platform:
+        type: string
+        default: "linux/amd64"
+        description: Target platform for building
   workflow_call:
     inputs:
-        platform:
-          type: string
-          default: "linux/amd64"
+      platform:
+        type: string
+        default: "linux/amd64"
+        description: Target platform for building
 
 jobs:
   build:
