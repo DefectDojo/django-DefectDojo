@@ -639,3 +639,31 @@ class JIRAWebhookTest(DojoTestCase):
                                     content_type="application/json")
 
         self.assertEqual(200, response.status_code, response.content[:1000])
+
+    def test_webhook_issue_updated_extracts_comment(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        # finding 5 has a JIRA issue in the initial fixture for unit tests with id=2
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_before = finding.notes.count()
+
+        body = json.loads(self.jira_issue_update_template_string)
+        # Ensure we're targeting the linked issue id
+        body["issue"]["id"] = 2
+
+        response = self.client.post(
+            reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+            body,
+            content_type="application/json",
+        )
+
+        jira_issue.refresh_from_db()
+        finding = jira_issue.finding
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(finding.notes.count(), notes_count_before + 1)
+
+        # Verify the created note content matches expected extraction format
+        last_note = finding.notes.order_by("-id").first()
+        self.assertIsNotNone(last_note)
+        self.assertEqual(last_note.entry, "(Valentijn Scholten (valentijn)): test2")

@@ -91,8 +91,6 @@ env = environ.FileAwareEnv(
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
-    DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -783,10 +781,7 @@ TEAM_NAME = env("DD_TEAM_NAME")
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
 
-# Django-tagging settings
-FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
-MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
-
+# V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
 
 
@@ -894,7 +889,6 @@ INSTALLED_APPS = (
     "auditlog",
     "dojo",
     "watson",
-    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     "imagekit",
     "multiselectfield",
     "rest_framework",
