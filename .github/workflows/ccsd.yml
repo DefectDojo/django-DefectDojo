@@ -70,10 +70,10 @@ jobs:
             ./docker/docker-compose-check.sh
 
             docker compose build
-            sleep 300
+            sleep 1000
             
             docker compose up -d
-            sleep 300
+            sleep 1000
             
             docker compose logs initializer | grep "Admin password:"
    
