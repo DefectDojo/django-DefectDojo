@@ -20,10 +20,10 @@ from dojo.filters import (
 from dojo.forms import CustomReportOptionsForm
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
-from dojo.url.filters import URLFilter
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.settings import settings
+from dojo.url.filters import URLFilter
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
 """
@@ -372,7 +372,7 @@ class EndpointList(Widget):
 
 
 def report_widget_factory(
-    json_data=None, request=None, user=None, *, finding_notes=False, finding_images=False, host=None
+    json_data=None, request=None, user=None, *, finding_notes=False, finding_images=False, host=None,
 ):
     def convert_to_querydict(data):
         d = QueryDict(mutable=True)
@@ -404,7 +404,7 @@ def report_widget_factory(
                     finding__out_of_scope=False,
                 )
                 if get_system_setting("enforce_verified_status", True) or get_system_setting(
-                    "enforce_verified_status_metrics", True
+                    "enforce_verified_status_metrics", True,
                 ):
                     endpoints = endpoints.filter(finding__verified=True)
 
