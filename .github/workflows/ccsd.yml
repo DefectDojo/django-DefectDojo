@@ -59,6 +59,7 @@ jobs:
           host: 5.129.250.92
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_timeout: 10m
           script: |
             cd /opt/
             rm -rf django-DefectDojo
