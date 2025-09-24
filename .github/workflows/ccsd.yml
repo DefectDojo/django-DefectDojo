@@ -61,7 +61,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/
-            rm -rf diplom_defect
+            rm -rf django-DefectDojo
 
             git clone https://github.com/DefectDojo/django-DefectDojo
             sleep 300
