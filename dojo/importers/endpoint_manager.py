@@ -43,7 +43,7 @@ class EndpointManager:
                     product=finding.test.engagement.product)
                 if hasattr(endpoint, 'unsaved_tags') and endpoint.unsaved_tags:
                     logger.debug(f"Applying tags to endpoint {ep.host}: {endpoint.unsaved_tags}")
-                    ep.tags.add(*[tag.lower() for tag in endpoint.unsaved_tags])
+                    ep.tags.add(*[tag.lower() for tag in endpoint.unsaved_tags]) 
             except (MultipleObjectsReturned):
                 msg = (
                     f"Endpoints in your database are broken. "
