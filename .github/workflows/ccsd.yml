@@ -65,17 +65,12 @@ jobs:
             rm -rf django-DefectDojo
 
             git clone https://github.com/DefectDojo/django-DefectDojo
-            sleep 300
+            
             cd django-DefectDojo
 
-            ./docker/docker-compose-check.sh
-
-            docker compose build
-            sleep 1000
-            
-            docker compose up -d
-            sleep 1000
-            
-            docker compose logs initializer | grep "Admin password:"
-   
- 
+      - name: Initialize
+        timeout-minutes: 10
+        run: docker compose up --no-deps --exit-code-from initializer initializer
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: alpine
