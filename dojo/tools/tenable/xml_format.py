@@ -240,6 +240,11 @@ class TenableXMLParser:
                         item.find("cwe"),
                     )
 
+                    if cwe_element_text is not None:
+                        match = re.search(r"\d+", cwe_element_text)
+                        if match:
+                            cwe = int(match.group())
+
                     # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
                     # if not cwe:
                     #     for ref in item.iter("xref"):
@@ -248,11 +253,6 @@ class TenableXMLParser:
                     #             cwe = parse_cwe_from_ref(ref_text)
                     #             if cwe > 0:
                     #                 break
-
-                    if cwe_element_text is not None:
-                        match = re.search(r"\d+", cwe_element_text)
-                        if match:
-                            cwe = int(match.group())
 
                     cvssv3 = None
                     cvssv3_element_text = self.safely_get_element_text(
