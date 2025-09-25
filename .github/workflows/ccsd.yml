@@ -18,7 +18,7 @@ jobs:
   build:
     name: Build Application
     #needs: sast
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       
@@ -49,7 +49,7 @@ jobs:
   deploy:
     name: Deploy to Server
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       
