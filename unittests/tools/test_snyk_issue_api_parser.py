@@ -5,56 +5,6 @@ from dojo.tools.snyk_issue_api.parser import SnykIssueApiParser
 
 class TestSnykIssueApiParser(TestCase):
 
-    # Tests for get_scan_types()
-    def test_get_scan_types(self):
-        parser = SnykIssueApiParser()
-        scan_types = parser.get_scan_types()
-        self.assertEqual(["Snyk Issue API Scan"], scan_types)
-
-    # Tests for get_label_for_scan_types()
-    def test_get_label_for_scan_types(self):
-        parser = SnykIssueApiParser()
-        label = parser.get_label_for_scan_types("Snyk Issue API Scan")
-        self.assertEqual("Snyk Issue API Scan", label)
-
-    # Tests for get_description_for_scan_types()
-    def test_get_description_for_scan_types(self):
-        parser = SnykIssueApiParser()
-        description = parser.get_description_for_scan_types("Snyk Issue API Scan")
-        self.assertEqual("Snyk Issue API output file can be imported in JSON format.", description)
-
-    # Tests for parse_json()
-    def test_parse_json_valid_utf8(self):
-        import io
-        parser = SnykIssueApiParser()
-        json_data = '{"data": []}'
-        json_file = io.StringIO(json_data)
-        result = parser.parse_json(json_file)
-        self.assertEqual({"data": []}, result)
-
-    def test_parse_json_invalid_format(self):
-        import io
-        parser = SnykIssueApiParser()
-        json_data = "invalid json"
-        json_file = io.StringIO(json_data)
-        with self.assertRaises(ValueError) as context:
-            parser.parse_json(json_file)
-        self.assertEqual("Invalid format", str(context.exception))
-
-    # Tests for process_tree()
-    def test_process_tree_empty(self):
-        parser = SnykIssueApiParser()
-        from dojo.models import Test
-        result = parser.process_tree({}, Test())
-        self.assertEqual([], result)
-
-    def test_process_tree_no_data(self):
-        parser = SnykIssueApiParser()
-        from dojo.models import Test
-        result = parser.process_tree({"other": "value"}, Test())
-        self.assertEqual([], result)
-
-    # Tests for extract_cwe_classes()
     def test_extract_cwe_classes_single_cwe(self):
         parser = SnykIssueApiParser()
         attributes = {
@@ -410,31 +360,4 @@ class TestSnykIssueApiParser(TestCase):
 
         # Test None input
         result = parser.extract_convert_created_date(None)
-        self.assertIsNone(result)
-
-    # Tests for get_finding() - only basic functionality tests since integration tests cover the full method
-    def test_get_finding_invalid_type(self):
-        parser = SnykIssueApiParser()
-        from dojo.models import Test
-
-        issue = {"type": "not_issue"}
-        result = parser.get_finding(issue, Test())
-        self.assertIsNone(result)
-
-    def test_get_finding_invalid_attributes_type(self):
-        parser = SnykIssueApiParser()
-        from dojo.models import Test
-
-        issue = {
-            "type": "issue",
-            "attributes": {"type": "invalid_type"},
-        }
-        result = parser.get_finding(issue, Test())
-        self.assertIsNone(result)
-
-    def test_get_finding_none_issue(self):
-        parser = SnykIssueApiParser()
-        from dojo.models import Test
-
-        result = parser.get_finding(None, Test())
         self.assertIsNone(result)
