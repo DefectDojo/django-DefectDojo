@@ -1405,10 +1405,15 @@ def update_epic(engagement, **kwargs):
             epic_name = kwargs.get("epic_name")
             if not epic_name:
                 epic_name = engagement.name
+            
+            description = epic_name
+            branch_tag = engagement.branch_tag
+            if branch_tag:
+                description += "\nBranch: " + branch_tag
 
             jira_issue_update_kwargs = {
                 "summary": epic_name,
-                "description": epic_name,
+                "description": description,
             }
             if (epic_priority := kwargs.get("epic_priority")) is not None:
                 jira_issue_update_kwargs["priority"] = {"name": epic_priority}
@@ -1443,12 +1448,16 @@ def add_epic(engagement, **kwargs):
         epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
+        description = epic_name
+        branch_tag = engagement.branch_tag
+        if branch_tag:
+            description += "\nBranch: " + branch_tag
         issue_dict = {
             "project": {
                 "key": jira_project.project_key,
             },
             "summary": epic_name,
-            "description": epic_name,
+            "description": description,
             "issuetype": {
                 "name": epic_issue_type_name,
             },
