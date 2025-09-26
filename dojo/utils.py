@@ -1616,7 +1616,8 @@ def calculate_grade_internal(product, *args, **kwargs):
             product.prod_numeric_grade = prod_numeric_grade
             super(Product, product).save()
         else:
-            logger.debug("Product %s grade %i is up to date", product.id, prod_numeric_grade)
+            # Use %s to safely handle None grades without formatter errors
+            logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
 
 
 def perform_product_grading(product):
