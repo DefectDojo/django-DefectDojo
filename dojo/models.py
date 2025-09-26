@@ -1653,7 +1653,7 @@ class Engagement(models.Model):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
             from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
-            perform_product_grading(self.test.engagement.product)
+            perform_product_grading(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2260,7 +2260,7 @@ class Test(models.Model):
                 # Suppressing a potential issue created from async delete removing
                 # related objects in a separate task
                 from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
-                perform_product_grading(self.test.engagement.product)
+                perform_product_grading(self.engagement.product)
 
     @property
     def statistics(self):
