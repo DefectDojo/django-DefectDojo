@@ -19,7 +19,6 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.utils import calculate_grade
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -312,10 +311,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Note: All chord batching is now handled within the loop above
 
         # Synchronous tasks were already executed during processing, just calculate grade
-        product = self.test.engagement.product
-        system_settings = System_Settings.objects.get()
-        if system_settings.enable_product_grade:
-            calculate_grade(product)
+        self.perform_product_grading()
 
         # Process the results and return them back
         return self.process_results(**kwargs)
@@ -361,10 +357,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         # Calculate grade once after all findings have been closed
         if mitigated_findings:
-            product = self.test.engagement.product
-            system_settings = System_Settings.objects.get()
-            if system_settings.enable_product_grade:
-                calculate_grade(product)
+            self.perform_product_grading()
 
         return mitigated_findings
 
