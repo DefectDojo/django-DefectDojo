@@ -41,7 +41,7 @@ class NucleiParser:
             data.extend(json.loads(line) for line in file if line)
         dupes = {}
         for item in data:
-            logger.debug("Item %s.", str(item))
+            logger.debug("Item %s.", item)
             template_id = item.get("templateID", item.get("template-id", ""))
             info = item.get("info")
             name = info.get("name")
@@ -148,7 +148,7 @@ class NucleiParser:
             ).hexdigest()
 
             if dupe_key in dupes:
-                logger.debug("dupe_key %s exists.", str(dupe_key))
+                logger.debug("dupe_key %s exists.", dupe_key)
                 finding = dupes[dupe_key]
                 if endpoint not in finding.unsaved_endpoints:
                     finding.unsaved_endpoints.append(endpoint)
