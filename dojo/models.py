@@ -1652,7 +1652,8 @@ class Engagement(models.Model):
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.product)
+            from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+            perform_product_grading(self.test.engagement.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2258,9 +2259,8 @@ class Test(models.Model):
             with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
                 # Suppressing a potential issue created from async delete removing
                 # related objects in a separate task
-                system_settings = System_Settings.objects.get()
-                if system_settings.enable_product_grade:
-                    calculate_grade(self.engagement.product)
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.test.engagement.product)
 
     @property
     def statistics(self):
@@ -2868,9 +2868,8 @@ class Finding(models.Model):
             with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
                 # Suppressing a potential issue created from async delete removing
                 # related objects in a separate task
-                system_settings = System_Settings.objects.get()
-                if system_settings.enable_product_grade:
-                    calculate_grade(self.test.engagement.product)
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -4713,7 +4712,6 @@ if settings.ENABLE_AUDITLOG:
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
-    calculate_grade,
     parse_cvss_data,
     to_str_typed,
 )

@@ -1619,6 +1619,12 @@ def calculate_grade_internal(product, *args, **kwargs):
             logger.debug("Product %s grade %i is up to date", product.id, prod_numeric_grade)
 
 
+def perform_product_grading(product):
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        calculate_grade(product)
+
+
 def get_celery_worker_status():
     from .tasks import celery_status  # noqa: PLC0415 circular import
     res = celery_status.apply_async()

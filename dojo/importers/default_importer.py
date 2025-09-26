@@ -20,6 +20,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -297,7 +298,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: All chord batching is now handled within the loop above
 
         # Always perform an initial grading, even though it might get overwritten later.
-        self.perform_product_grading()
+        perform_product_grading(self.test.engagement.product)
 
         sync = kwargs.get("sync", True)
         if not sync:
@@ -385,7 +386,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         # Calculate grade once after all findings have been closed
         if old_findings:
-            self.perform_product_grading()
+            perform_product_grading(self.test.engagement.product)
 
         return old_findings
 

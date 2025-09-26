@@ -24,7 +24,6 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding,
-    System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -34,7 +33,7 @@ from dojo.models import (
 from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
-from dojo.utils import calculate_grade, max_safe
+from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
 
@@ -812,9 +811,3 @@ class BaseImporter(ImporterOptions):
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
-
-    def perform_product_grading(self):
-        product = self.test.engagement.product
-        system_settings = System_Settings.objects.get()
-        if system_settings.enable_product_grade:
-            calculate_grade(product)
