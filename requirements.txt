@@ -10,7 +10,7 @@ django-dbbackup==4.3.0
 django-environ==0.12.0
 django-filter==25.1
 django-imagekit==5.0.0
-django-multiselectfield==0.1.13
+django-multiselectfield==1.0.1
 django-polymorphic==4.1.0
 django-crispy-forms==2.4
 django_extensions==4.1
@@ -55,7 +55,8 @@ django-debug-toolbar==5.2.0
 django-debug-toolbar-request-history==0.1.4
 vcrpy==7.0.0
 vcrpy-unittest==0.1.7
-django-tagulous==2.1.1
+# do not upgrade to 2.1.1 - https://github.com/DefectDojo/django-DefectDojo/issues/12918
+django-tagulous==2.1.0
 PyJWT==2.10.1
 cvss==3.6
 django-fieldsignals==0.7.0
