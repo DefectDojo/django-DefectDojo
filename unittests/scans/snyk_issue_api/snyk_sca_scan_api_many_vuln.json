@@ -1,0 +1,625 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "self": "/rest/orgs/11111111111-2222-3333333-4444/issues?version=2024-10-15&limit=100",
+    "first": "/rest/orgs/11111111111-2222-3333333-4444/issues?limit=100&version=2024-10-15",
+    "last": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before=end&limit=100&version=2024-10-15",
+    "prev": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before="
+  },
+  "data": [
+    {
+      "id": "1534153a-33bb-434a-a80e-64690166ee4a",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-400",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pillow",
+                  "package_version": "9.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "high",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "Not Defined"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Not Defined"
+            }
+          ],
+          "sources": []
+        },
+        "ignored": false,
+        "key": "SNYK-PYTHON-PILLOW-6219984",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PILLOW-6219984",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-11T18:25:24.263774Z"
+          }
+        ],
+        "risk": {
+          "factors": [],
+          "score": {
+            "model": "v1",
+            "value": 115
+          }
+        },
+        "severities": [
+          {
+            "level": "high",
+            "modification_time": "2024-03-06T14:09:56.795Z",
+            "score": 7.5,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "version": "3.1"
+          }
+        ],
+        "status": "open",
+        "title": "Denial of Service (DoS)",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-11T18:25:22.457Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "11111111111-2222-3333333-4444",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "1111111-1111-1111-1111-11111",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444/projects/1111111-1111-1111-1111-11111"
+          }
+        }
+      }
+    },
+    {
+      "id": "834bd190-3f57-46bb-b9ef-e11fee859ab4",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-122",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pillow",
+                  "package_version": "9.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "critical",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "High"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Attacked"
+            }
+          ],
+          "sources": ["CISA", "PoC in GitHub", "Snyk"]
+        },
+        "ignored": true,
+        "key": "SNYK-PYTHON-PILLOW-5918878",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PILLOW-5918878",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          },
+          {
+            "id": "CVE-2023-4863",
+            "source": "NVD",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147504Z",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-4863"
+          }
+        ],
+        "risk": {
+          "factors": [],
+          "score": {
+            "model": "v1",
+            "value": 649
+          }
+        },
+        "severities": [
+          {
+            "level": "critical",
+            "modification_time": "2024-10-01T15:25:03.834Z",
+            "score": 9.6,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H/E:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:47:26.644Z",
+            "score": 8.8,
+            "source": "NVD",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "critical",
+            "modification_time": "2024-03-11T09:54:02.586Z",
+            "score": 9.6,
+            "source": "Red Hat",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:53:37.22Z",
+            "score": 8.8,
+            "source": "SUSE",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          }
+        ],
+        "status": "open",
+        "title": "Heap-based Buffer Overflow",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "11111111111-2222-3333333-4444",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "222222-2222-2222-2222-222222222222",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444/projects/222222-2222-2222-2222-222222222222"
+          }
+        }
+      }
+    },
+    {
+      "id": "f6c21bae-ceba-4239-9568-bae7dc2b16c9",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-95",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pillow",
+                  "package_version": "9.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "high",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "Proof of Concept"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Proof of Concept"
+            }
+          ],
+          "sources": ["Snyk"]
+        },
+        "ignored": true,
+        "key": "SNYK-PYTHON-PILLOW-6182918",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PILLOW-6182918",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147543Z"
+          },
+          {
+            "id": "CVE-2023-50447",
+            "source": "NVD",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147544Z",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-50447"
+          }
+        ],
+        "risk": {
+          "factors": [],
+          "score": {
+            "model": "v1",
+            "value": 239
+          }
+        },
+        "severities": [
+          {
+            "level": "high",
+            "modification_time": "2024-03-06T14:09:52.902Z",
+            "score": 8.1,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:49:52.392Z",
+            "score": 8.1,
+            "source": "NVD",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-31T14:26:22.402Z",
+            "score": 8.1,
+            "source": "Red Hat",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:49:49.469Z",
+            "score": 8.4,
+            "source": "SUSE",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          }
+        ],
+        "status": "open",
+        "title": "Eval Injection",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:15.559Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "11111111111-2222-3333333-4444",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "333333-3333-3333-3333-3333333333",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444/projects/333333-3333-3333-3333-3333333333"
+          }
+        }
+      }
+    },
+    {
+      "id": "b827a682-67a5-4a7e-94df-26ebc4156f74",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-94",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "setuptools",
+                  "package_version": "40.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "high",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "Proof of Concept"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Proof of Concept"
+            }
+          ],
+          "sources": ["Snyk"]
+        },
+        "ignored": true,
+        "key": "SNYK-PYTHON-SETUPTOOLS-7448482",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-SETUPTOOLS-7448482",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-21T07:05:30.476947Z"
+          },
+          {
+            "id": "CVE-2024-6345",
+            "source": "NVD",
+            "type": "vulnerability",
+            "updated_at": "2025-09-21T07:05:30.476949Z",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-6345"
+          }
+        ],
+        "risk": {
+          "factors": [],
+          "score": {
+            "model": "v1",
+            "value": 205
+          }
+        },
+        "severities": [
+          {
+            "level": "high",
+            "modification_time": "2024-08-24T15:25:03.939Z",
+            "score": 7.5,
+            "source": "Snyk",
+            "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P",
+            "version": "4.0"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-08-24T15:25:03.939Z",
+            "score": 7.5,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H/E:P",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-07-15T15:10:53.73Z",
+            "score": 8.8,
+            "source": "Red Hat",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-08-15T11:01:58.643Z",
+            "score": 7,
+            "source": "SUSE",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          }
+        ],
+        "status": "open",
+        "title": "Improper Control of Generation of Code ('Code Injection')",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-21T07:05:28.644Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "11111111111-2222-3333333-4444",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "44444444-44444-4444-4444-44444444444",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444/projects/44444444-44444-4444-4444-44444444444"
+          }
+        }
+      }
+    },
+    {
+      "id": "681e5433-d988-4347-8cb3-572723eac067",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-444",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "h11",
+                  "package_version": "0.14.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-06-03T16:02:54.714Z",
+        "effective_severity_level": "critical",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "Not Defined"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Not Defined"
+            }
+          ],
+          "sources": []
+        },
+        "ignored": false,
+        "key": "SNYK-PYTHON-H11-10293728",
+        "problems": [
+          {
+            "id": "CVE-2025-43859",
+            "source": "NVD",
+            "type": "vulnerability",
+            "updated_at": "2025-06-03T16:24:54.209301Z",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-43859"
+          },
+          {
+            "id": "SNYK-PYTHON-H11-10293728",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-06-03T16:24:54.209299Z"
+          }
+        ],
+        "resolution": {
+          "details": "",
+          "resolved_at": "2025-06-03T16:24:52.31Z",
+          "type": "disappeared"
+        },
+        "severities": [
+          {
+            "level": "critical",
+            "modification_time": "2025-06-03T14:56:22.921Z",
+            "score": 9.3,
+            "source": "Snyk",
+            "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N",
+            "version": "4.0"
+          },
+          {
+            "level": "critical",
+            "modification_time": "2025-06-03T14:56:22.921Z",
+            "score": 9.1,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "version": "3.1"
+          },
+          {
+            "level": "critical",
+            "modification_time": "2025-05-03T11:03:27.869Z",
+            "score": 9.1,
+            "source": "SUSE",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2025-04-29T08:14:46.796Z",
+            "score": 7.4,
+            "source": "Red Hat",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "version": "3.1"
+          }
+        ],
+        "status": "resolved",
+        "title": "HTTP Request Smuggling",
+        "type": "package_vulnerability",
+        "updated_at": "2025-06-03T16:24:52.31Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "11111111111-2222-3333333-4444",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "55555555-5555-5555-5555-5555555555",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/11111111111-2222-3333333-4444/projects/55555555-5555-5555-5555-5555555555"
+          }
+        }
+      }
+    }
+  ]
+}
