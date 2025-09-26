@@ -736,6 +736,10 @@ def get_roles_with_permissions():
             Permissions.Metrics_Panel_Admin,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Finding_Add_Recommendation,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Add,
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
