@@ -1825,7 +1825,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def set_dedupe_inside_engagement(self, deduplication_on_engagement):
         for eng in Engagement.objects.all():
-            logger.debug("setting deduplication_on_engagment to %s for %i", str(deduplication_on_engagement), eng.id)
+            logger.debug("setting deduplication_on_engagment to %s for %i", deduplication_on_engagement, eng.id)
             eng.deduplication_on_engagement = deduplication_on_engagement
             eng.save()
 

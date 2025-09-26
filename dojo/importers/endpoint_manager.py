@@ -84,7 +84,7 @@ class EndpointManager:
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
-                logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+                logger.debug("Re-import: reactivating endpoint %s that is present in this scan", endpoint_status.endpoint)
                 endpoint_status.mitigated_by = None
                 endpoint_status.mitigated_time = None
                 endpoint_status.mitigated = False
