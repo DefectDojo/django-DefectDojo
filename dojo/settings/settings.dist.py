@@ -329,7 +329,7 @@ env = environ.FileAwareEnv(
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled
-    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
