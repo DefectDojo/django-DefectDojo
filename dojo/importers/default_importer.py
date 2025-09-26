@@ -1,13 +1,11 @@
 import logging
 
-from celery import chord, group
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
-from dojo import utils
 from dojo.decorators import we_want_async
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -15,7 +13,6 @@ from dojo.importers.options import ImporterOptions
 from dojo.models import (
     Engagement,
     Finding,
-    System_Settings,
     Test,
     Test_Import,
 )
@@ -253,30 +250,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Check if we should launch a chord (batch full or end of findings)
             if we_want_async(async_user=self.user) and post_processing_task_signatures:
-                # Calculate current batch size: 2^batch_number, capped at max_batch_size
-                # We do this because post processing only starts after all tasks have been added to the chord
-                # So we start with small batches to minmize the delay
-                current_batch_size = min(2 ** current_batch_number, max_batch_size)
-
-                batch_full = len(post_processing_task_signatures) >= current_batch_size
-
-                if batch_full or is_final_finding:
-                    # Launch chord with current batch of signatures
-                    product = self.test.engagement.product
-                    system_settings = System_Settings.objects.get()
-                    if system_settings.enable_product_grade:
-                        calculate_grade_signature = utils.calculate_grade_signature(product)
-                        chord(post_processing_task_signatures)(calculate_grade_signature)
-                    elif post_processing_task_signatures:
-                        # If product grading is disabled, just run the post-processing tasks without the grade calculation callback
-                        group(post_processing_task_signatures).apply_async()
-
-                    logger.debug(f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})")
-
-                    # Reset for next batch (only if not final)
-                    post_processing_task_signatures = []
-                    if not is_final_finding:
-                        current_batch_number += 1
+                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
+                    post_processing_task_signatures,
+                    current_batch_number,
+                    max_batch_size,
+                    is_final_finding,
+                )
             else:
                 # Execute task immediately for synchronous processing
                 post_processing_task_signature()
