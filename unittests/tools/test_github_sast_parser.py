@@ -47,7 +47,6 @@ class TestGithubSASTParser(DojoTestCase):
 
     def test_parse_file_invalid_format_raises(self):
         """Non-list JSON should raise"""
-
         bad_json = io.StringIO('{"not": "a list"}')
         parser = GithubSASTParser()
         with self.assertRaises(TypeError):
