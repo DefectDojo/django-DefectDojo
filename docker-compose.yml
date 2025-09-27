@@ -34,7 +34,7 @@ services:
     build:
       context: ./
       dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
-      target: django
+      target: release
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       initializer:
@@ -120,7 +120,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:17.6-alpine@sha256:3406990b6e4c7192317b6fdc5680498744f6142f01f0287f4ee0420d8c74063c
+    image: postgres:17.6-alpine@sha256:855021a5b10954343902a8c22a15f8464233126c1d12d9ad84d4a14c5af07a80
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}

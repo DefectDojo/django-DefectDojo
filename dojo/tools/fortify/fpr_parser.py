@@ -68,19 +68,19 @@ class FortifyFPRParser:
         related_data = FortifyRelatedData()
         for description in root.findall("Description", self.namespaces):
             class_id = description.attrib.get("classID")
-            logger.debug(f"Description: {class_id}")
+            logger.debug("Description: %s", class_id)
             if class_id:
                 related_data.descriptions[class_id] = self.parse_description_information(description)
 
         for snippet in root.find("Snippets", self.namespaces):
             snippet_id = snippet.attrib.get("id")
-            logger.debug(f"Snippet: {snippet_id}")
+            logger.debug("Snippet: %s", snippet_id)
             if snippet_id:
                 related_data.snippets[snippet_id] = self.parse_snippet_information(snippet)
 
         for rule in root.find("EngineData", self.namespaces).find("RuleInfo", self.namespaces):
             rule_id = rule.attrib.get("id")
-            logger.debug(f"Rule: {rule_id}")
+            logger.debug("Rule: %s", rule_id)
             if rule_id:
                 related_data.rules[rule_id] = self.parse_rule_information(rule.find("MetaInfo", self.namespaces))
         return related_data
@@ -95,11 +95,11 @@ class FortifyFPRParser:
             if instance_id:
                 suppressed_string = issue.attrib.get("suppressed")
                 suppressed = suppressed_string.lower() == "true" if suppressed_string else False
-                logger.debug(f"Issue: {instance_id} - Suppressed: {suppressed}")
+                logger.debug("Issue: %s - Suppressed: %s", instance_id, suppressed)
                 related_data.suppressed[instance_id] = suppressed
 
                 threaded_comments = issue.find("ThreadedComments", self.namespaces_audit_log)
-                logger.debug(f"ThreadedComments: {threaded_comments}")
+                logger.debug("ThreadedComments: %s", threaded_comments)
                 if threaded_comments is not None:
                     related_data.threaded_comments[instance_id] = [self.get_comment_text(comment) for comment in threaded_comments.findall("Comment", self.namespaces_audit_log)]
         return related_data
@@ -298,7 +298,7 @@ class FortifyFPRParser:
             # This comes from Fortify support documentation, requested in #11901
             likelihood = (accuracy * confidence * probability) / 25
             likelihood = round(likelihood, 1)
-            logger.debug(f"Impact: {impact}, Likelihood: {likelihood}")
+            logger.debug("Impact: %s, Likelihood: %s", impact, likelihood)
 
             if impact >= 2.5 and likelihood >= 2.5:
                 return "Critical"

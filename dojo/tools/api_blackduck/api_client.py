@@ -1,4 +1,10 @@
-from blackduck import Client
+import warnings
+
+# Ignore DeprecationWarning from the blackduck library because we cannot do anything about it
+# until they fix it in their library
+# TODO: Corrects https://github.com/DefectDojo/django-DefectDojo/issues/13218 in the short term
+with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+    from blackduck import Client
 
 
 class BlackduckAPI:

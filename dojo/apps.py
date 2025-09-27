@@ -71,21 +71,21 @@ class DojoAppConfig(AppConfig):
 
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the reciever decorator
-        import dojo.announcement.signals
-        import dojo.benchmark.signals
-        import dojo.cred.signals
-        import dojo.endpoint.signals
-        import dojo.engagement.signals
-        import dojo.file_uploads.signals
-        import dojo.finding_group.signals
-        import dojo.notes.signals
-        import dojo.product.signals
-        import dojo.product_type.signals
-        import dojo.risk_acceptance.signals
-        import dojo.sla_config.helpers
-        import dojo.tags_signals
-        import dojo.test.signals
-        import dojo.tool_product.signals  # noqa: F401
+        import dojo.announcement.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.benchmark.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.cred.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.endpoint.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.engagement.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.file_uploads.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.finding_group.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.notes.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.product.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.product_type.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.risk_acceptance.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.sla_config.helpers  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.tags_signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.test.signals  # noqa: PLC0415 raised: AppRegistryNotReady
+        import dojo.tool_product.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
 
 
 def get_model_fields_with_extra(model, extra_fields=()):
