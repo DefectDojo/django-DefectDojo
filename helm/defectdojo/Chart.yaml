@@ -17,3 +17,6 @@ dependencies:
     version: ~19.6.4
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
+annotations:
+  artifacthub.io/prerelease: "true"
+  artifacthub.io/changes: ""
