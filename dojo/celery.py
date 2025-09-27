@@ -1,5 +1,6 @@
 import logging
 import os
+from logging.config import dictConfig
 
 from celery import Celery
 from celery.signals import setup_logging
@@ -26,7 +27,6 @@ def debug_task(self):
 
 @setup_logging.connect
 def config_loggers(*args, **kwags):
-    from logging.config import dictConfig
     dictConfig(settings.LOGGING)
 
 

@@ -233,7 +233,7 @@ class BlackduckComponentRiskParser:
                 vuln["Base score"], vuln["Exploitability"], vuln["Impact"],
             )
             # Not all have a URL
-            if vuln["URL"] != "":
+            if vuln["URL"]:
                 desc += "**URL:** [{}]({})\n".format(
                     vuln["Vulnerability id"], vuln["URL"],
                 )
@@ -319,7 +319,7 @@ class BlackduckComponentRiskParser:
         """
         references = "**Project:** {}\n".format(vulns[0]["Project path"])
         for vuln in vulns:
-            if vuln["URL"] != "":
+            if vuln["URL"]:
                 references += "{}: [{}]({})\n".format(
                     vuln["Vulnerability id"], vuln["URL"], vuln["URL"],
                 )
@@ -335,7 +335,7 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        if vulns[0]["Component origin id"] == "":
+        if not vulns[0]["Component origin id"]:
             component_key = "{}/{}".format(
                 vulns[0]["Component name"], vulns[0]["Component version name"],
             )

@@ -219,7 +219,7 @@ class TagListSerializerField(serializers.ListField):
             except ValueError:
                 self.fail("invalid_json")
 
-        logger.debug(f"data as json: {data}")
+        logger.debug("data as json: %s", data)
 
         if not isinstance(data, list):
             self.fail("not_a_list", input_type=type(data).__name__)
@@ -238,7 +238,7 @@ class TagListSerializerField(serializers.ListField):
                 tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
-        logger.debug(f"result after rendering tags: {data_safe}")
+        logger.debug("result after rendering tags: %s", data_safe)
         return data_safe
 
     def to_representation(self, value):
@@ -1870,7 +1870,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        logger.debug(f"Creating finding with validated data: {validated_data}")
+        logger.debug("Creating finding with validated data: %s", validated_data)
         push_to_jira = validated_data.pop("push_to_jira", False)
         notes = validated_data.pop("notes", None)
         found_by = validated_data.pop("found_by", None)
@@ -2314,14 +2314,16 @@ class ImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same engagement.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same product."
                     "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
     )
@@ -2396,7 +2398,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=True,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same test.",
     )
     close_old_findings_product_scope = serializers.BooleanField(

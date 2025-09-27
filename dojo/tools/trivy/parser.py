@@ -290,7 +290,7 @@ class TrivyParser:
                 references = "\n".join(vuln.get("References", []))
                 mitigation = vuln.get("FixedVersion", "")
                 fix_available = True
-                if mitigation == "":
+                if not mitigation:
                     fix_available = False
                 impact = vuln.get("Status", "")
                 status_fields = self.convert_trivy_status(vuln.get("Status", ""))
@@ -346,7 +346,7 @@ class TrivyParser:
                 misc_cause_code = misc_causemetadata.get("Code", {})
                 misc_cause_lines = misc_cause_code.get("Lines", [])
                 string_lines_table = self.get_lines_as_string_table(misc_cause_lines)
-                if string_lines_table != "":
+                if string_lines_table:
                     misc_message += ("\n" + string_lines_table)
 
                 title = f"{misc_id} - {misc_title}"

@@ -71,7 +71,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
         soc = user.social_auth.order_by("-created").first()
         token = soc.extra_data["access_token"]
         group_names = []
-        if "groups" not in kwargs["response"] or kwargs["response"]["groups"] == "":
+        if "groups" not in kwargs["response"] or not kwargs["response"]["groups"]:
             logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
             return
         group_IDs = kwargs["response"]["groups"]
@@ -93,13 +93,13 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                     logger.debug("detected " + group_from_response + " as group name and will not call microsoft graph")
                     group_name = group_from_response
 
-                if settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER == "" or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
+                if not settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
                     group_names.append(group_name)
                 else:
                     logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
                     continue
             except Exception as e:
-                logger.error(f"Could not call microsoft graph API or save groups to member: {e}")
+                logger.error("Could not call microsoft graph API or save groups to member: %s", e)
         if len(group_names) > 0:
             assign_user_to_groups(user, group_names, Dojo_Group.AZURE)
         if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
@@ -114,18 +114,18 @@ def assign_user_to_groups(user, group_names, social_provider):
     for group_name in group_names:
         group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
         if created_group:
-            logger.debug("Group %s for social provider %s was created", str(group), social_provider)
+            logger.debug("Group %s for social provider %s was created", group, social_provider)
         _group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
             "role": Role.objects.get(id=Roles.Maintainer)})
         if is_member_created:
-            logger.debug("User %s become member of group %s (social provider: %s)", user, str(group), social_provider)
+            logger.debug("User %s become member of group %s (social provider: %s)", user, group, social_provider)
 
 
 def cleanup_old_groups_for_user(user, group_names):
     for group_member in Dojo_Group_Member.objects.select_related("group").filter(user=user):
         group = group_member.group
         if str(group) not in group_names:
-            logger.debug("Deleting membership of user %s from %s group %s", user, group.social_provider, str(group))
+            logger.debug("Deleting membership of user %s from %s group %s", user, group.social_provider, group)
             group_member.delete()
 
 
