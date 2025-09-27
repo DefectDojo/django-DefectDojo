@@ -407,6 +407,7 @@ class TestNotificationTriggersApi(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
     @patch("dojo.notifications.helper.NotificationManager._process_notifications")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type API")
         self.client.delete(reverse("product_type-detail", args=(prod_type.pk,)), format="json")
