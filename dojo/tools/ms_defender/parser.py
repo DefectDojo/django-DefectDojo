@@ -31,7 +31,7 @@ class MSDefenderParser:
                 vulnerabilitydata = vulnerabilityfile["value"]
                 findings.extend(self.process_json(vulnerability) for vulnerability in vulnerabilitydata)
             except (json.JSONDecodeError, KeyError) as e:
-                logger.warning("Error parsing JSON file %s: %s", file.name, str(e))
+                logger.warning("Error parsing JSON file %s: %s", file.name, e)
                 return []
         elif str(file.name).endswith(".zip"):
             if str(file.__class__) == "<class '_io.TextIOWrapper'>":
@@ -71,7 +71,7 @@ class MSDefenderParser:
                     for data in output:
                         vulnerabilities.append(data)
                 except (json.JSONDecodeError, KeyError, UnicodeDecodeError) as e:
-                    logger.warning("Error parsing vulnerability file %s: %s", vulnerabilityfile, str(e))
+                    logger.warning("Error parsing vulnerability file %s: %s", vulnerabilityfile, e)
                     continue
 
             for machinefile in machinefiles:
@@ -91,7 +91,7 @@ class MSDefenderParser:
                     for data in output:
                         machines[data.get("id")] = data
                 except (json.JSONDecodeError, KeyError, UnicodeDecodeError) as e:
-                    logger.warning("Error parsing machine file %s: %s", machinefile, str(e))
+                    logger.warning("Error parsing machine file %s: %s", machinefile, e)
                     continue
             for vulnerability in vulnerabilities:
                 try:
