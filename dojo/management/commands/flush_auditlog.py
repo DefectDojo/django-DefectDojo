@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from dojo.tasks import run_flush_auditlog
+from dojo.auditlog import run_flush_auditlog
 
 
 class Command(BaseCommand):

@@ -1,9 +1,7 @@
 import logging
-from datetime import date, datetime, time, timedelta
+from datetime import timedelta
 
-from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
-from dateutil.relativedelta import relativedelta
 from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
@@ -11,6 +9,7 @@ from django.db.models import Count, Prefetch
 from django.urls import reverse
 from django.utils import timezone
 
+from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
 from dojo.finding.helper import fix_loop_duplicates
@@ -91,54 +90,6 @@ def cleanup_alerts(*args, **kwargs):
             total_deleted_count += len(alerts_to_delete)
             Alerts.objects.filter(pk__in=list(alerts_to_delete)).delete()
         logger.info("total number of alerts deleted: %s", total_deleted_count)
-
-
-def run_flush_auditlog(retention_period: int | None = None,
-                       batch_size: int | None = None,
-                       max_batches: int | None = None) -> tuple[int, int, bool]:
-    """
-    Deletes audit log entries older than the configured retention period.
-
-    Returns a tuple of (deleted_total, batches_done, reached_limit).
-    """
-    retention_period = retention_period if retention_period is not None else getattr(settings, "AUDITLOG_FLUSH_RETENTION_PERIOD", -1)
-    if retention_period < 0:
-        logger.info("Flushing auditlog is disabled")
-        return 0, 0, False
-
-    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
-    # Compute a datetime cutoff at start of the cutoff day to keep index-usage friendly
-    retention_day = date.today() - relativedelta(months=retention_period)
-    # Use a timestamp to avoid postgres having to cast to a Date field
-    cutoff_dt = datetime.combine(retention_day, time.min, tzinfo=timezone.get_current_timezone())
-
-    # Settings to control batching; sensible defaults if not configured
-    batch_size = batch_size if batch_size is not None else getattr(settings, "AUDITLOG_FLUSH_BATCH_SIZE", 1000)
-    max_batches = max_batches if max_batches is not None else getattr(settings, "AUDITLOG_FLUSH_MAX_BATCHES", 100)
-
-    # Delete in batches to avoid long-running transactions and table locks
-    deleted_total = 0
-    batches_done = 0
-    while batches_done < max_batches:
-        batch_qs = LogEntry.objects.filter(timestamp__lt=cutoff_dt).order_by("pk")
-        pks = list(batch_qs.values_list("pk", flat=True)[:batch_size])
-        if not pks:
-            if batches_done == 0:
-                logger.info("No outdated Logentries found")
-            break
-        qs = LogEntry.objects.filter(pk__in=pks)
-        deleted_count = qs._raw_delete(qs.db)
-        deleted_total += int(deleted_count)
-        batches_done += 1
-        logger.info("Deleted batch %s (size ~%s), total deleted: %s", batches_done, batch_size, deleted_total)
-
-    reached_limit = batches_done >= max_batches
-    if reached_limit:
-        logger.info("Reached max batches limit (%s). Remaining audit log entries will be deleted in the next run.", max_batches)
-    else:
-        logger.info("Total number of audit log entries deleted: %s", deleted_total)
-
-    return deleted_total, batches_done, reached_limit
 
 
 @app.task(bind=True)
