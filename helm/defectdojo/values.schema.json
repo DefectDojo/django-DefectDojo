@@ -432,6 +432,9 @@
                         "appSettings": {
                             "type": "object",
                             "properties": {
+                                "maxFd": {
+                                    "type": "integer"
+                                },
                                 "processes": {
                                     "type": "integer"
                                 },
@@ -569,7 +572,13 @@
         "extraConfigs": {
             "type": "object"
         },
+        "extraEnv": {
+            "type": "array"
+        },
         "extraLabels": {
+            "type": "object"
+        },
+        "extraSecrets": {
             "type": "object"
         },
         "gke": {
@@ -665,6 +674,9 @@
                     "type": "array"
                 }
             }
+        },
+        "localsettingspy": {
+            "type": "string"
         },
         "monitoring": {
             "type": "object",
@@ -986,6 +998,9 @@
                     }
                 }
             }
+        },
+        "trackConfig": {
+            "type": "string"
         }
     }
 }

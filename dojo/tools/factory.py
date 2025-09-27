@@ -119,7 +119,12 @@ for module_name in os.listdir(package_dir):  # noqa: PTH208
                 module = import_module(f"dojo.tools.{module_name}.parser")
                 for attribute_name in dir(module):
                     attribute = getattr(module, attribute_name)
-                    if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
+                    # Allow parser class names with optional v[number] suffix (e.g., OpenVASParser, OpenVASParserV2)
+                    expected_base = module_name.replace("_", "") + "parser"
+                    if isclass(attribute) and (
+                        attribute_name.lower() == expected_base or
+                        re.match(rf"^{re.escape(expected_base)}v\d+$", attribute_name.lower())
+                    ):
                         register(attribute)
         except:
             logger.exception("failed to load %s", module_name)
