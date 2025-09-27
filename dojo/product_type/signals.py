@@ -1,6 +1,7 @@
 import contextlib
 
 from auditlog.models import LogEntry
+from crum import get_current_user
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -57,6 +58,12 @@ def product_type_post_delete(sender, instance, **kwargs):
                     object_id=instance.id,
                 ).order_by("-id").first():
                     user = le.actor
+
+            # Since adding pghistory as auditlog option, this signal here runs before the django-auditlog signal
+            # Fallback to the current user of the request (Which might be not available for ASYNC_OBJECT_DELETE scenario's)
+            if not user:
+                current_user = get_current_user()
+                user = current_user
 
             # Update description with user if found
             if user:
