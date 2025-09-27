@@ -64,8 +64,8 @@ jobs:
           DJANGO_VERSION: ${{ matrix.os }}
 
       - name: Logs
-        if: failure()
-        run: docker compose logs --tail="2500" uwsgi
+        if: always()
+        run: docker compose logs uwsgi 2>&1 | grep -i audit
 
       - name: Shutdown
         if: always()
