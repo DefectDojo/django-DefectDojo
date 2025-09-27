@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 
 from dojo.models import Finding
 
@@ -37,8 +38,6 @@ class GithubSASTParser:
             owner = repo = None
             commit_sha = inst.get("commit_sha")
             if html_url:
-                from urllib.parse import urlparse
-
                 parsed = urlparse(html_url)
                 parts = parsed.path.strip("/").split("/")
                 # URL is /<owner>/<repo>/security/... so parts[0]=owner, parts[1]=repo

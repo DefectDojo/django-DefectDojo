@@ -1,3 +1,5 @@
+import io
+
 from dojo.models import Test
 from dojo.tools.github_sast.parser import GithubSASTParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -45,7 +47,6 @@ class TestGithubSASTParser(DojoTestCase):
 
     def test_parse_file_invalid_format_raises(self):
         """Non-list JSON should raise"""
-        import io
 
         bad_json = io.StringIO('{"not": "a list"}')
         parser = GithubSASTParser()
