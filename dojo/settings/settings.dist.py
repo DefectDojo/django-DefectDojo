@@ -31,6 +31,10 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
+    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # see https://github.com/laymonage/django-jsonfield-backport
+    # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -746,6 +750,7 @@ SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
 # Override default Django behavior for incorrect URLs
 APPEND_SLASH = env("DD_APPEND_SLASH")
+
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
@@ -1823,9 +1828,7 @@ ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 
-# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
-# see https://github.com/laymonage/django-jsonfield-backport
-SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+SILENCED_SYSTEM_CHECKS = env("DD_SILENCED_SYSTEM_CHECKS")
 
 VULNERABILITY_URLS = {
     "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html

@@ -9,7 +9,7 @@ from json import dumps
 from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
-from unittest.mock import ANY, MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
 from django.contrib.auth.models import Permission
 from django.test import tag as test_tag
@@ -848,6 +848,75 @@ class AppAnalysisTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Technology_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class FindingCloseAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+
+    def _close_url(self, finding_id: int) -> str:
+        return f"/api/v2/findings/{finding_id}/close/"
+
+    def test_close_finding_basic(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._close_url(finding.id), {"is_mitigated": True}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.is_mitigated)
+        self.assertFalse(finding.active)
+        self.assertIsNotNone(finding.mitigated)
+        self.assertEqual(finding.mitigated_by, self.admin)
+        self.assertFalse(finding.under_review)
+        self.assertEqual(finding.last_reviewed, finding.mitigated)
+
+    def test_close_finding_with_note_and_mitigated_by_admin(self):
+        finding = Finding.objects.get(id=7)
+        note_type = Note_Type.objects.first()
+        with patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True):
+            payload = {
+                "is_mitigated": True,
+                "note": "Closed by API",
+                "note_type": note_type.id if note_type else None,
+                "mitigated_by": self.admin.id,
+            }
+            response = self.client.post(self._close_url(finding.id), payload, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.notes.exists())
+        latest_note = finding.notes.order_by("-date").first()
+        self.assertIsNotNone(latest_note)
+        self.assertIn("Closed by API", latest_note.entry)
+        self.assertEqual(latest_note.author, self.admin)
+        self.assertEqual(finding.mitigated.date(), latest_note.date.date())
+
+    def test_close_finding_rejects_unauthorized_mitigated_by(self):
+        finding = Finding.objects.get(id=7)
+        payload = {"is_mitigated": True, "mitigated_by": self.admin.id}
+        # With default settings, admin cannot edit mitigated_by unless EDITABLE_MITIGATED_DATA is enabled
+        response = self.client.post(self._close_url(finding.id), payload, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("mitigated_by", response.data)
+
+    def test_close_finding_pushes_note_to_jira_when_configured(self):
+        finding = Finding.objects.get(id=7)
+        with patch("dojo.jira_link.helper.add_comment") as add_comment_mock, \
+             patch("dojo.jira_link.helper.is_push_all_issues", return_value=True), \
+             patch.object(Finding, "has_jira_issue", new_callable=PropertyMock, return_value=True):
+            payload = {
+                "is_mitigated": True,
+                "note": "Closed by API and pushed to Jira",
+            }
+            response = self.client.post(self._close_url(finding.id), payload, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+            self.assertTrue(add_comment_mock.called)
 
 
 class EndpointStatusTest(BaseClass.BaseClassTest):
