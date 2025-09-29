@@ -72,10 +72,12 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
 
     data["adoption_devsecops"] = adoption_devsecops_exclude(tags)
     active_finding = engagement.get_all_finding_active
-    data["active_findings"] = active_finding.distinct().count() 
-    data["active_critical_findings"] = active_finding.filter(severity="Critical").count()
-    data["active_high_findings"] = active_finding.filter(severity="High").count()
-    data["active_medium_findings"] = active_finding.filter(severity="Medium").count()
+    data["counter_active_findings"] = active_finding.distinct().count() 
+    data["counter_very_critical"] = active_finding.filter(severity="Critical").count()
+    data["counter_critical"] = active_finding.filter(severity="High").count()
+    data["counter_high"] = active_finding.filter(severity="Medium").count()
+    data["counter_medium_low"] = active_finding.filter(severity="Low").count()
+    data["counter_info"] = active_finding.filter(severity="Info").count()
     events = active_finding.filter(
         active=True,
         is_mitigated=False,

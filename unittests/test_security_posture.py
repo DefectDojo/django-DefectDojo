@@ -129,10 +129,11 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(data['engagement_name'], self.engagement.name)
         self.assertEqual(data['engagement_id'], self.engagement.id)
         self.assertEqual(data['severity_product'], self.product.business_criticality)
-        self.assertIn('active_findings', data)
-        self.assertIn('active_critical_findings', data)
-        self.assertIn('active_high_findings', data)
-        self.assertIn('active_medium_findings', data)
+        self.assertIn('counter_active_findings', data)
+        self.assertIn('counter_very_critical', data)
+        self.assertIn('counter_critical', data)
+        self.assertIn('counter_medium_low', data)
+        self.assertIn('counter_info', data)
 
 
     def test_get_security_posture_with_engagement_name(self):
@@ -188,8 +189,9 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()['data']
         
-        self.assertEqual(data['active_findings'], 9)
-        self.assertEqual(data['active_critical_findings'], 1)
-        self.assertEqual(data['active_high_findings'], 7)
-        self.assertEqual(data['active_medium_findings'], 1)
+        self.assertEqual(data['counter_active_findings'], 9)
+        self.assertEqual(data['counter_very_critical'], 1)
+        self.assertEqual(data['counter_critical'], 7)
+        self.assertEqual(data['counter_medium_low'], 0)
+        self.assertEqual(data['counter_info'], 0)
 
