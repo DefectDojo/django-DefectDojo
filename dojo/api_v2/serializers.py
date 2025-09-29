@@ -2104,8 +2104,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         required=False,
         validators=[ImporterFileExtensionValidator()],
     )
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
+    product_type_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Organization' name."),
+    )
+    product_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Asset' name."),
+    )
     engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
@@ -2160,8 +2166,14 @@ class CommonImportScanSerializer(serializers.Serializer):
     # confused
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)
-    product_id = serializers.IntegerField(read_only=True)
-    product_type_id = serializers.IntegerField(read_only=True)
+    product_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Asset' ID."),
+    )
+    product_type_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Organization' ID."),
+    )
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
     pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
