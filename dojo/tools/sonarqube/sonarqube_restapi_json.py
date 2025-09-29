@@ -13,7 +13,7 @@ class SonarQubeRESTAPIJSON:
                     rule = issue.get("rule")
                     component = issue.get("component")
                     project = issue.get("project")
-                    line = str(issue.get("line"))
+                    line = issue.get("line")
                     textRange = issue.get("textRange", {})
                     flows = issue.get("flows", [])
                     status = issue.get("status")
@@ -28,7 +28,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    description += "**line:** " + line + "\n"
+                    description += "**line:** " + str(line) + "\n"
                     if bool(textRange):
                         res = [item + ": " + str(textRange[item]) for item in textRange]
                         description += "**textRange:** " + ", ".join(res) + "\n"
@@ -49,6 +49,7 @@ class SonarQubeRESTAPIJSON:
                         static_finding=True,
                         dynamic_finding=False,
                         tags=["bug"],
+                        line=line,
                     )
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
@@ -58,6 +59,7 @@ class SonarQubeRESTAPIJSON:
                     flows = issue.get("flows", [])
                     status = issue.get("status")
                     message = issue.get("message")
+                    line = issue.get("line")
                     cwe = None
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
@@ -91,6 +93,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
+                    description += "**line:** " + str(line) + "\n"
                     if flows != []:
                         description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
@@ -115,6 +118,7 @@ class SonarQubeRESTAPIJSON:
                         cvssv3_score=cvss,
                         file_path=component,
                         tags=["vulnerability"],
+                        line=line,
                     )
                     vulnids = []
                     if "Reference: CVE" in message:
@@ -141,7 +145,7 @@ class SonarQubeRESTAPIJSON:
                     rule = issue.get("rule")
                     component = issue.get("component")
                     project = issue.get("project")
-                    line = str(issue.get("line"))
+                    line = issue.get("line")
                     textRange = issue.get("textRange", {})
                     flows = issue.get("flows", [])
                     status = issue.get("status")
@@ -154,7 +158,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    description += "**line:** " + line + "\n"
+                    description += "**line:** " + str(line) + "\n"
                     if bool(textRange):
                         res = []
                         for item in textRange:
@@ -180,6 +184,7 @@ class SonarQubeRESTAPIJSON:
                         dynamic_finding=False,
                         file_path=component,
                         tags=["code_smell"],
+                        line=line,
                     )
                 items.append(item)
         if json_content.get("hotspots"):
@@ -189,7 +194,7 @@ class SonarQubeRESTAPIJSON:
                 project = hotspot.get("project")
                 securityCategory = hotspot.get("securityCategory")
                 status = hotspot.get("status")
-                line = str(hotspot.get("line"))
+                line = hotspot.get("line")
                 message = hotspot.get("message")
                 textRange = hotspot.get("textRange", {})
                 flows = hotspot.get("flows", [])
@@ -201,7 +206,7 @@ class SonarQubeRESTAPIJSON:
                 description += "**project:** " + project + "\n"
                 description += "**securityCategory:** " + securityCategory + "\n"
                 description += "**status:** " + status + "\n"
-                description += "**line:** " + line + "\n"
+                description += "**line:** " + str(line) + "\n"
                 description += "**message:** " + message + "\n"
                 if bool(textRange):
                     res = []
@@ -223,6 +228,7 @@ class SonarQubeRESTAPIJSON:
                     dynamic_finding=False,
                     file_path=component,
                     tags=["hotspot"],
+                    line=line,
                 )
                 items.append(item)
         return items
