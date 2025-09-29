@@ -22,6 +22,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 
+import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
@@ -122,6 +123,7 @@ from dojo.tools.factory import (
     requires_file,
     requires_tool_type,
 )
+from dojo.user.queries import get_authorized_users
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
 from dojo.validators import ImporterFileExtensionValidator, tag_validator
@@ -2697,6 +2699,9 @@ class FindingCloseSerializer(serializers.ModelSerializer):
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)
     duplicate = serializers.BooleanField(required=False)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Dojo_User.objects.all())
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
 
     class Meta:
         model = Finding
@@ -2706,7 +2711,33 @@ class FindingCloseSerializer(serializers.ModelSerializer):
             "false_p",
             "out_of_scope",
             "duplicate",
+            "mitigated_by",
+            "note",
+            "note_type",
         )
+
+    def validate(self, data):
+        request = self.context.get("request")
+        request_user = getattr(request, "user", None)
+
+        mitigated_by_user = data.get("mitigated_by")
+        if mitigated_by_user is not None:
+            # Require permission to edit mitigated metadata
+            if not (request_user and finding_helper.can_edit_mitigated_data(request_user)):
+                raise serializers.ValidationError({
+                    "mitigated_by": ["Not allowed to set mitigated_by."],
+                })
+
+            # Ensure selected user is authorized (Finding_Edit)
+            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
+            if not authorized_users.filter(id=mitigated_by_user.id).exists():
+                raise serializers.ValidationError({
+                    "mitigated_by": [
+                        "Selected user is not authorized to be set as mitigated_by.",
+                    ],
+                })
+
+        return data
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
