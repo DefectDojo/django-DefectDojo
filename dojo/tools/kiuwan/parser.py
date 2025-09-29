@@ -98,7 +98,7 @@ class KiuwanParser:
 
             finding.title = findingdict["title"]
             finding.file_path = findingdict["file"]
-            finding.line = findingdict["line_number"] if findingdict["line_number"] != "" else None
+            finding.line = findingdict["line_number"] or None
             finding.description = findingdict["description"]
             finding.references = "Not provided!"
             finding.mitigation = "Not provided!"

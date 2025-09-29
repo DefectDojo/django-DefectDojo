@@ -299,7 +299,7 @@ def get_item(item_node, test):
     if len(cwes) > 1:
         # TODO: support more than one CWE
         logger.debug(
-            f"more than one CWE for a finding {cwes}. NOT supported by parser API",
+            "more than one CWE for a finding %s. NOT supported by parser API", cwes,
         )
     if len(cwes) > 0:
         finding.cwe = cwes[0]

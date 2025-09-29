@@ -3,7 +3,7 @@
 
 FROM openapitools/openapi-generator-cli:v7.15.0@sha256:509f01c3c7eee9d1ad286506a7b6aa4624a95b410be9a238a306d209e900621f AS openapitools
 # currently only supports x64, no arm yet due to chrome and selenium dependencies
-FROM python:3.11.11-slim-bookworm@sha256:42420f737ba91d509fc60d5ed65ed0492678a90c561e1fa08786ae8ba8b52eda AS build
+FROM python:3.12.11-slim-trixie@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -47,11 +47,11 @@ RUN \
   apt-get -y install $missing_chrome_deps
 
 # Install a suggested list of additional packages (https://stackoverflow.com/a/76734752)
-RUN apt-get install -y libxi6 libgconf-2-4 jq libjq1 libonig5 libxkbcommon0 libxss1 libglib2.0-0 libnss3 \
-  libfontconfig1 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libpango-1.0-0 libgdk-pixbuf2.0-0 libxcomposite1 \
+RUN apt-get install -y libxi6 jq libjq1 libonig5 libxkbcommon0 libxss1 libglib2.0-0 libnss3 \
+  libfontconfig1 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libpango-1.0-0 libxcomposite1 \
   libxcursor1 libxdamage1 libxtst6 libappindicator3-1 libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libxfixes3 \
   libdbus-1-3 libexpat1 libgcc1 libnspr4 libgbm1 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxext6 \
-  libxrandr2 libxrender1 gconf-service ca-certificates fonts-liberation libappindicator1 lsb-release xdg-utils
+  libxrandr2 libxrender1 ca-certificates fonts-liberation lsb-release xdg-utils
 
 # Installing the latest stable Google Chrome driver release
 WORKDIR /opt/chrome-driver

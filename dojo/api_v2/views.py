@@ -40,6 +40,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization.roles_permissions import Permissions
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
@@ -584,8 +585,6 @@ class EngagementViewSet(
     )
     @action(detail=True, methods=["get", "post"])
     def complete_checklist(self, request, pk=None):
-        from dojo.api_v2.prefetch.prefetcher import _Prefetcher
-
         engagement = self.get_object()
         check_lists = Check_List.objects.filter(engagement=engagement)
         if request.method == "POST":
@@ -2648,7 +2647,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             jira_driver = test or (engagement or (product or None))
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
-        logger.debug(f"push_to_jira: {push_to_jira}")
+        logger.debug("push_to_jira: %s", push_to_jira)
         serializer.save(push_to_jira=push_to_jira)
 
 

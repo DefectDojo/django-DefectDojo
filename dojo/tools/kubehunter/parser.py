@@ -44,7 +44,7 @@ class KubeHunterParser:
             # Finding mitigation and reference
             avd_reference = item.get("avd_reference")
 
-            if avd_reference and avd_reference != "" and vulnerability_id != "None":
+            if avd_reference and avd_reference and vulnerability_id != "None":
                 mitigation = f"Further details can be found in kube-hunter documentation available at : {avd_reference}"
                 references = "**Kube-hunter AVD reference**: " + avd_reference
             else:

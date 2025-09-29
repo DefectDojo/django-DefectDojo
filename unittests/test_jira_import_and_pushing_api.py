@@ -3,6 +3,7 @@ import logging
 from unittest.mock import patch
 
 from crum import impersonate
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -21,6 +22,7 @@ from .dojo_test_case import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 # these tests are using vcrpy to record traffic to and from JIRA: https://vcrpy.readthedocs.io/en/latest/usage.html
 # after being recorded, the traffic is used for future runs of the tests
@@ -1018,7 +1020,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
 
         # Use Django test client instead of RequestFactory for proper auth
-        from django.contrib.auth import get_user_model
 
         # Prepare bulk edit request data
         # Get the current finding IDs after group modifications

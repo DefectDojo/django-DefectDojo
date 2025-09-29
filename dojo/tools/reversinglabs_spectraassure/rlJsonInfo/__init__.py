@@ -401,17 +401,17 @@ class RlJsonInfo:
         fallback = ""
 
         if name_first is False:
-            if path != "":
+            if path:
                 return str(path)
-            if name != "":
+            if name:
                 return str(name)
 
             return fallback
 
-        if name != "":
+        if name:
             return str(name)
 
-        if path != "":
+        if path:
             return str(path)
 
         return fallback

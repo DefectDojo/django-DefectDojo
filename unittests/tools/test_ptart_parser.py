@@ -1,5 +1,18 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.ptart.parser import PTARTParser
+from dojo.tools.ptart.ptart_parser_tools import (
+    generate_test_description_from_report,
+    parse_attachment_from_hit,
+    parse_cwe_from_hit,
+    parse_cwe_id_from_cwe,
+    parse_endpoints_from_hit,
+    parse_ptart_fix_effort,
+    parse_ptart_severity,
+    parse_references_from_hit,
+    parse_retest_status,
+    parse_screenshots_from_hit,
+    parse_title_from_hit,
+)
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -13,7 +26,6 @@ class TestPTARTParser(DojoTestCase):
         self.test = Test(engagement=self.engagement)
 
     def test_ptart_parser_tools_parse_ptart_severity(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_ptart_severity
         with self.subTest("Critical"):
             self.assertEqual("Critical", parse_ptart_severity(1))
         with self.subTest("High"):
@@ -28,7 +40,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Info", parse_ptart_severity(6))
 
     def test_ptart_parser_tools_parse_ptart_fix_effort(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_ptart_fix_effort
         with self.subTest("High"):
             self.assertEqual("High", parse_ptart_fix_effort(1))
         with self.subTest("Medium"):
@@ -39,7 +50,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual(None, parse_ptart_fix_effort(4))
 
     def test_ptart_parser_tools_parse_title_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_title_from_hit
         with self.subTest("Title and ID"):
             self.assertEqual("1234: Test Title", parse_title_from_hit({"title": "Test Title", "id": "1234"}))
         with self.subTest("Title Only"):
@@ -60,7 +70,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Test Title", parse_title_from_hit({"title": "Test Title", "id": ""}))
 
     def test_ptart_parser_tools_retest_fix_status_parse(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_retest_status
         with self.subTest("Fixed"):
             self.assertEqual("Fixed", parse_retest_status("F"))
         with self.subTest("Not Fixed"):
@@ -77,7 +86,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual(None, parse_retest_status(""))
 
     def test_ptart_parser_tools_parse_screenshots_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_screenshots_from_hit
         with self.subTest("No Screenshots"):
             hit = {}
             screenshots = parse_screenshots_from_hit(hit)
@@ -193,7 +201,6 @@ class TestPTARTParser(DojoTestCase):
                             "Invalid Screenshot Data")
 
     def test_ptart_parser_tools_parse_attachment_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_attachment_from_hit
         with self.subTest("No Attachments"):
             hit = {}
             attachments = parse_attachment_from_hit(hit)
@@ -271,7 +278,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
 
     def test_ptart_parser_tools_get_description_from_report_base(self):
-        from dojo.tools.ptart.ptart_parser_tools import generate_test_description_from_report
         with self.subTest("No Description"):
             data = {}
             self.assertEqual(None, generate_test_description_from_report(data))
@@ -335,7 +341,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("This is an overview", generate_test_description_from_report(data))
 
     def test_ptart_parser_tools_parse_references_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_references_from_hit
         with self.subTest("No References"):
             hit = {}
             self.assertEqual(None, parse_references_from_hit(hit))
@@ -392,7 +397,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Reference1: https://ref.example.com\nReference: https://ref3.example.com", parse_references_from_hit(hit))
 
     def test_ptart_parser_tools_parse_cwe_id_from_cwe(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_cwe_id_from_cwe
         with self.subTest("Valid CWE"):
             self.assertEqual(862, parse_cwe_id_from_cwe({"cwe_id": 862, "title": "CWE-862 - Missing Authorization"}))
         with self.subTest("Invalid CWE ID Type"):
@@ -405,7 +409,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual(None, parse_cwe_id_from_cwe(None))
 
     def test_ptart_parser_tools_parse_cwe_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_cwe_from_hit
         with self.subTest("Valid CWE"):
             hit = {
                 "cwes": [{
@@ -442,7 +445,6 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual(None, parse_cwe_from_hit(hit))
 
     def test_ptart_parser_tools_parse_endpoints_from_hit(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_endpoints_from_hit
         with self.subTest("No Asset"):
             hit = {}
             self.assertEqual([], parse_endpoints_from_hit(hit))
