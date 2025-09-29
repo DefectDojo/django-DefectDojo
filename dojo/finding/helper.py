@@ -380,10 +380,32 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
 
 @dojo_model_to_id
+@dojo_async_task(signature=True)
+@app.task
+@dojo_model_from_id
+def post_process_finding_save_signature(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+    """
+    Returns a task signature for post-processing a finding. This is useful for creating task signatures
+    that can be used in chords or groups or to await results. We need this extra method because of our dojo_async decorator.
+    If we use more of these celery features, we should probably move away from that decorator.
+    """
+    return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
+                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+
+
+@dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
 def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+
+    return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
+                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+
+
+def post_process_finding_save_internal(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
     if not finding:
@@ -477,7 +499,6 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-        # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):

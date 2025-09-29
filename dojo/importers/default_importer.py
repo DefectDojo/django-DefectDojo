@@ -5,8 +5,9 @@ from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
+from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -16,6 +17,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -155,6 +157,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
+        # Progressive batching for chord execution
+        post_processing_task_signatures = []
+        current_batch_number = 1
+        max_batch_size = 1024
+
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -166,13 +173,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for non_clean_unsaved_finding in parsed_findings:
-            # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
-            # Filter on minimum severity if applicable
-            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                # finding's severity is below the configured threshold : ignoring the finding
+        # Pre-sanitize and filter by minimum severity
+        cleaned_findings = []
+        for raw_finding in parsed_findings or []:
+            sanitized = self.sanitize_severity(raw_finding)
+            if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
+                logger.debug("skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)", sanitized.title, sanitized.severity, self.minimum_severity)
                 continue
+            cleaned_findings.append(sanitized)
+
+        for idx, unsaved_finding in enumerate(cleaned_findings):
+            is_final_finding = idx == len(cleaned_findings) - 1
 
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
@@ -183,7 +194,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_findings: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
+            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:
                 unsaved_finding.active = self.active
@@ -205,7 +216,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
             unsaved_finding.save_no_options()
 
-            finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
                 finding,
@@ -225,9 +235,30 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing
 
-            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            # We create a signature for the post processing task so we can decide to apply it async or sync
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
+            post_processing_task_signature = finding_helper.post_process_finding_save_signature(
+                finding,
+                dedupe_option=True,
+                rules_option=True,
+                product_grading_option=False,
+                issue_updater_option=True,
+                push_to_jira=push_to_jira,
+            )
+
+            post_processing_task_signatures.append(post_processing_task_signature)
+
+            # Check if we should launch a chord (batch full or end of findings)
+            if we_want_async(async_user=self.user) and post_processing_task_signatures:
+                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
+                    post_processing_task_signatures,
+                    current_batch_number,
+                    max_batch_size,
+                    is_final_finding,
+                )
+            else:
+                # Execute task immediately for synchronous processing
+                post_processing_task_signature()
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -242,6 +273,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+
+        # Note: All chord batching is now handled within the loop above
+
+        # Always perform an initial grading, even though it might get overwritten later.
+        perform_product_grading(self.test.engagement.product)
 
         sync = kwargs.get("sync", True)
         if not sync:
@@ -320,11 +356,16 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "as it is not present anymore in recent scans."
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
+                product_grading_option=False,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        # Calculate grade once after all findings have been closed
+        if old_findings:
+            perform_product_grading(self.test.engagement.product)
 
         return old_findings
 
