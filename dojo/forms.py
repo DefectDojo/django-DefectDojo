@@ -1470,7 +1470,7 @@ class FindingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
-        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1908,7 +1908,7 @@ class CloseFindingForm(forms.ModelForm):
             else False
 
         if self.can_edit_mitigated_data:
-            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
         if disclaimer := get_system_setting("disclaimer_notes"):
