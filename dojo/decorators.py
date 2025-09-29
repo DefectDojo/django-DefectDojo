@@ -55,8 +55,7 @@ dojo_async_task_counter = ThreadLocalTaskCounter()
 
 
 def we_want_async(*args, func=None, **kwargs):
-    from dojo.models import Dojo_User
-    from dojo.utils import get_current_user
+    from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
     sync = kwargs.get("sync", False)
     if sync:
@@ -64,13 +63,17 @@ def we_want_async(*args, func=None, **kwargs):
         return False
 
     user = kwargs.get("async_user", get_current_user())
-    logger.debug("user: %s", user)
+    logger.debug("async user: %s", user)
+
+    if not user:
+        logger.debug("dojo_async_task %s: no current user, running task in the background", func)
+        return True
 
     if Dojo_User.wants_block_execution(user):
         logger.debug("dojo_async_task %s: running task in the foreground as block_execution is set to True for %s", func, user)
         return False
 
-    logger.debug("dojo_async_task %s: no current user, running task in the background", func)
+    logger.debug("dojo_async_task %s: running task in the background as user has not set block_execution to True for %s", func, user)
     return True
 
 
@@ -79,7 +82,7 @@ def we_want_async(*args, func=None, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
-        from dojo.utils import get_current_user
+        from dojo.utils import get_current_user  # noqa: PLC0415 circular import
         user = get_current_user()
         kwargs["async_user"] = user
 

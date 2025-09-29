@@ -57,7 +57,7 @@ class OSVScannerParser:
         return "OSV scan output can be imported in JSON format (option --format json)."
 
     def classify_severity(self, severity_input):
-        return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input != "" else "Low"
+        return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input else "Low"
 
     def get_findings(self, file, test):
         try:
@@ -85,7 +85,7 @@ class OSVScannerParser:
                     if (affected := vulnerability.get("affected")) is not None:
                         if len(affected) > 0:
                             # Pull the package purl if present
-                            if (vulnerabilitypackage := affected[0].get("package", "")) != "":
+                            if (vulnerabilitypackage := affected[0].get("package", "")):
                                 vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
                             # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:

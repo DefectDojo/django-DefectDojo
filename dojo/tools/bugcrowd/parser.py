@@ -157,7 +157,7 @@ class BugCrowdParser:
         lines = [
             line
             for line in ret["description"].replace("#", "").split("\n")
-            if line != ""
+            if line
         ]
         ret["description"] = ""
         for line in lines:
@@ -196,7 +196,7 @@ class BugCrowdParser:
 
     def split_description(self, description):
         ret = {}
-        if description is None or description == "":
+        if description is None or not description:
             return ret
 
         split_des = description.split("---")
@@ -205,7 +205,7 @@ class BugCrowdParser:
             lines = [
                 line.strip()
                 for line in "".join(item.split("#")).splitlines()
-                if line != ""
+                if line
             ]
             if lines:
                 first = lines[0].strip()
@@ -222,7 +222,7 @@ class BugCrowdParser:
 
         ret = self.description_parse(ret)
 
-        if ret["description"] == "":
+        if not ret["description"]:
             ret["description"] = description
 
         return ret

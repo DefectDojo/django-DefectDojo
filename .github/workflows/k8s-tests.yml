@@ -27,7 +27,7 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.33.4'
+            k8s: 'v1.34.1'
             os: debian
     steps:
       - name: Checkout
@@ -36,7 +36,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
         with:
-          minikube version: 'v1.33.1'
+          minikube version: 'v1.37.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -108,43 +108,46 @@ jobs:
                  echo "INFO: status:"
                  kubectl get pods
                  echo "INFO: logs:"
-                 kubectl logs  --selector=$3 --all-containers=true
+                 kubectl logs --selector=$3 --all-containers=true
                  exit 1
                fi
                return ${?}
              }
              echo "Waiting for init job..."
-             to_complete  "condition=Complete" job "defectdojo.org/component=initializer"
+             to_complete "condition=Complete" job "defectdojo.org/component=initializer"
              echo "Waiting for celery pods..."
-             to_complete  "condition=ready" pod "defectdojo.org/component=celery"
+             to_complete "condition=ready" pod "defectdojo.org/component=celery"
              echo "Waiting for django pod..."
-             to_complete  "condition=ready" pod "defectdojo.org/component=django"
+             to_complete "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
+
+      - name: Test login page
+        timeout-minutes: 10
+        run: |-
              RETRY=0
              while :
                do
                DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
                OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
-                  --overrides='{ "apiVersion": "v1" }' \
                   --restart=Never -i --rm -- \
                     --silent \
                     --max-time 20 \
                     --head \
                     --header "Host: $DD_HOSTNAME" \
-                    http://$DJANGO_IP/login?next=/)
+                    "http://${DJANGO_IP}/login?next=/")
                echo $OUT
-               CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
+               CR=$(echo $OUT | egrep "^HTTP" | cut -d' ' -f2)
                echo $CR
                if [[ $CR -ne 200 ]]; then
                   echo $RETRY
                   if [[ $RETRY -gt 2 ]]; then
                     kubectl get pods
-                    echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
+                    echo $(kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi)
                     echo "ERROR: cannot display login screen; got HTTP code $CR"
                     exit 1
                   else
-                    ((RETRY++))
+                    RETRY=$((RETRY+1))
                     echo "Attempt $RETRY to get login page"
                     sleep 5
                   fi
@@ -153,29 +156,51 @@ jobs:
                 break
                fi
              done
+
+      - name: Test API auth call
+        timeout-minutes: 10
+        run: |-
              ADMIN_PASS=$(kubectl get secret/defectdojo -o jsonpath='{.data.DD_ADMIN_PASSWORD}' | base64 -d)
              echo "Simple API check"
              DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
-             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
-               --overrides='{ "apiVersion": "v1" }' \
-               --restart=Never -i --rm -- \
-                 --silent \
-                 --max-time 20 \
-                 --header "Host: $DD_HOSTNAME" \
-                 --data-raw "username=admin&password=$ADMIN_PASS" \
-                 --output /dev/null \
-                 --write-out "%{http_code}\n" \
-                 http://$DJANGO_IP/api/v2/api-token-auth/)
-             echo $CR
-             if [[ $CR -ne 200 ]]; then
-              echo "ERROR: login is not possible; got HTTP code $CR"
-              exit 1
-             else
-              echo "Result received"
-             fi
+             RETRY=0
+             while :
+               do
+                  OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:8.15.0 \
+                    --restart=Never -i --rm -- \
+                      --dump-header - \
+                      --no-progress-meter \
+                      --max-time 20 \
+                      --header "Host: $DD_HOSTNAME" \
+                      --data-raw "username=admin&password=$ADMIN_PASS" \
+                      "http://${DJANGO_IP}/api/v2/api-token-auth/")
+                  CR=$(echo $OUT | egrep "^HTTP" | cut -d' ' -f2)
+                  echo "Return code $CR"
+                  if [[ $CR -ne 200 ]]; then
+                    echo "Retry: $RETRY"
+                    if [[ $RETRY -gt 2 ]]; then
+                      kubectl get pods
+                      echo $(kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi)
+                      echo "ERROR: cannot perform API login; got HTTP code $CR; Full response:"
+                      echo $OUT
+                      exit 1
+                    else
+                      RETRY=$((RETRY+1))
+                      echo "Attempt $RETRY to perform API login"
+                      sleep 5
+                    fi
+                  else
+                    echo "Result received"
+                    break
+                  fi
+              done
+
+      - name: Check of logs
+        timeout-minutes: 10
+        run: |-
              echo "Final Check of components"
-             errors=`kubectl get pods | grep Error | awk '{print  $1}'`
-             if [[ ! -z  $errors ]]; then
+             errors=$(kubectl get pods | grep Error | awk '{print $1}')
+             if [[ ! -z $errors ]]; then
                echo "Few pods with errors"
                for line in $errors; do
                  echo "Dumping log from $line"
@@ -185,3 +210,11 @@ jobs:
              else
                echo "DD K8S successfully deployed"
              fi
+
+      - name: Failed Logs
+        if: failure()
+        run: |-
+             echo "ERROR: Here are logs from deployment/defectdojo-django containers:"
+             kubectl logs deployment/defectdojo-django --all-pods=true --all-containers=true --tail=100
+             echo "And all pod status one more time"
+             kubectl get pods

@@ -1,1 +1,1 @@
-scan_added.tpl
+{% include "notifications/slack/scan_added.tpl" %}

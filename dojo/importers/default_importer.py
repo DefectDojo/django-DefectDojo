@@ -183,7 +183,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_findings: active from report: %s, verified from report: %s", unsaved_finding.active, unsaved_finding.verified)
+            logger.debug("process_parsed_findings: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:
                 unsaved_finding.active = self.active
@@ -198,8 +198,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # Force parsers to use unsaved_tags (stored in below after saving)
             unsaved_finding.tags = None
-            # postprocessing will be done on next save.
+            finding = self.process_cve(unsaved_finding)
+            # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
+            finding.set_hash_code(True)
+
+            # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
             unsaved_finding.save_no_options()
+
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
@@ -218,11 +223,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
+            # all data is already saved on the finding, we only need to trigger post processing
+
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if self.findings_groups_enabled and self.group_by:
-                finding.save()
-            else:
-                finding.save(push_to_jira=self.push_to_jira)
+            push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(

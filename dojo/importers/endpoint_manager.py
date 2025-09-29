@@ -84,7 +84,7 @@ class EndpointManager:
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
-                logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+                logger.debug("Re-import: reactivating endpoint %s that is present in this scan", endpoint_status.endpoint)
                 endpoint_status.mitigated_by = None
                 endpoint_status.mitigated_time = None
                 endpoint_status.mitigated = False
@@ -111,7 +111,7 @@ class EndpointManager:
             try:
                 endpoint.clean()
             except ValidationError as e:
-                logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
+                logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: %s", e)
 
     def chunk_endpoints_and_reactivate(
         self,
