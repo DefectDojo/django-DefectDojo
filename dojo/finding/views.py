@@ -112,7 +112,6 @@ from dojo.utils import (
     add_success_message_to_response,
     apply_cwe_to_template,
     calculate_grade,
-    close_external_issue,
     do_false_positive_history,
     get_page_items,
     get_page_items_and_count,
@@ -1140,68 +1139,22 @@ def close_finding(request, fid):
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
 
-        close_external_issue(finding, "Closed by defectdojo", "github")
-
         if form.is_valid():
-            now = timezone.now()
-            new_note = form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = form.cleaned_data.get("mitigated") or now
-            new_note.save()
-            finding.notes.add(new_note)
-
-            messages.add_message(
-                request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success",
-            )
+            messages.add_message(request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success")
 
             if len(missing_note_types) <= 1:
-                finding.active = False
-                now = timezone.now()
-                finding.mitigated = form.cleaned_data.get("mitigated") or now
-                finding.mitigated_by = (
-                    form.cleaned_data.get("mitigated_by") or request.user
+                finding_helper.close_finding(
+                    finding=finding,
+                    user=request.user,
+                    is_mitigated=True,
+                    mitigated=form.cleaned_data.get("mitigated"),
+                    mitigated_by=form.cleaned_data.get("mitigated_by") or request.user,
+                    false_p=form.cleaned_data.get("false_p", False),
+                    out_of_scope=form.cleaned_data.get("out_of_scope", False),
+                    duplicate=form.cleaned_data.get("duplicate", False),
+                    note_entry=form.cleaned_data.get("entry"),
+                    note_type=form.cleaned_data.get("note_type"),
                 )
-                finding.is_mitigated = True
-                finding.under_review = False
-                finding.last_reviewed = finding.mitigated
-                finding.last_reviewed_by = request.user
-                finding.false_p = form.cleaned_data.get("false_p", False)
-                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
-                finding.duplicate = form.cleaned_data.get("duplicate", False)
-                endpoint_status = finding.status_finding.all()
-                for status in endpoint_status:
-                    status.mitigated_by = (
-                        form.cleaned_data.get("mitigated_by") or request.user
-                    )
-                    status.mitigated_time = form.cleaned_data.get("mitigated") or now
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
-                # Clear the risk acceptance, if present
-                ra_helper.risk_unaccept(request.user, finding)
-
-                # Manage the jira status changes
-                push_to_jira = False
-                # Determine if the finding is in a group. if so, not push to jira
-                finding_in_group = finding.has_finding_group
-                # Check if there is a jira issue that needs to be updated
-                jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-                # fetch the project
-                jira_instance = jira_helper.get_jira_instance(finding)
-                jira_project = jira_helper.get_jira_project(finding)
-                # Only push if the finding is not in a group
-                if jira_issue_exists:
-                    # Determine if any automatic sync should occur
-                    push_to_jira = jira_helper.is_push_all_issues(finding) or jira_instance.finding_jira_sync
-                    # Add the closing note
-                    if (jira_project.push_notes or push_to_jira) and not finding_in_group:
-                        jira_helper.add_comment(finding, new_note, force_push=True)
-                # Save the finding
-                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-                # we only push the group after saving the finding to make sure
-                # the updated data of the finding is pushed as part of the group
-                if push_to_jira and finding_in_group:
-                    jira_helper.push_to_jira(finding.finding_group)
 
                 messages.add_message(
                     request,
@@ -1210,17 +1163,7 @@ def close_finding(request, fid):
                     extra_tags="alert-success",
                 )
 
-                # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
-                # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
-                # TODO: but same should be implemented for API endpoint
-
-                create_notification(
-                    event="finding_closed",
-                    title=_("Closing of %s") % finding.title,
-                    finding=finding,
-                    description=f'The finding "{finding.title}" was closed by {request.user}',
-                    url=reverse("view_finding", args=(finding.id,)),
-                )
+                # Notification sent by helper
                 return HttpResponseRedirect(
                     reverse("view_test", args=(finding.test.id,)),
                 )
