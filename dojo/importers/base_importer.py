@@ -31,6 +31,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
+from dojo.tag_utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
@@ -421,15 +422,34 @@ class BaseImporter(ImporterOptions):
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
-            for finding in test_import.findings_affected.all():
-                for tag in self.tags:
-                    self.add_tags_safe(finding, tag)
+            findings_qs = test_import.findings_affected.all()
+            try:
+                bulk_add_tags_to_instances(
+                    tag_or_tags=self.tags,
+                    instances=findings_qs,
+                    tag_field_name="tags",
+                )
+            except IntegrityError:
+                # Fallback to safe per-instance tagging if concurrent deletes occur
+                for finding in findings_qs:
+                    for tag in self.tags:
+                        self.add_tags_safe(finding, tag)
+
         # Add any tags to any endpoints of the findings imported if necessary
         if self.apply_tags_to_endpoints and self.tags:
-            for finding in test_import.findings_affected.all():
-                for endpoint in finding.endpoints.all():
-                    for tag in self.tags:
-                        self.add_tags_safe(endpoint, tag)
+            # Collect all endpoints linked to the affected findings
+            endpoints_qs = Endpoint.objects.filter(finding__in=test_import.findings_affected.all()).distinct()
+            try:
+                bulk_add_tags_to_instances(
+                    tag_or_tags=self.tags,
+                    instances=endpoints_qs,
+                    tag_field_name="tags",
+                )
+            except IntegrityError:
+                for finding in test_import.findings_affected.all():
+                    for endpoint in finding.endpoints.all():
+                        for tag in self.tags:
+                            self.add_tags_safe(endpoint, tag)
 
         return test_import
 

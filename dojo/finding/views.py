@@ -100,6 +100,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
 )
 from dojo.notifications.helper import create_notification
+from dojo.tag_utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
 from dojo.tools import tool_issue_updater
 from dojo.utils import (
@@ -2809,17 +2810,10 @@ def finding_bulk_update_all(request, pid=None):
                     finding.save()
 
             if form.cleaned_data["tags"]:
-                for finding in finds:
-                    tags = form.cleaned_data["tags"]
-                    logger.debug(
-                        "bulk_edit: setting tags for: %i %s %s",
-                        finding.id,
-                        finding,
-                        tags,
-                    )
-                    # currently bulk edit overwrites existing tags
-                    finding.tags = tags
-                    finding.save()
+                tags = form.cleaned_data["tags"]
+                logger.debug("bulk_edit: adding tags to %d findings: %s", finds.count(), tags)
+                # Delegate parsing and handling of strings/iterables to helper
+                bulk_add_tags_to_instances(tag_or_tags=tags, instances=finds, tag_field_name="tags")
 
             error_counts = defaultdict(lambda: 0)
             success_count = 0
