@@ -166,6 +166,24 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     new_state_finding.last_status_update = now
 
 
+def filter_findings_by_existence(findings):
+    """
+    Return only findings that still exist in the database (by id).
+
+    Centralized helper used by importers to avoid FK violations during
+    bulk_create.
+    """
+    if not findings:
+        return []
+    candidate_ids = [finding.id for finding in findings if getattr(finding, "id", None)]
+    if not candidate_ids:
+        return []
+    existing_ids = set(
+        Finding.objects.filter(id__in=candidate_ids).values_list("id", flat=True),
+    )
+    return [finding for finding in findings if finding.id in existing_ids]
+
+
 def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
 
