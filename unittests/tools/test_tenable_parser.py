@@ -195,6 +195,16 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("http", endpoint.protocol)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
 
+    def test_parse_some_findings_with_nessus_with_cwe(self):
+        with (get_unit_tests_scans_path("tenable/nessus") / "nessus_with_cwe-.nessus").open(encoding="utf-8") as testfile:
+            parser = TenableParser()
+            findings = parser.get_findings(testfile, self.create_test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            finding = findings[0]
+            self.assertEqual(94, finding.cwe)
+
     def test_parse_many_findings_xml_nessus_was_legacy(self):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
