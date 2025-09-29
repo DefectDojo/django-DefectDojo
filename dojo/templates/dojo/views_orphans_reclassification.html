@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load event_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Button to upload Excel -->
+    <div class="text-right mb-3">
+        <button type="button" class="btn btn-info" id="upload-excel">
+            <i class="fa fa-file-excel-o"></i> Upload Excel
+        </button>
+        <input type="file" id="excel-file" class="hidden" accept=".xlsx,.xls,.csv">
+        <span id="excel-file-info" class="label label-default ml-2">No file selected</span>
+    </div>
+
+    <!-- Selection area -->
+    <div class="row">
+        <!-- Orphan products panel -->
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <i class="fa fa-cubes"></i> Orphan Products
+                    <div class="pull-right">
+                        <small id="selected-count">0 selected</small>
+                        {% if search_query %}
+                        <small> | Filtered: "{{ search_query }}"</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Export button -->
+                    <div class="text-right mb-2">
+                        <a href="{% url 'export_orphan_products' %}?{{ request.GET.urlencode }}" 
+                           class="btn btn-success btn-sm" 
+                           id="export-orphans-btn"
+                           title="Export orphan products to Excel">
+                            <i class="fa fa-download"></i> Export Excel
+                        </a>
+                        {% if search_query %}
+                        <a href="{% url 'export_orphan_products' %}" 
+                           class="btn btn-outline-success btn-sm"
+                           title="Export all orphan products">
+                            <i class="fa fa-download"></i> Export All
+                        </a>
+                        {% endif %}
+                    </div>
+        
+                    <!-- Search form -->
+                    <form method="get" id="search-form">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" 
+                                    id="product-search" placeholder="Search by name or code..." 
+                                    value="{{ request.GET.search|default_if_none:'' }}">
+                                <div class="input-group-append">
+                                    {% if search_query %}
+                                        <a href="?" class="btn btn-outline-secondary" title="Clear filter">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Keep other parameters -->
+                        <input type="hidden" name="page" value="1" id="page-input">
+                        <input type="hidden" name="product_type" value="{{ request.GET.product_type }}">
+                    </form>
+                    
+                    <div class="list-group" id="orphan-products-list">
+                        {% for product in orphan_products %}
+                            <label class="list-group-item" style="cursor: pointer; margin-bottom: 0;" data-product-id="{{ product.id }}">
+                                <input type="checkbox" name="products" value="{{ product.id }}" 
+                                    data-name="{{ product.name }}" data-code="{{ product.code}}"
+                                    style="margin-right: 10px;">
+                                <strong>{{ product.name }}</strong>
+                                <br><small class="text-muted">{{ product.code }}</small>
+                            </label>
+                        {% empty %}
+                            {% if search_query %}
+                                <p class="text-muted text-center">
+                                    No products found for "{{ search_query }}".
+                                    <br><a href="?" class="btn btn-sm btn-link">Clear filter</a>
+                                </p>
+                            {% else %}
+                                <p class="text-muted text-center">No orphan products available.</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination with search parameters -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}&product_type={{ request.GET.product_type }}">
+                                    Previous
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ num }}&product_type={{ request.GET.product_type }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}&product_type={{ request.GET.product_type }}">
+                                    Next
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="col-md-2 text-center">
+            <div class="btn-group-vertical" style="margin-top:100px;">
+                <button type="button" class="btn btn-primary" id="move-right" title="Move to selected">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+                <button type="button" class="btn btn-default" id="move-left" title="Return to available">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Product type panel -->
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <i class="fa fa-tags"></i> Product Type
+                </div>
+                <div class="panel-body">
+                    <select class="mb-3" id="product-type-select" name="product_type" style="max-width: 300px !important;">
+                        <option value="">-- Select Product Type --</option>
+                        {% for product_type in product_types %}
+                            <option value="{{ product_type.id }}" {% if product_type.id|stringformat:"s" == request.GET.product_type %}selected{% endif %}>
+                                {{ product_type.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <small>Products to reclassify: <span id="moved-count">0</span></small>
+                        </div>
+                        <div class="panel-body" id="selected-products-preview" style="max-height: 300px; overflow-y: auto;">
+                            <p class="text-muted text-center">Selected products will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reclassify button -->
+    <div class="text-center mt-4">
+        <button type="button" class="btn btn-success btn-lg" id="reclassify-btn">
+            <i class="fa fa-check"></i> Reclassify
+        </button>
+    </div>
+</div>
+
+<!-- Form for submission -->
+<form id="reclassification-form" method="post" action="{% url 'reclassify_orphans' %}">
+    {% csrf_token %}
+    <input type="hidden" name="selected_products" id="selected-products-input">
+    <input type="hidden" name="product_type" id="product-type-input">
+</form>
+
+<!-- Modal for Excel progress -->
+<div class="modal fade" id="excelProgressModal" tabindex="-1" role="dialog" aria-labelledby="excelProgressModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="excelProgressModalLabel">
+                    <i class="fa fa-file-excel-o"></i> Processing Excel File
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="progress" style="height: 30px;">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%;" 
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-3 text-center">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 id="total-products">0</h5>
+                                <small>Total Productos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 id="successful-products">0</h5>
+                                <small>Exitosos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 id="pending-products">0</h5>
+                                <small>Pendientes</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body">
+                                <h5 id="failed-products">0</h5>
+                                <small>Fallidos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="processing-details" class="mt-3">
+                    <h6>Detalles del Procesamiento:</h6>
+                    <div id="processing-log" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-processing" style="display: none;">
+                    <i class="fa fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="close-modal" style="display: none;" data-dismiss="modal">
+                    <i class="fa fa-check"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.list-group-item:hover {
+    background-color: #f5f5f5;
+}
+
+.list-group-item.selected {
+    background-color: #337ab7 !important;
+    color: white !important;
+}
+
+.list-group-item.selected small {
+    color: #e6e6e6 !important;
+}
+
+#selected-products-preview .selected-product {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.hidden {
+    display: none;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.product-moved {
+    display: none !important;
+}
+
+/* Estilos para el modal de progreso */
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position: 1rem 0; }
+    100% { background-position: 0 0; }
+}
+
+.processing-log-item {
+    padding: 5px 10px;
+    margin: 2px 0;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.log-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 3px solid #28a745;
+}
+
+.log-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 3px solid #dc3545;
+}
+
+.log-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 3px solid #17a2b8;
+}
+
+.log-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 3px solid #ffc107;
+}
+
+.card {
+    margin-bottom: 0;
+}
+
+.card h5 {
+    margin-bottom: 0;
+}
+
+#export-orphans-btn {
+    margin-left: 5px;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.text-right.mb-2 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px !important;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    console.log('[DEBUG] ✅ JavaScript loaded successfully!');
+    
+    // Simple state
+    let movedProducts = [];
+    let processingInterval = null;
+    let currentSessionKey = null;
+    
+    // Function to enable/disable buttons
+    function toggleButton($button, disabled) {
+        if (disabled) {
+            $button.prop('disabled', true).addClass('disabled');
+        } else {
+            $button.prop('disabled', false).removeClass('disabled');
+        }
+    }
+    
+    // Update counters and UI
+    function updateUI() {
+        const selectedCount = $('input[name="products"]:checked:not(:disabled)').length;
+        const movedCount = movedProducts.length;
+        const productTypeSelected = $('#product-type-select').val() !== '';
+        
+        // Update counters
+        $('#selected-count').text(selectedCount + ' selected' + (selectedCount !== 1 ? 's' : ''));
+        $('#moved-count').text(movedCount);
+        
+        // Update buttons
+        toggleButton($('#move-right'), selectedCount === 0);
+        toggleButton($('#move-left'), movedCount === 0);
+        toggleButton($('#reclassify-btn'), movedCount === 0 || !productTypeSelected);
+        
+        console.log('[DEBUG] UI updated - Selected:', selectedCount, 'Moved:', movedCount, 'ProductType:', productTypeSelected);
+    }
+    
+    // Select/deselect products
+    $('#orphan-products-list').on('change', 'input[type="checkbox"]', function() {
+        const $item = $(this).closest('.list-group-item');
+        
+        if (this.checked) {
+            $item.addClass('selected');
+        } else {
+            $item.removeClass('selected');
+        }
+        
+        updateUI();
+    });
+    
+    // Move selected products to the right
+    $('#move-right').on('click', function() {
+        if ($(this).prop('disabled')) {
+            console.log('[DEBUG] Right button disabled');
+            return;
+        }
+        
+        console.log('[DEBUG] Moving products to the right...');
+        
+        const checkboxes = $('input[name="products"]:checked:not(:disabled)');
+        
+        checkboxes.each(function() {
+            const $checkbox = $(this);
+            const productId = $checkbox.val();
+            const productName = $checkbox.data('name');
+            const productCode = $checkbox.data('code');
+            const $productItem = $checkbox.closest('.list-group-item');
+            
+            const alreadyMoved = movedProducts.some(p => p.id == productId);
+            
+            if (!alreadyMoved) {
+                movedProducts.push({
+                    id: productId,
+                    name: productName,
+                    code: productCode
+                });
+                console.log('[DEBUG] Product moved:', productName);
+
+                $productItem.addClass('product-moved');
+                $checkbox.prop('disabled', true);
+            }
+            
+            $checkbox.prop('checked', false);
+            $productItem.removeClass('selected');
+        });
+        
+        updatePreview();
+        updateUI();
+    });
+    
+    $('#move-left').on('click', function() {
+        if ($(this).prop('disabled')) {
+            console.log('[DEBUG] Left button disabled');
+            return;
+        }
+        
+        console.log('[DEBUG] Returning products...');
+        
+        movedProducts.forEach(product => {
+            const $productItem = $(`.list-group-item[data-product-id="${product.id}"]`);
+            const $checkbox = $productItem.find('input[name="products"]');
+            
+            $productItem.removeClass('product-moved');
+            $checkbox.prop('disabled', false);
+        });
+        
+        movedProducts = [];
+        updatePreview();
+        updateUI();
+    });
+    
+    function updatePreview() {
+        const $preview = $('#selected-products-preview');
+        
+        if (movedProducts.length === 0) {
+            $preview.html('<p class="text-muted text-center">Selected products will appear here.</p>');
+            return;
+        }
+        
+        let html = '';
+        movedProducts.forEach(product => {
+            html += `
+                <div class="selected-product" data-product-id="${product.id}">
+                    <strong>${product.name}</strong>
+                    <br><small class="text-muted">${product.code}</small>
+                </div>
+            `;
+        });
+        
+        $preview.html(html);
+    }
+    
+    $('#product-type-select').on('change', function() {
+        console.log('[DEBUG] Product type changed:', $(this).val());
+        updateUI();
+    });
+    
+    $('#reclassify-btn').on('click', function() {
+        if ($(this).prop('disabled')) {
+            alert('Please select products and a product type first.');
+            return;
+        }
+        
+        const productTypeId = $('#product-type-select').val();
+        const productTypeText = $('#product-type-select option:selected').text();
+        
+        if (!confirm(`Reclassify ${movedProducts.length} product(s) to type "${productTypeText}"?`)) {
+            return;
+        }
+        
+        const $form = $('#reclassification-form');
+        
+        $form.find('input[name="selected_products"]').remove();
+        
+        movedProducts.forEach(product => {
+            $('<input>')
+                .attr('type', 'hidden')
+                .attr('name', 'selected_products')
+                .val(product.id)
+                .appendTo($form);
+        });
+        
+        $('#product-type-input').val(productTypeId);
+        
+        $form.submit();
+    });
+    
+    $('#upload-excel').on('click', function() {
+        $('#excel-file').click();
+    });
+    
+    $('#excel-file').on('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        $('#excel-file-info').text(file.name)
+            .removeClass('label-default')
+            .addClass('label-success');
+        
+        $('#excelProgressModal').modal({backdrop: 'static', keyboard: false});
+        resetProgressModal();
+        addToLog('Starting file processing...', 'info');
+        
+        const formData = new FormData();
+        formData.append('excel_file', file);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        $.ajax({
+            url: '{% url "reclassify_excel" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status === 'error') {
+                    addToLog('Error: ' + response.message, 'error');
+                    showModalCompletion(false, response.message);
+                    return;
+                }
+                
+                if (response.status === 'started') {
+                    currentSessionKey = response.session_key;
+                    $('#total-products').text(response.total);
+                    $('#pending-products').text(response.total);
+                    addToLog(`File uploaded successfully. ${response.total} products found.`, 'success');
+                    addToLog('Starting batch processing...', 'info');
+                    
+                    startBatchProcessing(currentSessionKey);
+                }
+            },
+            error: function(xhr, status, error) {
+                addToLog('Error uploading file: ' + error, 'error');
+                showModalCompletion(false, 'Server communication error');
+            }
+        });
+    });
+    
+    function startBatchProcessing(sessionKey) {
+        $('#cancel-processing').show();
+        
+        processBatch(sessionKey, 0);
+    }
+    
+    function processBatch(sessionKey, attempt = 0) {
+        if (attempt > 5) {
+            addToLog('Error: Too many failed attempts', 'error');
+            showModalCompletion(false, 'Processing error');
+            return;
+        }
+
+        const csrfToken = getCSRFToken();
+        
+        $.ajax({
+            url: '{% url "process_batch" %}',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            data: JSON.stringify({
+                session_key: sessionKey,
+                batch_size: 100
+            }),
+            success: function(response) {
+                if (response.status === 'error') {
+                    addToLog('Batch error: ' + response.message, 'error');
+                    setTimeout(() => processBatch(sessionKey, attempt + 1), 1000);
+                    return;
+                }
+                
+                updateProgress(response);
+                
+                if (!response.completed) {
+                    setTimeout(() => processBatch(sessionKey), 800);
+                } else {
+                    showModalCompletion(true, 
+                        `Processing completed: ${response.successful} successful, ${response.failed} failed`);
+                }
+            },
+            error: function(xhr, status, error) {
+                addToLog(`Connection error (attempt ${attempt + 1}/5), retrying...`, 'warning');
+                setTimeout(() => processBatch(sessionKey, attempt + 1), 1500);
+            }
+        });
+    }
+
+    function getCSRFToken() {
+        let csrfToken = '';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                csrfToken = value;
+                break;
+            }
+        }
+        return csrfToken;
+    }
+    
+    function updateProgress(data) {
+        const percentage = Math.round((data.processed / data.total) * 100);
+        $('#progress-bar').css('width', percentage + '%')
+                         .attr('aria-valuenow', percentage);
+        $('#progress-text').text(percentage + '%');
+        
+        $('#successful-products').text(data.successful);
+        $('#failed-products').text(data.failed);
+        $('#pending-products').text(data.total - data.processed);
+        
+        addToLog(`Batch processed: ${data.processed}/${data.total} products (${percentage}%)`, 'info');
+    }
+    
+    function resetProgressModal() {
+        $('#progress-bar').css('width', '0%')
+                         .attr('aria-valuenow', 0)
+                         .removeClass('bg-success bg-danger')
+                         .addClass('progress-bar-animated');
+        $('#progress-text').text('0%');
+        $('#total-products').text('0');
+        $('#successful-products').text('0');
+        $('#pending-products').text('0');
+        $('#failed-products').text('0');
+        $('#processing-log').empty();
+        $('#cancel-processing').hide();
+        $('#close-modal').hide();
+    }
+    
+    function addToLog(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logItem = $('<div class="processing-log-item log-' + type + '"></div>')
+            .html(`<strong>[${timestamp}]</strong> ${message}`);
+        $('#processing-log').prepend(logItem);
+        
+        $('#processing-log').scrollTop(0);
+    }
+    
+    function showModalCompletion(success, message) {
+        const type = success ? 'success' : 'error';
+        addToLog(message, type);
+        
+        $('#progress-bar').removeClass('progress-bar-animated');
+        if (success) {
+            $('#progress-bar').addClass('bg-success');
+        } else {
+            $('#progress-bar').addClass('bg-danger');
+        }
+        
+        $('#cancel-processing').hide();
+        $('#close-modal').show();
+        
+        if (success) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+    }
+    
+    $('#cancel-processing').on('click', function() {
+        if (confirm('Are you sure you want to cancel processing?')) {
+            addToLog('Processing canceled by user', 'warning');
+            showModalCompletion(false, 'Processing canceled');
+        }
+    });
+    
+    $('#close-modal').on('click', function() {
+        $('#excelProgressModal').modal('hide');
+    });
+    
+    $('#excelProgressModal').on('hidden.bs.modal', function() {
+        resetProgressModal();
+        $('#excel-file').val('');
+        $('#excel-file-info').text('No file selected')
+            .removeClass('label-success')
+            .addClass('label-default');
+    });
+    
+    console.log('[DEBUG] ✅ System ready!');
+    updateUI();
+});
+</script>
+{% endblock %}
