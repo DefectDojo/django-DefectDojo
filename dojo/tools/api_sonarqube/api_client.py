@@ -334,6 +334,31 @@ class SonarQubeAPI:
             self.rules_cache.update({rule_id: rule})
         return rule
 
+    def get_hotspot(self, rule_id):
+        """
+        Get detailed information about a hotspot
+        :param rule_id:
+        :return:
+        """
+        rule = self.rules_cache.get(rule_id)
+        if not rule:
+            response = self.session.get(
+                url=f"{self.sonar_api_url}/hotspots/search",
+                params={"hotspots": rule_id},
+                headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
+            )
+            if not response.ok:
+                msg = (
+                    f"Unable to get the hotspot rule {rule_id} "
+                    f"due to {response.status_code} - {response.content}"
+                )
+                raise Exception(msg)
+
+            rule = response.json()["hotspots"][0]
+            self.rules_cache.update({rule_id: rule})
+        return rule
+
     def transition_issue(self, issue_key, transition):
         """
         Do workflow transition on an issue. Requires authentication and Browse permission on project.
@@ -371,6 +396,46 @@ class SonarQubeAPI:
         if not response.ok:
             msg = (
                 f"Unable to transition {transition} the issue {issue_key} "
+                f'due to {response.status_code} - {response.content.decode("utf-8")}'
+            )
+            raise Exception(msg)
+
+    def transition_hotspot(self, issue_key, status, resolution=None):
+        """
+        Do workflow transition on an issue. Requires authentication and Browse permission on project.
+        The transitions 'wontfix' and 'falsepositive' require the permission 'Administer Issues'.
+        The transitions involving security hotspots (except 'requestreview') require
+        the permission 'Administer Security Hotspot'.
+
+        Possible resolution values:
+        - FIXED
+        - SAFE
+        - ACKNOWLEDGED
+
+        Possible status values:
+        - TO_REVIEW
+        - REVIEWED
+
+        :param issue_key:
+        :param status:
+        :param resolution:
+        :return:
+        """
+        data = {"hotspot": issue_key, "status": status}
+
+        if resolution:
+            data["resolution"] = resolution
+
+        response = self.session.post(
+            url=f"{self.sonar_api_url}/hotspots/change_status",
+            data=data,
+            headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
+        )
+
+        if not response.ok:
+            msg = (
+                f"Unable to change status {status} / resolution {resolution} the issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
             raise Exception(msg)
