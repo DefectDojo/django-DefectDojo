@@ -214,10 +214,6 @@ class SonarQubeApiUpdater:
         logger.debug(
                 f"Updating finding '{finding}' transition {current_status} -> {target_status} in SonarQube",
             )
-            if transitions:
-                logger.info(
-                    "Updating finding '%s' in SonarQube", finding,
-                )
 
         # Apply transitions
         for transition in transitions:
