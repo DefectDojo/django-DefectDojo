@@ -64,7 +64,7 @@ class ReportBuilderTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Asset Report").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Product Report").click()
 
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))
         my_select.select_by_index(1)

@@ -41,7 +41,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization members added successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type members added successfully."))
             # Query the site to determine if the member has been added
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Reader")
@@ -68,7 +68,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization member updated successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type member updated successfully."))
             # Query the site to determine if the member has been edited
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Owner")
@@ -93,7 +93,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization member deleted successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type member deleted successfully."))
             # Query the site to determine if the member has been deleted
             self.assertFalse(driver.find_elements(By.NAME, "member_product_type"))
         else:
@@ -128,7 +128,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization members added successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type members added successfully."))
             # Query the site to determine if the member has been added
             self.assertEqual(driver.find_elements(By.NAME, "member_user")[1].text, "Proper Samuel (propersahm)")
             self.assertEqual(driver.find_elements(By.NAME, "member_role")[1].text, "Reader")
@@ -157,7 +157,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization member updated successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type member updated successfully."))
             # Query the site to determine if the member has been edited
             self.assertEqual(driver.find_elements(By.NAME, "member_user")[1].text, "Proper Samuel (propersahm)")
             self.assertEqual(driver.find_elements(By.NAME, "member_role")[1].text, "Maintainer")
@@ -184,7 +184,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # "Click" the submit button to complete the transaction
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text="Organization member deleted successfully."))
+            self.assertTrue(self.is_success_message_present(text="Product Type member deleted successfully."))
             # Query the site to determine if the member has been deleted
             self.assertEqual(len(driver.find_elements(By.NAME, "member_user")), 1)
         else:

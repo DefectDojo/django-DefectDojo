@@ -295,7 +295,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return f"/asset/{product.id}"
+        return f"/product/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, *, expect_200=False):
         response = self.client.get(reverse("new_product"))
@@ -304,7 +304,7 @@ class DojoTestUtilsMixin:
         # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
-            expect_redirect_to = "/asset/%i"
+            expect_redirect_to = "/product/%i"
 
         response = self.client.post(reverse("new_product"), urlencode(data), content_type="application/x-www-form-urlencoded")
 
