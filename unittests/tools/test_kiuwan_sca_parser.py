@@ -15,15 +15,15 @@ class TestKiuwanSCAParser(DojoTestCase):
         with (get_unit_tests_scans_path("kiuwan_sca") / "kiuwan_sca_two_vuln.json").open(encoding="utf-8") as testfile:
             parser = KiuwanSCAParser()
             findings = parser.get_findings(testfile, Test())
-            # file contains 3, but we only get 2 as "muted" ones are ignored:
-            self.assertEqual(2, len(findings))
+            # file contains 3 cves, one of them is muted. so we have 2 cves with a total of 5 components
+            self.assertEqual(5, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("kiuwan_sca") / "kiuwan_sca_many_vuln.json").open(encoding="utf-8") as testfile:
             parser = KiuwanSCAParser()
             findings = parser.get_findings(testfile, Test())
-            # also tests deduplication as there are 28 findings in the file:
-            self.assertEqual(27, len(findings))
+            # also tests deduplication as there are 28 cves in the file (but some including >1 components!):
+            self.assertEqual(45, len(findings))
 
     def test_correct_mapping(self):
         with (get_unit_tests_scans_path("kiuwan_sca") / "kiuwan_sca_two_vuln.json").open(encoding="utf-8") as testfile:
@@ -37,7 +37,7 @@ class TestKiuwanSCAParser(DojoTestCase):
             self.assertEqual(finding1.component_name, "org.apache.cxf:cxf-rt-ws-policy")
             self.assertEqual(finding1.component_version, "3.3.5")
             self.assertEqual(finding1.cwe, 835)
-            self.assertEqual(finding1.unique_id_from_tool, 158713)
+            self.assertEqual(finding1.vuln_id_from_tool, "158713")
             self.assertEqual(finding1.cvssv3_score, 7.5)
             self.assertEqual(finding1.epss_score, 0.1)
             self.assertEqual(finding1.epss_percentile, 0.2)
