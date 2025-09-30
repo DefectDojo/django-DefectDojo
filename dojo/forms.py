@@ -559,13 +559,15 @@ class ImportScanForm(forms.Form):
     # Exposing the choice as two different check boxes.
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
     close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "If service has been set, only the findings for this service will be closed; "
+                                                        "if no service is set, only findings without a service will be closed. "
                                                         "This affects findings within the same engagement by default.",
                                             label="Close old findings",
                                             required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "If service has been set, only the findings for this service will be closed; "
+                                                        "if no service is set, only findings without a service will be closed. "
                                                         "This affects findings within the same product.",
                                             label="Close old findings within this product",
                                             required=False,
@@ -1091,7 +1093,6 @@ class TestForm(forms.ModelForm):
         attrs={"class": "datepicker", "autocomplete": "off"}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={"class": "datepicker", "autocomplete": "off"}))
-
     lead = forms.ModelChoiceField(
         queryset=None,
         required=False, label="Testing Lead")
@@ -1469,7 +1470,7 @@ class FindingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
-        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1718,7 +1719,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("severity", "date", "planned_remediation_date", "active", "verified", "false_p", "duplicate", "out_of_scope",
-                  "is_mitigated")
+                  "under_review", "is_mitigated")
 
 
 class EditEndpointForm(forms.ModelForm):
@@ -1907,7 +1908,7 @@ class CloseFindingForm(forms.ModelForm):
             else False
 
         if self.can_edit_mitigated_data:
-            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
         if disclaimer := get_system_setting("disclaimer_notes"):

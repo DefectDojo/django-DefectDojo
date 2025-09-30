@@ -1556,10 +1556,24 @@ def get_setting(setting):
 
 
 @dojo_model_to_id
+@dojo_async_task(signature=True)
+@app.task
+@dojo_model_from_id(model=Product)
+def calculate_grade_signature(product, *args, **kwargs):
+    """Returns a signature for calculating product grade that can be used in chords or groups."""
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+@dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
 def calculate_grade(product, *args, **kwargs):
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+def calculate_grade_internal(product, *args, **kwargs):
+    """Internal function for calculating product grade."""
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning("ignoring calculate product for product None!")
@@ -1596,8 +1610,20 @@ def calculate_grade(product, *args, **kwargs):
         aeval = Interpreter()
         aeval(system_settings.product_grade)
         grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
-        product.prod_numeric_grade = aeval(grade_product)
-        super(Product, product).save()
+        prod_numeric_grade = aeval(grade_product)
+        if prod_numeric_grade != product.prod_numeric_grade:
+            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, prod_numeric_grade)
+            product.prod_numeric_grade = prod_numeric_grade
+            super(Product, product).save()
+        else:
+            # Use %s to safely handle None grades without formatter errors
+            logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
+
+
+def perform_product_grading(product):
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        calculate_grade(product)
 
 
 def get_celery_worker_status():
@@ -2463,7 +2489,8 @@ def get_open_findings_burndown(product):
     findings = Finding.objects.filter(test__engagement__product=product, duplicate=False)
     f_list = list(findings)
 
-    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    curr_date = datetime.combine(timezone.now().date(), datetime.min.time())
+    curr_date = timezone.make_aware(curr_date)
     start_date = curr_date - timedelta(days=90)
 
     critical_count = 0
@@ -2701,3 +2728,21 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         }
     logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
+
+
+def truncate_timezone_aware(dt):
+    """
+    Truncate datetime to date and make it timezone-aware.
+    This replaces the django_filters._truncate function which creates naive datetimes.
+    """
+    if dt is None:
+        return None
+
+    # Get the date part and create a new datetime at midnight
+    truncated = datetime.combine(dt.date(), datetime.min.time())
+
+    # Make it timezone-aware if it isn't already
+    if timezone.is_naive(truncated):
+        truncated = timezone.make_aware(truncated)
+
+    return truncated

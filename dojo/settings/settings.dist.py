@@ -30,6 +30,10 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
+    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # see https://github.com/laymonage/django-jsonfield-backport
+    # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -91,8 +95,6 @@ env = environ.FileAwareEnv(
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
-    DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -742,6 +744,7 @@ SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 # Override default Django behavior for incorrect URLs
 APPEND_SLASH = env("DD_APPEND_SLASH")
 
+
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
 CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
@@ -780,11 +783,6 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
-
-# Django-tagging settings
-FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
-MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
-
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -890,7 +888,6 @@ INSTALLED_APPS = (
     "auditlog",
     "dojo",
     "watson",
-    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     "imagekit",
     "multiselectfield",
     "rest_framework",
@@ -1363,6 +1360,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1434,6 +1432,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
+    "OpenVAS Parser v2": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1620,6 +1619,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
+    "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1819,9 +1819,7 @@ ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 
-# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
-# see https://github.com/laymonage/django-jsonfield-backport
-SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+SILENCED_SYSTEM_CHECKS = env("DD_SILENCED_SYSTEM_CHECKS")
 
 VULNERABILITY_URLS = {
     "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html
@@ -1862,6 +1860,7 @@ VULNERABILITY_URLS = {
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
+    "NN-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/NN-2021:2-01
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330

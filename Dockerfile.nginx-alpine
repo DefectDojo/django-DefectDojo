@@ -26,14 +26,15 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
-COPY requirements.txt ./
+COPY requirements.txt requirements-dev.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+# needed for static files debug toolbar
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements-dev.txt
 
 
 FROM build AS collectstatic
-ARG COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC=false
 RUN apk add nodejs npm
 RUN npm install -g yarn --force
 
@@ -45,6 +46,13 @@ RUN pip3 install \
   --find-links=/tmp/wheels \
 	-r ./requirements.txt
 
+# needed for static files debug toolbar
+RUN pip3 install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+	-r ./requirements-dev.txt
+
 # generate static files
 COPY components/ ./components/
 RUN \
@@ -52,7 +60,8 @@ RUN \
   yarn
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=${COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC} python3 manage.py collectstatic --noinput --verbosity=2 && true
+# always collect static for debug toolbar as we can't make it dependant on env variables or build arguments without breaking docker layer caching
+RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py collectstatic --noinput --verbosity=2 && true
 
 FROM nginx:1.29.1-alpine3.22@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
 ARG uid=1001

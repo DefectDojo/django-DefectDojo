@@ -30,7 +30,7 @@ from django_filters import (
     RangeFilter,
 )
 from django_filters import rest_framework as filters
-from django_filters.filters import ChoiceFilter, _truncate
+from django_filters.filters import ChoiceFilter
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from polymorphic.base import ManagerInheritanceWarning
@@ -92,7 +92,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, is_finding_groups_enabled
+from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
 
 logger = logging.getLogger(__name__)
 
@@ -194,8 +194,8 @@ class FindingStatusFilter(ChoiceFilter):
         if earliest_finding is not None:
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -654,16 +654,16 @@ class DateRangeFilter(ChoiceFilter):
             f"{name}__day": now().day,
         })),
         2: (_("Past 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=7)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=7)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         3: (_("Past 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=30)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=30)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         4: (_("Past 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=90)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=90)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         5: (_("Current month"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
@@ -673,8 +673,8 @@ class DateRangeFilter(ChoiceFilter):
             f"{name}__year": now().year,
         })),
         7: (_("Past year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=365)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=365)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
     }
 
@@ -700,43 +700,43 @@ class DateRangeOmniFilter(ChoiceFilter):
             f"{name}__day": now().day,
         })),
         2: (_("Next 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=7)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=7)),
         })),
         3: (_("Next 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=30)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=30)),
         })),
         4: (_("Next 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=90)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=90)),
         })),
         5: (_("Past 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=7)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=7)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         6: (_("Past 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=30)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=30)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         7: (_("Past 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=90)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=90)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         8: (_("Current month"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
             f"{name}__month": now().month,
         })),
         9: (_("Past year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=365)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=365)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         10: (_("Current year"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
         })),
         11: (_("Next year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=365)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=365)),
         })),
     }
 
@@ -818,8 +818,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         if earliest_finding is not None:
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
             return qs.all()
         return None
 
@@ -839,8 +839,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def past_x_days(self, qs, name, days):
-        self.start_date = _truncate(now() - timedelta(days=days))
-        self.end_date = _truncate(now() + timedelta(days=1))
+        self.start_date = truncate_timezone_aware(now() - timedelta(days=days))
+        self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         return qs.filter(**{
             f"{name}__gte": self.start_date,
             f"{name}__lt": self.end_date,
@@ -884,8 +884,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         if earliest_finding is not None:
             start_date = datetime.combine(
                 earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         try:
             value = int(value)
         except (ValueError, TypeError):
