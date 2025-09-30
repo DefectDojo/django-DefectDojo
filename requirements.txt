@@ -98,7 +98,7 @@ opentelemetry-proto==1.36.0
 opentelemetry-semantic-conventions==0.57b0
 opentelemetry-instrumentation==0.57b0
 django-redis==6.0.0
-pandas==2.3.2
+pandas==2.3.3
 pyarrow==21.0.0
 # Pinning Dependencies
 azure-core==1.35.1
