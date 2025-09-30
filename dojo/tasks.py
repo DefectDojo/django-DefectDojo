@@ -115,7 +115,7 @@ def async_dupe_delete(*args, **kwargs):
         logger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
         deduplicationLogger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
 
-        # limit to 100 to prevent overlapping jobs
+        # limit to settings.DUPE_DELETE_MAX_PER_RUN to prevent overlapping jobs
         results = Finding.objects \
                 .filter(duplicate=True) \
                 .order_by() \
@@ -132,13 +132,17 @@ def async_dupe_delete(*args, **kwargs):
             queryset=Finding.objects.filter(duplicate=True).order_by("date")))
 
         total_deleted_count = 0
+        affected_products = set()
         for original in originals_with_too_many_duplicates:
             duplicate_list = original.original_finding.all()
             dupe_count = len(duplicate_list) - dupe_max
 
             for finding in duplicate_list:
                 deduplicationLogger.debug(f"deleting finding {finding.id}:{finding.title} ({finding.hash_code}))")
-                finding.delete()
+                # Collect the product for batch grading later
+                affected_products.add(finding.test.engagement.product)
+                # Skip individual product grading during deletion
+                finding.delete(product_grading_option=False)
                 total_deleted_count += 1
                 dupe_count -= 1
                 if dupe_count <= 0:
@@ -150,6 +154,14 @@ def async_dupe_delete(*args, **kwargs):
                 break
 
         logger.info("total number of excess duplicates deleted: %s", total_deleted_count)
+
+        # Batch product grading for all affected products
+        if affected_products:
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                logger.info("performing batch product grading for %s products", len(affected_products))
+                for product in affected_products:
+                    calculate_grade(product)
 
 
 @app.task(ignore_result=False)

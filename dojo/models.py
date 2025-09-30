@@ -1651,7 +1651,8 @@ class Engagement(models.Model):
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.product)
+            from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+            perform_product_grading(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2250,13 +2251,15 @@ class Test(models.Model):
         deduplicationLogger.debug(f"HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}")
         return hashCodeAllowsNullCwe
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.engagement.product)
+        if product_grading_option:
+            with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2855,15 +2858,17 @@ class Finding(models.Model):
 
         return copy
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
         finding_helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -4694,7 +4699,6 @@ class ChoiceAnswer(Answer):
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
-    calculate_grade,
     parse_cvss_data,
     to_str_typed,
 )
