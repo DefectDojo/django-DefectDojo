@@ -1303,7 +1303,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
-    "Github Secrets Detection Report": ["title", "severity", "file_path", "line"],
+    "Github Secrets Detection Report": ["title", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
     "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
