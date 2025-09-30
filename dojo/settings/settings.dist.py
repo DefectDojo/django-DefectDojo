@@ -1356,6 +1356,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1613,6 +1614,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
