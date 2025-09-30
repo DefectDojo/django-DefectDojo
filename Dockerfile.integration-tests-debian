@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM openapitools/openapi-generator-cli:v7.15.0@sha256:509f01c3c7eee9d1ad286506a7b6aa4624a95b410be9a238a306d209e900621f AS openapitools
+FROM openapitools/openapi-generator-cli:v7.16.0@sha256:e56372add5e038753fb91aa1bbb470724ef58382fdfc35082bf1b3e079ce353c AS openapitools
 # currently only supports x64, no arm yet due to chrome and selenium dependencies
 FROM python:3.12.11-slim-trixie@sha256:d67a7b66b989ad6b6d6b10d428dcc5e0bfc3e5f88906e67d490c4d3daac57047 AS build
 WORKDIR /app
