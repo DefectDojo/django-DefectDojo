@@ -71,7 +71,7 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
             data["is_in_hacking_continuos"] = True
         tags.extend(test.tags.all().values_list("name", flat=True))
 
-    data["adoption_devsecops"] = adoption_devsecops_exclude(tags)
+    data["adoption_devsecops"] = adoption_devsecops_include(tags)
     active_finding = engagement.get_all_finding_active.only(
         "id",
         "severity",
