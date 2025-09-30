@@ -198,11 +198,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         configure_pghistory_triggers()
 
         self.import_reimport_performance(
-            expected_num_queries1=648,
+            expected_num_queries1=646,
             expected_num_async_tasks1=10,
-            expected_num_queries2=603,
+            expected_num_queries2=599,
             expected_num_async_tasks2=22,
-            expected_num_queries3=287,
+            expected_num_queries3=284,
             expected_num_async_tasks3=20,
         )
 
@@ -244,11 +244,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self.import_reimport_performance(
-            expected_num_queries1=648,
+            expected_num_queries1=646,
             expected_num_async_tasks1=10,
-            expected_num_queries2=608,
+            expected_num_queries2=604,
             expected_num_async_tasks2=22,
-            expected_num_queries3=292,
+            expected_num_queries3=289,
             expected_num_async_tasks3=20,
         )
 
@@ -293,10 +293,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self.import_reimport_performance(
-            expected_num_queries1=653,
-            expected_num_async_tasks1=15,
-            expected_num_queries2=614,
-            expected_num_async_tasks2=28,
-            expected_num_queries3=297,
-            expected_num_async_tasks3=25,
+            expected_num_queries1=647,
+            expected_num_async_tasks1=11,
+            expected_num_queries2=605,
+            expected_num_async_tasks2=23,
+            expected_num_queries3=290,
+            expected_num_async_tasks3=21,
         )
