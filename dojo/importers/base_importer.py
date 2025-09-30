@@ -1,6 +1,7 @@
 import base64
 import logging
 
+from celery import chord, group
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -10,6 +11,7 @@ from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
+from dojo import utils
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -24,6 +26,7 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding,
+    System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -552,6 +555,47 @@ class BaseImporter(ImporterOptions):
             self.test.test_type.dynamic_tool = dynamic_tool
         self.test.test_type.save()
 
+    def maybe_launch_post_processing_chord(
+        self,
+        post_processing_task_signatures,
+        current_batch_number: int,
+        max_batch_size: int,
+        *
+        is_final_batch: bool,
+    ) -> tuple[list, int, bool]:
+        """
+        Helper to optionally launch a chord of post-processing tasks with a calculate-grade callback
+        when async is desired. Uses exponential batch sizing up to the configured max batch size.
+
+        Returns a tuple of (post_processing_task_signatures, current_batch_number, launched)
+        where launched indicates whether a chord/group was dispatched and signatures were reset.
+        """
+        launched = False
+        if not post_processing_task_signatures:
+            return post_processing_task_signatures, current_batch_number, launched
+
+        current_batch_size = min(2 ** current_batch_number, max_batch_size)
+        batch_full = len(post_processing_task_signatures) >= current_batch_size
+
+        if batch_full or is_final_batch:
+            product = self.test.engagement.product
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                calculate_grade_signature = utils.calculate_grade_signature(product)
+                chord(post_processing_task_signatures)(calculate_grade_signature)
+            else:
+                group(post_processing_task_signatures).apply_async()
+
+            logger.debug(
+                f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})",
+            )
+            post_processing_task_signatures = []
+            if not is_final_batch:
+                current_batch_number += 1
+            launched = True
+
+        return post_processing_task_signatures, current_batch_number, launched
+
     def verify_tool_configuration_from_test(self):
         """
         Verify that the Tool_Configuration supplied along with the
@@ -763,6 +807,7 @@ class BaseImporter(ImporterOptions):
         note_message: str,
         *,
         finding_groups_enabled: bool,
+        product_grading_option: bool = True,
     ) -> None:
         """
         Mitigates a finding, all endpoint statuses, leaves a note on the finding
@@ -784,9 +829,9 @@ class BaseImporter(ImporterOptions):
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
-            finding.save(dedupe_option=False)
+            finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+            finding.save(dedupe_option=False, push_to_jira=self.push_to_jira, product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,
