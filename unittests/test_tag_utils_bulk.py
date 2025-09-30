@@ -90,6 +90,28 @@ class BulkTagUtilsTest(TestCase):
         tag = self.tag_model.objects.get(name="bulk-test")
         self.assertEqual(tag.count, 25)
 
+    def test_bulk_add_clears_prefetch_cache_instances_reused(self):
+        # Create instances and prefetch their tags into the Django prefetch cache
+        created = self._make_endpoints(3)
+        ids = [e.id for e in created]
+        instances = list(Endpoint.objects.filter(id__in=ids).prefetch_related("tags"))
+
+        # Sanity: tags initially empty via prefetch cache
+        for instance in instances:
+            self.assertEqual(list(instance.tags.all()), [])
+
+        # Bulk add tag using the same in-memory instances
+        added = bulk_add_tags_to_instances(tag_or_tags="cache-test", instances=instances)
+        self.assertEqual(added, 3)
+
+        # Our bulk add method clears the prefetch cache so this should now reflect the DB state
+        for instance in instances:
+            names = [t.name for t in instance.tags.all()]
+            self.assertIn("cache-test", names)
+
+        # Tag count should reflect total relationships
+        self.assertEqual(self.tag_model.objects.get(name="cache-test").count, 3)
+
     def test_bulk_add_tag_to_instances_case_insensitive(self):
         instances = self._make_endpoints(3)
 

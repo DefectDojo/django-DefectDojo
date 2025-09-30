@@ -16,6 +16,7 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
     - tags can be a single string, an iterable of strings or tag objects, or a Tagulous edit string
     - Works with QuerySet or list of instances
     - Does not (yet) enforce TagField max_count
+    - Will clear the prefetch cache for the tag_field_name field to avoid stale results
 
     Returns the number of new relationships created across all provided tags.
     """
@@ -149,6 +150,9 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
                     # the affected instances so subsequent access reloads from DB.
                     # This avoids stale results when callers reuse the same
                     # in-memory objects after the bulk operation.
+                    # It will result in a refresh from DB if the caller calls instance.tags
+                    # In theory we could update the django-tagulous private cache of tags
+                    # but that would create a bit of a tight link with tagulous internals.
                     for instance in new_instances:
                         prefetch_cache = getattr(instance, "_prefetched_objects_cache", None)
                         if prefetch_cache is not None:
