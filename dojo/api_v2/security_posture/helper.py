@@ -46,13 +46,6 @@ def adoption_devsecops_exclude(tags):
     tags = list(set(tags))
     return [tag for tag in tags if tag not in GeneralSettings.get_value("DEVSECOPS_ADOPTION_EXCLUDE_TAGS", ["transferred", "duplicated"])]
 
-def increase_counter_by_priority(priority: str, counter_key, data):
-    if counter_key in data.keys():
-        data[counter_key][str(priority).lower()] += 1
-    else: 
-        data[counter_key][str(priority).lower()] = 0
-
-    return counter_key
 
 def get_security_posture(engagement: Engagement, engagement_name: str):
     data = {} 
@@ -106,8 +99,6 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
         logger.debug(f"Finding {finding.id} has priority {priority}")
         data["counter_findings_by_priority"][str(priority).lower().replace("-", "_")] += 1 
         data["counter_findings_by_severity"][str(finding.severity).lower()] += 1 
-    # retornada data
-    # counter severity 
     events = active_finding.filter(
         active=True,
         is_mitigated=False,
