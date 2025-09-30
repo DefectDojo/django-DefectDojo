@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import models, transaction
 from tagulous.utils import parse_tags
 
+from dojo.models import Product  # local import to avoid circulars at import time
+
 
 def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "tags", batch_size: int | None = None) -> int:
     """
@@ -30,6 +32,15 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
 
     # Get model class and resolve TagField from first instance
     model_class = instances[0].__class__
+
+    # Explicitly reject Product instances for now. Bulk tagging Products should
+    # trigger tag inheritance propagation to child objects, which is normally
+    # handled by m2m signals that this utility bypasses. To avoid partial
+    # updates or surprising side effects, we disallow Products here. Use the
+    # standard `.tags.add(...)` API or a dedicated propagation-aware helper.
+    if model_class is Product:
+        msg = "bulk_add_tags_to_instances: Product instances are not supported; use Product.tags.add() or a propagation-aware helper"
+        raise ValueError(msg)
 
     try:
         tag_field = model_class._meta.get_field(tag_field_name)

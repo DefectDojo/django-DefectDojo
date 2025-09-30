@@ -1,16 +1,21 @@
 from django.test import TestCase
+from django.utils import timezone
 
-from dojo.models import Endpoint
+from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tag_utils import bulk_add_tags_to_instances
+from unittests.dojo_test_case import DojoAPITestCase
 
 
 class BulkTagUtilsTest(TestCase):
     def setUp(self):
         # Tag model backing Endpoint.tags
         self.tag_model = Endpoint.tags.tag_model
+        # Ensure endpoints have a product to satisfy tag inheritance signals
+        self.product_type = Product_Type.objects.create(name="PT-Bulk-Base")
+        self.product = Product.objects.create(name="Bulk Base Product", prod_type=self.product_type)
 
     def _make_endpoints(self, n):
-        return [Endpoint.objects.create(host=f"host-{i}.example.com") for i in range(n)]
+        return [Endpoint.objects.create(product=self.product, host=f"host-{i}.example.com") for i in range(n)]
 
     def test_bulk_add_tag_to_instances_basic(self):
         instances = self._make_endpoints(5)
@@ -165,6 +170,29 @@ class BulkTagUtilsTest(TestCase):
         self.assertEqual(self.tag_model.objects.count(), 1)
         self.assertEqual(self.tag_model.objects.first().count, 3)
 
+    def test_bulk_add_tag_to_product_rejected(self):
+        # Arrange: create product with inheritance enabled and children
+        pt = Product_Type.objects.create(name="PT")
+        product = Product.objects.create(name="P1", prod_type=pt, enable_product_tag_inheritance=True)
+        eng = Engagement.objects.create(name="E1", product=product, target_start=timezone.now(), target_end=timezone.now())
+        tt = Test_Type.objects.create(name="Dummy")
+        test = Test.objects.create(title="T1", engagement=eng, test_type=tt, target_start=timezone.now(), target_end=timezone.now())
+        ep1 = Endpoint.objects.create(product=product, host="p.example.com")
+        ep2 = Endpoint.objects.create(product=product, host="q.example.com")
+
+        # Act & Assert: bulk util should reject Product instances
+        with self.assertRaises(ValueError) as cm:
+            _ = bulk_add_tags_to_instances(tag_or_tags="p-tag", instances=[product])
+        self.assertIn("Product instances are not supported", str(cm.exception))
+
+        # Ensure nothing was tagged as a side-effect
+        product.refresh_from_db()
+        self.assertNotIn("p-tag", [t.name for t in product.tags.all()])
+        for child in (eng, test, ep1, ep2):
+            child.refresh_from_db()
+            self.assertNotIn("p-tag", [t.name for t in child.tags.all()])
+            self.assertNotIn("p-tag", [t.name for t in child.inherited_tags.all()])
+
     def test_bulk_add_invalid_field_name(self):
         instances = self._make_endpoints(1)
 
@@ -186,3 +214,49 @@ class BulkTagUtilsTest(TestCase):
                 tag_field_name="host",
             )
         self.assertIn("is not a TagField", str(cm.exception))
+
+
+class BulkTagUtilsInheritanceTest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.system_settings(enable_product_tag_inheritance=True)
+        self.product_type = Product_Type.objects.create(name="PT-Bulk-Inherit")
+        self.product = Product.objects.create(name="Bulk Inherit Product", prod_type=self.product_type, enable_product_tag_inheritance=True, tags=["inherit", "these", "tags"])
+
+    def _tags_list(self, obj):
+        return [t.name for t in obj.tags.all()]
+
+    def _inherited_tags_list(self, obj):
+        return [t.name for t in obj.inherited_tags.all()]
+
+    def test_bulk_add_tags_to_findings_does_not_affect_inheritance(self):
+        # Arrange: build a minimal tree with engagement/test and two findings
+        engagement = Engagement.objects.create(name="E-Bulk", product=self.product, target_start=timezone.now(), target_end=timezone.now())
+        # Ensure a Test_Type exists for this scan_type in fixtures; use a common one
+        scan_type = "ZAP Scan"
+        test = Test.objects.create(title="T-Bulk", engagement=engagement, test_type=Test_Type.objects.get(name=scan_type), target_start=timezone.now(), target_end=timezone.now())
+
+        finding_a = Finding.objects.create(title="F-A", severity="Low", test=test)
+        finding_b = Finding.objects.create(title="F-B", severity="Low", test=test)
+
+        # Assert preconditions: inherited tags equal product tags, and tags include inherited
+        product_tags = self._tags_list(self.product)
+        self.assertEqual(product_tags, self._inherited_tags_list(finding_a))
+        self.assertEqual(product_tags, self._inherited_tags_list(finding_b))
+        self.assertEqual(product_tags, self._tags_list(finding_a))
+        self.assertEqual(product_tags, self._tags_list(finding_b))
+
+        # Act: bulk add a custom tag to both findings
+        created = bulk_add_tags_to_instances(tag_or_tags="custom-bulk", instances=[finding_a, finding_b])
+        self.assertEqual(created, 2)
+
+        # Reload and verify: inherited tags unchanged; new tag present only in main tags
+        for f in (finding_a, finding_b):
+            f.refresh_from_db()
+            self.assertEqual(product_tags, self._inherited_tags_list(f))
+            tags = self._tags_list(f)
+            self.assertIn("custom-bulk", tags)
+            # Ensure inherited tags did not get polluted by the new tag
+            self.assertNotIn("custom-bulk", self._inherited_tags_list(f))
