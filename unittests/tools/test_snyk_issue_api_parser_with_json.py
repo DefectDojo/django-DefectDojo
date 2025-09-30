@@ -4,28 +4,29 @@ from django.test import TestCase
 
 from dojo.models import Test
 from dojo.tools.snyk_issue_api.parser import SnykIssueApiParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
-
-class TestSnykIssueApiParserWithJson(TestCase):
+class TestSnykIssueApiParserWithJson(DojoTestCase):
     def parse_json(self, filename):
-        with Path(filename).open(encoding="utf-8") as testfile:
-            parser = SnykIssueApiParser()
-            return parser.get_findings(testfile, Test())
+        testfile = (get_unit_tests_scans_path("snyk_issue_api") / filename).open(encoding="utf-8")
+        parser = SnykIssueApiParser()
+        return parser.get_findings(testfile, Test())
+
 
     def test_parse_sca_single_finding(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_single_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_single_vuln.json")
         self.assertEqual(1, len(findings))
 
     def test_parse_sca_finding_count(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
         self.assertEqual(5, len(findings))
 
     def test_parse_code_findings_count(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_code_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_code_scan_api_many_vuln.json")
         self.assertEqual(3, len(findings))
 
     def test_parse_code_finding_csrf_open(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_code_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_code_scan_api_many_vuln.json")
 
         finding = findings[0]
         # Basic identification
@@ -81,7 +82,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertIsNone(finding.cvssv4)
 
     def test_parse_code_finding_xss_ignored(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_code_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_code_scan_api_many_vuln.json")
 
         # Ignored - Not Vulnerable, does not expire
         finding = findings[1]
@@ -122,7 +123,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertEqual("Cross-site Scripting (XSS)", finding.title)
 
     def test_parse_code_finding_hardcoded_password_temp_ignored(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_code_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_code_scan_api_many_vuln.json")
 
         # Ignored Temporary - expires
         finding = findings[2]
@@ -165,7 +166,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertEqual("Use of Hardcoded Passwords", finding.title)
 
     def test_parse_sca_findings_status_open(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
         # 1 - Open issue - following JSON structure order
         finding = findings[0]
@@ -232,7 +233,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertIsNone(finding.references)
 
     def test_parse_sca_findings_status_ignored_not_vuln(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
         # 2 - Ignored - Not Vulnerable, does not expire - following JSON structure order
         finding = findings[1]
@@ -296,7 +297,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertIsNone(finding.references)
 
     def test_parse_sca_findings_status_ignored_temporary(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
         # 3 - Ignored Temporary - expires - following JSON structure order
         finding = findings[2]
@@ -355,7 +356,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertIsNone(finding.references)
 
     def test_parse_sca_findings_status_wont_be_fixed(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
         # 4 - Won't fixed issue - without date - following JSON structure order
         finding = findings[3]
@@ -414,7 +415,7 @@ class TestSnykIssueApiParserWithJson(TestCase):
         self.assertIsNone(finding.references)
 
     def test_parse_sca_findings_status_resolved(self):
-        findings = self.parse_json("unittests/scans/snyk_issue_api/snyk_sca_scan_api_many_vuln.json")
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
         # 5 - Resolved issue ( fixed, and does not appear in UI) - following JSON structure order
         finding = findings[4]
@@ -478,3 +479,21 @@ class TestSnykIssueApiParserWithJson(TestCase):
 
         # Validate no references field for single CWE
         self.assertIsNone(finding.references)
+
+    def test_deduplication_fields_match_other_snyk_scans_for_sca(self):
+        findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
+        finding = findings[0]
+        # currently deduplication is  done via 4 fields 'vuln_id_from_tool' 'file_path' 'component_name' and 'component_version'
+        self.assertEqual("SNYK-PYTHON-PILLOW-6219984", finding.vuln_id_from_tool)
+        # !!! there is no way to make this field match Sarif value chain 'python-tool > watchgod > anyio'
+        self.assertEqual("pillow", finding.file_path)
+        self.assertEqual("pillow", finding.component_name)
+        self.assertEqual("9.5.0", finding.component_version)
+
+    def test_deduplication_fields_match_other_snyk_scans_for_code(self):
+        findings = self.parse_json("snyk_code_scan_api_many_vuln.json")
+        finding = findings[0]
+        # currently deduplication is only done via 2 fields 'vuln_id_from_tool' and 'file_path'
+        # !!! sarif value is something like 'python/CodeInjection', cannot be matched
+        self.assertEqual("9a29d87f-aa94-47eb-b46f-375b293a8631", finding.vuln_id_from_tool)
+        self.assertEqual("path/path/file.abc", finding.file_path)
