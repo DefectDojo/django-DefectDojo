@@ -145,6 +145,15 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
                         count=models.F("count") + batch_created,
                     )
 
+                    # Invalidate Django's prefetch cache for the tag relation on
+                    # the affected instances so subsequent access reloads from DB.
+                    # This avoids stale results when callers reuse the same
+                    # in-memory objects after the bulk operation.
+                    for instance in new_instances:
+                        prefetch_cache = getattr(instance, "_prefetched_objects_cache", None)
+                        if prefetch_cache is not None:
+                            prefetch_cache.pop(tag_field_name, None)
+
     return total_created
 
 
