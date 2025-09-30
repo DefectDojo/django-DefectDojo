@@ -1303,6 +1303,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
+    "Github Secrets Detection Report": ["title", "severity", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
     "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
@@ -1545,6 +1546,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
     "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
