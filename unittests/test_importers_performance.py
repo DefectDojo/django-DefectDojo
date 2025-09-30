@@ -1,6 +1,5 @@
 import logging
 from contextlib import contextmanager
-from unittest.mock import patch
 
 from crum import impersonate
 from django.contrib.contenttypes.models import ContentType
@@ -20,11 +19,14 @@ from dojo.models import (
     Product_Type,
     Test,
     User,
+    UserContactInfo,
 )
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings.json"
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
@@ -38,6 +40,9 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def setUp(self):
         super().setUp()
+
+        testuser = User.objects.create(username="admin")
+        UserContactInfo.objects.create(user=testuser, block_execution=False)
 
         self.system_settings(enable_webhooks_notifications=False)
         self.system_settings(enable_product_grade=False)
@@ -66,6 +71,14 @@ class TestDojoImporterPerformance(DojoTestCase):
                 f"Tasks created:\n{tasks_str}"
             )
             raise self.failureException(msg)
+
+        tasks = dojo_async_task_counter.get_tasks()
+        tasks_str = "\n".join(str(task) for task in tasks)
+        msg = (
+            f"Correct number of {num} celery tasks were created.\n"
+            f"Tasks created:\n{tasks_str}"
+        )
+        logger.debug(msg)
 
     def import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
         """
@@ -158,18 +171,22 @@ class TestDojoImporterPerformance(DojoTestCase):
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
-    def test_import_reimport_reimport_performance(self):
+    # patch the we_want_async decorator to always return True so we don't depend on block_execution flag shenanigans
+    # @patch("dojo.decorators.we_want_async", return_value=True)
+    # def test_import_reimport_reimport_performance_async(self, mock):
+    def test_import_reimport_reimport_performance_async(self):
         self.import_reimport_performance(
-            expected_num_queries1=712,
+            expected_num_queries1=680,
             expected_num_async_tasks1=10,
-            expected_num_queries2=656,
+            expected_num_queries2=606,
             expected_num_async_tasks2=22,
-            expected_num_queries3=332,
+            expected_num_queries3=289,
             expected_num_async_tasks3=20,
         )
 
-    @patch("dojo.decorators.we_want_async", return_value=False)
-    def test_import_reimport_reimport_performance_no_async(self, mock):
+    # @patch("dojo.decorators.we_want_async", return_value=False)
+    # def test_import_reimport_reimport_performance_no_async(self, mock):
+    def test_import_reimport_reimport_performance_no_async(self):
         """
         This test checks the performance of the importers when they are run in sync mode.
         The reason for this is that we also want to be aware of when a PR affects the number of queries
@@ -177,17 +194,21 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
         self.import_reimport_performance(
-            expected_num_queries1=712,
+            expected_num_queries1=680,
             expected_num_async_tasks1=10,
-            expected_num_queries2=656,
+            expected_num_queries2=611,
             expected_num_async_tasks2=22,
-            expected_num_queries3=332,
+            expected_num_queries3=294,
             expected_num_async_tasks3=20,
         )
 
-    @patch("dojo.decorators.we_want_async", return_value=False)
-    def test_import_reimport_reimport_performance_no_async_with_product_grading(self, mock):
+    # @patch("dojo.decorators.we_want_async", return_value=False)
+    # def test_import_reimport_reimport_performance_no_async_with_product_grading(self, mock):
+    def test_import_reimport_reimport_performance_no_async_with_product_grading(self):
         """
         This test checks the performance of the importers when they are run in sync mode.
         The reason for this is that we also want to be aware of when a PR affects the number of queries
@@ -195,16 +216,16 @@ class TestDojoImporterPerformance(DojoTestCase):
         The impersonate context manager above does not work as expected for disabling async,
         so we patch the we_want_async decorator to always return False.
         """
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
-        # Refresh the cache with the new settings
-        from dojo.middleware import DojoSytemSettingsMiddleware
-        DojoSytemSettingsMiddleware.load()
 
         self.import_reimport_performance(
-            expected_num_queries1=717,
-            expected_num_async_tasks1=15,
-            expected_num_queries2=662,
-            expected_num_async_tasks2=28,
-            expected_num_queries3=337,
-            expected_num_async_tasks3=25,
+            expected_num_queries1=681,
+            expected_num_async_tasks1=11,
+            expected_num_queries2=612,
+            expected_num_async_tasks2=23,
+            expected_num_queries3=295,
+            expected_num_async_tasks3=21,
         )

@@ -1,3 +1,4 @@
+import io
 import json
 
 from cvss.cvss3 import CVSS3
@@ -122,7 +123,6 @@ class SnykParser:
         if "runs" in tree and tree["runs"][0].get("results"):
             # Delegate SARIF handling to Snyk Code parser
             snyk_code_parser = SnykCodeParser()
-            import io
             json_output = io.StringIO(json.dumps(tree))
             findings = snyk_code_parser.get_findings(json_output, test)
             items.extend(findings)

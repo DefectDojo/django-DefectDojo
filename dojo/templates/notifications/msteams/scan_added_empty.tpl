@@ -1,1 +1,1 @@
-scan_added.tpl
+{% include "notifications/msteams/scan_added.tpl" %}

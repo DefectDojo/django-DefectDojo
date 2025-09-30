@@ -101,6 +101,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.test.queries import get_authorized_tests
+from dojo.tools import tool_issue_updater
 from dojo.utils import (
     FileIterWrapper,
     Product_Tab,
@@ -111,7 +112,6 @@ from dojo.utils import (
     add_success_message_to_response,
     apply_cwe_to_template,
     calculate_grade,
-    close_external_issue,
     do_false_positive_history,
     get_page_items,
     get_page_items_and_count,
@@ -323,7 +323,7 @@ class ListFindings(View, BaseListFindings):
         # show custom breadcrumb if user has filtered by exactly 1 endpoint
         if "endpoints" in request.GET:
             endpoint_ids = request.GET.getlist("endpoints", [])
-            if len(endpoint_ids) == 1 and endpoint_ids[0] != "":
+            if len(endpoint_ids) == 1 and endpoint_ids[0]:
                 endpoint_id = endpoint_ids[0]
                 endpoint = get_object_or_404(Endpoint, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
@@ -486,7 +486,7 @@ class ViewFinding(View):
                 burp_request = base64.b64decode(request_response.burpRequestBase64)
                 burp_response = base64.b64decode(request_response.burpResponseBase64)
         except Exception as e:
-            logger.debug(f"unsuspected error: {e}")
+            logger.debug("unsuspected error: %s", e)
 
         return {
             "burp_request": burp_request,
@@ -1139,68 +1139,22 @@ def close_finding(request, fid):
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
 
-        close_external_issue(finding, "Closed by defectdojo", "github")
-
         if form.is_valid():
-            now = timezone.now()
-            new_note = form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = form.cleaned_data.get("mitigated") or now
-            new_note.save()
-            finding.notes.add(new_note)
-
-            messages.add_message(
-                request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success",
-            )
+            messages.add_message(request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success")
 
             if len(missing_note_types) <= 1:
-                finding.active = False
-                now = timezone.now()
-                finding.mitigated = form.cleaned_data.get("mitigated") or now
-                finding.mitigated_by = (
-                    form.cleaned_data.get("mitigated_by") or request.user
+                finding_helper.close_finding(
+                    finding=finding,
+                    user=request.user,
+                    is_mitigated=True,
+                    mitigated=form.cleaned_data.get("mitigated"),
+                    mitigated_by=form.cleaned_data.get("mitigated_by") or request.user,
+                    false_p=form.cleaned_data.get("false_p", False),
+                    out_of_scope=form.cleaned_data.get("out_of_scope", False),
+                    duplicate=form.cleaned_data.get("duplicate", False),
+                    note_entry=form.cleaned_data.get("entry"),
+                    note_type=form.cleaned_data.get("note_type"),
                 )
-                finding.is_mitigated = True
-                finding.under_review = False
-                finding.last_reviewed = finding.mitigated
-                finding.last_reviewed_by = request.user
-                finding.false_p = form.cleaned_data.get("false_p", False)
-                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
-                finding.duplicate = form.cleaned_data.get("duplicate", False)
-                endpoint_status = finding.status_finding.all()
-                for status in endpoint_status:
-                    status.mitigated_by = (
-                        form.cleaned_data.get("mitigated_by") or request.user
-                    )
-                    status.mitigated_time = form.cleaned_data.get("mitigated") or now
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
-                # Clear the risk acceptance, if present
-                ra_helper.risk_unaccept(request.user, finding)
-
-                # Manage the jira status changes
-                push_to_jira = False
-                # Determine if the finding is in a group. if so, not push to jira
-                finding_in_group = finding.has_finding_group
-                # Check if there is a jira issue that needs to be updated
-                jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-                # fetch the project
-                jira_instance = jira_helper.get_jira_instance(finding)
-                jira_project = jira_helper.get_jira_project(finding)
-                # Only push if the finding is not in a group
-                if jira_issue_exists:
-                    # Determine if any automatic sync should occur
-                    push_to_jira = jira_helper.is_push_all_issues(finding) or jira_instance.finding_jira_sync
-                    # Add the closing note
-                    if (jira_project.push_notes or push_to_jira) and not finding_in_group:
-                        jira_helper.add_comment(finding, new_note, force_push=True)
-                # Save the finding
-                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-                # we only push the group after saving the finding to make sure
-                # the updated data of the finding is pushed as part of the group
-                if push_to_jira and finding_in_group:
-                    jira_helper.push_to_jira(finding.finding_group)
 
                 messages.add_message(
                     request,
@@ -1209,17 +1163,7 @@ def close_finding(request, fid):
                     extra_tags="alert-success",
                 )
 
-                # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
-                # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
-                # TODO: but same should be implemented for API endpoint
-
-                create_notification(
-                    event="finding_closed",
-                    title=_("Closing of %s") % finding.title,
-                    finding=finding,
-                    description=f'The finding "{finding.title}" was closed by {request.user}',
-                    url=reverse("view_finding", args=(finding.id,)),
-                )
+                # Notification sent by helper
                 return HttpResponseRedirect(
                     reverse("view_test", args=(finding.test.id,)),
                 )
@@ -1597,7 +1541,7 @@ def request_finding_review(request, fid):
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
-            logger.debug(f"Asking {reviewers_string} for review")
+            logger.debug("Asking %s for review", reviewers_string)
 
             create_notification(
                 event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
@@ -2470,7 +2414,7 @@ def merge_finding_product(request, pid):
                                 finding.tags.add("merged-inactive")
 
                     # Update the finding to merge into
-                    if finding_descriptions != "":
+                    if finding_descriptions:
                         finding_to_merge_into.description = f"{finding_to_merge_into.description}\n\n{finding_descriptions}"
 
                     if finding_to_merge_into.static_finding:
@@ -2479,7 +2423,7 @@ def merge_finding_product(request, pid):
                     if finding_to_merge_into.dynamic_finding:
                         dynamic = finding.dynamic_finding
 
-                    if finding_references != "":
+                    if finding_references:
                         finding_to_merge_into.references = f"{finding_to_merge_into.references}\n{finding_references}"
 
                     finding_to_merge_into.static_finding = static
@@ -2919,8 +2863,6 @@ def finding_bulk_update_all(request, pid=None):
             error_counts = defaultdict(lambda: 0)
             success_count = 0
             for finding in finds:
-                from dojo.tools import tool_issue_updater
-
                 tool_issue_updater.async_tool_issue_update(finding)
 
                 # not sure yet if we want to support bulk unlink, so leave as commented out for now
