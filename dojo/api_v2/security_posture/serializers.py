@@ -31,6 +31,23 @@ class EngagementEventsSerializer(serializers.Serializer):
     status = serializers.BooleanField()
     events = serializers.ListField(child=EngagementEventSerializer())
 
+class EngagementProritySerializer(serializers.Serializer):
+    very_critical = serializers.IntegerField()
+    critical = serializers.IntegerField()
+    high = serializers.IntegerField()
+    medium_low = serializers.IntegerField()
+    unknown = serializers.IntegerField()
+
+class EngagementSeveritySerializer(serializers.Serializer):
+    critical = serializers.IntegerField()
+    high = serializers.IntegerField()
+    medium = serializers.IntegerField()
+    low = serializers.IntegerField()
+    info = serializers.IntegerField()
+    unknown = serializers.IntegerField()
+
+
+
 class EngagementSecuritypostureSerializer(serializers.Serializer):
     engagement_name = serializers.CharField(required=False)
     engagement_id = serializers.PrimaryKeyRelatedField(
@@ -39,11 +56,8 @@ class EngagementSecuritypostureSerializer(serializers.Serializer):
     severity_product = serializers.CharField(required=False, allow_null=True)
     adoption_devsecops = serializers.ListField(child=serializers.CharField())
     counter_active_findings = serializers.IntegerField()
-    counter_very_critical = serializers.IntegerField()
-    counter_critical = serializers.IntegerField()
-    counter_high = serializers.IntegerField()
-    counter_medium_low = serializers.IntegerField()
-    counter_info = serializers.IntegerField()
+    counter_findings_by_priority = EngagementProritySerializer()
+    counter_findings_by_severity = EngagementSeveritySerializer()
     is_in_hacking_continuos = serializers.BooleanField(default=False)
     events_active_hacking = EngagementEventsSerializer()
     result = serializers.FloatField()
