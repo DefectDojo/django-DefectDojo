@@ -1511,6 +1511,11 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         user = getattr(self.context.get("request", None), "user", None)
         ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
+        findings = instance.accepted_findings.all()
+        if findings.exists():
+            engagement = findings.first().test.engagement
+            engagement.risk_acceptance.add(instance)
+            engagement.save()
         return instance
 
     def update(self, instance, validated_data):
