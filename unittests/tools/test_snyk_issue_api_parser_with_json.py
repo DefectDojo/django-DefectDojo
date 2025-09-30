@@ -1,17 +1,15 @@
-from pathlib import Path
 
-from django.test import TestCase
 
 from dojo.models import Test
 from dojo.tools.snyk_issue_api.parser import SnykIssueApiParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+
 
 class TestSnykIssueApiParserWithJson(DojoTestCase):
     def parse_json(self, filename):
         testfile = (get_unit_tests_scans_path("snyk_issue_api") / filename).open(encoding="utf-8")
         parser = SnykIssueApiParser()
         return parser.get_findings(testfile, Test())
-
 
     def test_parse_sca_single_finding(self):
         findings = self.parse_json("snyk_sca_scan_api_single_vuln.json")
