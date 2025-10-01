@@ -5,7 +5,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from rest_framework import status
 from unittest.mock import patch
-from dojo.utils import calculate_severity_priority
 
 from dojo.models import (
     Product, 
