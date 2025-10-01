@@ -88,7 +88,6 @@ class TenableCSVParser:
         csv.field_size_limit(int(sys.maxsize / 10))
         reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
 
-        # MODIFIED: Ajustement de la validation des headers
         required_headers = ["definition.name", "asset.name", "Name", "Plugin Name"]
         if not any(h in reader.fieldnames for h in required_headers):
             msg = f"Fichier CSV invalide : en-tête requis manquant. Attendu un parmi {required_headers}"
@@ -96,12 +95,10 @@ class TenableCSVParser:
 
         dupes = {}
         for row in reader:
-            # MODIFIED: Priorité aux nouveaux champs pour le titre
             title = row.get("definition.name", row.get("Name", row.get("Plugin Name", row.get("asset.name"))))
             if not title:
                 continue
 
-            # MODIFIED: Priorité aux nouveaux champs pour la sévérité
             raw_severity = row.get("severity", row.get("Risk", row.get("Severity", "Info")))
             with contextlib.suppress(ValueError):
                 int_severity = int(raw_severity)
@@ -110,7 +107,6 @@ class TenableCSVParser:
 
             description = row.get("definition.synopsis", row.get("Synopsis", "N/A"))
             
-            # ADDED: Construction plus riche de la justification de sévérité
             severity_justification = f"Severity: {severity}\n"
             for field in [
                 "definition.vpr.score", "definition.cvss3.base_score", "definition.cvss3.temporal_score",
@@ -123,7 +119,6 @@ class TenableCSVParser:
             mitigation = row.get("definition.solution", row.get("Solution", "N/A"))
             impact = row.get("definition.description", row.get("Description", "N/A"))
             
-            # ADDED: Références plus complètes
             references = row.get("definition.see_also", row.get("See Also", ""))
             if row.get("definition.id"):
                 references += f"\nTenable Plugin ID: {row.get('definition.id')}"
@@ -132,31 +127,22 @@ class TenableCSVParser:
             if row.get("definition.vulnerability_published"):
                 references += f"\nPublished: {row.get('definition.vulnerability_published')}"
 
-            # MODIFIED: Clé de déduplication ajustée pour les nouveaux headers
             dupe_key = (
-                severity,
-                title,
+                severity, title,
                 row.get("asset.host_name", row.get("Host", "No host")),
-                str(row.get("port", row.get("Port", "No port"))), # <-- Correction clé 'port'
+                str(row.get("port", row.get("Port", "No port"))),
                 description,
             )
 
             if dupe_key not in dupes:
                 find = Finding(
-                    title=title,
-                    test=test,
-                    description=description,
-                    severity=severity,
-                    mitigation=mitigation,
-                    impact=impact,
-                    references=references,
+                    title=title, test=test, description=description, severity=severity,
+                    mitigation=mitigation, impact=impact, references=references,
                     severity_justification=severity_justification,
                 )
 
-                # MODIFIED: Utilisation du vecteur CVSSv3 des nouveaux headers
                 cvss_vector = row.get("definition.cvss3.base_vector", row.get("CVSS V3 Vector", ""))
                 if cvss_vector:
-                    # Le vecteur Tenable n'inclut pas le préfixe, on l'ajoute
                     if not cvss_vector.startswith("CVSS:3"):
                         cvss_vector = "CVSS:3.1/" + cvss_vector
                     find.cvssv3 = CVSS3(cvss_vector).clean_vector(output_prefix=True)
@@ -165,11 +151,22 @@ class TenableCSVParser:
                 if cvssv3_score:
                     find.cvssv3_score = float(cvssv3_score)
 
+                # ==================== BLOC MODIFIÉ ====================
+                # On encapsule la logique CPE dans un try/except pour éviter de faire planter l'import
                 detected_cpe = self._format_cpe(row.get("definition.cpe", row.get("CPE", "")))
                 if detected_cpe:
-                    cpe_decoded = CPE(detected_cpe[0])
-                    find.component_name = cpe_decoded.get_product()[0] if cpe_decoded.get_product() else None
-                    find.component_version = cpe_decoded.get_version()[0] if cpe_decoded.get_version() else None
+                    cpe_string = detected_cpe[0]
+                    try:
+                        cpe_decoded = CPE(cpe_string)
+                        find.component_name = cpe_decoded.get_product()[0] if cpe_decoded.get_product() else None
+                        find.component_version = cpe_decoded.get_version()[0] if cpe_decoded.get_version() else None
+                    except Exception as e:
+                        # Si le CPE n'est pas valide, on enregistre un avertissement au lieu de planter.
+                        LOGGER.warning(
+                            f"Impossible de parser la chaîne CPE : '{cpe_string}'. Erreur : {e}. "
+                            "Le nom et la version du composant ne seront pas ajoutés pour cette vulnérabilité."
+                        )
+                # ======================================================
 
                 find.unsaved_endpoints = []
                 find.unsaved_vulnerability_ids = []
@@ -185,13 +182,12 @@ class TenableCSVParser:
             if detected_cve:
                 find.unsaved_vulnerability_ids.extend(detected_cve)
 
-            # MODIFIED: Logique des endpoints pour utiliser les nouveaux headers
             host = row.get("asset.host_name", row.get("asset.display_ipv4_address", row.get("Host", row.get("IP Address", ""))))
             if not host:
-                continue # Pas d'hôte, on ne peut pas créer d'endpoint
+                continue
 
             protocol = row.get("protocol", row.get("Protocol", "")).lower() or None
-            port = str(row.get("port", row.get("Port", ""))) # <-- Correction clé 'port'
+            port = str(row.get("port", row.get("Port", "")))
             if port in {"", "0"}:
                 port = None
 
