@@ -54,7 +54,7 @@ django-fieldsignals==0.7.0
 hyperlink==21.0.0
 djangosaml2==1.11.1
 drf-spectacular==0.28.0
-drf-spectacular-sidecar==2025.9.1
+drf-spectacular-sidecar==2025.10.1
 django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
