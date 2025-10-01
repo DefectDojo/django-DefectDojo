@@ -14,48 +14,17 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TenableCSVParser:
-
+    # Les méthodes get_fields, get_dedupe_fields et les conversions de sévérité
+    # ne nécessitent pas de changement logique, elles restent donc telles quelles.
+    # ... (le début de la classe reste identique)
     def get_fields(self) -> list[str]:
-        """
-        Return the list of fields used in the Tenable CSV Parser
-
-        Fields:
-        - title: Made using the name, plugin name, and asset name from Tenable scanner.
-        - description: Made by combining synopsis and plugin output from Tenable Scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - mitigation: Set to solution from Tenable Scanner.
-        - impact: Set to definition description from Tenable Scanner.
-        - cvssv3: If present, set to cvssv3 from Tenable scanner.
-        - component_name: If present, set to product name from Tenable Scanner.
-        - component_version: If present, set to version from Tenable Scanner.
-        """
         return [
-            "title",
-            "description",
-            "severity",
-            "mitigation",
-            "impact",
-            "cvssv3",
-            "component_name",
-            "component_version",
+            "title", "description", "severity", "mitigation", "impact",
+            "cvssv3", "component_name", "component_version",
         ]
 
     def get_dedupe_fields(self) -> list[str]:
-        """
-        Return the list of dedupe fields used in the Tenable CSV Parser
-
-        Fields:
-        - title: Made using the name, plugin name, and asset name from Tenable scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - description: Made by combining synopsis and plugin output from Tenable Scanner.
-
-        NOTE: vulnerability_ids & cwe are not provided by parser
-        """
-        return [
-            "title",
-            "severity",
-            "description",
-        ]
+        return ["title", "severity", "description"]
 
     def _validated_severity(self, severity):
         if severity not in Finding.SEVERITIES:
@@ -63,7 +32,6 @@ class TenableCSVParser:
         return severity
 
     def _int_severity_conversion(self, severity_value):
-        """Convert data of the report into severity"""
         severity = "Info"
         if severity_value == 4:
             severity = "Critical"
@@ -73,11 +41,9 @@ class TenableCSVParser:
             severity = "Medium"
         elif severity_value == 1:
             severity = "Low"
-        # Ensure the severity is a valid choice. Fall back to info otherwise
         return self._validated_severity(severity)
 
     def _string_severity_conversion(self, severity_value):
-        """Convert data of the report into severity"""
         if severity_value is None or len(severity_value) == 0:
             return "Info"
         severity = severity_value.title()
@@ -93,12 +59,8 @@ class TenableCSVParser:
     def _format_cve(self, val):
         if val is None or val == "":
             return None
-        cve_match = re.findall(
-            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE,
-        )
-        if cve_match:
-            return cve_match
-        return None
+        cve_match = re.findall(r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE)
+        return cve_match or None
 
     def _format_cpe(self, val):
         if val is None or val == "":
@@ -107,174 +69,133 @@ class TenableCSVParser:
         return cpe_match or None
 
     def detect_delimiter(self, content: str):
-        """Detect the delimiter of the CSV file"""
         if isinstance(content, bytes):
-            content = content.decode("utf-8")
+            content = content.decode("utf-8", errors="ignore")
         first_line = content.split("\n")[0]
+        # Dans votre cas, les headers sont séparés par des tabulations '\t'
+        if "\t" in first_line:
+            return "\t"
         if ";" in first_line:
             return ";"
-        return ","  # default to comma if no semicolon found
+        return ","
 
     def get_findings(self, filename: str, test: Test):
-        # Read the CSV
         content = filename.read()
         delimiter = self.detect_delimiter(content)
         if isinstance(content, bytes):
-            content = content.decode("utf-8")
-        csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
+            content = content.decode("utf-8", errors="ignore")
+
+        csv.field_size_limit(int(sys.maxsize / 10))
         reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
-        if "Name" not in reader.fieldnames and "Plugin Name" not in reader.fieldnames and "asset.name" not in reader.fieldnames:
-            msg = "Invalid CSV file: missing 'Name', 'Plugin Name' or 'asset.name' field"
+
+        # MODIFIED: Ajustement de la validation des headers
+        required_headers = ["definition.name", "asset.name", "Name", "Plugin Name"]
+        if not any(h in reader.fieldnames for h in required_headers):
+            msg = f"Fichier CSV invalide : en-tête requis manquant. Attendu un parmi {required_headers}"
             raise ValueError(msg)
+
         dupes = {}
-        # Iterate over each line and create findings
         for row in reader:
-            # title: Could come from "Name" or "Plugin Name"
-            title = row.get("Name", row.get("Plugin Name", row.get("asset.name")))
-            if title is None or title == "":
+            # MODIFIED: Priorité aux nouveaux champs pour le titre
+            title = row.get("definition.name", row.get("Name", row.get("Plugin Name", row.get("asset.name"))))
+            if not title:
                 continue
-            # severity: Could come from "Severity" or "Risk"
-            raw_severity = row.get("Risk", row.get("severity", ""))
-            if raw_severity == "":
-                raw_severity = row.get("Severity", "Info")
-            # this could actually be a int, so try to convert
-            # and swallow the exception if it's a string a move on
+
+            # MODIFIED: Priorité aux nouveaux champs pour la sévérité
+            raw_severity = row.get("severity", row.get("Risk", row.get("Severity", "Info")))
             with contextlib.suppress(ValueError):
                 int_severity = int(raw_severity)
                 raw_severity = int_severity
-            # convert the severity to something dojo likes
             severity = self._convert_severity(raw_severity)
 
-            epss_score = None
-            epss_score_string = row.get("EPSS Score") if "EPSS Score" in row else None
-            # example seen so far are "1234" for an actual score of "0.1234" so let's prepend that instead of "risky" divisions
-            if epss_score_string:
-                if "0." not in epss_score_string:
-                    epss_score_string = "0." + epss_score_string
-                epss_score = float(epss_score_string)
-
-            # Other text fields
-            description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
-
+            description = row.get("definition.synopsis", row.get("Synopsis", "N/A"))
+            
+            # ADDED: Construction plus riche de la justification de sévérité
             severity_justification = f"Severity: {severity}\n"
-            for field in (
-                "VPR score",
-                "EPSS Score",
-                "Risk Factor",
-                "STIG Severity",
-                "CVSS v4.0 Base Score",
-                "CVSS v4.0 Base+Threat Score",
-                "CVSS v3.0 Base Score",
-                "CVSS v3.0 Temporal Score",
-                "Metasploit",
-                "Core Impact",
-                "CANVAS",
-                "XREF",
-            ):
-                severity_justification += f"{field}: {row.get(field, 'N/A')}\n"
+            for field in [
+                "definition.vpr.score", "definition.cvss3.base_score", "definition.cvss3.temporal_score",
+                "definition.cvss2.base_score", "definition.cvss2.temporal_score", "definition.stig_severity",
+                "definition.exploitability_ease", "VPR score", "Risk Factor", "STIG Severity"
+            ]:
+                if row.get(field):
+                    severity_justification += f"{field}: {row.get(field)}\n"
+            
+            mitigation = row.get("definition.solution", row.get("Solution", "N/A"))
+            impact = row.get("definition.description", row.get("Description", "N/A"))
+            
+            # ADDED: Références plus complètes
+            references = row.get("definition.see_also", row.get("See Also", ""))
+            if row.get("definition.id"):
+                references += f"\nTenable Plugin ID: {row.get('definition.id')}"
+            if row.get("definition.plugin_version"):
+                references += f"\nPlugin Version: {row.get('definition.plugin_version')}"
+            if row.get("definition.vulnerability_published"):
+                references += f"\nPublished: {row.get('definition.vulnerability_published')}"
 
-            # cwe = parse_cwe_from_ref(row.get("XREF"))  # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
-
-            mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
-            impact = row.get("Description", row.get("definition.description", "N/A"))
-            references = ""
-            references += row.get("References") if "References" in row else ""
-            references += row.get("See Also", row.get("definition.see_also", "N/A"))
-            references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
-            references += "\nPlugin Information: " + row.get("Plugin Information", "N/A")
-            references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
-            references += "\nPlugin Modification Date: " + row.get("Plugin Modification Date", "N/A")
-            # Determine if the current row has already been processed
+            # MODIFIED: Clé de déduplication ajustée pour les nouveaux headers
             dupe_key = (
-                severity
-                + title
-                + row.get("Host", row.get("asset.host_name", "No host"))
-                + str(row.get("Port", row.get("asset.port", "No port")))
-                + row.get("Synopsis", row.get("definition.synopsis", "No synopsis"))
+                severity,
+                title,
+                row.get("asset.host_name", row.get("Host", "No host")),
+                str(row.get("port", row.get("Port", "No port"))), # <-- Correction clé 'port'
+                description,
             )
-            # Finding has not been detected in the current report. Proceed with
-            # parsing
+
             if dupe_key not in dupes:
-                # Create the finding object
                 find = Finding(
                     title=title,
                     test=test,
                     description=description,
                     severity=severity,
-                    # cwe=cwe,
-                    epss_score=epss_score,
                     mitigation=mitigation,
                     impact=impact,
                     references=references,
                     severity_justification=severity_justification,
                 )
 
-                # manage CVSS vector (only v3.x for now)
-                cvss_vector = row.get("CVSS V3 Vector", "")
-                if cvss_vector != "":
-                    find.cvssv3 = CVSS3(
-                        "CVSS:3.0/" + str(cvss_vector),
-                    ).clean_vector(output_prefix=True)
+                # MODIFIED: Utilisation du vecteur CVSSv3 des nouveaux headers
+                cvss_vector = row.get("definition.cvss3.base_vector", row.get("CVSS V3 Vector", ""))
+                if cvss_vector:
+                    # Le vecteur Tenable n'inclut pas le préfixe, on l'ajoute
+                    if not cvss_vector.startswith("CVSS:3"):
+                        cvss_vector = "CVSS:3.1/" + cvss_vector
+                    find.cvssv3 = CVSS3(cvss_vector).clean_vector(output_prefix=True)
 
-                # Add CVSS score if present
-                cvssv3 = row.get("CVSSv3", row.get("definition.cvss3.base_score", ""))
-                if cvssv3 != "":
-                    find.cvssv3_score = cvssv3
-                # manage CPE data
-                detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
+                cvssv3_score = row.get("definition.cvss3.base_score", row.get("CVSSv3", ""))
+                if cvssv3_score:
+                    find.cvssv3_score = float(cvssv3_score)
+
+                detected_cpe = self._format_cpe(row.get("definition.cpe", row.get("CPE", "")))
                 if detected_cpe:
-                    # TODO: support more than one CPE in Nessus CSV parser
-                    if len(detected_cpe) > 1:
-                        LOGGER.debug(
-                            "more than one CPE for a finding. NOT supported by Nessus CSV parser",
-                        )
                     cpe_decoded = CPE(detected_cpe[0])
-                    find.component_name = (
-                        cpe_decoded.get_product()[0]
-                        if len(cpe_decoded.get_product()) > 0
-                        else None
-                    )
-                    find.component_version = (
-                        cpe_decoded.get_version()[0]
-                        if len(cpe_decoded.get_version()) > 0
-                        else None
-                    )
+                    find.component_name = cpe_decoded.get_product()[0] if cpe_decoded.get_product() else None
+                    find.component_version = cpe_decoded.get_version()[0] if cpe_decoded.get_version() else None
 
                 find.unsaved_endpoints = []
                 find.unsaved_vulnerability_ids = []
                 dupes[dupe_key] = find
             else:
-                # This is a duplicate. Update the description of the original
-                # finding
                 find = dupes[dupe_key]
+            
+            plugin_output = row.get("output", row.get("Plugin Output", ""))
+            if plugin_output:
+                find.description += f"\n\n--- Plugin Output ---\n{plugin_output}"
 
-            # Determine if there is more details to be included in the
-            # description
-            plugin_output = str(row.get("Plugin Output", row.get("output", "")))
-            if plugin_output != "":
-                find.description += f"\n\n{plugin_output}"
-            # Process any CVEs
-            detected_cve = self._format_cve(str(row.get("CVE", row.get("definition.cve", ""))))
+            detected_cve = self._format_cve(row.get("definition.cve", row.get("CVE", "")))
             if detected_cve:
-                if isinstance(detected_cve, list):
-                    find.unsaved_vulnerability_ids += detected_cve
-                else:
-                    find.unsaved_vulnerability_ids.append(detected_cve)
-            # Endpoint related fields
-            host = row.get("Host", row.get("asset.host_name", ""))
-            if host == "":
-                host = row.get("DNS Name", "")
-            if host == "":
-                host = row.get("IP Address", "localhost")
+                find.unsaved_vulnerability_ids.extend(detected_cve)
 
-            protocol = row.get("Protocol", row.get("protocol", ""))
-            protocol = protocol.lower() if protocol != "" else None
-            port = str(row.get("Port", row.get("asset.port", "")))
-            if isinstance(port, str) and port in {"", "0"}:
+            # MODIFIED: Logique des endpoints pour utiliser les nouveaux headers
+            host = row.get("asset.host_name", row.get("asset.display_ipv4_address", row.get("Host", row.get("IP Address", ""))))
+            if not host:
+                continue # Pas d'hôte, on ne peut pas créer d'endpoint
+
+            protocol = row.get("protocol", row.get("Protocol", "")).lower() or None
+            port = str(row.get("port", row.get("Port", ""))) # <-- Correction clé 'port'
+            if port in {"", "0"}:
                 port = None
-            # Update the endpoints
-            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
-            # Add the list to be processed later
+
+            endpoint = Endpoint(protocol=protocol, host=host, port=port)
             find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())

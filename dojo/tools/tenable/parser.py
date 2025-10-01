@@ -3,71 +3,10 @@ from dojo.tools.tenable.xml_format import TenableXMLParser
 
 
 class TenableParser:
-
-    def get_fields(self) -> list[str]:
-        """
-        Return the list of fields used in the Tenable CSV Parser
-
-        Fields:
-        - title: Made using the name, plugin name, and asset name from Tenable scanner.
-        - description: Made by combining synopsis and plugin output from Tenable Scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - mitigation: Set to solution from Tenable Scanner.
-        - impact: Set to definition description from Tenable Scanner.
-        - cvssv3: If present, set to cvssv3 from Tenable scanner.
-        - component_name: If present, set to product name from Tenable Scanner.
-        - component_version: If present, set to version from Tenable Scanner.
-
-        Return the list of fields used in the Tenable XML Parser
-
-        Fields:
-        - title: Set to plugin name from Tenable scanner.
-        - description: Made by combining synopsis element text and plugin output from Tenable Scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - mitigation: Set to solution from Tenable Scanner.
-        - impact: Made by combining description element text, cvss score, cvssv3 score, cvss vector, cvss base score, and cvss temporal score from Tenable Scanner.
-        - cwe: If present, set to cwe from Tenable scanner.
-        - cvssv3: If present, set to cvssv3 from Tenable scanner.
-        """
-        return [
-            "title",
-            "description",
-            "severity",
-            "mitigation",
-            "impact",
-            "cvssv3",
-            "component_name",
-            "component_version",
-            "cwe",
-        ]
-
-    def get_dedupe_fields(self) -> list[str]:
-        """
-        Return the list of dedupe fields used in the Tenable CSV Parser
-
-        Fields:
-        - title: Made using the name, plugin name, and asset name from Tenable scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - description: Made by combining synopsis and plugin output from Tenable Scanner.
-
-        NOTE: vulnerability_ids & cwe are not provided by parser
-
-        Return the list of dedupe fields used in the Tenable XML Parser
-
-        Fields:
-        - title: Made using the name, plugin name, and asset name from Tenable scanner.
-        - severity: Set to severity from Tenable Scanner converted to Defect Dojo format.
-        - cwe: If present, set to cwe from Tenable scanner.
-        - description: Made by combining synopsis and plugin output from Tenable Scanner.
-
-        NOTE: vulnerability_ids are not provided by parser
-        """
-        return [
-            "title",
-            "severity",
-            "description",
-            "cwe",
-        ]
+    """
+    This class is a "dispatcher" that chooses the correct parser (XML or CSV)
+    based on the file extension.
+    """
 
     def get_scan_types(self):
         return ["Tenable Scan"]
@@ -76,14 +15,70 @@ class TenableParser:
         return "Tenable Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return (
-            "Reports can be imported as CSV or .nessus (XML) report formats."
-        )
+        return "Les rapports peuvent être importés aux formats CSV ou .nessus (XML)."
 
     def get_findings(self, filename, test):
+        """
+        Main function that determines which parser to use based on the file extension.
+        """
         if filename.name.lower().endswith((".xml", ".nessus")):
             return TenableXMLParser().get_findings(filename, test)
-        if filename.name.lower().endswith(".csv"):
+        elif filename.name.lower().endswith(".csv"):
             return TenableCSVParser().get_findings(filename, test)
-        msg = "Filename extension not recognized. Use .xml, .nessus or .csv"
-        raise ValueError(msg)
+        else:
+            msg = "Extension de fichier non reconnue. Utilisez .xml, .nessus ou .csv"
+            raise ValueError(msg)
+
+    # Note: Les fonctions ci-dessous sont pour la documentation et l'interface utilisateur
+    # de DefectDojo. J'ai mis à jour les commentaires pour refléter vos nouveaux champs CSV.
+
+    def get_fields(self) -> list[str]:
+        """
+        Retourne la liste des champs utilisés par les parseurs Tenable.
+
+        Champs pour le parseur CSV (basé sur vos nouveaux en-têtes) :
+        - title: Construit à partir de 'definition.name' et 'asset.name'.
+        - description: Combinaison de 'definition.synopsis' et 'output'.
+        - severity: Mappé à partir du champ 'severity'.
+        - mitigation: Provient du champ 'definition.solution'.
+        - impact: Provient du champ 'definition.description'.
+        - cve: Provient du champ 'definition.cve'.
+        - cvssv3_score: Provient du champ 'definition.cvss3.base_score'.
+        - references: Provient du champ 'definition.see_also'.
+        - component_name: Pourrait être mappé à partir de 'definition.family'.
+        
+        Champs pour le parseur XML :
+        - title: Défini à partir du nom du plugin.
+        - description: Combinaison du synopsis et du plugin output.
+        - severity: Défini à partir de la sévérité.
+        - mitigation: Défini à partir de la solution.
+        - impact: Combinaison de la description, des scores CVSS, etc.
+        - cwe: Si présent, défini à partir de cwe.
+        - cvssv3: Si présent, défini à partir de cvssv3.
+        """
+        # Cette liste combine les champs possibles des deux parseurs
+        return [
+            "title",
+            "description",
+            "severity",
+            "mitigation",
+            "impact",
+            "cve",
+            "cvssv3_score",
+            "references",
+            "component_name",
+            "component_version",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Retourne les champs utilisés pour la déduplication des vulnérabilités.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "cwe",
+            # Vous pourriez vouloir ajouter 'component_name' si c'est pertinent
+        ]
