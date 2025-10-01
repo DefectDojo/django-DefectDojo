@@ -29,7 +29,8 @@ RUN \
 COPY requirements.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
-RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN export PYCURL_SSL_LIBRARY=openssl && \
+    CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS release
 WORKDIR /app
@@ -55,10 +56,10 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
-COPY --from=build /tmp/wheels /tmp/wheels
-COPY requirements.txt ./
-RUN export PYCURL_SSL_LIBRARY=openssl && \
-    pip3 install \
+RUN \
+  --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
+  --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \
+  pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \

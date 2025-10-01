@@ -3,9 +3,9 @@ title: 'Generic Findings Import'
 toc_hide: true
 ---
 
-Import Generic findings in CSV or JSON format.
+Generic Findings Import can be used to import any report in CSV or JSON format.
 
-Attributes supported for CSV:
+### Supported Attributes (CSV)
 
 - Date: Date of the finding in mm/dd/yyyy format.
 - Title: Title of the finding
@@ -36,6 +36,8 @@ Attributes supported for CSV:
 The CSV expects a header row with the names of the attributes.
 
 Date fields are parsed using [dateutil.parse](https://dateutil.readthedocs.io/en/stable/parser.html) supporting a variety of formats such a YYYY-MM-DD or ISO-8601.
+
+### Supported Attributes (JSON)
 
 The list of supported fields in JSON format:
 
@@ -93,7 +95,7 @@ The list of supported fields in JSON format:
 - ransomware_used: Bool
 - fix_available: Bool
 
-Example of JSON format:
+### Example JSON
 
 ```JSON
 {

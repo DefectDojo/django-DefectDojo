@@ -10,6 +10,15 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Sept 2025: v2.50
 
+### Sept 15, 2025: v2.50.3
+
+* **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
+
+### Sept 15, 2025: v2.50.2
+
+* **(Pro UI)** Added Any/All status filtering.  Filtering by status allows you to apply either AND (inner join) logic, or OR (outer join) logic to the filter.
+* **(Pro UI)** Added Contact Support form for On-Premise installs.
+
 ### Sept 9, 2025: v2.50.1
 
 * **(Tools)** Removed CSV limit for Qualys HackerGuardian

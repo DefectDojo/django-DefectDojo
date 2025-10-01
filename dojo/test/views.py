@@ -405,6 +405,10 @@ def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
     end_date = datetime.combine(test.target_end, datetime.max.time())
+    if timezone.is_naive(start_date):
+        start_date = timezone.make_aware(start_date)
+    if timezone.is_naive(end_date):
+        end_date = timezone.make_aware(end_date)
     uid = f"dojo_test_{test.id}_{test.engagement.id}_{test.engagement.product.id}"
     cal = get_cal_event(
         start_date,
