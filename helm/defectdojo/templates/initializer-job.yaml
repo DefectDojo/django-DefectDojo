@@ -45,8 +45,8 @@ spec:
       securityContext:
         {{- include "helpers.securityContext" (list
           .Values
-          "initializer.podSecurityContext"
           "securityContext.podSecurityContext"
+          "initializer.podSecurityContext"
         ) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
@@ -85,8 +85,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "cloudsql.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "cloudsql.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         command: ["/cloud_sql_proxy"]
@@ -118,8 +118,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "django.uwsgi.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "django.uwsgi.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         envFrom:
@@ -149,8 +149,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "initializer.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "initializer.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         volumeMounts:

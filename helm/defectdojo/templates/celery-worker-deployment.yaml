@@ -55,8 +55,8 @@ spec:
       securityContext:
         {{- include "helpers.securityContext" (list
           .Values
-          "celery.worker.podSecurityContext"
           "securityContext.podSecurityContext"
+          "celery.worker.podSecurityContext"
         ) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
@@ -96,8 +96,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "cloudsql.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "cloudsql.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         command: ["/cloud_sql_proxy"]
@@ -133,8 +133,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "celery.worker.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "celery.worker.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         command: ['/entrypoint-celery-worker.sh']

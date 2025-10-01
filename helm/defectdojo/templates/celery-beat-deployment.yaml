@@ -55,8 +55,8 @@ spec:
       securityContext:
         {{- include "helpers.securityContext" (list
           .Values
-          "celery.beat.podSecurityContext"
           "securityContext.podSecurityContext"
+          "celery.beat.podSecurityContext"
         ) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
@@ -98,8 +98,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "cloudsql.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "cloudsql.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         command: ["/cloud_sql_proxy"]
@@ -137,8 +137,8 @@ spec:
         securityContext:
           {{- include "helpers.securityContext" (list
             .Values
-            "celery.beat.containerSecurityContext"
             "securityContext.containerSecurityContext"
+            "celery.beat.containerSecurityContext"
           ) | nindent 10 }}
         {{- end }}
         volumeMounts:

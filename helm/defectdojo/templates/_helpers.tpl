@@ -147,8 +147,8 @@
   securityContext:
     {{- include "helpers.securityContext" (list
     .Values
-    "dbMigrationChecker.containerSecurityContext"
     "securityContext.containerSecurityContext"
+    "dbMigrationChecker.containerSecurityContext"
   ) | nindent 4 }}
   {{- end }}
   envFrom:
@@ -185,8 +185,8 @@
 Returns the JSON representation of the value for a dot-notation path
 from a given context.
   Args:
-    1: context (e.g., .Values)
-    2: path (e.g., "foo.bar")
+    0: context (e.g., .Values)
+    1: path (e.g., "foo.bar")
 */}}
 {{- define "helpers.getValue" -}}
   {{- $ctx := merge dict (index . 0) -}}
@@ -208,20 +208,20 @@ from a given context.
 {{- /*
   Build the security context.
   Args:
-    1: values context (.Values)
-    2: the key under the context (e.g., "foo.bar")
-    3: the security context key (e.g. "securityContext.containerSecurityContext")
+    0: values context (.Values)
+    1: the default security context key (e.g. "securityContext.containerSecurityContext")
+    2: the key under the context with security context (e.g., "foo.bar")
 */}}
 {{- define "helpers.securityContext" -}}
 {{- $securityContext := dict -}}
 {{- $values := merge dict (index . 0) -}}
-{{- $path := index . 1 -}}
-{{- $sctx := index . 2 -}}
+{{- $defaultSecurityContextKey := merge dict (index . 1) -}}
+{{- $securityContextKey := merge dict (index . 2) -}}
 {{- with $values }}
   {{- $securityContext = (merge
     $securityContext
-    (include "helpers.getValue" (list $values $sctx) | fromJson)
-    (include "helpers.getValue" (list $values $path) | fromJson)
+    (include "helpers.getValue" (list $values $defaultSecurityContextKey) | fromJson)
+    (include "helpers.getValue" (list $values $securityContextKey) | fromJson)
   ) -}}
 {{- end -}}
 {{- with $securityContext -}}
